@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="ui.css">
+    <script src="../lib/polyfill.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>YouLy+ Settings</h1>
+
+        <div class="section">
+            <h2>App Menu</h2>
+            <label class="switch">
+                <input type="checkbox" id="lyEnabled">
+                <span class="slider"></span>
+                Enable YouLy+
+            </label>
+
+        </div>
+        
+        <div class="section">
+            <h2>Preferred Lyrics Provider</h2>
+            <select id="lyricsProvider" class="dropdown">
+                <option value="kpoe">Lyrics+ (KPoe)</option>
+                <option value="lrclib">LRCLIB</option>
+            </select>
+            
+            <label class="switch">
+                <input type="checkbox" id="sponsorblock">
+                <span class="slider"></span>
+                use SponsorBlock as additional Syncer
+            </label>
+        </div>
+
+        <div class="section">
+            <h2>Lyrics Display</h2>
+            <label class="switch">
+                <input type="checkbox" id="wordByWord">
+                <span class="slider"></span>
+                Word-by-Word Highlighting
+            </label>
+            
+            <label class="switch">
+                <input type="checkbox" id="lightweight">
+                <span class="slider"></span>
+                Lightweight Mode
+            </label>
+        </div>
+
+        <div id="status" class="status"></div>
+        <footer>
+            <a href="https://github.com/ibratabian17/YouLy" target="_blank">Check our GitHub</a>
+          </footer>
+    </div>
+    <script src="ui.js"></script>
+</body>
+</html>

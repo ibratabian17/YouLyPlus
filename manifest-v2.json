@@ -1,0 +1,37 @@
+{
+  "manifest_version": 2,
+  "name": "YouLy+",
+  "version": "1.0",
+  "description": "Enhanced lyrics feature for YouTube Music with line-by-line and word-by-word sync",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "*://*.music.youtube.com/*"
+  ],
+  "browser_action": {
+    "default_popup": "src/popup/ui.html",
+    "default_icon": "icons/icon256.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.music.youtube.com/*"],
+      "js": [
+        "src/lib/sponsorblock.js",
+        "src/localization.js",
+        "src/modules/settings.js",
+        "src/modules/songTracker.js",
+        "src/modules/lyricsManager.js",
+        "src/modules/lyricsRenderer.js",
+        "src/modules/forceTab.js",
+        "src/content.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    "src/inject/stylesheet.css"
+  ],
+  "background": {
+    "scripts": ["src/background/lyricsHandler.js"],
+    "persistent": false
+  }
+}
