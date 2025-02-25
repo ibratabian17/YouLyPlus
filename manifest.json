@@ -3,26 +3,23 @@
   "name": "YouLy+",
   "version": "1.0",
   "description": "Enhanced lyrics feature for YouTube Music with line-by-line and word-by-word sync",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "scripting"
-  ],
-  "host_permissions": [
-    "*://*.music.youtube.com/*"
-  ],
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["*://*.music.youtube.com/*"],
   "action": {
     "default_popup": "src/popup/ui.html",
     "default_icon": {
-      "256": "icons/icon256.png"
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
     }
   },
   "browser_specific_settings": {
-  "gecko": {
-    "id": "{00a6e1f0-4808-45e7-b66d-3a5aa6527a0e}",
-    "strict_min_version": "58.0"
-  }
-},
+    "gecko": {
+      "id": "{00a6e1f0-4808-45e7-b66d-3a5aa6527a0e}",
+      "strict_min_version": "58.0"
+    }
+  },
   "content_scripts": [
     {
       "matches": ["*://*.music.youtube.com/*"],
