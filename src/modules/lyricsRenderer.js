@@ -1,6 +1,8 @@
 // Use a variable to store the requestAnimationFrame ID
 let lyricsAnimationFrameId = null;
-let rescroll = false
+let rescroll = false;
+let currentPrimaryActiveLine = null;
+
 let lyricsContainer = document.getElementById('lyrics-plus-container');
 if (!lyricsContainer) {
   lyricsContainer = createLyricsContainer();
@@ -224,7 +226,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       const nextStart = parseFloat(nextLine.dataset.startTime);
       const gap = nextStart - currentEnd;
       if (gap > 0) {
-        const extension = Math.min(0.5, gap); 
+        const extension = Math.min(0.5, gap);
         line.dataset.endTime = (currentEnd + extension).toFixed(3);
       }
     }
@@ -242,6 +244,11 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   sourceDiv.classList.add('lyrics-source-provider');
   sourceDiv.innerText = `${t("source")} ${source}`;
   lyricsContainer.appendChild(sourceDiv);
+
+  // Cache lyrics lines and syllables for performance in the sync loop
+  window.cachedLyricsLines = Array.from(lyricsContainer.getElementsByClassName('lyrics-line'));
+  window.cachedSyllables = Array.from(lyricsContainer.getElementsByClassName('lyrics-syllable'));
+  currentPrimaryActiveLine = null;
 
   startLyricsSync();
 }
@@ -288,7 +295,7 @@ function injectCssFile() {
   linkElement.type = 'text/css';
   // Replace 'css/your-styles.css' with the path to your CSS file relative to your extension's root
   linkElement.href = chrome.runtime.getURL('src/inject/stylesheet.css');
-  
+
   // Append the <link> element to the document head
   document.head.appendChild(linkElement);
 }
@@ -318,7 +325,8 @@ function cleanupLyrics() {
 }
 
 function updateLyricsHighlight(currentTime) {
-  const lines = Array.from(document.getElementsByClassName('lyrics-line'));
+  const lines =
+    window.cachedLyricsLines || Array.from(document.getElementsByClassName('lyrics-line'));
   let activeLines = [];
 
   // Kumpulkan baris yang seharusnya aktif berdasarkan currentTime
@@ -349,7 +357,8 @@ function updateLyricsHighlight(currentTime) {
   });
 
   // Update animasi tiap suku kata
-  const syllables = Array.from(document.getElementsByClassName('lyrics-syllable'));
+  const syllables =
+    window.cachedSyllables || Array.from(document.getElementsByClassName('lyrics-syllable'));
   syllables.forEach(syllable => updateSyllableAnimation(syllable, currentTime));
 }
 
@@ -378,37 +387,37 @@ function resetSyllables(line) {
 }
 
 function updateSyllableAnimation(syllable, currentTime) {
-  const startTime = parseInt(syllable.dataset.startTime, 10);
-  const duration = parseInt(syllable.dataset.duration, 10);
+  // Use Number() to convert dataset values to numbers for faster math
+  const startTime = Number(syllable.dataset.startTime);
+  const duration = Number(syllable.dataset.duration);
   const endTime = startTime + duration;
   let wipeAnimation = syllable.classList.contains('rtl-text') ? 'wipe-rtl' : 'wipe';
 
   if (currentTime >= startTime && currentTime <= endTime) {
     if (!syllable.classList.contains('highlight')) {
       const charSpans = syllable.querySelectorAll('span.char');
-      const wordDuration = parseInt(syllable.dataset.wordDuration, 10);
-      const effectiveDuration = !isNaN(wordDuration) ? wordDuration : duration;
-
+      const wordDuration = Number(syllable.dataset.wordDuration) || duration;
       if (charSpans.length) {
-        charSpans.forEach((span, index) => {
-          const wipeDur = duration / charSpans.length;
+        const charCount = charSpans.length;
+        const wipeDur = duration / charCount;
+        for (let index = 0; index < charCount; index++) {
+          const span = charSpans[index];
           const wipeDelay = wipeDur * index;
-          const growDelay =
-            effectiveDuration > 1000
-              ? 200 * index
-              : (effectiveDuration / charSpans.length) * index;
-
-          const growDur = effectiveDuration * 1.3;
+          const growDelay = wordDuration > 1000 ? 200 * index : (wordDuration / charCount) * index;
+          const growDur = wordDuration * 1.3;
           span.style.animation = `${wipeAnimation} ${wipeDur}ms linear ${wipeDelay}ms forwards, grow-static ${growDur}ms ease-in-out ${growDelay}ms`;
-        });
+        }
       } else {
-        if(syllable.parentElement.parentElement.classList.contains('lyrics-gap'))wipeAnimation = "fade-gap"
+        if (syllable.parentElement.parentElement.classList.contains('lyrics-gap')) {
+          wipeAnimation = "fade-gap";
+        }
         syllable.style.animation = `${wipeAnimation} ${duration}ms linear forwards`;
       }
       syllable.classList.add('highlight');
     }
   } else if (currentTime <= endTime) {
-    Array.from(syllable.querySelectorAll('span.char')).forEach(span => {
+    const charSpans = syllable.querySelectorAll('span.char');
+    charSpans.forEach(span => {
       span.style.animation = '';
     });
     syllable.classList.remove('highlight');
@@ -416,27 +425,42 @@ function updateSyllableAnimation(syllable, currentTime) {
   }
 }
 
-
-
-
 function scrollToActiveLine(activeLine) {
   if (!activeLine) return;
-
-  // Try to find the YouTube Music lyrics container first.
-  let offset = 0;
-  const container = document.querySelector("#lyrics-plus-container")
-
+  
+  // Get the lyrics container element
+  const container = document.querySelector("#lyrics-plus-container");
+  if (!container) return;
+  
+  // Only proceed if the container is visible (displayed as block)
   const computedStyle = window.getComputedStyle(container);
-  if (computedStyle.display === 'block') {
-    // For Apple Music, center the active line in the container
-    const containerRect = container.getBoundingClientRect();
-    const lineRect = activeLine.getBoundingClientRect();
-    const relativePosition = lineRect.top - containerRect.top;
-    offset = container.clientHeight / 4;
-
-    container.parentElement.scrollTo({
-      top: container.scrollTop + relativePosition - offset,
-      behavior: 'smooth'
-    });
+  if (computedStyle.display !== 'block') return;
+  
+  // The actual scroll container is the parent element (what the user sees)
+  const scrollContainer = container.parentElement;
+  const scrollContainerRect = scrollContainer.getBoundingClientRect();
+  
+  // Get the bounding rectangle of the active line
+  const lineRect = activeLine.getBoundingClientRect();
+  
+  // Define the safe area based on the visible scroll container.
+  // Here, we set the safe area as the middle 50% of the scroll container's height.
+  const safeAreaTop = scrollContainerRect.top + scrollContainerRect.height * 0.25;
+  const safeAreaBottom = scrollContainerRect.top + scrollContainerRect.height * 0.5;
+  
+  // If the top of the active line is outside the safe area, no scroll is needed.
+  if (lineRect.top < safeAreaTop || lineRect.top > safeAreaBottom) {
+    return;
   }
+  
+  // Calculate the active line's position relative to the lyrics container
+  const containerRect = container.getBoundingClientRect();
+  const relativePosition = lineRect.top - containerRect.top;
+  const offset = container.clientHeight / 4; // Offset remains the same as before
+  
+  // Scroll the scroll container to the target position
+  scrollContainer.scrollTo({
+    top: container.scrollTop + relativePosition - offset,
+    behavior: 'smooth'
+  });
 }
