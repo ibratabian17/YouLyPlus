@@ -237,7 +237,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   if (songWriters) {
     const songWritersDiv = document.createElement('span');
     songWritersDiv.classList.add('lyrics-song-writters');
-    songWritersDiv.innerText = `${t("writtenBy")} ${songWriters}`;
+    songWritersDiv.innerText = `${t("writtenBy")} ${songWriters.join(', ')}`;
     lyricsContainer.appendChild(songWritersDiv);
   }
 
