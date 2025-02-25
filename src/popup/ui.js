@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lightweight = document.getElementById('lightweight');
     const isEnabled = document.getElementById('lyEnabled');
     const status = document.getElementById('status');
+    const sponsorBlock = document.getElementById('sponsorblock');
 
     // Load saved settings
     loadSettings(() => {
@@ -13,17 +14,19 @@ document.addEventListener('DOMContentLoaded', () => {
         wordByWord.checked = currentSettings.wordByWord ?? true;
         lightweight.checked = currentSettings.lightweight ?? false;
         isEnabled.checked = currentSettings.isEnabled ?? true;
+        sponsorBlock.checked = currentSettings.useSponsorBlock ?? false;
     });
 
     // Save settings and notify tabs
      // Save settings and notify tabs
-     [providerSelect, wordByWord, lightweight, isEnabled].forEach(element => {
+     [providerSelect, wordByWord, lightweight, isEnabled, sponsorBlock].forEach(element => {
         element.addEventListener('change', () => {
             const newSettings = {
                 lyricsProvider: providerSelect.value,
                 wordByWord: wordByWord.checked,
                 lightweight: lightweight.checked,
-                isEnabled: isEnabled.checked
+                isEnabled: isEnabled.checked,
+                useSponsorBlock: sponsorBlock.checked
             };
 
             updateSettings(newSettings);
