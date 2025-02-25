@@ -45,7 +45,7 @@ async function fetchAndDisplayLyrics() {
     );
   } catch (error) {
     console.warn('Error in fetchAndDisplayLyrics:', error);
-    displaySongNotFound();
+    displaySongError();
   }
 }
 
