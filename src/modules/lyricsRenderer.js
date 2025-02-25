@@ -2,6 +2,7 @@
 let lyricsAnimationFrameId = null;
 let rescroll = false;
 let currentPrimaryActiveLine = null;
+let lastTime = 0;
 
 let lyricsContainer = document.getElementById('lyrics-plus-container');
 if (!lyricsContainer) {
@@ -18,7 +19,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     const time = parseFloat(e.currentTarget.dataset.startTime);
     const player = document.querySelector("video");
     if (player) player.currentTime = time;
-    scrollToActiveLine(e);
+    scrollToActiveLine(e.currentTarget, true);
   };
 
   const isRTL = text => /[֑-߿יִ-﷽ﹰ-ﻼ]/.test(text);
@@ -305,9 +306,11 @@ function startLyricsSync() {
   if (!videoElement) return;
 
   function sync() {
-    // Convert currentTime to milliseconds once per frame.
     const currentTime = videoElement.currentTime * 1000;
-    updateLyricsHighlight(currentTime);
+    const gap = currentTime - lastTime
+    // Convert currentTime to milliseconds once per frame.
+    updateLyricsHighlight(currentTime, Math.abs(gap) > 5000);
+    lastTime = currentTime
     lyricsAnimationFrameId = requestAnimationFrame(sync);
   }
   lyricsAnimationFrameId = requestAnimationFrame(sync);
@@ -324,7 +327,7 @@ function cleanupLyrics() {
   }
 }
 
-function updateLyricsHighlight(currentTime) {
+function updateLyricsHighlight(currentTime, isForceScroll =false) {
   const lines =
     window.cachedLyricsLines || Array.from(document.getElementsByClassName('lyrics-line'));
   let activeLines = [];
@@ -348,7 +351,7 @@ function updateLyricsHighlight(currentTime) {
     if (allowedActive.includes(line)) {
       if (!line.classList.contains('active')) {
         line.classList.add('active');
-        scrollActiveLine(currentTime);
+        scrollActiveLine(currentTime, isForceScroll);
       }
     } else {
       line.classList.remove('active');
@@ -363,7 +366,7 @@ function updateLyricsHighlight(currentTime) {
 }
 
 
-function scrollActiveLine(currentTime) {
+function scrollActiveLine(currentTime, forceScroll = false) {
   const activeLines = Array.from(document.querySelectorAll('.lyrics-line.active'));
   if (!activeLines.length) return;
 
@@ -372,7 +375,7 @@ function scrollActiveLine(currentTime) {
   if (firstLineEnd - currentTime <= 200 && activeLines[1]) {
     lineToScroll = activeLines[1];
   }
-  scrollToActiveLine(lineToScroll);
+  scrollToActiveLine(lineToScroll, forceScroll);
 }
 
 function resetSyllables(line) {
@@ -425,7 +428,7 @@ function updateSyllableAnimation(syllable, currentTime) {
   }
 }
 
-function scrollToActiveLine(activeLine) {
+function scrollToActiveLine(activeLine, forceScroll = false) {
   if (!activeLine) return;
   
   // Get the lyrics container element
@@ -446,11 +449,11 @@ function scrollToActiveLine(activeLine) {
   // Define the safe area based on the visible scroll container.
   // Here, we set the safe area as the middle 50% of the scroll container's height.
   const safeAreaTop = scrollContainerRect.top + scrollContainerRect.height * 0.25;
-  const safeAreaBottom = scrollContainerRect.top + scrollContainerRect.height * 0.5;
+  const safeAreaBottom = scrollContainerRect.top + scrollContainerRect.height * 0.65;
   
   // If the top of the active line is outside the safe area, no scroll is needed.
-  if (lineRect.top < safeAreaTop || lineRect.top > safeAreaBottom) {
-    return;
+  if ((lineRect.top < safeAreaTop || lineRect.top > safeAreaBottom)) {
+    if(!forceScroll)return;
   }
   
   // Calculate the active line's position relative to the lyrics container
