@@ -11,6 +11,11 @@ YouLy+ is a browser extension that enhances your YouTube Music experience by pro
 
 ## Installation
 
+### From Official Web Store
+<p float="left">
+<a href="https://addons.mozilla.org/en-US/firefox/addon/youly/" target="_blank"><img src="https://blog.mozilla.org/addons/files/2020/04/get-the-addon-fx-apr-2020.svg" alt="Firefox Add-ons" height="60"/></a>
+</p>
+
 ### For Chrome (Manifest V3)
 
 1. **Clone or Download the Repository:**  
