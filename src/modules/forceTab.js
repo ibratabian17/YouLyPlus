@@ -113,6 +113,8 @@
       const lyricsElement = document.querySelector('.lyrics-plus-integrated');
       if (lyricsElement) {
         lyricsElement.style.display = 'block';
+        const videoElement = document.querySelector('video');
+        if (videoElement) scrollActiveLine(videoElement.currentTime, true)
         console.log('Menampilkan .lyrics-plus-integrated');
       }
     });
