@@ -1,21 +1,24 @@
-// Initialize the observer to watch for changes in the song title and subtitle elements.
+// Initialize the observer to watch for changes in the player state.
 function setupMutationObserver() {
+  // We'll still keep the DOM observer as a fallback
   const titleElement = document.querySelector('.title.style-scope.ytmusic-player-bar');
   const subtitleElement = document.querySelector('.subtitle.style-scope.ytmusic-player-bar');
 
-  // Exit early if neither element is found.
-  if (!titleElement && !subtitleElement) return;
+  if (titleElement || subtitleElement) {
+    const observer = new MutationObserver(handleMutations);
+    const observerOptions = { characterData: true, childList: true, subtree: true };
 
-  const observer = new MutationObserver(handleMutations);
-  const observerOptions = { characterData: true, childList: true, subtree: true };
+    if (titleElement) {
+      observer.observe(titleElement, observerOptions);
+    }
 
-  if (titleElement) {
-    observer.observe(titleElement, observerOptions);
+    if (subtitleElement) {
+      observer.observe(subtitleElement, observerOptions);
+    }
   }
-
-  if (subtitleElement) {
-    observer.observe(subtitleElement, observerOptions);
-  }
+  
+  // Also check for song changes periodically using the player API
+  setInterval(checkForSongChange, 1000);
 }
 
 // Callback for MutationObserver: checks if mutations affect the song title or subtitle.
@@ -52,6 +55,30 @@ function debounceCheckForSongChange() {
 // Holds the current song information.
 let currentSong = {};
 
+// Get player instance using the new method
+function getPlayer() {
+  // First try the standard YouTube player
+  let player = document.getElementById("movie_player");
+  
+  // If not found, try the YouTube Music player (which might have a different ID)
+  if (!player) {
+    // YouTube Music might use a different player implementation
+    player = document.querySelector('ytmusic-player');
+    
+    // If ytmusic-player exists but doesn't have the API methods,
+    // try to access the underlying player object
+    if (player && !player.getCurrentTime) {
+      if (player.playerApi) {
+        player = player.playerApi;
+      } else if (window.ytmusic && ytmusic.player) {
+        player = ytmusic.player;
+      }
+    }
+  }
+  
+  return player;
+}
+
 // Checks for song changes and triggers lyric fetching if needed.
 async function checkForSongChange() {
   const newSongInfo = getSongInfo();
@@ -71,47 +98,110 @@ async function checkForSongChange() {
   }
 }
 
-// Extracts song information from the DOM.
+// Extracts song information using both the player API and DOM fallbacks.
 function getSongInfo() {
-  const titleElement = document.querySelector('.title.style-scope.ytmusic-player-bar');
-  const artistElement = document.querySelector('.subtitle.style-scope.ytmusic-player-bar');
-  const videoElement = document.querySelector('video');
-  const playerBar = document.querySelector('ytmusic-player-bar'); // May contain extra attributes
-
-  if (!titleElement || !artistElement || !videoElement) return null;
-
-  let artist = "";
-  let album = "";
-  let isVideo = false;
-  let videoId = "";
-
-  // Try to extract artist and album using anchor tags.
-  const artistLinks = artistElement.querySelectorAll('a');
-  if (artistLinks.length > 0) {
-    artist = artistLinks[0].textContent.trim();
-    if (artistLinks.length > 1) {
-      album = artistLinks[1].textContent.trim();
-    } else {
-      // With only one link, it might be an MV.
-      isVideo = true;
+  // Try to get data using the player API first
+  const player = getPlayer();
+  
+  if (player && typeof player.getVideoData === 'function') {
+    try {
+      // Get basic data from player API
+      const currentTime = player.getCurrentTime?.() || 0;
+      const { video_id, title, author } = player.getVideoData?.() || {};
+      const audioTrackData = player.getAudioTrack?.() || {}; // For subtitles
+      const duration = player.getDuration?.() || 0;
+      
+      // Try to get playing state
+      let isPlaying = false;
+      if (typeof player.getPlayerState === 'function') {
+        isPlaying = player.getPlayerState() === 1; // 1 means playing
+      } else if (typeof player.getPlayerStateObject === 'function') {
+        const { isPlaying: playerIsPlaying } = player.getPlayerStateObject() || {};
+        isPlaying = playerIsPlaying;
+      }
+      
+      // If we got valid data from the player API, use it
+      if (title && author) {
+        console.log('Song info retrieved via player API');
+        return {
+          title: title,
+          artist: author,
+          album: getAlbumFromDOM(), // Still get album from DOM as it's not in API
+          duration: duration,
+          videoId: video_id,
+          subtitle: audioTrackData // Store subtitle info if available
+        };
+      }
+    } catch (error) {
+      console.error('Error getting data from player API:', error);
+      // Continue to fallback method
     }
-  } else {
-    // Fallback: split the subtitle text by '•'
-    const artistAlbumText = artistElement.textContent.split('•').map(text => text.trim());
-    artist = artistAlbumText[0] || "";
   }
+  
+  // Fallback to the original DOM method if player API failed
+  return getDOMSongInfo();
+}
 
-  // Primary: Attempt to extract videoId from the URL query parameter.
+function getAlbumFromDOM() {
+  const byline = document.querySelector('.byline.style-scope.ytmusic-player-bar');
+  if (!byline) return "";
+  
+  // Find all <a> elements in the byline.
+  const links = byline.querySelectorAll('a');
+  
+  // Iterate over them: if any link’s href starts with "browse/", that’s our album.
+  for (const link of links) {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith("browse/")) {
+      return link.textContent.trim();
+    }
+  }
+  
+  return "";
+}
+
+function getDOMSongInfo() {
+  const titleElement = document.querySelector('.title.style-scope.ytmusic-player-bar');
+  const byline = document.querySelector('.byline.style-scope.ytmusic-player-bar');
+  const videoElement = document.querySelector('video');
+  const playerBar = document.querySelector('ytmusic-player-bar');
+
+  if (!titleElement || !byline || !videoElement) return null;
+
+  // Initialize arrays for artists and album variable.
+  let artists = [];
+  let album = "";
+
+  // Look at all <a> elements within the byline.
+  const links = byline.querySelectorAll('a');
+  for (const link of links) {
+    const href = link.getAttribute('href');
+    if (href) {
+      if (href.startsWith("channel/")) {
+        // These are artist links.
+        artists.push(link.textContent.trim());
+      } else if (href.startsWith("browse/")) {
+        // This one is the album.
+        album = link.textContent.trim();
+      }
+    }
+  }
+  
+  // Combine multiple artist names if necessary.
+  const artist = artists.join(" & ");
+  
+  // In video pages, album info is absent (view count is in spans).
+  const isVideo = album === "";
+  
+  // Extract videoId from URL parameters or from playerBar attribute.
+  let videoId = "";
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('v')) {
     videoId = urlParams.get('v');
-  }
-
-  // Fallback: Try to get it from the player bar attribute.
-  if (!videoId && playerBar && playerBar.hasAttribute('video-id')) {
+  } else if (playerBar && playerBar.hasAttribute('video-id')) {
     videoId = playerBar.getAttribute('video-id');
   }
-
+  
   return {
     title: titleElement.textContent.trim(),
     artist,
@@ -124,5 +214,6 @@ function getSongInfo() {
 
 
 
-// Start observing for changes.
+
+// Start observing for changes
 setupMutationObserver();
