@@ -310,7 +310,7 @@ function startLyricsSync() {
     const currentTime = videoElement.currentTime * 1000;
     const gap = currentTime - lastTime
     // Convert currentTime to milliseconds once per frame.
-    updateLyricsHighlight(currentTime, Math.abs(gap) > 5000);
+    updateLyricsHighlight(currentTime, Math.abs(gap) > 1000);
     lastTime = currentTime
     lyricsAnimationFrameId = requestAnimationFrame(sync);
   }
