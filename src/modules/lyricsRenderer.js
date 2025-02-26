@@ -250,6 +250,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   window.cachedLyricsLines = Array.from(lyricsContainer.getElementsByClassName('lyrics-line'));
   window.cachedSyllables = Array.from(lyricsContainer.getElementsByClassName('lyrics-syllable'));
   currentPrimaryActiveLine = null;
+  if(window.cachedLyricsLines.length != 0)scrollToActiveLine(window.cachedLyricsLines[0], true)
 
   startLyricsSync();
 }
