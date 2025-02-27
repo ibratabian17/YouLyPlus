@@ -132,12 +132,14 @@ function LYPLUS_getSongInfo() {
             if (player.getAudioTrack && typeof player.getAudioTrack === 'function') {
                 audioTrackData = player.getAudioTrack();
             }
+            //author uses Localized style, so let's use LYPLUS_getArtistFromDOM
+            let artistCurrent = LYPLUS_getArtistFromDOM() != "" ? LYPLUS_getArtistFromDOM() : author || author
       
             const duration = player.getDuration();
       
             return {
                 title: title,
-                artist: author,
+                artist: artistCurrent,
                 album: LYPLUS_getAlbumFromDOM(), // Still get album from DOM as it's not in API
                 duration: duration,
                 videoId: video_id,
@@ -169,6 +171,40 @@ function LYPLUS_getAlbumFromDOM() {
     }
   
     return "";
+}
+
+function LYPLUS_getArtistFromDOM() {
+    const byline = document.querySelector('.byline.style-scope.ytmusic-player-bar');
+    if (!byline) return "";
+
+    let artists = [];
+  
+    // Look at all <a> elements within the byline
+    const links = byline.querySelectorAll('a');
+    for (const link of links) {
+        const href = link.getAttribute('href');
+        if (href) {
+            if (href.startsWith("channel/")) {
+                // These are artist links
+                artists.push(link.textContent.trim());
+            } else if (href.startsWith("browse/")) {
+                // This one is the album
+                album = link.textContent.trim();
+            }
+        }
+    }
+
+    // Properly format the artist names
+    let artist = "";
+    if (artists.length === 1) {
+        artist = artists[0];
+    } else if (artists.length === 2) {
+        artist = artists.join(" & ");
+    } else if (artists.length > 2) {
+        artist = artists.slice(0, -1).join(", ") + ", & " + artists[artists.length - 1];
+    }
+  
+    return artist;
 }
 
 function LYPLUS_getDOMSongInfo() {
