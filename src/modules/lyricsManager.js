@@ -42,7 +42,7 @@ async function fetchAndDisplayLyrics(currentSong) {
     }
 
     // If it's an MV, adjust timings using SponsorBlock
-    if (currentSong.isVideo && currentSong.videoId && currentSettings.useSponsorBlock) {
+    if (currentSong.isVideo && currentSong.videoId && currentSettings.useSponsorBlock && !lyrics.ignoreSponsorblock) {
       const segments = await fetchSponsorSegments(currentSong.videoId);
       lyrics.data = adjustLyricTiming(lyrics.data, segments, lyrics.type === "Line" ? "s" : "ms");
     }

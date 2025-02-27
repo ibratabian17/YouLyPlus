@@ -173,6 +173,11 @@ async function handleLyricsFetch(songInfo, sendResponse) {
                     await fetchKPoeLyrics(songInfo);
             }
 
+            // If both providers failed, try YouTube subtitles if available
+            if (!lyrics && songInfo.videoId && songInfo.subtitle) {
+                lyrics = await fetchYouTubeSubtitles(songInfo);
+            }
+
             if (!lyrics) {
                 throw new Error('No lyrics found');
             }
@@ -220,6 +225,102 @@ async function fetchLRCLibLyrics(songInfo) {
 
     const data = await response.json();
     return parseLRCLibFormat(data);
+}
+
+async function fetchYouTubeSubtitles(songInfo) {
+    try {
+        // Find the best subtitle track (non-auto-generated)
+        const subtitleData = songInfo.subtitle;
+        
+        if (!subtitleData || !subtitleData.captionTracks || subtitleData.captionTracks.length === 0) {
+            return null;
+        }
+        
+        // First try to get the default track from j property if it exists and is not auto-generated
+        let selectedTrack = subtitleData.j;
+        if (selectedTrack && 
+            (selectedTrack.kind === 'asr' || (selectedTrack.vssId && selectedTrack.vssId.startsWith('a.')))) {
+            selectedTrack = null; // Don't use auto-generated
+        }
+        
+        // If default track wasn't suitable, search for the first non-auto-generated track
+        if (!selectedTrack) {
+            selectedTrack = subtitleData.captionTracks.find(track => 
+                track.kind !== 'asr' && 
+                (!track.vssId || !track.vssId.startsWith('a.'))
+            );
+        }
+        
+        // If still no suitable track, return null
+        if (!selectedTrack) {
+            return null;
+        }
+        
+        // Parse the URL and replace the format parameter
+        const url = new URL(selectedTrack.url);
+        url.searchParams.set('fmt', 'json3');
+        
+        // Fetch the subtitle data
+        const response = await fetch(url.toString());
+        if (!response.ok) return null;
+        
+        const data = await response.json();
+        return parseYouTubeSubtitles(data, songInfo);
+    } catch (error) {
+        console.error("Error fetching YouTube subtitles:", error);
+        return null;
+    }
+}
+
+function parseYouTubeSubtitles(data, songInfo) {
+    if (!data.events || data.events.length === 0) {
+        return null;
+    }
+    
+    const parsedLines = [];
+    
+    // Process each subtitle event
+    for (let i = 0; i < data.events.length; i++) {
+        const event = data.events[i];
+        
+        // Skip events without text
+        if (!event.segs || !event.segs.length) continue;
+        
+        // Combine all segments into one text string
+        const text = event.segs.map(seg => seg.utf8).join(' ').trim();
+        if (!text) continue;
+        
+        // Convert times from milliseconds to seconds
+        const startTime = event.tStartMs / 1000;
+        const duration = event.dDurationMs / 1000;
+        const endTime = startTime + duration;
+        
+        parsedLines.push({
+            text,
+            startTime,
+            endTime,
+            duration,
+            element: { singer: 'v1' }
+        });
+    }
+    
+    if (parsedLines.length === 0) {
+        return null;
+    }
+    
+    return {
+        type: 'Line',
+        data: parsedLines,
+        ignoreSponsorblock: true,
+        metadata: {
+            title: songInfo.title,
+            artist: songInfo.artist,
+            album: songInfo.album,
+            duration: songInfo.duration,
+            instrumental: false,
+            source: "YouTube Captions"
+        }
+    };
 }
 
 function parseLRCLibFormat(data) {
