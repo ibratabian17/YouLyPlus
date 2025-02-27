@@ -1,7 +1,11 @@
 // lyricsManager.js
+let currentFetchVideoId = null;
 
 async function fetchAndDisplayLyrics(currentSong) {
   try {
+    // Set the latest videoId being processed
+    currentFetchVideoId = currentSong.videoId;
+
     // Remove any existing lyrics from the UI
     cleanupLyrics();
 
@@ -13,9 +17,16 @@ async function fetchAndDisplayLyrics(currentSong) {
         artist: currentSong.artist,
         album: currentSong.album,
         isVideo: currentSong.isVideo,
-        videoId: currentSong.videoId
+        videoId: currentSong.videoId,
+        subtitle: currentSong.subtitle
       }
     });
+
+    // If the videoId changed while fetching, abort displaying lyrics
+    if (currentFetchVideoId !== currentSong.videoId) {
+      console.warn("Song changed while fetching lyrics. Aborting display.", currentSong);
+      return;
+    }
 
     if (!response.success) {
       console.warn('Failed to fetch lyrics:', response.error);
@@ -36,6 +47,12 @@ async function fetchAndDisplayLyrics(currentSong) {
       lyrics.data = adjustLyricTiming(lyrics.data, segments, lyrics.type === "Line" ? "s" : "ms");
     }
 
+    // Ensure the videoId is still the same before displaying lyrics
+    if (currentFetchVideoId !== currentSong.videoId) {
+      console.warn("Song changed while fetching lyrics. Aborting display.", currentSong);
+      return;
+    }
+
     displayLyrics(
       lyrics,
       lyrics.metadata.source,
@@ -45,7 +62,11 @@ async function fetchAndDisplayLyrics(currentSong) {
     );
   } catch (error) {
     console.warn('Error in fetchAndDisplayLyrics:', error);
-    displaySongError();
+    
+    // Ensure the videoId is still the same before displaying error message
+    if (currentFetchVideoId === currentSong.videoId) {
+      displaySongError();
+    }
   }
 }
 

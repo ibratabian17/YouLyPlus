@@ -127,7 +127,7 @@ async function handleLyricsFetch(songInfo, sendResponse) {
 
     // Check the in‑memory cache first.
     if (lyricsCache.has(cacheKey)) {
-        sendResponse({ success: true, lyrics: lyricsCache.get(cacheKey) });
+        sendResponse({ success: true, lyrics: lyricsCache.get(cacheKey), metadata: songInfo });
         return;
     }
 
@@ -136,7 +136,7 @@ async function handleLyricsFetch(songInfo, sendResponse) {
         const dbCachedLyrics = await getLyricsFromDB(cacheKey);
         if (dbCachedLyrics) {
             lyricsCache.set(cacheKey, dbCachedLyrics);
-            sendResponse({ success: true, lyrics: dbCachedLyrics });
+            sendResponse({ success: true, lyrics: dbCachedLyrics, metadata: songInfo });
             return;
         }
     } catch (error) {
@@ -147,9 +147,9 @@ async function handleLyricsFetch(songInfo, sendResponse) {
     if (ongoingFetches.has(cacheKey)) {
         try {
             const lyrics = await ongoingFetches.get(cacheKey);
-            sendResponse({ success: true, lyrics });
+            sendResponse({ success: true, lyrics, metadata: songInfo });
         } catch (error) {
-            sendResponse({ success: false, error: error.message });
+            sendResponse({ success: false, error: error.message, metadata: songInfo });
         }
         return;
     }
@@ -190,9 +190,9 @@ async function handleLyricsFetch(songInfo, sendResponse) {
 
     try {
         const lyrics = await fetchPromise;
-        sendResponse({ success: true, lyrics });
+        sendResponse({ success: true, lyrics, metadata: songInfo });
     } catch (error) {
-        sendResponse({ success: false, error: error.message });
+        sendResponse({ success: false, error: error.message, metadata: songInfo });
     }
 }
 
