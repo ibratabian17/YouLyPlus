@@ -2,12 +2,82 @@
 const pBrowser = chrome || browser;
 console.log('Service Workers Running')
 
-// background.js
+// In‑memory caches for quick access
 const lyricsCache = new Map();
 const ongoingFetches = new Map();
 let currentFetchController = null;
 
+/* =================== IndexedDB Helper Functions =================== */
+function openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open("LyricsCacheDB", 1);
+        request.onupgradeneeded = event => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains("lyrics")) {
+                db.createObjectStore("lyrics", { keyPath: "key" });
+            }
+        };
+        request.onsuccess = event => resolve(event.target.result);
+        request.onerror = event => reject(event.target.error);
+    });
+}
 
+async function getLyricsFromDB(key) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["lyrics"], "readonly");
+        const store = transaction.objectStore("lyrics");
+        const request = store.get(key);
+        request.onsuccess = event => {
+            resolve(event.target.result ? event.target.result.lyrics : null);
+        };
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
+async function saveLyricsToDB(key, lyrics) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["lyrics"], "readwrite");
+        const store = transaction.objectStore("lyrics");
+        const request = store.put({ key, lyrics });
+        request.onsuccess = () => resolve();
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
+async function clearCacheDB() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["lyrics"], "readwrite");
+        const store = transaction.objectStore("lyrics");
+        const request = store.clear();
+        request.onsuccess = () => resolve();
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
+async function estimateIndexedDBSizeInKB() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["lyrics"], "readonly");
+        const store = transaction.objectStore("lyrics");
+        const request = store.getAll();
+        request.onsuccess = event => {
+            const allRecords = event.target.result;
+            const totalSizeBytes = allRecords.reduce((acc, record) => {
+                // Rough estimation: convert record to a JSON string and get its byte length.
+                return acc + new TextEncoder().encode(JSON.stringify(record)).length;
+            }, 0);
+            // Convert bytes to kilobytes.
+            const sizeInKB = totalSizeBytes / 1024;
+            resolve(sizeInKB);
+        };
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
+/* =================== Local Storage Function =================== */
 function storageLocalGet(keys) {
     if (typeof browser !== 'undefined' && browser.storage && browser.storage.local) {
         return browser.storage.local.get(keys);
@@ -15,30 +85,65 @@ function storageLocalGet(keys) {
     return new Promise(resolve => chrome.storage.local.get(keys, resolve));
 }
 
-// Listen for messages from content scripts
+/* =================== Runtime Message Listeners =================== */
 pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'FETCH_LYRICS') {
-        // We need to return true to indicate we'll respond asynchronously
         try {
             handleLyricsFetch(message.songInfo, sendResponse);
-        }
-        catch (error) {
+        } catch (error) {
             sendResponse({ success: false, error: error });
         }
+        return true; // Indicates asynchronous response.
+    }
+    if (message.type === 'RESET_CACHE') {
+        (async () => {
+            try {
+                lyricsCache.clear();
+                ongoingFetches.clear();
+                await clearCacheDB();
+                sendResponse({ success: true, message: "Cache reset successfully" });
+            } catch (error) {
+                sendResponse({ success: false, error: error.message });
+            }
+        })();
+        return true;
+    }
+    if (message.type === 'GET_CACHED_SIZE') {
+        (async () => {
+            try {
+                const sizeKB = await estimateIndexedDBSizeInKB();
+                sendResponse({ success: true, sizeKB });
+            } catch (error) {
+                sendResponse({ success: false, error: error.message });
+            }
+        })();
         return true;
     }
 });
 
+/* =================== Lyrics Fetching Logic =================== */
 async function handleLyricsFetch(songInfo, sendResponse) {
-    const cacheKey = `${songInfo.title} - ${songInfo.artist}`;
+    const cacheKey = `${songInfo.title} - ${songInfo.artist} - ${songInfo.album}`;
 
-    // Return cached lyrics if available
+    // Check the in‑memory cache first.
     if (lyricsCache.has(cacheKey)) {
         sendResponse({ success: true, lyrics: lyricsCache.get(cacheKey) });
         return;
     }
 
-    // If there's an ongoing fetch for this song, wait for it instead of starting a new one
+    // Check the persistent IndexedDB cache.
+    try {
+        const dbCachedLyrics = await getLyricsFromDB(cacheKey);
+        if (dbCachedLyrics) {
+            lyricsCache.set(cacheKey, dbCachedLyrics);
+            sendResponse({ success: true, lyrics: dbCachedLyrics });
+            return;
+        }
+    } catch (error) {
+        console.error("Error reading from DB:", error);
+    }
+
+    // If an ongoing fetch is present, wait for it.
     if (ongoingFetches.has(cacheKey)) {
         try {
             const lyrics = await ongoingFetches.get(cacheKey);
@@ -49,19 +154,19 @@ async function handleLyricsFetch(songInfo, sendResponse) {
         return;
     }
 
-    // Start a new fetch and store its promise
+    // Start a new fetch and store its promise.
     const fetchPromise = (async () => {
         try {
-            // Determine provider based on settings
+            // Determine provider based on settings.
             const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe' });
             const isPrimaryKPoe = settings.lyricsProvider === 'kpoe';
 
-            // Try the primary provider first
+            // Try the primary provider first.
             let lyrics = isPrimaryKPoe ?
                 await fetchKPoeLyrics(songInfo) :
                 await fetchLRCLibLyrics(songInfo);
 
-            // If no result, try the secondary provider
+            // If no result, try the secondary provider.
             if (!lyrics) {
                 lyrics = isPrimaryKPoe ?
                     await fetchLRCLibLyrics(songInfo) :
@@ -73,9 +178,10 @@ async function handleLyricsFetch(songInfo, sendResponse) {
             }
 
             lyricsCache.set(cacheKey, lyrics);
+            await saveLyricsToDB(cacheKey, lyrics);
             return lyrics;
         } finally {
-            // Clean up the ongoing fetch record regardless of outcome
+            // Clean up ongoing fetch record.
             ongoingFetches.delete(cacheKey);
         }
     })();
@@ -88,13 +194,6 @@ async function handleLyricsFetch(songInfo, sendResponse) {
     } catch (error) {
         sendResponse({ success: false, error: error.message });
     }
-}
-
-function storageLocalGet(keys) {
-    if (typeof browser !== 'undefined' && browser.storage && browser.storage.local) {
-        return browser.storage.local.get(keys);
-    }
-    return new Promise(resolve => chrome.storage.local.get(keys, resolve));
 }
 
 async function fetchKPoeLyrics(songInfo) {
@@ -123,7 +222,6 @@ async function fetchLRCLibLyrics(songInfo) {
     return parseLRCLibFormat(data);
 }
 
-
 function parseLRCLibFormat(data) {
     if (!data.syncedLyrics) return null;
 
@@ -132,7 +230,7 @@ function parseLRCLibFormat(data) {
     const parsedLines = [];
     const matches = [];
 
-    // Extract timestamps and text for each line.
+    // Extract timestamps and text.
     for (const line of lines) {
         const match = timeRegex.exec(line);
         if (match) {
@@ -147,12 +245,12 @@ function parseLRCLibFormat(data) {
         }
     }
 
-    // Calculate end times for each lyric line.
+    // Calculate end times.
     for (let i = 0; i < matches.length; i++) {
         const { startTime, text } = matches[i];
         const endTime = (i < matches.length - 1)
             ? matches[i + 1].startTime
-            : startTime + 4; // Default duration if no following timestamp.
+            : startTime + 4; // Default duration.
         parsedLines.push({
             text,
             startTime,
@@ -179,7 +277,7 @@ function parseKPoeFormat(data) {
     if (!Array.isArray(data.lyrics)) return null;
 
     const isLineType = data.type === "Line";
-    // Clone metadata to avoid mutating the original object.
+    // Clone metadata to avoid mutation.
     const metadata = {
         ...data.metadata,
         source: `${data.metadata.source} (KPoe)`
@@ -211,4 +309,3 @@ function parseKPoeFormat(data) {
         metadata
     };
 }
-

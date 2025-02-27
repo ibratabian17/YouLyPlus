@@ -1,5 +1,5 @@
-const pBrowser = chrome || pBrowser;
-
+const pBrowser = chrome || browser;
+//Global
 document.addEventListener('DOMContentLoaded', () => {
     const providerSelect = document.getElementById('lyricsProvider');
     const wordByWord = document.getElementById('wordByWord');
@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const isEnabled = document.getElementById('lyEnabled');
     const status = document.getElementById('status');
     const sponsorBlock = document.getElementById('sponsorblock');
+    const clearCacheButton = document.querySelector('.clear-cache');
+    const cacheSizeElem = document.querySelector('.cache-size');
 
     // Load saved settings
     loadSettings(() => {
@@ -18,8 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Save settings and notify tabs
-     // Save settings and notify tabs
-     [providerSelect, wordByWord, lightweight, isEnabled, sponsorBlock].forEach(element => {
+    [providerSelect, wordByWord, lightweight, isEnabled, sponsorBlock].forEach(element => {
         element.addEventListener('change', () => {
             const newSettings = {
                 lyricsProvider: providerSelect.value,
@@ -30,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             updateSettings(newSettings);
-            // Use storageLocalSet instead of pBrowser.storage.sync.set
             storageLocalSet(newSettings).then(() => {
                 showStatus();
                 notifyTabs(newSettings); // Notify content script
@@ -59,6 +59,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    // Update the displayed cache size when the popup loads.
+    updateCacheSize();
+
+    // Add event listener to the Clear Cache button.
+    clearCacheButton.addEventListener('click', () => {
+        pBrowser.runtime.sendMessage({ type: 'RESET_CACHE' }, (response) => {
+            if (response.success) {
+                updateCacheSize(); // Refresh the displayed cache size
+            } else {
+                console.error("Error resetting cache:", response.error);
+            }
+        });
+    });
 });
 
 let currentSettings = {};
@@ -79,4 +93,15 @@ function loadSettings(callback) {
 
 function updateSettings(newSettings) {
     currentSettings = newSettings;
+}
+
+// Function to update the cache size display.
+function updateCacheSize() {
+    pBrowser.runtime.sendMessage({ type: 'GET_CACHED_SIZE' }, (response) => {
+        if (response.success) {
+            document.querySelector('.cache-size').textContent = response.sizeKB.toFixed(2);
+        } else {
+            console.error("Error getting cache size:", response.error);
+        }
+    });
 }

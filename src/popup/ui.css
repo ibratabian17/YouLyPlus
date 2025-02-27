@@ -23,7 +23,7 @@ h1 {
 h2 {
     font-size: 1.1em;
     color: #da7272;
-    margin-bottom: 15px;
+    margin: 8px 0;
 }
 
 .section {
@@ -122,4 +122,14 @@ a {
     bottom: 0;
     display: block;
     color: #fff;
+}
+
+button {
+    background-color: #da7272;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: opacity 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: none;
 }
