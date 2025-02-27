@@ -28,7 +28,6 @@
         "src/lib/polyfill.js",
         "src/localization.js",
         "src/modules/settings.js",
-        "src/modules/songTracker.js",
         "src/modules/lyricsManager.js",
         "src/modules/lyricsRenderer.js",
         "src/modules/forceTab.js",
@@ -38,7 +37,10 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["src/inject/stylesheet.css"],
+      "resources": [
+        "src/inject/stylesheet.css",
+        "src/inject/songTracker.js"
+      ],
       "matches": ["*://*.music.youtube.com/*"]
     }
   ],

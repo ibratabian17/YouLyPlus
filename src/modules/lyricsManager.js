@@ -1,6 +1,6 @@
 // lyricsManager.js
 
-async function fetchAndDisplayLyrics() {
+async function fetchAndDisplayLyrics(currentSong) {
   try {
     // Remove any existing lyrics from the UI
     cleanupLyrics();
