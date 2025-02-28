@@ -29,7 +29,21 @@ async function getLyricsFromDB(key) {
         const store = transaction.objectStore("lyrics");
         const request = store.get(key);
         request.onsuccess = event => {
-            resolve(event.target.result ? event.target.result.lyrics : null);
+            const result = event.target.result;
+            if (result) {
+                const now = Date.now();
+                const age = now - result.timestamp;
+                const twoHours = 2 * 60 * 60 * 1000;
+                if (age < twoHours) {
+                    resolve(result.lyrics);
+                } else {
+                    // If expired, remove from DB
+                    deleteLyricsFromDB(key);
+                    resolve(null);
+                }
+            } else {
+                resolve(null);
+            }
         };
         request.onerror = event => reject(event.target.error);
     });
@@ -40,11 +54,45 @@ async function saveLyricsToDB(key, lyrics) {
     return new Promise((resolve, reject) => {
         const transaction = db.transaction(["lyrics"], "readwrite");
         const store = transaction.objectStore("lyrics");
-        const request = store.put({ key, lyrics });
+        const request = store.put({ key, lyrics, timestamp: Date.now() });
         request.onsuccess = () => resolve();
         request.onerror = event => reject(event.target.error);
     });
 }
+
+async function deleteLyricsFromDB(key) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["lyrics"], "readwrite");
+        const store = transaction.objectStore("lyrics");
+        const request = store.delete(key);
+        request.onsuccess = () => resolve();
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
+// Clear only expired cache entries
+async function clearExpiredCache() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["lyrics"], "readwrite");
+        const store = transaction.objectStore("lyrics");
+        const request = store.getAll();
+        request.onsuccess = async event => {
+            const now = Date.now();
+            const twoHours = 2 * 60 * 60 * 1000;
+            const allRecords = event.target.result;
+            for (const record of allRecords) {
+                if (now - record.timestamp >= twoHours) {
+                    await deleteLyricsFromDB(record.key);
+                }
+            }
+            resolve();
+        };
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
 
 async function clearCacheDB() {
     const db = await openDB();
