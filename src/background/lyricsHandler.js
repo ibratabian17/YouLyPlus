@@ -229,41 +229,68 @@ async function fetchLRCLibLyrics(songInfo) {
 
 async function fetchYouTubeSubtitles(songInfo) {
     try {
-        // Find the best subtitle track (non-auto-generated)
         const subtitleData = songInfo.subtitle;
-        
         if (!subtitleData || !subtitleData.captionTracks || subtitleData.captionTracks.length === 0) {
             return null;
         }
-        
-        // First try to get the default track from j property if it exists and is not auto-generated
-        let selectedTrack = subtitleData.j;
-        if (selectedTrack && 
-            (selectedTrack.kind === 'asr' || (selectedTrack.vssId && selectedTrack.vssId.startsWith('a.')))) {
-            selectedTrack = null; // Don't use auto-generated
+
+        let selectedTrack = null;
+        let fallbackCandidate = null;
+
+        // Look for a default track among one-letter keys, prioritizing isDefault true
+        for (const key in subtitleData) {
+            if (key.length === 1) { // likely a default track key
+                const candidate = subtitleData[key];
+                if (
+                    candidate &&
+                    typeof candidate === 'object' &&
+                    candidate.url &&
+                    candidate.languageCode &&
+                    candidate.kind !== 'asr' &&
+                    !(candidate.vssId && candidate.vssId.startsWith('a.'))
+                ) {
+                    // Prioritize if isDefault is true
+                    if (candidate.isDefault) {
+                        selectedTrack = candidate;
+                        break;
+                    }
+                    // Save candidate as fallback if none marked default yet
+                    if (!fallbackCandidate) {
+                        fallbackCandidate = candidate;
+                    }
+                }
+            }
         }
-        
-        // If default track wasn't suitable, search for the first non-auto-generated track
+
+        // If no isDefault candidate was found among one-letter keys, use the fallback candidate
+        if (!selectedTrack && fallbackCandidate) {
+            selectedTrack = fallbackCandidate;
+        }
+
+        // Fallback to captionTracks if still not found
         if (!selectedTrack) {
-            selectedTrack = subtitleData.captionTracks.find(track => 
-                track.kind !== 'asr' && 
+            const validTracks = subtitleData.captionTracks.filter(track =>
+                track.kind !== 'asr' &&
                 (!track.vssId || !track.vssId.startsWith('a.'))
             );
+            if (validTracks.length > 0) {
+                // Prefer track with isDefault true
+                const defaultTrack = validTracks.find(track => track.isDefault);
+                selectedTrack = defaultTrack || validTracks[0];
+            }
         }
-        
-        // If still no suitable track, return null
+
         if (!selectedTrack) {
             return null;
         }
-        
-        // Parse the URL and replace the format parameter
+
+        // Update the URL to request JSON3 format
         const url = new URL(selectedTrack.url);
         url.searchParams.set('fmt', 'json3');
-        
-        // Fetch the subtitle data
+
         const response = await fetch(url.toString());
         if (!response.ok) return null;
-        
+
         const data = await response.json();
         return parseYouTubeSubtitles(data, songInfo);
     } catch (error) {
