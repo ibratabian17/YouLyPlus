@@ -33,8 +33,9 @@ function initializeLyricsPlus() {
 
 // Function to inject the DOM script
 function injectDOMScript() {
+    const pBrowser = chrome || browser;
     const script = document.createElement('script');
-    script.src = chrome.runtime.getURL('src/inject/songTracker.js');
+    script.src = pBrowser.runtime.getURL('src/inject/songTracker.js');
     script.onload = function() {
         this.remove();
     };

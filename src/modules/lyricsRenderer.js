@@ -292,11 +292,12 @@ function createLyricsContainer() {
 
 function injectCssFile() {
   // Create a new <link> element
+  const pBrowser = chrome || browser;
   const linkElement = document.createElement('link');
   linkElement.rel = 'stylesheet';
   linkElement.type = 'text/css';
   // Replace 'css/your-styles.css' with the path to your CSS file relative to your extension's root
-  linkElement.href = chrome.runtime.getURL('src/inject/stylesheet.css');
+  linkElement.href = pBrowser.runtime.getURL('src/inject/stylesheet.css');
 
   // Append the <link> element to the document head
   document.head.appendChild(linkElement);
