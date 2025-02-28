@@ -124,7 +124,7 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
 
 .lyrics-line .main-vocal-container {
     transition: .5s ease, .18s color;
-    transform: scale(0.95) translateZ(0);
+    transform: scale3d(0.95, 0.95, 0.95);
     transform-origin: left;
     will-change: transform;
 }
@@ -132,7 +132,7 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
     transform-origin: right;
 }
 .lyrics-line.active .main-vocal-container {
-    transform: scale(1) translateZ(0);
+    transform: scale3d(1.001,1.001,1);
 }
 /* SYLLABLES */
 .lyrics-line:not(.lyrics-gap) .lyrics-syllable {
@@ -215,9 +215,9 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
     background-size: 0% 100%;
     background-repeat: no-repeat;
     will-change: transform, background, opacity;
+    transform: scale3d(1,1,1);
     font-kerning: none;
     transform-origin: bottom;
-    transform: translateZ(0);
     backface-visibility: hidden;
 }
 
@@ -282,31 +282,31 @@ span.lyrics-syllable.background-vocal {
 
 @keyframes grow-dynamic {
     0% {
-        transform: scale3d(1, 1, 1) translateZ(0);
+        transform: scale3d(1, 1, 1);
         text-shadow: 0 0 5px rgba(255, 255, 255, 0);
     }
     30%, 40% {
-        transform: scale3d(var(--target-scale, 1.1), var(--target-scale, 1.1), var(--target-scale, 1.1)) translateZ(0);
+        transform: scale3d(var(--target-scale, 1.1), var(--target-scale, 1.1), var(--target-scale, 1.1));
         text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
     }
     100% {
-        transform: scale3d(1, 1, 1) translateZ(0);
+        transform: scale3d(1, 1, 1);
         text-shadow: 0 0 5px rgba(255, 255, 255, 0);
     }
 }
 
 @keyframes grow-static {
     0% {
-        transform: scale3d(1, 1, 1) translateZ(0);
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0);
+        transform: scale3d(1.001, 1.001, 1);
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0);
     }
     30%, 40% {
-        transform: scale3d(1.1, 1.1, 1.1) translateZ(0);
-        text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        transform: scale3d(1.1, 1.1, 1.1);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
     }
     100% {
-        transform: scale3d(1, 1, 1) translateZ(0);
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0);
+        transform: scale3d(1.001, 1.001, 1);
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0);
     }
 }
 
