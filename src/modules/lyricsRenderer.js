@@ -131,17 +131,13 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
           }
           if (isRTL(s.text)) {
             sylSpan.classList.add('rtl-text');
-            backgroundContainer.prepend(sylSpan);
-          } else {
-            backgroundContainer.appendChild(sylSpan);
           }
+          backgroundContainer.appendChild(sylSpan);
         } else {
           if (isRTL(s.text)) {
             sylSpan.classList.add('rtl-text');
-            mainContainer.prepend(sylSpan);
-          } else {
-            mainContainer.appendChild(sylSpan);
           }
+          mainContainer.appendChild(sylSpan);
         }
       });
       wordBuffer = [];
@@ -194,11 +190,14 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     // "Line" mode: each lyrics.data entry is a full line.
     lyrics.data.forEach(line => {
       const lineDiv = document.createElement('div');
-      lineDiv.textContent = line.text;
       lineDiv.dataset.startTime = line.startTime;
       lineDiv.dataset.endTime = line.endTime;
       lineDiv.classList.add('lyrics-line');
       lineDiv.classList.add(line.element.singer === "v2" ? 'singer-right' : 'singer-left');
+      const mainContainer = document.createElement('div');
+      mainContainer.classList.add('main-vocal-container');
+      mainContainer.textContent = line.text;
+      lineDiv.appendChild(mainContainer);
       if (isRTL(line.text)) lineDiv.classList.add('rtl-text');
       lineDiv.addEventListener('click', onLyricClick);
       lyricsContainer.appendChild(lineDiv);

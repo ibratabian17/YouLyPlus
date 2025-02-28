@@ -91,7 +91,7 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
 }
 
 .lyrics-line.singer-right {
-    text-align: right;
+    text-align: end;
 }
 
 .lyrics-line.active .background-vocal {
@@ -112,6 +112,10 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
     transform: translateZ(0);
 }
 
+.lyrics-line.rtl-text {
+    direction: rtl;
+}
+
 .lyrics-line.active .background-vocal-container {
     height: 1em;
     opacity: 1;
@@ -119,12 +123,12 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
 }
 
 .lyrics-line .main-vocal-container {
-    transition: .5s ease;
+    transition: .5s ease, .18s color;
     transform: scale(0.95) translateZ(0);
     transform-origin: left;
     will-change: transform;
 }
-.lyrics-line.singer-right .main-vocal-container {
+.lyrics-line.singer-right:not(.rtl-text)  .main-vocal-container,  .lyrics-line.rtl-text:not(.singer-right) .main-vocal-container{
     transform-origin: right;
 }
 .lyrics-line.active .main-vocal-container {
