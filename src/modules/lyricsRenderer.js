@@ -662,13 +662,16 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
   const lineRect = activeLine.getBoundingClientRect();
 
   // Define the safe area based on the visible scroll container.
-  // Here, we set the safe area as the middle 50% of the scroll container's height.
-  const safeAreaTop = scrollContainerRect.top + scrollContainerRect.height * 0.25;
-  const safeAreaBottom = scrollContainerRect.top + scrollContainerRect.height * 0.85;
+  const safeAreaTop = scrollContainerRect.top + scrollContainerRect.height * 0.15;
+  const safeAreaBottom = scrollContainerRect.top + scrollContainerRect.height * 0.95;
 
-  // If the top of the active line is outside the safe area, no scroll is needed.
-  if ((lineRect.top < safeAreaTop || lineRect.top > safeAreaBottom)) {
-    if (!forceScroll) return;
+  // Check if the line is outside the safe area
+  const lineIsOutsideSafeArea = lineRect.top < safeAreaTop || lineRect.top > safeAreaBottom;
+  
+  // Correct logic: Scroll if line is outside safe area OR forceScroll is true
+  if (lineIsOutsideSafeArea && !forceScroll) {
+    // Line is already in the visible area and we're not forcing a scroll
+    return;
   }
 
   // Calculate the active line's position relative to the lyrics container
@@ -679,6 +682,6 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
   // Scroll the scroll container to the target position
   scrollContainer.scrollTo({
     top: container.scrollTop + relativePosition - offset,
-    behavior: 'smooth'
+    behavior: 'smooth' // Use immediate scrolling for jumps
   });
 }
