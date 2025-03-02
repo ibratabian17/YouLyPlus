@@ -54,13 +54,12 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
 
 /* LYRICS LINE - Base styles */
 .lyrics-line {
-    font-size: 24px;
+    font-size: 25px;
     line-height: 1.1;
     padding: 10px;
     cursor: pointer;
     opacity: 0.7;
     color: #ffffff85;
-    transform: scale(0.95);
     transform-origin: left;
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
@@ -97,7 +96,7 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
 /* MAIN VOCAL CONTAINER */
 .lyrics-line .main-vocal-container {
     transition: transform .5s ease, color .18s;
-    transform: scale3d(0.95, 0.95, 0.95);
+    transform: scale3d(0.93, 0.93, 0.95);
     transform-origin: left;
 }
 
