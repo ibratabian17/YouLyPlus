@@ -554,6 +554,8 @@ function updateSyllables(currentTime) {
       }
     } else if (currentTime < startTime && syllable.classList.contains('highlight')) {
       resetSyllable(syllable);
+    } else if (currentTime > startTime && !syllable.classList.contains('highlight')){
+      updateSyllableAnimation(syllable, startTime);
     }
   });
 
