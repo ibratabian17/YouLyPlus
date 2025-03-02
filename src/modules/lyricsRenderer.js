@@ -499,8 +499,13 @@ function updateLyricsHighlight(currentTime, isForceScroll = false) {
     if (shouldBeActive && !wasActive) {
       line.classList.add('active');
 
-      if (!currentPrimaryActiveLine ||
-        parseFloat(line.dataset.startTime) > parseFloat(currentPrimaryActiveLine.dataset.startTime)) {
+      if (
+        !currentPrimaryActiveLine ||
+        (currentTime >= lastTime &&
+          parseFloat(line.dataset.startTime) > parseFloat(currentPrimaryActiveLine.dataset.startTime)) ||
+        (currentTime < lastTime &&
+          parseFloat(line.dataset.startTime) < parseFloat(currentPrimaryActiveLine.dataset.startTime))
+      ) {
         scrollActiveLine(currentTime, isForceScroll);
         currentPrimaryActiveLine = line;
       }
