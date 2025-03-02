@@ -28,7 +28,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     scrollToActiveLine(e.currentTarget, true);
   };
 
-  const isRTL = text => /[֑-߿יִ-﷽ﹰ-ﻼ]/.test(text);
+  const isRTL = text => /[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF\u08A0-\u08FF\uFB50-\uFDCF\uFDF0-\uFDFF\uFE70-\uFEFF]/.test(text);
 
   // ---------------------------
   // Helper to create a gap line with three dots.
