@@ -57,7 +57,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       syllableSpan.classList.add('lyrics-syllable');
       // Distribute the gap evenly among the three dots.
       const syllableStart = (gapStart + (i * gapDuration / 3)) * 1000;
-      const syllableDuration = (gapDuration / 3) * 1000;
+      const syllableDuration = ((gapDuration / 3) / 0.9) * 1000;
       syllableSpan.dataset.startTime = syllableStart;
       syllableSpan.dataset.duration = syllableDuration;
       syllableSpan.dataset.endTime = syllableStart + syllableDuration;
@@ -231,7 +231,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       if (firstLine.classList.contains('singer-left')) classesToInherit.push('singer-left');
       if (firstLine.classList.contains('singer-right')) classesToInherit.push('singer-right');
 
-      const beginningGap = createGapLine(0, firstStartTime - 0.5, classesToInherit);
+      const beginningGap = createGapLine(0, firstStartTime - 0.85, classesToInherit);
       lyricsContainer.insertBefore(beginningGap, firstLine);
     }
   }
@@ -249,7 +249,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
         if (nextLine.classList.contains('singer-left')) classesToInherit.push('singer-left');
         if (nextLine.classList.contains('singer-right')) classesToInherit.push('singer-right');
 
-        const gapLine = createGapLine(currentEnd + 0.4, nextStart - 0.8, classesToInherit);
+        const gapLine = createGapLine(currentEnd + 0.4, nextStart - 0.85, classesToInherit);
         lyricsContainer.insertBefore(gapLine, nextLine);
       }
     }

@@ -198,6 +198,10 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
     border-radius: 1em;
 }
 
+.lyrics-line.lyrics-gap:not(.active) .lyrics-syllable {
+    background-color: #FFF;
+}
+
 .lyrics-line.lyrics-gap.active .lyrics-syllable.highlight {
     background-color: #ffffff;
 }
