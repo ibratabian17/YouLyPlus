@@ -143,6 +143,7 @@ function LYPLUS_getSongInfo() {
                 album: LYPLUS_getAlbumFromDOM(), // Still get album from DOM as it's not in API
                 duration: duration,
                 videoId: video_id,
+                isVideo: LYPLUS_getAlbumFromDOM() == "",
                 subtitle: audioTrackData // Store subtitle info if available
             };
         } catch (error) {
