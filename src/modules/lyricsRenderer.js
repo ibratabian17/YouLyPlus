@@ -144,7 +144,8 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
             );
           }
         } else {
-          sylSpan.textContent = s.text.replace('(', '').replace(')', '');
+          // Only remove parentheses for background vocals
+          sylSpan.textContent = s.element.isBackground ? s.text.replace(/[()]/g, '') : s.text;
         }
 
         if (s.element.isBackground) {
@@ -605,13 +606,13 @@ function updateSyllableAnimation(syllable, currentTime) {
           const wordElement = syllable.closest('.lyrics-word');
           const allCharsInWord = wordElement ? wordElement.querySelectorAll('span.char') : charSpans;
           const totalChars = allCharsInWord.length;
-          
+
           // Apply animations based on character position
           allCharsInWord.forEach((span, index) => {
             const growDelay = 200 * index; // 200ms delay between each character
             const spanSyllable = span.closest('.lyrics-syllable');
             const isCurrentSyllable = spanSyllable === syllable;
-            
+
             if (isCurrentSyllable) {
               const wipeDelay = wipeDur * Array.from(charSpans).indexOf(span);
               span.style.animation = `${wipeAnimation} ${wipeDur}ms linear ${wipeDelay}ms forwards, grow-static ${growDur}ms ease-in-out ${growDelay}ms forwards`;
