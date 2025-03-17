@@ -86,6 +86,11 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
 
     const flushWordBuffer = () => {
       if (!wordBuffer.length) return;
+
+      // Create word container for main vocals
+      const wordSpan = document.createElement('span');
+      wordSpan.classList.add('lyrics-word');
+
       const combinedText = wordBuffer.map(s => s.text).join('');
       const trimmedText = combinedText.trim();
       const textLength = trimmedText.length;
@@ -107,6 +112,11 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
         trimmedText.length <= 7 &&
         avgDuration >= requiredThreshold &&
         firstSyllableDuration >= firstSyllableRequiredThreshold;
+
+      // Create word container for background vocals if needed
+      const backgroundWordSpan = document.createElement('span');
+      backgroundWordSpan.classList.add('lyrics-word');
+      let hasBackgroundSyllables = false;
 
       wordBuffer.forEach(s => {
         const sylSpan = document.createElement('span');
@@ -138,22 +148,32 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
         }
 
         if (s.element.isBackground) {
-          if (!backgroundContainer) {
-            backgroundContainer = document.createElement('div');
-            backgroundContainer.classList.add('background-vocal-container');
-            currentLine.appendChild(backgroundContainer);
-          }
+          hasBackgroundSyllables = true;
           if (isRTL(s.text)) {
             sylSpan.classList.add('rtl-text');
           }
-          backgroundContainer.appendChild(sylSpan);
+          backgroundWordSpan.appendChild(sylSpan);
         } else {
           if (isRTL(s.text)) {
             sylSpan.classList.add('rtl-text');
           }
-          mainContainer.appendChild(sylSpan);
+          wordSpan.appendChild(sylSpan);
         }
       });
+
+      // Add the word span to the main container
+      mainContainer.appendChild(wordSpan);
+
+      // Add background word if necessary
+      if (hasBackgroundSyllables) {
+        if (!backgroundContainer) {
+          backgroundContainer = document.createElement('div');
+          backgroundContainer.classList.add('background-vocal-container');
+          currentLine.appendChild(backgroundContainer);
+        }
+        backgroundContainer.appendChild(backgroundWordSpan);
+      }
+
       wordBuffer = [];
     };
 
@@ -554,7 +574,7 @@ function updateSyllables(currentTime) {
       }
     } else if (currentTime < startTime && syllable.classList.contains('highlight')) {
       resetSyllable(syllable);
-    } else if (currentTime > startTime && !syllable.classList.contains('highlight')){
+    } else if (currentTime > startTime && !syllable.classList.contains('highlight')) {
       updateSyllableAnimation(syllable, startTime);
     }
   });
@@ -564,7 +584,6 @@ function updateSyllables(currentTime) {
 }
 
 function updateSyllableAnimation(syllable, currentTime) {
-  // Use Number() to convert dataset values to numbers for faster math
   const startTime = Number(syllable.dataset.startTime);
   const duration = Number(syllable.dataset.duration);
   const endTime = startTime + duration;
@@ -575,22 +594,33 @@ function updateSyllableAnimation(syllable, currentTime) {
       const charSpans = syllable.querySelectorAll('span.char');
 
       if (charSpans.length > 0) {
-        // Performance optimization: Use simpler animation for many characters
         const charCount = charSpans.length;
         const wordDuration = Number(syllable.dataset.wordDuration) || duration;
 
-        // Use full char animation only for shorter words (better performance)
         if (charCount <= 10) {
           const wipeDur = duration / charCount;
+          const growDur = wordDuration * 1.3;
 
-          charSpans.forEach((span, index) => {
-            const wipeDelay = wipeDur * index;
-            const growDelay = wordDuration > 1000 ? 200 * index : (wordDuration / charCount) * index;
-            const growDur = wordDuration * 1.3;
-            span.style.animation = `${wipeAnimation} ${wipeDur}ms linear ${wipeDelay}ms forwards, grow-static ${growDur}ms ease-in-out ${growDelay}ms`;
+          // Find all characters in the word
+          const wordElement = syllable.closest('.lyrics-word');
+          const allCharsInWord = wordElement ? wordElement.querySelectorAll('span.char') : charSpans;
+          const totalChars = allCharsInWord.length;
+          
+          // Apply animations based on character position
+          allCharsInWord.forEach((span, index) => {
+            const growDelay = 200 * index; // 200ms delay between each character
+            const spanSyllable = span.closest('.lyrics-syllable');
+            const isCurrentSyllable = spanSyllable === syllable;
+            
+            if (isCurrentSyllable) {
+              const wipeDelay = wipeDur * Array.from(charSpans).indexOf(span);
+              span.style.animation = `${wipeAnimation} ${wipeDur}ms linear ${wipeDelay}ms forwards, grow-static ${growDur}ms ease-in-out ${growDelay}ms forwards`;
+            } else if (!spanSyllable.classList.contains('highlight')) {
+              // Only apply grow animation to non-highlighted syllables
+              span.style.animation = `grow-static ${growDur}ms ease-in-out ${growDelay}ms forwards`;
+            }
           });
         } else {
-          // Simpler animation for longer text
           charSpans.forEach(span => {
             span.style.animation = `${wipeAnimation} ${duration}ms linear forwards`;
           });
@@ -674,7 +704,7 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
 
   // Check if the line is outside the safe area
   const lineIsOutsideSafeArea = lineRect.top < safeAreaTop || lineRect.top > safeAreaBottom;
-  
+
   // Correct logic: Scroll if line is outside safe area OR forceScroll is true
   if (lineIsOutsideSafeArea && !forceScroll) {
     // Line is already in the visible area and we're not forcing a scroll

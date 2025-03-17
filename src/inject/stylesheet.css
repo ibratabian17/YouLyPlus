@@ -98,6 +98,7 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
     transition: transform .5s ease, color .18s;
     transform: scale3d(0.93, 0.93, 0.95);
     transform-origin: left;
+    overflow-wrap: break-word;
 }
 
 .lyrics-line.active .main-vocal-container {
@@ -127,6 +128,12 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
 }
 
 /* SYLLABLES - Apply effects ONLY to active line */
+.lyrics-word {
+    display: inline-block;
+    vertical-align: baseline;
+    white-space: nowrap;
+}
+
 .lyrics-line .lyrics-syllable {
     display: inline-block;
     white-space: break-spaces;
@@ -220,9 +227,10 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
     -webkit-background-clip: text;
     background-size: 0% 100%;
     background-repeat: no-repeat;
-    transform-origin: bottom;
+    transform-origin: 50% 80%;
+    transform: scale3d(1.01, 1.01, 1.1);
     transition: background 0s linear, transform 0.5s;
-    will-change: background;
+    will-change: background, transform;
 }
 
 .lyrics-line.active .lyrics-syllable span.char.highlight {
@@ -347,16 +355,12 @@ span.lyrics-source-provider {
 }
 
 @keyframes grow-static {
-    0% {
-        transform: scale3d(1.001, 1.001, 1);
-        text-shadow: none;
+    0%, 100% {
+        transform: scale3d(1.01, 1.01, 1.1) translateY(-0.05%);
+        text-shadow: 0 0 0px rgba(255, 255, 255, 0);
     }
     30%, 40% {
-        transform: scale3d(1.1, 1.1, 1.1);
+        transform: scale3d(1.10, 1.10, 1.1) translateY(-0.05%);
         text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-    }
-    100% {
-        transform: scale3d(1.001, 1.001, 1);
-        text-shadow: none;
     }
 }
