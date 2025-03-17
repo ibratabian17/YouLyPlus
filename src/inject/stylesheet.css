@@ -20,6 +20,7 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
 }
 
 ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
+    scroll-padding-top: 25%;
     scroll-margin-top: 25%;
     overflow-anchor: auto;
 }
