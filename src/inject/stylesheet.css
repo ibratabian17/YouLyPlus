@@ -19,6 +19,11 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
     transform: translateZ(0);
 }
 
+ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
+    scroll-margin-top: 25%;
+    overflow-anchor: auto;
+}
+
 /* Selection styles - combined */
 .lyrics-plus-integrated *::selection,
 .lyrics-plus-integrated *::-moz-selection {
