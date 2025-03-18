@@ -588,7 +588,6 @@ function updateSyllableAnimation(syllable, currentTime) {
   const startTime = Number(syllable.dataset.startTime);
   const duration = Number(syllable.dataset.duration);
   const endTime = startTime + duration;
-
   let wipeAnimation = syllable.classList.contains('rtl-text') ? 'wipe-rtl' : 'wipe';
 
   if (currentTime >= startTime && currentTime <= endTime) {
@@ -596,10 +595,13 @@ function updateSyllableAnimation(syllable, currentTime) {
       const charSpans = syllable.querySelectorAll('span.char');
       if (charSpans.length > 0) {
         const charCount = charSpans.length;
+        // Get word duration from dataset or default to syllable duration
         const wordDuration = Number(syllable.dataset.wordDuration) || duration;
 
         if (charCount <= 10) {
+          // Keep wipe duration based on syllable duration
           const wipeDur = duration / charCount;
+          // Set grow duration based on word duration
           const growDur = wordDuration * 1.3;
 
           // Find all characters in the word
@@ -607,51 +609,52 @@ function updateSyllableAnimation(syllable, currentTime) {
           const allCharsInWord = wordElement ? wordElement.querySelectorAll('span.char') : charSpans;
           const totalChars = allCharsInWord.length;
 
+          // Calculate positions for each character in the word
+          const charPositions = [];
+          allCharsInWord.forEach((_, index) => {
+            charPositions.push(index / (totalChars - 1));
+          });
+
           // Apply animations based on character position
           allCharsInWord.forEach((span, index) => {
-            // More dynamic growDelay based on character position and total characters
-            const normalizedPosition = index / (totalChars - 1);
-            const growDelay = 200 * (Math.sin(normalizedPosition * Math.PI) * 0.5 + 0.5) * index;
+            const normalizedPosition = charPositions[index];
+
+            // Create a consistent grow delay pattern based on word duration
+            // Scale the delay by word duration but keep it proportional
+            const growDelayFactor = 0.3; // 30% of word duration as max delay
+            const growDelay = wordDuration * growDelayFactor * normalizedPosition;
 
             const spanSyllable = span.closest('.lyrics-syllable');
             const isCurrentSyllable = spanSyllable === syllable;
 
-            // Truly dynamic transform-origin calculation
-            // Calculate position percentage from 0 to 100
-            const positionPercentage = (index / (totalChars - 1)) * 100;
-
-            // Calculate middle position
-            const middlePosition = 50;
-
             // Calculate dynamic transform origin
-            // Characters gradually transition from expanding from right to expanding from left
-            // Characters at far left (0%) will have transformOriginX of 100% (expand from right)
-            // Characters at far right (100%) will have transformOriginX of 0% (expand from left)
-            // Characters in middle will have intermediate values
+            const positionPercentage = normalizedPosition * 100;
             const transformOriginX = `${100 - positionPercentage}%`;
-
-            // Apply transform origin with vertical component for wave effect
             span.style.transformOrigin = `${transformOriginX} 80%`;
 
             if (isCurrentSyllable) {
-              const wipeDelay = wipeDur * Array.from(charSpans).indexOf(span);
+              // For characters in the current syllable, apply both animations
+              const charIndexInSyllable = Array.from(charSpans).indexOf(span);
+              const wipeDelay = wipeDur * charIndexInSyllable;
               span.style.animation = `${wipeAnimation} ${wipeDur}ms linear ${wipeDelay}ms forwards, grow-static ${growDur}ms ease-in-out ${growDelay}ms forwards`;
             } else if (!spanSyllable.classList.contains('highlight')) {
+              // For characters in other syllables, only apply grow animation
               span.style.animation = `grow-static ${growDur}ms ease-in-out ${growDelay}ms forwards`;
             }
           });
         } else {
+          // For syllables with many characters, use simple wipe animation
           charSpans.forEach(span => {
             span.style.animation = `${wipeAnimation} ${duration}ms linear forwards`;
           });
         }
       } else {
+        // For syllables without individual character spans
         if (syllable.parentElement.parentElement.classList.contains('lyrics-gap')) {
           wipeAnimation = "fade-gap";
         }
         syllable.style.animation = `${wipeAnimation} ${duration}ms linear forwards`;
       }
-
       syllable.classList.add('highlight');
     }
   }
