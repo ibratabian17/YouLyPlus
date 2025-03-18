@@ -588,12 +588,12 @@ function updateSyllableAnimation(syllable, currentTime) {
   const startTime = Number(syllable.dataset.startTime);
   const duration = Number(syllable.dataset.duration);
   const endTime = startTime + duration;
+
   let wipeAnimation = syllable.classList.contains('rtl-text') ? 'wipe-rtl' : 'wipe';
 
   if (currentTime >= startTime && currentTime <= endTime) {
     if (!syllable.classList.contains('highlight')) {
       const charSpans = syllable.querySelectorAll('span.char');
-
       if (charSpans.length > 0) {
         const charCount = charSpans.length;
         const wordDuration = Number(syllable.dataset.wordDuration) || duration;
@@ -609,15 +609,34 @@ function updateSyllableAnimation(syllable, currentTime) {
 
           // Apply animations based on character position
           allCharsInWord.forEach((span, index) => {
-            const growDelay = 200 * index; // 200ms delay between each character
+            // More dynamic growDelay based on character position and total characters
+            const normalizedPosition = index / (totalChars - 1);
+            const growDelay = 200 * (Math.sin(normalizedPosition * Math.PI) * 0.5 + 0.5) * index;
+
             const spanSyllable = span.closest('.lyrics-syllable');
             const isCurrentSyllable = spanSyllable === syllable;
+
+            // Truly dynamic transform-origin calculation
+            // Calculate position percentage from 0 to 100
+            const positionPercentage = (index / (totalChars - 1)) * 100;
+
+            // Calculate middle position
+            const middlePosition = 50;
+
+            // Calculate dynamic transform origin
+            // Characters gradually transition from expanding from right to expanding from left
+            // Characters at far left (0%) will have transformOriginX of 100% (expand from right)
+            // Characters at far right (100%) will have transformOriginX of 0% (expand from left)
+            // Characters in middle will have intermediate values
+            const transformOriginX = `${100 - positionPercentage}%`;
+
+            // Apply transform origin with vertical component for wave effect
+            span.style.transformOrigin = `${transformOriginX} 80%`;
 
             if (isCurrentSyllable) {
               const wipeDelay = wipeDur * Array.from(charSpans).indexOf(span);
               span.style.animation = `${wipeAnimation} ${wipeDur}ms linear ${wipeDelay}ms forwards, grow-static ${growDur}ms ease-in-out ${growDelay}ms forwards`;
             } else if (!spanSyllable.classList.contains('highlight')) {
-              // Only apply grow animation to non-highlighted syllables
               span.style.animation = `grow-static ${growDur}ms ease-in-out ${growDelay}ms forwards`;
             }
           });
