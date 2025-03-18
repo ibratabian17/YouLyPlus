@@ -619,10 +619,11 @@ function updateSyllableAnimation(syllable, currentTime) {
           allCharsInWord.forEach((span, index) => {
             const normalizedPosition = charPositions[index];
 
-            // Create a consistent grow delay pattern based on word duration
-            // Scale the delay by word duration but keep it proportional
-            const growDelayFactor = 0.3; // 30% of word duration as max delay
-            const growDelay = wordDuration * growDelayFactor * normalizedPosition;
+            // Create a consistent grow delay pattern based on word duration and length
+            // Scale the delay by word duration and total characters, but keep it proportional
+            const growDelayFactor = 0.4; // 40% of word duration as max delay
+            const lengthFactor = Math.max(0.6, 1 + (totalChars * 0.03)); // More delay for longer words
+            const growDelay = wordDuration * growDelayFactor * normalizedPosition * lengthFactor;
 
             const spanSyllable = span.closest('.lyrics-syllable');
             const isCurrentSyllable = spanSyllable === syllable;
