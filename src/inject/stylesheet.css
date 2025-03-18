@@ -346,27 +346,23 @@ span.lyrics-source-provider {
 }
 
 @keyframes grow-dynamic {
-    0% {
-        transform: scale3d(1, 1, 1);
-        text-shadow: none;
+    0%, 100% {
+        transform: scale3d(1.01, 1.01, 1.1) translateY(-0.05%);
+        text-shadow: 0 0 0 rgba(255, 255, 255, 0);
     }
     30%, 40% {
         transform: scale3d(var(--target-scale, 1.1), var(--target-scale, 1.1), var(--target-scale, 1.1));
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-    }
-    100% {
-        transform: scale3d(1, 1, 1);
-        text-shadow: none;
+        text-shadow: 0 0 0.3em rgba(255, 255, 255, 0.5);
     }
 }
 
 @keyframes grow-static {
     0%, 100% {
         transform: scale3d(1.01, 1.01, 1.1) translateY(-0.05%);
-        text-shadow: 0 0 0px rgba(255, 255, 255, 0);
+        text-shadow: 0 0 0 rgba(255, 255, 255, 0);
     }
     30%, 40% {
         transform: scale3d(1.10, 1.10, 1.1) translateY(-0.05%);
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        text-shadow: 0 0 0.3em rgba(255, 255, 255, 0.5);
     }
 }
