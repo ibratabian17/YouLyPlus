@@ -24,7 +24,7 @@
   let updateScheduled = false;
   let isUpdating = false;
 
-  // Update the middle tab’s attributes if they are not already set correctly.
+  // Update the middle tab's attributes if they are not already set correctly.
   function forceActivateMiddleTab(tabElement) {
     if (!tabElement) return;
 
@@ -54,7 +54,8 @@
     tabElement.setAttribute('tabindex', '0');
     tabElement.setAttribute('aria-selected', 'true');
     tabElement.style.pointerEvents = 'auto';
-    console.log('Middle tab dipaksa aktif');
+    
+    console.log('Middle tab forced active');
 
     isUpdating = false;
 
@@ -89,6 +90,49 @@
     });
   }
 
+  // Enhance touch handling for both mobile and desktop
+  function enhanceTouchHandling(tabs, middleIndex) {
+    tabs.forEach((tab, index) => {
+      // Add touch event listeners for mobile devices
+      tab.addEventListener('touchend', (e) => {
+        // Handle touch end event for mobile
+        handleTabInteraction(index, middleIndex);
+      });
+    });
+  }
+
+  // Handle tab interaction (used for both click and touch)
+  function handleTabInteraction(tabIndex, middleIndex) {
+    if (tabIndex === middleIndex) {
+      const lyricsElement = document.querySelector('.lyrics-plus-integrated');
+      if (lyricsElement) {
+        lyricsElement.style.display = 'block';
+        const videoElement = document.querySelector('video');
+        if (videoElement) {
+          try {
+            if (typeof scrollActiveLine === 'function') {
+              scrollActiveLine(videoElement.currentTime, true);
+            }
+          } catch (error) {
+            console.log('Error scrolling to active line:', error);
+          }
+        }
+        console.log('Showing .lyrics-plus-integrated');
+      }
+    } else {
+      const lyricsElement = document.querySelector('.lyrics-plus-integrated');
+      if (lyricsElement) {
+        lyricsElement.style.display = 'none';
+        console.log('Hiding .lyrics-plus-integrated');
+      }
+    }
+  }
+
+  // Function to check if viewport is mobile sized
+  function isMobileViewport() {
+    return window.innerWidth <= 768;
+  }
+
   // Async initializer: waits for the required tabs to be present, then attaches listeners.
   async function init() {
     let tabs;
@@ -108,26 +152,19 @@
     forceActivateMiddleTab(middleTab);
     observeMiddleTab(middleTab);
 
+    // Add enhanced touch handling for all devices
+    enhanceTouchHandling(tabs, middleIndex);
+
     // When the middle tab is clicked, show the ".lyrics-plus-integrated" element.
     middleTab.addEventListener('click', () => {
-      const lyricsElement = document.querySelector('.lyrics-plus-integrated');
-      if (lyricsElement) {
-        lyricsElement.style.display = 'block';
-        const videoElement = document.querySelector('video');
-        if (videoElement) scrollActiveLine(videoElement.currentTime, true)
-        console.log('Menampilkan .lyrics-plus-integrated');
-      }
+      handleTabInteraction(middleIndex, middleIndex);
     });
 
     // For all other tabs, hide the ".lyrics-plus-integrated" element on click.
     tabs.forEach((tab, index) => {
       if (index !== middleIndex) {
         tab.addEventListener('click', () => {
-          const lyricsElement = document.querySelector('.lyrics-plus-integrated');
-          if (lyricsElement) {
-            lyricsElement.style.display = 'none';
-            console.log('Menyembunyikan .lyrics-plus-integrated');
-          }
+          handleTabInteraction(index, middleIndex);
         });
       }
     });
