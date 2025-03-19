@@ -17,12 +17,15 @@ ytmusic-message-renderer.style-scope.ytmusic-tab-renderer[style=""] {
     padding-top: 1em;
     /* Single transform for performance */
     transform: translateZ(0);
+    direction: ltr;
+    /* Firefox */
 }
 
 ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
     scroll-padding-top: 25%;
     scroll-margin-top: 25%;
     overflow-anchor: auto;
+    scrollbar-width: none;
 }
 
 /* Selection styles - combined */
@@ -195,6 +198,7 @@ ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
     animation: gap-loop 2s ease infinite alternate;
     will-change: transform;
 }
+
 .lyrics-line.lyrics-gap .main-vocal-container {
     animation: gap-ended .8s ease;
     transform: translateY(-25%) scale(0) translateZ(0);
@@ -301,6 +305,7 @@ span.lyrics-source-provider {
     from {
         background-size: 0% 100%;
     }
+
     to {
         background-size: 100% 100%;
     }
@@ -310,18 +315,22 @@ span.lyrics-source-provider {
     from {
         transform: translateY(-25%) scale(1.1) translateZ(0);
     }
+
     to {
         transform: translateY(-25%) scale(1) translateZ(0);
     }
 }
+
 @keyframes gap-ended {
-    
+
     0% {
         transform: translateY(-25%) scale(1) translateZ(0);
     }
+
     30% {
         transform: translateY(-25%) scale(1.2) translateZ(0);
     }
+
     100% {
         transform: translateY(-25%) scale(0) translateZ(0);
     }
@@ -331,6 +340,7 @@ span.lyrics-source-provider {
     from {
         background-color: rgba(255, 255, 255, 0.36);
     }
+
     to {
         background-color: #FFF;
     }
@@ -340,28 +350,37 @@ span.lyrics-source-provider {
     from {
         background-size: 0% 100%;
     }
+
     to {
         background-size: 100% 100%;
     }
 }
 
 @keyframes grow-dynamic {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale3d(1.01, 1.01, 1.1) translateY(-0.05%);
         text-shadow: 0 0 0 rgba(255, 255, 255, 0);
     }
-    30%, 40% {
+
+    30%,
+    40% {
         transform: scale3d(var(--target-scale, 1.1), var(--target-scale, 1.1), var(--target-scale, 1.1));
         text-shadow: 0 0 0.3em rgba(255, 255, 255, 0.5);
     }
 }
 
 @keyframes grow-static {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale3d(1.01, 1.01, 1.1) translateY(-0.05%);
         text-shadow: 0 0 0 rgba(255, 255, 255, 0);
     }
-    30%, 40% {
+
+    30%,
+    40% {
         transform: scale3d(1.10, 1.10, 1.1) translateY(-0.05%);
         text-shadow: 0 0 0.3em rgba(255, 255, 255, 0.5);
     }
