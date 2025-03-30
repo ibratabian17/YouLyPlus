@@ -5,6 +5,7 @@ let LYPLUS_currentSong = {};
 (function() {
     console.log('LYPLUS: DOM script injected successfully');
     LYPLUS_setupMutationObserver();
+    LYPLUS_setupBlurEffect();
 })();
 
 // Initialize the observer to watch for changes in the player state
@@ -99,6 +100,9 @@ function LYPLUS_checkForSongChange() {
     // Notify extension only if the song title or artist has changed
     if (newSongInfo.title !== LYPLUS_currentSong.title || newSongInfo.artist !== LYPLUS_currentSong.artist) {
         LYPLUS_currentSong = newSongInfo;
+        
+        // Update blur background when song changes
+        LYPLUS_updateBlurBackground();
         
         // Send message to the extension script
         window.postMessage({
@@ -271,4 +275,42 @@ function LYPLUS_getDOMSongInfo() {
         isVideo,
         videoId
     };
+}
+
+function LYPLUS_setupBlurEffect() {
+    // Remove existing container if present
+    const existingContainer = document.querySelector('.lyplus-blur-container');
+    if (existingContainer) {
+        existingContainer.remove();
+    }
+
+    // Create new containers
+    const blurContainer = document.createElement('div');
+    blurContainer.classList.add('lyplus-blur-container');
+
+    const blurBackground = document.createElement('div');
+    blurBackground.classList.add('lyplus-blur-background');
+
+    const gradientOverlay = document.createElement('div');
+    gradientOverlay.classList.add('lyplus-gradient-overlay');
+
+    blurContainer.appendChild(blurBackground);
+    blurContainer.appendChild(gradientOverlay);
+    document.querySelector('#layout').prepend(blurContainer);
+
+    return blurBackground;
+}
+
+// Update blur background with album art
+function LYPLUS_updateBlurBackground() {
+    const artworkElement = document.querySelector('#song-image>#thumbnail>#img');
+    if (!artworkElement) return;
+
+    const blurBackground = document.querySelector('.lyplus-blur-background');
+    if (!blurBackground) return;
+
+    const artworkUrl = artworkElement.src;
+    if (artworkUrl) {
+        blurBackground.style.backgroundImage = `url(${artworkUrl})`;
+    }
 }
