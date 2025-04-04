@@ -253,7 +253,7 @@ async function fetchKPoeLyrics(songInfo) {
     const albumParam = (songInfo.album && songInfo.album !== songInfo.title)
         ? `&album=${encodeURIComponent(songInfo.album)}`
         : '';
-    const url = `https://lyricsplus.prjktla.workers.dev/v1/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}`;
+    const url = `https://lyricsplus.prjktla.workers.dev/v1/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}&duration=${songInfo.duration}`;
 
     const response = await fetch(url);
     if (!response.ok) return null;
