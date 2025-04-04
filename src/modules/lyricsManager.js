@@ -18,7 +18,8 @@ async function fetchAndDisplayLyrics(currentSong) {
         album: currentSong.album,
         isVideo: currentSong.isVideo,
         videoId: currentSong.videoId,
-        subtitle: currentSong.subtitle
+        subtitle: currentSong.subtitle,
+        duration: currentSong.duration,
       }
     });
 
