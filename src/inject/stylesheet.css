@@ -158,7 +158,11 @@ ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
 }
 .lyrics-line.active .lyrics-syllable.finished {
     color: #ffffff;
-    transition: none;
+    transition: all 0s!important;
+}
+.lyrics-line:not(.active) .lyrics-syllable.finished {
+    color: #ffffff;
+    transition: color 0.18s;
 }
 
 /* Only apply background effects and transitions to ACTIVE line syllables */
@@ -325,10 +329,14 @@ span.lyrics-source-provider {
 .lyrics-plus-integrated .text-loading:after {
     content: "...";
     display: inline-block;
-    animation: ellipsis 1.5s steps(4, end) infinite;
+    animation: ellipsis 3s ease-in-out infinite;
+    mask-image: linear-gradient(to right,  #FFF 90%,  transparent 100%);
+    mask-size: 200% 100%;
+    mask-repeat: no-repeat;
     width: 0;
     overflow: hidden;
     vertical-align: bottom;
+    text-overflow: clip;
 }
 /* ANIMATIONS - Simplified */
 @keyframes wipe {
@@ -427,7 +435,24 @@ span.lyrics-source-provider {
 }
 
 @keyframes ellipsis {
-    to { width: 1.25em; }
+    0% {
+        width: 0;
+        opacity: 1;
+        mask-position: 0% 0%;
+    }
+    60% {
+        width: 0.8em;
+        opacity: 1;
+        mask-position: 10% 0%;
+    }
+    80%, 82% {
+        width: 0.8em;
+        opacity: 0;
+    }
+    100% {
+        width: 0;
+        opacity: 0;
+    }
 }
 
 
