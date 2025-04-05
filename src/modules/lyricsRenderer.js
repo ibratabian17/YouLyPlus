@@ -95,23 +95,13 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       const trimmedText = combinedText.trim();
       const textLength = trimmedText.length;
       const totalDuration = wordBuffer.reduce((sum, s) => sum + s.duration, 0);
-      const baseThreshold = 170;
-      const requiredThreshold = baseThreshold * (7 / textLength) + 7;
-      const avgDuration = totalDuration / textLength;
-
-      // Calculate threshold for the first syllable.
-      const firstSyllableThreshold = 100;
-      const firstSyllableTextLength = wordBuffer[0].text.length;
-      const firstSyllableRequiredThreshold = firstSyllableThreshold * (7 / firstSyllableTextLength);
-      const firstSyllableDuration = wordBuffer[0].duration;
 
       // Performance optimization: Only apply character-by-character glow for short text
-      const applyGlow =
-        !lightweight &&
+      const shouldEmphasize = !lightweight &&
         !isRTL(combinedText) &&
         trimmedText.length <= 7 &&
-        avgDuration >= requiredThreshold &&
-        firstSyllableDuration >= firstSyllableRequiredThreshold;
+        trimmedText.length > 1 &&
+        totalDuration >= 1000;
 
       // Create word container for background vocals if needed
       const backgroundWordSpan = document.createElement('span');
@@ -127,7 +117,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
         sylSpan.dataset.wordDuration = totalDuration;
         sylSpan.addEventListener('click', onLyricClick);
 
-        if (applyGlow && !(s.element.isBackground)) {
+        if (shouldEmphasize && !(s.element.isBackground)) {
           for (const char of s.text) {
             sylSpan.appendChild(
               char === ' '
@@ -293,7 +283,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
         // Normal case: add a small extension if there's a positive gap
         const extension = Math.min(0.5, gap);
         line.dataset.endTime = (currentEnd + extension).toFixed(3);
-        
+
         // Update any previous lines that end at the same time
         for (let i = 0; i < idx; i++) {
           if (Math.abs(parseFloat(originalLines[i].dataset.endTime) - currentEnd) < 0.001) {
@@ -303,7 +293,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       } else if (gap < 0) {
         // Set end time to next line's end time
         line.dataset.endTime = nextEnd.toFixed(3);
-        
+
         // Update any previous lines that end at the same time 
         for (let i = 0; i < idx; i++) {
           if (Math.abs(parseFloat(originalLines[i].dataset.endTime) - currentEnd) < 0.001) {
@@ -608,95 +598,113 @@ function updateSyllables(currentTime) {
 function updateSyllableAnimation(syllable, currentTime) {
   // Only process if not already highlighted
   if (syllable.classList.contains('highlight')) return;
-  
+
   const startTime = Number(syllable.dataset.startTime);
   const duration = Number(syllable.dataset.duration);
   const endTime = startTime + duration;
-  
+
   // Only process if we're in the time window
   if (currentTime < startTime || currentTime > endTime) return;
-  
+
   let wipeAnimation = syllable.classList.contains('rtl-text') ? 'wipe-rtl' : 'wipe';
   const charSpans = syllable.querySelectorAll('span.char');
-  
+
   // Mark as highlighted immediately to prevent repeated processing
   syllable.classList.add('highlight');
-  
-  if (charSpans.length > 0 && charSpans.length <= 10) {
+
+  if (charSpans.length > 0 && charSpans.length <= 10) { //emphasize short words
     const charCount = charSpans.length;
     // Cache the word element and related data to avoid repeated DOM traversal
     const wordElement = syllable.closest('.lyrics-word');
     // Get word duration from dataset or default to syllable duration
     const wordDuration = Number(syllable.dataset.wordDuration) || duration;
-    
+
     // Find all characters in the word - only do this DOM query once
     const allCharsInWord = wordElement ? wordElement.querySelectorAll('span.char') : charSpans;
     const totalChars = allCharsInWord.length;
-    
+
     if (totalChars > 0) {
       // Pre-calculate values that don't change per character
       const wipeDur = duration / charCount;
       const growDur = wordDuration * 1.3;
-      
+
+      // Calculate dynamic scale based on word duration
+      const durationFactor = Math.min(1.0, wordDuration / 1000); // Normalize duration to 0-1 scale
+      const maxScale = Math.max(1.08, Math.min(1.15, 1.15 - (durationFactor * 0.05)));
+      const minScale = Math.max(1.01, Math.min(1.05, 1.05 - (durationFactor * 0.02)));
+
+      // Dynamic shadow intensity based on word duration
+      const shadowIntensity = Math.max(0.4, Math.min(0.8, 0.8 - (durationFactor * 0.3)));
+
+      // Inside the durationFactor calculation block:
+      const translateYPeak = -0.5 - (durationFactor * 2); // Ranges from -0.5% to -2.5%
+
+
+      // Set CSS variables for dynamic animation properties
+      document.documentElement.style.setProperty('--translate-y-peak', `${translateYPeak}%`);
+      document.documentElement.style.setProperty('--max-scale', maxScale);
+      document.documentElement.style.setProperty('--min-scale', minScale);
+      document.documentElement.style.setProperty('--shadow-intensity', shadowIntensity);
+
+      // Get word boundaries for calculating absolute center
+      let wordRect;
+      if (wordElement) {
+        wordRect = wordElement.getBoundingClientRect();
+        // Add a class to the word element to handle positioning context
+        wordElement.classList.add('lyrics-word-animating');
+      }
+
       // Special case handling for single-letter words/syllables
       if (totalChars === 1) {
         const span = allCharsInWord[0];
-        // For single letters, center the transform origin and use immediate growth
-        span.style.transformOrigin = "50% 85%";
-        
-        // For single letters, apply immediate grow with no delay
+        // For single letters, set transform origin to word center
+        span.style.transformOrigin = "center center";
+
         if (span.closest('.lyrics-syllable') === syllable) {
-          span.style.animation = `${wipeAnimation} ${wipeDur}ms linear forwards, grow-static ${growDur}ms ease-in-out forwards`;
+          span.style.animation = `${wipeAnimation} ${wipeDur}ms linear forwards, grow-dynamic ${growDur}ms ease-in-out forwards`;
         } else if (!span.closest('.lyrics-syllable').classList.contains('highlight')) {
-          span.style.animation = `grow-static ${growDur}ms ease-in-out forwards`;
+          span.style.animation = `grow-dynamic ${growDur}ms ease-in-out forwards`;
         }
         return; // Exit early for single letter case
       }
-      
-      // Improved dynamic growth delay factor based on word length
-      // Shorter words get shorter delays overall, longer words get proportionally longer delays
-      const baseDelayFactor = Math.max(0.25, Math.min(0.5, 0.5 - (totalChars * 0.01)));
-      
-      // Calculate dynamic curve steepness - shorter words get steeper curves
-      const curveSteepness = Math.max(0.5, Math.min(1.5, 2.0 - (totalChars * 0.1)));
-      
-      // Maximum total delay as percentage of word duration, scales with word length
-      const maxDelayPercent = Math.min(0.6, 0.3 + (totalChars * 0.03));
-      
-      // Pre-compute character positions array with non-linear curve for more natural timing
-      const charPositions = new Array(totalChars);
-      const divisor = totalChars - 1 || 1; // Avoid division by zero
-      for (let i = 0; i < totalChars; i++) {
-        // Apply non-linear curve to character positions for more natural animation
-        const normalizedPos = i / divisor;
-        charPositions[i] = Math.pow(normalizedPos, curveSteepness);
-      }
-      
+
+      // Wave propagation speed factor - higher values make the wave move faster
+      const waveSpeed = Math.max(0.5, Math.min(1.2, 1.0 - (durationFactor * 0.3)));
+
+      // Maximum total delay as percentage of word duration, scales with word duration
+      const maxDelayPercent = Math.min(0.5, 0.2 + (durationFactor * 0.25));
+
       // Process all characters at once
       const spans = Array.from(allCharsInWord);
-      
+      const divisor = totalChars - 1 || 1; // Avoid division by zero
+
       for (let i = 0; i < spans.length; i++) {
         const span = spans[i];
-        const normalizedPosition = charPositions[i];
         const spanSyllable = span.closest('.lyrics-syllable');
         const isCurrentSyllable = spanSyllable === syllable;
-        
-        // Calculate dynamic transform origin - only calculate once per span
-        const positionPercentage = (i / divisor) * 100; // Use linear position for transform origin
-        const transformOriginX = `${100 - positionPercentage}%`;
-        span.style.transformOrigin = `${transformOriginX} 85%`;
-        
-        // Calculate the dynamic growth delay based on character position and word length
-        const growDelay = wordDuration * maxDelayPercent * normalizedPosition * baseDelayFactor * (totalChars / 3);
-        
+
+        // Calculate position for left-to-right wave (0 at start, 1 at end)
+        const normalizedPosition = i / divisor;
+
+        // Apply non-linear curve for more natural wave movement
+        const curvedPosition = Math.pow(normalizedPosition, waveSpeed);
+
+        // Calculate wave delay based on position from left to right
+        const waveDelay = wordDuration * maxDelayPercent * curvedPosition;
+
+        const positionPercentage = (i / divisor) * 100; // Get original percentage
+        const scaledPercentage = positionPercentage === 0 ? 0 : positionPercentage * 1.5; // Scale non-zero values
+        const transformOriginX = `${100 - scaledPercentage}%`; // Center-based scaling
+        span.style.transformOrigin = `${transformOriginX} center`;
+
         if (isCurrentSyllable) {
           // For characters in current syllable
           const charIndexInSyllable = Array.from(charSpans).indexOf(span);
           const wipeDelay = wipeDur * charIndexInSyllable;
-          span.style.animation = `${wipeAnimation} ${wipeDur}ms linear ${wipeDelay}ms forwards, grow-static ${growDur}ms ease-in-out ${growDelay}ms forwards`;
+          span.style.animation = `${wipeAnimation} ${wipeDur}ms linear ${wipeDelay}ms forwards, grow-dynamic ${growDur}ms ease-in-out ${waveDelay}ms forwards`;
         } else if (!spanSyllable.classList.contains('highlight')) {
           // For characters in other syllables
-          span.style.animation = `grow-static ${growDur}ms ease-in-out ${growDelay}ms forwards`;
+          span.style.animation = `grow-dynamic ${growDur}ms ease-in-out ${waveDelay}ms forwards`;
         }
       }
     }
