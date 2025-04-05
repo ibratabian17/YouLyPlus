@@ -612,7 +612,7 @@ function updateSyllableAnimation(syllable, currentTime) {
   // Mark as highlighted immediately to prevent repeated processing
   syllable.classList.add('highlight');
 
-  if (charSpans.length > 0 && charSpans.length <= 10) { //emphasize short words
+  if (charSpans.length > 0 && charSpans.length <= 7) { //emphasize short words
     const charCount = charSpans.length;
     // Cache the word element and related data to avoid repeated DOM traversal
     const wordElement = syllable.closest('.lyrics-word');
@@ -628,23 +628,30 @@ function updateSyllableAnimation(syllable, currentTime) {
       const wipeDur = duration / charCount;
       const growDur = wordDuration * 1.3;
 
-      // Calculate dynamic scale based on word duration
+      // Calculate dynamic scale based on word duration and character count
       const durationFactor = Math.min(1.0, wordDuration / 1000); // Normalize duration to 0-1 scale
-      const maxScale = Math.max(1.08, Math.min(1.15, 1.15 - (durationFactor * 0.05)));
-      const minScale = Math.max(1.01, Math.min(1.05, 1.05 - (durationFactor * 0.02)));
+      const charFactor = Math.max(0, Math.min(1.0, (7 - totalChars) / 7)); // More impact for shorter words
+      
+      // Combined factor giving more weight to duration than char count
+      const combinedFactor = (durationFactor * 0.8) + (charFactor * 0.2);
+      
+      // Dynamic scaling based on combined factor
+      const maxScale = Math.max(1.08, Math.min(1.18, 1.18 - (combinedFactor * 0.05)));
+      const minScale = Math.max(1.01, Math.min(1.06, 1.06 - (combinedFactor * 0.02)));
 
-      // Dynamic shadow intensity based on word duration
-      const shadowIntensity = Math.max(0.4, Math.min(0.8, 0.8 - (durationFactor * 0.3)));
+      // Dynamic shadow intensity, mainly duration-based with slight char influence
+      const shadowIntensity = Math.max(0.4, Math.min(0.85, 0.85 - (combinedFactor * 0.3)));
 
-      // Inside the durationFactor calculation block:
-      const translateYPeak = -0.5 - (durationFactor * 2); // Ranges from -0.5% to -2.5%
+      // Vertical translation peak, more influenced by duration than char count
+      const translateYPeak = -Math.min(2.5, 0.5 + (durationFactor * 3) + (charFactor * 0.5)); // Ranges from -0.5% to -2.5%
 
 
       // Set CSS variables for dynamic animation properties
-      document.documentElement.style.setProperty('--translate-y-peak', `${translateYPeak}%`);
-      document.documentElement.style.setProperty('--max-scale', maxScale);
-      document.documentElement.style.setProperty('--min-scale', minScale);
-      document.documentElement.style.setProperty('--shadow-intensity', shadowIntensity);
+      wordElement.style.setProperty('--translate-y-peak', `${translateYPeak}%`);
+      wordElement.style.setProperty('--max-scale', maxScale);
+      wordElement.style.setProperty('--min-scale', minScale);
+      wordElement.style.setProperty('--shadow-intensity', shadowIntensity);
+
 
       // Get word boundaries for calculating absolute center
       let wordRect;

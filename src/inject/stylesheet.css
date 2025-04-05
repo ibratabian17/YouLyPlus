@@ -406,7 +406,7 @@ span.lyrics-source-provider {
 
     25%, 30% {
         transform: scale3d(var(--max-scale), var(--max-scale), 1) translateY(var(--translate-y-peak));
-        text-shadow: 0 0 0.4em rgba(255, 255, 255, var(--shadow-intensity));
+        text-shadow: 0 0 0.2em rgba(255, 255, 255, var(--shadow-intensity));
     }
 
     100% {
