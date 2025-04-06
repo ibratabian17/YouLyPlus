@@ -1,62 +1,116 @@
+<!-- Updated HTML -->
 <!DOCTYPE html>
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="../lib/polyfill.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>YouLy+ Settings</h1>
+        <header>
+            <h1>
+                <i class="fas fa-music"></i>
+                YouLy+ Settings
+            </h1>
+        </header>
 
-        <div class="section">
-            <h2>App Menu</h2>
-            <label class="switch">
-                <input type="checkbox" id="lyEnabled">
-                <span class="slider"></span>
-                Enable YouLy+
-            </label>
-
+        <div class="tabs">
+            <button class="tab active" data-tab="general">General</button>
+            <button class="tab" data-tab="appearance">Appearance</button>
+            <button class="tab" data-tab="advanced">Advanced</button>
         </div>
+
+        <div class="tab-content active" id="general">
+            <div class="section">
+                <h2><i class="fas fa-toggle-on"></i> Core Features</h2>
+                <label class="switch">
+                    <input type="checkbox" id="lyEnabled">
+                    <span class="slider"></span>
+                    Enable YouLy+
+                </label>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-cloud-download-alt"></i> Data Sources</h2>
+                <div class="setting-group">
+                    <label>Primary Lyrics Provider</label>
+                    <select id="lyricsProvider" class="dropdown">
+                        <option value="kpoe">Lyrics+ (KPoe)</option>
+                        <option value="lrclib">LRCLIB</option>
+                    </select>
+                </div>
+                
+                <label class="switch">
+                    <input type="checkbox" id="sponsorblock">
+                    <span class="slider"></span>
+                    Integrate SponsorBlock
+                </label>
+
+            </div>
+        </div>
+
+        <div class="tab-content" id="appearance">
+            <div class="section">
+                <h2><i class="fas fa-palette"></i> Display Settings</h2>
+                
+                <label class="switch">
+                    <input type="checkbox" id="lightweight">
+                    <span class="slider"></span>
+                    Lightweight Mode
+                </label>
+
+                <label class="switch">
+                    <input type="checkbox" id="wordByWord">
+                    <span class="slider"></span>
+                    Word-by-Word Highlighting
+                </label>
+            </div>
+        </div>
+
+        <div class="tab-content" id="advanced">
+            <!-----<div class="section">
+                <h2><i class="fas fa-microchip"></i> Performance</h2>
+                
+                <div class="setting-group">
+                    <label>Cache Strategy</label>
+                    <select id="cacheStrategy" class="dropdown">
+                        <option value="aggressive">Aggressive</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="none">None</option>
+                    </select>
+                </div>
+            </div>--->
+
+            <div class="section">
+                <h2><i class="fas fa-database"></i> Data Management</h2>
+                <div class="cache-info">
+                    <div class="cache-stats">
+                        <p>Storage Used: <span class="cache-size">0.00</span>MB</p>
+                        <p>Lyrics Cached: <span class="cache-count">0</span></p>
+                    </div>
+                    <div class="cache-controls">
+                        <button class="clear-cache btn-warning">
+                            <i class="fas fa-trash"></i> Clear Cache
+                        </button>
+                        <button class="refresh-cache">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status" id="status"></div>
         
-        <div class="section">
-            <h2>Preferred Lyrics Provider</h2>
-            <select id="lyricsProvider" class="dropdown">
-                <option value="kpoe">Lyrics+ (KPoe)</option>
-                <option value="lrclib">LRCLIB</option>
-            </select>
-            
-            <label class="switch">
-                <input type="checkbox" id="sponsorblock">
-                <span class="slider"></span>
-                use SponsorBlock as additional Syncer
-            </label>
-        </div>
-
-        <div class="section">
-            <h2>Lyrics Display</h2>
-            <label class="switch">
-                <input type="checkbox" id="wordByWord">
-                <span class="slider"></span>
-                Word-by-Word Highlighting
-            </label>
-            
-            <label class="switch">
-                <input type="checkbox" id="lightweight">
-                <span class="slider"></span>
-                Lightweight Mode
-            </label>
-        </div>
-
-        <div class="section">
-            <h2>Cached Lyrics</h2>
-            <p>Saved Lyrics on Cache: <span class="cache-size"></span>KB</p>
-            <button class="clear-cache">Clear</button>
-        </div>
-
-        <div id="status" class="status"></div>
         <footer>
-            <a href="https://github.com/ibratabian17/YouLy" target="_blank">Check our GitHub</a>
-          </footer>
+            <a href="https://github.com/ibratabian17/YouLy" target="_blank" class="github-link">
+                <i class="fab fa-github"></i> View on GitHub
+            </a>
+            <!------<a href="../settings/index.html" target="_blank" class="github-link">
+                <i class="fab fa-settings"></i> Open more settings
+            </a>---->
+        </footer>
     </div>
     <script src="ui.js"></script>
 </body>

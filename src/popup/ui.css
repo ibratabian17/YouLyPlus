@@ -117,10 +117,6 @@ input:checked + .slider:before {
 }
 
 a {
-    width: 100%;
-    position: relative;
-    bottom: 0;
-    display: block;
     color: #fff;
 }
 
@@ -133,3 +129,210 @@ button {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     border: none;
 }
+
+/* Updated CSS */
+body {
+    width: 350px;
+    min-height: 500px;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-family: 'Segoe UI', system-ui;
+    --accent-color: #da7272;
+    --hover-accent: #ff8585;
+}
+
+.container {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+header h1 {
+    font-size: 1.6em;
+    margin: 0 0 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--accent-color);
+}
+
+.version {
+    font-size: 0.7em;
+    color: #888;
+    margin-left: auto;
+}
+
+.tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.tab {
+    flex: 1;
+    padding: 8px 12px;
+    background: #2a2a2a;
+    border: none;
+    border-radius: 6px;
+    color: #ccc;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab.active {
+    background: var(--accent-color);
+    color: white;
+}
+
+.tab-content {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+.section {
+    padding: 15px;
+    background: #2a2a2a;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.section h2 {
+    font-size: 1.1em;
+    margin: -5px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-color);
+}
+
+.setting-group {
+    margin: 12px 0;
+}
+
+.setting-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.95em;
+    color: #ddd;
+}
+
+.switch {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 6px;
+}
+
+.switch:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+.slider-range {
+    width: 100%;
+    height: 4px;
+    background: #4a4a4a;
+    border-radius: 2px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.slider-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.range-value {
+    float: right;
+    color: #888;
+    font-size: 0.9em;
+}
+
+.cache-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.cache-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-warning {
+    background: #d86d6d !important;
+}
+
+button {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+button:hover {
+    background: var(--hover-accent);
+    transform: translateY(-1px);
+}
+
+.github-link {
+    text-align: center;
+    padding: 10px;
+    margin: 15px 0;
+    background: #2a2a2a;
+    border-radius: 6px;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.github-link:hover {
+    background: #333;
+}
+
+.credits {
+    text-align: center;
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 10px;
+}
+
+.status {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    background: var(--accent-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    opacity: 0;
+    transition: opacity 0.3s;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+.show-status {
+    opacity: 1;
+}
+
+/* Keep existing slider styles and add new ones as needed */

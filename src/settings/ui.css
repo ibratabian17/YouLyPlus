@@ -1,0 +1,259 @@
+:root {
+    --primary-color: #da7272;
+    --bg-color: #1a1a1a;
+    --sidebar-bg: #1a1a1a;
+    --text-color: #fff;
+    --border-color: #0e0e0e;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--sidebar-bg);
+    height: 100vh;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    padding: 20px 0;
+}
+
+.sidebar-title {
+    padding: 0 20px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--primary-color);
+}
+
+.sidebar-menu {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin: 1em;
+    border-radius: 0.5em;
+}
+
+.sidebar-menu li:hover {
+    background-color: rgba(218, 114, 114, 0.1);
+}
+
+.sidebar-menu li.active {
+    background-color: rgba(218, 114, 114, 0.2);
+}
+
+h1 {
+    font-size: 1.5em;
+    margin-bottom: 9px;
+    color: #da7272;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+h2 {
+    font-size: 1.1em;
+    color: #da7272;
+    margin: 8px 0;
+}
+
+.section {
+    margin-bottom: 5px;
+    padding: 7px;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.switch {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    background-color: #4a4a4a;
+    border-radius: 20px;
+    margin-right: 10px;
+    transition: .4s;
+}
+
+.slider:before {
+    content: "";
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #da7272;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    height: 100vh;
+}
+
+.section {
+    display: none;
+    animation: fadeIn 0.3s;
+}
+
+.section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+textarea {
+    min-height: 150px;
+    font-family: monospace;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-group input {
+    margin-right: 10px;
+}
+
+.source-list {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.source-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+}
+
+.source-item:last-child {
+    border-bottom: none;
+}
+
+.source-controls {
+    display: flex;
+    gap: 5px;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #c25555;
+}
+
+button.secondary {
+    background-color: #888;
+}
+
+button.secondary:hover {
+    background-color: #666;
+}
+
+.btn-icon {
+    padding: 5px 8px;
+    font-size: 12px;
+}
+
+.add-source {
+    margin-top: 10px;
+}
+
+.preview-box {
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    border-radius: 4px;
+    background-color: white;
+    margin-top: 10px;
+    min-height: 100px;
+}
+
+.color-preview {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-left: 10px;
+    border: 1px solid #ccc;
+}

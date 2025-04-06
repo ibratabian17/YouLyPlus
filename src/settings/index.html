@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouLy+ Settings</title>
+    <link rel="stylesheet" type="text/css" href="ui.css">
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-title">YouLy+ Settings</div>
+        <ul class="sidebar-menu">
+            <li class="active" data-section="general">General Settings</li>
+            <li data-section="sources">Lyrics Sources</li>
+            <li data-section="appearance">Appearance</li>
+            <li data-section="synchronization">Lyrics Synchronization</li>
+            <li data-section="cache">Cache Options</li>
+            <li data-section="advanced">Advanced</li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <!-- General Settings Section -->
+        <div class="section active" id="general">
+            <h2>General Settings</h2>
+
+            <label class="switch">
+                <input type="checkbox" id="enabled" checked>
+                <span class="slider"></span>
+                Enable YouLy+
+            </label>
+
+            <div class="form-group">
+                <label for="default-provider">Default Lyrics Provider</label>
+                <select id="default-provider">
+                    <option value="kpoe" selected>kpoe</option>
+                    <option value="lyricsplus">LyricsPlus</option>
+                    <option value="musixmatch">Musixmatch</option>
+                    <option value="apple">Apple Music</option>
+                </select>
+            </div>
+
+            <label class="switch">
+                <input type="checkbox" id="sponsor-block">
+                <span class="slider"></span>
+                Use SponsorBlock API (skip non-music sections)
+            </label>
+
+            <label class="switch">
+                <input type="checkbox" id="lightweight">
+                <span class="slider"></span>
+                Lightweight Mode (reduces animations and effects)
+            </label>
+
+            <button id="save-general">Save Settings</button>
+        </div>
+
+        <!-- Lyrics Sources Section -->
+        <div class="section" id="sources">
+            <h2>Lyrics Sources</h2>
+
+            <p>Configure and prioritize lyrics sources. Sources higher in the list will be tried first.</p>
+
+            <div class="source-list" id="source-list">
+                <div class="source-item">
+                    <span>Apple Music</span>
+                    <div class="source-controls">
+                        <button class="btn-icon">↑</button>
+                        <button class="btn-icon">↓</button>
+                        <button class="btn-icon secondary">×</button>
+                    </div>
+                </div>
+                <div class="source-item">
+                    <span>LyricsPlus</span>
+                    <div class="source-controls">
+                        <button class="btn-icon">↑</button>
+                        <button class="btn-icon">↓</button>
+                        <button class="btn-icon secondary">×</button>
+                    </div>
+                </div>
+                <div class="source-item">
+                    <span>Musixmatch</span>
+                    <div class="source-controls">
+                        <button class="btn-icon">↑</button>
+                        <button class="btn-icon">↓</button>
+                        <button class="btn-icon secondary">×</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="add-source">
+                <div class="form-group">
+                    <label for="new-source">Add Source</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="new-source" placeholder="Source URL or name">
+                        <button>Add</button>
+                    </div>
+                </div>
+            </div>
+
+            <button id="save-sources">Save Sources</button>
+        </div>
+
+        <!-- Appearance Section -->
+        <div class="section" id="appearance">
+            <h2>Appearance</h2>
+
+            <div class="form-group">
+                <label for="font-size">Font Size (px)</label>
+                <input type="number" id="font-size" value="16" min="8" max="36">
+            </div>
+
+            <div class="form-group">
+                <label for="accent-color">Accent Color <span id="color-preview" class="color-preview"
+                        style="background-color: #da7272;"></span></label>
+                <input type="text" id="accent-color" value="#da7272">
+            </div>
+
+            <div class="form-group">
+                <label for="custom-css">Custom CSS</label>
+                <textarea id="custom-css" placeholder=".lyrics-container { 
+    /* Your custom CSS here */
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+}
+
+.lyrics-line {
+    font-weight: bold;
+}
+
+.lyrics-line.active {
+    color: #da7272;
+}"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>CSS Preview</label>
+                <div class="preview-box">
+                    <div class="lyrics-line">This is how normal lyrics will look</div>
+                    <div class="lyrics-line active">This is how active lyrics will look</div>
+                </div>
+            </div>
+
+            <button id="save-appearance">Save Appearance</button>
+        </div>
+
+        <!-- Synchronization Section -->
+        <div class="section" id="synchronization">
+            <h2>Lyrics Synchronization</h2>
+
+            <label class="switch">
+                <input type="checkbox" id="wordByWord">
+                <span class="slider"></span>
+                Enable Line-by-Line Synchronization
+            </label>
+
+            <label class="switch">
+                <input type="checkbox" id="word-sync" checked>
+                <span class="slider"></span>
+                Enable Word-by-Word Synchronization
+            </label>
+            <p><small>Note: Converts line synced lyrics to word synced when possible</small></p>
+
+            <div class="form-group">
+                <label for="highlight-style">Word Highlight Style</label>
+                <select id="highlight-style">
+                    <option value="color" selected>Color Change</option>
+                    <option value="underline">Underline</option>
+                    <option value="box">Box Highlight</option>
+                    <option value="bold">Bold Text</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="sync-offset">Synchronization Offset (ms)</label>
+                <input type="number" id="sync-offset" value="0" step="100">
+                <p><small>Positive values make lyrics appear earlier, negative values make lyrics appear later</small>
+                </p>
+            </div>
+
+            <button id="save-sync">Save Synchronization Settings</button>
+        </div>
+
+        <!-- Cache Options Section -->
+        <!-- Cache Options Section -->
+        <div class="section" id="cache">
+            <h2>Cache Options</h2>
+
+            <label class="switch">
+                <input type="checkbox" id="enable-cache" checked>
+                <span class="slider"></span>
+                Enable Lyrics Caching
+            </label>
+
+            <div class="form-group">
+                <label for="cache-duration">Cache Duration (days)</label>
+                <input type="number" id="cache-duration" value="30" min="1" max="365">
+            </div>
+
+            <div class="form-group">
+                <label>Current Cache Usage</label>
+                <p id="cache-size">5.2 MB used (42 songs cached)</p>
+            </div>
+
+            <button id="clear-cache" class="secondary">Clear Cache</button>
+            <button id="save-cache">Save Cache Settings</button>
+        </div>
+
+        <!-- Advanced Section -->
+        <div c class="section" id="advanced">
+            <h2>Advanced Settings</h2>
+
+            <div class="form-group">
+                <label for="api-key">Musixmatch API Key (optional)</label>
+                <input type="text" id="api-key" placeholder="Enter your API key">
+            </div>
+
+            <div class="form-group">
+                <label for="update-interval">Lyrics Check Interval (seconds)</label>
+                <input type="number" id="update-interval" value="2" min="1" max="10">
+            </div>
+
+            <label class="switch">
+                <input type="checkbox" id="debug-mode">
+                <span class="slider"></span>
+                Debug Mode
+            </label>
+
+            <div class="form-group">
+                <label for="export-settings">Export/Import Settings</label>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="export-settings">Export</button>
+                    <button id="import-settings">Import</button>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 30px;">
+                <button id="reset-defaults" class="secondary">Reset to Defaults</button>
+            </div>
+        </div>
+        <script src="ui.js"></script>
+</body>
+
+</html>

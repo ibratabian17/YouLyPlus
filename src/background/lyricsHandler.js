@@ -160,7 +160,15 @@ pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         (async () => {
             try {
                 const sizeKB = await estimateIndexedDBSizeInKB();
-                sendResponse({ success: true, sizeKB });
+                const db = await openDB();
+                const transaction = db.transaction(["lyrics"], "readonly"); 
+                const store = transaction.objectStore("lyrics");
+                const countRequest = store.count();
+                const cacheCount = await new Promise((resolve, reject) => {
+                    countRequest.onsuccess = () => resolve(countRequest.result);
+                    countRequest.onerror = () => reject(countRequest.error);
+                });
+                sendResponse({ success: true, sizeKB, cacheCount });
             } catch (error) {
                 sendResponse({ success: false, error: error.message });
             }

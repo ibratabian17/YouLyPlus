@@ -10,6 +10,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearCacheButton = document.querySelector('.clear-cache');
     const cacheSizeElem = document.querySelector('.cache-size');
 
+    // Tab functionality
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab, .tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab).classList.add('active');
+        });
+    });
+
+    // Range input
+    /*const fontSizeSlider = document.getElementById('fontSize');
+    const rangeValue = document.querySelector('.range-value');
+    fontSizeSlider.addEventListener('input', (e) => {
+        rangeValue.textContent = `${e.target.value}px`;
+        updateSettings({ fontSize: e.target.value });
+    });*/
+
     // Load saved settings
     loadSettings(() => {
         providerSelect.value = currentSettings.lyricsProvider ?? 'kpoe';
@@ -99,7 +118,9 @@ function updateSettings(newSettings) {
 function updateCacheSize() {
     pBrowser.runtime.sendMessage({ type: 'GET_CACHED_SIZE' }, (response) => {
         if (response.success) {
-            document.querySelector('.cache-size').textContent = response.sizeKB.toFixed(2);
+            const sizeMB = (response.sizeKB / 1024).toFixed(2);
+            document.querySelector('.cache-size').textContent = sizeMB;
+            document.querySelector('.cache-count').textContent = response.cacheCount;
         } else {
             console.error("Error getting cache size:", response.error);
         }
