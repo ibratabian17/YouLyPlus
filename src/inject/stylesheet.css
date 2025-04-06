@@ -400,17 +400,32 @@ span.lyrics-source-provider {
 
 @keyframes grow-dynamic {
     0% {
-        transform: scale3d(var(--min-scale), var(--min-scale), 1) translateY(0);
-        text-shadow: 0 0 0 rgba(255, 255, 255, 0);
+        transform: matrix3d(
+            var(--min-scale), 0, 0, 0,
+            0, var(--min-scale), 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        );
+        filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
     }
 
     25%, 30% {
-        transform: scale3d(var(--max-scale), var(--max-scale), 1) translateY(var(--translate-y-peak));
-        text-shadow: 0 0 0.2em rgba(255, 255, 255, var(--shadow-intensity));
+        transform: matrix3d(
+            var(--max-scale), 0, 0, 0,
+            0, var(--max-scale), 0, 0,
+            0, 0, 1, 0,
+            var(--char-offset-x, 0), var(--translate-y-peak, -2%), 0, 1
+        );
+        filter: drop-shadow(0 0 0.1em rgba(255, 255, 255, var(--shadow-intensity)));
     }
 
     100% {
-        transform: scale3d(var(--min-scale), var(--min-scale), 1) translateY(0);
+        transform: matrix3d(
+            var(--min-scale), 0, 0, 0,
+            0, var(--min-scale), 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        );
     }
 }
 

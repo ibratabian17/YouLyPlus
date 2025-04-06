@@ -84,89 +84,176 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       lineEndTime = null,
       wordBuffer = [];
 
-    const flushWordBuffer = () => {
-      if (!wordBuffer.length) return;
-
-      // Create word container for main vocals
-      const wordSpan = document.createElement('span');
-      wordSpan.classList.add('lyrics-word');
-
-      const combinedText = wordBuffer.map(s => s.text).join('');
-      const trimmedText = combinedText.trim();
-      const textLength = trimmedText.length;
-      const totalDuration = wordBuffer.reduce((sum, s) => sum + s.duration, 0);
-
-      // Performance optimization: Only apply character-by-character glow for short text
-      const shouldEmphasize = !lightweight &&
-        !isRTL(combinedText) &&
-        trimmedText.length <= 7 &&
-        trimmedText.length > 1 &&
-        totalDuration >= 1000;
-
-      // Create word container for background vocals if needed
-      const backgroundWordSpan = document.createElement('span');
-      backgroundWordSpan.classList.add('lyrics-word');
-      let hasBackgroundSyllables = false;
-
-      wordBuffer.forEach(s => {
-        const sylSpan = document.createElement('span');
-        sylSpan.classList.add('lyrics-syllable');
-        sylSpan.dataset.startTime = s.startTime;
-        sylSpan.dataset.duration = s.duration;
-        sylSpan.dataset.endTime = s.startTime + s.duration;
-        sylSpan.dataset.wordDuration = totalDuration;
-        sylSpan.addEventListener('click', onLyricClick);
-
-        if (shouldEmphasize && !(s.element.isBackground)) {
-          for (const char of s.text) {
-            sylSpan.appendChild(
-              char === ' '
-                ? document.createTextNode(' ')
-                : (() => {
-                  let targetScale = 1 + ((s.duration / 1000) * (8 - s.text.length) * 0.025);
-                  targetScale = Math.min(targetScale, 1.2);
-                  const charSpan = document.createElement('span');
-                  charSpan.textContent = char;
-                  charSpan.classList.add('char');
-                  charSpan.style.setProperty("--target-scale", targetScale);
-                  return charSpan;
-                })()
-            );
-          }
-        } else {
-          // Only remove parentheses for background vocals
-          sylSpan.textContent = s.element.isBackground ? s.text.replace(/[()]/g, '') : s.text;
+      const flushWordBuffer = () => {
+        if (!wordBuffer.length) return;
+      
+        // Helper function to get computed font
+        const getComputedFont = (element) => {
+          const style = window.getComputedStyle(element);
+          return `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        };
+      
+        // Create word container for main vocals
+        const wordSpan = document.createElement('span');
+        wordSpan.classList.add('lyrics-word');
+        
+        // Get the font from a reference element (or use defaults if not available)
+        let referenceFont = '400 16px sans-serif';
+        if (mainContainer.firstChild) {
+          referenceFont = getComputedFont(mainContainer.firstChild);
         }
-
-        if (s.element.isBackground) {
-          hasBackgroundSyllables = true;
-          if (isRTL(s.text)) {
+      
+        const combinedText = wordBuffer.map(s => s.text).join('');
+        const trimmedText = combinedText.trim();
+        const textLength = trimmedText.length;
+        const totalDuration = wordBuffer.reduce((sum, s) => sum + s.duration, 0);
+      
+        // Performance optimization: Only apply character-by-character glow for short text
+        const shouldEmphasize = !lightweight &&
+          !isRTL(combinedText) &&
+          trimmedText.length <= 7 &&
+          trimmedText.length > 1 &&
+          totalDuration >= 1000;
+      
+        // Pre-calculate animation parameters up front
+        const durationFactor = Math.min(1.0, Math.max(0.5, (totalDuration - 600) / 1000));
+        // Since the emphasize started from 1s
+      
+        // Calculate scale values based on word properties
+        let baseMinScale = 1.02;
+        let baseMaxScale = 1.05;
+      
+        if (textLength <= 3) {
+          baseMaxScale += 0.04;
+        } else if (textLength >= 7) {
+          baseMaxScale -= 0.03;
+          baseMinScale -= 0.01;
+        }
+      
+        const durationScaleFactor = durationFactor * 0.05;
+        baseMaxScale += durationScaleFactor;
+      
+        const maxScale = Math.min(1.2, baseMaxScale);
+        const minScale = Math.max(1.0, Math.min(1.06, baseMinScale));
+      
+        const shadowIntensity = Math.min(0.8, 0.4 + (durationFactor * 0.4));
+        const translateYPeak = -Math.min(4.0, 0.0 + (durationFactor * 4.0));
+      
+        // Store these pre-calculated values as data attributes for later use
+        wordSpan.style.setProperty('--max-scale', maxScale * 1.05);
+        wordSpan.style.setProperty('--min-scale', minScale);
+        wordSpan.style.setProperty('--shadow-intensity', shadowIntensity);
+        wordSpan.style.setProperty('--translate-y-peak', translateYPeak * 0.5);
+        wordSpan.dataset.totalDuration = totalDuration;
+      
+        // Create word container for background vocals if needed
+        const backgroundWordSpan = document.createElement('span');
+        backgroundWordSpan.classList.add('lyrics-word');
+      
+        let hasBackgroundSyllables = false;
+        const characterData = [];
+      
+        wordBuffer.forEach((s, syllableIndex) => {
+          const sylSpan = document.createElement('span');
+          sylSpan.classList.add('lyrics-syllable');
+          sylSpan.dataset.startTime = s.startTime;
+          sylSpan.dataset.duration = s.duration;
+          sylSpan.dataset.endTime = s.startTime + s.duration;
+          sylSpan.dataset.wordDuration = totalDuration;
+          sylSpan.dataset.syllableIndex = syllableIndex;
+          sylSpan.addEventListener('click', onLyricClick);
+      
+          const isRtlText = isRTL(s.text);
+          if (isRtlText) {
             sylSpan.classList.add('rtl-text');
           }
-          backgroundWordSpan.appendChild(sylSpan);
-        } else {
-          if (isRTL(s.text)) {
-            sylSpan.classList.add('rtl-text');
+      
+          if (shouldEmphasize && !(s.element.isBackground)) {
+            let charIndex = 0;
+      
+            for (const char of s.text) {
+              if (char === ' ') {
+                sylSpan.appendChild(document.createTextNode(' '));
+              } else {
+                const charSpan = document.createElement('span');
+                charSpan.textContent = char;
+                charSpan.classList.add('char');
+      
+                // Store the char index for later animation sequencing
+                charSpan.dataset.charIndex = charIndex++;
+                charSpan.dataset.syllableCharIndex = characterData.length;
+      
+                // Add to collection for post-processing
+                characterData.push({
+                  charSpan,
+                  syllableSpan: sylSpan,
+                  isBackground: s.element.isBackground
+                });
+      
+                sylSpan.appendChild(charSpan);
+              }
+            }
+          } else {
+            sylSpan.textContent = s.element.isBackground ? s.text.replace(/[()]/g, '') : s.text;
           }
-          wordSpan.appendChild(sylSpan);
+      
+          if (s.element.isBackground) {
+            hasBackgroundSyllables = true;
+            backgroundWordSpan.appendChild(sylSpan);
+          } else {
+            wordSpan.appendChild(sylSpan);
+          }
+        });
+      
+        // Add the word span to the main container
+        mainContainer.appendChild(wordSpan);
+      
+        // Calculate character positions using getTextWidth
+        if (shouldEmphasize && characterData.length > 0) {
+          // First get the full word width
+          const fullWordText = wordSpan.textContent;
+          const wordWidth = getTextWidth(fullWordText, referenceFont);
+      
+          // Calculate positions for each character
+          let cumulativeWidth = 0;
+          characterData.forEach((charData) => {
+            if (charData.isBackground) return;
+      
+            const span = charData.charSpan;
+            const charText = span.textContent;
+            const charWidth = getTextWidth(charText, referenceFont);
+            const charCenter = cumulativeWidth + (charWidth / 2);
+            const position = charCenter / wordWidth;
+      
+            // Calculate position-based offset
+            const relativePosition = (position - 0.5) * 2;
+            const scaleOffset = maxScale - 1.0;
+            const horizontalOffsetFactor = scaleOffset * 40;
+            const horizontalOffset = Math.sign(relativePosition) *
+              Math.pow(Math.abs(relativePosition), 1.3) *
+              horizontalOffsetFactor;
+      
+            // Store these pre-calculated values
+            span.dataset.horizontalOffset = horizontalOffset;
+            span.dataset.position = position;
+      
+            cumulativeWidth += charWidth;
+          });
         }
-      });
-
-      // Add the word span to the main container
-      mainContainer.appendChild(wordSpan);
-
-      // Add background word if necessary
-      if (hasBackgroundSyllables) {
-        if (!backgroundContainer) {
-          backgroundContainer = document.createElement('div');
-          backgroundContainer.classList.add('background-vocal-container');
-          currentLine.appendChild(backgroundContainer);
+      
+        // Add background word if necessary
+        if (hasBackgroundSyllables) {
+          if (!backgroundContainer) {
+            backgroundContainer = document.createElement('div');
+            backgroundContainer.classList.add('background-vocal-container');
+            currentLine.appendChild(backgroundContainer);
+          }
+          backgroundContainer.appendChild(backgroundWordSpan);
         }
-        backgroundContainer.appendChild(backgroundWordSpan);
-      }
-
-      wordBuffer = [];
-    };
+      
+        wordBuffer = [];
+      };
+      
 
     lyrics.data.forEach((s, i) => {
       if (lineSinger === null) lineSinger = s.element.singer;
@@ -381,6 +468,35 @@ function injectCssFile() {
 
   // Append the <link> element to the document head
   document.head.appendChild(linkElement);
+}
+
+/**
+ * Uses canvas.measureText to compute and return the width of the given text of given font in pixels.
+* 
+* @param {String} text The text to be rendered.
+* @param {String} font The css font descriptor that text is to be rendered with (e.g. "bold 14px verdana").
+* 
+* @see https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript/21015393#21015393
+*/
+function getTextWidth(text, font) {
+// re-use canvas object for better performance
+const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+const context = canvas.getContext("2d");
+context.font = font;
+const metrics = context.measureText(text);
+return metrics.width;
+}
+
+function getCssStyle(element, prop) {
+  return window.getComputedStyle(element, null).getPropertyValue(prop);
+}
+
+function getCanvasFont(el = document.body) {
+const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
+const fontSize = getCssStyle(el, 'font-size') || '16px';
+const fontFamily = getCssStyle(el, 'font-family') || 'Times New Roman';
+
+return `${fontWeight} ${fontSize} ${fontFamily}`;
 }
 
 // Add unique IDs to elements if they don't have them
@@ -612,114 +728,51 @@ function updateSyllableAnimation(syllable, currentTime) {
   // Mark as highlighted immediately to prevent repeated processing
   syllable.classList.add('highlight');
 
-  if (charSpans.length > 0 && charSpans.length <= 7) { //emphasize short words
+  if (charSpans.length > 0) {
     const charCount = charSpans.length;
     // Cache the word element and related data to avoid repeated DOM traversal
     const wordElement = syllable.closest('.lyrics-word');
     // Get word duration from dataset or default to syllable duration
-    const wordDuration = Number(syllable.dataset.wordDuration) || duration;
+    const finalDuration = Number(syllable.dataset.wordDuration) || duration;
 
     // Find all characters in the word - only do this DOM query once
     const allCharsInWord = wordElement ? wordElement.querySelectorAll('span.char') : charSpans;
     const totalChars = allCharsInWord.length;
 
     if (totalChars > 0) {
-      // Pre-calculate values that don't change per character
-      const wipeDur = duration / charCount;
-      const growDur = wordDuration * 1.3;
-
-      // Calculate dynamic scale based on word duration and character count
-      const durationFactor = Math.min(1.0, wordDuration / 1000); // Normalize duration to 0-1 scale
-      const charFactor = Math.max(0, Math.min(1.0, (7 - totalChars) / 7)); // More impact for shorter words
-      
-      // Combined factor giving more weight to duration than char count
-      const combinedFactor = (durationFactor * 0.8) + (charFactor * 0.2);
-      
-      // Dynamic scaling based on combined factor
-      const maxScale = Math.max(1.08, Math.min(1.18, 1.18 - (combinedFactor * 0.05)));
-      const minScale = Math.max(1.01, Math.min(1.06, 1.06 - (combinedFactor * 0.02)));
-
-      // Dynamic shadow intensity, mainly duration-based with slight char influence
-      const shadowIntensity = Math.max(0.4, Math.min(0.85, 0.85 - (combinedFactor * 0.3)));
-
-      // Vertical translation peak, more influenced by duration than char count
-      const translateYPeak = -Math.min(2.5, 0.5 + (durationFactor * 3) + (charFactor * 0.5)); // Ranges from -0.5% to -2.5%
-
-
-      // Set CSS variables for dynamic animation properties
-      wordElement.style.setProperty('--translate-y-peak', `${translateYPeak}%`);
-      wordElement.style.setProperty('--max-scale', maxScale);
-      wordElement.style.setProperty('--min-scale', minScale);
-      wordElement.style.setProperty('--shadow-intensity', shadowIntensity);
-
-
-      // Get word boundaries for calculating absolute center
-      let wordRect;
-      if (wordElement) {
-        wordRect = wordElement.getBoundingClientRect();
-        // Add a class to the word element to handle positioning context
-        wordElement.classList.add('lyrics-word-animating');
-      }
-
-      // Special case handling for single-letter words/syllables
-      if (totalChars === 1) {
-        const span = allCharsInWord[0];
-        // For single letters, set transform origin to word center
-        span.style.transformOrigin = "center center";
-
-        if (span.closest('.lyrics-syllable') === syllable) {
-          span.style.animation = `${wipeAnimation} ${wipeDur}ms linear forwards, grow-dynamic ${growDur}ms ease-in-out forwards`;
-        } else if (!span.closest('.lyrics-syllable').classList.contains('highlight')) {
-          span.style.animation = `grow-dynamic ${growDur}ms ease-in-out forwards`;
-        }
-        return; // Exit early for single letter case
-      }
-
-      // Wave propagation speed factor - higher values make the wave move faster
-      const waveSpeed = Math.max(0.5, Math.min(1.2, 1.0 - (durationFactor * 0.3)));
-
-      // Maximum total delay as percentage of word duration, scales with word duration
-      const maxDelayPercent = Math.min(0.5, 0.2 + (durationFactor * 0.25));
-
       // Process all characters at once
       const spans = Array.from(allCharsInWord);
-      const divisor = totalChars - 1 || 1; // Avoid division by zero
+
+      // Calculate base delay per character for more linear distribution
+      const baseDelayPerChar = finalDuration * 0.07; // 7% of duration per character
 
       for (let i = 0; i < spans.length; i++) {
         const span = spans[i];
         const spanSyllable = span.closest('.lyrics-syllable');
         const isCurrentSyllable = spanSyllable === syllable;
 
-        // Calculate position for left-to-right wave (0 at start, 1 at end)
-        const normalizedPosition = i / divisor;
+        // Use pre-computed horizontal offset if available
+        const horizontalOffset = span.dataset.horizontalOffset || 0;
+        span.style.setProperty('--char-offset-x', `${horizontalOffset}`);
 
-        // Apply non-linear curve for more natural wave movement
-        const curvedPosition = Math.pow(normalizedPosition, waveSpeed);
-
-        // Calculate wave delay based on position from left to right
-        const waveDelay = wordDuration * maxDelayPercent * curvedPosition;
-
-        const positionPercentage = (i / divisor) * 100; // Get original percentage
-        const scaledPercentage = positionPercentage === 0 ? 0 : positionPercentage * 1.5; // Scale non-zero values
-        const transformOriginX = `${100 - scaledPercentage}%`; // Center-based scaling
-        span.style.transformOrigin = `${transformOriginX} center`;
+        // Calculate delays based on pre-computed character index
+        const charIndex = Number(span.dataset.syllableCharIndex || i);
+        const growDelay = baseDelayPerChar * charIndex;
 
         if (isCurrentSyllable) {
           // For characters in current syllable
           const charIndexInSyllable = Array.from(charSpans).indexOf(span);
-          const wipeDelay = wipeDur * charIndexInSyllable;
-          span.style.animation = `${wipeAnimation} ${wipeDur}ms linear ${wipeDelay}ms forwards, grow-dynamic ${growDur}ms ease-in-out ${waveDelay}ms forwards`;
+          const wipeDelay = (duration / charCount) * charIndexInSyllable;
+
+          // Apply both wipe and grow animations with proper timing
+          span.style.animation = `${wipeAnimation} ${duration / charCount}ms linear ${wipeDelay}ms forwards, 
+                                  grow-dynamic ${finalDuration * 1.2}ms ease-in-out ${growDelay}ms forwards`;
         } else if (!spanSyllable.classList.contains('highlight')) {
           // For characters in other syllables
-          span.style.animation = `grow-dynamic ${growDur}ms ease-in-out ${waveDelay}ms forwards`;
+          span.style.animation = `grow-dynamic ${finalDuration * 1.2}ms ease-in-out ${growDelay}ms forwards`;
         }
       }
     }
-  } else if (charSpans.length > 0) {
-    // For syllables with many characters
-    charSpans.forEach(span => {
-      span.style.animation = `${wipeAnimation} ${duration}ms linear forwards`;
-    });
   } else {
     // For syllables without character spans
     if (syllable.parentElement.parentElement.classList.contains('lyrics-gap')) {
