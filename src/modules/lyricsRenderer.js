@@ -116,34 +116,27 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
           totalDuration >= 1000;
       
         // Pre-calculate animation parameters up front
-        const durationFactor = Math.min(1.0, Math.max(0.5, (totalDuration - 600) / 1000));
+        const durationFactor = Math.min(1.0, Math.max(0.5, (totalDuration - 1000) / 1000));
         // Since the emphasize started from 1s
       
         // Calculate scale values based on word properties
         let baseMinScale = 1.02;
-        let baseMaxScale = 1.05;
+        let baseMaxScale = 1;
       
-        if (textLength <= 3) {
-          baseMaxScale += 0.04;
-        } else if (textLength >= 7) {
-          baseMaxScale -= 0.03;
-          baseMinScale -= 0.01;
-        }
-      
-        const durationScaleFactor = durationFactor * 0.05;
+        const durationScaleFactor = durationFactor * 0.15;
         baseMaxScale += durationScaleFactor;
       
         const maxScale = Math.min(1.2, baseMaxScale);
         const minScale = Math.max(1.0, Math.min(1.06, baseMinScale));
       
         const shadowIntensity = Math.min(0.8, 0.4 + (durationFactor * 0.4));
-        const translateYPeak = -Math.min(4.0, 0.0 + (durationFactor * 4.0));
+        const translateYPeak = -Math.min(3.0, 0.0 + (durationFactor * 3.0));
       
         // Store these pre-calculated values as data attributes for later use
-        wordSpan.style.setProperty('--max-scale', maxScale * 1.05);
+        wordSpan.style.setProperty('--max-scale', maxScale);
         wordSpan.style.setProperty('--min-scale', minScale);
         wordSpan.style.setProperty('--shadow-intensity', shadowIntensity);
-        wordSpan.style.setProperty('--translate-y-peak', translateYPeak * 0.5);
+        wordSpan.style.setProperty('--translate-y-peak', translateYPeak);
         wordSpan.dataset.totalDuration = totalDuration;
       
         // Create word container for background vocals if needed
@@ -178,18 +171,18 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
                 const charSpan = document.createElement('span');
                 charSpan.textContent = char;
                 charSpan.classList.add('char');
-      
+
                 // Store the char index for later animation sequencing
                 charSpan.dataset.charIndex = charIndex++;
                 charSpan.dataset.syllableCharIndex = characterData.length;
-      
+            
                 // Add to collection for post-processing
                 characterData.push({
                   charSpan,
                   syllableSpan: sylSpan,
                   isBackground: s.element.isBackground
                 });
-      
+            
                 sylSpan.appendChild(charSpan);
               }
             }
@@ -807,20 +800,52 @@ function resetSyllables(line) {
 }
 
 function scrollActiveLine(currentTime, forceScroll = false) {
-  const activeLines = Array.from(document.querySelectorAll('.lyrics-line.active'));
+  const container = document.querySelector("#lyrics-plus-container");
+  const activeLines = container.querySelectorAll('.lyrics-line.active');
   if (!activeLines.length) return;
 
+  // Find the most relevant active line based on timing
   let lineToScroll = activeLines[0];
-
-  // If we have multiple active lines, prioritize the next one
-  // when we're close to the end of the current one
+  let activestLine = activeLines[activeLines.length - 1];
+  
   if (activeLines.length > 1) {
-    const firstLineEnd = parseFloat(lineToScroll.dataset.endTime) * 1000;
-    if (firstLineEnd - currentTime <= 200) {
-      lineToScroll = activeLines[1];
+    // Find line that hasn't ended yet or is ending soon
+    for (const line of activeLines) {
+      const endTime = parseFloat(line.dataset.endTime) * 1000;
+      if (endTime - currentTime > 200) {
+        lineToScroll = line;
+        break;
+      }
     }
   }
-
+  
+  // Get all lyrics lines and find index of scroll line
+  const allLyricLines = container.querySelectorAll('.lyrics-line');
+  const scrollLineIndex = Array.from(allLyricLines).indexOf(lineToScroll);
+  
+  // Clear previous position classes
+  const positionClasses = ['lyrics-activest', 'pre-active-line', 'next-active-line'];
+  for (let i = 1; i <= 4; i++) {
+    positionClasses.push(`prev-${i}`, `next-${i}`);
+  }
+  
+  document.querySelectorAll('.' + positionClasses.join(', .'))
+    .forEach(el => el.classList.remove(...positionClasses));
+  
+  // Mark activest line
+  activestLine.classList.add('lyrics-activest');
+  
+  // Add position classes only to relevant lines
+  for (let i = Math.max(0, scrollLineIndex - 4); i <= Math.min(allLyricLines.length - 1, scrollLineIndex + 4); i++) {
+    const position = i - scrollLineIndex;
+    const line = allLyricLines[i];
+    
+    if (position === -1) line.classList.add('pre-active-line');
+    else if (position === 1) line.classList.add('next-active-line');
+    else if (position <= -1 && position >= -4) line.classList.add(`prev-${Math.abs(position)}`);
+    else if (position >= 1 && position <= 4) line.classList.add(`next-${position}`);
+  }
+  
   scrollToActiveLine(lineToScroll, forceScroll);
 }
 
@@ -859,12 +884,10 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
 
   // Calculate the active line's position relative to the lyrics container
   const containerRect = container.getBoundingClientRect();
-  const relativePosition = lineRect.top - containerRect.top;
-  const offset = container.clientHeight / 4; // Offset for positioning
 
   // Scroll the scroll container to the target position
-  scrollContainer.scrollTo({
-    top: container.scrollTop + relativePosition - offset,
-    behavior: 'smooth' // Use immediate scrolling for jumps
+  activeLine.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
   });
 }
