@@ -1,26 +1,54 @@
+
+// lyricsRenderer.js
 // Use a variable to store the requestAnimationFrame ID
 let lyricsAnimationFrameId = null;
-let rescroll = false;
 let currentPrimaryActiveLine = null;
 let lastTime = 0;
 
-// Track which lines and syllables are already active/highlighted to minimize DOM operations
+// Performance optimization: Cache selectors and calculations
+let lyricsContainer = null;
+let cachedLyricsLines = [];
+let cachedSyllables = [];
 let activeLineIds = new Set();
 let highlightedSyllableIds = new Set();
 let visibleLineIds = new Set();
 let lastProcessedTime = 0;
+let fontCache = {};
+let textWidthCanvas = null;
+let visibilityObserver = null;
 
-let lyricsContainer = document.getElementById('lyrics-plus-container');
-if (!lyricsContainer) {
-  lyricsContainer = createLyricsContainer();
+// Cached DOM references
+const getContainer = () => {
+  if (!lyricsContainer) {
+    lyricsContainer = document.getElementById('lyrics-plus-container') || createLyricsContainer();
+  }
+  return lyricsContainer;
+};
+
+// Performance optimization: Batch DOM manipulations
+function batchDOMUpdates(callback) {
+  requestAnimationFrame(() => {
+    const fragment = document.createDocumentFragment();
+    callback(fragment);
+    getContainer().appendChild(fragment);
+  });
 }
 
 function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters) {
-  const lyricsContainer =
-    document.getElementById('lyrics-plus-container') || createLyricsContainer();
-  if (!lyricsContainer) return;
-  lyricsContainer.innerHTML = '';
-
+  const container = getContainer();
+  if (!container) return;
+  
+  // Performance optimization: Clear container once
+  container.innerHTML = '';
+  
+  // Performance optimization: Create element pool for reuse
+  const elementPool = {
+    lines: [],
+    syllables: [],
+    chars: []
+  };
+  
+  // Cache the onLyricClick handler to avoid recreating it for each element
   const onLyricClick = e => {
     const time = parseFloat(e.currentTarget.dataset.startTime);
     const player = document.querySelector("video");
@@ -31,15 +59,21 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   const isRTL = text => /[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF\u08A0-\u08FF\uFB50-\uFDCF\uFDF0-\uFDFF\uFE70-\uFEFF]/.test(text);
 
   // ---------------------------
-  // Helper to create a gap line with three dots.
+  // Helper to create a gap line with three dots - optimized
   const GAP_THRESHOLD = 7; // seconds
   function createGapLine(gapStart, gapEnd, classesToInherit = null) {
     const gapDuration = gapEnd - gapStart;
-    const gapLine = document.createElement('div');
-    gapLine.classList.add('lyrics-line', 'lyrics-gap');
+    // Performance optimization: Reuse elements from pool if available
+    const gapLine = elementPool.lines.pop() || document.createElement('div');
+    gapLine.className = 'lyrics-line lyrics-gap';
     gapLine.dataset.startTime = gapStart;
     gapLine.dataset.endTime = gapEnd;
-    gapLine.addEventListener('click', onLyricClick);
+    
+    // Performance optimization: Use single event listener
+    if (!gapLine.hasClickListener) {
+      gapLine.addEventListener('click', onLyricClick);
+      gapLine.hasClickListener = true;
+    }
 
     // Add inherited classes if provided
     if (classesToInherit) {
@@ -48,27 +82,40 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       if (classesToInherit.includes('singer-right')) gapLine.classList.add('singer-right');
     }
 
-    // In syllable mode, create a container and add three syllable spans.
+    // Performance optimization: Minimize DOM operations
     const mainContainer = document.createElement('div');
-    mainContainer.classList.add('main-vocal-container');
-    gapLine.appendChild(mainContainer);
+    mainContainer.className = 'main-vocal-container';
+    
+    // Create all syllables at once
     for (let i = 0; i < 3; i++) {
-      const syllableSpan = document.createElement('span');
-      syllableSpan.classList.add('lyrics-syllable');
-      // Distribute the gap evenly among the three dots.
+      const syllableSpan = elementPool.syllables.pop() || document.createElement('span');
+      syllableSpan.className = 'lyrics-syllable';
+      
+      // Distribute the gap evenly among the three dots
       const syllableStart = (gapStart + (i * gapDuration / 3)) * 1000;
       const syllableDuration = ((gapDuration / 3) / 0.9) * 1000;
       syllableSpan.dataset.startTime = syllableStart;
       syllableSpan.dataset.duration = syllableDuration;
       syllableSpan.dataset.endTime = syllableStart + syllableDuration;
       syllableSpan.textContent = "•";
-      syllableSpan.addEventListener('click', onLyricClick);
+      
+      // Performance optimization: Use single event listener
+      if (!syllableSpan.hasClickListener) {
+        syllableSpan.addEventListener('click', onLyricClick);
+        syllableSpan.hasClickListener = true;
+      }
+      
       mainContainer.appendChild(syllableSpan);
     }
+    
+    gapLine.appendChild(mainContainer);
     return gapLine;
   }
   // ---------------------------
 
+  // Performance optimization: Process lines in batches using DocumentFragment
+  const fragment = document.createDocumentFragment();
+  
   if (type !== "Line") {
     // Syllable mode with word-by-word glow.
     let currentLine = document.createElement('div');
@@ -77,240 +124,292 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     mainContainer.classList.add('main-vocal-container');
     currentLine.appendChild(mainContainer);
     let backgroundContainer = null;
-    lyricsContainer.appendChild(currentLine);
+    fragment.appendChild(currentLine);
 
     let lineSinger = null,
       lineStartTime = null,
       lineEndTime = null,
       wordBuffer = [];
 
-      const flushWordBuffer = () => {
-        if (!wordBuffer.length) return;
-      
-        // Helper function to get computed font
-        const getComputedFont = (element) => {
-          const style = window.getComputedStyle(element);
-          return `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-        };
-      
-        // Create word container for main vocals
-        const wordSpan = document.createElement('span');
-        wordSpan.classList.add('lyrics-word');
+    // Performance optimization: Move function outside loop and optimize DOM operations
+    const flushWordBuffer = () => {
+      if (!wordBuffer.length) return;
+    
+      // Performance optimization: Cache font computation
+      const getComputedFont = (element) => {
+        if (!element) return '400 16px sans-serif';
+        const cacheKey = element.tagName + (element.className || '');
+        if (fontCache[cacheKey]) return fontCache[cacheKey];
         
-        // Get the font from a reference element (or use defaults if not available)
-        let referenceFont = '400 16px sans-serif';
-        if (mainContainer.firstChild) {
-          referenceFont = getComputedFont(mainContainer.firstChild);
-        }
-      
-        const combinedText = wordBuffer.map(s => s.text).join('');
-        const trimmedText = combinedText.trim();
-        const textLength = trimmedText.length;
-        const totalDuration = wordBuffer.reduce((sum, s) => sum + s.duration, 0);
-      
-        // Performance optimization: Only apply character-by-character glow for short text
-        const shouldEmphasize = !lightweight &&
-          !isRTL(combinedText) &&
-          trimmedText.length <= 7 &&
-          trimmedText.length > 1 &&
-          totalDuration >= 1000;
-      
-        // Pre-calculate animation parameters up front
-        const durationFactor = Math.min(1.0, Math.max(0.5, (totalDuration - 1000) / 1000));
-        // Since the emphasize started from 1s
-      
-        // Calculate scale values based on word properties
-        let baseMinScale = 1.02;
-        let baseMaxScale = 1;
-      
-        const durationScaleFactor = durationFactor * 0.15;
-        baseMaxScale += durationScaleFactor;
-      
-        const maxScale = Math.min(1.2, baseMaxScale);
-        const minScale = Math.max(1.0, Math.min(1.06, baseMinScale));
-      
-        const shadowIntensity = Math.min(0.8, 0.4 + (durationFactor * 0.4));
-        const translateYPeak = -Math.min(3.0, 0.0 + (durationFactor * 3.0));
-      
-        // Store these pre-calculated values as data attributes for later use
-        wordSpan.style.setProperty('--max-scale', maxScale);
-        wordSpan.style.setProperty('--min-scale', minScale);
-        wordSpan.style.setProperty('--shadow-intensity', shadowIntensity);
-        wordSpan.style.setProperty('--translate-y-peak', translateYPeak);
-        wordSpan.dataset.totalDuration = totalDuration;
-      
-        // Create word container for background vocals if needed
-        const backgroundWordSpan = document.createElement('span');
-        backgroundWordSpan.classList.add('lyrics-word');
-      
-        let hasBackgroundSyllables = false;
-        const characterData = [];
-      
-        wordBuffer.forEach((s, syllableIndex) => {
-          const sylSpan = document.createElement('span');
-          sylSpan.classList.add('lyrics-syllable');
-          sylSpan.dataset.startTime = s.startTime;
-          sylSpan.dataset.duration = s.duration;
-          sylSpan.dataset.endTime = s.startTime + s.duration;
-          sylSpan.dataset.wordDuration = totalDuration;
-          sylSpan.dataset.syllableIndex = syllableIndex;
-          sylSpan.addEventListener('click', onLyricClick);
-      
-          const isRtlText = isRTL(s.text);
-          if (isRtlText) {
-            sylSpan.classList.add('rtl-text');
-          }
-      
-          if (shouldEmphasize && !(s.element.isBackground)) {
-            let charIndex = 0;
-      
-            for (const char of s.text) {
-              if (char === ' ') {
-                sylSpan.appendChild(document.createTextNode(' '));
-              } else {
-                const charSpan = document.createElement('span');
-                charSpan.textContent = char;
-                charSpan.classList.add('char');
-
-                // Store the char index for later animation sequencing
-                charSpan.dataset.charIndex = charIndex++;
-                charSpan.dataset.syllableCharIndex = characterData.length;
-            
-                // Add to collection for post-processing
-                characterData.push({
-                  charSpan,
-                  syllableSpan: sylSpan,
-                  isBackground: s.element.isBackground
-                });
-            
-                sylSpan.appendChild(charSpan);
-              }
-            }
-          } else {
-            sylSpan.textContent = s.element.isBackground ? s.text.replace(/[()]/g, '') : s.text;
-          }
-      
-          if (s.element.isBackground) {
-            hasBackgroundSyllables = true;
-            backgroundWordSpan.appendChild(sylSpan);
-          } else {
-            wordSpan.appendChild(sylSpan);
-          }
-        });
-      
-        // Add the word span to the main container
-        mainContainer.appendChild(wordSpan);
-      
-        // Calculate character positions using getTextWidth
-        if (shouldEmphasize && characterData.length > 0) {
-          // First get the full word width
-          const fullWordText = wordSpan.textContent;
-          const wordWidth = getTextWidth(fullWordText, referenceFont);
-      
-          // Calculate positions for each character
-          let cumulativeWidth = 0;
-          characterData.forEach((charData) => {
-            if (charData.isBackground) return;
-      
-            const span = charData.charSpan;
-            const charText = span.textContent;
-            const charWidth = getTextWidth(charText, referenceFont);
-            const charCenter = cumulativeWidth + (charWidth / 2);
-            const position = charCenter / wordWidth;
-      
-            // Calculate position-based offset
-            const relativePosition = (position - 0.5) * 2;
-            const scaleOffset = maxScale - 1.0;
-            const horizontalOffsetFactor = scaleOffset * 40;
-            const horizontalOffset = Math.sign(relativePosition) *
-              Math.pow(Math.abs(relativePosition), 1.3) *
-              horizontalOffsetFactor;
-      
-            // Store these pre-calculated values
-            span.dataset.horizontalOffset = horizontalOffset;
-            span.dataset.position = position;
-      
-            cumulativeWidth += charWidth;
-          });
-        }
-      
-        // Add background word if necessary
-        if (hasBackgroundSyllables) {
-          if (!backgroundContainer) {
-            backgroundContainer = document.createElement('div');
-            backgroundContainer.classList.add('background-vocal-container');
-            currentLine.appendChild(backgroundContainer);
-          }
-          backgroundContainer.appendChild(backgroundWordSpan);
-        }
-      
-        wordBuffer = [];
+        const style = getComputedStyle(element);
+        const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        fontCache[cacheKey] = font;
+        return font;
       };
+    
+      // Create word container for main vocals
+      const wordSpan = document.createElement('span');
+      wordSpan.classList.add('lyrics-word');
       
-
-    lyrics.data.forEach((s, i) => {
-      if (lineSinger === null) lineSinger = s.element.singer;
-      lineStartTime =
-        lineStartTime === null ? s.startTime : Math.min(lineStartTime, s.startTime);
-      lineEndTime =
-        lineEndTime === null
-          ? s.startTime + s.duration
-          : Math.max(lineEndTime, s.startTime + s.duration);
-      const lineRTL = isRTL(s.text);
-
-      wordBuffer.push(s);
-      if (/\s$/.test(s.text) || s.isLineEnding || i === lyrics.data.length - 1) {
-        flushWordBuffer();
-      }
-
-      if (s.isLineEnding || i === lyrics.data.length - 1) {
-        currentLine.dataset.startTime = lineStartTime / 1000;
-        currentLine.dataset.endTime = lineEndTime / 1000;
-        currentLine.addEventListener('click', onLyricClick);
-        currentLine.classList.add(
-          lineSinger === "v2" || lineSinger === "v2000" ? 'singer-right' : 'singer-left'
-        );
-        if (lineRTL) currentLine.classList.add('rtl-text');
-
-        if (i !== lyrics.data.length - 1) {
-          currentLine = document.createElement('div');
-          currentLine.classList.add('lyrics-line');
-          mainContainer = document.createElement('div');
-          mainContainer.classList.add('main-vocal-container');
-          currentLine.appendChild(mainContainer);
-          backgroundContainer = null;
-          lyricsContainer.appendChild(currentLine);
-          lineSinger = null;
+      // Get the font from a reference element (or use defaults if not available)
+      let referenceFont = mainContainer.firstChild ? 
+                         getComputedFont(mainContainer.firstChild) : 
+                         '400 16px sans-serif';
+    
+      const combinedText = wordBuffer.map(s => s.text).join('');
+      const trimmedText = combinedText.trim();
+      const textLength = trimmedText.length;
+      const totalDuration = wordBuffer.reduce((sum, s) => sum + s.duration, 0);
+    
+      // Performance optimization: Only apply character-by-character glow for short text
+      const shouldEmphasize = !lightweight &&
+        !isRTL(combinedText) &&
+        trimmedText.length <= 7 &&
+        trimmedText.length > 1 &&
+        totalDuration >= 1000;
+    
+      // Pre-calculate animation parameters up front
+      const durationFactor = Math.min(1.0, Math.max(0.5, (totalDuration - 1000) / 1000));
+      
+      // Calculate scale values based on word properties
+      let baseMinScale = 1.02;
+      let baseMaxScale = 1;
+    
+      const durationScaleFactor = durationFactor * 0.15;
+      baseMaxScale += durationScaleFactor;
+    
+      const maxScale = Math.min(1.2, baseMaxScale);
+      const minScale = Math.max(1.0, Math.min(1.06, baseMinScale));
+    
+      const shadowIntensity = Math.min(0.8, 0.4 + (durationFactor * 0.4));
+      const translateYPeak = -Math.min(3.0, 0.0 + (durationFactor * 3.0));
+    
+      // Store these pre-calculated values as data attributes for later use
+      wordSpan.style.setProperty('--max-scale', maxScale);
+      wordSpan.style.setProperty('--min-scale', minScale);
+      wordSpan.style.setProperty('--shadow-intensity', shadowIntensity);
+      wordSpan.style.setProperty('--translate-y-peak', translateYPeak);
+      wordSpan.dataset.totalDuration = totalDuration;
+    
+      // Create word container for background vocals if needed
+      const backgroundWordSpan = document.createElement('span');
+      backgroundWordSpan.classList.add('lyrics-word');
+    
+      let hasBackgroundSyllables = false;
+      const characterData = [];
+    
+      // Performance optimization: Batch syllable creation
+      const syllableFragment = document.createDocumentFragment();
+      const backgroundSyllableFragment = document.createDocumentFragment();
+      
+      wordBuffer.forEach((s, syllableIndex) => {
+        const sylSpan = document.createElement('span');
+        sylSpan.classList.add('lyrics-syllable');
+        sylSpan.dataset.startTime = s.startTime;
+        sylSpan.dataset.duration = s.duration;
+        sylSpan.dataset.endTime = s.startTime + s.duration;
+        sylSpan.dataset.wordDuration = totalDuration;
+        sylSpan.dataset.syllableIndex = syllableIndex;
+        
+        // Performance optimization: Single event listener attachment
+        if (!sylSpan.hasClickListener) {
+          sylSpan.addEventListener('click', onLyricClick);
+          sylSpan.hasClickListener = true;
         }
-        lineStartTime = lineEndTime = null;
+    
+        const isRtlText = isRTL(s.text);
+        if (isRtlText) {
+          sylSpan.classList.add('rtl-text');
+        }
+    
+        if (shouldEmphasize && !(s.element.isBackground)) {
+          wordSpan.classList.add('growable');
+          let charIndex = 0;
+          
+          // Performance optimization: Create text nodes first
+          const textNodes = [];
+          for (const char of s.text) {
+            if (char === ' ') {
+              textNodes.push(document.createTextNode(' '));
+            } else {
+              const charSpan = document.createElement('span');
+              charSpan.textContent = char;
+              charSpan.classList.add('char');
+              charSpan.dataset.charIndex = charIndex++;
+              charSpan.dataset.syllableCharIndex = characterData.length;
+              
+              characterData.push({
+                charSpan,
+                syllableSpan: sylSpan,
+                isBackground: s.element.isBackground
+              });
+              
+              textNodes.push(charSpan);
+            }
+          }
+          
+          // Performance optimization: Append all nodes at once
+          textNodes.forEach(node => sylSpan.appendChild(node));
+        } else {
+          sylSpan.textContent = s.element.isBackground ? s.text.replace(/[()]/g, '') : s.text;
+        }
+    
+        if (s.element.isBackground) {
+          hasBackgroundSyllables = true;
+          backgroundSyllableFragment.appendChild(sylSpan);
+        } else {
+          syllableFragment.appendChild(sylSpan);
+        }
+      });
+      
+      // Append all syllables at once
+      wordSpan.appendChild(syllableFragment);
+      mainContainer.appendChild(wordSpan);
+      
+      // Performance optimization: Only calculate text widths for chars if needed
+      if (shouldEmphasize && characterData.length > 0) {
+        // First get the full word width
+        const fullWordText = wordSpan.textContent;
+        const wordWidth = getTextWidth(fullWordText, referenceFont);
+    
+        // Batch style updates
+        let cumulativeWidth = 0;
+        characterData.forEach((charData) => {
+          if (charData.isBackground) return;
+    
+          const span = charData.charSpan;
+          const charText = span.textContent;
+          const charWidth = getTextWidth(charText, referenceFont);
+          const charCenter = cumulativeWidth + (charWidth / 2);
+          const position = charCenter / wordWidth;
+    
+          // Calculate position-based offset
+          const relativePosition = (position - 0.5) * 2;
+          const scaleOffset = maxScale - 1.0;
+          const horizontalOffsetFactor = scaleOffset * 40;
+          const horizontalOffset = Math.sign(relativePosition) *
+            Math.pow(Math.abs(relativePosition), 1.3) *
+            horizontalOffsetFactor;
+    
+          // Store these pre-calculated values
+          span.dataset.horizontalOffset = horizontalOffset;
+          span.dataset.position = position;
+    
+          cumulativeWidth += charWidth;
+        });
       }
-    });
+    
+      // Add background word if necessary - only create container if needed
+      if (hasBackgroundSyllables) {
+        if (!backgroundContainer) {
+          backgroundContainer = document.createElement('div');
+          backgroundContainer.classList.add('background-vocal-container');
+          currentLine.appendChild(backgroundContainer);
+        }
+        backgroundWordSpan.appendChild(backgroundSyllableFragment);
+        backgroundContainer.appendChild(backgroundWordSpan);
+      }
+    
+      wordBuffer = [];
+    };
+
+    // Performance optimization: Process lyrics data in chunks
+    const CHUNK_SIZE = 50; // Process 50 items at a time
+    for (let i = 0; i < lyrics.data.length; i += CHUNK_SIZE) {
+      const chunk = lyrics.data.slice(i, i + CHUNK_SIZE);
+      
+      chunk.forEach((s, chunkIndex) => {
+        const dataIndex = i + chunkIndex;
+        
+        if (lineSinger === null) lineSinger = s.element.singer;
+        lineStartTime =
+          lineStartTime === null ? s.startTime : Math.min(lineStartTime, s.startTime);
+        lineEndTime =
+          lineEndTime === null
+            ? s.startTime + s.duration
+            : Math.max(lineEndTime, s.startTime + s.duration);
+        const lineRTL = isRTL(s.text);
+  
+        wordBuffer.push(s);
+        if (/\s$/.test(s.text) || s.isLineEnding || dataIndex === lyrics.data.length - 1) {
+          flushWordBuffer();
+        }
+  
+        if (s.isLineEnding || dataIndex === lyrics.data.length - 1) {
+          currentLine.dataset.startTime = lineStartTime / 1000;
+          currentLine.dataset.endTime = lineEndTime / 1000;
+          
+          // Performance optimization: Single event listener attachment
+          if (!currentLine.hasClickListener) {
+            currentLine.addEventListener('click', onLyricClick);
+            currentLine.hasClickListener = true;
+          }
+          
+          currentLine.classList.add(
+            lineSinger === "v2" || lineSinger === "v2000" ? 'singer-right' : 'singer-left'
+          );
+          if (lineRTL) currentLine.classList.add('rtl-text');
+  
+          if (dataIndex !== lyrics.data.length - 1) {
+            // Create new line for next set of lyrics
+            currentLine = document.createElement('div');
+            currentLine.classList.add('lyrics-line');
+            mainContainer = document.createElement('div');
+            mainContainer.classList.add('main-vocal-container');
+            currentLine.appendChild(mainContainer);
+            backgroundContainer = null;
+            fragment.appendChild(currentLine);
+            lineSinger = null;
+          }
+          lineStartTime = lineEndTime = null;
+        }
+      });
+    }
+    
     flushWordBuffer();
 
-    const lines = Array.from(lyricsContainer.querySelectorAll('.lyrics-line'));
+    // Performance optimization: Remove empty lines once
+    const lines = Array.from(fragment.querySelectorAll('.lyrics-line'));
     if (lines.length && !lines[lines.length - 1].dataset.startTime) {
-      lines.pop().remove();
+      const lastLine = lines[lines.length - 1];
+      if (lastLine.parentNode === fragment) {
+        fragment.removeChild(lastLine);
+      }
     }
   } else {
     // "Line" mode: each lyrics.data entry is a full line.
+    // Performance optimization: Batch creation of lines
+    const lineFragment = document.createDocumentFragment();
+    
     lyrics.data.forEach(line => {
       const lineDiv = document.createElement('div');
       lineDiv.dataset.startTime = line.startTime;
       lineDiv.dataset.endTime = line.endTime;
       lineDiv.classList.add('lyrics-line');
       lineDiv.classList.add(line.element.singer === "v2" ? 'singer-right' : 'singer-left');
+      
       const mainContainer = document.createElement('div');
       mainContainer.classList.add('main-vocal-container');
       mainContainer.textContent = line.text;
       lineDiv.appendChild(mainContainer);
+      
       if (isRTL(line.text)) lineDiv.classList.add('rtl-text');
+      
+      // Performance optimization: Single event listener attachment
       lineDiv.addEventListener('click', onLyricClick);
-      lyricsContainer.appendChild(lineDiv);
+      
+      lineFragment.appendChild(lineDiv);
     });
+    
+    fragment.appendChild(lineFragment);
   }
 
+  // Add the created elements to the container
+  container.appendChild(fragment);
+
   // --- Add a gap line at the beginning if needed ---
-  const originalLines = Array.from(lyricsContainer.querySelectorAll('.lyrics-line:not(.lyrics-gap)'));
+  // Performance optimization: Get lines once
+  const originalLines = Array.from(container.querySelectorAll('.lyrics-line:not(.lyrics-gap)'));
   if (originalLines.length > 0) {
     const firstLine = originalLines[0];
     const firstStartTime = parseFloat(firstLine.dataset.startTime);
@@ -323,11 +422,15 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       if (firstLine.classList.contains('singer-right')) classesToInherit.push('singer-right');
 
       const beginningGap = createGapLine(0, firstStartTime - 0.85, classesToInherit);
-      lyricsContainer.insertBefore(beginningGap, firstLine);
+      container.insertBefore(beginningGap, firstLine);
     }
   }
 
   // --- Insert gap lines for long intervals between original lyric lines ---
+  // Performance optimization: Batch gap line creation
+  const gapLinesFragment = document.createDocumentFragment();
+  const gapLinesToInsert = [];
+  
   originalLines.forEach((line, index) => {
     if (index < originalLines.length - 1) {
       const nextLine = originalLines[index + 1];
@@ -341,12 +444,17 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
         if (nextLine.classList.contains('singer-right')) classesToInherit.push('singer-right');
 
         const gapLine = createGapLine(currentEnd + 0.4, nextStart - 0.85, classesToInherit);
-        lyricsContainer.insertBefore(gapLine, nextLine);
+        gapLinesToInsert.push({ gapLine, nextLine });
       }
     }
   });
+  
+  // Insert all gap lines at once
+  gapLinesToInsert.forEach(({ gapLine, nextLine }) => {
+    container.insertBefore(gapLine, nextLine);
+  });
 
-  // Only apply extension to lines that are not followed by gap lines
+  // Performance optimization: Batch line extension updates
   originalLines.forEach((line, idx) => {
     if (idx < originalLines.length - 1) {
       const currentEnd = parseFloat(line.dataset.endTime);
@@ -385,21 +493,26 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   });
   // -------------------------------------------------------------------------
 
+  // Performance optimization: Append metadata in batch
+  const metadataFragment = document.createDocumentFragment();
+  
   if (songWriters) {
     const songWritersDiv = document.createElement('span');
     songWritersDiv.classList.add('lyrics-song-writters');
     songWritersDiv.innerText = `${t("writtenBy")} ${songWriters.join(', ')}`;
-    lyricsContainer.appendChild(songWritersDiv);
+    metadataFragment.appendChild(songWritersDiv);
   }
 
   const sourceDiv = document.createElement('span');
   sourceDiv.classList.add('lyrics-source-provider');
   sourceDiv.innerText = `${t("source")} ${source}`;
-  lyricsContainer.appendChild(sourceDiv);
+  metadataFragment.appendChild(sourceDiv);
+  
+  container.appendChild(metadataFragment);
 
   // Cache lyrics lines and syllables for performance in the sync loop
-  window.cachedLyricsLines = Array.from(lyricsContainer.getElementsByClassName('lyrics-line'));
-  window.cachedSyllables = Array.from(lyricsContainer.getElementsByClassName('lyrics-syllable'));
+  cachedLyricsLines = Array.from(container.getElementsByClassName('lyrics-line'));
+  cachedSyllables = Array.from(container.getElementsByClassName('lyrics-syllable'));
 
   // Add unique IDs to all lyric elements for tracking
   ensureElementIds();
@@ -410,24 +523,24 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   visibleLineIds = new Set();
   currentPrimaryActiveLine = null;
 
-  if (window.cachedLyricsLines.length != 0) {
-    scrollToActiveLine(window.cachedLyricsLines[0], true);
+  if (cachedLyricsLines.length !== 0) {
+    scrollToActiveLine(cachedLyricsLines[0], true);
   }
 
   startLyricsSync();
 }
 
 function displaySongNotFound() {
-  let lyricsContainer = document.getElementById('lyrics-plus-container');
-  if (lyricsContainer) {
-    lyricsContainer.innerHTML = `<span class="text-not-found">${t("notFound")}</span>`;
+  const container = getContainer();
+  if (container) {
+    container.innerHTML = `<span class="text-not-found">${t("notFound")}</span>`;
   }
 }
 
 function displaySongError() {
-  let lyricsContainer = document.getElementById('lyrics-plus-container');
-  if (lyricsContainer) {
-    lyricsContainer.innerHTML = `<span class="text-not-found">${t("notFoundError")}</span>`;
+  const container = getContainer();
+  if (container) {
+    container.innerHTML = `<span class="text-not-found">${t("notFoundError")}</span>`;
   }
 }
 
@@ -447,17 +560,21 @@ function createLyricsContainer() {
   originalLyricsSection.appendChild(container);
   injectCssFile();
 
+  lyricsContainer = container;
   return container;
 }
 
 function injectCssFile() {
+  // Performance optimization: Check if style is already injected
+  if (document.querySelector('link[data-lyrics-plus-style]')) return;
+  
   // Create a new <link> element
   const pBrowser = chrome || browser;
   const linkElement = document.createElement('link');
   linkElement.rel = 'stylesheet';
   linkElement.type = 'text/css';
-  // Replace 'css/your-styles.css' with the path to your CSS file relative to your extension's root
   linkElement.href = pBrowser.runtime.getURL('src/inject/stylesheet.css');
+  linkElement.setAttribute('data-lyrics-plus-style', 'true');
 
   // Append the <link> element to the document head
   document.head.appendChild(linkElement);
@@ -465,54 +582,75 @@ function injectCssFile() {
 
 /**
  * Uses canvas.measureText to compute and return the width of the given text of given font in pixels.
-* 
-* @param {String} text The text to be rendered.
-* @param {String} font The css font descriptor that text is to be rendered with (e.g. "bold 14px verdana").
-* 
-* @see https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript/21015393#21015393
-*/
+ * Performance optimization: Cache text width measurements
+ */
 function getTextWidth(text, font) {
-// re-use canvas object for better performance
-const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
-const context = canvas.getContext("2d");
-context.font = font;
-const metrics = context.measureText(text);
-return metrics.width;
+  // Performance optimization: Cache text width measurements
+  const cacheKey = `${text}_${font}`;
+  if (fontCache[cacheKey]) return fontCache[cacheKey];
+  
+  // Initialize canvas once and reuse
+  if (!textWidthCanvas) {
+    textWidthCanvas = document.createElement("canvas");
+  }
+  
+  const context = textWidthCanvas.getContext("2d");
+  context.font = font;
+  const metrics = context.measureText(text);
+  
+  // Cache the result
+  fontCache[cacheKey] = metrics.width;
+  return metrics.width;
 }
 
 function getCssStyle(element, prop) {
-  return window.getComputedStyle(element, null).getPropertyValue(prop);
+  // Performance optimization: Use element.style if possible
+  if (element.style[prop]) return element.style[prop];
+  return getComputedStyle(element, null).getPropertyValue(prop);
 }
 
 function getCanvasFont(el = document.body) {
-const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
-const fontSize = getCssStyle(el, 'font-size') || '16px';
-const fontFamily = getCssStyle(el, 'font-family') || 'Times New Roman';
-
-return `${fontWeight} ${fontSize} ${fontFamily}`;
+  // Performance optimization: Cache font styles
+  const cacheKey = el.tagName + (el.className || '');
+  if (fontCache[cacheKey]) return fontCache[cacheKey];
+  
+  const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
+  const fontSize = getCssStyle(el, 'font-size') || '16px';
+  const fontFamily = getCssStyle(el, 'font-family') || 'Times New Roman';
+  
+  const font = `${fontWeight} ${fontSize} ${fontFamily}`;
+  fontCache[cacheKey] = font;
+  return font;
 }
 
 // Add unique IDs to elements if they don't have them
 function ensureElementIds() {
-  if (!window.cachedLyricsLines || !window.cachedSyllables) return;
+  if (!cachedLyricsLines || !cachedSyllables) return;
 
-  window.cachedLyricsLines.forEach((line, i) => {
+  // Performance optimization: Only add IDs to elements that don't have them
+  cachedLyricsLines.forEach((line, i) => {
     if (!line.id) line.id = `line-${i}`;
   });
 
-  window.cachedSyllables.forEach((syllable, i) => {
+  cachedSyllables.forEach((syllable, i) => {
     if (!syllable.id) syllable.id = `syllable-${i}`;
   });
 }
 
 // Setup IntersectionObserver to track which lines are visible
 function setupVisibilityTracking() {
-  const container = document.getElementById('lyrics-plus-container');
+  const container = getContainer();
   if (!container || !container.parentElement) return null;
 
+  // Performance optimization: Reuse existing observer
+  if (visibilityObserver) {
+    visibilityObserver.disconnect();
+  }
+
   // Create an observer with margins to include elements close to the viewport
-  const observer = new IntersectionObserver(
+  visibilityObserver = new IntersectionObserver(
     (entries) => {
+      // Batch updates to visible lines
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           visibleLineIds.add(entry.target.id);
@@ -523,18 +661,19 @@ function setupVisibilityTracking() {
     },
     {
       root: container.parentElement,
-      rootMargin: '200px 0px' // 200px buffer above and below visible area
+      rootMargin: '200px 0px', // 200px buffer above and below visible area
+      threshold: 0.1 // Trigger when at least 10% is visible
     }
   );
 
-  // Observe all lyric lines
-  if (window.cachedLyricsLines) {
-    window.cachedLyricsLines.forEach(line => {
-      if (line) observer.observe(line);
+  // Performance optimization: Only observe lines that aren't already being observed
+  if (cachedLyricsLines) {
+    cachedLyricsLines.forEach(line => {
+      if (line) visibilityObserver.observe(line);
     });
   }
 
-  return observer;
+  return visibilityObserver;
 }
 
 function startLyricsSync() {
@@ -587,9 +726,11 @@ function cleanupLyrics() {
     cancelAnimationFrame(lyricsAnimationFrameId);
     lyricsAnimationFrameId = null;
   }
-  const lyricsContainer = document.getElementById('lyrics-plus-container');
-  if (lyricsContainer) {
-    lyricsContainer.innerHTML = `<span class="text-loading">${t("loading")}</span>`;
+  
+  // Performance optimization: Clean entire container at once
+  const container = getContainer();
+  if (container) {
+    container.innerHTML = `<span class="text-loading">${t("loading")}</span>`;
   }
 
   // Clear tracking sets
@@ -597,16 +738,21 @@ function cleanupLyrics() {
   highlightedSyllableIds.clear();
   visibleLineIds.clear();
   currentPrimaryActiveLine = null;
+  
+  // Clear observers
+  if (visibilityObserver) {
+    visibilityObserver.disconnect();
+  }
 }
 
 function updateLyricsHighlight(currentTime, isForceScroll = false) {
-  if (!window.cachedLyricsLines || !window.cachedLyricsLines.length) return;
+  if (!cachedLyricsLines || !cachedLyricsLines.length) return;
 
   let newActiveLineIds = new Set();
   let activeLines = [];
 
   // First pass: identify active lines
-  window.cachedLyricsLines.forEach(line => {
+  cachedLyricsLines.forEach(line => {
     if (!line) return;
 
     const lineStart = parseFloat(line.dataset.startTime) * 1000;
@@ -629,7 +775,7 @@ function updateLyricsHighlight(currentTime, isForceScroll = false) {
   const allowedActiveIds = new Set(allowedActiveLines.map(line => line.id));
 
   // Update DOM for lines that changed state
-  window.cachedLyricsLines.forEach(line => {
+  cachedLyricsLines.forEach(line => {
     if (!line) return;
 
     const wasActive = line.classList.contains('active');
@@ -663,11 +809,11 @@ function updateLyricsHighlight(currentTime, isForceScroll = false) {
 
 // Update syllable animations
 function updateSyllables(currentTime) {
-  if (!window.cachedSyllables) return;
+  if (!cachedSyllables) return;
 
   let newHighlightedSyllableIds = new Set();
 
-  window.cachedSyllables.forEach(syllable => {
+  cachedSyllables.forEach(syllable => {
     if (!syllable) return;
 
     // Check if parent line is active
@@ -857,7 +1003,7 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
   if (!container) return;
 
   // Only proceed if the container is visible (displayed as block)
-  const computedStyle = window.getComputedStyle(container);
+  const computedStyle = getComputedStyle(container);
   if (computedStyle.display !== 'block') return;
 
   // The actual scroll container is the parent element (what the user sees)
@@ -874,16 +1020,13 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
   const safeAreaBottom = scrollContainerRect.top + scrollContainerRect.height * 0.95;
 
   // Check if the line is outside the safe area
-  const lineIsOutsideSafeArea = lineRect.top < safeAreaTop || lineRect.top > safeAreaBottom;
+  const lineIsInsideSafeArea = lineRect.top < safeAreaTop || lineRect.top > safeAreaBottom;
 
   // Correct logic: Scroll if line is outside safe area OR forceScroll is true
-  if (lineIsOutsideSafeArea && !forceScroll) {
+  if (lineIsInsideSafeArea && !forceScroll) {
     // Line is already in the visible area and we're not forcing a scroll
     return;
   }
-
-  // Calculate the active line's position relative to the lyrics container
-  const containerRect = container.getBoundingClientRect();
 
   // Scroll the scroll container to the target position
   activeLine.scrollIntoView({

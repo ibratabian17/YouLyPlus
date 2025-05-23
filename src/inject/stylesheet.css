@@ -159,6 +159,11 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     vertical-align: baseline;
 }
 
+.lyrics-word.growable:has(.lyrics-syllable.highlight) .lyrics-syllable {
+    /* Fix Growing Animation */
+    transform: translateY(-3%);
+}
+
 .lyrics-line .lyrics-syllable {
     display: inline-block;
     white-space: break-spaces;

@@ -223,18 +223,18 @@ async function handleLyricsFetch(songInfo, sendResponse) {
                 await fetchLRCLibLyrics(songInfo);
 
             // If no result, try the secondary provider.
-            if (!lyrics) {
+            if (isEmptyLyrics(lyrics)) {
                 lyrics = isPrimaryKPoe ?
                     await fetchLRCLibLyrics(songInfo) :
                     await fetchKPoeLyrics(songInfo);
             }
 
             // If both providers failed, try YouTube subtitles if available
-            if (!lyrics && songInfo.videoId && songInfo.subtitle) {
+            if (isEmptyLyrics(lyrics) && songInfo.videoId && songInfo.subtitle) {
                 lyrics = await fetchYouTubeSubtitles(songInfo);
             }
 
-            if (!lyrics) {
+            if (isEmptyLyrics(lyrics)) {
                 throw new Error('No lyrics found');
             }
 
@@ -255,6 +255,21 @@ async function handleLyricsFetch(songInfo, sendResponse) {
     } catch (error) {
         sendResponse({ success: false, error: error.message, metadata: songInfo });
     }
+}
+
+// Helper function to check if lyrics object is empty
+function isEmptyLyrics(lyrics) {
+    if (!lyrics) {
+        return true;
+    }
+    if (lyrics.data && Array.isArray(lyrics.data) && lyrics.data.length === 0) {
+        return true;
+    }
+    // Check if all lines have empty text
+    if (lyrics.data && Array.isArray(lyrics.data)) {
+        return lyrics.data.every(line => !line.text);
+    }
+    return false;
 }
 
 async function fetchKPoeLyrics(songInfo) {

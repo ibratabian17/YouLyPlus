@@ -54,7 +54,7 @@
     tabElement.setAttribute('tabindex', '0');
     tabElement.setAttribute('aria-selected', 'true');
     tabElement.style.pointerEvents = 'auto';
-    
+
     console.log('Middle tab forced active');
 
     isUpdating = false;
@@ -92,11 +92,27 @@
 
   // Enhance touch handling for both mobile and desktop
   function enhanceTouchHandling(tabs, middleIndex) {
+    const MOVE_THRESHOLD_PX = 10;
     tabs.forEach((tab, index) => {
-      // Add touch event listeners for mobile devices
+      let startTime, startX, startY;
+
+      tab.addEventListener('touchstart', (e) => {
+        const t = e.touches[0];
+        startX = t.clientX;
+        startY = t.clientY;
+      }, { passive: true });
+
       tab.addEventListener('touchend', (e) => {
-        // Handle touch end event for mobile
-        handleTabInteraction(index, middleIndex);
+        const t = e.changedTouches[0];
+        const dt = Date.now() - startTime;
+        const dx = Math.abs(t.clientX - startX);
+        const dy = Math.abs(t.clientY - startY);
+
+        // Only handle true taps
+        if (dx < MOVE_THRESHOLD_PX && dy < MOVE_THRESHOLD_PX) {
+          // Handle touch end event for mobile
+          handleTabInteraction(index, middleIndex);
+        }
       });
     });
   }

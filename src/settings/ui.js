@@ -87,7 +87,7 @@ function updateUI() {
     document.getElementById('lightweight').checked = currentSettings.lightweight;
     
     // Sync settings
-    document.getElementById('line-sync').checked = currentSettings.lineByLine;
+    document.getElementById('wordByWord').checked = currentSettings.lineByLine; /* Corrected ID from line-sync to wordByWord based on index.html */
     document.getElementById('word-sync').checked = currentSettings.wordByWord;
     document.getElementById('highlight-style').value = currentSettings.highlightStyle || 'color';
     document.getElementById('sync-offset').value = currentSettings.syncOffset || 0;
@@ -217,7 +217,7 @@ document.getElementById('save-appearance').addEventListener('click', () => {
 
 document.getElementById('save-sync').addEventListener('click', () => {
     updateSettings({
-        lineByLine: document.getElementById('line-sync').checked,
+        lineByLine: document.getElementById('wordByWord').checked, /* Corrected ID */
         wordByWord: document.getElementById('word-sync').checked,
         highlightStyle: document.getElementById('highlight-style').value,
         syncOffset: parseInt(document.getElementById('sync-offset').value)
