@@ -11,22 +11,30 @@ window.addEventListener('message', (event) => {
 });
 
 let currentSettings = {
-    lyricsProvider: 'kpoe',
+    lyricsProvider: 'kpoe', // Can be 'kpoe' or 'lrclib'
+    lyricsSourceOrder: 'lyricsplus,apple,musixmatch,spotify,musixmatch-word', // For KPoe provider
     wordByWord: true,
-    lineByLine: true,
     lightweight: false,
     isEnabled: true,
-    useSponsorBlock: false
+    useSponsorBlock: false,
+    autoHideLyrics: false,
+    cacheStrategy: 'aggressive',
+    fontSize: 16,
+    customCSS: '',
 };
 
 function loadSettings(callback) {
     storageLocalGet({
         lyricsProvider: 'kpoe',
+        lyricsSourceOrder: 'lyricsplus,apple,musixmatch,spotify,musixmatch-word',
         wordByWord: true,
         lineByLine: true,
         lightweight: false,
         isEnabled: true,
-        useSponsorBlock: false
+        useSponsorBlock: false,
+        autoHideLyrics: false,
+        cacheStrategy: 'aggressive',
+        fontSize: 16
     }).then((items) => {
         currentSettings = items;
         console.log(currentSettings);

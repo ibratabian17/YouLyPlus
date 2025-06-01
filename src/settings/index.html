@@ -14,11 +14,8 @@
         <div class="sidebar-title">YouLy+ Settings</div>
         <ul class="sidebar-menu">
             <li class="active" data-section="general">General Settings</li>
-            <li data-section="sources">Lyrics Sources</li>
             <li data-section="appearance">Appearance</li>
-            <li data-section="synchronization">Lyrics Synchronization</li>
             <li data-section="cache">Cache Options</li>
-            <li data-section="advanced">Advanced</li>
         </ul>
     </div>
 
@@ -36,11 +33,24 @@
             <div class="form-group">
                 <label for="default-provider">Default Lyrics Provider</label>
                 <select id="default-provider">
-                    <option value="kpoe" selected>kpoe</option>
-                    <option value="lyricsplus">LyricsPlus</option>
-                    <option value="musixmatch">Musixmatch</option>
-                    <option value="apple">Apple Music</option>
+                    <option value="kpoe" selected>Lyrics+ (KPoe)</option>
+                    <option value="lrclib">LRCLIB</option>
                 </select>
+            </div>
+
+            <div class="form-group" id="kpoe-sources-group">
+                <label>Lyrics+ (KPoe) Source Order</label>
+                <div id="lyrics-source-order-draggable" class="draggable-list">
+                    <!-- Draggable items will be populated by ui.js -->
+                </div>
+                <p><small>Drag and drop to reorder the sources for Lyrics+ (KPoe).</small></p>
+                <div class="add-source-group">
+                    <select id="available-sources-dropdown" class="dropdown">
+                        <!-- Options will be populated by ui.js -->
+                    </select>
+                    <button id="add-source-button" class="secondary">Add Source</button>
+                </div>
+                <p id="add-source-status" class="status-message"></p>
             </div>
 
             <label class="switch">
@@ -54,70 +64,19 @@
                 <span class="slider"></span>
                 Lightweight Mode (reduces animations and effects)
             </label>
+            
+            <label class="switch">
+                <input type="checkbox" id="wordByWord">
+                <span class="slider"></span>
+                Word-by-Word Highlighting
+            </label>
 
             <button id="save-general">Save Settings</button>
-        </div>
-
-        <!-- Lyrics Sources Section -->
-        <div class="section" id="sources">
-            <h2>Lyrics Sources</h2>
-
-            <p>Configure and prioritize lyrics sources. Sources higher in the list will be tried first.</p>
-
-            <div class="source-list" id="source-list">
-                <div class="source-item">
-                    <span>Apple Music</span>
-                    <div class="source-controls">
-                        <button class="btn-icon">↑</button>
-                        <button class="btn-icon">↓</button>
-                        <button class="btn-icon secondary">×</button>
-                    </div>
-                </div>
-                <div class="source-item">
-                    <span>LyricsPlus</span>
-                    <div class="source-controls">
-                        <button class="btn-icon">↑</button>
-                        <button class="btn-icon">↓</button>
-                        <button class="btn-icon secondary">×</button>
-                    </div>
-                </div>
-                <div class="source-item">
-                    <span>Musixmatch</span>
-                    <div class="source-controls">
-                        <button class="btn-icon">↑</button>
-                        <button class="btn-icon">↓</button>
-                        <button class="btn-icon secondary">×</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="add-source">
-                <div class="form-group">
-                    <label for="new-source">Add Source</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="new-source" placeholder="Source URL or name">
-                        <button>Add</button>
-                    </div>
-                </div>
-            </div>
-
-            <button id="save-sources">Save Sources</button>
         </div>
 
         <!-- Appearance Section -->
         <div class="section" id="appearance">
             <h2>Appearance</h2>
-
-            <div class="form-group">
-                <label for="font-size">Font Size (px)</label>
-                <input type="number" id="font-size" value="16" min="8" max="36">
-            </div>
-
-            <div class="form-group">
-                <label for="accent-color">Accent Color <span id="color-preview" class="color-preview"
-                        style="background-color: #da7272;"></span></label>
-                <input type="text" id="accent-color" value="#da7272">
-            </div>
 
             <div class="form-group">
                 <label for="custom-css">Custom CSS</label>
@@ -138,108 +97,66 @@
 
             <div class="form-group">
                 <label>CSS Preview</label>
-                <div class="preview-box">
-                    <div class="lyrics-line">This is how normal lyrics will look</div>
-                    <div class="lyrics-line active">This is how active lyrics will look</div>
+                <div class="preview-box" id="lyrics-plus-container-preview" class="lyrics-plus-integrated">
+                    <div class="lyrics-line singer-left" data-start-time="0" data-end-time="3">
+                        <div class="main-vocal-container">
+                            <span class="lyrics-word">
+                                <span class="lyrics-syllable" data-start-time="0" data-duration="500">This</span>
+                                <span class="lyrics-syllable" data-start-time="500" data-duration="500">is</span>
+                            </span>
+                            <span class="lyrics-word">
+                                <span class="lyrics-syllable" data-start-time="1000" data-duration="500">a</span>
+                                <span class="lyrics-syllable" data-start-time="1500" data-duration="500">preview</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="lyrics-line singer-left active" data-start-time="3" data-end-time="6">
+                        <div class="main-vocal-container">
+                            <span class="lyrics-word">
+                                <span class="lyrics-syllable highlight" data-start-time="3000" data-duration="500">of</span>
+                                <span class="lyrics-syllable highlight" data-start-time="3500" data-duration="500">how</span>
+                            </span>
+                            <span class="lyrics-word">
+                                <span class="lyrics-syllable highlight" data-start-time="4000" data-duration="500">lyrics</span>
+                                <span class="lyrics-syllable highlight" data-start-time="4500" data-duration="500">will</span>
+                                <span class="lyrics-syllable highlight" data-start-time="5000" data-duration="500">look!</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="lyrics-line lyrics-gap" data-start-time="6" data-end-time="9">
+                        <div class="main-vocal-container">
+                            <span class="lyrics-syllable" data-start-time="6000" data-duration="1000">•</span>
+                            <span class="lyrics-syllable" data-start-time="7000" data-duration="1000">•</span>
+                            <span class="lyrics-syllable" data-start-time="8000" data-duration="1000">•</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <button id="save-appearance">Save Appearance</button>
+            <button id="play-example" class="secondary">Play Example</button>
         </div>
 
-        <!-- Synchronization Section -->
-        <div class="section" id="synchronization">
-            <h2>Lyrics Synchronization</h2>
-
-            <label class="switch">
-                <input type="checkbox" id="wordByWord">
-                <span class="slider"></span>
-                Enable Line-by-Line Synchronization
-            </label>
-
-            <label class="switch">
-                <input type="checkbox" id="word-sync" checked>
-                <span class="slider"></span>
-                Enable Word-by-Word Synchronization
-            </label>
-            <p><small>Note: Converts line synced lyrics to word synced when possible</small></p>
-
-            <div class="form-group">
-                <label for="highlight-style">Word Highlight Style</label>
-                <select id="highlight-style">
-                    <option value="color" selected>Color Change</option>
-                    <option value="underline">Underline</option>
-                    <option value="box">Box Highlight</option>
-                    <option value="bold">Bold Text</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="sync-offset">Synchronization Offset (ms)</label>
-                <input type="number" id="sync-offset" value="0" step="100">
-                <p><small>Positive values make lyrics appear earlier, negative values make lyrics appear later</small>
-                </p>
-            </div>
-
-            <button id="save-sync">Save Synchronization Settings</button>
-        </div>
-
-        <!-- Cache Options Section -->
         <!-- Cache Options Section -->
         <div class="section" id="cache">
             <h2>Cache Options</h2>
 
-            <label class="switch">
-                <input type="checkbox" id="enable-cache" checked>
-                <span class="slider"></span>
-                Enable Lyrics Caching
-            </label>
-
             <div class="form-group">
-                <label for="cache-duration">Cache Duration (days)</label>
-                <input type="number" id="cache-duration" value="30" min="1" max="365">
+                <label for="cache-strategy">Cache Strategy</label>
+                <select id="cache-strategy">
+                    <option value="aggressive" selected>Aggressive (2 hours)</option>
+                    <option value="moderate">Moderate (1 hour)</option>
+                    <option value="none">None (no caching)</option>
+                </select>
             </div>
 
             <div class="form-group">
                 <label>Current Cache Usage</label>
-                <p id="cache-size">5.2 MB used (42 songs cached)</p>
+                <p id="cache-size">0.00 MB used (0 songs cached)</p>
             </div>
 
             <button id="clear-cache" class="secondary">Clear Cache</button>
             <button id="save-cache">Save Cache Settings</button>
-        </div>
-
-        <!-- Advanced Section -->
-        <div c class="section" id="advanced">
-            <h2>Advanced Settings</h2>
-
-            <div class="form-group">
-                <label for="api-key">Musixmatch API Key (optional)</label>
-                <input type="text" id="api-key" placeholder="Enter your API key">
-            </div>
-
-            <div class="form-group">
-                <label for="update-interval">Lyrics Check Interval (seconds)</label>
-                <input type="number" id="update-interval" value="2" min="1" max="10">
-            </div>
-
-            <label class="switch">
-                <input type="checkbox" id="debug-mode">
-                <span class="slider"></span>
-                Debug Mode
-            </label>
-
-            <div class="form-group">
-                <label for="export-settings">Export/Import Settings</label>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button id="export-settings">Export</button>
-                    <button id="import-settings">Import</button>
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 30px;">
-                <button id="reset-defaults" class="secondary">Reset to Defaults</button>
-            </div>
         </div>
         <script src="ui.js"></script>
 </body>

@@ -1,4 +1,3 @@
-
 // lyricsRenderer.js
 // Use a variable to store the requestAnimationFrame ID
 let lyricsAnimationFrameId = null;
@@ -57,6 +56,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   };
 
   const isRTL = text => /[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF\u08A0-\u08FF\uFB50-\uFDCF\uFDF0-\uFDFF\uFE70-\uFEFF]/.test(text);
+  const isCJK = text => /[\u4E00-\u9FFF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/.test(text);
 
   // ---------------------------
   // Helper to create a gap line with three dots - optimized
@@ -164,8 +164,8 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       // Performance optimization: Only apply character-by-character glow for short text
       const shouldEmphasize = !lightweight &&
         !isRTL(combinedText) &&
+        !isCJK(combinedText) &&
         trimmedText.length <= 7 &&
-        trimmedText.length > 1 &&
         totalDuration >= 1000;
     
       // Pre-calculate animation parameters up front
@@ -268,36 +268,40 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       
       // Performance optimization: Only calculate text widths for chars if needed
       if (shouldEmphasize && characterData.length > 0) {
-        // First get the full word width
-        const fullWordText = wordSpan.textContent;
-        const wordWidth = getTextWidth(fullWordText, referenceFont);
-    
-        // Batch style updates
-        let cumulativeWidth = 0;
-        characterData.forEach((charData) => {
-          if (charData.isBackground) return;
-    
-          const span = charData.charSpan;
-          const charText = span.textContent;
-          const charWidth = getTextWidth(charText, referenceFont);
-          const charCenter = cumulativeWidth + (charWidth / 2);
-          const position = charCenter / wordWidth;
-    
-          // Calculate position-based offset
-          const relativePosition = (position - 0.5) * 2;
-          const scaleOffset = maxScale - 1.0;
-          const horizontalOffsetFactor = scaleOffset * 40;
-          const horizontalOffset = Math.sign(relativePosition) *
-            Math.pow(Math.abs(relativePosition), 1.3) *
-            horizontalOffsetFactor;
-    
-          // Store these pre-calculated values
-          span.dataset.horizontalOffset = horizontalOffset;
-          span.dataset.position = position;
-    
-          cumulativeWidth += charWidth;
-        });
-      }
+          // First get the full word width
+          const fullWordText = wordSpan.textContent;
+          const wordWidth = getTextWidth(fullWordText, referenceFont);
+      
+          // Calculate positions for each character
+          let cumulativeWidth = 0;
+          characterData.forEach((charData) => {
+            if (charData.isBackground) return;
+      
+            const span = charData.charSpan;
+            const charText = span.textContent;
+            
+            // Only calculate text widths for chars if needed to trim the space
+            if (charText.trim().length > 0) {
+              const charWidth = getTextWidth(charText, referenceFont);
+              const charCenter = cumulativeWidth + (charWidth / 2);
+              const position = charCenter / wordWidth;
+        
+              // Calculate position-based offset
+              const relativePosition = (position - 0.5) * 2;
+              const scaleOffset = maxScale - 1.0;
+              const horizontalOffsetFactor = scaleOffset * 40;
+              const horizontalOffset = Math.sign(relativePosition) *
+                Math.pow(Math.abs(relativePosition), 1.3) *
+                horizontalOffsetFactor;
+        
+              // Store these pre-calculated values
+              span.dataset.horizontalOffset = horizontalOffset;
+              span.dataset.position = position;
+        
+              cumulativeWidth += charWidth;
+            }
+          });
+        }
     
       // Add background word if necessary - only create container if needed
       if (hasBackgroundSyllables) {
@@ -518,9 +522,9 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   ensureElementIds();
 
   // Reset tracking variables
-  activeLineIds = new Set();
-  highlightedSyllableIds = new Set();
-  visibleLineIds = new Set();
+  activeLineIds.clear();
+  highlightedSyllableIds.clear();
+  visibleLineIds.clear();
   currentPrimaryActiveLine = null;
 
   if (cachedLyricsLines.length !== 0) {
@@ -568,15 +572,14 @@ function injectCssFile() {
   // Performance optimization: Check if style is already injected
   if (document.querySelector('link[data-lyrics-plus-style]')) return;
   
-  // Create a new <link> element
   const pBrowser = chrome || browser;
+
+  // Create a new <link> element for the main stylesheet
   const linkElement = document.createElement('link');
   linkElement.rel = 'stylesheet';
   linkElement.type = 'text/css';
   linkElement.href = pBrowser.runtime.getURL('src/inject/stylesheet.css');
   linkElement.setAttribute('data-lyrics-plus-style', 'true');
-
-  // Append the <link> element to the document head
   document.head.appendChild(linkElement);
 }
 
@@ -585,42 +588,24 @@ function injectCssFile() {
  * Performance optimization: Cache text width measurements
  */
 function getTextWidth(text, font) {
-  // Performance optimization: Cache text width measurements
-  const cacheKey = `${text}_${font}`;
-  if (fontCache[cacheKey]) return fontCache[cacheKey];
-  
-  // Initialize canvas once and reuse
-  if (!textWidthCanvas) {
-    textWidthCanvas = document.createElement("canvas");
-  }
-  
-  const context = textWidthCanvas.getContext("2d");
-  context.font = font;
-  const metrics = context.measureText(text);
-  
-  // Cache the result
-  fontCache[cacheKey] = metrics.width;
-  return metrics.width;
+// re-use canvas object for better performance
+const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+const context = canvas.getContext("2d");
+context.font = font;
+const metrics = context.measureText(text);
+return metrics.width;
 }
 
 function getCssStyle(element, prop) {
-  // Performance optimization: Use element.style if possible
-  if (element.style[prop]) return element.style[prop];
-  return getComputedStyle(element, null).getPropertyValue(prop);
+  return window.getComputedStyle(element, null).getPropertyValue(prop);
 }
 
 function getCanvasFont(el = document.body) {
-  // Performance optimization: Cache font styles
-  const cacheKey = el.tagName + (el.className || '');
-  if (fontCache[cacheKey]) return fontCache[cacheKey];
-  
-  const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
-  const fontSize = getCssStyle(el, 'font-size') || '16px';
-  const fontFamily = getCssStyle(el, 'font-family') || 'Times New Roman';
-  
-  const font = `${fontWeight} ${fontSize} ${fontFamily}`;
-  fontCache[cacheKey] = font;
-  return font;
+const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
+const fontSize = getCssStyle(el, 'font-size') || '16px';
+const fontFamily = getCssStyle(el, 'font-family') || 'Times New Roman';
+
+return `${fontWeight} ${fontSize} ${fontFamily}`;
 }
 
 // Add unique IDs to elements if they don't have them

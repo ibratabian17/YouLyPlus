@@ -24,7 +24,15 @@ function openDB() {
 
 async function getLyricsFromDB(key) {
     const db = await openDB();
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+        const settings = await storageLocalGet({ 'cacheStrategy': 'aggressive' });
+        const cacheStrategy = settings.cacheStrategy;
+
+        if (cacheStrategy === 'none') {
+            resolve(null);
+            return;
+        }
+
         const transaction = db.transaction(["lyrics"], "readonly");
         const store = transaction.objectStore("lyrics");
         const request = store.get(key);
@@ -32,9 +40,14 @@ async function getLyricsFromDB(key) {
             const result = event.target.result;
             if (result) {
                 const now = Date.now();
+                let expirationTime = 2 * 60 * 60 * 1000; // Default: aggressive (2 hours)
+
+                if (cacheStrategy === 'moderate') {
+                    expirationTime = 1 * 60 * 60 * 1000; // Moderate: 1 hour
+                }
+
                 const age = now - result.timestamp;
-                const twoHours = 2 * 60 * 60 * 1000;
-                if (age < twoHours) {
+                if (age < expirationTime) {
                     resolve(result.lyrics);
                 } else {
                     // If expired, remove from DB
@@ -50,6 +63,13 @@ async function getLyricsFromDB(key) {
 }
 
 async function saveLyricsToDB(key, lyrics) {
+    const settings = await storageLocalGet({ 'cacheStrategy': 'aggressive' });
+    const cacheStrategy = settings.cacheStrategy;
+
+    if (cacheStrategy === 'none') {
+        return; // Do not save if cache strategy is 'none'
+    }
+
     const db = await openDB();
     return new Promise((resolve, reject) => {
         const transaction = db.transaction(["lyrics"], "readwrite");
@@ -71,19 +91,32 @@ async function deleteLyricsFromDB(key) {
     });
 }
 
-// Clear only expired cache entries
+// Clear only expired cache entries based on current strategy
 async function clearExpiredCache() {
     const db = await openDB();
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+        const settings = await storageLocalGet({ 'cacheStrategy': 'aggressive' });
+        const cacheStrategy = settings.cacheStrategy;
+
+        if (cacheStrategy === 'none') {
+            resolve(); // Nothing to clear if cache is disabled
+            return;
+        }
+
         const transaction = db.transaction(["lyrics"], "readwrite");
         const store = transaction.objectStore("lyrics");
         const request = store.getAll();
         request.onsuccess = async event => {
             const now = Date.now();
-            const twoHours = 2 * 60 * 60 * 1000;
+            let expirationTime = 2 * 60 * 60 * 1000; // Default: aggressive (2 hours)
+
+            if (cacheStrategy === 'moderate') {
+                expirationTime = 1 * 60 * 60 * 1000; // Moderate: 1 hour
+            }
+
             const allRecords = event.target.result;
             for (const record of allRecords) {
-                if (now - record.timestamp >= twoHours) {
+                if (now - record.timestamp >= expirationTime) {
                     await deleteLyricsFromDB(record.key);
                 }
             }
@@ -213,20 +246,27 @@ async function handleLyricsFetch(songInfo, sendResponse) {
     // Start a new fetch and store its promise.
     const fetchPromise = (async () => {
         try {
-            // Determine provider based on settings.
-            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe' });
-            const isPrimaryKPoe = settings.lyricsProvider === 'kpoe';
+            // Determine provider and source order based on settings.
+            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,musixmatch,spotify,musixmatch-word' });
+            const lyricsProvider = settings.lyricsProvider;
+            const lyricsSourceOrder = settings.lyricsSourceOrder;
+
+            let lyrics = null;
 
             // Try the primary provider first.
-            let lyrics = isPrimaryKPoe ?
-                await fetchKPoeLyrics(songInfo) :
-                await fetchLRCLibLyrics(songInfo);
+            if (lyricsProvider === 'kpoe') {
+                lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder);
+            } else if (lyricsProvider === 'lrclib') {
+                lyrics = await fetchLRCLibLyrics(songInfo);
+            }
 
-            // If no result, try the secondary provider.
+            // If no result from primary, try the other provider as fallback.
             if (isEmptyLyrics(lyrics)) {
-                lyrics = isPrimaryKPoe ?
-                    await fetchLRCLibLyrics(songInfo) :
-                    await fetchKPoeLyrics(songInfo);
+                if (lyricsProvider === 'kpoe') {
+                    lyrics = await fetchLRCLibLyrics(songInfo);
+                } else if (lyricsProvider === 'lrclib') {
+                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder);
+                }
             }
 
             // If both providers failed, try YouTube subtitles if available
@@ -272,11 +312,12 @@ function isEmptyLyrics(lyrics) {
     return false;
 }
 
-async function fetchKPoeLyrics(songInfo) {
+async function fetchKPoeLyrics(songInfo, sourceOrder = '') {
     const albumParam = (songInfo.album && songInfo.album !== songInfo.title)
         ? `&album=${encodeURIComponent(songInfo.album)}`
         : '';
-    const url = `https://lyricsplus.prjktla.workers.dev/v1/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}&duration=${songInfo.duration}`;
+    const sourceParam = sourceOrder ? `&source=${encodeURIComponent(sourceOrder)}` : '';
+    const url = `https://lyricsplus.prjktla.workers.dev/v1/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}&duration=${songInfo.duration}${sourceParam}`;
 
     const response = await fetch(url);
     if (!response.ok) return null;

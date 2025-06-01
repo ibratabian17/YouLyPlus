@@ -294,48 +294,6 @@ button.secondary:active {
     background-color: transparent;
 }
 
-.source-list {
-    border: 1px solid var(--md-sys-color-outline);
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 20px;
-    background-color: var(--md-sys-color-surface);
-}
-
-.source-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--md-sys-color-outline-variant);
-    color: var(--md-sys-color-on-surface);
-}
-
-.source-item:last-child {
-    border-bottom: none;
-}
-
-.source-controls {
-    display: flex;
-    gap: 5px;
-}
-
-.add-source {
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-}
-
-.add-source input[type="text"] {
-    flex-grow: 1;
-    margin-bottom: 0; /* Remove default margin */
-}
-
-.add-source button {
-    margin-bottom: 0; /* Remove default margin */
-}
-
 .preview-box {
     border: 1px solid var(--md-sys-color-outline);
     padding: 15px;
@@ -360,4 +318,532 @@ button.secondary:active {
 small {
     color: var(--md-sys-color-on-surface-variant);
     font-size: 0.85em;
+}
+
+/* Styles for Draggable List */
+.draggable-list {
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: 8px;
+    background-color: var(--md-sys-color-surface);
+    padding: 10px;
+    min-height: 100px; /* Ensure it's visible even when empty */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.draggable-source-item {
+    display: flex;
+    align-items: center;
+    background-color: var(--md-sys-color-surface-variant);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: grab;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    color: var(--md-sys-color-on-surface);
+    font-weight: 500;
+}
+
+.draggable-source-item:hover {
+    background-color: rgba(218, 114, 114, 0.15); /* Slightly lighter on hover */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.draggable-source-item.dragging {
+    opacity: 0.5;
+    border: 1px dashed var(--md-sys-color-primary);
+    background-color: rgba(218, 114, 114, 0.3);
+}
+
+.draggable-source-item .drag-handle {
+    margin-right: 10px;
+    color: var(--md-sys-color-on-surface-variant);
+    cursor: grab;
+    font-size: 20px; /* Adjust as needed for Material Symbols */
+}
+
+.add-source-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.add-source-group input[type="text"] {
+    flex-grow: 1;
+}
+
+.draggable-source-item .remove-source-button {
+    margin-left: auto; /* Pushes the button to the right */
+    background-color: transparent;
+    border: none;
+    color: var(--md-sys-color-on-surface-variant);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+    font-size: 20px; /* Adjust as needed for Material Symbols */
+    line-height: 1; /* Ensure icon is centered */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.draggable-source-item .remove-source-button:hover {
+    background-color: rgba(218, 114, 114, 0.2);
+    color: var(--md-sys-color-error);
+}
+
+.status-message {
+    font-size: 0.9em;
+    margin-top: 10px;
+    min-height: 1.2em; /* Reserve space to prevent layout shift */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Styles for lyrics preview from stylesheet.css */
+#lyrics-plus-container-preview {
+    --yt-spec-text-primary: #ffffff; /* White for primary text */
+    --ytmusic-description-shelf-renderer-description-color: #fff; /* Use accent color for active lyrics */
+    --yt-spec-text-secondary: #aaaaaa; /* Grey for secondary text */
+    --yt-spec-10-percent-layer: rgba(255, 255, 255, 0.1); /* For borders */
+
+    /* Base styles for the preview container */
+    width: 100%;
+    height: 200px; /* Fixed height for preview */
+    overflow-y: auto; /* Enable scrolling for preview */
+    color: var(--yt-spec-text-primary);
+    font-family: 'YouTube Sans', 'Roboto', 'Noto Naskh Arabic UI', 'Arial', sans-serif;
+    font-weight: bolder;
+    padding-top: 1em;
+    transform: translateZ(0);
+    direction: ltr;
+    box-sizing: border-box;
+    background-color: #1a1a1a; /* Dark background for contrast */
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+#lyrics-plus-container-preview *::selection,
+#lyrics-plus-container-preview *::-moz-selection {
+    background: #ffffff21;
+    color: #FFF;
+}
+
+#lyrics-plus-container-preview .lyrics-line {
+    font-size: 25px;
+    line-height: 1.1;
+    padding: 10px;
+    cursor: pointer;
+    opacity: 0.7;
+    color: #ffffff85;
+    transform-origin: left;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#lyrics-plus-container-preview .lyrics-line.active {
+    opacity: 1;
+    color: var(--ytmusic-description-shelf-renderer-description-color, #fff);
+    will-change: transform, opacity;
+}
+
+#lyrics-plus-container-preview .lyrics-line:hover {
+    background: #ffffff21;
+    border-radius: 0.6em;
+}
+
+#lyrics-plus-container-preview .lyrics-line.singer-right {
+    text-align: end;
+}
+
+#lyrics-plus-container-preview .lyrics-line.rtl-text {
+    direction: rtl;
+}
+
+#lyrics-plus-container-preview .lyrics-line.singer-right:not(.rtl-text) .main-vocal-container,
+#lyrics-plus-container-preview .lyrics-line.rtl-text:not(.singer-right) .main-vocal-container {
+    transform-origin: right;
+}
+
+#lyrics-plus-container-preview .lyrics-line .main-vocal-container {
+    transition: transform .5s ease, color .18s;
+    transform: scale3d(0.93, 0.93, 0.95);
+    transform-origin: left;
+    overflow-wrap: break-word;
+}
+
+#lyrics-plus-container-preview .lyrics-line.active .main-vocal-container {
+    transform: scale3d(1.001, 1.001, 1);
+    will-change: transform;
+}
+
+#lyrics-plus-container-preview .lyrics-line .background-vocal-container {
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    font-size: 0.6em;
+    padding-top: 0.2em;
+    transition: height .2s, opacity .2s;
+}
+
+#lyrics-plus-container-preview .lyrics-line.active .background-vocal-container {
+    height: 1em;
+    opacity: 1;
+    transition: height .4s, opacity .4s;
+    will-change: height, opacity;
+}
+
+#lyrics-plus-container-preview .lyrics-line.active .background-vocal {
+    opacity: 1;
+}
+
+#lyrics-plus-container-preview .lyrics-word {
+    display: inline-block;
+    vertical-align: baseline;
+}
+
+#lyrics-plus-container-preview .lyrics-word.growable:has(.lyrics-syllable.highlight) .lyrics-syllable {
+    transform: translateY(-3%);
+}
+
+#lyrics-plus-container-preview .lyrics-line .lyrics-syllable {
+    display: inline-block;
+    white-space: break-spaces;
+    color: #ffffff85;
+    font-kerning: none;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0;
+    transition: color 0.18s;
+}
+
+#lyrics-plus-container-preview .lyrics-line.active .lyrics-syllable.finished {
+    color: #ffffff;
+    transition: all 0s !important;
+}
+
+#lyrics-plus-container-preview .lyrics-line:not(.active) .lyrics-syllable.finished {
+    color: #ffffff;
+    transition: color 0.18s;
+}
+
+#lyrics-plus-container-preview .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable {
+    background: linear-gradient(to right, var(--ytmusic-description-shelf-renderer-description-color, #fff) 100%, transparent 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+    transition: background 0s linear, transform 0.5s, color 0.5s;
+    will-change: transform, background;
+}
+
+#lyrics-plus-container-preview .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.rtl-text {
+    background-position: right;
+    direction: rtl;
+}
+
+#lyrics-plus-container-preview .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight {
+    background-size: 100% 100%;
+    transform: translateY(-3%);
+}
+
+#lyrics-plus-container-preview .lyrics-line.lyrics-gap {
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: padding .3s .5s, height .3s .5s, opacity .2s .5s;
+    box-sizing: content-box;
+    padding: 0 0.4em;
+}
+
+#lyrics-plus-container-preview .lyrics-line.lyrics-gap.active {
+    opacity: 1;
+    height: 1em;
+    transition: padding .3s, height .3s, opacity .2s .3s;
+    padding: 0.4em;
+    will-change: height, opacity, padding;
+}
+
+#lyrics-plus-container-preview .lyrics-line.lyrics-gap.active .main-vocal-container {
+    animation: gap-loop 2s ease infinite alternate;
+    will-change: transform;
+}
+
+#lyrics-plus-container-preview .lyrics-line.lyrics-gap .main-vocal-container {
+    animation: gap-ended .8s ease;
+    transform: translateY(-25%) scale(0) translateZ(0);
+}
+
+#lyrics-plus-container-preview .lyrics-line.lyrics-gap .lyrics-syllable {
+    height: 0.4em;
+    width: 0.4em;
+    display: inline-block;
+    margin: 0em 0.1em;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.36);
+    border-radius: 1em;
+}
+
+#lyrics-plus-container-preview .lyrics-line.lyrics-gap:not(.active) .lyrics-syllable {
+    background-color: #FFF;
+}
+
+#lyrics-plus-container-preview .lyrics-line.lyrics-gap.active .lyrics-syllable.highlight {
+    background-color: #ffffff;
+}
+
+#lyrics-plus-container-preview .lyrics-line .lyrics-syllable span.char {
+    display: inline-block;
+    white-space: break-spaces;
+    color: #ffffff85;
+    font-kerning: none;
+    transition: color 0.18s;
+}
+
+#lyrics-plus-container-preview .lyrics-line .lyrics-syllable.finished span.char {
+    transition: none;
+    color: #ffffff;
+}
+
+#lyrics-plus-container-preview .lyrics-line.active .lyrics-syllable span.char {
+    background: linear-gradient(to right, var(--ytmusic-description-shelf-renderer-description-color, #fff) 100%, transparent 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+    transform-origin: 50% 80%;
+    transform: scale3d(1.01, 1.01, 1.1);
+    transition: background 0s linear, transform 0.5s, color 0.18s;
+    will-change: background, transform;
+}
+
+#lyrics-plus-container-preview .lyrics-line.active .lyrics-syllable span.char.highlight {
+    background-size: 100% 100%;
+}
+
+#lyrics-plus-container-preview .lyrics-line.active .lyrics-syllable:has(span.char) span.char.highlight {
+    background-size: 0% 100%;
+}
+
+#lyrics-plus-container-preview span.lyrics-syllable.background-vocal {
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 1em;
+    font-size: 0.6em;
+    opacity: 0.1;
+    transition: opacity .5s;
+}
+
+#lyrics-plus-container-preview span.lyrics-song-writters,
+#lyrics-plus-container-preview span.lyrics-source-provider {
+    font-weight: normal;
+    box-sizing: border-box;
+    position: relative;
+    display: block;
+}
+
+#lyrics-plus-container-preview span.lyrics-song-writters {
+    font-size: 1.6em;
+    color: #ffffff7a;
+    margin-top: 1em;
+}
+
+#lyrics-plus-container-preview span.lyrics-source-provider {
+    font-size: 1.5em;
+    color: #ffffff31;
+    margin-bottom: 1em;
+    height: 150%;
+}
+
+#lyrics-plus-container-preview .text-loading,
+#lyrics-plus-container-preview .text-not-found {
+    font-size: 24px;
+    position: absolute;
+    top: 30%;
+    text-align: center;
+    width: 100%;
+    display: block;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+    transition: opacity 0.3s ease;
+}
+
+#lyrics-plus-container-preview .text-not-found {
+    opacity: 0.7;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+#lyrics-plus-container-preview .text-loading {
+    opacity: 0.8;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+#lyrics-plus-container-preview .text-loading:after {
+    content: "...";
+    display: inline-block;
+    animation: ellipsis 3s ease-in-out infinite;
+    mask-image: linear-gradient(to right, #FFF 90%, transparent 100%);
+    mask-size: 200% 100%;
+    mask-repeat: no-repeat;
+    width: 0;
+    overflow: hidden;
+    vertical-align: bottom;
+    text-overflow: clip;
+}
+
+/* ANIMATIONS - Simplified */
+@keyframes wipe {
+    from {
+        background-size: 0% 100%;
+    }
+
+    to {
+        background-size: 100% 100%;
+    }
+}
+
+@keyframes gap-loop {
+    from {
+        transform: translateY(-25%) scale(1.1) translateZ(0);
+    }
+
+    to {
+        transform: translateY(-25%) scale(1) translateZ(0);
+    }
+}
+
+@keyframes gap-ended {
+
+    0% {
+        transform: translateY(-25%) scale(1) translateZ(0);
+    }
+
+    30% {
+        transform: translateY(-25%) scale(1.2) translateZ(0);
+    }
+
+    100% {
+        transform: translateY(-25%) scale(0) translateZ(0);
+    }
+}
+
+@keyframes fade-gap {
+    from {
+        background-color: rgba(255, 255, 255, 0.36);
+    }
+
+    to {
+        background-color: #FFF;
+    }
+}
+
+@keyframes wipe-rtl {
+    from {
+        background-size: 0% 100%;
+    }
+
+    to {
+        background-size: 100% 100%;
+    }
+}
+
+@keyframes grow-dynamic {
+    0% {
+        transform: matrix3d(var(--min-scale), 0, 0, 0,
+                0, var(--min-scale), 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1);
+        filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+    }
+
+    25%,
+    30% {
+        transform: matrix3d(var(--max-scale), 0, 0, 0,
+                0, var(--max-scale), 0, 0,
+                0, 0, 1, 0,
+                var(--char-offset-x, 0), var(--translate-y-peak, -2%), 0, 1);
+        filter: drop-shadow(0 0 0.1em rgba(255, 255, 255, var(--shadow-intensity)));
+    }
+
+    100% {
+        transform: matrix3d(var(--min-scale), 0, 0, 0,
+                0, var(--min-scale), 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1);
+    }
+}
+
+@keyframes grow-static {
+
+    0%,
+    100% {
+        transform: scale3d(1.01, 1.01, 1.1) translateY(-0.05%);
+        text-shadow: 0 0 0 rgba(255, 255, 255, 0);
+    }
+
+    30%,
+    40% {
+        transform: scale3d(1.10, 1.10, 1.1) translateY(-0.05%);
+        text-shadow: 0 0 0.3em rgba(255, 255, 255, 0.5);
+    }
+}
+
+#lyrics-plus-container-preview {
+    --max-scale: 1.12;
+    --min-scale: 1.01;
+    --shadow-intensity: 0.6;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(0.98);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 0.7;
+        transform: translateY(0);
+    }
+}
+
+@keyframes ellipsis {
+    0% {
+        width: 0;
+        opacity: 1;
+        mask-position: 0% 0%;
+    }
+
+    60% {
+        width: 0.8em;
+        opacity: 1;
+        mask-position: 10% 0%;
+    }
+
+    80%,
+    82% {
+        width: 0.8em;
+        opacity: 0;
+    }
+
+    100% {
+        width: 0;
+        opacity: 0;
+    }
 }
