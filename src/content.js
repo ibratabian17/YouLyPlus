@@ -2,6 +2,20 @@ loadSettings(() => {
     initializeLyricsPlus();
 });
 
+// Expose fetchAndDisplayLyrics and t globally for other modules to use
+window.LyricsPlusAPI = {
+    fetchAndDisplayLyrics: fetchAndDisplayLyrics,
+    t: t, // Assuming 't' is available in this scope from localization.js
+    sendMessageToBackground: (message) => {
+        return new Promise((resolve) => {
+            const pBrowser = chrome || browser;
+            pBrowser.runtime.sendMessage(message, (response) => {
+                resolve(response);
+            });
+        });
+    }
+};
+
 function initializeLyricsPlus() {
     // Inject the DOM script
     injectDOMScript();

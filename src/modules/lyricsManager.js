@@ -37,15 +37,17 @@ async function fetchAndDisplayLyrics(currentSong) {
 
     let lyrics = response.lyrics;
 
-    // Convert word-by-word lyrics to line if needed
-    if (!currentSettings.wordByWord && lyrics.type !== "Line") {
+    // If the fetched lyrics are of type "Word" (meaning they have syllabus data)
+    // but the user prefers line-by-line display, convert them.
+    if (lyrics.type === "Word" && !currentSettings.wordByWord) {
       lyrics = convertWordLyricsToLine(lyrics);
     }
 
     // If it's an MV, adjust timings using SponsorBlock
     if (currentSong.isVideo && currentSong.videoId && currentSettings.useSponsorBlock && !lyrics.ignoreSponsorblock) {
       const segments = await fetchSponsorSegments(currentSong.videoId);
-      lyrics.data = adjustLyricTiming(lyrics.data, segments, lyrics.type === "Line" ? "s" : "ms");
+      // Adjust timing based on whether the lyrics are line-based or word-based (with syllabus)
+      lyrics.data = adjustLyricTiming(lyrics.data, segments, lyrics.type === "Line" ? "s" : "s"); // V2 times are always in seconds
     }
 
     // Ensure the videoId is still the same before displaying lyrics
@@ -59,7 +61,8 @@ async function fetchAndDisplayLyrics(currentSong) {
       lyrics.metadata.source,
       lyrics.type === "Line" ? "Line" : "Word",
       currentSettings.lightweight,
-      lyrics.metadata.songWriters
+      lyrics.metadata.songWriters,
+      currentSong // Pass the songInfo here
     );
   } catch (error) {
     console.warn('Error in fetchAndDisplayLyrics:', error);

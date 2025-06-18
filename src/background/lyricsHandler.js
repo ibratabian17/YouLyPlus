@@ -208,6 +208,18 @@ pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         })();
         return true;
     }
+    if (message.type === 'TRANSLATE_LYRICS') {
+        (async () => {
+            try {
+                const translatedLyrics = await handleTranslateLyrics(message.songInfo, message.action, message.targetLang);
+                sendResponse({ success: true, translatedLyrics });
+            } catch (error) {
+                console.error("Error handling translation:", error);
+                sendResponse({ success: false, error: error.message });
+            }
+        })();
+        return true;
+    }
 });
 
 /* =================== Lyrics Fetching Logic =================== */
@@ -297,6 +309,80 @@ async function handleLyricsFetch(songInfo, sendResponse) {
     }
 }
 
+async function handleTranslateLyrics(songInfo, action, targetLang) {
+    const cacheKey = `${songInfo.title} - ${songInfo.artist} - ${songInfo.album}`;
+    let originalLyrics = lyricsCache.get(cacheKey);
+
+    if (!originalLyrics) {
+        originalLyrics = await getLyricsFromDB(cacheKey);
+    }
+
+    if (!originalLyrics) {
+        // If not in cache or DB, try to fetch them (without sending response)
+        const tempSendResponse = () => {}; // Dummy sendResponse
+        await handleLyricsFetch(songInfo, tempSendResponse);
+        originalLyrics = lyricsCache.get(cacheKey); // Try getting from cache again
+    }
+
+    if (!originalLyrics || !originalLyrics.data || originalLyrics.data.length === 0) {
+        throw new Error('Original lyrics not found or empty for translation.');
+    }
+
+    const translationPromises = originalLyrics.data.map(line => {
+        if (action === 'translate') {
+            return fetchGoogleTranslate(line.text, targetLang);
+        } else if (action === 'romanize') {
+            return fetchGoogleRomanize(line.text);
+        }
+        return Promise.resolve(line.text); // Return original text if no action
+    });
+
+    const translatedTexts = await Promise.all(translationPromises);
+
+    const translatedData = originalLyrics.data.map((line, index) => ({
+        ...line,
+        translatedText: translatedTexts[index] || line.text // Use original text if translation fails for a line
+    }));
+    console.log('song translated')
+
+    return {
+        ...originalLyrics,
+        data: translatedData,
+        metadata: {
+            ...originalLyrics.metadata,
+            source: `${originalLyrics.metadata.source} (${action === 'translate' ? 'Translated' : 'Romanized'} to ${targetLang})`
+        }
+    };
+}
+
+async function fetchGoogleTranslate(text, targetLang) {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Google Translate API error: ${response.statusText}`);
+    }
+    const data = await response.json();
+    // The translated text is usually in data[0][0][0]
+    return data[0].map(item => item[0]).join('');
+}
+
+async function fetchGoogleRomanize(text) {
+    // Google Translate's transliteration (romanization) is available via dt=rm
+    // We set target language to English (or any Latin-based script) to ensure romanization
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&hl=en&dt=rm&q=${encodeURIComponent(text)}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Google Romanize API error: ${response.statusText}`);
+    }
+    const data = await response.json();
+    // Romanized text is typically in data[0][0][3] for the first segment
+    // It's an array of arrays, so we need to map and join
+    if (data[0] && data[0][0] && data[0][0][3]) {
+        return data[0][0][3];
+    }
+    return text; // Return original text if romanization fails
+}
+
 // Helper function to check if lyrics object is empty
 function isEmptyLyrics(lyrics) {
     if (!lyrics) {
@@ -317,7 +403,7 @@ async function fetchKPoeLyrics(songInfo, sourceOrder = '') {
         ? `&album=${encodeURIComponent(songInfo.album)}`
         : '';
     const sourceParam = sourceOrder ? `&source=${encodeURIComponent(sourceOrder)}` : '';
-    const url = `https://lyricsplus.prjktla.workers.dev/v1/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}&duration=${songInfo.duration}${sourceParam}`;
+    const url = `https://lyricsplus.prjktla.workers.dev/v2/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}&duration=${songInfo.duration}${sourceParam}`;
 
     const response = await fetch(url);
     if (!response.ok) return null;
@@ -361,7 +447,7 @@ async function fetchYouTubeSubtitles(songInfo) {
                     candidate.kind !== 'asr' &&
                     !(candidate.vssId && candidate.vssId.startsWith('a.'))
                 ) {
-                    // Prioritize if isDefault is true
+                    // Prioritize if isDefault true
                     if (candidate.isDefault) {
                         selectedTrack = candidate;
                         break;
@@ -514,7 +600,6 @@ function parseLRCLibFormat(data) {
 function parseKPoeFormat(data) {
     if (!Array.isArray(data.lyrics)) return null;
 
-    const isLineType = data.type === "Line";
     // Clone metadata to avoid mutation.
     const metadata = {
         ...data.metadata,
@@ -522,25 +607,29 @@ function parseKPoeFormat(data) {
     };
 
     return {
-        type: data.type,
+        type: data.type, // This will be "Word" or "Line"
         data: data.lyrics.map(item => {
-            let startTime = Number(item.time) || 0;
-            let duration = Number(item.duration) || 0;
-            let endTime = startTime + duration;
+            const startTime = Number(item.time) || 0;
+            const duration = Number(item.duration) || 0;
+            const endTime = startTime + duration;
 
-            // Convert from milliseconds to seconds if needed.
-            if (isLineType) {
-                startTime /= 1000;
-                duration /= 1000;
-                endTime /= 1000;
-            }
+            // For v2, 'lyrics' array contains lines, and 'syllabus' contains words.
+            // Times are already in milliseconds from the API.
+            const parsedSyllabus = (item.syllabus || []).map(syllable => ({
+                text: syllable.text || '',
+                time: Number(syllable.time) || 0,
+                duration: Number(syllable.duration) || 0,
+                isLineEnding: Boolean(syllable.isLineEnding),
+                isBackground: Boolean(syllable.isBackground), // Add this line
+                element: syllable.element || {}
+            }));
 
             return {
-                text: item.text || '',
-                startTime,
-                duration,
-                endTime,
-                isLineEnding: Boolean(item.isLineEnding),
+                text: item.text || '', // Full line text
+                startTime: startTime / 1000, // Convert to seconds
+                duration: duration / 1000, // Convert to seconds
+                endTime: endTime / 1000, // Convert to seconds
+                syllabus: parsedSyllabus, // Word-by-word breakdown
                 element: item.element || {}
             };
         }),

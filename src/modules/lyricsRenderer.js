@@ -3,6 +3,7 @@
 let lyricsAnimationFrameId = null;
 let currentPrimaryActiveLine = null;
 let lastTime = 0;
+let lastKnownSongInfo = null; // Store last known song info for reload
 
 // Performance optimization: Cache selectors and calculations
 let lyricsContainer = null;
@@ -15,6 +16,9 @@ let lastProcessedTime = 0;
 let fontCache = {};
 let textWidthCanvas = null;
 let visibilityObserver = null;
+let translationButton = null; // Reference to the translation button
+let reloadButton = null; // Reference to the reload button
+let dropdownMenu = null; // Reference to the translation dropdown menu
 
 // Cached DOM references
 const getContainer = () => {
@@ -33,20 +37,28 @@ function batchDOMUpdates(callback) {
   });
 }
 
-function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters) {
+function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, isTranslated = false) {
   const container = getContainer();
   if (!container) return;
-  
+
+  if (isTranslated) {
+    container.classList.add('lyrics-translated');
+  } else {
+    container.classList.remove('lyrics-translated');
+  }
+
+  lastKnownSongInfo = songInfo; // Store the current song info
+
   // Performance optimization: Clear container once
   container.innerHTML = '';
-  
+
   // Performance optimization: Create element pool for reuse
   const elementPool = {
     lines: [],
     syllables: [],
     chars: []
   };
-  
+
   // Cache the onLyricClick handler to avoid recreating it for each element
   const onLyricClick = e => {
     const time = parseFloat(e.currentTarget.dataset.startTime);
@@ -68,7 +80,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     gapLine.className = 'lyrics-line lyrics-gap';
     gapLine.dataset.startTime = gapStart;
     gapLine.dataset.endTime = gapEnd;
-    
+
     // Performance optimization: Use single event listener
     if (!gapLine.hasClickListener) {
       gapLine.addEventListener('click', onLyricClick);
@@ -85,12 +97,12 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     // Performance optimization: Minimize DOM operations
     const mainContainer = document.createElement('div');
     mainContainer.className = 'main-vocal-container';
-    
+
     // Create all syllables at once
     for (let i = 0; i < 3; i++) {
       const syllableSpan = elementPool.syllables.pop() || document.createElement('span');
       syllableSpan.className = 'lyrics-syllable';
-      
+
       // Distribute the gap evenly among the three dots
       const syllableStart = (gapStart + (i * gapDuration / 3)) * 1000;
       const syllableDuration = ((gapDuration / 3) / 0.9) * 1000;
@@ -98,16 +110,16 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       syllableSpan.dataset.duration = syllableDuration;
       syllableSpan.dataset.endTime = syllableStart + syllableDuration;
       syllableSpan.textContent = "•";
-      
+
       // Performance optimization: Use single event listener
       if (!syllableSpan.hasClickListener) {
         syllableSpan.addEventListener('click', onLyricClick);
         syllableSpan.hasClickListener = true;
       }
-      
+
       mainContainer.appendChild(syllableSpan);
     }
-    
+
     gapLine.appendChild(mainContainer);
     return gapLine;
   }
@@ -115,296 +127,254 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
 
   // Performance optimization: Process lines in batches using DocumentFragment
   const fragment = document.createDocumentFragment();
-  
-  if (type !== "Line") {
+  const isWordByWordMode = type === "Word" && currentSettings.wordByWord;
+
+  if (isWordByWordMode) {
     // Syllable mode with word-by-word glow.
-    let currentLine = document.createElement('div');
-    currentLine.classList.add('lyrics-line');
-    let mainContainer = document.createElement('div');
-    mainContainer.classList.add('main-vocal-container');
-    currentLine.appendChild(mainContainer);
-    let backgroundContainer = null;
-    fragment.appendChild(currentLine);
+    // Performance optimization: Cache font computation
+    const getComputedFont = (element) => {
+      if (!element) return '400 16px sans-serif';
+      const cacheKey = element.tagName + (element.className || '');
+      if (fontCache[cacheKey]) return fontCache[cacheKey];
 
-    let lineSinger = null,
-      lineStartTime = null,
-      lineEndTime = null,
-      wordBuffer = [];
+      const style = getComputedStyle(element);
+      const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      fontCache[cacheKey] = font;
+      return font;
+    };
 
-    // Performance optimization: Move function outside loop and optimize DOM operations
-    const flushWordBuffer = () => {
-      if (!wordBuffer.length) return;
-    
-      // Performance optimization: Cache font computation
-      const getComputedFont = (element) => {
-        if (!element) return '400 16px sans-serif';
-        const cacheKey = element.tagName + (element.className || '');
-        if (fontCache[cacheKey]) return fontCache[cacheKey];
-        
-        const style = getComputedStyle(element);
-        const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-        fontCache[cacheKey] = font;
-        return font;
-      };
-    
-      // Create word container for main vocals
-      const wordSpan = document.createElement('span');
-      wordSpan.classList.add('lyrics-word');
-      
-      // Get the font from a reference element (or use defaults if not available)
-      let referenceFont = mainContainer.firstChild ? 
-                         getComputedFont(mainContainer.firstChild) : 
-                         '400 16px sans-serif';
-    
-      const combinedText = wordBuffer.map(s => s.text).join('');
-      const trimmedText = combinedText.trim();
-      const textLength = trimmedText.length;
-      const totalDuration = wordBuffer.reduce((sum, s) => sum + s.duration, 0);
-    
-      // Performance optimization: Only apply character-by-character glow for short text
-      const shouldEmphasize = !lightweight &&
-        !isRTL(combinedText) &&
-        !isCJK(combinedText) &&
-        trimmedText.length <= 7 &&
-        totalDuration >= 1000;
-    
-      // Pre-calculate animation parameters up front
-      const durationFactor = Math.min(1.0, Math.max(0.5, (totalDuration - 1000) / 1000));
-      
-      // Calculate scale values based on word properties
-      let baseMinScale = 1.02;
-      let baseMaxScale = 1;
-    
-      const durationScaleFactor = durationFactor * 0.15;
-      baseMaxScale += durationScaleFactor;
-    
-      const maxScale = Math.min(1.2, baseMaxScale);
-      const minScale = Math.max(1.0, Math.min(1.06, baseMinScale));
-    
-      const shadowIntensity = Math.min(0.8, 0.4 + (durationFactor * 0.4));
-      const translateYPeak = -Math.min(3.0, 0.0 + (durationFactor * 3.0));
-    
-      // Store these pre-calculated values as data attributes for later use
-      wordSpan.style.setProperty('--max-scale', maxScale);
-      wordSpan.style.setProperty('--min-scale', minScale);
-      wordSpan.style.setProperty('--shadow-intensity', shadowIntensity);
-      wordSpan.style.setProperty('--translate-y-peak', translateYPeak);
-      wordSpan.dataset.totalDuration = totalDuration;
-    
-      // Create word container for background vocals if needed
-      const backgroundWordSpan = document.createElement('span');
-      backgroundWordSpan.classList.add('lyrics-word');
-    
-      let hasBackgroundSyllables = false;
-      const characterData = [];
-    
-      // Performance optimization: Batch syllable creation
-      const syllableFragment = document.createDocumentFragment();
-      const backgroundSyllableFragment = document.createDocumentFragment();
-      
-      wordBuffer.forEach((s, syllableIndex) => {
-        const sylSpan = document.createElement('span');
-        sylSpan.classList.add('lyrics-syllable');
-        sylSpan.dataset.startTime = s.startTime;
-        sylSpan.dataset.duration = s.duration;
-        sylSpan.dataset.endTime = s.startTime + s.duration;
-        sylSpan.dataset.wordDuration = totalDuration;
-        sylSpan.dataset.syllableIndex = syllableIndex;
-        
-        // Performance optimization: Single event listener attachment
-        if (!sylSpan.hasClickListener) {
-          sylSpan.addEventListener('click', onLyricClick);
-          sylSpan.hasClickListener = true;
-        }
-    
-        const isRtlText = isRTL(s.text);
-        if (isRtlText) {
-          sylSpan.classList.add('rtl-text');
-        }
-    
-        if (shouldEmphasize && !(s.element.isBackground)) {
-          wordSpan.classList.add('growable');
-          let charIndex = 0;
-          
-          // Performance optimization: Create text nodes first
-          const textNodes = [];
-          for (const char of s.text) {
-            if (char === ' ') {
-              textNodes.push(document.createTextNode(' '));
+    lyrics.data.forEach((line, lineIndex) => {
+      let currentLine = document.createElement('div');
+      currentLine.classList.add('lyrics-line');
+      currentLine.dataset.startTime = line.startTime;
+      currentLine.dataset.endTime = line.endTime;
+      currentLine.classList.add(
+        line.element.singer === "v2" || line.element.singer === "v2000" ? 'singer-right' : 'singer-left'
+      );
+      if (isRTL(line.text)) currentLine.classList.add('rtl-text');
+
+      // Performance optimization: Single event listener attachment
+      if (!currentLine.hasClickListener) {
+        currentLine.addEventListener('click', onLyricClick);
+        currentLine.hasClickListener = true;
+      }
+
+      const mainContainer = document.createElement('div');
+      mainContainer.classList.add('main-vocal-container');
+      currentLine.appendChild(mainContainer);
+
+      if (line.translatedText) {
+        const translationContainer = document.createElement('div');
+        translationContainer.classList.add('lyrics-translation-container');
+        translationContainer.textContent = line.translatedText;
+        currentLine.appendChild(translationContainer);
+      }
+
+      let backgroundContainer = null; // Reset for each line
+
+      let wordBuffer = [];
+      let currentWordStartTime = null;
+      let currentWordEndTime = null;
+      let currentWordElement = {};
+
+      const flushWordBuffer = () => {
+        if (!wordBuffer.length) return;
+
+        const wordSpan = document.createElement('span');
+        wordSpan.classList.add('lyrics-word');
+
+        let referenceFont = mainContainer.firstChild ?
+          getComputedFont(mainContainer.firstChild) :
+          '400 16px sans-serif';
+
+        const combinedText = wordBuffer.map(s => s.text).join('');
+        const trimmedText = combinedText.trim();
+        const totalDuration = currentWordEndTime - currentWordStartTime;
+
+        const shouldEmphasize = !lightweight &&
+          !isRTL(combinedText) &&
+          !isCJK(combinedText) &&
+          trimmedText.length <= 7 &&
+          totalDuration >= 1000;
+
+        const durationFactor = Math.min(1.0, Math.max(0.5, (totalDuration - 1000) / 1000));
+
+        let baseMinScale = 1.02;
+        let baseMaxScale = 1;
+        const durationScaleFactor = durationFactor * 0.15;
+        baseMaxScale += durationScaleFactor;
+        const maxScale = Math.min(1.2, baseMaxScale);
+        const minScale = Math.max(1.0, Math.min(1.06, baseMinScale));
+        const shadowIntensity = Math.min(0.8, 0.4 + (durationFactor * 0.4));
+        const translateYPeak = -Math.min(3.0, 0.0 + (durationFactor * 3.0));
+
+        wordSpan.style.setProperty('--max-scale', maxScale);
+        wordSpan.style.setProperty('--min-scale', minScale);
+        wordSpan.style.setProperty('--shadow-intensity', shadowIntensity);
+        wordSpan.style.setProperty('--translate-y-peak', translateYPeak);
+        wordSpan.dataset.totalDuration = totalDuration;
+
+        let isCurrentWordBackground = false; // Flag for the entire word
+        const characterData = []; // For character-level emphasis
+
+        wordBuffer.forEach((s, syllableIndex) => {
+          const sylSpan = document.createElement('span');
+          sylSpan.classList.add('lyrics-syllable');
+          sylSpan.dataset.startTime = s.time;
+          sylSpan.dataset.duration = s.duration;
+          sylSpan.dataset.endTime = s.time + s.duration;
+          sylSpan.dataset.wordDuration = totalDuration;
+          sylSpan.dataset.syllableIndex = syllableIndex;
+
+          if (!sylSpan.hasClickListener) {
+            sylSpan.addEventListener('click', onLyricClick);
+            sylSpan.hasClickListener = true;
+          }
+
+          const isRtlText = isRTL(s.text);
+          if (isRtlText) {
+            sylSpan.classList.add('rtl-text');
+          }
+
+          if (s.isBackground) {
+            isCurrentWordBackground = true; // Mark the word as background if any syllable is background
+            sylSpan.textContent = s.text.replace(/[()]/g, ''); // Remove parentheses for background
+          } else {
+            if (shouldEmphasize) {
+              wordSpan.classList.add('growable'); // Only add growable if it's a main vocal word and should emphasize
+              let charIndex = 0;
+              const textNodes = [];
+              for (const char of s.text) {
+                if (char === ' ') {
+                  textNodes.push(document.createTextNode(' '));
+                } else {
+                  const charSpan = document.createElement('span');
+                  charSpan.textContent = char;
+                  charSpan.classList.add('char');
+                  charSpan.dataset.charIndex = charIndex++;
+                  charSpan.dataset.syllableCharIndex = characterData.length;
+
+                  characterData.push({
+                    charSpan,
+                    syllableSpan: sylSpan,
+                    isBackground: s.isBackground
+                  });
+                  textNodes.push(charSpan);
+                }
+              }
+              textNodes.forEach(node => sylSpan.appendChild(node));
             } else {
-              const charSpan = document.createElement('span');
-              charSpan.textContent = char;
-              charSpan.classList.add('char');
-              charSpan.dataset.charIndex = charIndex++;
-              charSpan.dataset.syllableCharIndex = characterData.length;
-              
-              characterData.push({
-                charSpan,
-                syllableSpan: sylSpan,
-                isBackground: s.element.isBackground
-              });
-              
-              textNodes.push(charSpan);
+              sylSpan.textContent = s.text;
             }
           }
-          
-          // Performance optimization: Append all nodes at once
-          textNodes.forEach(node => sylSpan.appendChild(node));
-        } else {
-          sylSpan.textContent = s.element.isBackground ? s.text.replace(/[()]/g, '') : s.text;
-        }
-    
-        if (s.element.isBackground) {
-          hasBackgroundSyllables = true;
-          backgroundSyllableFragment.appendChild(sylSpan);
-        } else {
-          syllableFragment.appendChild(sylSpan);
-        }
-      });
-      
-      // Append all syllables at once
-      wordSpan.appendChild(syllableFragment);
-      mainContainer.appendChild(wordSpan);
-      
-      // Performance optimization: Only calculate text widths for chars if needed
-      if (shouldEmphasize && characterData.length > 0) {
-          // First get the full word width
+          wordSpan.appendChild(sylSpan); // Append syllable to the word span
+        });
+
+        if (shouldEmphasize && characterData.length > 0) {
           const fullWordText = wordSpan.textContent;
           const wordWidth = getTextWidth(fullWordText, referenceFont);
-      
-          // Calculate positions for each character
+
           let cumulativeWidth = 0;
           characterData.forEach((charData) => {
             if (charData.isBackground) return;
-      
+
             const span = charData.charSpan;
             const charText = span.textContent;
-            
-            // Only calculate text widths for chars if needed to trim the space
+
             if (charText.trim().length > 0) {
               const charWidth = getTextWidth(charText, referenceFont);
               const charCenter = cumulativeWidth + (charWidth / 2);
               const position = charCenter / wordWidth;
-        
-              // Calculate position-based offset
+
               const relativePosition = (position - 0.5) * 2;
               const scaleOffset = maxScale - 1.0;
               const horizontalOffsetFactor = scaleOffset * 40;
               const horizontalOffset = Math.sign(relativePosition) *
                 Math.pow(Math.abs(relativePosition), 1.3) *
                 horizontalOffsetFactor;
-        
-              // Store these pre-calculated values
+
               span.dataset.horizontalOffset = horizontalOffset;
               span.dataset.position = position;
-        
+
               cumulativeWidth += charWidth;
             }
           });
         }
-    
-      // Add background word if necessary - only create container if needed
-      if (hasBackgroundSyllables) {
-        if (!backgroundContainer) {
-          backgroundContainer = document.createElement('div');
-          backgroundContainer.classList.add('background-vocal-container');
-          currentLine.appendChild(backgroundContainer);
-        }
-        backgroundWordSpan.appendChild(backgroundSyllableFragment);
-        backgroundContainer.appendChild(backgroundWordSpan);
-      }
-    
-      wordBuffer = [];
-    };
 
-    // Performance optimization: Process lyrics data in chunks
-    const CHUNK_SIZE = 50; // Process 50 items at a time
-    for (let i = 0; i < lyrics.data.length; i += CHUNK_SIZE) {
-      const chunk = lyrics.data.slice(i, i + CHUNK_SIZE);
-      
-      chunk.forEach((s, chunkIndex) => {
-        const dataIndex = i + chunkIndex;
-        
-        if (lineSinger === null) lineSinger = s.element.singer;
-        lineStartTime =
-          lineStartTime === null ? s.startTime : Math.min(lineStartTime, s.startTime);
-        lineEndTime =
-          lineEndTime === null
-            ? s.startTime + s.duration
-            : Math.max(lineEndTime, s.startTime + s.duration);
-        const lineRTL = isRTL(s.text);
-  
-        wordBuffer.push(s);
-        if (/\s$/.test(s.text) || s.isLineEnding || dataIndex === lyrics.data.length - 1) {
-          flushWordBuffer();
-        }
-  
-        if (s.isLineEnding || dataIndex === lyrics.data.length - 1) {
-          currentLine.dataset.startTime = lineStartTime / 1000;
-          currentLine.dataset.endTime = lineEndTime / 1000;
-          
-          // Performance optimization: Single event listener attachment
-          if (!currentLine.hasClickListener) {
-            currentLine.addEventListener('click', onLyricClick);
-            currentLine.hasClickListener = true;
+        if (isCurrentWordBackground) {
+          if (!backgroundContainer) {
+            backgroundContainer = document.createElement('div');
+            backgroundContainer.classList.add('background-vocal-container');
+            currentLine.appendChild(backgroundContainer);
           }
-          
-          currentLine.classList.add(
-            lineSinger === "v2" || lineSinger === "v2000" ? 'singer-right' : 'singer-left'
-          );
-          if (lineRTL) currentLine.classList.add('rtl-text');
-  
-          if (dataIndex !== lyrics.data.length - 1) {
-            // Create new line for next set of lyrics
-            currentLine = document.createElement('div');
-            currentLine.classList.add('lyrics-line');
-            mainContainer = document.createElement('div');
-            mainContainer.classList.add('main-vocal-container');
-            currentLine.appendChild(mainContainer);
-            backgroundContainer = null;
-            fragment.appendChild(currentLine);
-            lineSinger = null;
-          }
-          lineStartTime = lineEndTime = null;
+          backgroundContainer.appendChild(wordSpan);
+        } else {
+          mainContainer.appendChild(wordSpan);
         }
-      });
-    }
-    
-    flushWordBuffer();
 
-    // Performance optimization: Remove empty lines once
-    const lines = Array.from(fragment.querySelectorAll('.lyrics-line'));
-    if (lines.length && !lines[lines.length - 1].dataset.startTime) {
-      const lastLine = lines[lines.length - 1];
-      if (lastLine.parentNode === fragment) {
-        fragment.removeChild(lastLine);
+        wordBuffer = [];
+        currentWordStartTime = null;
+        currentWordEndTime = null;
+        currentWordElement = {};
+      };
+
+      // Process syllables within the current line's syllabus
+      if (line.syllabus && line.syllabus.length > 0) {
+        line.syllabus.forEach((s, syllableIndex) => {
+          if (wordBuffer.length === 0) {
+            currentWordStartTime = s.time;
+          }
+          wordBuffer.push(s);
+          currentWordEndTime = s.time + s.duration;
+          currentWordElement = s.element || {};
+
+          // If this syllable marks the end of a word (e.g., followed by space or isLineEnding)
+          if (s.isLineEnding || /\s$/.test(s.text) || syllableIndex === line.syllabus.length - 1) {
+            flushWordBuffer();
+          }
+        });
+        // No need for a final flushWordBuffer here, as the loop condition handles the last syllable.
+      } else {
+        // If no syllabus, just display the full line text
+        const mainContainerText = document.createElement('div');
+        mainContainerText.classList.add('main-vocal-container');
+        mainContainerText.textContent = line.text;
+        currentLine.appendChild(mainContainerText);
       }
-    }
+      fragment.appendChild(currentLine);
+    });
   } else {
-    // "Line" mode: each lyrics.data entry is a full line.
+    // "Line" mode: each lyrics.data entry is a full line (either originally Line type or converted from Word type).
     // Performance optimization: Batch creation of lines
     const lineFragment = document.createDocumentFragment();
-    
+
     lyrics.data.forEach(line => {
       const lineDiv = document.createElement('div');
       lineDiv.dataset.startTime = line.startTime;
       lineDiv.dataset.endTime = line.endTime;
       lineDiv.classList.add('lyrics-line');
       lineDiv.classList.add(line.element.singer === "v2" ? 'singer-right' : 'singer-left');
-      
+
       const mainContainer = document.createElement('div');
       mainContainer.classList.add('main-vocal-container');
       mainContainer.textContent = line.text;
       lineDiv.appendChild(mainContainer);
-      
+
+      if (line.translatedText) {
+        const translationContainer = document.createElement('div');
+        translationContainer.classList.add('lyrics-translation-container');
+        translationContainer.textContent = line.translatedText;
+        lineDiv.appendChild(translationContainer);
+      }
+
       if (isRTL(line.text)) lineDiv.classList.add('rtl-text');
-      
+
       // Performance optimization: Single event listener attachment
       lineDiv.addEventListener('click', onLyricClick);
-      
+
       lineFragment.appendChild(lineDiv);
     });
-    
+
     fragment.appendChild(lineFragment);
   }
 
@@ -434,7 +404,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   // Performance optimization: Batch gap line creation
   const gapLinesFragment = document.createDocumentFragment();
   const gapLinesToInsert = [];
-  
+
   originalLines.forEach((line, index) => {
     if (index < originalLines.length - 1) {
       const nextLine = originalLines[index + 1];
@@ -452,7 +422,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       }
     }
   });
-  
+
   // Insert all gap lines at once
   gapLinesToInsert.forEach(({ gapLine, nextLine }) => {
     container.insertBefore(gapLine, nextLine);
@@ -499,7 +469,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
 
   // Performance optimization: Append metadata in batch
   const metadataFragment = document.createDocumentFragment();
-  
+
   if (songWriters) {
     const songWritersDiv = document.createElement('span');
     songWritersDiv.classList.add('lyrics-song-writters');
@@ -511,7 +481,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   sourceDiv.classList.add('lyrics-source-provider');
   sourceDiv.innerText = `${t("source")} ${source}`;
   metadataFragment.appendChild(sourceDiv);
-  
+
   container.appendChild(metadataFragment);
 
   // Cache lyrics lines and syllables for performance in the sync loop
@@ -532,6 +502,9 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   }
 
   startLyricsSync();
+
+  // Create and manage control buttons (translation, reload)
+  createControlButtons(lyricsContainer); // Pass sourceDiv to position buttons correctly
 }
 
 function displaySongNotFound() {
@@ -571,7 +544,7 @@ function createLyricsContainer() {
 function injectCssFile() {
   // Performance optimization: Check if style is already injected
   if (document.querySelector('link[data-lyrics-plus-style]')) return;
-  
+
   const pBrowser = chrome || browser;
 
   // Create a new <link> element for the main stylesheet
@@ -588,12 +561,12 @@ function injectCssFile() {
  * Performance optimization: Cache text width measurements
  */
 function getTextWidth(text, font) {
-// re-use canvas object for better performance
-const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
-const context = canvas.getContext("2d");
-context.font = font;
-const metrics = context.measureText(text);
-return metrics.width;
+  // re-use canvas object for better performance
+  const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+  const context = canvas.getContext("2d");
+  context.font = font;
+  const metrics = context.measureText(text);
+  return metrics.width;
 }
 
 function getCssStyle(element, prop) {
@@ -601,11 +574,11 @@ function getCssStyle(element, prop) {
 }
 
 function getCanvasFont(el = document.body) {
-const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
-const fontSize = getCssStyle(el, 'font-size') || '16px';
-const fontFamily = getCssStyle(el, 'font-family') || 'Times New Roman';
+  const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
+  const fontSize = getCssStyle(el, 'font-size') || '16px';
+  const fontFamily = getCssStyle(el, 'font-family') || 'Times New Roman';
 
-return `${fontWeight} ${fontSize} ${fontFamily}`;
+  return `${fontWeight} ${fontSize} ${fontFamily}`;
 }
 
 // Add unique IDs to elements if they don't have them
@@ -711,7 +684,7 @@ function cleanupLyrics() {
     cancelAnimationFrame(lyricsAnimationFrameId);
     lyricsAnimationFrameId = null;
   }
-  
+
   // Performance optimization: Clean entire container at once
   const container = getContainer();
   if (container) {
@@ -723,7 +696,7 @@ function cleanupLyrics() {
   highlightedSyllableIds.clear();
   visibleLineIds.clear();
   currentPrimaryActiveLine = null;
-  
+
   // Clear observers
   if (visibilityObserver) {
     visibilityObserver.disconnect();
@@ -938,7 +911,7 @@ function scrollActiveLine(currentTime, forceScroll = false) {
   // Find the most relevant active line based on timing
   let lineToScroll = activeLines[0];
   let activestLine = activeLines[activeLines.length - 1];
-  
+
   if (activeLines.length > 1) {
     // Find line that hasn't ended yet or is ending soon
     for (const line of activeLines) {
@@ -949,34 +922,34 @@ function scrollActiveLine(currentTime, forceScroll = false) {
       }
     }
   }
-  
+
   // Get all lyrics lines and find index of scroll line
   const allLyricLines = container.querySelectorAll('.lyrics-line');
   const scrollLineIndex = Array.from(allLyricLines).indexOf(lineToScroll);
-  
+
   // Clear previous position classes
   const positionClasses = ['lyrics-activest', 'pre-active-line', 'next-active-line'];
   for (let i = 1; i <= 4; i++) {
     positionClasses.push(`prev-${i}`, `next-${i}`);
   }
-  
+
   document.querySelectorAll('.' + positionClasses.join(', .'))
     .forEach(el => el.classList.remove(...positionClasses));
-  
+
   // Mark activest line
   activestLine.classList.add('lyrics-activest');
-  
+
   // Add position classes only to relevant lines
   for (let i = Math.max(0, scrollLineIndex - 4); i <= Math.min(allLyricLines.length - 1, scrollLineIndex + 4); i++) {
     const position = i - scrollLineIndex;
     const line = allLyricLines[i];
-    
+
     if (position === -1) line.classList.add('pre-active-line');
     else if (position === 1) line.classList.add('next-active-line');
     else if (position <= -1 && position >= -4) line.classList.add(`prev-${Math.abs(position)}`);
     else if (position >= 1 && position <= 4) line.classList.add(`next-${position}`);
   }
-  
+
   scrollToActiveLine(lineToScroll, forceScroll);
 }
 
@@ -1018,4 +991,173 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
     behavior: 'smooth',
     block: 'start'
   });
+}
+
+// Function to create and manage the control buttons
+function createControlButtons(sourceDivElement) {
+  // Create a wrapper div for the buttons to control their layout
+  let buttonsWrapper = document.getElementById('lyrics-plus-buttons-wrapper');
+  if (!buttonsWrapper) {
+    buttonsWrapper = document.createElement('div');
+    buttonsWrapper.id = 'lyrics-plus-buttons-wrapper';
+    // Insert after sourceDivElement
+    if (sourceDivElement && sourceDivElement.parentNode) {
+      sourceDivElement.parentNode.insertBefore(buttonsWrapper, sourceDivElement.nextSibling);
+    } else {
+      // Fallback if sourceDivElement is not found (shouldn't happen if lyrics are displayed)
+      getContainer().appendChild(buttonsWrapper);
+    }
+  }
+
+  async function handleTranslationAction(action) {
+    dropdownMenu.classList.add('hidden'); // Hide dropdown after selection
+
+    let errorMessage = '';
+    if (!lastKnownSongInfo) {
+      errorMessage = 'Song information is not available.';
+    } else if (!window.LyricsPlusAPI || !window.LyricsPlusAPI.sendMessageToBackground) {
+      errorMessage = 'LyricsPlus API is not available.';
+    }
+
+    if (errorMessage) {
+      console.warn(`Cannot perform translation/romanization: ${errorMessage}`);
+      displaySongError(); // Display a user-facing error
+      return;
+    }
+
+    const htmlLang = document.documentElement.lang || 'en'; // Get current HTML lang
+    const targetLang = htmlLang.split('-')[0]; // Use primary language code (e.g., 'id' from 'id-ID')
+
+    try {
+      const response = await window.LyricsPlusAPI.sendMessageToBackground({
+        type: 'TRANSLATE_LYRICS',
+        action: action, // 'translate' or 'romanize'
+        songInfo: lastKnownSongInfo,
+        targetLang: targetLang
+      });
+
+      if (response.success && response.translatedLyrics) {
+        updateLyricsWithTranslation(response.translatedLyrics, action);
+      } else {
+        console.error('Translation/Romanization failed:', response.error);
+        displaySongError(); // Or a specific translation error message
+      }
+    } catch (error) {
+      console.error('Error sending translation message:', error);
+      displaySongError();
+    }
+  }
+
+  // Function to update existing lyrics with translation/romanization
+  function updateLyricsWithTranslation(translatedLyrics, actionType) {
+    const container = getContainer();
+    if (!container) return;
+
+    // Add/remove class based on whether it's a translation or romanization
+    if (actionType === 'translate') {
+      container.classList.add('lyrics-translated');
+      container.classList.remove('lyrics-romanized');
+    } else if (actionType === 'romanize') {
+      container.classList.add('lyrics-romanized');
+      container.classList.remove('lyrics-translated');
+    } else {
+      container.classList.remove('lyrics-translated', 'lyrics-romanized');
+    }
+
+    // Create a map for quick lookup of translated lines by startTime
+    const translatedMap = new Map();
+    translatedLyrics.data.forEach(line => {
+      translatedMap.set(line.startTime, line.translatedText);
+    });
+
+    cachedLyricsLines.forEach(originalLineElement => {
+      const startTime = parseFloat(originalLineElement.dataset.startTime);
+      const translatedText = translatedMap.get(startTime);
+
+      let translationContainer = originalLineElement.querySelector('.lyrics-translation-container');
+
+      if (translatedText) {
+        if (!translationContainer) {
+          translationContainer = document.createElement('div');
+          translationContainer.classList.add('lyrics-translation-container');
+          originalLineElement.appendChild(translationContainer);
+        }
+        translationContainer.textContent = translatedText;
+      } else {
+        // If no translation for this line, remove the translation container if it exists
+        if (translationContainer) {
+          translationContainer.remove();
+        }
+      }
+    });
+  }
+
+  // Check if LyricsPlusAPI is available before creating buttons
+  if (window.LyricsPlusAPI && window.LyricsPlusAPI.sendMessageToBackground) {
+    // Create translation button if it doesn't exist
+    if (!translationButton) {
+      translationButton = document.createElement('button');
+      translationButton.id = 'lyrics-plus-translate-button';
+      translationButton.innerHTML = '&#x22EF;'; // Unicode for "midline horizontal ellipsis" (3 dots)
+      translationButton.title = 'Translate/Romanize Lyrics';
+      buttonsWrapper.appendChild(translationButton);
+
+      translationButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent click from propagating to document
+        createDropdownMenu(buttonsWrapper); // Pass buttonsWrapper
+        dropdownMenu.classList.toggle('hidden');
+      });
+
+      // Close dropdown if clicked outside
+      document.addEventListener('click', (event) => {
+        if (dropdownMenu && !dropdownMenu.contains(event.target) && event.target !== translationButton) {
+          dropdownMenu.classList.add('hidden');
+        }
+      });
+
+      function createDropdownMenu(parentWrapper) { // Accept parentWrapper
+        if (dropdownMenu) return; // Dropdown already exists
+
+        dropdownMenu = document.createElement('div');
+        dropdownMenu.id = 'lyrics-plus-translation-dropdown';
+        dropdownMenu.classList.add('hidden'); // Hidden by default
+
+        const translateOption = document.createElement('div');
+        translateOption.classList.add('dropdown-option');
+        translateOption.textContent = 'Translate';
+        translateOption.addEventListener('click', () => handleTranslationAction('translate'));
+
+        const romanizeOption = document.createElement('div');
+        romanizeOption.classList.add('dropdown-option');
+        romanizeOption.textContent = 'Romanize';
+        romanizeOption.addEventListener('click', () => handleTranslationAction('romanize'));
+
+        dropdownMenu.appendChild(translateOption);
+        dropdownMenu.appendChild(romanizeOption);
+
+        // Append to the provided parentWrapper instead of lyricsContainer
+        if (parentWrapper) {
+          parentWrapper.appendChild(dropdownMenu);
+        }
+      }
+      createDropdownMenu(buttonsWrapper); // Pass buttonsWrapper here too
+    }
+
+    // Create reload button if it doesn't exist
+    if (!reloadButton) {
+      reloadButton = document.createElement('button');
+      reloadButton.id = 'lyrics-plus-reload-button';
+      reloadButton.innerHTML = '&#x21BB;'; // Unicode for "clockwise open circle arrow" (reload icon)
+      reloadButton.title = 'Reload Lyrics';
+      buttonsWrapper.appendChild(reloadButton);
+
+      reloadButton.addEventListener('click', () => {
+        if (lastKnownSongInfo && window.LyricsPlusAPI && window.LyricsPlusAPI.fetchAndDisplayLyrics) {
+          window.LyricsPlusAPI.fetchAndDisplayLyrics(lastKnownSongInfo);
+        } else {
+          console.warn('Cannot reload lyrics: song info or API not available.');
+        }
+      });
+    }
+  }
 }
