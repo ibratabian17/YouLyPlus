@@ -479,9 +479,7 @@ function parseLRCLibFormat(data) {
             const centiseconds = parseInt(match[3], 10);
             const startTime = minutes * 60 + seconds + centiseconds / 100;
             const text = match[4].trim();
-            if (text) {
-                matches.push({ startTime, text });
-            }
+            matches.push({ startTime, text });
         }
     }
 
@@ -491,7 +489,7 @@ function parseLRCLibFormat(data) {
         const endTime = (i < matches.length - 1)
             ? matches[i + 1].startTime
             : startTime + 4; // Default duration.
-        parsedLines.push({
+        if(text.trim() !== "")parsedLines.push({
             text,
             startTime,
             endTime,

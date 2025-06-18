@@ -98,7 +98,7 @@ function LYPLUS_checkForSongChange() {
     }
 
     // Notify extension only if the song title or artist has changed
-    if (newSongInfo.title !== LYPLUS_currentSong.title || newSongInfo.artist !== LYPLUS_currentSong.artist || newSongInfo.duration !== LYPLUS_currentSong.duration || newSongInfo.videoId !== LYPLUS_currentSong.videoId) {
+    if (newSongInfo.title !== LYPLUS_currentSong.title || newSongInfo.artist !== LYPLUS_currentSong.artist || Math.round(newSongInfo.duration) !== Math.round(LYPLUS_currentSong.duration) || newSongInfo.videoId !== LYPLUS_currentSong.videoId) {
         LYPLUS_currentSong = newSongInfo;
         
         // Update blur background when song changes
