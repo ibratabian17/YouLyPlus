@@ -378,6 +378,12 @@ async function handleTranslateLyrics(songInfo, action, targetLang) {
         translatedTexts = originalLyrics.data.map(line => line.text); // Return original text if no action
     }
 
+    // Verify translatedTexts array length matches originalLyrics.data length
+    if (translatedTexts.length !== originalLyrics.data.length) {
+        console.error(`Translation failed: Mismatched array lengths. Original: ${originalLyrics.data.length}, Translated: ${translatedTexts.length}`);
+        throw new Error('Translation failed: The number of translated lines does not match the original.');
+    }
+
     const translatedData = originalLyrics.data.map((line, index) => ({
         ...line,
         translatedText: translatedTexts[index] || line.text // Use original text if translation fails for a line
@@ -477,10 +483,10 @@ async function getOrFetchLyrics(songInfo) {
     try {
         return await fetchPromise;
     } catch (error) {
-        console.error("Error fetching lyrics:", error);
-        return null;
+            console.error("Error fetching lyrics:", error);
+            return null;
+        }
     }
-}
 
 async function fetchGoogleTranslate(text, targetLang) {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
