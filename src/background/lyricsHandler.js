@@ -213,7 +213,8 @@ pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
             try {
                 const translatedLyrics = await handleTranslateLyrics(message.songInfo, message.action, message.targetLang);
                 sendResponse({ success: true, translatedLyrics });
-            } catch (error) {
+            }
+            catch (error) {
                 console.error("Error handling translation:", error);
                 sendResponse({ success: false, error: error.message });
             }
@@ -310,27 +311,49 @@ async function handleLyricsFetch(songInfo, sendResponse) {
 }
 
 async function handleTranslateLyrics(songInfo, action, targetLang) {
-    const cacheKey = `${songInfo.title} - ${songInfo.artist} - ${songInfo.album}`;
-    let originalLyrics = lyricsCache.get(cacheKey);
+    const originalLyricsCacheKey = `${songInfo.title} - ${songInfo.artist} - ${songInfo.album}`;
+    const translatedLyricsCacheKey = `${originalLyricsCacheKey} - ${action} - ${targetLang}`;
 
-    if (!originalLyrics) {
-        originalLyrics = await getLyricsFromDB(cacheKey);
+    // Check in-memory cache for translated lyrics first
+    if (lyricsCache.has(translatedLyricsCacheKey)) {
+        return lyricsCache.get(translatedLyricsCacheKey);
     }
 
-    if (!originalLyrics) {
-        // If not in cache or DB, try to fetch them (without sending response)
-        const tempSendResponse = () => { }; // Dummy sendResponse
-        await handleLyricsFetch(songInfo, tempSendResponse);
-        originalLyrics = lyricsCache.get(cacheKey); // Try getting from cache again
+    // Check persistent IndexedDB cache for translated lyrics
+    try {
+        const dbCachedTranslatedLyrics = await getLyricsFromDB(translatedLyricsCacheKey);
+        if (dbCachedTranslatedLyrics) {
+            lyricsCache.set(translatedLyricsCacheKey, dbCachedTranslatedLyrics);
+            return dbCachedTranslatedLyrics;
+        }
+    } catch (error) {
+        console.error("Error reading translated lyrics from DB:", error);
     }
+
+    const originalLyrics = await getOrFetchLyrics(songInfo);
 
     if (!originalLyrics || !originalLyrics.data || originalLyrics.data.length === 0) {
         throw new Error('Original lyrics not found or empty for translation.');
     }
 
-    const settings = await storageLocalGet({ 'translationProvider': 'google', 'geminiApiKey': '' });
+    const settings = await storageLocalGet({
+        'translationProvider': 'google',
+        'geminiApiKey': '',
+        'geminiModel': 'gemini-pro', // Include geminiModel in settings retrieval
+        'overrideTranslateTarget': false,
+        'customTranslateTarget': '',
+        'overrideGeminiPrompt': false,
+        'customGeminiPrompt': ''
+    });
     const translationProvider = settings.translationProvider;
     const geminiApiKey = settings.geminiApiKey;
+    const geminiModel = settings.geminiModel; // Get the selected Gemini model
+    const overrideTranslateTarget = settings.overrideTranslateTarget;
+    const customTranslateTarget = settings.customTranslateTarget;
+    const overrideGeminiPrompt = settings.overrideGeminiPrompt;
+    const customGeminiPrompt = settings.customGeminiPrompt;
+
+    let actualTargetLang = overrideTranslateTarget && customTranslateTarget ? customTranslateTarget : targetLang;
 
     let translatedTexts = [];
 
@@ -340,9 +363,9 @@ async function handleTranslateLyrics(songInfo, action, targetLang) {
                 throw new Error('Gemini AI API Key is not provided in settings.');
             }
             const textsToTranslate = originalLyrics.data.map(line => line.text);
-            translatedTexts = await fetchGeminiTranslate(textsToTranslate, targetLang, geminiApiKey);
+            translatedTexts = await fetchGeminiTranslate(textsToTranslate, actualTargetLang, geminiApiKey, geminiModel, overrideGeminiPrompt, customGeminiPrompt);
         } else {
-            const translationPromises = originalLyrics.data.map(line => fetchGoogleTranslate(line.text, targetLang));
+            const translationPromises = originalLyrics.data.map(line => fetchGoogleTranslate(line.text, actualTargetLang));
             translatedTexts = await Promise.all(translationPromises);
         }
     } else if (action === 'romanize') {
@@ -359,16 +382,104 @@ async function handleTranslateLyrics(songInfo, action, targetLang) {
         ...line,
         translatedText: translatedTexts[index] || line.text // Use original text if translation fails for a line
     }));
-    console.log('song translated')
-
-    return {
+    const finalTranslatedLyrics = {
         ...originalLyrics,
         data: translatedData,
         metadata: {
             ...originalLyrics.metadata,
-            source: `${originalLyrics.metadata.source} (${action === 'translate' ? 'Translated' : 'Romanized'} by ${translationProvider === 'gemini' && action === 'translate' ? 'Gemini AI' : 'Google Translate'} to ${targetLang})`
+            source: `${originalLyrics.metadata.source}`
         }
     };
+
+    lyricsCache.set(translatedLyricsCacheKey, finalTranslatedLyrics);
+    await saveLyricsToDB(translatedLyricsCacheKey, finalTranslatedLyrics); // Save translated lyrics to DB
+    console.log('song translated and cached');
+
+    return finalTranslatedLyrics;
+}
+
+// Helper function to get lyrics from cache/DB or fetch them
+async function getOrFetchLyrics(songInfo) {
+    const cacheKey = `${songInfo.title} - ${songInfo.artist} - ${songInfo.album}`;
+
+    // Check in-memory cache
+    if (lyricsCache.has(cacheKey)) {
+        return lyricsCache.get(cacheKey);
+    }
+
+    // Check persistent IndexedDB cache
+    try {
+        const dbCachedLyrics = await getLyricsFromDB(cacheKey);
+        if (dbCachedLyrics) {
+            lyricsCache.set(cacheKey, dbCachedLyrics);
+            return dbCachedLyrics;
+        }
+    } catch (error) {
+        console.error("Error reading from DB:", error);
+    }
+
+    // If an ongoing fetch is present, wait for it.
+    if (ongoingFetches.has(cacheKey)) {
+        try {
+            return await ongoingFetches.get(cacheKey);
+        } catch (error) {
+            console.error("Error waiting for ongoing fetch:", error);
+            return null;
+        }
+    }
+
+    // Start a new fetch and store its promise.
+    const fetchPromise = (async () => {
+        try {
+            // Determine provider and source order based on settings.
+            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,musixmatch,spotify,musixmatch-word' });
+            const lyricsProvider = settings.lyricsProvider;
+            const lyricsSourceOrder = settings.lyricsSourceOrder;
+
+            let lyrics = null;
+
+            // Try the primary provider first.
+            if (lyricsProvider === 'kpoe') {
+                lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder);
+            } else if (lyricsProvider === 'lrclib') {
+                lyrics = await fetchLRCLibLyrics(songInfo);
+            }
+
+            // If no result from primary, try the other provider as fallback.
+            if (isEmptyLyrics(lyrics)) {
+                if (lyricsProvider === 'kpoe') {
+                    lyrics = await fetchLRCLibLyrics(songInfo);
+                } else if (lyricsProvider === 'lrclib') {
+                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder);
+                }
+            }
+
+            // If both providers failed, try YouTube subtitles if available
+            if (isEmptyLyrics(lyrics) && songInfo.videoId && songInfo.subtitle) {
+                lyrics = await fetchYouTubeSubtitles(songInfo);
+            }
+
+            if (isEmptyLyrics(lyrics)) {
+                throw new Error('No lyrics found');
+            }
+
+            lyricsCache.set(cacheKey, lyrics);
+            await saveLyricsToDB(cacheKey, lyrics);
+            return lyrics;
+        } finally {
+            // Clean up ongoing fetch record.
+            ongoingFetches.delete(cacheKey);
+        }
+    })();
+
+    ongoingFetches.set(cacheKey, fetchPromise);
+
+    try {
+        return await fetchPromise;
+    } catch (error) {
+        console.error("Error fetching lyrics:", error);
+        return null;
+    }
 }
 
 async function fetchGoogleTranslate(text, targetLang) {
@@ -400,26 +511,28 @@ async function fetchGoogleRomanize(text) {
 }
 
 
-async function fetchGeminiTranslate(texts, targetLang, apiKey) {
-    const model = 'gemini-2.0-flash'; // Or 'gemini-1.5-pro' for more advanced capabilities
+async function fetchGeminiTranslate(texts, targetLang, apiKey, model, overridePrompt, customPrompt) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-    const prompt = `
-You are a professional translator and lyricist. Translate the following array of song lyric lines into natural-sounding and poetic ${targetLang}.
-Maintain the original meaning, emotion, and tone of each line, as if the lyrics were written natively in ${targetLang}.
-Do NOT include any explanation or formatting. Only return a JSON array of translated lines, in the same order.
-
-Example input: ["I miss you", "Like the deserts miss the rain"]
-Example output: ["Aku merindukanmu", "Seperti gurun merindukan hujan"]
-
-Here are the lyrics: ${JSON.stringify(texts)}
-`;
-
+    let prompt = '';
+    if (overridePrompt && customPrompt) {
+        prompt = customPrompt.replace(/\{targetLang\}/g, targetLang);
+    } else {
+        prompt = `
+You are a professional translator for song lyrics.
+Translate the following lines into ${targetLang}.
+Your most important task is to preserve the original meaning, emotion, and tone of each line.
+After ensuring the meaning is preserved, try to make the translation sound natural in ${targetLang}.
+If the current whole line has exact language from ${targetLang}, do not change/rephrase it.
+but if it has multiple language at the same line, translate it`;
+    }
 
     const requestBody = {
         contents: [{
             parts: [{
-                text: prompt
+                text: prompt + `\n\nDo NOT include any explanation or formatting.
+                Only return a with this format {"translated": ["you need to fill this"],"info":{"sourceLanguage":["this is used for songs lyrics that could be multiple"],"targetLanguage":"${targetLang}"}, in the same order.
+                Here are the lyrics: ${JSON.stringify(texts)}`
             }]
         }]
     };
@@ -447,8 +560,8 @@ Here are the lyrics: ${JSON.stringify(texts)}
         try {
             // Attempt to parse the raw text as a JSON array
             const parsedArray = JSON.parse(rawText);
-            if (Array.isArray(parsedArray)) {
-                return parsedArray;
+            if (Array.isArray(parsedArray.translated)) {
+                return parsedArray.translated;
             }
         } catch (e) {
             console.warn("Gemini AI response was not a valid JSON array, attempting to recover:", rawText);

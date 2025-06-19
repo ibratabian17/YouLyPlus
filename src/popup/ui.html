@@ -1,117 +1,137 @@
-<!-- Updated HTML -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouLy+ Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="ui.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="../lib/polyfill.js"></script>
+    <!-- Assuming polyfill.js provides browser/chrome namespace and storage helpers -->
+    <script src="../lib/polyfill.js" defer></script>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>
-                <i class="fas fa-music"></i>
-                YouLy+ Settings
-            </h1>
+        <header class="app-header">
+            <span class="material-symbols-outlined header-icon">music_note</span>
+            <h1>YouLy+ Settings</h1>
         </header>
 
-        <div class="tabs">
-            <button class="tab active" data-tab="general">General</button>
-            <button class="tab" data-tab="appearance">Appearance</button>
-            <button class="tab" data-tab="advanced">Advanced</button>
-        </div>
+        <nav class="tabs">
+            <button class="tab active" data-tab="general-tab">
+                <span class="material-symbols-outlined tab-icon">tune</span>General
+            </button>
+            <button class="tab" data-tab="appearance-tab">
+                <span class="material-symbols-outlined tab-icon">visibility</span>Appearance
+            </button>
+            <button class="tab" data-tab="advanced-tab">
+                <span class="material-symbols-outlined tab-icon">settings</span>Advanced
+            </button>
+        </nav>
 
-        <div class="tab-content active" id="general">
-            <div class="section">
-                <h2><i class="fas fa-toggle-on"></i> Core Features</h2>
-                <label class="switch">
-                    <input type="checkbox" id="lyEnabled">
-                    <span class="slider"></span>
-                    Enable YouLy+
-                </label>
+        <main>
+            <!-- General Tab Content -->
+            <div class="tab-content active" id="general-tab">
+                <section class="settings-section">
+                    <h2 class="section-title">
+                        <span class="material-symbols-outlined section-icon">toggle_on</span>Core Features
+                    </h2>
+                    <div class="setting-item">
+                        <label for="lyEnabled" class="setting-label">Enable YouLy+</label>
+                        <div class="m3-switch" role="switch" aria-labelledby="lyEnabled">
+                            <input type="checkbox" id="lyEnabled" class="m3-switch-input">
+                            <span class="m3-switch-track"></span>
+                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="settings-section">
+                    <h2 class="section-title">
+                        <span class="material-symbols-outlined section-icon">cloud_download</span>Data Sources
+                    </h2>
+                    <div class="setting-item">
+                        <label for="lyricsProvider" class="setting-label">Primary Lyrics Provider</label>
+                        <div class="m3-select-wrapper">
+                            <select id="lyricsProvider" class="m3-select">
+                                <option value="kpoe">Lyrics+ (KPoe)</option>
+                                <option value="lrclib">LRCLIB</option>
+                            </select>
+                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="sponsorblock" class="setting-label">Integrate SponsorBlock</label>
+                        <div class="m3-switch" role="switch" aria-labelledby="sponsorblock">
+                            <input type="checkbox" id="sponsorblock" class="m3-switch-input">
+                            <span class="m3-switch-track"></span>
+                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
+                        </div>
+                    </div>
+                </section>
             </div>
 
-            <div class="section">
-                <h2><i class="fas fa-cloud-download-alt"></i> Data Sources</h2>
-                <div class="setting-group">
-                    <label>Primary Lyrics Provider</label>
-                    <select id="lyricsProvider" class="dropdown">
-                        <option value="kpoe">Lyrics+ (KPoe)</option>
-                        <option value="lrclib">LRCLIB</option>
-                    </select>
-                </div>
-                
-                <label class="switch">
-                    <input type="checkbox" id="sponsorblock">
-                    <span class="slider"></span>
-                    Integrate SponsorBlock
-                </label>
-
+            <!-- Appearance Tab Content -->
+            <div class="tab-content" id="appearance-tab">
+                <section class="settings-section">
+                    <h2 class="section-title">
+                        <span class="material-symbols-outlined section-icon">palette</span>Display Settings
+                    </h2>
+                    <div class="setting-item">
+                        <label for="lightweight" class="setting-label">Lightweight Mode</label>
+                        <div class="m3-switch" role="switch" aria-labelledby="lightweight">
+                            <input type="checkbox" id="lightweight" class="m3-switch-input">
+                            <span class="m3-switch-track"></span>
+                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="wordByWord" class="setting-label">Word-by-Word Highlighting</label>
+                        <div class="m3-switch" role="switch" aria-labelledby="wordByWord">
+                            <input type="checkbox" id="wordByWord" class="m3-switch-input">
+                            <span class="m3-switch-track"></span>
+                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </div>
 
-        <div class="tab-content" id="appearance">
-            <div class="section">
-                <h2><i class="fas fa-palette"></i> Display Settings</h2>
-                
-                <label class="switch">
-                    <input type="checkbox" id="lightweight">
-                    <span class="slider"></span>
-                    Lightweight Mode
-                </label>
-
-                <label class="switch">
-                    <input type="checkbox" id="wordByWord">
-                    <span class="slider"></span>
-                    Word-by-Word Highlighting
-                </label>
-            </div>
-        </div>
-
-        <div class="tab-content" id="advanced">
-            <!-----<div class="section">
-                <h2><i class="fas fa-microchip"></i> Performance</h2>
-                
-                <div class="setting-group">
-                    <label>Cache Strategy</label>
-                    <select id="cacheStrategy" class="dropdown">
-                        <option value="aggressive">Aggressive</option>
-                        <option value="moderate">Moderate</option>
-                        <option value="none">None</option>
-                    </select>
-                </div>
-            </div>--->
-
-            <div class="section">
-                <h2><i class="fas fa-database"></i> Data Management</h2>
-                <div class="cache-info">
-                    <div class="cache-stats">
-                        <p>Storage Used: <span class="cache-size">0.00</span>MB</p>
-                        <p>Lyrics Cached: <span class="cache-count">0</span></p>
+            <!-- Advanced Tab Content -->
+            <div class="tab-content" id="advanced-tab">
+                <section class="settings-section">
+                    <h2 class="section-title">
+                        <span class="material-symbols-outlined section-icon">database</span>Data Management
+                    </h2>
+                    <div class="cache-info">
+                        <p>Storage Used: <span class="cache-size-value">0.00 MB</span></p>
+                        <p>Lyrics Cached: <span class="cache-count-value">0</span></p>
                     </div>
                     <div class="cache-controls">
-                        <button class="clear-cache btn-warning">
-                            <i class="fas fa-trash"></i> Clear Cache
+                        <button class="m3-button m3-button-filled m3-button-error" id="clearCache">
+                            <span class="material-symbols-outlined button-icon">delete</span>Clear Cache
                         </button>
-                        <button class="refresh-cache">
-                            <i class="fas fa-sync"></i>
+                        <button class="m3-button m3-button-tonal" id="refreshCache">
+                            <span class="material-symbols-outlined button-icon">sync</span>Refresh
                         </button>
                     </div>
-                </div>
+                </section>
             </div>
-        </div>
+        </main>
 
-        <div class="status" id="status"></div>
-        
-        <footer>
-            <a href="https://github.com/ibratabian17/YouLy" target="_blank" class="github-link">
-                <i class="fab fa-github"></i> View on GitHub
+        <footer class="app-footer">
+            <a href="https://github.com/ibratabian17/YouLy" target="_blank" class="m3-button m3-button-outlined">
+                <span class="material-symbols-outlined button-icon">open_in_new</span>View on GitHub
             </a>
-            <a href="../settings/index.html" target="_blank" class="github-link">
-                <i class="fab fa-settings"></i> Open more settings
+            <a href="../settings/index.html" target="_blank" class="m3-button m3-button-text">
+                <span class="material-symbols-outlined button-icon">settings_applications</span>More Settings
             </a>
         </footer>
     </div>
-    <script src="ui.js"></script>
+
+    <div class="m3-snackbar" id="statusSnackbar">
+        <span class="snackbar-text"></span>
+    </div>
+
+    <script src="ui.js" defer></script>
 </body>
 </html>

@@ -5,96 +5,219 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouLy+ Settings</title>
+    <link rel="stylesheet" type="text/css" href="../inject/stylesheet.css">
     <link rel="stylesheet" type="text/css" href="ui.css">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
-    <div class="sidebar">
-        <div class="sidebar-title">YouLy+ Settings</div>
-        <ul class="sidebar-menu">
-            <li class="active" data-section="general">General Settings</li>
-            <li data-section="appearance">Appearance</li>
-            <li data-section="cache">Cache Options</li>
-        </ul>
-    </div>
+    <aside class="navigation-drawer">
+        <header class="drawer-header">
+            <span class="material-symbols-outlined logo-icon">lyrics</span>
+            <h1>YouLy+ Settings</h1>
+        </header>
+        <nav class="drawer-nav">
+            <a href="#" class="nav-item active" data-section="general">
+                <span class="material-symbols-outlined">tune</span>
+                General
+            </a>
+            <a href="#" class="nav-item" data-section="appearance">
+                <span class="material-symbols-outlined">palette</span>
+                Appearance
+            </a>
+            <a href="#" class="nav-item" data-section="translation">
+                <span class="material-symbols-outlined">translate</span>
+                Translation
+            </a>
+            <a href="#" class="nav-item" data-section="cache">
+                <span class="material-symbols-outlined">cached</span>
+                Cache
+            </a>
+        </nav>
+    </aside>
 
-    <div class="content">
+    <main class="content-area">
         <!-- General Settings Section -->
-        <div class="section active" id="general">
-            <h2>General Settings</h2>
+        <section class="settings-card active" id="general">
+            <h2 class="card-title">General Settings</h2>
 
-            <label class="switch">
-                <input type="checkbox" id="enabled" checked>
-                <span class="slider"></span>
-                Enable YouLy+
-            </label>
-
-            <div class="form-group">
-                <label for="default-provider">Default Lyrics Provider</label>
-                <select id="default-provider">
-                    <option value="kpoe" selected>Lyrics+ (KPoe)</option>
-                    <option value="lrclib">LRCLIB</option>
-                </select>
+            <div class="setting-item">
+                <label class="switch">
+                    <input type="checkbox" id="enabled" checked>
+                    <span class="slider"></span>
+                    <span class="switch-label">Enable YouLy+</span>
+                </label>
+                <p class="setting-description">Globally enable or disable the extension.</p>
             </div>
 
-            <div class="form-group">
-                <label for="translation-provider">Translation Provider</label>
-                <select id="translation-provider">
-                    <option value="google" selected>Google Translate</option>
-                    <option value="gemini">Gemini AI</option>
-                </select>
+            <div class="setting-item">
+                <div class="form-group">
+                    <label for="default-provider">Default Lyrics Provider</label>
+                    <div class="select-wrapper">
+                        <select id="default-provider">
+                            <option value="kpoe" selected>Lyrics+ (KPoe)</option>
+                            <option value="lrclib">LRCLIB</option>
+                        </select>
+                        <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
+                    </div>
+                </div>
+                <p class="setting-description">Choose your preferred source for lyrics.</p>
             </div>
 
-            <div class="form-group" id="gemini-api-key-group" style="display: none;">
-                <label for="gemini-api-key">Gemini AI API Key</label>
-                <input type="text" id="gemini-api-key" placeholder="Enter your Gemini AI API Key">
-                <p><small>Your API key is stored locally and never sent to external servers other than Google's Gemini API.</small></p>
-            </div>
 
-            <div class="form-group" id="kpoe-sources-group">
-                <label>Lyrics+ (KPoe) Source Order</label>
+            <div class="setting-item" id="kpoe-sources-group">
+                <label class="form-group-label">Lyrics+ (KPoe) Source Order</label>
                 <div id="lyrics-source-order-draggable" class="draggable-list">
                     <!-- Draggable items will be populated by ui.js -->
                 </div>
-                <p><small>Drag and drop to reorder the sources for Lyrics+ (KPoe).</small></p>
-                <div class="add-source-group">
-                    <select id="available-sources-dropdown" class="dropdown">
-                        <!-- Options will be populated by ui.js -->
-                    </select>
-                    <button id="add-source-button" class="secondary">Add Source</button>
+                <p class="setting-description helper-text">Drag and drop to reorder the sources for Lyrics+ (KPoe).</p>
+                <div class="add-source-container">
+                    <div class="select-wrapper">
+                        <select id="available-sources-dropdown">
+                            <!-- Options will be populated by ui.js -->
+                        </select>
+                        <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
+                    </div>
+                    <button id="add-source-button" class="btn btn-tonal">
+                        <span class="material-symbols-outlined">add</span>
+                        Add Source
+                    </button>
                 </div>
                 <p id="add-source-status" class="status-message"></p>
             </div>
 
-            <label class="switch">
-                <input type="checkbox" id="sponsor-block">
-                <span class="slider"></span>
-                Use SponsorBlock API (skip non-music sections)
-            </label>
+            <div class="setting-item">
+                <label class="switch">
+                    <input type="checkbox" id="wordByWord">
+                    <span class="slider"></span>
+                    <span class="switch-label">Word-by-Word Highlighting</span>
+                </label>
+                <p class="setting-description">Enable karaoke-style word highlighting if available.</p>
+            </div>
 
-            <label class="switch">
-                <input type="checkbox" id="lightweight">
-                <span class="slider"></span>
-                Lightweight Mode (reduces animations and effects)
-            </label>
-            
-            <label class="switch">
-                <input type="checkbox" id="wordByWord">
-                <span class="slider"></span>
-                Word-by-Word Highlighting
-            </label>
+            <div class="setting-item">
+                <label class="switch">
+                    <input type="checkbox" id="sponsor-block">
+                    <span class="slider"></span>
+                    <span class="switch-label">Use SponsorBlock API</span>
+                </label>
+                <p class="setting-description">Skip non-music sections like intros, outros, or sponsor segments.</p>
+            </div>
 
-            <button id="save-general">Save Settings</button>
-        </div>
+            <div class="setting-item">
+                <label class="switch">
+                    <input type="checkbox" id="lightweight">
+                    <span class="slider"></span>
+                    <span class="switch-label">Lightweight Mode</span>
+                </label>
+                <p class="setting-description">Reduces animations and visual effects for better performance on older
+                    devices.</p>
+            </div>
+
+            <div class="card-actions">
+                <button id="save-general" class="btn btn-filled">Save General</button>
+            </div>
+        </section>
+
+        <!-- Translation Settings Section -->
+        <section class="settings-card" id="translation">
+            <h2 class="card-title">Translation Settings</h2>
+
+            <div class="setting-item">
+                <div class="form-group">
+                    <label for="translation-provider">Translation Provider</label>
+                    <div class="select-wrapper">
+                        <select id="translation-provider">
+                            <option value="google" selected>Google Translate</option>
+                            <option value="gemini">Gemini AI</option>
+                        </select>
+                        <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
+                    </div>
+                </div>
+                <p class="setting-description">Select the service for translating lyrics.</p>
+            </div>
+
+            <div class="setting-item form-group" id="gemini-api-key-group" style="display: none;">
+                <label for="gemini-api-key">Gemini AI API Key</label>
+                <div class="input-with-button">
+                    <input type="password" id="gemini-api-key" placeholder="Enter your Gemini AI API Key" autocomplete="off">
+                    <button type="button" id="toggle-gemini-api-key-visibility" class="btn btn-icon" title="Show/Hide API Key">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                </div>
+                <p class="helper-text">Your API key is stored locally and never sent to external servers other than
+                    Google's Gemini API.</p>
+            </div>
+
+            <div class="setting-item form-group" id="gemini-model-group" style="display: none;">
+                <label for="gemini-model">Gemini AI Model</label>
+                <div class="select-wrapper">
+                    <select id="gemini-model">
+                        <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                        <option value="gemini-2.5-flash-lite-preview-06-17">Gemini 2.5 Flash-Lite (Preview)</option>
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                        <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
+                    </select>
+                    <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
+                </div>
+                <p class="setting-description">Choose the Gemini AI model for translations.</p>
+            </div>
+
+            <div class="setting-item">
+                <label class="switch">
+                    <input type="checkbox" id="override-translate-target">
+                    <span class="slider"></span>
+                    <span class="switch-label">Override Translation Target Language</span>
+                </label>
+                <p class="setting-description">Manually specify the target language for translation (e.g., 'en', 'ko', 'ja').</p>
+            </div>
+
+            <div class="setting-item form-group" id="custom-translate-target-group" style="display: none;">
+                <label for="custom-translate-target">Custom Target Language Code</label>
+                <input type="text" id="custom-translate-target" placeholder="e.g., en, ko, ja">
+                <p class="helper-text">Enter the 2-letter language code (e.g., 'en' for English, 'ko' for Korean).</p>
+            </div>
+
+            <div class="setting-item" id="override-gemini-prompt-group" style="display: none;">
+                <label class="switch">
+                    <input type="checkbox" id="override-gemini-prompt">
+                    <span class="slider"></span>
+                    <span class="switch-label">Override Gemini AI Prompt</span>
+                </label>
+                <p class="setting-description">Use a custom prompt for Gemini AI translations. Use <code>{targetLang}</code> and <code>{lyrics}</code> placeholders.</p>
+            </div>
+
+            <div class="setting-item form-group" id="custom-gemini-prompt-group" style="display: none;">
+                <label for="custom-gemini-prompt">Custom Gemini AI Prompt</label>
+                <textarea id="custom-gemini-prompt" placeholder="You are a professional translator for song lyrics.
+Translate the following lines into ${targetLang}.
+Your most important task is to preserve the original meaning, emotion, and tone of each line.
+After ensuring the meaning is preserved, try to make the translation sound natural in ${targetLang}.
+If the current whole line has exact language from ${targetLang}, do not rephrase it.
+but if it has multiple language at the same line, translate it"></textarea>
+                <p class="helper-text">Customize the prompt sent to Gemini AI. Use <code>{targetLang}</code> for the target language</p>
+            </div>
+
+            <div class="card-actions">
+                <button id="save-translation" class="btn btn-filled">Save Translation</button>
+            </div>
+        </section>
 
         <!-- Appearance Section -->
-        <div class="section" id="appearance">
-            <h2>Appearance</h2>
+        <section class="settings-card" id="appearance">
+            <h2 class="card-title">Appearance</h2>
 
-            <div class="form-group">
-                <label for="custom-css">Custom CSS</label>
-                <textarea id="custom-css" placeholder=".lyrics-container { 
+            <div class="setting-item">
+                <div class="form-group">
+                    <label for="custom-css">Custom CSS</label>
+                    <textarea id="custom-css" placeholder=".lyrics-container { 
     /* Your custom CSS here */
     background-color: rgba(0, 0, 0, 0.8);
     padding: 20px;
@@ -105,74 +228,111 @@
 }
 
 .lyrics-line.active {
-    color: #da7272;
+    color: #da7272; /* Example accent */
 }"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>CSS Preview</label>
-                <div class="preview-box" id="lyrics-plus-container-preview" class="lyrics-plus-integrated">
-                    <div class="lyrics-line singer-left" data-start-time="0" data-end-time="3">
-                        <div class="main-vocal-container">
-                            <span class="lyrics-word">
-                                <span class="lyrics-syllable" data-start-time="0" data-duration="500">This</span>
-                                <span class="lyrics-syllable" data-start-time="500" data-duration="500">is</span>
-                            </span>
-                            <span class="lyrics-word">
-                                <span class="lyrics-syllable" data-start-time="1000" data-duration="500">a</span>
-                                <span class="lyrics-syllable" data-start-time="1500" data-duration="500">preview</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="lyrics-line singer-left active" data-start-time="3" data-end-time="6">
-                        <div class="main-vocal-container">
-                            <span class="lyrics-word">
-                                <span class="lyrics-syllable highlight" data-start-time="3000" data-duration="500">of</span>
-                                <span class="lyrics-syllable highlight" data-start-time="3500" data-duration="500">how</span>
-                            </span>
-                            <span class="lyrics-word">
-                                <span class="lyrics-syllable highlight" data-start-time="4000" data-duration="500">lyrics</span>
-                                <span class="lyrics-syllable highlight" data-start-time="4500" data-duration="500">will</span>
-                                <span class="lyrics-syllable highlight" data-start-time="5000" data-duration="500">look!</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="lyrics-line lyrics-gap" data-start-time="6" data-end-time="9">
-                        <div class="main-vocal-container">
-                            <span class="lyrics-syllable" data-start-time="6000" data-duration="1000">•</span>
-                            <span class="lyrics-syllable" data-start-time="7000" data-duration="1000">•</span>
-                            <span class="lyrics-syllable" data-start-time="8000" data-duration="1000">•</span>
-                        </div>
-                    </div>
+                    <p class="helper-text">Apply your own styles to the lyrics display. Use with caution.</p>
                 </div>
             </div>
 
-            <button id="save-appearance">Save Appearance</button>
-            <button id="play-example" class="secondary">Play Example</button>
-        </div>
+            <div class="setting-item">
+                <label class="form-group-label">CSS Preview</label>
+                <div class="preview-box-container">
+                    <div id="lyrics-plus-container-preview" class="lyrics-plus-integrated">
+                        <!-- PRESERVED PREVIEW STRUCTURE -->
+                        <div class="lyrics-line singer-left" data-start-time="0" data-end-time="3">
+                            <div class="main-vocal-container">
+                                <span class="lyrics-word">
+                                    <span class="lyrics-syllable" data-start-time="0" data-duration="500">This</span>
+                                    <span class="lyrics-syllable" data-start-time="500" data-duration="500">is</span>
+                                </span>
+                                <span class="lyrics-word">
+                                    <span class="lyrics-syllable" data-start-time="1000" data-duration="500">a</span>
+                                    <span class="lyrics-syllable" data-start-time="1500"
+                                        data-duration="500">preview</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="lyrics-line singer-left active" data-start-time="3" data-end-time="6">
+                            <div class="main-vocal-container">
+                                <span class="lyrics-word">
+                                    <span class="lyrics-syllable highlight" data-start-time="3000"
+                                        data-duration="500">of</span>
+                                    <span class="lyrics-syllable highlight" data-start-time="3500"
+                                        data-duration="500">how</span>
+                                </span>
+                                <span class="lyrics-word">
+                                    <span class="lyrics-syllable highlight" data-start-time="4000"
+                                        data-duration="500">lyrics</span>
+                                    <span class="lyrics-syllable highlight" data-start-time="4500"
+                                        data-duration="500">will</span>
+                                    <span class="lyrics-syllable highlight" data-start-time="5000"
+                                        data-duration="500">look!</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="lyrics-line lyrics-gap" data-start-time="6" data-end-time="9">
+                            <div class="main-vocal-container">
+                                <span class="lyrics-syllable" data-start-time="6000" data-duration="1000">•</span>
+                                <span class="lyrics-syllable" data-start-time="7000" data-duration="1000">•</span>
+                                <span class="lyrics-syllable" data-start-time="8000" data-duration="1000">•</span>
+                            </div>
+                        </div>
+                        <!-- END PRESERVED PREVIEW STRUCTURE -->
+                    </div>
+                </div>
+                <button id="play-example" class="btn btn-outlined">
+                    <span class="material-symbols-outlined">play_arrow</span>
+                    Play Example
+                </button>
+            </div>
+
+
+            <div class="card-actions">
+                <button id="save-appearance" class="btn btn-filled">Save Appearance</button>
+            </div>
+        </section>
 
         <!-- Cache Options Section -->
-        <div class="section" id="cache">
-            <h2>Cache Options</h2>
+        <section class="settings-card" id="cache">
+            <h2 class="card-title">Cache Options</h2>
 
-            <div class="form-group">
-                <label for="cache-strategy">Cache Strategy</label>
-                <select id="cache-strategy">
-                    <option value="aggressive" selected>Aggressive (2 hours)</option>
-                    <option value="moderate">Moderate (1 hour)</option>
-                    <option value="none">None (no caching)</option>
-                </select>
+            <div class="setting-item">
+                <div class="form-group">
+                    <label for="cache-strategy">Cache Strategy</label>
+                    <div class="select-wrapper">
+                        <select id="cache-strategy">
+                            <option value="aggressive" selected>Aggressive (2 hours)</option>
+                            <option value="moderate">Moderate (1 hour)</option>
+                            <option value="none">None (no caching)</option>
+                        </select>
+                        <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
+                    </div>
+                </div>
+                <p class="setting-description">Determines how long lyrics are stored locally to reduce loading times.
+                </p>
             </div>
 
-            <div class="form-group">
-                <label>Current Cache Usage</label>
-                <p id="cache-size">0.00 MB used (0 songs cached)</p>
+            <div class="setting-item">
+                <label class="form-group-label">Current Cache Usage</label>
+                <p id="cache-size" class="cache-info">0.00 MB used (0 songs cached)</p>
             </div>
 
-            <button id="clear-cache" class="secondary">Clear Cache</button>
-            <button id="save-cache">Save Cache Settings</button>
-        </div>
-        <script src="ui.js"></script>
+            <div class="card-actions">
+                <button id="clear-cache" class="btn btn-outlined btn-error">
+                    <span class="material-symbols-outlined">delete_sweep</span>
+                    Clear Cache
+                </button>
+                <button id="save-cache" class="btn btn-filled">Save Cache Settings</button>
+            </div>
+        </section>
+
+        <footer class="content-footer">
+            <p>YouLy+ Settings</p>
+        </footer>
+    </main>
+    <script type="module" src="settingsManager.js"></script>
+    <script type="module" src="previewManager.js"></script>
+    <script type="module" src="ui.js"></script>
 </body>
 
 </html>

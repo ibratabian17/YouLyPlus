@@ -1,121 +1,207 @@
 // lyricsManager.js
 let currentFetchVideoId = null;
+let currentDisplayMode = 'none'; // Manages the active translation/romanization mode
 
-async function fetchAndDisplayLyrics(currentSong) {
+
+async function fetchAndDisplayLyrics(currentSong, isNewSong = false) {
   try {
-    // Set the latest videoId being processed
-    currentFetchVideoId = currentSong.videoId;
+    const localCurrentFetchVideoId = currentSong.videoId;
+    currentFetchVideoId = localCurrentFetchVideoId; // Set the latest videoId being processed globally for this manager
 
-    // Remove any existing lyrics from the UI
     cleanupLyrics();
 
-    // Request lyrics from the background service worker
-    const response = await pBrowser.runtime.sendMessage({
-      type: 'FETCH_LYRICS',
-      songInfo: {
-        title: currentSong.title,
-        artist: currentSong.artist,
-        album: currentSong.album,
-        isVideo: currentSong.isVideo,
-        videoId: currentSong.videoId,
-        subtitle: currentSong.subtitle,
-        duration: currentSong.duration,
-      }
-    });
+    let effectiveMode = currentDisplayMode; // Default to existing persisted mode
 
-    // If the videoId changed while fetching, abort displaying lyrics
-    if (currentFetchVideoId !== currentSong.videoId) {
+    if (isNewSong) {
+      if (currentSettings.translationEnabled) {
+        effectiveMode = 'translate';
+      } else if (currentSettings.romanizationEnabled) {
+        effectiveMode = 'romanize';
+      } else {
+        effectiveMode = 'none';
+      }
+      currentDisplayMode = effectiveMode; // Persist auto-applied mode for this song session
+    }
+
+    let lyricsObjectToDisplay;
+    let finalDisplayModeForRenderer = 'none';
+    const htmlLang = document.documentElement.getAttribute('lang');
+
+    if (effectiveMode !== 'none') {
+      const translationResponse = await pBrowser.runtime.sendMessage({
+        type: 'TRANSLATE_LYRICS',
+        action: effectiveMode,
+        songInfo: currentSong,
+        targetLang: htmlLang
+      });
+
+      if (currentFetchVideoId !== localCurrentFetchVideoId) {
+        console.warn("Song changed during TRANSLATE_LYRICS. Aborting display.", currentSong);
+        return;
+      }
+
+      if (translationResponse.success && translationResponse.translatedLyrics) {
+        lyricsObjectToDisplay = translationResponse.translatedLyrics;
+        finalDisplayModeForRenderer = effectiveMode;
+      } else {
+        console.warn(`${effectiveMode === 'translate' ? 'Translation' : 'Romanization'} failed: ${translationResponse.error}. Falling back to original lyrics.`);
+        // Fallback to fetching original lyrics
+        const originalLyricsResponse = await pBrowser.runtime.sendMessage({
+          type: 'FETCH_LYRICS',
+          songInfo: currentSong
+        });
+
+        if (currentFetchVideoId !== localCurrentFetchVideoId) {
+          console.warn("Song changed during FETCH_LYRICS (fallback). Aborting display.", currentSong);
+          return;
+        }
+
+        if (originalLyricsResponse.success) {
+          lyricsObjectToDisplay = originalLyricsResponse.lyrics;
+          // finalDisplayModeForRenderer remains 'none'
+        } else {
+          console.warn('Failed to fetch original lyrics after translation/romanization fallback:', originalLyricsResponse.error);
+          if (displaySongNotFound) displaySongNotFound();
+          currentDisplayMode = 'none'; // Reset mode
+          return;
+        }
+      }
+    } else {
+      // No translation/romanization mode active, fetch original lyrics
+      const originalLyricsResponse = await pBrowser.runtime.sendMessage({
+        type: 'FETCH_LYRICS',
+        songInfo: currentSong
+      });
+
+      if (currentFetchVideoId !== localCurrentFetchVideoId) {
+        console.warn("Song changed during FETCH_LYRICS. Aborting display.", currentSong);
+        return;
+      }
+
+      if (originalLyricsResponse.success) {
+        lyricsObjectToDisplay = originalLyricsResponse.lyrics;
+        // finalDisplayModeForRenderer remains 'none'
+      } else {
+        console.warn('Failed to fetch lyrics:', originalLyricsResponse.error);
+        if (displaySongNotFound) displaySongNotFound();
+        currentDisplayMode = 'none'; // Reset mode
+        return;
+      }
+    }
+
+    // If the videoId changed at any point during async operations, abort.
+    if (currentFetchVideoId !== localCurrentFetchVideoId) {
       console.warn("Song changed while fetching lyrics. Aborting display.", currentSong);
       return;
     }
 
-    if (!response.success) {
-      console.warn('Failed to fetch lyrics:', response.error);
-      displaySongNotFound();
-      return;
+    // Process lyrics (convert, adjust timing)
+    if (lyricsObjectToDisplay.type === "Word" && !currentSettings.wordByWord) {
+      lyricsObjectToDisplay = convertWordLyricsToLine(lyricsObjectToDisplay);
     }
 
-    let lyrics = response.lyrics;
-
-    // If the fetched lyrics are of type "Word" (meaning they have syllabus data)
-    // but the user prefers line-by-line display, convert them.
-    if (lyrics.type === "Word" && !currentSettings.wordByWord) {
-      lyrics = convertWordLyricsToLine(lyrics);
-    }
-
-    // If it's an MV, adjust timings using SponsorBlock
-    if (currentSong.isVideo && currentSong.videoId && currentSettings.useSponsorBlock && !lyrics.ignoreSponsorblock) {
+    if (currentSong.isVideo && currentSong.videoId && currentSettings.useSponsorBlock && !lyricsObjectToDisplay.ignoreSponsorblock) {
       const segments = await fetchSponsorSegments(currentSong.videoId);
-      // Adjust timing based on whether the lyrics are line-based or word-based (with syllabus)
-      lyrics.data = adjustLyricTiming(lyrics.data, segments, lyrics.type === "Line" ? "s" : "s"); // V2 times are always in seconds
+      if (currentFetchVideoId !== localCurrentFetchVideoId) { // Check again after await
+          console.warn("Song changed during SponsorBlock fetch. Aborting display.", currentSong);
+          return;
+      }
+      lyricsObjectToDisplay.data = adjustLyricTiming(lyricsObjectToDisplay.data, segments, lyricsObjectToDisplay.type === "Line" ? "s" : "s");
     }
 
     // Ensure the videoId is still the same before displaying lyrics
-    if (currentFetchVideoId !== currentSong.videoId) {
-      console.warn("Song changed while fetching lyrics. Aborting display.", currentSong);
+    if (currentFetchVideoId !== localCurrentFetchVideoId) {
+      console.warn("Song changed just before displaying lyrics. Aborting display.", currentSong);
       return;
     }
+    
 
-    displayLyrics(
-      lyrics,
-      lyrics.metadata.source,
-      lyrics.type === "Line" ? "Line" : "Word",
-      currentSettings.lightweight,
-      lyrics.metadata.songWriters,
-      currentSong // Pass the songInfo here
-    );
+    if (displayLyrics) {
+        displayLyrics(
+            lyricsObjectToDisplay,
+            lyricsObjectToDisplay.metadata.source,
+            lyricsObjectToDisplay.type === "Line" ? "Line" : "Word",
+            currentSettings.lightweight,
+            lyricsObjectToDisplay.metadata.songWriters,
+            currentSong,
+            finalDisplayModeForRenderer // Pass the actual display mode
+        );
+    } else {
+        console.error("displayLyrics is not available.");
+    }
+
   } catch (error) {
     console.warn('Error in fetchAndDisplayLyrics:', error);
+    currentDisplayMode = 'none'; // Reset manager's mode on error
     
-    // Ensure the videoId is still the same before displaying error message
-    if (currentFetchVideoId === currentSong.videoId) {
-      displaySongError();
+    if (currentFetchVideoId === (currentSong ? currentSong.videoId : null)) { // Check if error is for current song
+      if (displaySongError) displaySongError();
     }
   }
 }
 
 function convertWordLyricsToLine(lyrics) {
-  if (lyrics.type === "Line") return lyrics; // Already line-based
+  if (lyrics.type === "Line") return lyrics; 
 
   const words = lyrics.data;
   const lines = [];
   let currentLineWords = [];
   let lineStartTime = null;
   let lineEndTime = null;
-  let element = {}
+  let element = {};
+  // Capture translatedText if present from the first word of the line
+  let lineTranslatedText = null; 
 
   words.forEach((word, index) => {
       if (currentLineWords.length === 0) {
-          // Start a new line.
           lineStartTime = word.startTime;
+          if (word.translatedText) { 
+              lineTranslatedText = word.translatedText;
+          }
       }
       currentLineWords.push(word.text);
-      // Update end time for the current line.
       lineEndTime = word.endTime;
+      element = word.element || {};
+      element.isBackground = false;
 
-      //element
-      element = word.element || {}
-      element.isBackground = false
-
-      // If this word marks the end of a line or it's the last word, form a line.
       if (word.isLineEnding || index === words.length - 1) {
           const lineText = currentLineWords.join('');
-          lines.push({
+          const lineEntry = {
               text: lineText,
               startTime: lineStartTime / 1000,
               endTime: lineEndTime / 1000,
               element: element
-          });
-          // Reset for the next line.
+          };
+          if (lineTranslatedText) { // Add translatedText to the converted line
+              lineEntry.translatedText = lineTranslatedText;
+          }
+          lines.push(lineEntry);
           currentLineWords = [];
           lineStartTime = null;
           lineEndTime = null;
+          lineTranslatedText = null; // Reset for next line
       }
   });
 
   return {
       type: "Line",
       data: lines,
-      metadata: lyrics.metadata
+      metadata: lyrics.metadata,
+      // Carry over other potential top-level properties if necessary
+      ignoreSponsorblock: lyrics.ignoreSponsorblock 
   };
 }
+
+// New API function for renderer to call
+setCurrentDisplayModeAndRefetch = async (mode, songInfoForRefetch) => {
+    currentDisplayMode = mode; // Update manager's internal state
+
+    // Immediately update renderer's UI state if possible
+
+    if (songInfoForRefetch) {
+        // Call fetchAndDisplayLyrics, isNewSong will be false.
+        // fetchAndDisplayLyrics will use the new `currentDisplayMode`.
+        await fetchAndDisplayLyrics(songInfoForRefetch, false);
+    } else {
+    }
+};
