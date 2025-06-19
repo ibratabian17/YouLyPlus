@@ -13,6 +13,8 @@ let currentSettings = {
     cacheStrategy: 'aggressive',
     fontSize: 16,
     customCSS: '',
+    translationProvider: 'google', // New: 'google' or 'gemini'
+    geminiApiKey: '', // New: Gemini AI API Key
 };
 
 // Storage helper function (using pBrowser.storage.local directly)
@@ -35,7 +37,8 @@ function storageLocalSet(items) {
 // Load settings from storage
 function loadSettings(callback) {
     storageLocalGet(currentSettings).then((items) => { // Use currentSettings as default
-        currentSettings = items;
+        console.log("Items retrieved from storage:", items); // Debug log
+        currentSettings = { ...currentSettings, ...items }; // Merge loaded items with default settings
         console.log("Loaded settings:", currentSettings);
         updateUI();
         if (callback) callback();
@@ -82,13 +85,18 @@ function updateUI() {
     document.getElementById('lightweight').checked = currentSettings.lightweight;
     document.getElementById('wordByWord').checked = currentSettings.wordByWord;
 
+    // Translation settings
+    document.getElementById('translation-provider').value = currentSettings.translationProvider;
+    document.getElementById('gemini-api-key').value = currentSettings.geminiApiKey;
+    toggleGeminiApiKeyVisibility(); // Call this to set initial visibility
+
     // Populate draggable KPoe sources
     populateDraggableSources();
 
     // Appearance settings
     document.getElementById('custom-css').value = currentSettings.customCSS;
-    document.getElementById('fontSize').value = currentSettings.fontSize;
-    document.getElementById('autoHideLyrics').checked = currentSettings.autoHideLyrics;
+    // document.getElementById('fontSize').value = currentSettings.fontSize; // This element doesn't exist in index.html
+    // document.getElementById('autoHideLyrics').checked = currentSettings.autoHideLyrics; // This element doesn't exist in index.html
     // Cache settings
     document.getElementById('cache-strategy').value = currentSettings.cacheStrategy;
     updateCacheSize(); // Update cache size display on UI load
@@ -121,16 +129,19 @@ document.getElementById('save-general').addEventListener('click', () => {
         lyricsSourceOrder: orderedSources.join(','), // Save the new order
         useSponsorBlock: document.getElementById('sponsor-block').checked,
         lightweight: document.getElementById('lightweight').checked,
-        wordByWord: document.getElementById('wordByWord').checked
+        wordByWord: document.getElementById('wordByWord').checked,
+        translationProvider: document.getElementById('translation-provider').value, // Save translation provider
+        geminiApiKey: document.getElementById('gemini-api-key').value // Save Gemini API key
     });
+    console.log("Settings before saving:", currentSettings); // Debug log
     saveSettings();
 });
 
 document.getElementById('save-appearance').addEventListener('click', () => {
     updateSettings({
         customCSS: document.getElementById('custom-css').value,
-        fontSize: parseInt(document.getElementById('fontSize').value, 10),
-        autoHideLyrics: document.getElementById('autoHideLyrics').checked
+        // fontSize: parseInt(document.getElementById('fontSize').value, 10), // This element doesn't exist in index.html
+        // autoHideLyrics: document.getElementById('autoHideLyrics').checked // This element doesn't exist in index.html
     });
     saveSettings();
 });
@@ -357,6 +368,20 @@ document.getElementById('default-provider').addEventListener('change', (e) => {
         kpoeSourcesGroup.style.display = 'none';
     }
 });
+
+// Function to toggle Gemini API key visibility
+function toggleGeminiApiKeyVisibility() {
+    const translationProvider = document.getElementById('translation-provider').value;
+    const geminiApiKeyGroup = document.getElementById('gemini-api-key-group');
+    if (translationProvider === 'gemini') {
+        geminiApiKeyGroup.style.display = 'block';
+    } else {
+        geminiApiKeyGroup.style.display = 'none';
+    }
+}
+
+// Event listener for translation-provider change
+document.getElementById('translation-provider').addEventListener('change', toggleGeminiApiKeyVisibility);
 
 // Mock lyrics data for preview
 const mockLyricsData = {

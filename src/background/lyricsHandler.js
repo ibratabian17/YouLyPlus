@@ -194,7 +194,7 @@ pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
             try {
                 const sizeKB = await estimateIndexedDBSizeInKB();
                 const db = await openDB();
-                const transaction = db.transaction(["lyrics"], "readonly"); 
+                const transaction = db.transaction(["lyrics"], "readonly");
                 const store = transaction.objectStore("lyrics");
                 const countRequest = store.count();
                 const cacheCount = await new Promise((resolve, reject) => {
@@ -319,7 +319,7 @@ async function handleTranslateLyrics(songInfo, action, targetLang) {
 
     if (!originalLyrics) {
         // If not in cache or DB, try to fetch them (without sending response)
-        const tempSendResponse = () => {}; // Dummy sendResponse
+        const tempSendResponse = () => { }; // Dummy sendResponse
         await handleLyricsFetch(songInfo, tempSendResponse);
         originalLyrics = lyricsCache.get(cacheKey); // Try getting from cache again
     }
@@ -328,16 +328,32 @@ async function handleTranslateLyrics(songInfo, action, targetLang) {
         throw new Error('Original lyrics not found or empty for translation.');
     }
 
-    const translationPromises = originalLyrics.data.map(line => {
-        if (action === 'translate') {
-            return fetchGoogleTranslate(line.text, targetLang);
-        } else if (action === 'romanize') {
-            return fetchGoogleRomanize(line.text);
-        }
-        return Promise.resolve(line.text); // Return original text if no action
-    });
+    const settings = await storageLocalGet({ 'translationProvider': 'google', 'geminiApiKey': '' });
+    const translationProvider = settings.translationProvider;
+    const geminiApiKey = settings.geminiApiKey;
 
-    const translatedTexts = await Promise.all(translationPromises);
+    let translatedTexts = [];
+
+    if (action === 'translate') {
+        if (translationProvider === 'gemini') {
+            if (!geminiApiKey) {
+                throw new Error('Gemini AI API Key is not provided in settings.');
+            }
+            const textsToTranslate = originalLyrics.data.map(line => line.text);
+            translatedTexts = await fetchGeminiTranslate(textsToTranslate, targetLang, geminiApiKey);
+        } else {
+            const translationPromises = originalLyrics.data.map(line => fetchGoogleTranslate(line.text, targetLang));
+            translatedTexts = await Promise.all(translationPromises);
+        }
+    } else if (action === 'romanize') {
+        // Romanization is typically only available via Google Translate's unofficial API
+        // Gemini does not have a direct romanization endpoint.
+        // So, we'll always use Google for romanization for now.
+        const romanizationPromises = originalLyrics.data.map(line => fetchGoogleRomanize(line.text));
+        translatedTexts = await Promise.all(romanizationPromises);
+    } else {
+        translatedTexts = originalLyrics.data.map(line => line.text); // Return original text if no action
+    }
 
     const translatedData = originalLyrics.data.map((line, index) => ({
         ...line,
@@ -350,7 +366,7 @@ async function handleTranslateLyrics(songInfo, action, targetLang) {
         data: translatedData,
         metadata: {
             ...originalLyrics.metadata,
-            source: `${originalLyrics.metadata.source} (${action === 'translate' ? 'Translated' : 'Romanized'} to ${targetLang})`
+            source: `${originalLyrics.metadata.source} (${action === 'translate' ? 'Translated' : 'Romanized'} by ${translationProvider === 'gemini' && action === 'translate' ? 'Gemini AI' : 'Google Translate'} to ${targetLang})`
         }
     };
 }
@@ -381,6 +397,66 @@ async function fetchGoogleRomanize(text) {
         return data[0][0][3];
     }
     return text; // Return original text if romanization fails
+}
+
+
+async function fetchGeminiTranslate(texts, targetLang, apiKey) {
+    const model = 'gemini-2.0-flash'; // Or 'gemini-1.5-pro' for more advanced capabilities
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    const prompt = `
+You are a professional translator and lyricist. Translate the following array of song lyric lines into natural-sounding and poetic ${targetLang}.
+Maintain the original meaning, emotion, and tone of each line, as if the lyrics were written natively in ${targetLang}.
+Do NOT include any explanation or formatting. Only return a JSON array of translated lines, in the same order.
+
+Example input: ["I miss you", "Like the deserts miss the rain"]
+Example output: ["Aku merindukanmu", "Seperti gurun merindukan hujan"]
+
+Here are the lyrics: ${JSON.stringify(texts)}
+`;
+
+
+    const requestBody = {
+        contents: [{
+            parts: [{
+                text: prompt
+            }]
+        }]
+    };
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Gemini AI API error: ${response.status} - ${errorData.error.message}`);
+    }
+
+    const data = await response.json();
+    if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+        let rawText = data.candidates[0].content.parts[0].text.trim();
+        // Remove markdown code block if present
+        if (rawText.startsWith('```json') && rawText.endsWith('```')) {
+            rawText = rawText.substring(7, rawText.length - 3).trim();
+        }
+        try {
+            // Attempt to parse the raw text as a JSON array
+            const parsedArray = JSON.parse(rawText);
+            if (Array.isArray(parsedArray)) {
+                return parsedArray;
+            }
+        } catch (e) {
+            console.warn("Gemini AI response was not a valid JSON array, attempting to recover:", rawText);
+            // Fallback: if it's not a valid JSON array, assume it's a single string and return it in an array
+            return [rawText];
+        }
+    }
+    throw new Error('Gemini AI translation failed: No content or invalid format in response.');
 }
 
 // Helper function to check if lyrics object is empty
@@ -501,25 +577,25 @@ function parseYouTubeSubtitles(data, songInfo) {
     if (!data.events || data.events.length === 0) {
         return null;
     }
-    
+
     const parsedLines = [];
-    
+
     // Process each subtitle event
     for (let i = 0; i < data.events.length; i++) {
         const event = data.events[i];
-        
+
         // Skip events without text
         if (!event.segs || !event.segs.length) continue;
-        
+
         // Combine all segments into one text string
         const text = event.segs.map(seg => seg.utf8).join(' ').trim();
         if (!text) continue;
-        
+
         // Convert times from milliseconds to seconds
         const startTime = event.tStartMs / 1000;
         const duration = event.dDurationMs / 1000;
         const endTime = startTime + duration;
-        
+
         parsedLines.push({
             text,
             startTime,
@@ -528,11 +604,11 @@ function parseYouTubeSubtitles(data, songInfo) {
             element: { singer: 'v1' }
         });
     }
-    
+
     if (parsedLines.length === 0) {
         return null;
     }
-    
+
     return {
         type: 'Line',
         data: parsedLines,
@@ -575,7 +651,7 @@ function parseLRCLibFormat(data) {
         const endTime = (i < matches.length - 1)
             ? matches[i + 1].startTime
             : startTime + 4; // Default duration.
-        if(text.trim() !== "")parsedLines.push({
+        if (text.trim() !== "") parsedLines.push({
             text,
             startTime,
             endTime,
