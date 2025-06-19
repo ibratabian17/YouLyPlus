@@ -140,6 +140,7 @@ async function buildSponsorBlockUrl(options) {
  * @param {string} videoID - The YouTube video ID.
  * @param {Object} [customOptions] - Optional extra options to override defaults.
  * @returns {Promise<Array>} A promise that resolves to an array of segments.
+ * Each segment object typically has a `segment: [startTime, endTime]` property.
  */
 async function fetchSponsorSegments(videoID, customOptions = {}) {
     try {
@@ -162,15 +163,23 @@ async function fetchSponsorSegments(videoID, customOptions = {}) {
         const data = await response.json();
 
         // If the API returns an array of objects, search for the one matching our videoID.
-        if (Array.isArray(data)) {
+        // This happens when querying with a hash prefix.
+        if (Array.isArray(data) && data.length > 0 && data[0].hasOwnProperty('videoID')) {
             const videoObj = data.find(item => item.videoID === videoID);
             if (videoObj && videoObj.segments) {
                 return videoObj.segments;
             }
+            return []; // videoID not found in the hashed response, or no segments for it
         }
 
         // Fallback: if data is already an array of segments, return it.
-        return data;
+        // This can happen if videoID was passed as a query param (though less private).
+        if (Array.isArray(data)) {
+            return data;
+        }
+
+        console.warn("SponsorBlock response format not recognized or empty:", data);
+        return [];
     } catch (error) {
         console.warn('Error fetching SponsorBlock segments:', error);
         return [];
@@ -178,69 +187,123 @@ async function fetchSponsorSegments(videoID, customOptions = {}) {
 }
 
 /**
- * Menyesuaikan timing lirik dengan menambahkan delay (offset) berdasarkan total durasi segmen
- * SponsorBlock yang sudah dimulai sebelum lirik muncul. Fungsi ini menggabungkan segmen yang tumpang tindih
- * dan langsung menghitung offset untuk setiap lirik.
+ * Adjusts the timing of lyrics by adding a delay (offset) based on the total duration of the segment
+ * SponsorBlock that has started before the lyrics appear. This function merges overlapping segments
+ * and calculates the offset for each lyric item (line or syllable).
+ * Supports V1 (individual items) and V2 (lines with nested syllables) lyric formats.
  *
- * @param {Array} lyricsData - Array objek lirik dengan properti startTime dan endTime.
- *                             (Satuan waktu "s" untuk detik atau "ms" untuk milidetik)
- * @param {Array} segments - Array objek segmen SponsorBlock, masing-masing memiliki properti "segment": [start, end] (dalam detik).
- * @param {string} [timeUnit="s"] - Satuan waktu lirik ("s" untuk detik, "ms" untuk milidetik).
- * @returns {Array} Array lirik dengan timing yang telah disesuaikan.
+ * @param {Array<Object>} lyricsData
+ * @param {Array<Object>} segments
+ * @param {string} [timeUnit="s"] 
+ * @returns {Array<Object>}
  */
 function adjustLyricTiming(lyricsData, segments, timeUnit = "s") {
-    // 1. Buat array interval dari setiap segmen dan urutkan berdasarkan waktu mulai
+    if (!lyricsData || lyricsData.length === 0) {
+        return [];
+    }
+    // If no segments, return a deep copy of lyricsData without adjustments.
+    if (!segments || segments.length === 0) {
+        return lyricsData.map(lyric => JSON.parse(JSON.stringify(lyric)));
+    }
+
+    // 1. Filter valid segments (start < end) and sort by start time
     const intervals = segments
         .map(s => s.segment)
+        .filter(segment =>
+            segment && segment.length === 2 &&
+            typeof segment[0] === 'number' && typeof segment[1] === 'number' &&
+            segment[0] < segment[1] // Ensure start time is less than end time
+        )
         .sort((a, b) => a[0] - b[0]);
 
-    // 2. Gabungkan interval yang tumpang tindih agar tidak terjadi perhitungan ganda
+    // If no valid segments after filtering, return a deep copy.
+    if (intervals.length === 0) {
+        return lyricsData.map(lyric => JSON.parse(JSON.stringify(lyric)));
+    }
+
+    // 2. Merge overlapping or adjacent intervals
     const mergedIntervals = [];
-    for (const interval of intervals) {
-        if (interval) {
-            if (!mergedIntervals.length) {
-                mergedIntervals.push(interval.slice());
-            } else {
-                const last = mergedIntervals[mergedIntervals.length - 1];
-                if (interval[0] <= last[1]) {
-                    // Tumpang tindih: perbarui waktu akhir interval terakhir
-                    last[1] = Math.max(last[1], interval[1]);
-                } else {
-                    mergedIntervals.push(interval.slice());
-                }
-            }
+    mergedIntervals.push([...intervals[0]]); // Start with a copy of the first interval
+
+    for (let i = 1; i < intervals.length; i++) {
+        const currentInterval = intervals[i];
+        const lastMerged = mergedIntervals[mergedIntervals.length - 1];
+
+        if (currentInterval[0] <= lastMerged[1]) { // Overlap or adjacent
+            lastMerged[1] = Math.max(lastMerged[1], currentInterval[1]); // Extend the last merged interval
+        } else {
+            mergedIntervals.push([...currentInterval]); // No overlap, add as a new interval (copy)
         }
     }
 
-    const adjustedLyrics = lyricsData.map(lyric => {
-        // Konversi waktu lirik ke detik bila satuan adalah ms
-        const lyricStartSec = timeUnit === "ms" ? lyric.startTime / 1000 : lyric.startTime;
+    const adjustedLyrics = lyricsData.map(originalLyricItem => {
+        // Deep copy each lyric item to prevent modifying original objects
+        const lyricItem = JSON.parse(JSON.stringify(originalLyricItem));
 
-        // Hitung offset: jumlah durasi setiap interval yang sudah mulai sebelum lirik muncul
-        let offsetSec = 0;
-        for (const [start, end] of mergedIntervals) {
-            if (lyricStartSec >= start) {
-                offsetSec += (end - start);
+        let itemOriginalStartTimeMs;
+
+        // Determine the original start time of the lyric item in milliseconds
+        // Prioritize 'time' as it's common in V1/V2 examples, then 'startTime'.
+        if (lyricItem.hasOwnProperty('time')) {
+            itemOriginalStartTimeMs = (timeUnit === "ms") ? lyricItem.time : Math.round(lyricItem.time * 1000);
+        } else if (lyricItem.hasOwnProperty('startTime')) {
+            itemOriginalStartTimeMs = (timeUnit === "ms") ? lyricItem.startTime : Math.round(lyricItem.startTime * 1000);
+        } else {
+            // If no time property, return the item as is (already a copy)
+            // console.warn("Lyric item missing 'time' or 'startTime' property:", lyricItem);
+            return lyricItem;
+        }
+
+        const itemOriginalStartSec = itemOriginalStartTimeMs / 1000;
+
+        // Calculate cumulative offset in seconds
+        let cumulativeOffsetSec = 0;
+        for (const [segmentStartSec, segmentEndSec] of mergedIntervals) {
+            if (itemOriginalStartSec >= segmentStartSec) {
+                cumulativeOffsetSec += (segmentEndSec - segmentStartSec);
             } else {
-                break;
+                break; // Intervals sorted, no need to check further
             }
         }
 
-        // Tambahkan offset ke waktu lirik (konversi ke ms bila diperlukan)
-        if (timeUnit === "ms") {
-            const offsetMs = offsetSec * 1000;
-            return {
-                ...lyric,
-                startTime: lyric.startTime + offsetMs,
-                endTime: lyric.endTime + offsetMs
-            };
-        } else {
-            return {
-                ...lyric,
-                startTime: lyric.startTime + offsetSec,
-                endTime: lyric.endTime + offsetSec
-            };
+        const cumulativeOffsetMs = Math.round(cumulativeOffsetSec * 1000);
+
+        // Apply offset if there is any
+        if (cumulativeOffsetMs !== 0) {
+            // Adjust 'time' property if it exists
+            if (lyricItem.hasOwnProperty('time')) {
+                const originalTimeMs = (timeUnit === "ms") ? lyricItem.time : Math.round(lyricItem.time * 1000);
+                const newTimeMs = originalTimeMs + cumulativeOffsetMs;
+                lyricItem.time = (timeUnit === "ms") ? newTimeMs : (newTimeMs / 1000);
+            }
+
+            // Adjust 'startTime' and 'endTime' properties if they exist
+            if (lyricItem.hasOwnProperty('startTime')) {
+                const originalStartMs = (timeUnit === "ms") ? lyricItem.startTime : Math.round(lyricItem.startTime * 1000);
+                const newStartMs = originalStartMs + cumulativeOffsetMs;
+                lyricItem.startTime = (timeUnit === "ms") ? newStartMs : (newStartMs / 1000);
+
+                if (lyricItem.hasOwnProperty('endTime')) {
+                    const originalEndMs = (timeUnit === "ms") ? lyricItem.endTime : Math.round(lyricItem.endTime * 1000);
+                    const newEndMs = originalEndMs + cumulativeOffsetMs;
+                    lyricItem.endTime = (timeUnit === "ms") ? newEndMs : (newEndMs / 1000);
+                }
+            }
+
+            // Adjust 'syllabus' times if it's a V2 line with a syllabus array
+            // Assumption: Syllabus times are always in milliseconds.
+            if (lyricItem.hasOwnProperty('syllabus') && Array.isArray(lyricItem.syllabus)) {
+                lyricItem.syllabus = lyricItem.syllabus.map(syl => {
+                    // newSyl is already a part of the deep-copied lyricItem
+                    if (syl.hasOwnProperty('time')) {
+                        // Assuming syl.time is in MS
+                        syl.time += cumulativeOffsetMs;
+                    }
+                    return syl; // syl is modified in place from the copied lyricItem
+                });
+            }
         }
+        return lyricItem;
     });
 
     return adjustedLyrics;
