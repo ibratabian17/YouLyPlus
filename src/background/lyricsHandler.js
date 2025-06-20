@@ -260,7 +260,7 @@ async function handleLyricsFetch(songInfo, sendResponse) {
     const fetchPromise = (async () => {
         try {
             // Determine provider and source order based on settings.
-            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,musixmatch,spotify,musixmatch-word' });
+            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,lyricsplus,musixmatch,spotify,musixmatch-word' });
             const lyricsProvider = settings.lyricsProvider;
             const lyricsSourceOrder = settings.lyricsSourceOrder;
 
@@ -438,7 +438,7 @@ async function getOrFetchLyrics(songInfo) {
     const fetchPromise = (async () => {
         try {
             // Determine provider and source order based on settings.
-            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,musixmatch,spotify,musixmatch-word' });
+            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,lyricsplus,musixmatch,spotify,musixmatch-word' });
             const lyricsProvider = settings.lyricsProvider;
             const lyricsSourceOrder = settings.lyricsSourceOrder;
 

@@ -4,7 +4,7 @@ const pBrowser = window.chrome || window.browser;
 // Current settings object (default values)
 let currentSettings = {
     lyricsProvider: 'kpoe', // Can be 'kpoe' or 'lrclib'
-    lyricsSourceOrder: 'apple,musixmatch,spotify,musixmatch-word', // For KPoe provider
+    lyricsSourceOrder: 'apple,lyricsplus,musixmatch,spotify,musixmatch-word', // For KPoe provider
     wordByWord: true,
     lightweight: false,
     isEnabled: true,
