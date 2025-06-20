@@ -114,7 +114,6 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 .lyrics-line.rtl-text {
     direction: rtl;
 }
-
 /* Origin adjustments for different text directions within line */
 .lyrics-line.singer-right:not(.rtl-text) .main-vocal-container,
 .lyrics-line.rtl-text:not(.singer-right) .main-vocal-container {
@@ -214,6 +213,11 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     background-image: linear-gradient(-90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 100%, #0000 100%);
     background-position: calc(100% + 0.5em) 0%, right;
     direction: rtl;
+}
+
+
+.lyrics-syllable.rtl-text {
+    line-height: 1.5em;
 }
 
 /* ===== LYRICS GAP HANDLING (Instrumental Sections) ===== */
@@ -411,7 +415,7 @@ span.lyrics-source-provider {
 @keyframes wipe-rtl {
     from {
         background-size: 0.5em 100%, 0% 100%;
-        background-position: calc(100% + 0.5em) 0%, calc(100% + 0.25em) 0%;
+        background-position: calc(100% + 0.25em) 0%, right;
     }
     to {
         background-size: 0.5em 100%, 100% 100%;
