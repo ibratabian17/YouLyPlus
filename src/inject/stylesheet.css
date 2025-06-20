@@ -126,7 +126,6 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     transform: scale3d(0.93, 0.93, 0.95);
     transform-origin: left;
     overflow-wrap: break-word;
-    content-visibility: auto;
 }
 
 .lyrics-line.active .main-vocal-container {
@@ -142,7 +141,6 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     font-size: 0.6em;
     padding-top: 0.2em;
     transition: height .2s, opacity .2s;
-    content-visibility: auto;
 }
 
 .lyrics-line.active .background-vocal-container {
