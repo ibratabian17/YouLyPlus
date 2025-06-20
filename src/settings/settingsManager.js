@@ -12,6 +12,8 @@ let currentSettings = {
     autoHideLyrics: false,
     cacheStrategy: 'aggressive',
     fontSize: 16,
+    compabilityVisibility: false, // New compatibility setting
+    compabilityWipe: false, // New compatibility setting
     customCSS: '',
     translationProvider: 'google', // Default translation provider
     geminiApiKey: '', // Default Gemini API key

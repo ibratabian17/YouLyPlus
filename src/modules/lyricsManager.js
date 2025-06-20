@@ -3,7 +3,7 @@ let currentFetchVideoId = null;
 let currentDisplayMode = 'none'; // Manages the active translation/romanization mode
 
 
-async function fetchAndDisplayLyrics(currentSong, isNewSong = false) {
+async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload = false) {
   try {
     const localCurrentFetchVideoId = currentSong.videoId;
     currentFetchVideoId = localCurrentFetchVideoId; // Set the latest videoId being processed globally for this manager
@@ -48,7 +48,8 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false) {
         // Fallback to fetching original lyrics
         const originalLyricsResponse = await pBrowser.runtime.sendMessage({
           type: 'FETCH_LYRICS',
-          songInfo: currentSong
+          songInfo: currentSong,
+          forceReload: forceReload // Pass forceReload to background script
         });
 
         if (currentFetchVideoId !== localCurrentFetchVideoId) {
@@ -70,7 +71,8 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false) {
       // No translation/romanization mode active, fetch original lyrics
       const originalLyricsResponse = await pBrowser.runtime.sendMessage({
         type: 'FETCH_LYRICS',
-        songInfo: currentSong
+        songInfo: currentSong,
+        forceReload: forceReload // Pass forceReload to background script
       });
 
       if (currentFetchVideoId !== localCurrentFetchVideoId) {
@@ -124,7 +126,8 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false) {
             currentSettings.lightweight,
             lyricsObjectToDisplay.metadata.songWriters,
             currentSong,
-            finalDisplayModeForRenderer // Pass the actual display mode
+            finalDisplayModeForRenderer, // Pass the actual display mode
+            currentSettings // Pass currentSettings
         );
     } else {
         console.error("displayLyrics is not available.");
@@ -201,7 +204,8 @@ setCurrentDisplayModeAndRefetch = async (mode, songInfoForRefetch) => {
     if (songInfoForRefetch) {
         // Call fetchAndDisplayLyrics, isNewSong will be false.
         // fetchAndDisplayLyrics will use the new `currentDisplayMode`.
-        await fetchAndDisplayLyrics(songInfoForRefetch, false);
+        // When called from translation/romanization buttons, forceReload should be false.
+        await fetchAndDisplayLyrics(songInfoForRefetch, false, false);
     } else {
     }
 };

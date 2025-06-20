@@ -20,6 +20,8 @@ let currentSettings = {
     autoHideLyrics: false,
     cacheStrategy: 'aggressive',
     fontSize: 16,
+    compabilityVisibility: false, // New compatibility setting
+    compabilityWipe: false, // New compatibility setting
     customCSS: '',
     // Translation settings
     translationProvider: 'google', // 'google' or 'gemini'
@@ -49,6 +51,8 @@ function loadSettings(callback) {
         autoHideLyrics: false,
         cacheStrategy: 'aggressive',
         fontSize: 16,
+        compabilityVisibility: false, // New compatibility setting
+        compabilityWipe: false, // New compatibility setting
         // Translation settings
         translationProvider: 'google',
         geminiApiKey: '',

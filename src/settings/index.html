@@ -133,8 +133,10 @@
             <div class="setting-item form-group" id="gemini-api-key-group" style="display: none;">
                 <label for="gemini-api-key">Gemini AI API Key</label>
                 <div class="input-with-button">
-                    <input type="password" id="gemini-api-key" placeholder="Enter your Gemini AI API Key" autocomplete="off">
-                    <button type="button" id="toggle-gemini-api-key-visibility" class="btn btn-icon" title="Show/Hide API Key">
+                    <input type="password" id="gemini-api-key" placeholder="Enter your Gemini AI API Key"
+                        autocomplete="off">
+                    <button type="button" id="toggle-gemini-api-key-visibility" class="btn btn-icon"
+                        title="Show/Hide API Key">
                         <span class="material-symbols-outlined">visibility</span>
                     </button>
                 </div>
@@ -166,7 +168,8 @@
                     <span class="slider"></span>
                     <span class="switch-label">Override Translation Target Language</span>
                 </label>
-                <p class="setting-description">Manually specify the target language for translation (e.g., 'en', 'ko', 'ja').</p>
+                <p class="setting-description">Manually specify the target language for translation (e.g., 'en', 'ko',
+                    'ja').</p>
             </div>
 
             <div class="setting-item form-group" id="custom-translate-target-group" style="display: none;">
@@ -181,7 +184,9 @@
                     <span class="slider"></span>
                     <span class="switch-label">Override Gemini AI Prompt</span>
                 </label>
-                <p class="setting-description">Use a custom prompt for Gemini AI translations. Use <code>{targetLang}</code> and <code>{lyrics}</code> placeholders.</p>
+                <p class="setting-description">Use a custom prompt for Gemini AI translations. Use
+                    <code>{targetLang}</code> and <code>{lyrics}</code> placeholders.
+                </p>
             </div>
 
             <div class="setting-item form-group" id="custom-gemini-prompt-group" style="display: none;">
@@ -192,7 +197,8 @@ Your most important task is to preserve the original meaning, emotion, and tone 
 After ensuring the meaning is preserved, try to make the translation sound natural in ${targetLang}.
 If the current whole line has exact language from ${targetLang}, do not rephrase it.
 but if it has multiple language at the same line, translate it"></textarea>
-                <p class="helper-text">Customize the prompt sent to Gemini AI. Use <code>{targetLang}</code> for the target language</p>
+                <p class="helper-text">Customize the prompt sent to Gemini AI. Use <code>{targetLang}</code> for the
+                    target language</p>
             </div>
 
             <div class="card-actions">
@@ -203,6 +209,44 @@ but if it has multiple language at the same line, translate it"></textarea>
         <!-- Appearance Section -->
         <section class="settings-card" id="appearance">
             <h2 class="card-title">Appearance</h2>
+
+            <div class="setting-item">
+                <label class="switch">
+                    <input type="checkbox" id="lightweight">
+                    <span class="slider"></span>
+                    <span class="switch-label">Lightweight Mode</span>
+                </label>
+                <p class="setting-description">Reduces animations and visual effects for better performance on older
+                    devices.</p>
+            </div>
+
+            <div class="setting-item">
+                <label class="switch">
+                    <input type="checkbox" id="compability-visibility">
+                    <span class="slider"></span>
+                    <span class="switch-label">Use JS-based Line Optimization</span>
+                </label>
+                <p class="setting-description">
+                    Switch from native CSS-based visibility to JavaScript-based handling. Enable this if lyrics
+                    unexpectedly scroll out of view on some devices.
+                </p>
+            </div>
+
+            <div class="setting-item">
+                <label class="switch">
+                    <input type="checkbox" id="compability-wipe">
+                    <span class="slider"></span>
+                    <span class="switch-label">Preload Wipe Animation</span>
+                </label>
+                <p class="setting-description">
+                    Pre-renders wipe animation on all syllables before they're active. Useful for devices where the
+                    highlight animation lags or fails to show if it's only triggered when the line becomes active.
+                </p>
+
+            </div>
+
+
+            <!--CSS-->
 
             <div class="setting-item">
                 <div class="form-group">
@@ -274,17 +318,6 @@ but if it has multiple language at the same line, translate it"></textarea>
                     <span class="material-symbols-outlined">play_arrow</span>
                     Play Example
                 </button>
-            </div>
-
-
-            <div class="setting-item">
-                <label class="switch">
-                    <input type="checkbox" id="lightweight">
-                    <span class="slider"></span>
-                    <span class="switch-label">Lightweight Mode</span>
-                </label>
-                <p class="setting-description">Reduces animations and visual effects for better performance on older
-                    devices.</p>
             </div>
 
             <div class="card-actions">

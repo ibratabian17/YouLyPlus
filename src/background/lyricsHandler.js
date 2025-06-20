@@ -170,7 +170,7 @@ function storageLocalGet(keys) {
 pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'FETCH_LYRICS') {
         try {
-            handleLyricsFetch(message.songInfo, sendResponse);
+            handleLyricsFetch(message.songInfo, sendResponse, message.forceReload);
         } catch (error) {
             sendResponse({ success: false, error: error });
         }
@@ -224,36 +224,39 @@ pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 /* =================== Lyrics Fetching Logic =================== */
-async function handleLyricsFetch(songInfo, sendResponse) {
+async function handleLyricsFetch(songInfo, sendResponse, forceReload = false) {
     const cacheKey = `${songInfo.title} - ${songInfo.artist} - ${songInfo.album}`;
 
-    // Check the in‑memory cache first.
-    if (lyricsCache.has(cacheKey)) {
-        sendResponse({ success: true, lyrics: lyricsCache.get(cacheKey), metadata: songInfo });
-        return;
-    }
-
-    // Check the persistent IndexedDB cache.
-    try {
-        const dbCachedLyrics = await getLyricsFromDB(cacheKey);
-        if (dbCachedLyrics) {
-            lyricsCache.set(cacheKey, dbCachedLyrics);
-            sendResponse({ success: true, lyrics: dbCachedLyrics, metadata: songInfo });
+    // If forceReload is true, bypass all cache checks.
+    if (!forceReload) {
+        // Check the in‑memory cache first.
+        if (lyricsCache.has(cacheKey)) {
+            sendResponse({ success: true, lyrics: lyricsCache.get(cacheKey), metadata: songInfo });
             return;
         }
-    } catch (error) {
-        console.error("Error reading from DB:", error);
-    }
 
-    // If an ongoing fetch is present, wait for it.
-    if (ongoingFetches.has(cacheKey)) {
+        // Check the persistent IndexedDB cache.
         try {
-            const lyrics = await ongoingFetches.get(cacheKey);
-            sendResponse({ success: true, lyrics, metadata: songInfo });
+            const dbCachedLyrics = await getLyricsFromDB(cacheKey);
+            if (dbCachedLyrics) {
+                lyricsCache.set(cacheKey, dbCachedLyrics);
+                sendResponse({ success: true, lyrics: dbCachedLyrics, metadata: songInfo });
+                return;
+            }
         } catch (error) {
-            sendResponse({ success: false, error: error.message, metadata: songInfo });
+            console.error("Error reading from DB:", error);
         }
-        return;
+
+        // If an ongoing fetch is present, wait for it.
+        if (ongoingFetches.has(cacheKey)) {
+            try {
+                const lyrics = await ongoingFetches.get(cacheKey);
+                sendResponse({ success: true, lyrics, metadata: songInfo });
+            } catch (error) {
+                sendResponse({ success: false, error: error.message, metadata: songInfo });
+            }
+            return;
+        }
     }
 
     // Start a new fetch and store its promise.
@@ -268,7 +271,7 @@ async function handleLyricsFetch(songInfo, sendResponse) {
 
             // Try the primary provider first.
             if (lyricsProvider === 'kpoe') {
-                lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder);
+                lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, forceReload);
             } else if (lyricsProvider === 'lrclib') {
                 lyrics = await fetchLRCLibLyrics(songInfo);
             }
@@ -278,7 +281,7 @@ async function handleLyricsFetch(songInfo, sendResponse) {
                 if (lyricsProvider === 'kpoe') {
                     lyrics = await fetchLRCLibLyrics(songInfo);
                 } else if (lyricsProvider === 'lrclib') {
-                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder);
+                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, forceReload);
                 }
             }
 
@@ -593,14 +596,15 @@ function isEmptyLyrics(lyrics) {
     return false;
 }
 
-async function fetchKPoeLyrics(songInfo, sourceOrder = '') {
+async function fetchKPoeLyrics(songInfo, sourceOrder = '', forceReload = false) {
     const albumParam = (songInfo.album && songInfo.album !== songInfo.title)
         ? `&album=${encodeURIComponent(songInfo.album)}`
         : '';
     const sourceParam = sourceOrder ? `&source=${encodeURIComponent(sourceOrder)}` : '';
-    const url = `https://lyricsplus.prjktla.workers.dev/v2/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}&duration=${songInfo.duration}${sourceParam}`;
+    const forceReloadParam = forceReload ? `&forceReload=true` : '';
+    const url = `https://lyricsplus.prjktla.workers.dev/v2/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}&duration=${songInfo.duration}${sourceParam}${forceReloadParam}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: 'no-store' }); // Disable fetch cache
     if (!response.ok) return null;
 
     const data = await response.json();

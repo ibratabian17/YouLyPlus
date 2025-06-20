@@ -37,7 +37,7 @@ function batchDOMUpdates(callback) {
   });
 }
 
-function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none') {
+function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}) {
   const container = getContainer();
   if (!container) return;
 
@@ -46,6 +46,18 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     container.classList.add('lyrics-translated');
   } else if (displayMode === 'romanize') {
     container.classList.add('lyrics-romanized');
+  }
+
+  // Add compatibility classes based on settings
+  if (currentSettings.compabilityVisibility) {
+    container.classList.add('compability-visibility');
+  } else {
+    container.classList.remove('compability-visibility');
+  }
+  if (currentSettings.compabilityWipe) {
+    container.classList.add('compability-wipe');
+  } else {
+    container.classList.remove('compability-wipe');
   }
 
   lastKnownSongInfo = songInfo;
@@ -405,7 +417,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   if (cachedLyricsLines.length !== 0) {
     scrollToActiveLine(cachedLyricsLines[0], true);
   }
-  startLyricsSync();
+  startLyricsSync(currentSettings); // Pass currentSettings
   createControlButtons(getContainer());
 }
 
@@ -520,7 +532,7 @@ function startLyricsSync() {
     const currentTime = videoElement.currentTime * 1000;
     const timeDelta = Math.abs(currentTime - lastTime);
     const isForceScroll = timeDelta > 1000;
-    updateLyricsHighlight(currentTime, isForceScroll);
+    updateLyricsHighlight(currentTime, isForceScroll, currentSettings); // Pass currentSettings
     lastTime = currentTime;
     lyricsAnimationFrameId = requestAnimationFrame(sync);
   }
@@ -621,10 +633,11 @@ function cleanupLyrics() {
   }
 }
 
-function updateLyricsHighlight(currentTime, isForceScroll = false) {
+function updateLyricsHighlight(currentTime, isForceScroll = false, currentSettings = {}) {
   if (!cachedLyricsLines || !cachedLyricsLines.length) return;
   let newActiveLineIds = new Set();
   let activeLines = [];
+  const compabilityVisibilityEnabled = currentSettings.compabilityVisibility;
 
   cachedLyricsLines.forEach(line => {
     if (!line) return;
@@ -656,6 +669,14 @@ function updateLyricsHighlight(currentTime, isForceScroll = false) {
     } else if (!shouldBeActive && wasActive) {
       line.classList.remove('active');
       resetSyllables(line);
+    }
+    // Handle visibility for lines outside the active/visible range if compabilityVisibility is enabled
+    if (compabilityVisibilityEnabled) {
+      if (!shouldBeActive && !visibleLineIds.has(line.id)) {
+        line.style.visibility = 'hidden';
+      } else {
+        line.style.visibility = ''; // Reset to default
+      }
     }
   });
   activeLineIds = allowedActiveIds;
@@ -925,7 +946,8 @@ function createControlButtons(sourceDivElement) {
 
     reloadButton.addEventListener('click', () => {
       if (lastKnownSongInfo && window.LyricsPlusAPI && fetchAndDisplayLyrics) {
-        fetchAndDisplayLyrics(lastKnownSongInfo, false); // isNewSong = false
+        // Pass true for forceReload when the reload button is clicked
+        fetchAndDisplayLyrics(lastKnownSongInfo, false, true); // isNewSong = false, forceReload = true
       } else {
         console.warn('Cannot reload lyrics: song info or API not available.');
       }
