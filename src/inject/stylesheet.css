@@ -80,6 +80,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyri
     color: #ffffff85;
     transform-origin: left;
     transition: opacity 0.3s ease, transform 0.3s ease;
+    content-visibility: auto;
     /*scroll-snap-align: center;*/
 }
 
@@ -125,6 +126,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     transform: scale3d(0.93, 0.93, 0.95);
     transform-origin: left;
     overflow-wrap: break-word;
+    content-visibility: auto;
 }
 
 .lyrics-line.active .main-vocal-container {
@@ -140,6 +142,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     font-size: 0.6em;
     padding-top: 0.2em;
     transition: height .2s, opacity .2s;
+    content-visibility: auto;
 }
 
 .lyrics-line.active .background-vocal-container {
@@ -186,18 +189,12 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 
 /* Only apply background effects and transitions to ACTIVE line syllables */
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable {
-    background-image: linear-gradient(90deg, #ffffff00 0%, var(--ytmusic-description-shelf-renderer-description-color, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 100%, #0000 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    background-size: 0.5em 100%, 0% 100%;
-    background-position: -0.5em 0%, -0.25em 0%;
-    background-repeat: no-repeat;
-    transition: transform 0.5s, color 0.5s;
-    will-change: transform, background;
+    transition: transform 0.5s, color 0.5s; /* Keep color transition */
+    will-change: transform;
 }
 
 /* RTL syllables - only for active line */
-.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.rtl-text {
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.rtl-text {
     background-image: linear-gradient(-90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 100%, #0000 100%);
     background-position: calc(100% + 0.5em) 0%, right;
     direction: rtl;
@@ -205,6 +202,14 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 
 /* Highlighted syllables - only for active line */
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight {
+    background-image: linear-gradient(90deg, #ffffff00 0%, var(--ytmusic-description-shelf-renderer-description-color, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 100%, #0000 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    background-size: 0.5em 100%, 0% 100%;
+    background-position: -0.5em 0%, -0.25em 0%;
+    background-repeat: no-repeat;
+    transition: transform 0.5s, background 0.5s;
+    will-change: transform, background;
     transform: translateY(-3%);
 }
 
@@ -714,15 +719,14 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
 
     /* Styles for larger screens */
 
-    ytmusic-app-layout[player-fullscreened] #lyrics-plus-buttons-wrapper {
-        display: none;
+    ytmusic-player-page[player-fullscreened] #lyrics-plus-buttons-wrapper {
+        display: none!important;
     }
 
     ytmusic-player-page:not([video-mode]):not([player-fullscreened]):not([player-ui-state="MINIPLAYER"]) #player.ytmusic-player-page {
         left: 50%;
         max-width: 400px !important;
         transform: translateX(-55%);
-        interactivity: auto !important;
     }
 
     ytmusic-player-page:not([video-mode]):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(.lyrics-plus-integrated[style*="display: block"]) #player.ytmusic-player-page {
@@ -749,6 +753,7 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
         min-width: 50%;
         transform: translateY(-8.8rem);
         mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
+        interactivity: auto !important;
     }
 
     ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened] .lyplus-blur-container {
