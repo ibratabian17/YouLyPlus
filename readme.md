@@ -56,6 +56,31 @@ If you’d like to contribute or modify YouLy+:
 2. **Load the Extension:**  
    Use the browser’s extension loading feature to test your changes in real-time.
 
+## Packaging
+
+To create the distributable zip files for different browser environments:
+
+1.  **Prerequisites:** Ensure you have `jq` (a lightweight and flexible command-line JSON processor) and `zip` installed and available in your system's PATH.
+    *   **Linux/macOS:** You can usually install them via your package manager (e.g., `sudo apt install jq zip` or `brew install jq zip`).
+    *   **Windows:** Ensure you have either `7z.exe` (7-Zip command-line tool) or `zip.exe` installed. The script will look for `7z.exe` in your PATH and in its default installation directory (`C:\Program Files\7-Zip\`), then fall back to `zip.exe` if `7z.exe` is not found. `7z.exe` is preferred for better compression.
+
+2.  **Run the bundling script:**
+    *   **On Linux/macOS:**
+        ```bash
+        chmod +x bundle.sh
+        ./bundle.sh
+        ```
+    *   **On Windows (using PowerShell):**
+        ```powershell
+        ./bundle.ps1
+        ```
+        Note: You might need to adjust your PowerShell execution policy to run local scripts. You can do this by running `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` in an elevated PowerShell prompt.
+
+The scripts will create a `dist` folder in the project root, containing the following zip files:
+*   `youlyplus-v{version}-chrome-edge.zip`: For Chrome and Edge (Manifest V3, optimized for these browsers).
+*   `youlyplus-v{version}-chrome-firefox.zip`: For Chrome and Firefox (Manifest V3, includes Firefox-specific settings).
+*   `youlyplus-v{version}-generic-v2.zip`: A generic Manifest V2 version.
+
 ## Contributing
 
 Contributions are welcome! Please fork this repository and create a pull request with your improvements. For major changes, feel free to open an issue first to discuss your ideas.

@@ -1,0 +1,7 @@
+# Bundling outputs
+/dist/
+
+# Temporary directories used by bundling scripts
+/temp_chrome_edge/
+/temp_chrome_firefox/
+/temp_generic_v2/
