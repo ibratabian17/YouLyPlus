@@ -196,7 +196,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     will-change: transform;
     background-clip: text;
     -webkit-background-clip: text;
-    transition: transform 0.5s, background 0.5s; /* Overrides previous transition */
+    transition: transform 0.5s, background-color 0.5s, color 0.5s; /* Overrides previous transition */
     will-change: transform, background; /* Overrides previous will-change */
 }
 
