@@ -207,6 +207,8 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     background-size: 0.5em 100%, 0% 100%;
     background-position: -0.5em 0%, -0.25em 0%;
     background-repeat: no-repeat;
+}
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight{
     transform: translateY(-3%);
 }
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.rtl-text {
