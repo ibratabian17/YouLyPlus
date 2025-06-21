@@ -267,10 +267,17 @@ async function handleLyricsFetch(songInfo, sendResponse, forceReload = false) {
             const lyricsSourceOrder = settings.lyricsSourceOrder;
 
             let lyrics = null;
+            let kpoeForceReload = forceReload;
+            if (!forceReload) {
+                const cacheSettings = await storageLocalGet({ 'cacheStrategy': 'aggressive' });
+                if (cacheSettings.cacheStrategy === 'none') {
+                    kpoeForceReload = false;
+                }
+            }
 
             // Try the primary provider first.
             if (lyricsProvider === 'kpoe') {
-                lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, forceReload);
+                lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, kpoeForceReload);
             } else if (lyricsProvider === 'lrclib') {
                 lyrics = await fetchLRCLibLyrics(songInfo);
             }
@@ -280,7 +287,7 @@ async function handleLyricsFetch(songInfo, sendResponse, forceReload = false) {
                 if (lyricsProvider === 'kpoe') {
                     lyrics = await fetchLRCLibLyrics(songInfo);
                 } else if (lyricsProvider === 'lrclib') {
-                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, forceReload);
+                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, kpoeForceReload);
                 }
             }
 
@@ -494,10 +501,144 @@ async function getOrFetchLyrics(songInfo) {
     try {
         return await fetchPromise;
     } catch (error) {
-            console.error("Error fetching lyrics:", error);
-            return null;
+        console.error("Error fetching lyrics:", error);
+        return null;
+    }
+}
+
+// This function generates the standard block for lyrics input and JSON output instructions.
+// It will be appended to the active translation rules.
+const getStandardInputOutputInstructionBlock = (textsArray, targetLangString) => `
+
+---
+You will receive the lyrics as a JSON array of strings.
+---
+LYRICS TO TRANSLATE (each element in the array is one line of lyrics):
+\`\`\`json
+${JSON.stringify(textsArray)}\`\`\`
+---
+MANDATORY OUTPUT INSTRUCTIONS (MUST BE FOLLOWED PRECISELY):
+Produce ONLY a single, valid JSON string as your output. NO other text, explanation, or markdown formatting (like \`\`\`json) should precede or follow the JSON object.
+The JSON object MUST have the following structure:
+{
+  "translated_lyrics": ["array_of_translated_lines_in_the_same_order_as_input"],
+  "detected_source_languages_per_line": ["array_indicating_identified_source_language(s)_for_each_original_line_e.g., 'en', 'es', 'mixed', or an array like ['en', 'fr'] if multiple distinct ones were clear"],
+  "target_language": "${targetLangString}"
+}
+The "translated_lyrics" array MUST contain the translated version of each corresponding input line, maintaining the original order.
+The "detected_source_languages_per_line" array should be parallel to "translated_lyrics", indicating the language(s) you identified in each original line.
+---
+Now, translate the provided lyrics according to all rules and output instructions.
+`;
+
+
+async function fetchGeminiTranslate(texts, targetLang, apiKey, model, overridePrompt, customPrompt) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    let translationRulesPart;
+
+    if (overridePrompt && customPrompt) {
+        // User's custom prompt defines the translation rules.
+        // It can use {targetLang} for language-specific instructions.
+        translationRulesPart = customPrompt.replace(/{targetLang}/g, targetLang);
+    } else {
+        // Default "Lyrical Bridge" translation rules part.
+        // Note: The explicit "Your output MUST strictly be a JSON object." is removed here
+        // as the standardInputOutputInstructionBlock will cover JSON output instructions.
+        translationRulesPart = `
+You are an expert AI Lyrical Translator and linguist, specializing in preserving the original meaning, emotion, nuance, and natural flow when translating song lyrics into {targetLang}.
+
+CRUCIAL TRANSLATION RULES (MUST BE FOLLOWED FOR EACH LINE OF LYRICS):
+
+1.  **INTERNAL LANGUAGE IDENTIFICATION:** For each line of lyrics received, internally identify all languages present within that line. This is crucial for the subsequent steps.
+2.  **TRANSLATE ALL NON-{targetLang} ELEMENTS:** ALL words, phrases, or segments within a line of lyrics that are NOT in {targetLang} MUST be accurately translated into {targetLang}. Ensure no foreign language parts (other than {targetLang}) remain untranslated or are merely romanized without semantic translation. For example, if Arabic, Japanese, or Korean text (not {targetLang}) is present, translate its MEANING into {targetLang}, do not just convert it to Latin characters.
+3.  **PRESERVE IF ALREADY {targetLang} (CONDITIONAL):**
+    *   If an ENTIRE line of lyrics is ALREADY in {targetLang} and contains NO other languages needing translation, then COPY that line EXACTLY AS IS into the translated output for that line. DO NOT change, DO NOT rephrase, DO NOT re-translate it.
+    *   If a line contains a MIX of {targetLang} and other languages, you MUST translate the non-{targetLang} parts into {targetLang} and integrate them naturally with the existing {targetLang} parts of that line.
+4.  **NATURALNESS AND CONTEXT:** The final translated line must sound natural and flow well in {targetLang}, as if it were originally written in that language. Maintain contextual continuity with other lines where appropriate.
+5.  **ACCURACY IS PARAMOUNT:** Prioritize the accurate conveyance of the original meaning and emotion over strict adherence to rhyme or poetic meter if a conflict arises. However, strive for both if possible without sacrificing meaning or naturalness.
+    `.replace(/{targetLang}/g, targetLang);
+    }
+
+    // Combine the translation rules with the standard input/output instructions.
+    const finalInputOutputBlock = getStandardInputOutputInstructionBlock(texts, targetLang);
+    const mainPromptText = translationRulesPart + finalInputOutputBlock;
+
+    const requestBody = {
+        contents: [{
+            parts: [{
+                text: mainPromptText
+            }]
+        }],
+        generation_config: {
+            response_mime_type: "application/json",
+        }
+    };
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+        let errorDetails = 'Unknown error';
+        try {
+            const errorData = await response.json();
+            if (errorData.error && errorData.error.message) {
+                errorDetails = errorData.error.message;
+                if (errorData.error.details) {
+                    errorDetails += ` | Details: ${JSON.stringify(errorData.error.details)}`;
+                }
+            } else {
+                errorDetails = JSON.stringify(errorData);
+            }
+        } catch (e) {
+            errorDetails = await response.text();
+        }
+        throw new Error(`Gemini AI API error: ${response.status} - ${errorDetails}`);
+    }
+
+    const data = await response.json();
+
+    if (data.promptFeedback && data.promptFeedback.blockReason) { // Check for blocked content first
+        throw new Error(`Gemini AI translation blocked: ${data.promptFeedback.blockReason}. Details: ${JSON.stringify(data.promptFeedback.safetyRatings)}`);
+    }
+
+    if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+        let rawJsonText = data.candidates[0].content.parts[0].text.trim();
+
+        if (rawJsonText.startsWith('```json') && rawJsonText.endsWith('```')) {
+            rawJsonText = rawJsonText.substring(7, rawJsonText.length - 3).trim();
+        } else if (rawJsonText.startsWith('```') && rawJsonText.endsWith('```')) {
+            rawJsonText = rawJsonText.substring(3, rawJsonText.length - 3).trim();
+        }
+
+        try {
+            const parsedJson = JSON.parse(rawJsonText);
+            if (parsedJson && Array.isArray(parsedJson.translated_lyrics) &&
+                parsedJson.target_language === targetLang &&
+                (Array.isArray(parsedJson.detected_source_languages_per_line) || parsedJson.detected_source_languages_per_line === undefined)
+            ) {
+                return parsedJson.translated_lyrics;
+            } else {
+                console.warn("Gemini AI response JSON structure mismatch or missing vital fields. Expected structure not fully met. Raw:", rawJsonText, "Parsed:", parsedJson);
+                throw new Error('Gemini AI translation: Invalid or incomplete JSON structure in response.');
+            }
+        } catch (e) {
+            console.error("Gemini AI response was not valid JSON or failed parsing:", e, "\nRaw text received:", rawJsonText);
+            const lines = rawJsonText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            if (lines.length === texts.length && !rawJsonText.includes("{") && !rawJsonText.includes("[")) {
+                console.warn("Attempting recovery by splitting lines as JSON parsing failed and response doesn't look like JSON.");
+                return lines;
+            }
+            throw new Error(`Gemini AI translation failed: Response was not valid JSON. ${e.message}`);
         }
     }
+    throw new Error('Gemini AI translation failed: No valid content or parts in response candidates.');
+}
 
 async function fetchGoogleTranslate(text, targetLang) {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
@@ -525,68 +666,6 @@ async function fetchGoogleRomanize(text) {
         return data[0][0][3];
     }
     return text; // Return original text if romanization fails
-}
-
-
-async function fetchGeminiTranslate(texts, targetLang, apiKey, model, overridePrompt, customPrompt) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-    let prompt = '';
-    if (overridePrompt && customPrompt) {
-        prompt = customPrompt.replace(/\{targetLang\}/g, targetLang);
-    } else {
-        prompt = `
-You are a professional translator for song lyrics.
-Translate the following lines into ${targetLang}.
-Your most important task is to preserve the original meaning, emotion, and tone of each line.
-After ensuring the meaning is preserved, try to make the translation sound natural in ${targetLang}.
-If the current whole line has exact language from ${targetLang}, do not change/rephrase it.
-but if it has multiple language at the same line, translate it`;
-    }
-
-    const requestBody = {
-        contents: [{
-            parts: [{
-                text: prompt + `\n\nDo NOT include any explanation or formatting.
-                Only return a with this format {"translated": ["you need to fill this"],"info":{"sourceLanguage":["this is used for songs lyrics that could be multiple"],"targetLanguage":"${targetLang}"}, in the same order.
-                Here are the lyrics: ${JSON.stringify(texts)}`
-            }]
-        }]
-    };
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Gemini AI API error: ${response.status} - ${errorData.error.message}`);
-    }
-
-    const data = await response.json();
-    if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
-        let rawText = data.candidates[0].content.parts[0].text.trim();
-        // Remove markdown code block if present
-        if (rawText.startsWith('```json') && rawText.endsWith('```')) {
-            rawText = rawText.substring(7, rawText.length - 3).trim();
-        }
-        try {
-            // Attempt to parse the raw text as a JSON array
-            const parsedArray = JSON.parse(rawText);
-            if (Array.isArray(parsedArray.translated)) {
-                return parsedArray.translated;
-            }
-        } catch (e) {
-            console.warn("Gemini AI response was not a valid JSON array, attempting to recover:", rawText);
-            // Fallback: if it's not a valid JSON array, assume it's a single string and return it in an array
-            return [rawText];
-        }
-    }
-    throw new Error('Gemini AI translation failed: No content or invalid format in response.');
 }
 
 // Helper function to check if lyrics object is empty

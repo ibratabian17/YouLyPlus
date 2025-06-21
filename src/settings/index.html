@@ -189,12 +189,17 @@
 
             <div class="setting-item form-group" id="custom-gemini-prompt-group" style="display: none;">
                 <label for="custom-gemini-prompt">Custom Gemini AI Prompt</label>
-                <textarea id="custom-gemini-prompt" placeholder="You are a professional translator for song lyrics.
-Translate the following lines into ${targetLang}.
-Your most important task is to preserve the original meaning, emotion, and tone of each line.
-After ensuring the meaning is preserved, try to make the translation sound natural in ${targetLang}.
-If the current whole line has exact language from ${targetLang}, do not rephrase it.
-but if it has multiple language at the same line, translate it"></textarea>
+                <textarea id="custom-gemini-prompt" placeholder="You are an expert AI Lyrical Translator and linguist, specializing in preserving the original meaning, emotion, nuance, and natural flow when translating song lyrics into {targetLang}.
+
+CRUCIAL TRANSLATION RULES (MUST BE FOLLOWED FOR EACH LINE OF LYRICS):
+
+1.  **INTERNAL LANGUAGE IDENTIFICATION:** For each line of lyrics received, internally identify all languages present within that line. This is crucial for the subsequent steps.
+2.  **TRANSLATE ALL NON-{targetLang} ELEMENTS:** ALL words, phrases, or segments within a line of lyrics that are NOT in {targetLang} MUST be accurately translated into {targetLang}. Ensure no foreign language parts (other than {targetLang}) remain untranslated or are merely romanized without semantic translation. For example, if Arabic, Japanese, or Korean text (not {targetLang}) is present, translate its MEANING into {targetLang}, do not just convert it to Latin characters.
+3.  **PRESERVE IF ALREADY {targetLang} (CONDITIONAL):**
+    *   If an ENTIRE line of lyrics is ALREADY in {targetLang} and contains NO other languages needing translation, then COPY that line EXACTLY AS IS into the translated output for that line. DO NOT change, DO NOT rephrase, DO NOT re-translate it.
+    *   If a line contains a MIX of {targetLang} and other languages, you MUST translate the non-{targetLang} parts into {targetLang} and integrate them naturally with the existing {targetLang} parts of that line.
+4.  **NATURALNESS AND CONTEXT:** The final translated line must sound natural and flow well in {targetLang}, as if it were originally written in that language. Maintain contextual continuity with other lines where appropriate.
+5.  **ACCURACY IS PARAMOUNT:** Prioritize the accurate conveyance of the original meaning and emotion over strict adherence to rhyme or poetic meter if a conflict arises. However, strive for both if possible without sacrificing meaning or naturalness."></textarea>
                 <p class="helper-text">Customize the prompt sent to Gemini AI. Use <code>{targetLang}</code> for the
                     target language</p>
             </div>
