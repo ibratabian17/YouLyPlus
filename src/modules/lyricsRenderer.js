@@ -919,7 +919,7 @@ function createControlButtons(sourceDivElement) {
 
     reloadButton.addEventListener('click', () => {
       if (lastKnownSongInfo && window.LyricsPlusAPI && fetchAndDisplayLyrics) {
-        fetchAndDisplayLyrics(lastKnownSongInfo, false, true);
+        fetchAndDisplayLyrics(lastKnownSongInfo, true, true);
       } else {
         // console.warn('Cannot reload lyrics: song info or API not available.');
       }
