@@ -210,7 +210,7 @@ pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'TRANSLATE_LYRICS') {
         (async () => {
             try {
-                const translatedLyrics = await handleTranslateLyrics(message.songInfo, message.action, message.targetLang);
+                const translatedLyrics = await handleTranslateLyrics(message.songInfo, message.action, message.targetLang, message.forceReload);
                 sendResponse({ success: true, translatedLyrics });
             }
             catch (error) {
@@ -319,7 +319,7 @@ async function handleLyricsFetch(songInfo, sendResponse, forceReload = false) {
     }
 }
 
-async function handleTranslateLyrics(songInfo, action, targetLang) {
+async function handleTranslateLyrics(songInfo, action, targetLang, forceReload = false) {
     const originalLyricsCacheKey = `${songInfo.title} - ${songInfo.artist} - ${songInfo.album}`;
     const translatedLyricsCacheKey = `${originalLyricsCacheKey} - ${action} - ${targetLang}`;
 
@@ -339,7 +339,7 @@ async function handleTranslateLyrics(songInfo, action, targetLang) {
         console.error("Error reading translated lyrics from DB:", error);
     }
 
-    const originalLyrics = await getOrFetchLyrics(songInfo);
+    const originalLyrics = await getOrFetchLyrics(songInfo, forceReload);
 
     if (!originalLyrics || !originalLyrics.data || originalLyrics.data.length === 0) {
         throw new Error('Original lyrics not found or empty for translation.');
@@ -417,7 +417,7 @@ async function handleTranslateLyrics(songInfo, action, targetLang) {
 }
 
 // Helper function to get lyrics from cache/DB or fetch them
-async function getOrFetchLyrics(songInfo) {
+async function getOrFetchLyrics(songInfo, forceReload = false) {
     const cacheKey = `${songInfo.title} - ${songInfo.artist} - ${songInfo.album}`;
 
     // Check in-memory cache
@@ -464,7 +464,7 @@ async function getOrFetchLyrics(songInfo) {
 
             // Try the primary provider first.
             if (lyricsProvider === 'kpoe') {
-                lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, fetchOptions);
+                lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, forceReload);
             } else if (lyricsProvider === 'lrclib') {
                 lyrics = await fetchLRCLibLyrics(songInfo, fetchOptions);
             }
@@ -474,7 +474,7 @@ async function getOrFetchLyrics(songInfo) {
                 if (lyricsProvider === 'kpoe') {
                     lyrics = await fetchLRCLibLyrics(songInfo, fetchOptions);
                 } else if (lyricsProvider === 'lrclib') {
-                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, fetchOptions);
+                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, forceReload);
                 }
             }
 
@@ -688,10 +688,17 @@ async function fetchKPoeLyrics(songInfo, sourceOrder = '', forceReload = false) 
         ? `&album=${encodeURIComponent(songInfo.album)}`
         : '';
     const sourceParam = sourceOrder ? `&source=${encodeURIComponent(sourceOrder)}` : '';
-    const forceReloadParam = forceReload ? `&forceReload=true` : '';
+    let forceReloadParam = forceReload ? `&forceReload=true` : '';
+    let fetchOptions = {};
+
+    if (forceReload) {
+        fetchOptions = { cache: 'no-store' };
+        forceReloadParam = `&forceReload=true`;
+    }
+
     const url = `https://lyricsplus.prjktla.workers.dev/v2/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}&duration=${songInfo.duration}${sourceParam}${forceReloadParam}`;
 
-    const response = await fetch(url, { cache: 'no-store' }); // Disable fetch cache
+    const response = await fetch(url, fetchOptions);
     if (!response.ok) return null;
 
     const data = await response.json();
