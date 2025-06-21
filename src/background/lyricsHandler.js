@@ -64,11 +64,10 @@ async function getLyricsFromDB(key) {
 
 async function saveLyricsToDB(key, lyrics) {
     const settings = await storageLocalGet({ 'cacheStrategy': 'aggressive' });
-    const cacheStrategy = settings.cacheStrategy;
-
-    if (cacheStrategy === 'none') {
+    if (settings.cacheStrategy === 'none') {
         return; // Do not save if cache strategy is 'none'
     }
+    const cacheStrategy = settings.cacheStrategy;
 
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -401,7 +400,10 @@ async function handleTranslateLyrics(songInfo, action, targetLang) {
     };
 
     lyricsCache.set(translatedLyricsCacheKey, finalTranslatedLyrics);
-    await saveLyricsToDB(translatedLyricsCacheKey, finalTranslatedLyrics); // Save translated lyrics to DB
+    const cacheSettings = await storageLocalGet({ 'cacheStrategy': 'aggressive' });
+    if (cacheSettings.cacheStrategy !== 'none') {
+        await saveLyricsToDB(translatedLyricsCacheKey, finalTranslatedLyrics); // Save translated lyrics to DB
+    }
     console.log('song translated and cached');
 
     return finalTranslatedLyrics;
@@ -441,25 +443,31 @@ async function getOrFetchLyrics(songInfo) {
     const fetchPromise = (async () => {
         try {
             // Determine provider and source order based on settings.
-            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,lyricsplus,musixmatch,spotify,musixmatch-word' });
+            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,lyricsplus,musixmatch,spotify,musixmatch-word', 'cacheStrategy': 'aggressive' });
             const lyricsProvider = settings.lyricsProvider;
             const lyricsSourceOrder = settings.lyricsSourceOrder;
+            const cacheStrategy = settings.cacheStrategy;
 
             let lyrics = null;
+            let fetchOptions = {};
+
+            if (cacheStrategy === 'none') {
+                fetchOptions = { cache: 'no-cache' };
+            }
 
             // Try the primary provider first.
             if (lyricsProvider === 'kpoe') {
-                lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder);
+                lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, fetchOptions);
             } else if (lyricsProvider === 'lrclib') {
-                lyrics = await fetchLRCLibLyrics(songInfo);
+                lyrics = await fetchLRCLibLyrics(songInfo, fetchOptions);
             }
 
             // If no result from primary, try the other provider as fallback.
             if (isEmptyLyrics(lyrics)) {
                 if (lyricsProvider === 'kpoe') {
-                    lyrics = await fetchLRCLibLyrics(songInfo);
+                    lyrics = await fetchLRCLibLyrics(songInfo, fetchOptions);
                 } else if (lyricsProvider === 'lrclib') {
-                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder);
+                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, fetchOptions);
                 }
             }
 
