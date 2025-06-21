@@ -106,6 +106,39 @@ body {
     height: 100vh; 
 }
 
+/* --- Custom Scrollbar --- */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--md-sys-color-primary) var(--md-sys-color-surface-container-highest);
+}
+
+/* For WebKit browsers */
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--md-sys-color-surface-container-highest);
+    border-radius: var(--border-radius-small);
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--md-sys-color-primary);
+    border-radius: var(--border-radius-small);
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: var(--md-sys-color-primary-container);
+}
+
+*::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+
 /* --- Typography & Icons --- */
 h1 {
     font-size: 1.375rem; 
