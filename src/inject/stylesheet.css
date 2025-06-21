@@ -602,45 +602,57 @@ ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) #lyric
 /* Buttons (Translate, Reload) */
 #lyrics-plus-translate-button,
 #lyrics-plus-reload-button {
-    background-color: rgba(0, 0, 0, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 1000;
-    font-size: 20px;
-    color: #fff;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease;
     position: relative;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    border: none;
+    box-shadow: none;
+    backdrop-filter: blur(6px); /* subtle */
 }
 
 #lyrics-plus-translate-button:hover,
 #lyrics-plus-reload-button:hover {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(255, 255, 255, 0.16);
+    transform: scale(1.1);
+}
+
+#lyrics-plus-translate-button:active,
+#lyrics-plus-reload-button:active {
+    background-color: rgba(255, 255, 255, 0.24);
+    transform: scale(0.95);
+}
+
+
+#lyrics-plus-translate-button:hover,
+#lyrics-plus-reload-button:hover {
+    background-color: rgba(255, 255, 255, 0.137);
 }
 
 /* Translation Dropdown Menu */
 #lyrics-plus-translation-dropdown {
     position: absolute;
-    top: calc(100% + 10px); /* Positioned below the button, but overridden to top */
+    top: -10em; /* tetap seperti logika nte */
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(30, 30, 30, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    background-color: rgba(24, 24, 24, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    box-shadow: none;
     z-index: 999;
-    min-width: 150px;
+    min-width: 140px;
     overflow: hidden;
-    padding: 5px 0;
-    top: -10em; /* Actual position above the button */
+    padding: 4px 0;
+    backdrop-filter: blur(4px);
+    font-family: Roboto, Arial, sans-serif;
 }
 
 #lyrics-plus-translation-dropdown.hidden {
@@ -648,17 +660,20 @@ ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) #lyric
 }
 
 .dropdown-option {
-    padding: 10px 15px;
-    color: #fff;
-    font-size: 14px;
+    padding: 8px 12px;
+    color: rgba(255, 255, 255, 0.87);
+    font-size: 13px;
+    line-height: 1.4;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    text-align: center;
+    text-align: left;
+    white-space: nowrap;
 }
 
 .dropdown-option:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.08);
 }
+
 
 /* Translated/Romanized Text Container */
 .lyrics-translation-container {
