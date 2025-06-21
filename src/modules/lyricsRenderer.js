@@ -20,6 +20,8 @@ let translationButton = null; // Reference to the translation button
 let reloadButton = null; // Reference to the reload button
 let dropdownMenu = null; // Reference to the translation dropdown menu
 
+// --- Core DOM Manipulation & Setup ---
+
 // Cached DOM references
 const getContainer = () => {
   if (!lyricsContainer) {
@@ -27,6 +29,32 @@ const getContainer = () => {
   }
   return lyricsContainer;
 };
+
+function createLyricsContainer() {
+  const originalLyricsSection = document.querySelector('#tab-renderer');
+  if (!originalLyricsSection) {
+    // console.log('Lyrics section not found'); // Keep console logs minimal for release
+    return null;
+  }
+  const container = document.createElement('div');
+  container.id = 'lyrics-plus-container';
+  container.classList.add('lyrics-plus-integrated');
+  originalLyricsSection.appendChild(container);
+  injectCssFile();
+  lyricsContainer = container;
+  return container;
+}
+
+function injectCssFile() {
+  if (document.querySelector('link[data-lyrics-plus-style]')) return;
+  const pBrowser = chrome || browser;
+  const linkElement = document.createElement('link');
+  linkElement.rel = 'stylesheet';
+  linkElement.type = 'text/css';
+  linkElement.href = pBrowser.runtime.getURL('src/inject/stylesheet.css');
+  linkElement.setAttribute('data-lyrics-plus-style', 'true');
+  document.head.appendChild(linkElement);
+}
 
 // Performance optimization: Batch DOM manipulations
 function batchDOMUpdates(callback) {
@@ -36,6 +64,8 @@ function batchDOMUpdates(callback) {
     getContainer().appendChild(fragment);
   });
 }
+
+// --- Lyrics Display & Rendering Logic ---
 
 function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}) {
   const container = getContainer();
@@ -450,7 +480,6 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   createControlButtons(getContainer());
 }
 
-
 function displaySongNotFound() {
   const container = getContainer();
   if (container) {
@@ -465,32 +494,7 @@ function displaySongError() {
   }
 }
 
-
-function createLyricsContainer() {
-  const originalLyricsSection = document.querySelector('#tab-renderer');
-  if (!originalLyricsSection) {
-    // console.log('Lyrics section not found'); // Keep console logs minimal for release
-    return null;
-  }
-  const container = document.createElement('div');
-  container.id = 'lyrics-plus-container';
-  container.classList.add('lyrics-plus-integrated');
-  originalLyricsSection.appendChild(container);
-  injectCssFile();
-  lyricsContainer = container;
-  return container;
-}
-
-function injectCssFile() {
-  if (document.querySelector('link[data-lyrics-plus-style]')) return;
-  const pBrowser = chrome || browser;
-  const linkElement = document.createElement('link');
-  linkElement.rel = 'stylesheet';
-  linkElement.type = 'text/css';
-  linkElement.href = pBrowser.runtime.getURL('src/inject/stylesheet.css');
-  linkElement.setAttribute('data-lyrics-plus-style', 'true');
-  document.head.appendChild(linkElement);
-}
+// --- Text, Style, and ID Utilities ---
 
 function getTextWidth(text, font) {
   // textWidthCanvas is already cached globally, no change needed here.
@@ -522,31 +526,7 @@ function ensureElementIds() {
   });
 }
 
-function setupVisibilityTracking() {
-  const container = getContainer();
-  if (!container || !container.parentElement) return null;
-  if (visibilityObserver) {
-    visibilityObserver.disconnect();
-  }
-  visibilityObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          visibleLineIds.add(entry.target.id);
-        } else {
-          visibleLineIds.delete(entry.target.id);
-        }
-      });
-    },
-    { root: container.parentElement, rootMargin: '200px 0px', threshold: 0.1 }
-  );
-  if (cachedLyricsLines) {
-    cachedLyricsLines.forEach(line => {
-      if (line) visibilityObserver.observe(line);
-    });
-  }
-  return visibilityObserver;
-}
+// --- Lyrics Synchronization & Highlighting ---
 
 function startLyricsSync(currentSettings = {}) { // Added default for currentSettings
   const videoElement = document.querySelector('video');
@@ -575,95 +555,6 @@ function startLyricsSync(currentSettings = {}) { // Added default for currentSet
       lyricsAnimationFrameId = null;
     }
   };
-}
-
-function createDropdownMenu(parentWrapper) {
-  if (dropdownMenu) {
-    dropdownMenu.innerHTML = ''; // Clear existing options
-  } else {
-    dropdownMenu = document.createElement('div');
-    dropdownMenu.id = 'lyrics-plus-translation-dropdown';
-    dropdownMenu.classList.add('hidden'); // Initially hidden
-    if (parentWrapper) {
-      parentWrapper.appendChild(dropdownMenu);
-    } else {
-      // console.warn("Cannot create dropdown, parent wrapper not found."); // Keep console logs minimal
-      return;
-    }
-  }
-
-  // Use renderer's currentDisplayMode (synced by manager) to build menu
-  if (currentDisplayMode !== 'translate') {
-    const showTranslateOption = document.createElement('div');
-    showTranslateOption.classList.add('dropdown-option');
-    showTranslateOption.textContent = t('showTranslation');
-    showTranslateOption.addEventListener('click', () => {
-      dropdownMenu.classList.add('hidden');
-      if (setCurrentDisplayModeAndRefetch) {
-        setCurrentDisplayModeAndRefetch('translate', lastKnownSongInfo);
-      }
-    });
-    dropdownMenu.appendChild(showTranslateOption);
-  }
-
-  if (currentDisplayMode !== 'romanize') {
-    const showRomanizeOption = document.createElement('div');
-    showRomanizeOption.classList.add('dropdown-option');
-    showRomanizeOption.textContent = t('showPronunciation');
-    showRomanizeOption.addEventListener('click', () => {
-      dropdownMenu.classList.add('hidden');
-      if (setCurrentDisplayModeAndRefetch) {
-        setCurrentDisplayModeAndRefetch('romanize', lastKnownSongInfo);
-      }
-    });
-    dropdownMenu.appendChild(showRomanizeOption);
-  }
-
-  if (currentDisplayMode !== 'none') {
-    const separator = document.createElement('div');
-    separator.classList.add('dropdown-separator');
-    dropdownMenu.appendChild(separator);
-
-    const hideOption = document.createElement('div');
-    hideOption.classList.add('dropdown-option');
-    hideOption.textContent = currentDisplayMode === 'translate' ? t('hideTranslation') : t('hidePronunciation');
-    hideOption.addEventListener('click', () => {
-      dropdownMenu.classList.add('hidden');
-      if (setCurrentDisplayModeAndRefetch) {
-        setCurrentDisplayModeAndRefetch('none', lastKnownSongInfo);
-      }
-    });
-    dropdownMenu.appendChild(hideOption);
-  }
-  if (dropdownMenu.children.length === 0) {
-    const noOptionsText = document.createElement('div');
-    noOptionsText.textContent = "No options available";
-    noOptionsText.style.padding = "5px";
-    noOptionsText.style.color = "grey";
-    dropdownMenu.appendChild(noOptionsText);
-  }
-}
-
-function cleanupLyrics() {
-  if (lyricsAnimationFrameId) {
-    cancelAnimationFrame(lyricsAnimationFrameId);
-    lyricsAnimationFrameId = null;
-  }
-  const container = getContainer();
-  if (container) {
-    container.innerHTML = `<span class="text-loading">${t("loading")}</span>`;
-  }
-  activeLineIds.clear();
-  highlightedSyllableIds.clear();
-  visibleLineIds.clear();
-  currentPrimaryActiveLine = null;
-  if (visibilityObserver) {
-    visibilityObserver.disconnect();
-    visibilityObserver = null;
-  }
-  // Clear cached DOM element arrays
-  cachedLyricsLines = [];
-  cachedSyllables = [];
 }
 
 function updateLyricsHighlight(currentTime, isForceScroll = false, currentSettings = {}) {
@@ -841,6 +732,8 @@ function resetSyllables(line) {
   }
 }
 
+// --- Scrolling Logic ---
+
 function scrollActiveLine(currentTime, forceScroll = false) {
   const container = document.querySelector("#lyrics-plus-container");
   const activeLines = container.querySelectorAll('.lyrics-line.active');
@@ -931,11 +824,35 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
   });
 }
 
-function updateTranslationButtonText() {
-  if (!translationButton) return;
-  translationButton.innerHTML = '⋯'; // Ellipsis
-  translationButton.title = t('showTranslationOptions');
+// --- Visibility Tracking ---
+
+function setupVisibilityTracking() {
+  const container = getContainer();
+  if (!container || !container.parentElement) return null;
+  if (visibilityObserver) {
+    visibilityObserver.disconnect();
+  }
+  visibilityObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          visibleLineIds.add(entry.target.id);
+        } else {
+          visibleLineIds.delete(entry.target.id);
+        }
+      });
+    },
+    { root: container.parentElement, rootMargin: '200px 0px', threshold: 0.1 }
+  );
+  if (cachedLyricsLines) {
+    cachedLyricsLines.forEach(line => {
+      if (line) visibilityObserver.observe(line);
+    });
+  }
+  return visibilityObserver;
 }
+
+// --- Control Buttons & UI ---
 
 function createControlButtons(sourceDivElement) {
   let buttonsWrapper = document.getElementById('lyrics-plus-buttons-wrapper');
@@ -990,4 +907,101 @@ function createControlButtons(sourceDivElement) {
       }
     });
   }
+}
+
+function createDropdownMenu(parentWrapper) {
+  if (dropdownMenu) {
+    dropdownMenu.innerHTML = ''; // Clear existing options
+  } else {
+    dropdownMenu = document.createElement('div');
+    dropdownMenu.id = 'lyrics-plus-translation-dropdown';
+    dropdownMenu.classList.add('hidden'); // Initially hidden
+    if (parentWrapper) {
+      parentWrapper.appendChild(dropdownMenu);
+    } else {
+      // console.warn("Cannot create dropdown, parent wrapper not found."); // Keep console logs minimal
+      return;
+    }
+  }
+
+  // Use renderer's currentDisplayMode (synced by manager) to build menu
+  if (currentDisplayMode !== 'translate') {
+    const showTranslateOption = document.createElement('div');
+    showTranslateOption.classList.add('dropdown-option');
+    showTranslateOption.textContent = t('showTranslation');
+    showTranslateOption.addEventListener('click', () => {
+      dropdownMenu.classList.add('hidden');
+      if (setCurrentDisplayModeAndRefetch) {
+        setCurrentDisplayModeAndRefetch('translate', lastKnownSongInfo);
+      }
+    });
+    dropdownMenu.appendChild(showTranslateOption);
+  }
+
+  if (currentDisplayMode !== 'romanize') {
+    const showRomanizeOption = document.createElement('div');
+    showRomanizeOption.classList.add('dropdown-option');
+    showRomanizeOption.textContent = t('showPronunciation');
+    showRomanizeOption.addEventListener('click', () => {
+      dropdownMenu.classList.add('hidden');
+      if (setCurrentDisplayModeAndRefetch) {
+        setCurrentDisplayModeAndRefetch('romanize', lastKnownSongInfo);
+      }
+    });
+    dropdownMenu.appendChild(showRomanizeOption);
+  }
+
+  if (currentDisplayMode !== 'none') {
+    const separator = document.createElement('div');
+    separator.classList.add('dropdown-separator');
+    dropdownMenu.appendChild(separator);
+
+    const hideOption = document.createElement('div');
+    hideOption.classList.add('dropdown-option');
+    hideOption.textContent = currentDisplayMode === 'translate' ? t('hideTranslation') : t('hidePronunciation');
+    hideOption.addEventListener('click', () => {
+      dropdownMenu.classList.add('hidden');
+      if (setCurrentDisplayModeAndRefetch) {
+        setCurrentDisplayModeAndRefetch('none', lastKnownSongInfo);
+      }
+    });
+    dropdownMenu.appendChild(hideOption);
+  }
+  if (dropdownMenu.children.length === 0) {
+    const noOptionsText = document.createElement('div');
+    noOptionsText.textContent = "No options available";
+    noOptionsText.style.padding = "5px";
+    noOptionsText.style.color = "grey";
+    dropdownMenu.appendChild(noOptionsText);
+  }
+}
+
+function updateTranslationButtonText() {
+  if (!translationButton) return;
+  translationButton.innerHTML = '⋯'; // Ellipsis
+  translationButton.title = t('showTranslationOptions');
+}
+
+// --- Cleanup ---
+
+function cleanupLyrics() {
+  if (lyricsAnimationFrameId) {
+    cancelAnimationFrame(lyricsAnimationFrameId);
+    lyricsAnimationFrameId = null;
+  }
+  const container = getContainer();
+  if (container) {
+    container.innerHTML = `<span class="text-loading">${t("loading")}</span>`;
+  }
+  activeLineIds.clear();
+  highlightedSyllableIds.clear();
+  visibleLineIds.clear();
+  currentPrimaryActiveLine = null;
+  if (visibilityObserver) {
+    visibilityObserver.disconnect();
+    visibilityObserver = null;
+  }
+  // Clear cached DOM element arrays
+  cachedLyricsLines = [];
+  cachedSyllables = [];
 }
