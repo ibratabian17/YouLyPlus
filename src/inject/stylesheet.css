@@ -84,9 +84,17 @@ ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyri
     /*scroll-snap-align: center;*/
 }
 
-.lyrics-plus-integrated:not(.compability-visibility) .lyrics-line:not(.lyrics-gap) {
+.lyrics-plus-integrated:not(.compability-visibility) .lyrics-line {
     content-visibility: auto;
     contain-intrinsic-size: 100% 3em;
+}
+
+.lyrics-plus-integrated.compability-visibility .lyrics-line.viewport-hidden * {
+    transition: none !important;
+    animation: none !important;
+    will-change: auto !important;
+    background: none;
+    visibility: hidden;
 }
 
 /* States & Interaction */

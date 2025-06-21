@@ -559,9 +559,11 @@ function startLyricsSync(currentSettings = {}) { // Added default for currentSet
 
 function updateLyricsHighlight(currentTime, isForceScroll = false, currentSettings = {}) {
   if (!cachedLyricsLines || !cachedLyricsLines.length) return;
-  // const compabilityVisibilityEnabled = currentSettings.compabilityVisibility; // Not used in this function
 
   let activeLines = []; // To store actual line elements
+  const container = document.querySelector("#lyrics-plus-container");
+  const compabilityVisibilityEnabled = container.classList.contains('compability-visibility');
+
   // Iterate over cachedLyricsLines, using pre-parsed times
   cachedLyricsLines.forEach(line => {
     if (!line || typeof line._startTimeMs !== 'number' || typeof line._endTimeMs !== 'number') return;
@@ -571,6 +573,20 @@ function updateLyricsHighlight(currentTime, isForceScroll = false, currentSettin
 
     if (shouldBeActive) {
       activeLines.push(line);
+    }
+
+    if (compabilityVisibilityEnabled) {
+      const scrollContainer = container.parentElement;
+      if (scrollContainer) {
+        const scrollContainerRect = scrollContainer.getBoundingClientRect();
+        const lineRect = line.getBoundingClientRect();
+        const isOutOfView = lineRect.bottom < scrollContainerRect.top || lineRect.top > scrollContainerRect.bottom;
+        if (isOutOfView) {
+          line.classList.add('viewport-hidden');
+        } else {
+          line.classList.remove('viewport-hidden');
+        }
+      }
     }
   });
 
@@ -790,6 +806,8 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
   // Get the lyrics container element
   const container = document.querySelector("#lyrics-plus-container");
   if (!container) return;
+
+  const compabilityVisibilityEnabled = container.classList.contains('compability-visibility');
 
   // Only proceed if the container is visible (displayed as block)
   const computedStyle = getComputedStyle(container);
