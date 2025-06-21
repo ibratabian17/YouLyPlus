@@ -66,11 +66,11 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   const elementPool = {
     lines: [],
     syllables: [],
-    chars: []
+    chars: [] // Pool for char spans if needed, currently used by flushWordBuffer
   };
 
   const onLyricClick = e => {
-    const time = parseFloat(e.currentTarget.dataset.startTime);
+    const time = parseFloat(e.currentTarget.dataset.startTime); // Keep parseFloat here as it's infrequent
     const player = document.querySelector("video");
     if (player) player.currentTime = time;
     scrollToActiveLine(e.currentTarget, true);
@@ -97,6 +97,10 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       if (classesToInherit.includes('singer-left')) gapLine.classList.add('singer-left');
       if (classesToInherit.includes('singer-right')) gapLine.classList.add('singer-right');
     }
+
+    // Clear previous main container if reusing pooled gapLine
+    const existingMainContainer = gapLine.querySelector('.main-vocal-container');
+    if (existingMainContainer) existingMainContainer.remove();
 
     const mainContainer = document.createElement('div');
     mainContainer.className = 'main-vocal-container';
@@ -135,8 +139,10 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     };
 
     lyrics.data.forEach((line, lineIndex) => {
-      let currentLine = document.createElement('div');
-      currentLine.classList.add('lyrics-line');
+      let currentLine = elementPool.lines.pop() || document.createElement('div');
+      // Reset classes and content for pooled lines
+      currentLine.innerHTML = '';
+      currentLine.className = 'lyrics-line';
       currentLine.dataset.startTime = line.startTime; // Expecting seconds
       currentLine.dataset.endTime = line.endTime;     // Expecting seconds
       currentLine.classList.add(
@@ -152,7 +158,6 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       mainContainer.classList.add('main-vocal-container');
       currentLine.appendChild(mainContainer);
 
-      // Render translated/romanized text if available and different from original
       if (line.translatedText &&
         (displayMode === 'translate' || displayMode === 'romanize') &&
         line.text.trim() !== line.translatedText.trim()) {
@@ -166,12 +171,14 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       let wordBuffer = [];
       let currentWordStartTime = null; // in ms
       let currentWordEndTime = null;   // in ms
-      let currentWordElement = {};
+      // currentWordElement = {}; // Not used, can be removed
 
       const flushWordBuffer = () => {
         if (!wordBuffer.length) return;
-        const wordSpan = document.createElement('span');
-        wordSpan.classList.add('lyrics-word');
+        const wordSpan = elementPool.syllables.pop() || document.createElement('span'); // Using syllable pool for words too
+        wordSpan.innerHTML = ''; // Clear if reusing
+        wordSpan.className = 'lyrics-word'; // Reset class
+
         let referenceFont = mainContainer.firstChild ? getComputedFont(mainContainer.firstChild) : '400 16px sans-serif';
         const combinedText = wordBuffer.map(s => s.text).join('');
         const trimmedText = combinedText.trim();
@@ -190,13 +197,15 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
         wordSpan.style.setProperty('--min-scale', minScale);
         wordSpan.style.setProperty('--shadow-intensity', shadowIntensity);
         wordSpan.style.setProperty('--translate-y-peak', translateYPeak);
-        wordSpan.dataset.totalDuration = totalDuration;
+        wordSpan.dataset.totalDuration = totalDuration; // This is wordDuration for syllables
         let isCurrentWordBackground = wordBuffer[0].isBackground || false;
         const characterData = [];
 
         wordBuffer.forEach((s, syllableIndex) => {
-          const sylSpan = document.createElement('span');
-          sylSpan.classList.add('lyrics-syllable');
+          const sylSpan = elementPool.syllables.pop() || document.createElement('span');
+          sylSpan.innerHTML = ''; // Clear if reusing
+          sylSpan.className = 'lyrics-syllable'; // Reset class
+
           sylSpan.dataset.startTime = s.time; // ms
           sylSpan.dataset.duration = s.duration; // ms
           sylSpan.dataset.endTime = s.time + s.duration; // ms
@@ -219,9 +228,9 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
                 if (char === ' ') {
                   textNodes.push(document.createTextNode(' '));
                 } else {
-                  const charSpan = document.createElement('span');
+                  const charSpan = elementPool.chars.pop() || document.createElement('span');
                   charSpan.textContent = char;
-                  charSpan.classList.add('char');
+                  charSpan.className = 'char'; // Reset class
                   charSpan.dataset.charIndex = charIndex++;
                   charSpan.dataset.syllableCharIndex = characterData.length;
                   characterData.push({ charSpan, syllableSpan: sylSpan, isBackground: s.isBackground });
@@ -237,7 +246,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
         });
 
         if (shouldEmphasize && characterData.length > 0) {
-          const fullWordText = wordSpan.textContent;
+          const fullWordText = wordSpan.textContent; // This is fine for width calculation
           const wordWidth = getTextWidth(fullWordText, referenceFont);
           let cumulativeWidth = 0;
           characterData.forEach((charData) => {
@@ -272,7 +281,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
         wordBuffer = [];
         currentWordStartTime = null;
         currentWordEndTime = null;
-        currentWordElement = {};
+        // currentWordElement = {}; // Not used
       };
 
       if (line.syllabus && line.syllabus.length > 0) {
@@ -280,7 +289,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
           if (wordBuffer.length === 0) currentWordStartTime = s.time;
           wordBuffer.push(s);
           currentWordEndTime = s.time + s.duration;
-          currentWordElement = s.element || {};
+          // currentWordElement = s.element || {}; // Not used
           const isLastSyllableInLine = syllableIndex === line.syllabus.length - 1;
           const nextSyllable = line.syllabus[syllableIndex + 1];
           const endsWithExplicitDelimiter = s.isLineEnding || /\s$/.test(s.text);
@@ -298,10 +307,12 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     // "Line" mode
     const lineFragment = document.createDocumentFragment();
     lyrics.data.forEach(line => {
-      const lineDiv = document.createElement('div');
+      const lineDiv = elementPool.lines.pop() || document.createElement('div');
+      lineDiv.innerHTML = ''; // Clear if reusing
+      lineDiv.className = 'lyrics-line'; // Reset class
+
       lineDiv.dataset.startTime = line.startTime; // Expecting seconds
       lineDiv.dataset.endTime = line.endTime;   // Expecting seconds
-      lineDiv.classList.add('lyrics-line');
       lineDiv.classList.add(line.element.singer === "v2" ? 'singer-right' : 'singer-left');
       if (isRTL(line.text)) lineDiv.classList.add('rtl-text');
       if (!lineDiv.hasClickListener) {
@@ -314,7 +325,6 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       mainContainer.textContent = line.text;
       lineDiv.appendChild(mainContainer);
 
-      // Render translated/romanized text if available and different from original
       if (line.translatedText &&
         (displayMode === 'translate' || displayMode === 'romanize') &&
         line.text.trim() !== line.translatedText.trim()) {
@@ -406,8 +416,27 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   metadataFragment.appendChild(sourceDiv);
   container.appendChild(metadataFragment);
 
-  cachedLyricsLines = Array.from(container.getElementsByClassName('lyrics-line'));
-  cachedSyllables = Array.from(container.getElementsByClassName('lyrics-syllable'));
+  // Pre-parse times and cache them
+  cachedLyricsLines = Array.from(container.getElementsByClassName('lyrics-line')).map(line => {
+    if (line) {
+      line._startTimeMs = parseFloat(line.dataset.startTime) * 1000;
+      line._endTimeMs = parseFloat(line.dataset.endTime) * 1000;
+    }
+    return line;
+  }).filter(Boolean); // Filter out any null/undefined elements
+
+  cachedSyllables = Array.from(container.getElementsByClassName('lyrics-syllable')).map(syllable => {
+    if (syllable) {
+      syllable._startTimeMs = parseFloat(syllable.dataset.startTime);
+      syllable._durationMs = parseFloat(syllable.dataset.duration);
+      syllable._endTimeMs = syllable._startTimeMs + syllable._durationMs;
+      // Pre-parse wordDuration if present
+      const wordDuration = parseFloat(syllable.dataset.wordDuration);
+      syllable._wordDurationMs = isNaN(wordDuration) ? null : wordDuration;
+    }
+    return syllable;
+  }).filter(Boolean);
+
   ensureElementIds();
   activeLineIds.clear();
   highlightedSyllableIds.clear();
@@ -440,7 +469,7 @@ function displaySongError() {
 function createLyricsContainer() {
   const originalLyricsSection = document.querySelector('#tab-renderer');
   if (!originalLyricsSection) {
-    console.log('Lyrics section not found');
+    // console.log('Lyrics section not found'); // Keep console logs minimal for release
     return null;
   }
   const container = document.createElement('div');
@@ -464,7 +493,8 @@ function injectCssFile() {
 }
 
 function getTextWidth(text, font) {
-  const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+  // textWidthCanvas is already cached globally, no change needed here.
+  const canvas = textWidthCanvas || (textWidthCanvas = document.createElement("canvas"));
   const context = canvas.getContext("2d");
   context.font = font;
   const metrics = context.measureText(text);
@@ -518,11 +548,11 @@ function setupVisibilityTracking() {
   return visibilityObserver;
 }
 
-function startLyricsSync() {
+function startLyricsSync(currentSettings = {}) { // Added default for currentSettings
   const videoElement = document.querySelector('video');
   if (!videoElement) return;
-  ensureElementIds();
-  const obs = setupVisibilityTracking(); // Renamed to avoid conflict
+  ensureElementIds(); // Ensure IDs before sync
+  const obs = setupVisibilityTracking();
   if (lyricsAnimationFrameId) {
     cancelAnimationFrame(lyricsAnimationFrameId);
   }
@@ -531,14 +561,15 @@ function startLyricsSync() {
   function sync() {
     const currentTime = videoElement.currentTime * 1000;
     const timeDelta = Math.abs(currentTime - lastTime);
-    const isForceScroll = timeDelta > 1000;
-    updateLyricsHighlight(currentTime, isForceScroll, currentSettings); // Pass currentSettings
+    const isForceScroll = timeDelta > 1000; // Threshold for seeking
+    // Pass currentSettings to updateLyricsHighlight
+    updateLyricsHighlight(currentTime, isForceScroll, currentSettings);
     lastTime = currentTime;
     lyricsAnimationFrameId = requestAnimationFrame(sync);
   }
   lyricsAnimationFrameId = requestAnimationFrame(sync);
   return () => {
-    if (obs) obs.disconnect(); // Use renamed observer
+    if (obs) obs.disconnect();
     if (lyricsAnimationFrameId) {
       cancelAnimationFrame(lyricsAnimationFrameId);
       lyricsAnimationFrameId = null;
@@ -556,7 +587,7 @@ function createDropdownMenu(parentWrapper) {
     if (parentWrapper) {
       parentWrapper.appendChild(dropdownMenu);
     } else {
-      console.warn("Cannot create dropdown, parent wrapper not found.");
+      // console.warn("Cannot create dropdown, parent wrapper not found."); // Keep console logs minimal
       return;
     }
   }
@@ -604,10 +635,9 @@ function createDropdownMenu(parentWrapper) {
     });
     dropdownMenu.appendChild(hideOption);
   }
-  // If no options were added (e.g., if t() fails or modes are unexpected), make sure dropdown isn't empty
   if (dropdownMenu.children.length === 0) {
     const noOptionsText = document.createElement('div');
-    noOptionsText.textContent = "No options available"; // Fallback text
+    noOptionsText.textContent = "No options available";
     noOptionsText.style.padding = "5px";
     noOptionsText.style.color = "grey";
     dropdownMenu.appendChild(noOptionsText);
@@ -629,57 +659,56 @@ function cleanupLyrics() {
   currentPrimaryActiveLine = null;
   if (visibilityObserver) {
     visibilityObserver.disconnect();
-    visibilityObserver = null; // Ensure it's recreated if needed
+    visibilityObserver = null;
   }
+  // Clear cached DOM element arrays
+  cachedLyricsLines = [];
+  cachedSyllables = [];
 }
 
 function updateLyricsHighlight(currentTime, isForceScroll = false, currentSettings = {}) {
   if (!cachedLyricsLines || !cachedLyricsLines.length) return;
-  let newActiveLineIds = new Set();
-  let activeLines = [];
-  const compabilityVisibilityEnabled = currentSettings.compabilityVisibility;
+  // const compabilityVisibilityEnabled = currentSettings.compabilityVisibility; // Not used in this function
 
+  let activeLines = []; // To store actual line elements
+  // Iterate over cachedLyricsLines, using pre-parsed times
   cachedLyricsLines.forEach(line => {
-    if (!line) return;
-    const lineStart = parseFloat(line.dataset.startTime) * 1000; // startTime is in seconds
-    const lineEnd = parseFloat(line.dataset.endTime) * 1000;     // endTime is in seconds
+    if (!line || typeof line._startTimeMs !== 'number' || typeof line._endTimeMs !== 'number') return;
+    const lineStart = line._startTimeMs;
+    const lineEnd = line._endTimeMs;
     const shouldBeActive = currentTime >= lineStart - 190 && currentTime <= lineEnd - 1;
+
     if (shouldBeActive) {
-      newActiveLineIds.add(line.id);
       activeLines.push(line);
     }
   });
 
-  activeLines.sort((a, b) => parseFloat(b.dataset.startTime) - parseFloat(a.dataset.startTime));
+  // Sort active lines by start time (most recent first)
+  // This sort is on a very small array (max 2 after slice), so performance is fine.
+  activeLines.sort((a, b) => b._startTimeMs - a._startTimeMs);
   const allowedActiveLines = activeLines.slice(0, 2);
-  const allowedActiveIds = new Set(allowedActiveLines.map(line => line.id));
+  const newActiveLineIds = new Set(allowedActiveLines.map(line => line.id));
 
   cachedLyricsLines.forEach(line => {
     if (!line) return;
-    const wasActive = line.classList.contains('active');
-    const shouldBeActive = allowedActiveIds.has(line.id);
+    const wasActive = activeLineIds.has(line.id); // Check against old activeLineIds Set
+    const shouldBeActive = newActiveLineIds.has(line.id);
+
     if (shouldBeActive && !wasActive) {
       line.classList.add('active');
       if (!currentPrimaryActiveLine ||
-        (currentTime >= lastTime && parseFloat(line.dataset.startTime) > parseFloat(currentPrimaryActiveLine.dataset.startTime)) ||
-        (currentTime < lastTime && parseFloat(line.dataset.startTime) < parseFloat(currentPrimaryActiveLine.dataset.startTime))) {
-        scrollActiveLine(currentTime, isForceScroll); // scrollActiveLine handles its own logic now
+        (currentTime >= lastTime && line._startTimeMs > currentPrimaryActiveLine._startTimeMs) ||
+        (currentTime < lastTime && line._startTimeMs < currentPrimaryActiveLine._startTimeMs)) {
+        // scrollActiveLine will determine if actual scroll is needed
+        scrollActiveLine(currentTime, isForceScroll);
         currentPrimaryActiveLine = line;
       }
     } else if (!shouldBeActive && wasActive) {
       line.classList.remove('active');
       resetSyllables(line);
     }
-    // Handle visibility for lines outside the active/visible range if compabilityVisibility is enabled
-    if (compabilityVisibilityEnabled) {
-      if (!shouldBeActive && !visibleLineIds.has(line.id)) {
-        line.style.visibility = 'hidden';
-      } else {
-        line.style.visibility = ''; // Reset to default
-      }
-    }
   });
-  activeLineIds = allowedActiveIds;
+  activeLineIds = newActiveLineIds; // Update the global set
   updateSyllables(currentTime);
 }
 
@@ -687,15 +716,16 @@ function updateSyllables(currentTime) { // currentTime is in ms
   if (!cachedSyllables) return;
   let newHighlightedSyllableIds = new Set();
   cachedSyllables.forEach(syllable => {
-    if (!syllable) return;
-    const parentLine = syllable.closest('.lyrics-line');
-    if (!parentLine || !parentLine.classList.contains('active')) {
+    if (!syllable || typeof syllable._startTimeMs !== 'number' || typeof syllable._endTimeMs !== 'number') return;
+
+    const parentLine = syllable.closest('.lyrics-line'); // This is okay, happens per syllable
+    if (!parentLine || !activeLineIds.has(parentLine.id)) { // More efficient check using activeLineIds
       if (syllable.classList.contains('highlight')) resetSyllable(syllable);
       return;
     }
-    const startTime = parseFloat(syllable.dataset.startTime); // Expecting ms from dataset
-    const duration = parseFloat(syllable.dataset.duration); // Expecting ms
-    const endTime = startTime + duration;
+
+    const startTime = syllable._startTimeMs;
+    const endTime = syllable._endTimeMs; // Uses pre-parsed _endTimeMs
 
     if (currentTime >= startTime && currentTime <= endTime) {
       newHighlightedSyllableIds.add(syllable.id);
@@ -705,7 +735,8 @@ function updateSyllables(currentTime) { // currentTime is in ms
     } else if (currentTime > startTime && !syllable.classList.contains('finished')) {
       syllable.classList.add('finished');
     } else if (currentTime > startTime && !syllable.classList.contains('highlight')) {
-      updateSyllableAnimation(syllable, startTime); // Pass startTime to correctly set animation from beginning if missed
+      // This case means the syllable was missed, set it to its fully highlighted start state
+      updateSyllableAnimation(syllable, startTime);
     }
   });
   highlightedSyllableIds = newHighlightedSyllableIds;
@@ -714,69 +745,79 @@ function updateSyllables(currentTime) { // currentTime is in ms
 function updateSyllableAnimation(syllable, currentTime) { // currentTime in ms
   if (syllable.classList.contains('highlight')) return;
 
-  const startTime = Number(syllable.dataset.startTime);
-  const duration = Number(syllable.dataset.duration);
-  const endTime = startTime + duration;
+  const startTime = syllable._startTimeMs;
+  const duration = syllable._durationMs; // Pre-parsed
+  const endTime = syllable._endTimeMs;   // Pre-parsed
 
-  // Only process if we're in the time window
   if (currentTime < startTime || currentTime > endTime) return;
 
   let wipeAnimation = syllable.classList.contains('rtl-text') ? 'wipe-rtl' : 'wipe';
-  const charSpans = syllable.querySelectorAll('span.char');
+  const charSpansNodeList = syllable.querySelectorAll('span.char');
 
-  // Mark as highlighted immediately to prevent repeated processing
   syllable.classList.add('highlight');
 
-  if (charSpans.length > 0) {
-    const charCount = charSpans.length;
-    // Cache the word element and related data to avoid repeated DOM traversal
+  if (charSpansNodeList.length > 0) {
     const wordElement = syllable.closest('.lyrics-word');
-    // Get word duration from dataset or default to syllable duration
-    const finalDuration = Number(syllable.dataset.wordDuration) || duration;
+    // Use pre-parsed word duration if available, otherwise syllable's duration
+    const finalDuration = syllable._wordDurationMs !== null ? syllable._wordDurationMs : duration;
 
-    // Find all characters in the word - only do this DOM query once
-    const allCharsInWord = wordElement ? wordElement.querySelectorAll('span.char') : charSpans;
-    const totalChars = allCharsInWord.length;
+    let spansToAnimate; // All characters in the word for grow animation
+    if (wordElement && wordElement.classList.contains('growable')) {
+      if (!wordElement._cachedChars) { // Cache char elements on the wordElement
+        wordElement._cachedChars = Array.from(wordElement.querySelectorAll('span.char'));
+      }
+      spansToAnimate = wordElement._cachedChars;
+    } else {
+      // Fallback: This case should ideally not be hit if charSpans exist,
+      // as it implies 'shouldEmphasize' was true during creation.
+      // If it is hit, animate only chars in the current syllable.
+      spansToAnimate = Array.from(charSpansNodeList);
+    }
 
-    if (totalChars > 0) {
-      // Process all characters at once
-      const spans = Array.from(allCharsInWord);
+    const totalCharsInWord = spansToAnimate.length;
 
-      // Calculate base delay per character for more linear distribution
-      const baseDelayPerChar = finalDuration * 0.07; // 7% of duration per character
+    if (totalCharsInWord > 0) {
+      const baseDelayPerChar = finalDuration * 0.07;
+      // Convert current syllable's charSpansNodeList to array once for indexOf
+      const currentSyllableCharSpansArray = Array.from(charSpansNodeList);
+      const charCountInCurrentSyllable = currentSyllableCharSpansArray.length;
 
-      for (let i = 0; i < spans.length; i++) {
-        const span = spans[i];
+      for (let i = 0; i < totalCharsInWord; i++) {
+        const span = spansToAnimate[i]; // This is a char span from the entire word
         const spanSyllable = span.closest('.lyrics-syllable');
-        const isCurrentSyllable = spanSyllable === syllable;
+        const isCurrentSyllable = (spanSyllable === syllable);
 
-        // Use pre-computed horizontal offset if available
-        const horizontalOffset = span.dataset.horizontalOffset || 0;
+        const horizontalOffset = parseFloat(span.dataset.horizontalOffset) || 0;
         span.style.setProperty('--char-offset-x', `${horizontalOffset}`);
 
-        // Calculate delays based on pre-computed character index
-        const charIndex = Number(span.dataset.syllableCharIndex || i);
-        const growDelay = baseDelayPerChar * charIndex;
+        // charIndex is the index within the entire word
+        const charIndexInWord = parseFloat(span.dataset.syllableCharIndex);
+        const growDelay = baseDelayPerChar * charIndexInWord;
 
         if (isCurrentSyllable) {
-          // For characters in current syllable
-          const charIndexInSyllable = Array.from(charSpans).indexOf(span);
-          const wipeDelay = (duration / charCount) * charIndexInSyllable;
-          const preWipeDelay = (duration / charCount) * (charIndexInSyllable - 1);
+          const charIndexInSyllable = currentSyllableCharSpansArray.indexOf(span);
 
-          // Apply both wipe and grow animations with proper timing
-          span.style.animation = `pre-wipe-char ${(duration / charCount)}ms linear ${preWipeDelay}ms,
-                                  ${wipeAnimation} ${duration / charCount}ms linear ${wipeDelay}ms forwards, 
-                                  grow-dynamic ${finalDuration * 1.2}ms ease-in-out ${growDelay}ms forwards`;
-          } else if (!spanSyllable.classList.contains('highlight')) {
-          // For characters in other syllables
+          if (charIndexInSyllable !== -1 && charCountInCurrentSyllable > 0) {
+            const wipeDelay = (duration / charCountInCurrentSyllable) * charIndexInSyllable;
+            const preWipeDelay = (duration / charCountInCurrentSyllable) * (charIndexInSyllable - 1);
+
+            span.style.animation = `pre-wipe-char ${(duration / charCountInCurrentSyllable)}ms linear ${preWipeDelay}ms,
+                                    ${wipeAnimation} ${duration / charCountInCurrentSyllable}ms linear ${wipeDelay}ms forwards,
+                                    grow-dynamic ${finalDuration * 1.2}ms ease-in-out ${growDelay}ms forwards`;
+          } else if (!spanSyllable.classList.contains('highlight')) { // Should be caught by outer if
+            span.style.animation = `grow-dynamic ${finalDuration * 1.2}ms ease-in-out ${growDelay}ms forwards`;
+          }
+        } else if (!spanSyllable.classList.contains('highlight')) { // Char in another syllable of the same word
           span.style.animation = `grow-dynamic ${finalDuration * 1.2}ms ease-in-out ${growDelay}ms forwards`;
         }
       }
     }
   } else {
     // For syllables without character spans
-    if (syllable.parentElement.parentElement.classList.contains('lyrics-gap')) {
+    // syllable.parentElement is wordSpan, syllable.parentElement.parentElement is main/background-vocal-container
+    // For gap lines, syllable.parentElement is main-vocal-container, syllable.parentElement.parentElement is lyrics-gap line
+    if (syllable.parentElement && syllable.parentElement.parentElement &&
+      syllable.parentElement.parentElement.classList.contains('lyrics-gap')) {
       wipeAnimation = "fade-gap";
     }
     syllable.style.animation = `${wipeAnimation} ${duration}ms linear forwards`;
@@ -788,7 +829,7 @@ function resetSyllable(syllable) {
   if (!syllable) return;
   syllable.style.animation = '';
   syllable.classList.remove('highlight', 'finished');
-  const charSpans = syllable.querySelectorAll('span.char');
+  const charSpans = syllable.querySelectorAll('span.char'); // Query is fine for infrequent reset
   charSpans.forEach(span => { span.style.animation = ''; });
 }
 
@@ -830,7 +871,7 @@ function scrollActiveLine(currentTime, forceScroll = false) {
     positionClasses.push(`prev-${i}`, `next-${i}`);
   }
 
-  document.querySelectorAll('.' + positionClasses.join(', .'))
+  container.querySelectorAll('.' + positionClasses.join(', .'))
     .forEach(el => el.classList.remove(...positionClasses));
 
   // Mark activest line
@@ -896,7 +937,6 @@ function updateTranslationButtonText() {
   translationButton.title = t('showTranslationOptions');
 }
 
-// Function to create and manage the control buttons
 function createControlButtons(sourceDivElement) {
   let buttonsWrapper = document.getElementById('lyrics-plus-buttons-wrapper');
   if (!buttonsWrapper) {
@@ -905,8 +945,8 @@ function createControlButtons(sourceDivElement) {
     if (sourceDivElement && sourceDivElement.parentNode) {
       sourceDivElement.parentNode.insertBefore(buttonsWrapper, sourceDivElement.nextSibling);
     } else {
-      const cont = getContainer(); // Fallback to main container
-      if (cont) cont.appendChild(buttonsWrapper);
+      const cont = getContainer();
+      if (cont) cont.appendChild(buttonsWrapper); // Fallback
     }
   }
 
@@ -919,8 +959,8 @@ function createControlButtons(sourceDivElement) {
 
       translationButton.addEventListener('click', (event) => {
         event.stopPropagation();
-        createDropdownMenu(buttonsWrapper); // Pass current wrapper
-        dropdownMenu.classList.toggle('hidden');
+        createDropdownMenu(buttonsWrapper);
+        if (dropdownMenu) dropdownMenu.classList.toggle('hidden');
       });
 
       document.addEventListener('click', (event) => {
@@ -930,10 +970,8 @@ function createControlButtons(sourceDivElement) {
         }
       });
     }
-    // Moved createDropdownMenu outside the if(!translationButton) block
-    // to ensure it can be called to rebuild the menu
   } else {
-    console.warn("LyricsPlusAPI.setCurrentDisplayModeAndRefetch not available. Translation controls disabled.");
+    // console.warn("LyricsPlusAPI.setCurrentDisplayModeAndRefetch not available. Translation controls disabled.");
   }
 
 
@@ -941,15 +979,14 @@ function createControlButtons(sourceDivElement) {
     reloadButton = document.createElement('button');
     reloadButton.id = 'lyrics-plus-reload-button';
     reloadButton.innerHTML = '↻';
-    reloadButton.title = t('Reload Lyrics');
+    reloadButton.title = t('Reload Lyrics'); // Assuming t() is available globally
     buttonsWrapper.appendChild(reloadButton);
 
     reloadButton.addEventListener('click', () => {
       if (lastKnownSongInfo && window.LyricsPlusAPI && fetchAndDisplayLyrics) {
-        // Pass true for forceReload when the reload button is clicked
-        fetchAndDisplayLyrics(lastKnownSongInfo, false, true); // isNewSong = false, forceReload = true
+        fetchAndDisplayLyrics(lastKnownSongInfo, false, true);
       } else {
-        console.warn('Cannot reload lyrics: song info or API not available.');
+        // console.warn('Cannot reload lyrics: song info or API not available.');
       }
     });
   }
