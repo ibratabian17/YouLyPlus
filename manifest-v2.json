@@ -23,6 +23,7 @@
         "src/modules/lyricsManager.js",
         "src/modules/lyricsRenderer.js",
         "src/modules/forceTab.js",
+        "src/modules/fullscreen.js",
         "src/content.js"
       ]
     }

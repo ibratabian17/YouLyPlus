@@ -885,9 +885,9 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
   const lineIsAboveSafeArea = lineRect.top < safeAreaTopLimit;
   const lineIsBelowSafeArea = lineRect.top > safeAreaBottomLimit;
 
-  const needsScrollDueToPosition = lineIsAboveSafeArea || lineIsBelowSafeArea;
+  const isLyricsFocused = lineIsAboveSafeArea || lineIsBelowSafeArea;
 
-  if (!forceScroll && !needsScrollDueToPosition) {
+  if (!forceScroll && isLyricsFocused) {
     // If not forcing scroll, AND the line is already within the comfortable safe area, do nothing.
     return;
   }
