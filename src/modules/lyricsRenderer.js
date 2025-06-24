@@ -20,12 +20,40 @@ let translationButton = null; // Reference to the translation button
 let reloadButton = null; // Reference to the reload button
 let dropdownMenu = null; // Reference to the translation dropdown menu
 
+let isProgrammaticScrolling = false; // True if a scroll was initiated programmatically and is still settling
+let endProgrammaticScrollTimer = null; // Timer to manage the end of programmatic scrolling state
+let scrollEventHandlerAttached = false;
+
+pBrowser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'SETTINGS_CHANGED') {
+    const container = getContainer();
+    if (container) {
+      if (request.settings.blurInactive) {
+        container.classList.add('blur-inactive-enabled');
+      } else {
+        container.classList.remove('blur-inactive-enabled');
+      }
+    }
+  }
+});
+
 // --- Core DOM Manipulation & Setup ---
 
 // Cached DOM references
 const getContainer = () => {
   if (!lyricsContainer) {
-    lyricsContainer = document.getElementById('lyrics-plus-container') || createLyricsContainer();
+    lyricsContainer = document.getElementById('lyrics-plus-container');
+    if (!lyricsContainer) {
+      // createLyricsContainer will set the global lyricsContainer
+      // and call setupUserScrollListener internally if successful.
+      createLyricsContainer(); // This might set lyricsContainer to null if unsuccessful
+    }
+  }
+  // After lyricsContainer is potentially set (either found or created),
+  // try to set up the listener if not already done.
+  // setupUserScrollListener has internal checks.
+  if (lyricsContainer && lyricsContainer.parentElement && !scrollEventHandlerAttached) {
+    setupUserScrollListener();
   }
   return lyricsContainer;
 };
@@ -33,16 +61,50 @@ const getContainer = () => {
 function createLyricsContainer() {
   const originalLyricsSection = document.querySelector('#tab-renderer');
   if (!originalLyricsSection) {
-    // console.log('Lyrics section not found'); // Keep console logs minimal for release
+    // console.log('Lyrics section not found');
+    lyricsContainer = null; // Ensure lyricsContainer is null if creation fails
     return null;
   }
   const container = document.createElement('div');
   container.id = 'lyrics-plus-container';
-  container.classList.add('lyrics-plus-integrated');
+  container.classList.add('lyrics-plus-integrated', 'blur-inactive-enabled');
   originalLyricsSection.appendChild(container);
   injectCssFile();
-  lyricsContainer = container;
+  lyricsContainer = container; // Set global lyricsContainer
+  setupUserScrollListener(); // Call setup after container is in DOM and lyricsContainer is set
   return container;
+}
+
+// ---- NEW FUNCTION ----
+function setupUserScrollListener() {
+  // Ensure lyricsContainer and its parent exist, and listener not already attached
+  if (scrollEventHandlerAttached || !lyricsContainer || !lyricsContainer.parentElement) {
+    return;
+  }
+
+  const scrollListeningElement = lyricsContainer.parentElement; // This is the element that scrolls (e.g., #tab-renderer)
+
+  scrollListeningElement.addEventListener('scroll', () => {
+    if (isProgrammaticScrolling) {
+      // This scroll event is part of a programmatic scroll sequence (e.g., scrollIntoView + animations).
+      // We debounce to detect the actual end of this sequence.
+      clearTimeout(endProgrammaticScrollTimer);
+      endProgrammaticScrollTimer = setTimeout(() => {
+        isProgrammaticScrolling = false;
+        endProgrammaticScrollTimer = null;
+        // console.log('Debounced: Programmatic scroll sequence considered ended.');
+      }, 250); // If no scroll events for 250ms, assume the programmatic scroll sequence is over.
+      return;
+    }
+
+    // If not isProgrammaticScrolling, this scroll is considered user-initiated.
+    if (lyricsContainer) {
+      lyricsContainer.classList.add('not-focused');
+    }
+  }, { passive: true });
+
+  scrollEventHandlerAttached = true;
+  // console.log('User scroll listener attached to:', scrollListeningElement);
 }
 
 function injectCssFile() {
@@ -803,44 +865,56 @@ function scrollActiveLine(currentTime, forceScroll = false) {
 function scrollToActiveLine(activeLine, forceScroll = false) {
   if (!activeLine) return;
 
-  // Get the lyrics container element
   const container = document.querySelector("#lyrics-plus-container");
   if (!container) return;
 
-  const compabilityVisibilityEnabled = container.classList.contains('compability-visibility');
-
-  // Only proceed if the container is visible (displayed as block)
   const computedStyle = getComputedStyle(container);
   if (computedStyle.display !== 'block') return;
 
-  // The actual scroll container is the parent element (what the user sees)
   const scrollContainer = container.parentElement;
   if (!scrollContainer) return;
 
   const scrollContainerRect = scrollContainer.getBoundingClientRect();
-
-  // Get the bounding rectangle of the active line
   const lineRect = activeLine.getBoundingClientRect();
 
-  // Define the safe area based on the visible scroll container.
-  const safeAreaTop = scrollContainerRect.top + scrollContainerRect.height * 0.15;
-  const safeAreaBottom = scrollContainerRect.top + scrollContainerRect.height * 0.95;
+  // Determine if scrolling is necessary based on line position and forceScroll flag
+  const safeAreaTopLimit = scrollContainerRect.top + scrollContainerRect.height * 0.15;
+  // A line is considered too low if its top is past 85% of the scroll container's height from the top.
+  const safeAreaBottomLimit = scrollContainerRect.top + scrollContainerRect.height * 0.85;
 
-  // Check if the line is outside the safe area
-  const lineIsInsideSafeArea = lineRect.top < safeAreaTop || lineRect.top > safeAreaBottom;
+  const lineIsAboveSafeArea = lineRect.top < safeAreaTopLimit;
+  const lineIsBelowSafeArea = lineRect.top > safeAreaBottomLimit;
 
-  // Correct logic: Scroll if line is outside safe area OR forceScroll is true
-  if (lineIsInsideSafeArea && !forceScroll) {
-    // Line is already in the visible area and we're not forcing a scroll
+  const needsScrollDueToPosition = lineIsAboveSafeArea || lineIsBelowSafeArea;
+
+  if (!forceScroll && !needsScrollDueToPosition) {
+    // If not forcing scroll, AND the line is already within the comfortable safe area, do nothing.
     return;
   }
 
-  // Scroll the scroll container to the target position
+  // If we proceed, a programmatic scroll is about to happen.
+  if (container) {
+    container.classList.remove('not-focused');
+  }
+
+  isProgrammaticScrolling = true;
+  clearTimeout(endProgrammaticScrollTimer); // Clear any existing timer from previous scrolls or safety nets
+
   activeLine.scrollIntoView({
     behavior: 'smooth',
     block: 'start'
   });
+
+  // Fallback: Ensure isProgrammaticScrolling is reset if no scroll events occur
+  // (e.g., if element is already in view and scrollIntoView causes no actual scroll).
+  // This timer will be cleared by the scroll event handler's debounce if scroll events do occur.
+  endProgrammaticScrollTimer = setTimeout(() => {
+    isProgrammaticScrolling = false; // Reset state if no scroll events happened to extend it via debounce.
+    endProgrammaticScrollTimer = null;
+    // console.log('Programmatic scroll state ended by initial/safety timer.');
+  }, 500); // This duration should be longer than the debounce period in the scroll listener (250ms).
 }
+
 
 // --- Visibility Tracking ---
 

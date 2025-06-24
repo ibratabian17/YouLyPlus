@@ -20,11 +20,12 @@ let currentSettings = {
     autoHideLyrics: false,
     cacheStrategy: 'aggressive',
     fontSize: 16,
-    compabilityVisibility: false, // New compatibility setting
-    compabilityWipe: false, // New compatibility setting
-    customCSS: '',
-    // Translation settings
-    translationProvider: 'google', // 'google' or 'gemini'
+        compabilityVisibility: false, // New compatibility setting
+        compabilityWipe: false, // New compatibility setting
+        blurInactive: false,
+        customCSS: '',
+        // Translation settings
+        translationProvider: 'google', // 'google' or 'gemini'
     geminiApiKey: '',
     geminiModel: 'gemini-2.5-flash', // Default Gemini model updated
     overrideTranslateTarget: false,
@@ -75,4 +76,8 @@ After ensuring the meaning is preserved, try to make the translation sound natur
 
 function updateSettings(newSettings) {
     currentSettings = newSettings;
+    pBrowser.runtime.sendMessage({
+        type: 'SETTINGS_CHANGED',
+        settings: currentSettings
+    });
 }

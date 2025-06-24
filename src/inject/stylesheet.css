@@ -97,6 +97,15 @@ ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyri
     visibility: hidden;
 }
 
+.lyrics-plus-integrated.blur-inactive-enabled:not(.not-focused) .lyrics-line:not(.active):not(.lyrics-gap) {
+    filter: blur(0.07em);
+}
+.lyrics-plus-integrated.blur-inactive-enabled:not(.not-focused) .lyrics-line:not(.active)[class*="next-"]:not(.lyrics-gap),
+.lyrics-plus-integrated.blur-inactive-enabled:not(.not-focused) .lyrics-line.pre-active-line:not(.lyrics-gap),
+.lyrics-plus-integrated.blur-inactive-enabled:not(.not-focused) .lyrics-line.lyrics-activest:not(.active):not(.lyrics-gap){
+    filter: blur(0.035em);
+}
+
 /* States & Interaction */
 .lyrics-line.active {
     opacity: 1;

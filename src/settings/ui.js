@@ -16,6 +16,7 @@ function updateUI(settings) {
     document.getElementById('wordByWord').checked = currentSettings.wordByWord;
     document.getElementById('compability-visibility').checked = currentSettings.compabilityVisibility;
     document.getElementById('compability-wipe').checked = currentSettings.compabilityWipe;
+    document.getElementById('blur-inactive').checked = currentSettings.blurInactive;
 
     // Translation settings
     document.getElementById('translation-provider').value = currentSettings.translationProvider;
@@ -87,7 +88,8 @@ document.getElementById('save-appearance').addEventListener('click', () => {
     const newAppearanceSettings = {
         customCSS: document.getElementById('custom-css').value,
         compabilityVisibility: document.getElementById('compability-visibility').checked,
-        compabilityWipe: document.getElementById('compability-wipe').checked
+        compabilityWipe: document.getElementById('compability-wipe').checked,
+        blurInactive: document.getElementById('blur-inactive').checked
     };
     updateSettings(newAppearanceSettings);
     saveSettings();
