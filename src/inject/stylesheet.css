@@ -598,7 +598,7 @@ span.lyrics-source-provider {
     position: absolute;
     width: 100%;
     height: 100%;
-    backdrop-filter: blur(calc(calc(5vh + 5vw) / 2)) brightness(0.7) saturate(1.2) contrast(1.1);
+    backdrop-filter: blur(calc(calc(6vh + 6vw) / 2)) brightness(0.7) saturate(1.2) contrast(1.1);
     z-index: 29;
     top: 0;
     left: 0;
