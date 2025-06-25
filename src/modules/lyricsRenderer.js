@@ -3,7 +3,6 @@
 let lyricsAnimationFrameId = null;
 let currentPrimaryActiveLine = null;
 let lastTime = 0;
-let lastKnownSongInfo = null; // Store last known song info for reload
 
 // Performance optimization: Cache selectors and calculations
 let lyricsContainer = null;
@@ -152,7 +151,6 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     container.classList.remove('compability-wipe');
   }
 
-  lastKnownSongInfo = songInfo;
   container.innerHTML = ''; // Clear container
 
   const elementPool = {

@@ -2,6 +2,8 @@
 let currentFetchVideoId = null;
 let currentDisplayMode = 'none'; // Manages the active translation/romanization mode
 
+let lastKnownSongInfo = null; // Store last known song info for reload
+
 
 async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload = false) {
   try {
@@ -132,6 +134,8 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     } else {
         console.error("displayLyrics is not available.");
     }
+
+    lastKnownSongInfo = currentSong; // Update last known song info
 
   } catch (error) {
     console.warn('Error in fetchAndDisplayLyrics:', error);
