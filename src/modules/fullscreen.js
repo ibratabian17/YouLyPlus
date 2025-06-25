@@ -212,15 +212,16 @@ function LYPLUS_updateBlurBackground() {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
-        // ... (Palette extraction logic - same as before, result in `topContrastingPalette`)
         const tempCanvas = document.createElement('canvas');
         const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
         tempCanvas.width = OVERSAMPLE_GRID_WIDTH * 10; tempCanvas.height = OVERSAMPLE_GRID_HEIGHT * 10;
         try { tempCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height); }
         catch (e) { console.error("LYPLUS: Error drawing image to temp canvas.", e); return; }
+
         const sampledColors = [];
         const regionImgWidth = Math.floor(tempCanvas.width / OVERSAMPLE_GRID_WIDTH);
         const regionImgHeight = Math.floor(tempCanvas.height / OVERSAMPLE_GRID_HEIGHT);
+
         for (let y = 0; y < OVERSAMPLE_GRID_HEIGHT; y++) {
             for (let x = 0; x < OVERSAMPLE_GRID_WIDTH; x++) {
                 const color = getAverageColor(tempCtx, x * regionImgWidth, y * regionImgHeight, regionImgWidth, regionImgHeight);
@@ -228,7 +229,6 @@ function LYPLUS_updateBlurBackground() {
                 const contrastWithBlack = calculateContrastRatio(color, { r: 0, g: 0, b: 0 });
                 color.contrastScore = contrastWithWhite + contrastWithBlack;
 
-                // Track color frequency
                 let existingColor = sampledColors.find(c => c.r === color.r && c.g === color.g && c.b === color.b);
                 if (existingColor) {
                     existingColor.frequency = (existingColor.frequency || 1) + 1;
@@ -238,114 +238,115 @@ function LYPLUS_updateBlurBackground() {
                 }
             }
         }
-        function calculateSaturation(color) {
-            const max = Math.max(color.r, color.g, color.b);
-            const min = Math.min(color.r, color.g, color.b);
-            return (max - min) / max;
-        }
 
-        function calculateColorDifference(color1, color2) {
-            return Math.abs(color1.r - color2.r) + Math.abs(color1.g - color2.g) + Math.abs(color1.b - color2.b);
-        }
-
-        const minColorDifference = 40; // Adjust as needed
-
-        sampledColors.sort((a, b) => {
-            const saturationA = calculateSaturation(a);
-            const saturationB = calculateSaturation(b);
-            const frequencyA = a.frequency || 0;
-            const frequencyB = b.frequency || 0;
-
-            if (frequencyB !== frequencyA) {
-                return frequencyB - frequencyA; // Prioritize frequent colors
-            }
-
-            if (saturationB !== saturationA) {
-                return saturationB - saturationA;
-            }
-
-            const diffToPreviousA = previousMasterArtworkPalette.reduce((sum, prevColor) => sum + calculateColorDifference(a, prevColor), 0);
-            const diffToPreviousB = previousMasterArtworkPalette.reduce((sum, prevColor) => sum + calculateColorDifference(b, prevColor), 0);
-            if (diffToPreviousB !== diffToPreviousA) {
-                return diffToPreviousB - diffToPreviousA;
-            }
-
-            // let diffToOthersA = 0;
-            // for (let i = 0; i < topContrastingPalette.length; i++) {
-            //     if (topContrastingPalette[i] !== a) {
-            //         diffToOthersA += calculateColorDifference(a, topContrastingPalette[i]);
-            //     }
+        // 1. Calculate additional properties for each sampled color
+        sampledColors.forEach(color => {
+            // Ensure calculateSaturation is robust (handles black color where max component is 0)
+            // Example robust calculateSaturation (if not already globally defined correctly):
+            // function calculateSaturation(c) {
+            //     const max = Math.max(c.r, c.g, c.b);
+            //     const min = Math.min(c.r, c.g, c.b);
+            //     if (max === 0) return 0; 
+            //     return (max - min) / max;
             // }
-            // let diffToOthersB = 0;
-            // for (let i = 0; i < topContrastingPalette.length; i++) {
-            //     if (topContrastingPalette[i] !== b) {
-            //         diffToOthersB += calculateColorDifference(b, topContrastingPalette[i]);
-            //     }
-            // }
-            // if (diffToOthersB !== diffToOthersA) {
-            //     return diffToOthersB - diffToOthersA;
-            // }
+            color.saturation = calculateSaturation(color);
+            color.luminance = calculateLuminance(color);
 
+            // Vibrancy score: prioritizes saturation, gives some weight to frequency,
+            // and slightly prefers colors not at extreme black/white for "vibrancy".
+            const lumFactor = 1.0 - Math.abs(color.luminance - 0.5) * 1.8; // Factor is higher for mid-luminance colors
+            const freqNorm = color.frequency / (OVERSAMPLE_GRID_WIDTH * OVERSAMPLE_GRID_HEIGHT); // Normalize frequency 0-1
+            color.vibrancy = (color.saturation * 0.7) + (Math.max(0, lumFactor) * 0.15) + (freqNorm * 0.15);
+        });
+
+        // 2. Sort all sampled colors by quality metric
+        let sortedCandidates = [...sampledColors].sort((a, b) => {
+            if (b.vibrancy !== a.vibrancy) return b.vibrancy - a.vibrancy;
+            if (b.frequency !== a.frequency) return b.frequency - a.frequency;
             return b.contrastScore - a.contrastScore;
         });
 
-        const topFrequentColors = sampledColors.slice(0, MASTER_PALETTE_SIZE);
-        const topContrastingPalette = [];
+        const newMasterPalette = [];
+        // Adjust this threshold: higher means colors must be more different.
+        // calculateColorDifference sums abs diffs of R,G,B (max 765).
+        // A value of 75-100 means colors need to be reasonably distinct.
+        const MIN_COLOR_DIFFERENCE_THRESHOLD = 85;
 
-        for (let i = 0; i < Math.min(MASTER_PALETTE_SIZE, topFrequentColors.length); i++) {
-            topContrastingPalette.push(topFrequentColors[i]);
-        }
+        // 3. Iterative selection for diversity
+        for (const candidate of sortedCandidates) {
+            if (newMasterPalette.length >= MASTER_PALETTE_SIZE) {
+                break;
+            }
 
-        // If the most frequent colors don't fill the palette, add more diverse colors
-        if (topContrastingPalette.length < MASTER_PALETTE_SIZE) {
-            const remainingColors = sampledColors.slice(MASTER_PALETTE_SIZE);
+            if (newMasterPalette.length === 0) { // Always add the first (highest quality) color
+                newMasterPalette.push(candidate);
+                continue;
+            }
 
-            remainingColors.sort((a, b) => {
-                // Calculate the minimum color difference to the selected colors
-                let minDiffA = Infinity;
-                for (let j = 0; j < topContrastingPalette.length; j++) {
-                    minDiffA = Math.min(minDiffA, calculateColorDifference(a, topContrastingPalette[j]));
+            let isDifferentEnough = true;
+            for (const selectedColor of newMasterPalette) {
+                if (calculateColorDifference(candidate, selectedColor) < MIN_COLOR_DIFFERENCE_THRESHOLD) {
+                    isDifferentEnough = false;
+                    break;
                 }
-                let minDiffB = Infinity;
-                for (let j = 0; j < topContrastingPalette.length; j++) {
-                    minDiffB = Math.min(minDiffB, calculateColorDifference(b, topContrastingPalette[j]));
-                }
+            }
 
-                if (minDiffB !== minDiffA) {
-                    return minDiffB - minDiffA; // Prioritize colors with larger minimum difference
-                }
-
-                const frequencyA = a.frequency || 0;
-                const frequencyB = b.frequency || 0;
-                return frequencyB - frequencyA; // Then prioritize frequent colors
-            });
-
-            for (let i = 0; i < remainingColors.length && topContrastingPalette.length < MASTER_PALETTE_SIZE; i++) {
-                topContrastingPalette.push(remainingColors[i]);
+            if (isDifferentEnough) {
+                newMasterPalette.push(candidate);
             }
         }
 
-        // Fill remaining slots with default colors if needed
-        while (topContrastingPalette.length < MASTER_PALETTE_SIZE) {
-            topContrastingPalette.push({ r: 20, g: 20, b: 30, a: 255 });
+        // 4. If palette isn't full, fill with remaining top candidates (relaxing difference constraint)
+        if (newMasterPalette.length < MASTER_PALETTE_SIZE) {
+            const alreadySelectedIdentifiers = new Set(newMasterPalette.map(c => `${c.r}-${c.g}-${c.b}`));
+
+            for (const candidate of sortedCandidates) { // Iterate through original sorted list
+                if (newMasterPalette.length >= MASTER_PALETTE_SIZE) {
+                    break;
+                }
+                const candidateIdentifier = `${candidate.r}-${candidate.g}-${candidate.b}`;
+                if (!alreadySelectedIdentifiers.has(candidateIdentifier)) {
+                    newMasterPalette.push(candidate);
+                    alreadySelectedIdentifiers.add(candidateIdentifier); // Add to set prevent duplicates if any somehow pass
+                }
+            }
         }
 
-        // Start master palette transition
-        // Current activeMasterDisplayPalette (which might be mid-transition itself) becomes the 'previous'
-        previousMasterArtworkPalette = activeMasterDisplayPalette.map(c => ({ ...c }));
-        currentTargetMasterArtworkPalette = topContrastingPalette;
-        songPaletteTransitionProgress = 0.0; // Reset progress to start blending
+        // 5. Ensure palette has MASTER_PALETTE_SIZE colors, filling with default if necessary
+        while (newMasterPalette.length < MASTER_PALETTE_SIZE) {
+            newMasterPalette.push({ r: 20, g: 20, b: 30, a: 255 }); // Default color
+        }
 
-        // Individual cell fades will continue, but now using the gradually changing master palette.
-        // We don't need to reset individual cell states here unless we want an abrupt visual change
-        // in their patterns when a new song starts. For smoother overall transition, let them continue.
+        // Extract just r,g,b,a for the final palette, and ensure correct size
+        const finalTargetPalette = newMasterPalette.slice(0, MASTER_PALETTE_SIZE).map(c => ({
+            r: c.r, g: c.g, b: c.b, a: c.a !== undefined ? c.a : 255 // Ensure alpha
+        }));
+
+        // Start master palette transition
+        previousMasterArtworkPalette = activeMasterDisplayPalette.map(c => ({ ...c }));
+        currentTargetMasterArtworkPalette = finalTargetPalette;
+        songPaletteTransitionProgress = 0.0;
 
         if (!globalAnimationId) {
             console.log("LYPLUS: Starting WebGL animation loop.");
             animateWebGLBackground();
         }
     };
-    img.onerror = () => { /* ... (same error handling, set default palettes) ... */ };
+    img.onerror = () => {
+        console.error("LYPLUS: Error loading image for palette extraction. Using default palette.");
+        previousMasterArtworkPalette = activeMasterDisplayPalette.map(c => ({ ...c }));
+        // Fallback to a generic, dim palette
+        const defaultPalette = Array(MASTER_PALETTE_SIZE).fill(null).map((_, i) => {
+            const shade = 30 + (i % 5) * 5; // Some variation
+            return { r: shade, g: shade, b: shade + 10, a: 255 };
+        });
+        currentTargetMasterArtworkPalette = defaultPalette;
+        songPaletteTransitionProgress = 0.0;
+
+        if (!globalAnimationId) {
+            animateWebGLBackground();
+        }
+    };
     img.src = artworkUrl;
 }
 
@@ -512,6 +513,47 @@ function calculateContrastRatio(color1, color2) {
     const darkest = Math.min(lum1, lum2);
     return (brightest + 0.05) / (darkest + 0.05);
 }
+
+function calculateSaturation(color) { // color components r,g,b are 0-255
+    const r_norm = color.r / 255;
+    const g_norm = color.g / 255;
+    const b_norm = color.b / 255;
+
+    const max = Math.max(r_norm, g_norm, b_norm);
+    const min = Math.min(r_norm, g_norm, b_norm);
+    const delta = max - min;
+
+    if (delta < 0.00001) { // Essentially grayscale (including black and white)
+        return 0;
+    }
+
+    // Saturation using HSL definition: S = delta / (1 - |L*2 - 1|)
+    // For vibrancy, we often care more about "chroma" or perceived colorfulness.
+    // A simpler version, often used: S = delta / max (for HSV/HSB model)
+    // Let's use the HSL-like definition for more perceptual evenness if L is needed,
+    // or the HSV one if we just want "how far from gray for this brightness".
+    // Given the context of "vibrancy", the HSV model's saturation is often preferred.
+    if (max < 0.00001) return 0; // Black color, max is 0
+
+    return delta / max;
+}
+
+// Your existing helper functions (ensure they are indeed defined like this)
+function calculateLuminance(color) {
+    const a = [color.r, color.g, color.b].map(v => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+}
+
+function calculateColorDifference(color1, color2) {
+    // Ensure colors are not null or undefined
+    const c1 = color1 || { r: 0, g: 0, b: 0 };
+    const c2 = color2 || { r: 0, g: 0, b: 0 };
+    return Math.abs(c1.r - c2.r) + Math.abs(c1.g - c2.g) + Math.abs(c1.b - c2.b);
+}
+
 
 function getAverageColor(ctx, x, y, width, height) {
     if (width <= 0 || height <= 0) return { r: 0, g: 0, b: 0, a: 0 };
