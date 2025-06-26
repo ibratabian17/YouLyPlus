@@ -23,19 +23,6 @@ let isProgrammaticScrolling = false; // True if a scroll was initiated programma
 let endProgrammaticScrollTimer = null; // Timer to manage the end of programmatic scrolling state
 let scrollEventHandlerAttached = false;
 
-pBrowser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'SETTINGS_CHANGED') {
-    const container = getContainer();
-    if (container) {
-      if (request.settings.blurInactive) {
-        container.classList.add('blur-inactive-enabled');
-      } else {
-        container.classList.remove('blur-inactive-enabled');
-      }
-    }
-  }
-});
-
 // --- Core DOM Manipulation & Setup ---
 
 // Cached DOM references
@@ -538,6 +525,12 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   }
   startLyricsSync(currentSettings); // Pass currentSettings
   createControlButtons(getContainer());
+
+  if (currentSettings.blurInactive) {
+    container.classList.add('blur-inactive-enabled');
+  } else {
+    container.classList.remove('blur-inactive-enabled');
+  }
 }
 
 function displaySongNotFound() {

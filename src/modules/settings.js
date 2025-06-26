@@ -3,7 +3,7 @@ const pBrowser = chrome || browser;
 
 window.addEventListener('message', (event) => {
     if (event.source !== window || !event.data) return;
-    
+
     if (event.data.type === 'UPDATE_SETTINGS') {
         console.log("Received new settings:", event.data.settings);
         updateSettings(event.data.settings);
@@ -20,12 +20,12 @@ let currentSettings = {
     autoHideLyrics: false,
     cacheStrategy: 'aggressive',
     fontSize: 16,
-        compabilityVisibility: false, // New compatibility setting
-        compabilityWipe: false, // New compatibility setting
-        blurInactive: false,
-        customCSS: '',
-        // Translation settings
-        translationProvider: 'google', // 'google' or 'gemini'
+    compabilityVisibility: false, // New compatibility setting
+    compabilityWipe: false, // New compatibility setting
+    blurInactive: false,
+    customCSS: '',
+    // Translation settings
+    translationProvider: 'google', // 'google' or 'gemini'
     geminiApiKey: '',
     geminiModel: 'gemini-2.5-flash', // Default Gemini model updated
     overrideTranslateTarget: false,
@@ -54,6 +54,7 @@ function loadSettings(callback) {
         fontSize: 16,
         compabilityVisibility: false, // New compatibility setting
         compabilityWipe: false, // New compatibility setting
+        blurInactive: false,
         // Translation settings
         translationProvider: 'google',
         geminiApiKey: '',
