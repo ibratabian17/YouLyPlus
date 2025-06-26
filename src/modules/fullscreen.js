@@ -209,9 +209,7 @@ function LYPLUS_updateBlurBackground() {
     window.currentLyplusArtworkUrl = artworkUrl;
     console.log("LYPLUS: Updating master palette for new song:", artworkUrl.substring(0, 50) + "...");
 
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
+    const onImageLoadSuccess = (img) => {
         const tempCanvas = document.createElement('canvas');
         const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
         tempCanvas.width = OVERSAMPLE_GRID_WIDTH * 10; tempCanvas.height = OVERSAMPLE_GRID_HEIGHT * 10;
@@ -332,7 +330,8 @@ function LYPLUS_updateBlurBackground() {
             animateWebGLBackground();
         }
     };
-    img.onerror = () => {
+
+    const onImageLoadError = () => {
         console.error("LYPLUS: Error loading image for palette extraction. Using default palette.");
         previousMasterArtworkPalette = activeMasterDisplayPalette.map(c => ({ ...c }));
         // Fallback to a generic, dim palette
@@ -347,7 +346,47 @@ function LYPLUS_updateBlurBackground() {
             animateWebGLBackground();
         }
     };
-    img.src = artworkUrl;
+
+    // For http/https URLs, use fetch for robust CORS handling, which is often
+    // better respected by Firefox. For other schemes (blob:, data:), use direct
+    // Image loading.
+    if (artworkUrl.startsWith('http')) {
+        fetch(artworkUrl, { mode: 'cors' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`CORS fetch failed: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const img = new Image();
+                const objectURL = URL.createObjectURL(blob);
+                img.onload = () => {
+                    onImageLoadSuccess(img);
+                    URL.revokeObjectURL(objectURL);
+                };
+                img.onerror = () => {
+                    onImageLoadError();
+                    URL.revokeObjectURL(objectURL);
+                };
+                img.src = objectURL;
+            })
+            .catch(error => {
+                console.error("LYPLUS: CORS fetch failed, falling back to img.crossOrigin.", error);
+                // Fallback to original method which might work in some cases or on Chrome.
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => onImageLoadSuccess(img);
+                img.onerror = onImageLoadError;
+                img.src = artworkUrl;
+            });
+    } else {
+        // Direct load for non-http URLs like blobs or data URIs
+        const img = new Image();
+        img.onload = () => onImageLoadSuccess(img);
+        img.onerror = onImageLoadError;
+        img.src = artworkUrl;
+    }
 }
 
 // --- Animation Loop ---
