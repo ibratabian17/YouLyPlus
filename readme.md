@@ -83,4 +83,6 @@ The scripts will create a `dist` folder in the project root, containing the foll
 
 ## Contributing
 
-Contributions are welcome! Please fork this repository and create a pull request with your improvements. For major changes, feel free to open an issue first to discuss your ideas.
+Contributions are welcome! Please fork this repository and create a pull request with your improvements. For major changes, feel free to open an issue first to discuss your ideas. This project is completely handled by me for server, client, backend, database, and managing the account for taking lyrics. If you want to support me, you can do so on Ko-fi or Patreon.
+
+This project uses [GitHub Sponsors](https://github.com/sponsors) to manage funding. Please see the `FUNDING.yml` file for more information.
