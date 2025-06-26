@@ -23,6 +23,7 @@ let currentSettings = {
     compabilityVisibility: false, // New compatibility setting
     compabilityWipe: false, // New compatibility setting
     blurInactive: false,
+    dynamicPlayer: false,
     customCSS: '',
     // Translation settings
     translationProvider: 'google', // 'google' or 'gemini'
@@ -43,7 +44,7 @@ After ensuring the meaning is preserved, try to make the translation sound natur
 function loadSettings(callback) {
     storageLocalGet({
         lyricsProvider: 'kpoe',
-        lyricsSourceOrder: 'lyricsplus,apple,musixmatch,spotify,musixmatch-word',
+        lyricsSourceOrder: 'apple,lyricsplus,musixmatch,spotify,musixmatch-word',
         wordByWord: true,
         lineByLine: true,
         lightweight: false,
@@ -55,6 +56,7 @@ function loadSettings(callback) {
         compabilityVisibility: false, // New compatibility setting
         compabilityWipe: false, // New compatibility setting
         blurInactive: false,
+        dynamicPlayer: false,
         // Translation settings
         translationProvider: 'google',
         geminiApiKey: '',
@@ -77,8 +79,20 @@ After ensuring the meaning is preserved, try to make the translation sound natur
 
 function updateSettings(newSettings) {
     currentSettings = newSettings;
+    applyDynamicPlayerClass();
     pBrowser.runtime.sendMessage({
         type: 'SETTINGS_CHANGED',
         settings: currentSettings
     });
+}
+
+function applyDynamicPlayerClass() {
+    const layoutElement = document.getElementById('layout');
+    if (!layoutElement) return;
+
+    if (currentSettings.dynamicPlayer) {
+        layoutElement.classList.add('dynamic-player');
+    } else {
+        layoutElement.classList.remove('dynamic-player');
+    }
 }

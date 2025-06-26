@@ -15,6 +15,7 @@ let currentSettings = {
     compabilityVisibility: false, // New compatibility setting
     compabilityWipe: false, // New compatibility setting
     blurInactive: false,
+    dynamicPlayer: false,
     customCSS: '',
     translationProvider: 'google', // Default translation provider
     geminiApiKey: '', // Default Gemini API key
