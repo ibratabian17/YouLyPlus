@@ -643,13 +643,18 @@ span.lyrics-source-provider {
     border-color: transparent !important;
 }
 
-#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container {
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container,
+#layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="MINIPLAYER_IN_PLAYER_PAGE"]  .lyplus-blur-container{
     display: block;
     opacity: 1;
 }
 
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container::after {
     backdrop-filter: blur(calc(calc(6vh + 6vw) / 2)) brightness(0.5) saturate(1.2) contrast(1.1);
+}
+
+#layout.dynamic-player[is-mweb-modernization-enabled] .lyplus-blur-container{
+    transform: scale(2, 1);
 }
 
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #player-bar-background,
@@ -668,6 +673,24 @@ span.lyrics-source-provider {
 
 }
 
+#layout.dynamic-player[is-mweb-modernization-enabled] .side-panel.ytmusic-player-page,
+#layout.dynamic-player[is-mweb-modernization-enabled][player-page-ui-state="TABS_VIEW"] #side-panel.ytmusic-player-page {
+    background: none!important;
+}
+#layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="PLAYER_PAGE_OPEN"] .background-gradient,
+#layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="MINIPLAYER_IN_PLAYER_PAGE"] .background-gradient,
+#layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="MINIPLAYER_IN_PLAYER_PAGE"] #player-page,
+#layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="MINIPLAYER_IN_PLAYER_PAGE"] #top-player-bar {
+    background: none!important;
+}
+#layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="MINIPLAYER_IN_PLAYER_PAGE"] #player-bar-background, 
+#layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="MINIPLAYER_IN_PLAYER_PAGE"] #nav-bar-background,
+#layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="MINIPLAYER_IN_PLAYER_PAGE"] #mini-guide,
+#layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="MINIPLAYER_IN_PLAYER_PAGE"] #mini-guide-background,
+#layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="PLAYER_PAGE_OPEN"] #mini-guide,
+#layout.dynamic-player .background-image{
+    visibility: hidden!important;
+}
 /* Fullscreen specific background visibility */
 ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
     opacity: 1;
