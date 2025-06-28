@@ -77,7 +77,6 @@ document.getElementById('save-general').addEventListener('click', () => {
         lyricsProvider: document.getElementById('default-provider').value,
         lyricsSourceOrder: orderedSources.join(','),
         useSponsorBlock: document.getElementById('sponsor-block').checked,
-        lightweight: document.getElementById('lightweight').checked,
         wordByWord: document.getElementById('wordByWord').checked
     };
     updateSettings(newGeneralSettings);
@@ -87,6 +86,7 @@ document.getElementById('save-general').addEventListener('click', () => {
 
 document.getElementById('save-appearance').addEventListener('click', () => {
     const newAppearanceSettings = {
+        lightweight: document.getElementById('lightweight').checked,
         customCSS: document.getElementById('custom-css').value,
         compabilityVisibility: document.getElementById('compability-visibility').checked,
         compabilityWipe: document.getElementById('compability-wipe').checked,
