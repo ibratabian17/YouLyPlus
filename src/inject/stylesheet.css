@@ -629,16 +629,36 @@ span.lyrics-source-provider {
     position: absolute;
     width: 100%;
     height: 100%;
-    backdrop-filter: blur(calc(calc(6vh + 6vw) / 2)) brightness(0.7) saturate(1.2) contrast(1.1);
+    backdrop-filter:  brightness(0.7) saturate(1.2) contrast(1.1);
     z-index: 29;
     top: 0;
     left: 0;
 }
 
+canvas#lyplus-webgl-canvas {
+    /* 1. Positioning to center the canvas */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    /* 2. Core logic: Set minimum size and aspect ratio */
+    min-width: 100vw;
+    min-height: 100vh;
+    aspect-ratio: 16 / 9;
+
+    /* These are not strictly needed with the above, but can be a fallback */
+    width: auto;
+    height: auto;
+}
+
+
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #mini-guide-background,
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #nav-bar-background,
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #guide-wrapper,
-#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-player-page#player-page {
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-player-page#player-page,
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #nav-bar-divider.ytmusic-app-layout,
+#layout.dynamic-player[player-ui-state="MINIPLAYER_IN_PLAYER_PAGE"] #nav-bar-divider.ytmusic-app-layout {
     background-color: transparent !important;
     border-color: transparent !important;
 }
@@ -650,11 +670,7 @@ span.lyrics-source-provider {
 }
 
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container::after {
-    backdrop-filter: blur(calc(calc(6vh + 6vw) / 2)) brightness(0.5) saturate(1.2) contrast(1.1);
-}
-
-#layout.dynamic-player[is-mweb-modernization-enabled] .lyplus-blur-container{
-    transform: scale(2, 1);
+    backdrop-filter: brightness(0.5) saturate(1.2) contrast(1.1);
 }
 
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #player-bar-background,
