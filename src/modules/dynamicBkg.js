@@ -297,8 +297,7 @@ function LYPLUS_setupBlurEffect() {
     currentTargetMasterArtworkPalette = initialPalette.map(c => ({ ...c }));
     updateMasterPaletteTexture(initialPalette, initialPalette);
 
-    window.addEventListener('resize', handleResize, false);
-    handleResize();
+    initSize();
 
     if (!globalAnimationId) {
         console.log("LYPLUS: Starting WebGL animation loop.");
@@ -309,34 +308,27 @@ function LYPLUS_setupBlurEffect() {
     return blurContainer;
 }
 
-function handleResize() {
+function initSize() {
     if (!gl || !webglCanvas) return;
 
     const dpr = window.devicePixelRatio || 1;
 
-    const displayWidth = window.innerWidth;
-    const displayHeight = window.innerHeight;
+    const displayWidth = 512;
+    const displayHeight = 512;
 
-    const requiredWidth = Math.round(displayWidth * dpr);
-    const requiredHeight = Math.round(displayHeight * dpr);
+    webglCanvas.width = displayWidth;
+    webglCanvas.height = displayHeight;
 
-    if (webglCanvas.width !== requiredWidth || webglCanvas.height !== requiredHeight) {
-        webglCanvas.width = requiredWidth;
-        webglCanvas.height = requiredHeight;
+    gl.viewport(0, 0, webglCanvas.width, webglCanvas.height);
 
-        gl.viewport(0, 0, webglCanvas.width, webglCanvas.height);
+    const blurWidth = Math.round(displayWidth / BLUR_DOWNSAMPLE_FACTOR);
+    const blurHeight = Math.round(displayHeight / BLUR_DOWNSAMPLE_FACTOR);
 
-        const blurWidth = Math.round(displayWidth / BLUR_DOWNSAMPLE_FACTOR);
-        const blurHeight = Math.round(displayHeight / BLUR_DOWNSAMPLE_FACTOR);
+    gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, blurWidth, blurHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
-        gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, blurWidth, blurHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-        
-        console.log(`LYPLUS: Canvas resized to ${requiredWidth}x${requiredHeight}. Blur texture resized to ${blurWidth}x${blurHeight}.`);
-        return true; // Return true to indicate a resize happened
-    }
-
-    return false; // No resize was necessary
+    console.log(`LYPLUS: Blur texture resized to ${blurWidth}x${blurHeight}.`);
+    return true; // Return true to indicate a resize happened
 }
 
 // --- Texture Creation/Update Functions ---
