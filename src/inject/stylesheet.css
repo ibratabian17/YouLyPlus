@@ -273,12 +273,15 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 
 /* Gap Main Vocal Container Animation */
 .lyrics-line.lyrics-gap .main-vocal-container {
-    animation: gap-ended .8s ease;
+    transform: translateY(-25%) scale(1) translateZ(0);
+}
+.lyrics-line.lyrics-gap:not(.active) .main-vocal-container {
+    animation: gap-ended 0.8s ease;
     transform: translateY(-25%) scale(0) translateZ(0);
 }
 
-.lyrics-line.lyrics-gap.active .main-vocal-container {
-    animation: gap-loop 2s ease infinite alternate;
+.lyrics-line.lyrics-gap.active .main-vocal-container .lyrics-word {
+    animation: gap-loop 4s ease infinite alternate;
     will-change: transform;
 }
 
@@ -298,6 +301,10 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 }
 
 .lyrics-line.lyrics-gap.active .lyrics-syllable.highlight {
+    background-color: #ffffff;
+}
+.lyrics-line.lyrics-gap.active .lyrics-syllable.finished {
+    animation: none!important;
     background-color: #ffffff;
 }
 
@@ -418,11 +425,11 @@ span.lyrics-source-provider {
 
 @keyframes gap-loop {
     from {
-        transform: translateY(-25%) scale(1.1) translateZ(0);
+        transform: scale(1.1);
     }
 
     to {
-        transform: translateY(-25%) scale(1) translateZ(0);
+        transform: scale(0.9);
     }
 }
 
@@ -431,7 +438,7 @@ span.lyrics-source-provider {
         transform: translateY(-25%) scale(1) translateZ(0);
     }
 
-    30% {
+    35% {
         transform: translateY(-25%) scale(1.2) translateZ(0);
     }
 

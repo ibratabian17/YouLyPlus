@@ -182,6 +182,9 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     const mainContainer = document.createElement('div');
     mainContainer.className = 'main-vocal-container';
 
+    const lyricsWord = document.createElement('div');
+    lyricsWord.className = 'lyrics-word';
+
     for (let i = 0; i < 3; i++) {
       const syllableSpan = elementPool.syllables.pop() || document.createElement('span');
       syllableSpan.className = 'lyrics-syllable';
@@ -195,8 +198,9 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
         syllableSpan.addEventListener('click', onLyricClick);
         syllableSpan.hasClickListener = true;
       }
-      mainContainer.appendChild(syllableSpan);
+      lyricsWord.appendChild(syllableSpan);
     }
+    mainContainer.appendChild(lyricsWord);
     gapLine.appendChild(mainContainer);
     return gapLine;
   }
@@ -777,7 +781,7 @@ function updateSyllableAnimation(syllable, currentTime) { // currentTime in ms
     // syllable.parentElement is wordSpan, syllable.parentElement.parentElement is main/background-vocal-container
     // For gap lines, syllable.parentElement is main-vocal-container, syllable.parentElement.parentElement is lyrics-gap line
     if (syllable.parentElement && syllable.parentElement.parentElement &&
-      syllable.parentElement.parentElement.classList.contains('lyrics-gap')) {
+      syllable.parentElement.parentElement.parentElement.classList.contains('lyrics-gap')) {
       wipeAnimation = "fade-gap";
     }
     syllable.style.animation = `${wipeAnimation} ${duration}ms linear forwards`;
