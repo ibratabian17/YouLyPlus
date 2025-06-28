@@ -114,7 +114,6 @@ function batchDOMUpdates(callback) {
 }
 
 // --- Lyrics Display & Rendering Logic ---
-
 function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}) {
   const container = getContainer();
   if (!container) return;
@@ -139,6 +138,36 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   }
 
   container.innerHTML = ''; // Clear container
+
+  // Determine singer alignment based on a hierarchy of singer types present in the song.
+  const singerClassMap = {};
+  if (lyrics && lyrics.data && lyrics.data.length > 0) {
+    const allSingers = [...new Set(lyrics.data.map(line => line.element?.singer).filter(Boolean))];
+
+    // Categorize singers based on their typical role and sort them to establish a consistent hierarchy.
+    const leftCandidates = allSingers.filter(s => s === 'v1' || s === 'v1000').sort(); // 'v1' comes before 'v1000'
+    const rightCandidates = allSingers.filter(s => s === 'v2' || s === 'v2000').sort(); // 'v2' comes before 'v2000'
+
+    if (leftCandidates.length > 0 && rightCandidates.length > 0) {
+      // Standard case: Both left and right singers exist. Assign them to their default sides.
+      leftCandidates.forEach(s => singerClassMap[s] = 'singer-left');
+      rightCandidates.forEach(s => singerClassMap[s] = 'singer-right');
+    } else if (leftCandidates.length > 1) {
+      // Only "left" type singers exist. Make the primary one ('v1') left and others right for contrast.
+      singerClassMap[leftCandidates[0]] = 'singer-left';
+      for (let i = 1; i < leftCandidates.length; i++) {
+        singerClassMap[leftCandidates[i]] = 'singer-right';
+      }
+    } else if (rightCandidates.length > 1) {
+      // Only "right" type singers exist. Make the primary one ('v2') left and others right for contrast.
+      singerClassMap[rightCandidates[0]] = 'singer-left';
+      for (let i = 1; i < rightCandidates.length; i++) {
+        singerClassMap[rightCandidates[i]] = 'singer-right';
+      }
+    }
+    // If only one singer type exists in total, the map remains sparse or empty, and the fallback to 'singer-left' will be used.
+  }
+
 
   const elementPool = {
     lines: [],
@@ -225,10 +254,12 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       currentLine.innerHTML = '';
       currentLine.className = 'lyrics-line';
       currentLine.dataset.startTime = line.startTime; // Expecting seconds
-      currentLine.dataset.endTime = line.endTime;     // Expecting seconds
-      currentLine.classList.add(
-        line.element.singer === "v2" || line.element.singer === "v2000" ? 'singer-right' : 'singer-left'
-      );
+      currentLine.dataset.endTime = line.endTime; // Expecting seconds
+
+      const singer = line.element?.singer;
+      const singerClass = singer ? (singerClassMap[singer] || 'singer-left') : 'singer-left';
+      currentLine.classList.add(singerClass);
+
       if (isRTL(line.text)) currentLine.classList.add('rtl-text');
       if (!currentLine.hasClickListener) {
         currentLine.addEventListener('click', onLyricClick);
@@ -251,7 +282,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       let backgroundContainer = null;
       let wordBuffer = [];
       let currentWordStartTime = null; // in ms
-      let currentWordEndTime = null;   // in ms
+      let currentWordEndTime = null; // in ms
       // currentWordElement = {}; // Not used, can be removed
 
       const flushWordBuffer = () => {
@@ -393,8 +424,12 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       lineDiv.className = 'lyrics-line'; // Reset class
 
       lineDiv.dataset.startTime = line.startTime; // Expecting seconds
-      lineDiv.dataset.endTime = line.endTime;   // Expecting seconds
-      lineDiv.classList.add(line.element.singer === "v2" ? 'singer-right' : 'singer-left');
+      lineDiv.dataset.endTime = line.endTime; // Expecting seconds
+
+      const singer = line.element?.singer;
+      const singerClass = singer ? (singerClassMap[singer] || 'singer-left') : 'singer-left';
+      lineDiv.classList.add(singerClass);
+
       if (isRTL(line.text)) lineDiv.classList.add('rtl-text');
       if (!lineDiv.hasClickListener) {
         lineDiv.addEventListener('click', onLyricClick);
