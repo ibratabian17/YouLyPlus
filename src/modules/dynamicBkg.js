@@ -356,7 +356,7 @@ function handleResize() {
     // Resize the WebGL texture used for blurring
     gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, blurDimensions.width, blurDimensions.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    
+
     // Set the main viewport to the new canvas size
     gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
 
@@ -490,7 +490,7 @@ function processNextArtworkFromQueue() {
     const finishProcessing = (newTargetPalette) => {
         currentTargetMasterArtworkPalette = newTargetPalette;
         updateMasterPaletteTexture(previousPaletteForTransition, currentTargetMasterArtworkPalette);
-        songPaletteTransitionProgress = 0.0;
+        songPaletteTransitionProgress = currentSettings.lightweight ? 1.0 : 0.0;
         lastAppliedArtworkIdentifier = currentProcessingArtworkIdentifier;
         isProcessingArtwork = false;
         currentProcessingArtworkIdentifier = null;
@@ -612,23 +612,25 @@ function animateWebGLBackground() {
     const deltaTime = (now - lastFrameTime) / 1000.0;
     lastFrameTime = now;
 
-    // Pass 1: GPGPU Update 8x5 Cell States (A -> B)
-    gl.bindFramebuffer(gl.FRAMEBUFFER, cellStateFramebuffer);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, stateTextureB, 0);
-    gl.viewport(0, 0, DISPLAY_GRID_WIDTH, DISPLAY_GRID_HEIGHT);
-    gl.useProgram(updateStateProgram);
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.enableVertexAttribArray(a_update_positionLocation);
-    gl.vertexAttribPointer(a_update_positionLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, stateTextureA);
-    gl.uniform1i(u_update_currentStateTextureLocation, 0);
-    gl.uniform1f(u_update_deltaTimeLocation, deltaTime);
-    gl.uniform2f(u_update_randomLocation, Math.random(), Math.random());
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    if (currentSettings.lightweight !== true) {
+        // Pass 1: GPGPU Update 8x5 Cell States (A -> B)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, cellStateFramebuffer);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, stateTextureB, 0);
+        gl.viewport(0, 0, DISPLAY_GRID_WIDTH, DISPLAY_GRID_HEIGHT);
+        gl.useProgram(updateStateProgram);
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.enableVertexAttribArray(a_update_positionLocation);
+        gl.vertexAttribPointer(a_update_positionLocation, 2, gl.FLOAT, false, 0, 0);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, stateTextureA);
+        gl.uniform1i(u_update_currentStateTextureLocation, 0);
+        gl.uniform1f(u_update_deltaTimeLocation, deltaTime);
+        gl.uniform2f(u_update_randomLocation, Math.random(), Math.random());
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    // Swap textures. B has the new state. A is now the old state.
-    [stateTextureA, stateTextureB] = [stateTextureB, stateTextureA];
+        // Swap textures. B has the new state. A is now the old state.
+        [stateTextureA, stateTextureB] = [stateTextureB, stateTextureA];
+    }
 
     // Pass 2: Render 8x5 Grid to an Off-screen 16:9 Texture, stretching it.
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
@@ -638,7 +640,7 @@ function animateWebGLBackground() {
     gl.useProgram(glProgram);
     gl.enableVertexAttribArray(a_positionLocation);
     gl.vertexAttribPointer(a_positionLocation, 2, gl.FLOAT, false, 0, 0);
-    if (songPaletteTransitionProgress < 1.0) {
+    if (songPaletteTransitionProgress < 1.0 && currentSettings.lightweight !== true) {
         songPaletteTransitionProgress = Math.min(1.0, songPaletteTransitionProgress + SONG_PALETTE_TRANSITION_SPEED);
     }
     gl.uniform1f(u_songPaletteTransitionProgressLocation, songPaletteTransitionProgress);
@@ -654,7 +656,7 @@ function animateWebGLBackground() {
     gl.useProgram(blurProgram);
     gl.enableVertexAttribArray(a_blur_positionLocation);
     gl.vertexAttribPointer(a_blur_positionLocation, 2, gl.FLOAT, false, 0, 0);
-    
+
     // --- PERFORMANCE FIX ---
     // Use pre-calculated values instead of accessing DOM/re-calculating in the loop.
 
