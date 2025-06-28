@@ -24,7 +24,7 @@ let blurFramebuffer = null;
 let renderTexture = null;
 let blurTextureA = null;
 
-const BLUR_DOWNSAMPLE_FACTOR = 26;
+const BLUR_DOWNSAMPLE_FACTOR = 22;
 
 // Palette and Cell State Constants
 const MASTER_PALETTE_TEX_WIDTH = 8;
@@ -312,21 +312,31 @@ function LYPLUS_setupBlurEffect() {
 function handleResize() {
     if (!gl || !webglCanvas) return;
 
-    const displayWidth = webglCanvas.clientWidth;
-    const displayHeight = webglCanvas.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
 
-    if (webglCanvas.width !== displayWidth || webglCanvas.height !== displayHeight) {
-        webglCanvas.width = displayWidth;
-        webglCanvas.height = displayHeight;
+    const displayWidth = window.innerWidth;
+    const displayHeight = window.innerHeight;
+
+    const requiredWidth = Math.round(displayWidth * dpr);
+    const requiredHeight = Math.round(displayHeight * dpr);
+
+    if (webglCanvas.width !== requiredWidth || webglCanvas.height !== requiredHeight) {
+        webglCanvas.width = requiredWidth;
+        webglCanvas.height = requiredHeight;
+
+        gl.viewport(0, 0, webglCanvas.width, webglCanvas.height);
+
+        const blurWidth = Math.round(displayWidth / BLUR_DOWNSAMPLE_FACTOR);
+        const blurHeight = Math.round(displayHeight / BLUR_DOWNSAMPLE_FACTOR);
+
+        gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, blurWidth, blurHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        
+        console.log(`LYPLUS: Canvas resized to ${requiredWidth}x${requiredHeight}. Blur texture resized to ${blurWidth}x${blurHeight}.`);
+        return true; // Return true to indicate a resize happened
     }
 
-    const blurWidth = Math.round(displayWidth / BLUR_DOWNSAMPLE_FACTOR);
-    const blurHeight = Math.round(displayHeight / BLUR_DOWNSAMPLE_FACTOR);
-
-    gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, blurWidth, blurHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-
-    console.log(`LYPLUS: Canvas resized to ${displayWidth}x${displayHeight}. Blur texture resized to ${blurWidth}x${blurHeight}.`);
+    return false; // No resize was necessary
 }
 
 // --- Texture Creation/Update Functions ---
