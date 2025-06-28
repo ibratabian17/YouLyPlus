@@ -233,6 +233,32 @@ body {
     gap: 24px;
 }
 
+/* Reload Notification Bar */
+.reload-notification {
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--md-sys-color-tertiary-container);
+    color: var(--md-sys-color-on-tertiary-container);
+    padding: 12px 16px;
+    border-radius: var(--border-radius-medium);
+    margin: 0 0 0px; /* Adjusted margin */
+    font-size: 0.875rem; /* 14px */
+    font-weight: 500;
+    animation: fadeIn 0.3s var(--animation-timing-function);
+}
+
+.reload-notification span {
+    flex-grow: 1;
+}
+
+.reload-notification .btn {
+    margin-left: 16px;
+    padding: 8px 16px; /* Slightly smaller padding */
+    min-height: 36px;
+}
+
+
 /* Settings Card (for each section) */
 .settings-card {
     background-color: var(--md-sys-color-surface-container);
@@ -270,6 +296,33 @@ body {
     margin-bottom: 24px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.card-title.no-border {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Settings Category */
+.settings-category {
+    margin-bottom: 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--md-sys-color-surface-container-high);
+}
+
+.settings-card > .settings-category:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+.category-title {
+    font-size: 0.875rem; /* 14px */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--md-sys-color-primary);
+    margin-bottom: 20px;
 }
 
 /* Setting Item (wrapper for a single setting) */
@@ -719,6 +772,46 @@ select:focus {
     border: 1px solid var(--md-sys-color-outline-variant);
 }
 
+/* About Page Styles */
+.about-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.about-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--border-radius-medium);
+}
+
+.about-header-text .version {
+    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-top: -8px; /* Pull it closer to the title */
+}
+
+.about-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: 24px;
+}
+
+.about-links {
+    margin-top: 24px;
+}
+
+.links-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+}
+
 /* Footer */
 .content-footer {
     margin-top: auto;
@@ -810,6 +903,11 @@ select:focus {
         width: 100%;
         /* Full width buttons in stacked actions */
     }
+    
+    .links-container .btn {
+        flex-grow: 1; /* Make buttons grow to fill space */
+    }
+
 
     .add-source-container {
         flex-direction: column;

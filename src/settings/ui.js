@@ -3,6 +3,61 @@ import { startFullPreviewSync } from './previewManager.js';
 
 let currentSettings = getSettings(); // Initialize with default settings
 
+// Shows a notification bar telling the user to reload their YTM tab
+function showReloadNotification() {
+    const notification = document.getElementById('reload-notification');
+    if (notification) {
+        notification.style.display = 'flex'; // Use flex to align items
+    }
+}
+
+// Hides the notification bar
+function hideReloadNotification() {
+    const notification = document.getElementById('reload-notification');
+    if (notification) {
+        notification.style.display = 'none';
+    }
+}
+
+// Sets up listeners for controls that should save automatically on change
+function setupAutoSaveListeners() {
+    const autoSaveControls = [
+        // General
+        { id: 'enabled', key: 'isEnabled', type: 'checkbox' },
+        { id: 'default-provider', key: 'lyricsProvider', type: 'value' },
+        { id: 'sponsor-block', key: 'useSponsorBlock', type: 'checkbox' },
+        { id: 'wordByWord', key: 'wordByWord', type: 'checkbox' },
+        // Appearance
+        { id: 'lightweight', key: 'lightweight', type: 'checkbox' },
+        { id: 'compability-visibility', key: 'compabilityVisibility', type: 'checkbox' },
+        { id: 'compability-wipe', key: 'compabilityWipe', type: 'checkbox' },
+        { id: 'blur-inactive', key: 'blurInactive', type: 'checkbox' },
+        { id: 'dynamic-player', key: 'dynamicPlayer', type: 'checkbox' },
+        // Translation
+        { id: 'translation-provider', key: 'translationProvider', type: 'value' },
+        { id: 'gemini-model', key: 'geminiModel', type: 'value' },
+        { id: 'override-translate-target', key: 'overrideTranslateTarget', type: 'checkbox' },
+        { id: 'override-gemini-prompt', key: 'overrideGeminiPrompt', type: 'checkbox' },
+        // Cache
+        { id: 'cache-strategy', key: 'cacheStrategy', type: 'value' },
+    ];
+
+    autoSaveControls.forEach(control => {
+        const element = document.getElementById(control.id);
+        if (element) {
+            element.addEventListener('change', (e) => {
+                const value = control.type === 'checkbox' ? e.target.checked : e.target.value;
+                const newSetting = { [control.key]: value };
+
+                updateSettings(newSetting);
+                saveSettings();
+                showReloadNotification();
+            });
+        }
+    });
+}
+
+
 // Update UI elements to reflect current settings
 function updateUI(settings) {
     currentSettings = settings; // Update local reference
@@ -66,61 +121,44 @@ document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
     });
 });
 
-// Event listeners for save buttons
+// Event listeners for save buttons (now only for manual input fields)
 document.getElementById('save-general').addEventListener('click', () => {
     const draggableList = document.getElementById('lyrics-source-order-draggable');
     const orderedSources = Array.from(draggableList.children)
         .map(item => item.dataset.source);
 
     const newGeneralSettings = {
-        isEnabled: document.getElementById('enabled').checked,
-        lyricsProvider: document.getElementById('default-provider').value,
+        // Switches and dropdowns are auto-saved. This button only saves the source order.
         lyricsSourceOrder: orderedSources.join(','),
-        useSponsorBlock: document.getElementById('sponsor-block').checked,
-        wordByWord: document.getElementById('wordByWord').checked
     };
     updateSettings(newGeneralSettings);
     saveSettings();
-    showStatusMessage('General settings saved!', false, 'save-general');
+    showStatusMessage('Lyrics+ source order saved!', false, 'save-general');
 });
 
 document.getElementById('save-appearance').addEventListener('click', () => {
     const newAppearanceSettings = {
-        lightweight: document.getElementById('lightweight').checked,
+        // Switches are auto-saved. This button only saves the Custom CSS.
         customCSS: document.getElementById('custom-css').value,
-        compabilityVisibility: document.getElementById('compability-visibility').checked,
-        compabilityWipe: document.getElementById('compability-wipe').checked,
-        blurInactive: document.getElementById('blur-inactive').checked,
-        dynamicPlayer: document.getElementById('dynamic-player').checked
     };
     updateSettings(newAppearanceSettings);
     saveSettings();
-    showStatusMessage('Appearance settings saved!', false, 'save-appearance');
+    showStatusMessage('Custom CSS saved!', false, 'save-appearance');
 });
 
 document.getElementById('save-translation').addEventListener('click', () => {
     const newTranslationSettings = {
-        translationProvider: document.getElementById('translation-provider').value,
+        // Switches and dropdowns are auto-saved. This saves text inputs.
         geminiApiKey: document.getElementById('gemini-api-key').value,
-        geminiModel: document.getElementById('gemini-model').value, // Add geminiModel
-        overrideTranslateTarget: document.getElementById('override-translate-target').checked,
         customTranslateTarget: document.getElementById('custom-translate-target').value,
-        overrideGeminiPrompt: document.getElementById('override-gemini-prompt').checked,
         customGeminiPrompt: document.getElementById('custom-gemini-prompt').value
     };
     updateSettings(newTranslationSettings);
     saveSettings();
-    showStatusMessage('Translation settings saved!', false, 'save-translation');
+    showStatusMessage('Translation input fields saved!', false, 'save-translation');
 });
 
-document.getElementById('save-cache').addEventListener('click', () => {
-    const newCacheSettings = {
-        cacheStrategy: document.getElementById('cache-strategy').value
-    };
-    updateSettings(newCacheSettings);
-    saveSettings();
-    showStatusMessage('Cache settings saved!', false, 'save-cache');
-});
+// REMOVED: save-cache event listener is no longer needed.
 
 // Clear cache button
 document.getElementById('clear-cache').addEventListener('click', clearCache);
@@ -354,7 +392,7 @@ function toggleKpoeSourcesVisibility() {
 document.getElementById('default-provider').addEventListener('change', (e) => {
     currentSettings.lyricsProvider = e.target.value; // Update setting immediately for visibility toggle
     toggleKpoeSourcesVisibility();
-    // actual saving happens on "Save General"
+    // actual saving happens automatically via setupAutoSaveListeners
 });
 
 // Event listener for override-translate-target change
@@ -421,7 +459,7 @@ function toggleGeminiPromptVisibility() {
 document.getElementById('translation-provider').addEventListener('change', (e) => {
     currentSettings.translationProvider = e.target.value; // Update setting immediately
     toggleGeminiSettingsVisibility(); // Call the renamed function
-    // actual saving happens on "Save General"
+    // actual saving happens automatically via setupAutoSaveListeners
 });
 
 document.getElementById('play-example').addEventListener('click', () => {
@@ -440,12 +478,29 @@ document.getElementById('toggle-gemini-api-key-visibility').addEventListener('cl
         toggleButtonIcon.textContent = 'visibility';
     }
 });
+function setAppVersion() {
+    try {
+        const manifest = chrome.runtime.getManifest();
+        const version = manifest.version;
+        const versionElement = document.querySelector('.version');
+        if (versionElement) {
+            versionElement.textContent = `Version ${version}`;
+        }
+    } catch (e) {
+        console.error("Could not retrieve extension version from manifest:", e);
+        const versionElement = document.querySelector('.version');
+        if (versionElement) {
+            versionElement.textContent = 'Version unavailable';
+        }
+    }
+}
 
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
     loadSettings((settings) => {
         currentSettings = settings; // Ensure currentSettings is updated after load
         updateUI(currentSettings);
+        setupAutoSaveListeners(); // Setup auto-saving for switches and selects
 
         const firstNavItem = document.querySelector('.navigation-drawer .nav-item');
         const activeSectionId = firstNavItem ? firstNavItem.getAttribute('data-section') : 'general';
@@ -456,4 +511,28 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.settings-card').forEach(section => section.classList.remove('active'));
         document.getElementById(activeSectionId)?.classList.add('active');
     });
+
+    setAppVersion();
+    
+    // Add event listener for the new reload button
+    const reloadButton = document.getElementById('reload-button');
+    if (reloadButton) {
+        reloadButton.addEventListener('click', () => {
+            // Find the YouTube Music tab and reload it
+            chrome.tabs.query({ url: "*://music.youtube.com/*" }, (tabs) => {
+                if (tabs.length > 0) {
+                    const ytmTab = tabs[0];
+                    chrome.tabs.reload(ytmTab.id, () => {
+                        // After reloading, hide the notification and maybe show a success message
+                        hideReloadNotification();
+                        // Optionally, show a temporary success message
+                        showStatusMessage('YouTube Music tab reloaded!', false, 'save-general');
+                    });
+                } else {
+                    // Handle case where no YTM tab is open
+                    alert("No YouTube Music tab found. Please open one and try again.");
+                }
+            });
+        });
+    }
 });
