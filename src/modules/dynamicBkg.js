@@ -24,6 +24,11 @@ let blurFramebuffer = null;
 let renderTexture = null;
 let blurTextureA = null;
 
+// --- Performance & State Management ---
+// Store size-dependent values to avoid DOM reads in the animation loop
+let blurDimensions = { width: 0, height: 0 };
+let canvasDimensions = { width: 0, height: 0 };
+
 const BLUR_DOWNSAMPLE_FACTOR = 22;
 
 // Palette and Cell State Constants
@@ -297,38 +302,65 @@ function LYPLUS_setupBlurEffect() {
     currentTargetMasterArtworkPalette = initialPalette.map(c => ({ ...c }));
     updateMasterPaletteTexture(initialPalette, initialPalette);
 
-    initSize();
+    handleResize(); // Initial size calculation
+    window.addEventListener('resize', handleResize, { passive: true }); // Re-calculate on resize
 
-    if (!globalAnimationId) {
-        console.log("LYPLUS: Starting WebGL animation loop.");
-        lastFrameTime = performance.now();
-        animateWebGLBackground();
-    }
-    console.log("LYPLUS: WebGL setup complete with GPU blur pipeline.");
+    // Use IntersectionObserver to start/stop animation when canvas is on/off screen
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                if (!globalAnimationId) {
+                    console.log("LYPLUS: Canvas is visible, starting animation.");
+                    lastFrameTime = performance.now(); // Reset time to avoid large deltaTime jump
+                    globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+                }
+            } else {
+                if (globalAnimationId) {
+                    console.log("LYPLUS: Canvas is not visible, stopping animation.");
+                    cancelAnimationFrame(globalAnimationId);
+                    globalAnimationId = null;
+                }
+            }
+        });
+    }, { threshold: 0.01 }); // Trigger when at least 1% is visible
+
+    observer.observe(webglCanvas);
+
+    console.log("LYPLUS: WebGL setup complete with GPU blur pipeline. Animation will start when visible.");
     return blurContainer;
 }
 
-function initSize() {
+function handleResize() {
     if (!gl || !webglCanvas) return;
 
-    const dpr = window.devicePixelRatio || 1;
-
+    // Restore fixed size logic as per feedback
     const displayWidth = 512;
     const displayHeight = 512;
 
-    webglCanvas.width = displayWidth;
-    webglCanvas.height = displayHeight;
+    // Only perform resize operations if the size has actually changed
+    if (displayWidth === canvasDimensions.width && displayHeight === canvasDimensions.height) {
+        return false; // No resize needed
+    }
 
-    gl.viewport(0, 0, webglCanvas.width, webglCanvas.height);
+    canvasDimensions.width = displayWidth;
+    canvasDimensions.height = displayHeight;
 
-    const blurWidth = Math.round(displayWidth / BLUR_DOWNSAMPLE_FACTOR);
-    const blurHeight = Math.round(displayHeight / BLUR_DOWNSAMPLE_FACTOR);
+    // Set the canvas drawing buffer size
+    webglCanvas.width = canvasDimensions.width;
+    webglCanvas.height = canvasDimensions.height;
 
+    // Recalculate blur dimensions based on the new canvas size
+    blurDimensions.width = Math.round(canvasDimensions.width / BLUR_DOWNSAMPLE_FACTOR);
+    blurDimensions.height = Math.round(canvasDimensions.height / BLUR_DOWNSAMPLE_FACTOR);
+
+    // Resize the WebGL texture used for blurring
     gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, blurWidth, blurHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, blurDimensions.width, blurDimensions.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    
+    // Set the main viewport to the new canvas size
+    gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
 
-    console.log(`LYPLUS: Blur texture resized to ${blurWidth}x${blurHeight}.`);
-    return true; // Return true to indicate a resize happened
+    return true; // Indicate a resize happened
 }
 
 // --- Texture Creation/Update Functions ---
@@ -622,15 +654,16 @@ function animateWebGLBackground() {
     gl.useProgram(blurProgram);
     gl.enableVertexAttribArray(a_blur_positionLocation);
     gl.vertexAttribPointer(a_blur_positionLocation, 2, gl.FLOAT, false, 0, 0);
-    const blurWidth = Math.round(gl.canvas.width / BLUR_DOWNSAMPLE_FACTOR);
-    const blurHeight = Math.round(gl.canvas.height / BLUR_DOWNSAMPLE_FACTOR);
+    
+    // --- PERFORMANCE FIX ---
+    // Use pre-calculated values instead of accessing DOM/re-calculating in the loop.
 
     // Pass 3: Horizontal Blur (stretched texture -> blurTextureA)
     gl.bindFramebuffer(gl.FRAMEBUFFER, blurFramebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, blurTextureA, 0);
-    gl.viewport(0, 0, blurWidth, blurHeight);
+    gl.viewport(0, 0, blurDimensions.width, blurDimensions.height); // Use stored value
     gl.uniform2f(u_blur_directionLocation, 1.0, 0.0);
-    // FIX: The blur shader's source is now the 16:9 stretched texture.
+    // The blur shader's source is the fixed-size 16:9 stretched texture.
     gl.uniform2f(u_blur_resolutionLocation, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, renderTexture);
@@ -639,9 +672,9 @@ function animateWebGLBackground() {
 
     // Pass 4: Vertical Blur & Render to Screen (blurTextureA -> Canvas)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height); // Use stored value
     gl.uniform2f(u_blur_directionLocation, 0.0, 1.0);
-    gl.uniform2f(u_blur_resolutionLocation, blurWidth, blurHeight);
+    gl.uniform2f(u_blur_resolutionLocation, blurDimensions.width, blurDimensions.height); // Use stored values
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
     gl.uniform1i(u_blur_imageLocation, 0);
