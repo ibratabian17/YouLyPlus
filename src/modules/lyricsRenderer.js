@@ -149,7 +149,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   const onLyricClick = e => {
     const time = parseFloat(e.currentTarget.dataset.startTime); // Keep parseFloat here as it's infrequent
     const player = document.querySelector("video");
-    if (player) player.currentTime = time;
+    if (player) player.currentTime = time - 0.05; // Adjust for resetting animation
     scrollToActiveLine(e.currentTarget, true);
   };
 
