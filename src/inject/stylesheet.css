@@ -25,6 +25,7 @@ ytmusic-app-layout[player-fullscreened] .song-media-controls.ytmusic-player {
     transform: translateZ(0);
     direction: ltr;
     box-sizing: border-box;
+    --lyplus-lyrics-pallete: #fff;
 }
 
 ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
@@ -117,7 +118,7 @@ ytmusic-player-page:not([player-fullscreened]) .lyrics-plus-integrated.blur-inac
 /* States & Interaction */
 .lyrics-line.active {
     opacity: 1;
-    color: var(--ytmusic-description-shelf-renderer-description-color, #fff);
+    color: var(--lyplus-lyrics-pallete, #fff);
     will-change: transform, opacity;
     /* Only apply will-change to active line */
 }
@@ -201,15 +202,17 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     white-space: break-spaces;
     color: #ffffff85;
     font-kerning: none;
+    background-clip: text;
+    -webkit-background-clip: text;
     font-variant-ligatures: none;
     font-feature-settings: "liga" 0;
-    transition: color 0.18s;
+    transition: color 0.18s, background-color 0.18s;
 }
 
 /* Syllable States (Finished) */
 .lyrics-line .lyrics-syllable.finished {
     /* Common color for all finished syllables */
-    color: #ffffff;
+    background-color :var(--lyplus-lyrics-pallete, #fff);
 }
 
 .lyrics-line.active .lyrics-syllable.finished {
@@ -238,7 +241,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 /* Syllable Highlighting (Active Line, Excluding Gaps) */
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
 .lyrics-plus-integrated.compability-wipe .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable {
-    background-image: linear-gradient(90deg, #ffffff00 0%, var(--ytmusic-description-shelf-renderer-description-color, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 100%, #0000 100%);
+    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-lyrics-pallete, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
     background-size: 0.5em 100%, 0% 100%;
     background-position: -0.5em 0%, -0.25em 0%;
     background-repeat: no-repeat;
@@ -249,7 +252,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 }
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.rtl-text {
-    background-image: linear-gradient(-90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 100%, #0000 100%);
+    background-image: linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
     background-position: calc(100% + 0.5em) 0%, right;
     direction: rtl;
 }
@@ -266,6 +269,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     overflow: hidden;
     transition: padding .3s .5s, height .3s .5s, opacity .2s .5s;
     box-sizing: content-box;
+    background-clip: unset;
     padding: 0 0.4em;
 }
 
@@ -321,17 +325,19 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     display: inline-block;
     white-space: break-spaces;
     color: #ffffff85;
+    background-clip: text;
+    -webkit-background-clip: text;
     font-kerning: none;
-    transition: color 0.18s;
+    transition: color 0.18s, background-color 0.18s;
 }
 
 .lyrics-line .lyrics-syllable.finished span.char {
     transition: none;
-    color: #ffffff;
+    background-color: var(--lyplus-lyrics-pallete, #fff);
 }
 
 .lyrics-line.active .lyrics-syllable span.char {
-    background-image: linear-gradient(90deg, #ffffff00 0%, var(--ytmusic-description-shelf-renderer-description-color, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 100%, #0000 100%);
+    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-lyrics-pallete, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
     background-clip: text;
     -webkit-background-clip: text;
     background-size: 0.5em 100%, 0% 100%;
@@ -344,7 +350,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 }
 
 .lyrics-line.active .lyrics-syllable span.char.highlight {
-    background-image: linear-gradient(-90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--ytmusic-description-shelf-renderer-description-color, #fff) 100%, #0000 100%);
+    background-image: linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
     background-position: calc(100% + 0.5em) 0%, calc(100% + 0.25em) 0%;
 }
 
