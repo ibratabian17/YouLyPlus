@@ -284,6 +284,27 @@
                     <p class="setting-description">Applies animated album backgrounds when the player is expanded. This
                         setting has no effect in fullscreen mode, where dynamic background is always enabled.</p>
                 </div>
+                <div class="setting-item">
+                    <label class="switch">
+                        <input type="checkbox" id="useSongPaletteFullscreen">
+                        <span class="slider"></span>
+                        <span class="switch-label">Use song palette for lyrics color in fullscreen</span>
+                    </label>
+                    <p class="setting-description">Uses the song's color palette for the lyrics when in fullscreen mode.</p>
+                </div>
+                <div class="setting-item">
+                    <label class="switch">
+                        <input type="checkbox" id="useSongPaletteAllModes">
+                        <span class="slider"></span>
+                        <span class="switch-label">Use song palette for lyrics color in all modes</span>
+                    </label>
+                    <p class="setting-description">Uses the song's color palette for the lyrics in all display modes.</p>
+                </div>
+                <div class="setting-item form-group">
+                    <label for="overridePaletteColor">Override palette color</label>
+                    <input type="text" id="overridePaletteColor" placeholder="e.g., #ff0000">
+                    <p class="helper-text">Override the song palette color with a custom one. (Only for lyrics color, not dynamic backgrounf) (keep empty if dont want to override)</p>
+                </div>
             </div>
 
             <div class="settings-category">

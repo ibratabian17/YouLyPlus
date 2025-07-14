@@ -33,6 +33,9 @@ function setupAutoSaveListeners() {
         { id: 'compability-wipe', key: 'compabilityWipe', type: 'checkbox' },
         { id: 'blur-inactive', key: 'blurInactive', type: 'checkbox' },
         { id: 'dynamic-player', key: 'dynamicPlayer', type: 'checkbox' },
+        { id: 'useSongPaletteFullscreen', key: 'useSongPaletteFullscreen', type: 'checkbox' },
+        { id: 'useSongPaletteAllModes', key: 'useSongPaletteAllModes', type: 'checkbox' },
+        { id: 'overridePaletteColor', key: 'overridePaletteColor', type: 'value' },
         // Translation
         { id: 'translation-provider', key: 'translationProvider', type: 'value' },
         { id: 'gemini-model', key: 'geminiModel', type: 'value' },
@@ -73,6 +76,9 @@ function updateUI(settings) {
     document.getElementById('compability-wipe').checked = currentSettings.compabilityWipe;
     document.getElementById('blur-inactive').checked = currentSettings.blurInactive;
     document.getElementById('dynamic-player').checked = currentSettings.dynamicPlayer;
+    document.getElementById('useSongPaletteFullscreen').checked = currentSettings.useSongPaletteFullscreen;
+    document.getElementById('useSongPaletteAllModes').checked = currentSettings.useSongPaletteAllModes;
+    document.getElementById('overridePaletteColor').value = currentSettings.overridePaletteColor;
 
     // Translation settings
     document.getElementById('translation-provider').value = currentSettings.translationProvider;

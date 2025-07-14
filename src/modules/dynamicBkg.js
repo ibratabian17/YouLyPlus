@@ -535,7 +535,8 @@ function processNextArtworkFromQueue() {
             color.luminance = calculateLuminance(color);
             const lumFactor = 1.0 - Math.abs(color.luminance - 0.5) * 1.8;
             const freqNorm = color.frequency / (OVERSAMPLE_GRID_WIDTH * OVERSAMPLE_GRID_HEIGHT);
-            color.vibrancy = (color.saturation * 0.7) + (Math.max(0, lumFactor) * 0.15) + (freqNorm * 0.15);
+            // Adjusted vibrancy calculation to prioritize frequency and luminance more
+            color.vibrancy = (color.saturation * 0.5) + (Math.max(0, lumFactor) * 0.25) + (freqNorm * 0.25);
         });
         let sortedCandidates = [...sampledColors].sort((a, b) => b.vibrancy - a.vibrancy);
         const newMasterPalette = [];
@@ -722,9 +723,88 @@ function calculateSaturation(color) {
     if (delta < 0.00001 || max < 0.00001) return 0;
     return delta / max;
 }
+
+// Converts an RGB color value to HSL. Conversion formula
+// adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+// Assumes r, g, and b are contained in the set [0, 255] and
+// returns h, s, and l in the set [0, 1].
+function rgbToHsl(r, g, b) {
+    r /= 255, g /= 255, b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+        h = s = 0; // achromatic
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return [h, s, l];
+}
+
+// Converts an HSL color value to RGB. Conversion formula
+// adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+// Assumes h, s, and l are contained in the set [0, 1] and
+// returns r, g, and b in the set [0, 255].
+function hslToRgb(h, s, l) {
+    let r, g, b;
+
+    if (s === 0) {
+        r = g = b = l; // achromatic
+    } else {
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1 / 3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1 / 3);
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
 function calculateColorDifference(color1, color2) {
     const c1 = color1 || { r: 0, g: 0, b: 0 }; const c2 = color2 || { r: 0, g: 0, b: 0 };
     return Math.abs(c1.r - c2.r) + Math.abs(c1.g - c2.g) + Math.abs(c1.b - c2.b);
+}
+
+function LYPLUS_getSongPalette() {
+    if (!currentTargetMasterArtworkPalette || currentTargetMasterArtworkPalette.length === 0) {
+        return null;
+    }
+
+    // Filter out dark colors and then sort by vibrancy
+    const MIN_LUMINANCE_THRESHOLD = 0.15; // Adjust as needed, 0.15 is a common starting point
+    const filteredPalette = currentTargetMasterArtworkPalette.filter(color => calculateLuminance(color) > MIN_LUMINANCE_THRESHOLD);
+
+    let selectedColor;
+    if (filteredPalette.length > 0) {
+        // Sort by vibrancy and get the most vibrant color from the filtered list
+        selectedColor = filteredPalette.sort((a, b) => b.vibrancy - a.vibrancy)[0];
+    } else {
+        // If all colors are too dark, fall back to the original most vibrant color without filtering
+        console.warn("LYPLUS: All colors in palette are too dark. Using original most vibrant color.");
+        selectedColor = currentTargetMasterArtworkPalette.sort((a, b) => b.vibrancy - a.vibrancy)[0];
+    }
+
+    // Increase saturation of the selected color
+    const [h, s, l] = rgbToHsl(selectedColor.r, selectedColor.g, selectedColor.b);
+    const increasedSaturation = Math.min(1.0, s * 1.2); // Increase saturation by 20%, cap at 1.0
+    const [r, g, b] = hslToRgb(h, increasedSaturation, l);
+
+    return { r, g, b, a: selectedColor.a };
 }
 
 // --- Event Listener to Trigger Update ---

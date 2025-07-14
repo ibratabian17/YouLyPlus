@@ -15,6 +15,25 @@ ytmusic-app-layout[player-fullscreened] .song-media-controls.ytmusic-player {
 
 /* ===== LYRICS PLUS - BASE CONTAINER & LAYOUT ===== */
 .lyrics-plus-integrated {
+    --lyplus-song-pallete: #ffffff;
+    --lyplus-song-white-pallete: #ffffff85;
+}
+
+ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened] .lyrics-plus-integrated.use-song-palette-fullscreen.word-by-word-mode,
+.lyrics-plus-integrated.use-song-palette-all-modes.word-by-word-mode {
+    --lyplus-lyrics-pallete: var(--lyplus-song-pallete);
+}
+
+ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened] .lyrics-plus-integrated.use-song-palette-fullscreen.line-by-line-mode,
+.lyrics-plus-integrated.use-song-palette-all-modes.line-by-line-mode {
+    --lyplus-lyrics-pallete: var(--lyplus-song-white-pallete);
+}
+
+.lyrics-plus-integrated.override-palette-color {
+    --lyplus-lyrics-pallete: var(--lyplus-override-pallete) !important;
+}
+
+.lyrics-plus-integrated {
     display: none;
     width: 100%;
     height: 100%;
@@ -305,6 +324,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     overflow: hidden;
     background-color: rgba(255, 255, 255, 0.36);
     border-radius: 1em;
+    background-clip: unset;
 }
 
 .lyrics-line.lyrics-gap:not(.active) .lyrics-syllable {

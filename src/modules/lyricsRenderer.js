@@ -118,7 +118,69 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   const container = getContainer();
   if (!container) return;
 
-  container.classList.remove('lyrics-translated', 'lyrics-romanized');
+  // Handle song palette options
+  if (currentSettings.useSongPaletteFullscreen) {
+    container.classList.add('use-song-palette-fullscreen');
+  } else {
+    container.classList.remove('use-song-palette-fullscreen');
+  }
+
+  if (currentSettings.useSongPaletteAllModes) {
+    container.classList.add('use-song-palette-all-modes');
+  } else {
+    container.classList.remove('use-song-palette-all-modes');
+  }
+
+  // Handle override palette color first
+  if (currentSettings.overridePaletteColor) {
+    container.classList.add('override-palette-color');
+    container.style.setProperty('--lyplus-override-pallete', currentSettings.overridePaletteColor);
+    container.style.setProperty('--lyplus-override-pallete-white', `${currentSettings.overridePaletteColor}85`);
+    // Ensure song palette classes are removed if override is active
+    container.classList.remove('use-song-palette-fullscreen');
+    container.classList.remove('use-song-palette-all-modes');
+  } else {
+    container.classList.remove('override-palette-color');
+    // Only apply song palette if override is NOT active
+    if (currentSettings.useSongPaletteFullscreen) {
+      container.classList.add('use-song-palette-fullscreen');
+    } else {
+      container.classList.remove('use-song-palette-fullscreen');
+    }
+
+    if (currentSettings.useSongPaletteAllModes) {
+      container.classList.add('use-song-palette-all-modes');
+    } else {
+      container.classList.remove('use-song-palette-all-modes');
+    }
+
+    if (currentSettings.useSongPaletteFullscreen || currentSettings.useSongPaletteAllModes) {
+      if (typeof LYPLUS_getSongPalette === 'function') {
+        const songPalette = LYPLUS_getSongPalette();
+        if (songPalette) {
+          const { r, g, b } = songPalette;
+          const color = `rgb(${r}, ${g}, ${b})`;
+          container.style.setProperty('--lyplus-song-pallete', color);
+
+          // Blend with #ffffff at 85/255 alpha
+          const alpha = 133 / 255;
+          const r_blend = Math.round(alpha * 255 + (1 - alpha) * r);
+          const g_blend = Math.round(alpha * 255 + (1 - alpha) * g);
+          const b_blend = Math.round(alpha * 255 + (1 - alpha) * b);
+          const whitePalleteColor = `rgb(${r_blend}, ${g_blend}, ${b_blend})`;
+          container.style.setProperty('--lyplus-song-white-pallete', whitePalleteColor);
+        }
+      }
+    }
+  }
+
+  container.classList.toggle('fullscreen', document.body.hasAttribute('player-fullscreened_'));
+  
+  const isWordByWordMode = type === "Word" && currentSettings.wordByWord;
+  container.classList.toggle('word-by-word-mode', isWordByWordMode);
+  container.classList.toggle('line-by-line-mode', !isWordByWordMode);
+
+  container.classList.remove('lyrics-translated', 'lyrics-romanized');""
   if (displayMode === 'translate') {
     container.classList.add('lyrics-translated');
   } else if (displayMode === 'romanize') {
@@ -235,7 +297,6 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   }
 
   const fragment = document.createDocumentFragment();
-  const isWordByWordMode = type === "Word" && currentSettings.wordByWord;
 
   if (isWordByWordMode) {
     const getComputedFont = (element) => {
@@ -585,6 +646,7 @@ function displaySongError() {
     container.innerHTML = `<span class="text-not-found">${t("notFoundError")}</span>`;
   }
 }
+
 
 // --- Text, Style, and ID Utilities ---
 

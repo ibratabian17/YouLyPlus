@@ -70,6 +70,9 @@ Your most important task is to preserve the original meaning, emotion, and tone 
 After ensuring the meaning is preserved, try to make the translation sound natural in {targetLang}.`,
         translationEnabled: false,
         romanizationEnabled: false,
+        useSongPaletteFullscreen: false, // Ensure this is loaded
+        useSongPaletteAllModes: false, // Ensure this is loaded
+        overridePaletteColor: '', // Add this to be loaded from storage
     }).then((items) => {
         currentSettings = items;
         console.log(currentSettings);

@@ -10,7 +10,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     const localCurrentFetchVideoId = currentSong.videoId;
     currentFetchVideoId = localCurrentFetchVideoId; // Set the latest videoId being processed globally for this manager
 
-    cleanupLyrics();
+    window.cleanupLyrics();
 
     let effectiveMode = currentDisplayMode; // Default to existing persisted mode
 
@@ -64,7 +64,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
           // finalDisplayModeForRenderer remains 'none'
         } else {
           console.warn('Failed to fetch original lyrics after translation/romanization fallback:', originalLyricsResponse.error);
-          if (displaySongNotFound) displaySongNotFound();
+          if (window.displaySongNotFound) window.displaySongNotFound();
           currentDisplayMode = 'none'; // Reset mode
           return;
         }
