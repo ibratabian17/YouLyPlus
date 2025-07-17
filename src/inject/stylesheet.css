@@ -162,9 +162,27 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     direction: rtl;
 }
 
+/* Mixed direction lyrics: RTL lines align based on singer class, not forced left */
+.lyrics-plus-integrated.mixed-direction-lyrics .lyrics-line.rtl-text.singer-left {
+    text-align: left;
+}
+
+.lyrics-plus-integrated.mixed-direction-lyrics .lyrics-line.rtl-text.singer-right {
+    text-align: right;
+}
+
 /* Origin adjustments for different text directions within line */
 .lyrics-line.singer-right:not(.rtl-text) .main-vocal-container,
 .lyrics-line.rtl-text:not(.singer-right) .main-vocal-container {
+    transform-origin: right;
+}
+
+/* Adjust transform-origin for RTL lines in mixed direction based on singer class */
+.lyrics-plus-integrated.mixed-direction-lyrics .lyrics-line.rtl-text.singer-left .main-vocal-container {
+    transform-origin: left;
+}
+
+.lyrics-plus-integrated.mixed-direction-lyrics .lyrics-line.rtl-text.singer-right .main-vocal-container {
     transform-origin: right;
 }
 

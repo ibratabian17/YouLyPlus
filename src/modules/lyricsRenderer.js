@@ -23,6 +23,9 @@ let isProgrammaticScrolling = false; // True if a scroll was initiated programma
 let endProgrammaticScrollTimer = null; // Timer to manage the end of programmatic scrolling state
 let scrollEventHandlerAttached = false;
 
+const isRTL = text => /[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF\u08A0-\u08FF\uFB50-\uFDCF\uFDF0-\uFDFF\uFE70-\uFEFF]/.test(text);
+const isCJK = text => /[\u4E00-\u9FFF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/.test(text);
+
 // --- Core DOM Manipulation & Setup ---
 
 // Cached DOM references
@@ -201,6 +204,28 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
 
   container.innerHTML = ''; // Clear container
 
+  let hasRTL = false;
+  let hasLTR = false;
+  if (lyrics && lyrics.data && lyrics.data.length > 0) {
+    for (const line of lyrics.data) {
+      if (isRTL(line.text)) {
+        hasRTL = true;
+      } else {
+        hasLTR = true;
+      }
+      if (hasRTL && hasLTR) break;
+    }
+  }
+  const hasMixedDirection = hasRTL && hasLTR;
+  const isPurelyRTL = hasRTL && !hasLTR;
+
+  container.classList.remove('mixed-direction-lyrics', 'purely-rtl-lyrics');
+  if (hasMixedDirection) {
+    container.classList.add('mixed-direction-lyrics');
+  } else if (isPurelyRTL) {
+    container.classList.add('purely-rtl-lyrics');
+  }
+
   // Determine singer alignment based on a hierarchy of singer types present in the song.
   const singerClassMap = {};
   if (lyrics && lyrics.data && lyrics.data.length > 0) {
@@ -243,9 +268,6 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     if (player) player.currentTime = time - 0.05; // Adjust for resetting animation
     scrollToActiveLine(e.currentTarget, true);
   };
-
-  const isRTL = text => /[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF\u08A0-\u08FF\uFB50-\uFDCF\uFDF0-\uFDFF\uFE70-\uFEFF]/.test(text);
-  const isCJK = text => /[\u4E00-\u9FFF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/.test(text);
 
   const GAP_THRESHOLD = 7; // seconds
   function createGapLine(gapStart, gapEnd, classesToInherit = null) {
