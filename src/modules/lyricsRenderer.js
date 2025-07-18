@@ -218,7 +218,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   }
   const hasMixedDirection = hasRTL && hasLTR;
 
-  container.classList.remove('mixed-direction-lyrics',  'dual-side-lyrics'); // Clear all relevant classes
+  container.classList.remove('mixed-direction-lyrics', 'dual-side-lyrics'); // Clear all relevant classes
   if (hasMixedDirection) {
     container.classList.add('mixed-direction-lyrics');
   }
