@@ -217,17 +217,15 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     }
   }
   const hasMixedDirection = hasRTL && hasLTR;
-  const isPurelyRTL = hasRTL && !hasLTR;
 
-  container.classList.remove('mixed-direction-lyrics', 'purely-rtl-lyrics');
+  container.classList.remove('mixed-direction-lyrics',  'dual-side-lyrics'); // Clear all relevant classes
   if (hasMixedDirection) {
     container.classList.add('mixed-direction-lyrics');
-  } else if (isPurelyRTL) {
-    container.classList.add('purely-rtl-lyrics');
   }
 
   // Determine singer alignment based on a hierarchy of singer types present in the song.
   const singerClassMap = {};
+  let isDualSide = false; // Flag to track if both left and right singers are present
   if (lyrics && lyrics.data && lyrics.data.length > 0) {
     const allSingers = [...new Set(lyrics.data.map(line => line.element?.singer).filter(Boolean))];
 
@@ -239,20 +237,27 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
       // Standard case: Both left and right singers exist. Assign them to their default sides.
       leftCandidates.forEach(s => singerClassMap[s] = 'singer-left');
       rightCandidates.forEach(s => singerClassMap[s] = 'singer-right');
+      isDualSide = true; // Mark as dual-side
     } else if (leftCandidates.length > 1) {
       // Only "left" type singers exist. Make the primary one ('v1') left and others right for contrast.
       singerClassMap[leftCandidates[0]] = 'singer-left';
       for (let i = 1; i < leftCandidates.length; i++) {
         singerClassMap[leftCandidates[i]] = 'singer-right';
       }
+      isDualSide = true; // Treat as dual-side for alignment purposes
     } else if (rightCandidates.length > 1) {
       // Only "right" type singers exist. Make the primary one ('v2') left and others right for contrast.
       singerClassMap[rightCandidates[0]] = 'singer-left';
       for (let i = 1; i < rightCandidates.length; i++) {
         singerClassMap[rightCandidates[i]] = 'singer-right';
       }
+      isDualSide = true; // Treat as dual-side for alignment purposes
     }
     // If only one singer type exists in total, the map remains sparse or empty, and the fallback to 'singer-left' will be used.
+  }
+
+  if (isDualSide) {
+    container.classList.add('dual-side-lyrics');
   }
 
 

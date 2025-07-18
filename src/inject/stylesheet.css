@@ -163,11 +163,11 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 }
 
 /* Mixed direction lyrics: RTL lines align based on singer class, not forced left */
-.lyrics-plus-integrated.mixed-direction-lyrics .lyrics-line.rtl-text.singer-left {
+.lyrics-plus-integrated.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-left {
     text-align: left;
 }
 
-.lyrics-plus-integrated.mixed-direction-lyrics .lyrics-line.rtl-text.singer-right {
+.lyrics-plus-integrated.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-right {
     text-align: right;
 }
 
@@ -178,11 +178,11 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 }
 
 /* Adjust transform-origin for RTL lines in mixed direction based on singer class */
-.lyrics-plus-integrated.mixed-direction-lyrics .lyrics-line.rtl-text.singer-left .main-vocal-container {
+.lyrics-plus-integrated.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-left .main-vocal-container {
     transform-origin: left;
 }
 
-.lyrics-plus-integrated.mixed-direction-lyrics .lyrics-line.rtl-text.singer-right .main-vocal-container {
+.lyrics-plus-integrated.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-right .main-vocal-container {
     transform-origin: right;
 }
 
