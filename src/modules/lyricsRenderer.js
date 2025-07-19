@@ -178,12 +178,12 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   }
 
   container.classList.toggle('fullscreen', document.body.hasAttribute('player-fullscreened_'));
-  
+
   const isWordByWordMode = type === "Word" && currentSettings.wordByWord;
   container.classList.toggle('word-by-word-mode', isWordByWordMode);
   container.classList.toggle('line-by-line-mode', !isWordByWordMode);
 
-  container.classList.remove('lyrics-translated', 'lyrics-romanized');""
+  container.classList.remove('lyrics-translated', 'lyrics-romanized'); ""
   if (displayMode === 'translate') {
     container.classList.add('lyrics-translated');
   } else if (displayMode === 'romanize') {
@@ -741,63 +741,110 @@ function startLyricsSync(currentSettings = {}) { // Added default for currentSet
 function updateLyricsHighlight(currentTime, isForceScroll = false, currentSettings = {}) {
   if (!cachedLyricsLines || !cachedLyricsLines.length) return;
 
-  let activeLines = []; // To store actual line elements
-  const container = document.querySelector("#lyrics-plus-container");
-  const compabilityVisibilityEnabled = container.classList.contains('compability-visibility');
+  // Independent look-ahead values for scrolling and highlighting.
+  const scrollLookAheadMs = 300;
+  const highlightLookAheadMs = 190;
 
-  // Iterate over cachedLyricsLines, using pre-parsed times
-  cachedLyricsLines.forEach(line => {
-    if (!line || typeof line._startTimeMs !== 'number' || typeof line._endTimeMs !== 'number') return;
-    const lineStart = line._startTimeMs;
-    const lineEnd = line._endTimeMs;
-    const shouldBeActive = currentTime >= lineStart - 190 && currentTime <= lineEnd - 1;
 
-    if (shouldBeActive) {
-      activeLines.push(line);
+  // --- Intelligent Scroll Logic with "Scroll Ownership Windows" ---
+  // This new logic correctly identifies REAL overlaps in the data and adjusts.
+  // It does not "wait"; it correctly defines which line is responsible for the scroll at any given time.
+  let lineToScroll = null;
+
+  for (let i = 0; i < cachedLyricsLines.length; i++) {
+    const currentLine = cachedLyricsLines[i];
+    const nextLine = cachedLyricsLines[i + 1];
+
+    // Define the start of this line's scroll ownership window.
+    const scrollWindowStart = currentLine._startTimeMs - scrollLookAheadMs;
+    let scrollWindowEnd;
+
+    if (nextLine) {
+      // Check for a REAL overlap based on the data itself.
+      const isRealOverlap = nextLine._startTimeMs < currentLine._endTimeMs;
+
+      if (isRealOverlap) {
+        // If there is a real overlap, the current line owns the scroll
+        // until it is completely finished singing.
+        scrollWindowEnd = currentLine._endTimeMs;
+      } else {
+        // If there is no overlap, the current line owns the scroll until
+        // the next line's early-scroll trigger point.
+        scrollWindowEnd = nextLine._startTimeMs - scrollLookAheadMs;
+      }
+    } else {
+      // The last line owns the scroll until the end of the song.
+      scrollWindowEnd = Infinity;
     }
 
-    if (compabilityVisibilityEnabled) {
-      const scrollContainer = container.parentElement;
-      if (scrollContainer) {
-        const scrollContainerRect = scrollContainer.getBoundingClientRect();
-        const lineRect = line.getBoundingClientRect();
-        const isOutOfView = lineRect.bottom < scrollContainerRect.top || lineRect.top > scrollContainerRect.bottom;
-        if (isOutOfView) {
-          line.classList.add('viewport-hidden');
-        } else {
-          line.classList.remove('viewport-hidden');
-        }
-      }
+    // If the current time is within this line's calculated ownership window, it's our target.
+    if (currentTime >= scrollWindowStart && currentTime < scrollWindowEnd) {
+      lineToScroll = currentLine;
+      break;
+    }
+  }
+
+  // Fallback for the very beginning of the song, before the first window.
+  if (!lineToScroll && cachedLyricsLines.length > 0) {
+    lineToScroll = cachedLyricsLines[0];
+  }
+
+
+  // --- Separate Highlight Logic (With 3-Line Maximum) ---
+  let allMatchingHighlightLines = [];
+  cachedLyricsLines.forEach(line => {
+    if (!line || typeof line._startTimeMs !== 'number' || typeof line._endTimeMs !== 'number') return;
+    const shouldBeActiveForHighlight = currentTime >= line._startTimeMs - highlightLookAheadMs && currentTime <= line._endTimeMs;
+    if (shouldBeActiveForHighlight) {
+      allMatchingHighlightLines.push(line);
     }
   });
 
-  // Sort active lines by start time (most recent first)
-  // This sort is on a very small array (max 2 after slice), so performance is fine.
-  activeLines.sort((a, b) => b._startTimeMs - a._startTimeMs);
-  const allowedActiveLines = activeLines.slice(0, 2);
-  const newActiveLineIds = new Set(allowedActiveLines.map(line => line.id));
+  allMatchingHighlightLines.sort((a, b) => b._startTimeMs - a._startTimeMs);
+  const activeLinesForHighlighting = allMatchingHighlightLines.slice(0, 3);
+  const newActiveLineIds = new Set(activeLinesForHighlighting.map(line => line.id));
+
+
+  // --- DOM & State Updates ---
+  if (lineToScroll && (lineToScroll !== currentPrimaryActiveLine || isForceScroll)) {
+    updatePositionClassesAndScroll(lineToScroll, isForceScroll);
+    currentPrimaryActiveLine = lineToScroll;
+  }
 
   cachedLyricsLines.forEach(line => {
     if (!line) return;
-    const wasActive = activeLineIds.has(line.id); // Check against old activeLineIds Set
+    const wasActive = activeLineIds.has(line.id);
     const shouldBeActive = newActiveLineIds.has(line.id);
 
     if (shouldBeActive && !wasActive) {
       line.classList.add('active');
-      if (!currentPrimaryActiveLine ||
-        (currentTime >= lastTime && line._startTimeMs > currentPrimaryActiveLine._startTimeMs) ||
-        (currentTime < lastTime && line._startTimeMs < currentPrimaryActiveLine._startTimeMs)) {
-        // scrollActiveLine will determine if actual scroll is needed
-        scrollActiveLine(currentTime, isForceScroll);
-        currentPrimaryActiveLine = line;
-      }
     } else if (!shouldBeActive && wasActive) {
       line.classList.remove('active');
       resetSyllables(line);
     }
   });
-  activeLineIds = newActiveLineIds; // Update the global set
+  activeLineIds = newActiveLineIds;
+
+
+  // --- Final Updates ---
   updateSyllables(currentTime);
+
+  const container = document.querySelector("#lyrics-plus-container");
+  if (!container) return;
+
+  const compabilityVisibilityEnabled = container.classList.contains('compability-visibility');
+  if (compabilityVisibilityEnabled) {
+    const scrollContainer = container.parentElement;
+    if (scrollContainer) {
+      const scrollContainerRect = scrollContainer.getBoundingClientRect();
+      cachedLyricsLines.forEach(line => {
+        if (!line) return;
+        const lineRect = line.getBoundingClientRect();
+        const isOutOfView = lineRect.bottom < scrollContainerRect.top || lineRect.top > scrollContainerRect.bottom;
+        line.classList.toggle('viewport-hidden', isOutOfView);
+      });
+    }
+  }
 }
 
 function updateSyllables(currentTime) { // currentTime is in ms
@@ -931,31 +978,97 @@ function resetSyllables(line) {
 
 // --- Scrolling Logic ---
 
-function scrollActiveLine(currentTime, forceScroll = false) {
-  const container = document.querySelector("#lyrics-plus-container");
-  const activeLines = container.querySelectorAll('.lyrics-line.active');
-  if (!activeLines.length) return;
+function getScrollPaddingTop() {
+  const selectors = [
+    'ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
+    'ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
+    'ytmusic-player-page:not([is-video-truncation-fix-enabled])[player-fullscreened] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])'
+  ];
 
-  // Find the most relevant active line based on timing
-  let lineToScroll = activeLines[0];
-  let activestLine = activeLines[activeLines.length - 1];
-
-  if (activeLines.length > 1) {
-    // Find line that hasn't ended yet or is ending soon
-    for (const line of activeLines) {
-      const endTime = parseFloat(line.dataset.endTime) * 1000;
-      if (endTime - currentTime > 200) {
-        lineToScroll = line;
-        break;
+  for (const selector of selectors) {
+    const element = document.querySelector(selector);
+    if (element) {
+      const style = window.getComputedStyle(element);
+      // In the new system, the parent has overflow:hidden, so we can't use scroll-padding-top.
+      // We will simulate it. Let's use a percentage of the container height.
+      const height = element.getBoundingClientRect().height;
+      const paddingTopValue = style.getPropertyValue('--lyrics-scroll-padding-top') || '25%'; // Custom property fallback
+      if (paddingTopValue.includes('%')) {
+        return height * (parseFloat(paddingTopValue) / 100);
       }
+      return parseFloat(paddingTopValue) || 0;
     }
   }
+  // Fallback for the preview window or other cases
+  const container = document.querySelector("#lyrics-plus-container");
+  if (container) {
+    const style = window.getComputedStyle(container.parentElement);
+    const paddingTop = style.getPropertyValue('scroll-padding-top');
+    return parseFloat(paddingTop) || 0;
+  }
 
-  // Get all lyrics lines and find index of scroll line
-  const allLyricLines = container.querySelectorAll('.lyrics-line');
+  return 0; // Default value
+}
+
+function animateScroll(activeLine) {
+  const container = document.querySelector("#lyrics-plus-container");
+  if (!container) return;
+
+  const paddingTop = getScrollPaddingTop();
+  // Calculate the target translateY for *all* lines
+  const targetTranslateY = paddingTop - activeLine.offsetTop;
+
+  const allLines = Array.from(container.querySelectorAll('.lyrics-line'));
+  const scrollContainer = container.parentElement;
+
+  if (!scrollContainer) return;
+
+  const scrollRect = scrollContainer.getBoundingClientRect();
+  let visibleLines = [];
+
+  // Identify visible lines and store their original index
+  const bufferTopPx = 50; // Define buffer zone for above the viewport
+  const bufferBottomPx = 200; // Define buffer zone for below the viewport
+  allLines.forEach((line, index) => {
+    const lineRect = line.getBoundingClientRect();
+    // Check if the line is currently visible within the scroll container's viewport, including a buffer zone
+    const isVisible = lineRect.bottom > (scrollRect.top - bufferTopPx) && lineRect.top < (scrollRect.bottom + bufferBottomPx);
+    if (isVisible) {
+      visibleLines.push({ line, index });
+    }
+  });
+
+  // Sort visible lines by their current top position to ensure correct staggering order
+  visibleLines.sort((a, b) => a.line.getBoundingClientRect().top - b.line.getBoundingClientRect().top);
+
+  // Apply staggered delay and the final transform to visible lines
+  visibleLines.forEach((item, i) => {
+    const line = item.line;
+    const delay = i * 30; // 30ms stagger per visible line
+    line.style.transitionDelay = `${delay}ms`;
+    line.style.transform = `translateY(${targetTranslateY}px)`;
+  });
+
+  // For lines that are not visible, ensure their transitionDelay is reset and they snap to position
+  allLines.forEach(line => {
+    if (!visibleLines.some(item => item.line === line)) {
+      line.style.transitionDelay = '0ms';
+      line.style.transform = `translateY(${targetTranslateY}px)`;
+    }
+  });
+}
+
+function updatePositionClassesAndScroll(lineToScroll, forceScroll = false) {
+  const container = document.querySelector("#lyrics-plus-container");
+  if (!container) return;
+
+  const allLyricLines = cachedLyricsLines; // Use cached lines directly
+  if (!allLyricLines || allLyricLines.length === 0) return;
+
+  let activestLine = lineToScroll; // The line to scroll to is now the activest for position classes
+
   const scrollLineIndex = Array.from(allLyricLines).indexOf(lineToScroll);
 
-  // Clear previous position classes
   const positionClasses = ['lyrics-activest', 'pre-active-line', 'next-active-line'];
   for (let i = 1; i <= 4; i++) {
     positionClasses.push(`prev-${i}`, `next-${i}`);
@@ -964,10 +1077,8 @@ function scrollActiveLine(currentTime, forceScroll = false) {
   container.querySelectorAll('.' + positionClasses.join(', .'))
     .forEach(el => el.classList.remove(...positionClasses));
 
-  // Mark activest line
   activestLine.classList.add('lyrics-activest');
 
-  // Add position classes only to relevant lines
   for (let i = Math.max(0, scrollLineIndex - 4); i <= Math.min(allLyricLines.length - 1, scrollLineIndex + 4); i++) {
     const position = i - scrollLineIndex;
     const line = allLyricLines[i];
@@ -993,45 +1104,24 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
   const scrollContainer = container.parentElement;
   if (!scrollContainer) return;
 
-  const scrollContainerRect = scrollContainer.getBoundingClientRect();
-  const lineRect = activeLine.getBoundingClientRect();
+  if (!forceScroll) {
+    const scrollContainerRect = scrollContainer.getBoundingClientRect();
+    const lineRect = activeLine.getBoundingClientRect();
+    const paddingTop = getScrollPaddingTop();
 
-  // Determine if scrolling is necessary based on line position and forceScroll flag
-  const safeAreaTopLimit = scrollContainerRect.top + scrollContainerRect.height * 0.15;
-  // A line is considered too low if its top is past 85% of the scroll container's height from the top.
-  const safeAreaBottomLimit = scrollContainerRect.top + scrollContainerRect.height * 0.85;
+    const activeLinePosition = lineRect.top - scrollContainerRect.top;
 
-  const lineIsAboveSafeArea = lineRect.top < safeAreaTopLimit;
-  const lineIsBelowSafeArea = lineRect.top > safeAreaBottomLimit;
-
-  const isLyricsFocused = lineIsAboveSafeArea || lineIsBelowSafeArea;
-
-  if (!forceScroll && isLyricsFocused) {
-    // If not forcing scroll, AND the line is already within the comfortable safe area, do nothing.
-    return;
+    // Removed 5px tolerance to allow earlier scrolling
+    // if (Math.abs(activeLinePosition - paddingTop) < 5) {
+    //     return;
+    // }
   }
 
-  // If we proceed, a programmatic scroll is about to happen.
   if (container) {
     container.classList.remove('not-focused');
   }
 
-  isProgrammaticScrolling = true;
-  clearTimeout(endProgrammaticScrollTimer); // Clear any existing timer from previous scrolls or safety nets
-
-  activeLine.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start'
-  });
-
-  // Fallback: Ensure isProgrammaticScrolling is reset if no scroll events occur
-  // (e.g., if element is already in view and scrollIntoView causes no actual scroll).
-  // This timer will be cleared by the scroll event handler's debounce if scroll events do occur.
-  endProgrammaticScrollTimer = setTimeout(() => {
-    isProgrammaticScrolling = false; // Reset state if no scroll events happened to extend it via debounce.
-    endProgrammaticScrollTimer = null;
-    // console.log('Programmatic scroll state ended by initial/safety timer.');
-  }, 500); // This duration should be longer than the debounce period in the scroll listener (250ms).
+  animateScroll(activeLine);
 }
 
 
