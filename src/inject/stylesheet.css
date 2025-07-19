@@ -60,6 +60,11 @@ ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fu
     /*scroll-snap-align: center;*/
 }
 
+/* Disable transitions when user is actively scrolling */
+.lyrics-plus-integrated.user-scrolling .lyrics-line {
+    transition: transform .3s 0s !important;
+}
+
 ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
     overflow: hidden !important;
     scrollbar-width: none;

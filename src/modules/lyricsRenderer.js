@@ -23,6 +23,13 @@ let isProgrammaticScrolling = false; // True if a scroll was initiated programma
 let endProgrammaticScrollTimer = null; // Timer to manage the end of programmatic scrolling state
 let scrollEventHandlerAttached = false;
 
+// New variables for custom scrolling
+let currentScrollOffset = 0; // Stores the current translateY value for the lyrics lines
+let touchStartY = 0;
+let isTouching = false;
+let userScrollIdleTimer = null; // Timer to detect user scroll inactivity
+let isUserControllingScroll = false; // True if user has manually scrolled and taken control
+
 const isRTL = text => /[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF\u08A0-\u08FF\uFB50-\uFDCF\uFDF0-\uFDFF\uFE70-\uFEFF]/.test(text);
 const isCJK = text => /[\u4E00-\u9FFF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/.test(text);
 
@@ -73,28 +80,126 @@ function setupUserScrollListener() {
 
   const scrollListeningElement = lyricsContainer.parentElement; // This is the element that scrolls (e.g., #tab-renderer)
 
+  // Existing scroll listener (for native scroll, which we will try to prevent)
   scrollListeningElement.addEventListener('scroll', () => {
     if (isProgrammaticScrolling) {
-      // This scroll event is part of a programmatic scroll sequence (e.g., scrollIntoView + animations).
-      // We debounce to detect the actual end of this sequence.
       clearTimeout(endProgrammaticScrollTimer);
       endProgrammaticScrollTimer = setTimeout(() => {
         isProgrammaticScrolling = false;
         endProgrammaticScrollTimer = null;
-        // console.log('Debounced: Programmatic scroll sequence considered ended.');
-      }, 250); // If no scroll events for 250ms, assume the programmatic scroll sequence is over.
+      }, 250);
       return;
     }
-
-    // If not isProgrammaticScrolling, this scroll is considered user-initiated.
     if (lyricsContainer) {
       lyricsContainer.classList.add('not-focused');
     }
   }, { passive: true });
 
+  // New: Wheel event for custom scrolling
+  scrollListeningElement.addEventListener('wheel', (event) => {
+    event.preventDefault(); // Prevent native scroll
+    isProgrammaticScrolling = false; // User initiated scroll
+    if (lyricsContainer) {
+      lyricsContainer.classList.add('not-focused');
+      lyricsContainer.classList.add('user-scrolling'); // Add class to disable transitions
+    }
+
+    const scrollAmount = event.deltaY; // Use deltaY for vertical scroll
+    handleUserScroll(scrollAmount);
+
+    clearTimeout(userScrollIdleTimer);
+    userScrollIdleTimer = setTimeout(() => {
+      if (lyricsContainer) {
+        lyricsContainer.classList.remove('user-scrolling'); // Remove class after idle
+      }
+    }, 200); // Reduced idle time to 200ms
+  }, { passive: false }); // Use passive: false to allow preventDefault
+
+  // New: Touch events for custom scrolling
+  scrollListeningElement.addEventListener('touchstart', (event) => {
+    isTouching = true;
+    touchStartY = event.touches[0].clientY;
+    isProgrammaticScrolling = false; // User initiated scroll
+    if (lyricsContainer) {
+      lyricsContainer.classList.add('not-focused');
+      lyricsContainer.classList.add('user-scrolling'); // Add class to disable transitions
+    }
+  }, { passive: true });
+
+  scrollListeningElement.addEventListener('touchmove', (event) => {
+    if (!isTouching) return;
+    event.preventDefault(); // Prevent native scroll
+    const currentY = event.touches[0].clientY;
+    const deltaY = touchStartY - currentY; // Calculate scroll amount
+    touchStartY = currentY; // Update startY for next move
+
+    handleUserScroll(deltaY);
+
+    clearTimeout(userScrollIdleTimer);
+    userScrollIdleTimer = setTimeout(() => {
+      if (lyricsContainer) {
+        lyricsContainer.classList.remove('user-scrolling'); // Remove class after idle
+      }
+    }, 200); // Reduced idle time to 200ms
+  }, { passive: false }); // Use passive: false to allow preventDefault
+
+  scrollListeningElement.addEventListener('touchend', () => {
+    isTouching = false;
+  }, { passive: true });
+
   scrollEventHandlerAttached = true;
   // console.log('User scroll listener attached to:', scrollListeningElement);
 }
+
+function handleUserScroll(delta) {
+  isUserControllingScroll = true; // User has taken control
+  const scrollSensitivity = 0.7; // Adjust this value (e.g., 0.5 for slower, 1.0 for faster)
+  let newScrollOffset = currentScrollOffset - (delta * scrollSensitivity); // Subtract delta because positive deltaY means scroll down, which means translateY should become more negative
+
+  // Clamp the scroll offset
+  const container = getContainer();
+  if (!container || !cachedLyricsLines || cachedLyricsLines.length === 0) {
+    animateScroll(newScrollOffset); // Still apply, but clamping might be off
+    return;
+  }
+
+  const scrollContainer = container.parentElement;
+  if (!scrollContainer) {
+    animateScroll(newScrollOffset);
+    return;
+  }
+
+  const containerHeight = scrollContainer.clientHeight;
+
+  let minAllowedScroll = 0; // Cannot scroll up past the very top of the first line
+
+  let maxAllowedScroll = 0; // Default to no scroll if content is shorter than container
+  if (cachedLyricsLines.length > 0) {
+    const firstLine = cachedLyricsLines[0];
+    const lastLine = cachedLyricsLines[cachedLyricsLines.length - 1];
+
+    if (firstLine && lastLine) {
+      // Calculate the total height of the content if it were all at its natural position
+      const contentTotalHeight = lastLine.offsetTop + lastLine.offsetHeight - firstLine.offsetTop;
+
+      if (contentTotalHeight > containerHeight) {
+        // If content is taller than the container, we can scroll.
+        // The most negative translateY should be when the bottom of the last line
+        // aligns with the bottom of the scroll container.
+        // (lastLine.offsetTop + lastLine.offsetHeight) + maxAllowedScroll = containerHeight
+        // maxAllowedScroll = containerHeight - (lastLine.offsetTop + lastLine.offsetHeight)
+        maxAllowedScroll = containerHeight - (lastLine.offsetTop + lastLine.offsetHeight);
+      }
+    }
+  }
+
+  // Clamp newScrollOffset between maxAllowedScroll (most negative) and minAllowedScroll (0)
+  newScrollOffset = Math.max(newScrollOffset, maxAllowedScroll);
+  newScrollOffset = Math.min(newScrollOffset, minAllowedScroll);
+
+  animateScroll(newScrollOffset);
+}
+
 
 function injectCssFile() {
   if (document.querySelector('link[data-lyrics-plus-style]')) return;
@@ -168,7 +273,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
           // Blend with #ffffff at 85/255 alpha
           const alpha = 133 / 255;
           const r_blend = Math.round(alpha * 255 + (1 - alpha) * r);
-          const g_blend = Math.round(alpha * 255 + (1 - alpha) * g);
+          const g_blend = Math.round(alpha * 255 + (1 - alpha) * b);
           const b_blend = Math.round(alpha * 255 + (1 - alpha) * b);
           const whitePalleteColor = `rgb(${r_blend}, ${g_blend}, ${b_blend})`;
           container.style.setProperty('--lyplus-song-white-pallete', whitePalleteColor);
@@ -271,6 +376,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     const time = parseFloat(e.currentTarget.dataset.startTime); // Keep parseFloat here as it's infrequent
     const player = document.querySelector("video");
     if (player) player.currentTime = time - 0.05; // Adjust for resetting animation
+    // When clicking, we want to programmatically scroll to the line
     scrollToActiveLine(e.currentTarget, true);
   };
 
@@ -648,6 +754,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
   currentPrimaryActiveLine = null;
 
   if (cachedLyricsLines.length !== 0) {
+    // Initial scroll to the first line
     scrollToActiveLine(cachedLyricsLines[0], true);
   }
   startLyricsSync(currentSettings); // Pass currentSettings
@@ -789,6 +896,31 @@ function updateLyricsHighlight(currentTime, isForceScroll = false, currentSettin
     lineToScroll = cachedLyricsLines[0];
   }
 
+  // Calculate the target translateY for the lineToScroll
+  const container = getContainer();
+  const scrollContainer = container ? container.parentElement : null;
+  const paddingTop = getScrollPaddingTop();
+  let targetTranslateYForActiveLine = 0;
+  if (lineToScroll && scrollContainer) {
+    targetTranslateYForActiveLine = paddingTop - lineToScroll.offsetTop;
+  }
+
+  // If user was controlling scroll, check if they are back in the "safe area"
+  if (isUserControllingScroll && !isForceScroll) {
+    // Define a "safe area" threshold (e.g., 100 pixels from the target scroll position)
+    const safeAreaThreshold = 100; // pixels
+
+    // Check if the current user scroll position is within the safe area of the active line
+    if (Math.abs(currentScrollOffset - targetTranslateYForActiveLine) < safeAreaThreshold) {
+      // User has scrolled back into the safe area, or was never far off.
+      // Re-enable programmatic scrolling.
+      isUserControllingScroll = false;
+      if (lyricsContainer) {
+        lyricsContainer.classList.remove('user-scrolling'); // Re-enable transitions
+      }
+      clearTimeout(userScrollIdleTimer); // Clear any pending idle timer
+    }
+  }
 
   // --- Separate Highlight Logic (With 3-Line Maximum) ---
   let allMatchingHighlightLines = [];
@@ -807,8 +939,11 @@ function updateLyricsHighlight(currentTime, isForceScroll = false, currentSettin
 
   // --- DOM & State Updates ---
   if (lineToScroll && (lineToScroll !== currentPrimaryActiveLine || isForceScroll)) {
-    updatePositionClassesAndScroll(lineToScroll, isForceScroll);
-    currentPrimaryActiveLine = lineToScroll;
+    // Only allow programmatic scroll if user is NOT controlling scroll, OR if it's a force scroll (seek/click)
+    if (!isUserControllingScroll || isForceScroll) {
+      updatePositionClassesAndScroll(lineToScroll, isForceScroll);
+      currentPrimaryActiveLine = lineToScroll;
+    }
   }
 
   cachedLyricsLines.forEach(line => {
@@ -829,14 +964,14 @@ function updateLyricsHighlight(currentTime, isForceScroll = false, currentSettin
   // --- Final Updates ---
   updateSyllables(currentTime);
 
-  const container = document.querySelector("#lyrics-plus-container");
-  if (!container) return;
+  const containerElement = document.querySelector("#lyrics-plus-container");
+  if (!containerElement) return;
 
-  const compabilityVisibilityEnabled = container.classList.contains('compability-visibility');
+  const compabilityVisibilityEnabled = containerElement.classList.contains('compability-visibility');
   if (compabilityVisibilityEnabled) {
-    const scrollContainer = container.parentElement;
-    if (scrollContainer) {
-      const scrollContainerRect = scrollContainer.getBoundingClientRect();
+    const scrollContainerElement = containerElement.parentElement;
+    if (scrollContainerElement) {
+      const scrollContainerRect = scrollContainerElement.getBoundingClientRect();
       cachedLyricsLines.forEach(line => {
         if (!line) return;
         const lineRect = line.getBoundingClientRect();
@@ -1010,13 +1145,12 @@ function getScrollPaddingTop() {
   return 0; // Default value
 }
 
-function animateScroll(activeLine) {
+// Modified animateScroll to accept a direct translateY value
+function animateScroll(newTranslateY) {
   const container = document.querySelector("#lyrics-plus-container");
   if (!container) return;
 
-  const paddingTop = getScrollPaddingTop();
-  // Calculate the target translateY for *all* lines
-  const targetTranslateY = paddingTop - activeLine.offsetTop;
+  currentScrollOffset = newTranslateY; // Update global scroll offset
 
   const allLines = Array.from(container.querySelectorAll('.lyrics-line'));
   const scrollContainer = container.parentElement;
@@ -1044,20 +1178,22 @@ function animateScroll(activeLine) {
   // Apply staggered delay and the final transform to visible lines
   visibleLines.forEach((item, i) => {
     const line = item.line;
-    const delay = i * 30; // 30ms stagger per visible line
+    // Determine delay based on whether user is actively scrolling
+    const delay = lyricsContainer.classList.contains('user-scrolling') ? 0 : (i * 30); // 30ms stagger per visible line
     line.style.transitionDelay = `${delay}ms`;
-    line.style.transform = `translateY(${targetTranslateY}px)`;
+    line.style.transform = `translateY(${newTranslateY}px)`;
   });
 
   // For lines that are not visible, ensure their transitionDelay is reset and they snap to position
   allLines.forEach(line => {
     if (!visibleLines.some(item => item.line === line)) {
       line.style.transitionDelay = '0ms';
-      line.style.transform = `translateY(${targetTranslateY}px)`;
+      line.style.transform = `translateY(${newTranslateY}px)`;
     }
   });
 }
 
+// Modified updatePositionClassesAndScroll to use the new scrollToActiveLine
 function updatePositionClassesAndScroll(lineToScroll, forceScroll = false) {
   const container = document.querySelector("#lyrics-plus-container");
   if (!container) return;
@@ -1092,6 +1228,7 @@ function updatePositionClassesAndScroll(lineToScroll, forceScroll = false) {
   scrollToActiveLine(lineToScroll, forceScroll);
 }
 
+// Modified scrollToActiveLine to set isProgrammaticScrolling and call animateScroll with calculated value
 function scrollToActiveLine(activeLine, forceScroll = false) {
   if (!activeLine) return;
 
@@ -1104,24 +1241,33 @@ function scrollToActiveLine(activeLine, forceScroll = false) {
   const scrollContainer = container.parentElement;
   if (!scrollContainer) return;
 
+  const paddingTop = getScrollPaddingTop();
+  const targetTranslateY = paddingTop - activeLine.offsetTop;
+
   if (!forceScroll) {
-    const scrollContainerRect = scrollContainer.getBoundingClientRect();
-    const lineRect = activeLine.getBoundingClientRect();
-    const paddingTop = getScrollPaddingTop();
-
-    const activeLinePosition = lineRect.top - scrollContainerRect.top;
-
-    // Removed 5px tolerance to allow earlier scrolling
-    // if (Math.abs(activeLinePosition - paddingTop) < 5) {
-    //     return;
-    // }
+    // Check if already close to target, considering currentScrollOffset
+    // The current position of the active line relative to the viewport top
+    const currentActiveLineViewportTop = activeLine.getBoundingClientRect().top - scrollContainer.getBoundingClientRect().top;
+    if (Math.abs(currentActiveLineViewportTop - paddingTop) < 5) { // 5px tolerance
+        return;
+    }
   }
 
   if (container) {
     container.classList.remove('not-focused');
+    container.classList.remove('user-scrolling'); // Ensure transitions are re-enabled
   }
 
-  animateScroll(activeLine);
+  isProgrammaticScrolling = true;
+  isUserControllingScroll = false; // Programmatic scroll takes over, user is no longer controlling
+  clearTimeout(endProgrammaticScrollTimer); // Clear any existing user scroll debounce
+  clearTimeout(userScrollIdleTimer); // Clear any pending user scroll idle timer
+  endProgrammaticScrollTimer = setTimeout(() => {
+    isProgrammaticScrolling = false;
+    endProgrammaticScrollTimer = null;
+  }, 250); // Debounce for programmatic scroll end
+
+  animateScroll(targetTranslateY);
 }
 
 
@@ -1293,6 +1439,7 @@ function cleanupLyrics() {
   const container = getContainer();
   if (container) {
     container.innerHTML = `<span class="text-loading">${t("loading")}</span>`;
+    container.classList.remove('user-scrolling'); // Ensure user-scrolling class is removed on cleanup
   }
   activeLineIds.clear();
   highlightedSyllableIds.clear();
@@ -1305,4 +1452,7 @@ function cleanupLyrics() {
   // Clear cached DOM element arrays
   cachedLyricsLines = [];
   cachedSyllables = [];
+  currentScrollOffset = 0; // Reset scroll offset on cleanup
+  isUserControllingScroll = false; // Reset user control state on cleanup
+  clearTimeout(userScrollIdleTimer); // Clear any pending idle timer
 }
