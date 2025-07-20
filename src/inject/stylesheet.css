@@ -60,9 +60,18 @@ ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fu
     /*scroll-snap-align: center;*/
 }
 
-/* Disable transitions when user is actively scrolling */
-.lyrics-plus-integrated.user-scrolling .lyrics-line {
-    transition: transform .3s 0s !important;
+/* Disable transitions when user is actively scrolling by TOUCH for direct 1:1 feedback */
+.lyrics-plus-integrated.touch-scrolling .lyrics-line,
+.lyrics-plus-integrated.touch-scrolling .lyrics-song-writters,
+.lyrics-plus-integrated.touch-scrolling .lyrics-source-provider {
+    transition: none !important;
+}
+
+/* Apply a smooth gliding transition for MOUSE WHEEL scrolling */
+.lyrics-plus-integrated.wheel-scrolling .lyrics-line,
+.lyrics-plus-integrated.wheel-scrolling .lyrics-song-writters,
+.lyrics-plus-integrated.wheel-scrolling .lyrics-source-provider {
+    transition: transform 0.3s ease-out !important;
 }
 
 ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
@@ -72,7 +81,7 @@ ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
     --lyrics-scroll-padding-top: 25%;
 }
 
-ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
+ytmusic-app-layout[is-mweb-modernization-enabled] #lyrics-plus-container[style*="display: block"] {
     --lyrics-scroll-padding-top: 10%;
 }
 
@@ -121,6 +130,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyri
     color: #ffffff85;
     transform-origin: left;
     transition: opacity 0.3s ease, transform 0.4s ease, filter 0.3s ease; 
+    will-change: filter, transform, opacity;
     /*scroll-snap-align: center;*/
 }
 
@@ -221,7 +231,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     opacity: 0;
     font-size: 0.6em;
     padding-top: 0.2em;
-    transition: max-height .2s, opacity .2s, padding .2s;
+    transition: max-height .4s, opacity .2s, padding .2s;
 }
 
 .lyrics-line.active .background-vocal-container {
@@ -318,7 +328,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: padding .3s .5s, height .3s .5s, opacity .2s .5s;
+    transition: padding .3s .5s, height .3s .5s, opacity .2s .5s, transform .3s;
     box-sizing: content-box;
     background-clip: unset;
     padding: 0 0.4em;
@@ -327,7 +337,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 .lyrics-line.lyrics-gap.active {
     opacity: 1;
     height: 1em;
-    transition: padding .3s, height .3s, opacity .2s .3s;
+    transition: padding .3s, height .3s, opacity .2s .3s, transform .3s;
     padding: 0.4em;
     will-change: height, opacity, padding;
 }
@@ -424,6 +434,7 @@ span.lyrics-source-provider {
     box-sizing: border-box;
     position: relative;
     display: block;
+    transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), filter 0.3s ease;
 }
 
 span.lyrics-song-writters {
@@ -1050,7 +1061,7 @@ ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) #lyric
     }
 
     /* Scroll padding adjustments in fullscreen */
-    ytmusic-player-page:not([is-video-truncation-fix-enabled])[player-fullscreened] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
+    ytmusic-player-page:not([is-video-truncation-fix-enabled])[player-fullscreened] #lyrics-plus-container[style*="display: block"]{
         scroll-padding-top: 35%;
         scroll-padding-block-start: 35%;
     }
