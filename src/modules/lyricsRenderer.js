@@ -239,84 +239,62 @@ function retimingActiveTimings(originalLines) {
   }
 
   // --- 1. READ & PREPARE ---
-  // Create a clean data structure with original timings to use as a source of truth.
   const linesData = Array.from(originalLines).map((line) => ({
     element: line,
     startTime: parseFloat(line.dataset.startTime),
     originalEndTime: parseFloat(line.dataset.endTime),
-    newEndTime: parseFloat(line.dataset.endTime), // This is the working value we'll modify.
+    newEndTime: parseFloat(line.dataset.endTime),
+    isHandledByPrecursorPass: false, // Flag for the two-pass system
   }));
 
-  // --- 2. PROCESS LINES WITH FORWARD CHAIN ANALYSIS ---
-  for (let i = 0; i < linesData.length; i++) {
-    const currentLine = linesData[i];
+  // --- PASS 1: FORWARD (Isolate and handle ONLY the special "precursor" line A) ---
+  for (let i = 0; i <= linesData.length - 3; i++) {
+    const lineA = linesData[i];
+    const lineB = linesData[i + 1];
+    const lineC = linesData[i + 2];
 
-    // Find the complete chain of direct, one-after-the-other overlaps
-    let chain = [currentLine];
-    let chainEndIndex = i;
-    while (
-      linesData[chainEndIndex + 1] &&
-      linesData[chainEndIndex + 1].startTime < linesData[chainEndIndex].originalEndTime
-    ) {
-      chain.push(linesData[chainEndIndex + 1]);
-      chainEndIndex++;
+    // Check for the specific A->B->C precursor pattern:
+    const aOverlapsB = lineB.startTime < lineA.originalEndTime;
+    const bOverlapsC = lineC.startTime < lineB.originalEndTime;
+    const aDoesNotOverlapC = lineC.startTime >= lineA.originalEndTime;
+
+    if (aOverlapsB && bOverlapsC && aDoesNotOverlapC) {
+      // This is the special case. Apply the rule ONLY to A and lock it.
+      lineA.newEndTime = lineC.startTime;
+      lineA.isHandledByPrecursorPass = true;
+    }
+  }
+
+  // --- PASS 2: BACKWARD (Handle all other simple/simultaneous overlaps and gaps) ---
+  for (let i = linesData.length - 2; i >= 0; i--) {
+    const currentLine = linesData[i];
+    const nextLine = linesData[i + 1];
+
+    // Skip any line that was already handled as a special precursor
+    if (currentLine.isHandledByPrecursorPass) {
+      continue;
     }
 
-    if (chain.length > 1) {
-      // Iterate through the discovered chain to apply rules locally
-      for (let k = 0; k < chain.length; k++) {
-        const lineA = chain[k];
-        const lineB = chain[k + 1];
-        const lineC = chain[k + 2];
-
-        // The last line in the chain always keeps its original end time.
-        if (!lineB) {
-          lineA.newEndTime = lineA.originalEndTime;
-          continue;
-        }
-
-        // The second-to-last line has a simple overlap with the last.
-        if (!lineC) {
-          lineA.newEndTime = lineB.originalEndTime;
-          continue;
-        }
-
-        // We have a triplet (A, B, C) to analyze for the special precursor case.
-        const aDoesNotOverlapC = lineC.startTime >= lineA.originalEndTime;
-
-        if (aDoesNotOverlapC) {
-          // Rule: A -> B -> C, but A does not touch C. A ends when C starts.
-          lineA.newEndTime = lineC.startTime;
-        } else {
-          // Rule: A, B, C are all concurrent. A ends when B ends.
-          lineA.newEndTime = lineB.originalEndTime;
-        }
-      }
-      // Advance the main loop past the chain we just processed
-      i = chainEndIndex;
+    // Check for standard or simultaneous overlap
+    if (nextLine.startTime < currentLine.originalEndTime) {
+      // Propagate the already-calculated correct end time from the next line.
+      currentLine.newEndTime = nextLine.newEndTime;
     } else {
-      // This is an isolated line. Handle potential gaps.
-      const nextLine = linesData[i + 1];
-      if (nextLine) {
-        const gap = nextLine.startTime - currentLine.originalEndTime;
-        if (gap > 0) {
-          const nextElement = currentLine.element.nextElementSibling;
-          const isFollowedByManualGap = nextElement && nextElement.classList.contains('lyrics-gap');
-          if (!isFollowedByManualGap) {
-            const extension = Math.min(0.5, gap);
-            currentLine.newEndTime = currentLine.originalEndTime + extension;
-          }
-        }
+      // Handle gaps for isolated lines
+      const gap = nextLine.startTime - currentLine.originalEndTime;
+      const nextElement = currentLine.element.nextElementSibling;
+      const isFollowedByManualGap = nextElement && nextElement.classList.contains('lyrics-gap');
+      
+      if (gap > 0 && !isFollowedByManualGap) {
+        const extension = Math.min(0.5, gap);
+        currentLine.newEndTime = currentLine.originalEndTime + extension;
       }
     }
   }
 
   // --- 3. WRITE CHANGES TO THE DOM ---
   linesData.forEach(lineData => {
-    // Save the original value for debugging or reference.
     lineData.element.dataset.actualEndTime = lineData.originalEndTime.toFixed(3);
-
-    // Update the main end time only if it has changed.
     if (Math.abs(lineData.newEndTime - lineData.originalEndTime) > 0.001) {
       lineData.element.dataset.endTime = lineData.newEndTime.toFixed(3);
     }
