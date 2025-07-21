@@ -223,6 +223,106 @@ function batchDOMUpdates(callback) {
   });
 }
 
+/**
+ * Fixes lyric timings using a single forward pass with full chain analysis.
+ * This version correctly handles all specified overlap rules, including:
+ * - Simple A->B overlaps.
+ * - Simultaneous A->B->C overlaps where all lines are concurrent.
+ * - Special "precursor" A->B->C cases where A finishes before C begins.
+ * - Small gaps between non-overlapping lines.
+ *
+ * @param {NodeListOf<HTMLElement> | Array<HTMLElement>} originalLines - A list of lyric elements.
+ */
+function retimingActiveTimings(originalLines) {
+  if (!originalLines || originalLines.length < 2) {
+    return;
+  }
+
+  // --- 1. READ & PREPARE ---
+  // Create a clean data structure with original timings to use as a source of truth.
+  const linesData = Array.from(originalLines).map((line) => ({
+    element: line,
+    startTime: parseFloat(line.dataset.startTime),
+    originalEndTime: parseFloat(line.dataset.endTime),
+    newEndTime: parseFloat(line.dataset.endTime), // This is the working value we'll modify.
+  }));
+
+  // --- 2. PROCESS LINES WITH FORWARD CHAIN ANALYSIS ---
+  for (let i = 0; i < linesData.length; i++) {
+    const currentLine = linesData[i];
+
+    // Find the complete chain of direct, one-after-the-other overlaps
+    let chain = [currentLine];
+    let chainEndIndex = i;
+    while (
+      linesData[chainEndIndex + 1] &&
+      linesData[chainEndIndex + 1].startTime < linesData[chainEndIndex].originalEndTime
+    ) {
+      chain.push(linesData[chainEndIndex + 1]);
+      chainEndIndex++;
+    }
+
+    if (chain.length > 1) {
+      // Iterate through the discovered chain to apply rules locally
+      for (let k = 0; k < chain.length; k++) {
+        const lineA = chain[k];
+        const lineB = chain[k + 1];
+        const lineC = chain[k + 2];
+
+        // The last line in the chain always keeps its original end time.
+        if (!lineB) {
+          lineA.newEndTime = lineA.originalEndTime;
+          continue;
+        }
+
+        // The second-to-last line has a simple overlap with the last.
+        if (!lineC) {
+          lineA.newEndTime = lineB.originalEndTime;
+          continue;
+        }
+
+        // We have a triplet (A, B, C) to analyze for the special precursor case.
+        const aDoesNotOverlapC = lineC.startTime >= lineA.originalEndTime;
+
+        if (aDoesNotOverlapC) {
+          // Rule: A -> B -> C, but A does not touch C. A ends when C starts.
+          lineA.newEndTime = lineC.startTime;
+        } else {
+          // Rule: A, B, C are all concurrent. A ends when B ends.
+          lineA.newEndTime = lineB.originalEndTime;
+        }
+      }
+      // Advance the main loop past the chain we just processed
+      i = chainEndIndex;
+    } else {
+      // This is an isolated line. Handle potential gaps.
+      const nextLine = linesData[i + 1];
+      if (nextLine) {
+        const gap = nextLine.startTime - currentLine.originalEndTime;
+        if (gap > 0) {
+          const nextElement = currentLine.element.nextElementSibling;
+          const isFollowedByManualGap = nextElement && nextElement.classList.contains('lyrics-gap');
+          if (!isFollowedByManualGap) {
+            const extension = Math.min(0.5, gap);
+            currentLine.newEndTime = currentLine.originalEndTime + extension;
+          }
+        }
+      }
+    }
+  }
+
+  // --- 3. WRITE CHANGES TO THE DOM ---
+  linesData.forEach(lineData => {
+    // Save the original value for debugging or reference.
+    lineData.element.dataset.actualEndTime = lineData.originalEndTime.toFixed(3);
+
+    // Update the main end time only if it has changed.
+    if (Math.abs(lineData.newEndTime - lineData.originalEndTime) > 0.001) {
+      lineData.element.dataset.endTime = lineData.newEndTime.toFixed(3);
+    }
+  });
+}
+
 // --- Lyrics Display & Rendering Logic ---
 function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}) {
   const container = getContainer();
@@ -686,34 +786,7 @@ function displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = 
     container.insertBefore(gapLine, nextLine);
   });
 
-  originalLines.forEach((line, idx) => {
-    if (idx < originalLines.length - 1) {
-      const currentEnd = parseFloat(line.dataset.endTime);
-      const nextLine = originalLines[idx + 1];
-      const nextStart = parseFloat(nextLine.dataset.startTime);
-      const nextEnd = parseFloat(nextLine.dataset.endTime);
-      const gap = nextStart - currentEnd;
-      const nextElement = line.nextElementSibling;
-      const isFollowedByGap = nextElement && nextElement.classList.contains('lyrics-gap');
-
-      if (gap >= 0 && !isFollowedByGap) {
-        const extension = Math.min(0.5, gap);
-        line.dataset.endTime = (currentEnd + extension).toFixed(3);
-        for (let i = 0; i < idx; i++) {
-          if (Math.abs(parseFloat(originalLines[i].dataset.endTime) - currentEnd) < 0.001) {
-            originalLines[i].dataset.endTime = line.dataset.endTime;
-          }
-        }
-      } else if (gap < 0) {
-        line.dataset.endTime = nextEnd.toFixed(3);
-        for (let i = 0; i < idx; i++) {
-          if (Math.abs(parseFloat(originalLines[i].dataset.endTime) - currentEnd) < 0.001) {
-            originalLines[i].dataset.endTime = nextEnd.toFixed(3);
-          }
-        }
-      }
-    }
-  });
+  retimingActiveTimings(originalLines)
 
   const metadataFragment = document.createDocumentFragment();
   if (songWriters) {

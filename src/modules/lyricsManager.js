@@ -104,7 +104,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
       lyricsObjectToDisplay = convertWordLyricsToLine(lyricsObjectToDisplay);
     }
 
-    if (currentSong.isVideo && currentSong.videoId && currentSettings.useSponsorBlock && !lyricsObjectToDisplay.ignoreSponsorblock) {
+    if (currentSong.isVideo && currentSong.videoId && currentSettings.useSponsorBlock && !lyricsObjectToDisplay.ignoreSponsorblock || !lyricsObjectToDisplay.metadata.ignoreSponsorblock) {
       const segments = await fetchSponsorSegments(currentSong.videoId);
       if (currentFetchVideoId !== localCurrentFetchVideoId) { // Check again after await
           console.warn("Song changed during SponsorBlock fetch. Aborting display.", currentSong);
