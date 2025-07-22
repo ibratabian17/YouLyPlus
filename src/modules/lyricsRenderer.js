@@ -36,6 +36,7 @@ class LyricsPlusRenderer {
     this.isTouching = false;
     this.userScrollIdleTimer = null;
     this.isUserControllingScroll = false;
+    this.userScrollRevertTimer = null; // Timer to revert control to the player
 
     // --- Initial Setup ---
     this._injectCssFile();
@@ -177,10 +178,26 @@ class LyricsPlusRenderer {
 
   /**
    * Handles the logic for manual user scrolling, calculating and clamping the new scroll position.
+   * Also sets a timer to automatically resume player-controlled scrolling after a period of user inactivity.
    * @param {number} delta - The amount to scroll by.
    */
   _handleUserScroll(delta) {
+    // 1. Set the flag to indicate user is in control.
     this.isUserControllingScroll = true;
+
+    // 2. Clear any existing timer. This ensures the timer resets every time the user scrolls.
+    clearTimeout(this.userScrollRevertTimer);
+
+    // 3. Set a new timer. After 4 seconds of inactivity, control will be given back to the player.
+    this.userScrollRevertTimer = setTimeout(() => {
+      this.isUserControllingScroll = false;
+      // When reverting, force a scroll to the currently active line to re-sync the view.
+      if (this.currentPrimaryActiveLine) {
+        this._scrollToActiveLine(this.currentPrimaryActiveLine, true);
+      }
+    }, 4000); // 4-second delay before reverting. Adjust as needed.
+
+    // --- The rest of the original function's logic remains the same ---
     const scrollSensitivity = 0.7;
     let newScrollOffset = this.currentScrollOffset - (delta * scrollSensitivity);
 
