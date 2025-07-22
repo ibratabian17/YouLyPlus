@@ -10,7 +10,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     const localCurrentFetchVideoId = currentSong.videoId;
     currentFetchVideoId = localCurrentFetchVideoId; // Set the latest videoId being processed globally for this manager
 
-    window.cleanupLyrics();
+    LyricsPlusAPI.cleanupLyrics();
 
     let effectiveMode = currentDisplayMode; // Default to existing persisted mode
 
@@ -64,7 +64,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
           // finalDisplayModeForRenderer remains 'none'
         } else {
           console.warn('Failed to fetch original lyrics after translation/romanization fallback:', originalLyricsResponse.error);
-          if (window.displaySongNotFound) window.displaySongNotFound();
+          if (LyricsPlusAPI.displaySongNotFound) LyricsPlusAPI.displaySongNotFound();
           currentDisplayMode = 'none'; // Reset mode
           return;
         }
@@ -87,7 +87,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
         // finalDisplayModeForRenderer remains 'none'
       } else {
         console.warn('Failed to fetch lyrics:', originalLyricsResponse.error);
-        if (displaySongNotFound) displaySongNotFound();
+        if (LyricsPlusAPI.displaySongNotFound) LyricsPlusAPI.displaySongNotFound();
         currentDisplayMode = 'none'; // Reset mode
         return;
       }
@@ -104,7 +104,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
       lyricsObjectToDisplay = convertWordLyricsToLine(lyricsObjectToDisplay);
     }
 
-    if (currentSong.isVideo && currentSong.videoId && currentSettings.useSponsorBlock && !lyricsObjectToDisplay.ignoreSponsorblock || !lyricsObjectToDisplay.metadata.ignoreSponsorblock) {
+    if (currentSong.isVideo && currentSong.videoId && currentSettings.useSponsorBlock && !lyricsObjectToDisplay.ignoreSponsorblock && !lyricsObjectToDisplay.metadata.ignoreSponsorblock) {
       const segments = await fetchSponsorSegments(currentSong.videoId);
       if (currentFetchVideoId !== localCurrentFetchVideoId) { // Check again after await
           console.warn("Song changed during SponsorBlock fetch. Aborting display.", currentSong);
@@ -120,8 +120,8 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     }
     
 
-    if (displayLyrics) {
-        displayLyrics(
+    if (LyricsPlusAPI.displayLyrics) {
+        LyricsPlusAPI.displayLyrics(
             lyricsObjectToDisplay,
             lyricsObjectToDisplay.metadata.source,
             lyricsObjectToDisplay.type === "Line" ? "Line" : "Word",
@@ -142,7 +142,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     currentDisplayMode = 'none'; // Reset manager's mode on error
     
     if (currentFetchVideoId === (currentSong ? currentSong.videoId : null)) { // Check if error is for current song
-      if (displaySongError) displaySongError();
+      if (LyricsPlusAPI.displaySongError) LyricsPlusAPI.displaySongError();
     }
   }
 }

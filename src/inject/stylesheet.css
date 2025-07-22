@@ -47,18 +47,6 @@ ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fu
     --lyplus-lyrics-pallete: #fff;
 }
 
-/* Base styles */
-.lyrics-line {
-    font-size: 25px;
-    line-height: 1.1;
-    padding: 10px;
-    cursor: pointer;
-    opacity: 0.7;
-    color: #ffffff85;
-    transform-origin: left;
-    transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), filter 0.3s ease;
-    /*scroll-snap-align: center;*/
-}
 
 /* Disable transitions when user is actively scrolling by TOUCH for direct 1:1 feedback */
 .lyrics-plus-integrated.touch-scrolling .lyrics-line,
@@ -129,7 +117,8 @@ ytmusic-app-layout[is-mweb-modernization-enabled] #lyrics-plus-container[style*=
     opacity: 0.7;
     color: #ffffff85;
     transform-origin: left;
-    transition: opacity 0.3s ease, transform 0.4s ease, filter 0.3s ease; 
+    transform: translateY(var(--lyrics-scroll-offset, 0px)) translateZ(1px);
+    transition: opacity 0.3s ease, transform 0.4s ease var(--lyrics-line-delay, 0ms), filter 0.3s ease;
     will-change: filter, transform, opacity;
     /*scroll-snap-align: center;*/
 }
@@ -231,16 +220,15 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     opacity: 0;
     font-size: 0.6em;
     padding-top: 0.2em;
-    transition: max-height .4s, opacity .2s, padding .2s;
+    transition: max-height .6s 0s, opacity .6s, padding .6s;
 }
 
 .lyrics-line.active .background-vocal-container {
     max-height: 10em; /* Large enough to not clip */
     opacity: 1;
-    transition: max-height .4s, opacity .4s, padding .4s;
+    transition: max-height .6s 0s, opacity .6s, padding .6s;
     will-change: max-height, opacity, padding;
 }
-
 .lyrics-line.active .background-vocal {
     opacity: 1;
 }
@@ -328,7 +316,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: padding .3s .5s, height .3s .5s, opacity .2s .5s, transform .3s;
+    transition: padding .3s .5s, height .3s .5s, opacity .2s .5s, transform .3s var(--lyrics-line-delay, 0ms);
     box-sizing: content-box;
     background-clip: unset;
     padding: 0 0.4em;
@@ -434,9 +422,11 @@ span.lyrics-source-provider {
     box-sizing: border-box;
     position: relative;
     display: block;
-    transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), filter 0.3s ease;
+    transform: translateY(var(--lyrics-scroll-offset, 0px)) translateZ(1px);
+    transition-delay: var(--lyrics-line-delay, 0ms);
+    transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1) var(--lyrics-line-delay, 0ms), filter 0.3s ease;
+    /* ================================== */
 }
-
 span.lyrics-song-writters {
     font-size: 1.6em;
     color: #ffffff7a;
