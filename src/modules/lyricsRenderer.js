@@ -887,11 +887,10 @@ class LyricsPlusRenderer {
     if (containerElement && containerElement.classList.contains('compability-visibility')) {
       const scrollContainerElement = containerElement.parentElement;
       if (scrollContainerElement) {
-        const scrollContainerRect = scrollContainerElement.getBoundingClientRect();
         this.cachedLyricsLines.forEach(line => {
           if (!line) return;
-          const lineRect = line.getBoundingClientRect();
-          const isOutOfView = lineRect.bottom < scrollContainerRect.top || lineRect.top > scrollContainerRect.bottom;
+          // A line is hidden if its ID is NOT in the set of visible IDs.
+          const isOutOfView = !this.visibleLineIds.has(line.id);
           line.classList.toggle('viewport-hidden', isOutOfView);
         });
       }
