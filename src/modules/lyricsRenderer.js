@@ -24,6 +24,7 @@ class LyricsPlusRenderer {
     this.visibilityObserver = null;
     this.resizeObserver = null;
     this._cachedContainerRect = null; // New: Cache for container and parent dimensions
+    this._debouncedResizeHandler = this._debounce(this._handleContainerResize, 1); // Initialize debounced handler
 
     // --- UI Elements ---
     this.translationButton = null;
@@ -45,6 +46,39 @@ class LyricsPlusRenderer {
     this._injectCssFile();
     // This call ensures the container is found or created and listeners are attached.
     this._getContainer();
+  }
+
+  /**
+   * Generic debounce utility.
+   * @param {Function} func - The function to debounce.
+   * @param {number} delay - The debounce delay in milliseconds.
+   * @returns {Function} - The debounced function.
+   */
+  _debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+      const context = this;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+  }
+
+  /**
+   * Handles the actual logic for container resize, debounced by _debouncedResizeHandler.
+   * @param {HTMLElement} container - The lyrics container element.
+   * @private
+   */
+  _handleContainerResize(container) {
+    // Update cached dimensions when the parent container resizes
+    this._cachedContainerRect = {
+      containerTop: container.getBoundingClientRect().top,
+      scrollContainerTop: container.getBoundingClientRect().top
+    };
+    
+    // Re-evaluate scroll position if not user-controlled
+    if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
+      this._scrollToActiveLine(this.currentPrimaryActiveLine, false);
+    }
   }
 
   // --- Core DOM Manipulation & Setup ---
@@ -210,7 +244,7 @@ class LyricsPlusRenderer {
       return;
     }
 
-    const allScrollableElements = Array.from(container.querySelectorAll('.lyrics-line, .lyrics-song-writters, .lyrics-source-provider'));
+    const allScrollableElements = Array.from(container.querySelectorAll('.lyrics-line, .lyrics-plus-metadata, .lyrics-plus-empty'));
     if (allScrollableElements.length === 0) {
       this._animateScroll(newScrollOffset);
       return;
@@ -341,6 +375,8 @@ class LyricsPlusRenderer {
   displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}) {
     const container = this._getContainer();
     if (!container) return;
+
+    container.classList.remove('lyrics-plus-message'); // Remove the class when actual lyrics are displayed
 
     // Apply visual settings
     container.classList.toggle('use-song-palette-fullscreen', !!currentSettings.useSongPaletteFullscreen);
@@ -496,21 +532,35 @@ class LyricsPlusRenderer {
     this._retimingActiveTimings(originalLines);
 
     // Render metadata
-    const metadataFragment = document.createDocumentFragment();
+    const metadataContainer = document.createElement('div');
+    metadataContainer.className = 'lyrics-plus-metadata';
+    metadataContainer.dataset.startTime = (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 0.5; // Approximate start time for metadata
+    metadataContainer.dataset.endTime = (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 10; // Approximate end time for metadata
+
     if (songWriters) {
       const songWritersDiv = document.createElement('span');
       songWritersDiv.className = 'lyrics-song-writters';
       songWritersDiv.innerText = `${t("writtenBy")} ${songWriters.join(', ')}`;
-      metadataFragment.appendChild(songWritersDiv);
+      metadataContainer.appendChild(songWritersDiv);
     }
     const sourceDiv = document.createElement('span');
     sourceDiv.className = 'lyrics-source-provider';
     sourceDiv.innerText = `${t("source")} ${source}`;
-    metadataFragment.appendChild(sourceDiv);
-    container.appendChild(metadataFragment);
+    metadataContainer.appendChild(sourceDiv);
+    container.appendChild(metadataContainer);
+
+    // Add an empty div at the end for bottom padding
+    const emptyDiv = document.createElement('div');
+    emptyDiv.className = 'lyrics-plus-empty';
+    container.appendChild(emptyDiv);
+
+    // Create the fixed empty div for avoiding detected by resizerObserver
+    const emptyFixedDiv = document.createElement('div');
+    emptyFixedDiv.className = 'lyrics-plus-empty-fixed';
+    container.appendChild(emptyFixedDiv);
 
     // Cache and setup for sync
-    this.cachedLyricsLines = Array.from(container.getElementsByClassName('lyrics-line')).map(line => {
+    this.cachedLyricsLines = Array.from(container.querySelectorAll('.lyrics-line, .lyrics-plus-metadata, .lyrics-plus-empty')).map(line => {
       if (line) {
         line._startTimeMs = parseFloat(line.dataset.startTime) * 1000;
         line._endTimeMs = parseFloat(line.dataset.endTime) * 1000;
@@ -732,6 +782,7 @@ class LyricsPlusRenderer {
     const container = this._getContainer();
     if (container) {
       container.innerHTML = `<span class="text-not-found">${t("notFound")}</span>`;
+      container.classList.add('lyrics-plus-message');
     }
   }
 
@@ -742,6 +793,7 @@ class LyricsPlusRenderer {
     const container = this._getContainer();
     if (container) {
       container.innerHTML = `<span class="text-not-found">${t("notFoundError")}</span>`;
+      container.classList.add('lyrics-plus-message');
     }
   }
 
@@ -1031,8 +1083,8 @@ class LyricsPlusRenderer {
     // If this is a forced jump (seek/click) or a user-driven scroll,
     // make all line animations instant and exit early.
     if (forceScroll || this.lyricsContainer.classList.contains('user-scrolling')) {
-      this.cachedLyricsLines.forEach(line => {
-        if (line) line.style.setProperty('--lyrics-line-delay', '0ms');
+      this.cachedLyricsLines.forEach(element => {
+        if (element) element.style.setProperty('--lyrics-line-delay', '0ms');
       });
       return;
     }
@@ -1048,22 +1100,22 @@ class LyricsPlusRenderer {
     const referenceLine = this.currentPrimaryActiveLine || this.lastPrimaryActiveLine || (this.cachedLyricsLines.length > 0 ? this.cachedLyricsLines[0] : null);
     const referenceLineIndex = referenceLine ? this.cachedLyricsLines.indexOf(referenceLine) : -1;
 
-    this.cachedLyricsLines.forEach((line, index) => {
-      if (!line) return;
+    this.cachedLyricsLines.forEach((element, index) => {
+      if (!element) return;
 
-      // Check if the line's ID is in the set of currently visible (or nearly visible) elements.
+      // Check if the element's ID is in the set of currently visible (or nearly visible) elements.
       // The _setupVisibilityTracking() method maintains this set.
-      if (this.visibleLineIds.has(line.id)) {
-        // Apply a staggered delay to visible lines for a smooth "follow" effect.
+      if (this.visibleLineIds.has(element.id)) {
+        // Apply a staggered delay to visible elements for a smooth "follow" effect.
         // The delay should only start incrementing from the reference line's position.
         const delay = (index >= referenceLineIndex && referenceLineIndex !== -1) ? delayCounter * delayIncrement : 0;
-        line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
+        element.style.setProperty('--lyrics-line-delay', `${delay}ms`);
         if (index >= referenceLineIndex && referenceLineIndex !== -1) {
           delayCounter++;
         }
       } else {
-        // Lines far outside the viewport should move instantly to their new position without animation delay.
-        line.style.setProperty('--lyrics-line-delay', '0ms');
+        // Elements far outside the viewport should move instantly to their new position without animation delay.
+        element.style.setProperty('--lyrics-line-delay', '0ms');
       }
     });
   }
@@ -1077,15 +1129,15 @@ class LyricsPlusRenderer {
     this.lyricsContainer.querySelectorAll('.' + positionClasses.join(', .')).forEach(el => el.classList.remove(...positionClasses));
 
     lineToScroll.classList.add('lyrics-activest');
-    const lines = this.cachedLyricsLines;
-    for (let i = Math.max(0, scrollLineIndex - 4); i <= Math.min(lines.length - 1, scrollLineIndex + 4); i++) {
+    const elements = this.cachedLyricsLines; // Renamed for clarity, as it now includes metadata/empty divs
+    for (let i = Math.max(0, scrollLineIndex - 4); i <= Math.min(elements.length - 1, scrollLineIndex + 4); i++) {
       const position = i - scrollLineIndex;
       if (position === 0) continue;
-      const line = lines[i];
-      if (position === -1) line.classList.add('pre-active-line');
-      else if (position === 1) line.classList.add('next-active-line');
-      else if (position < 0) line.classList.add(`prev-${Math.abs(position)}`);
-      else line.classList.add(`next-${position}`);
+      const element = elements[i];
+      if (position === -1) element.classList.add('pre-active-line');
+      else if (position === 1) element.classList.add('next-active-line');
+      else if (position < 0) element.classList.add(`prev-${Math.abs(position)}`);
+      else element.classList.add(`next-${position}`);
     }
 
     this._scrollToActiveLine(lineToScroll, forceScroll);
@@ -1147,25 +1199,18 @@ class LyricsPlusRenderer {
 
   _setupResizeObserver() {
     const container = this._getContainer();
-    if (!container || !container.parentElement) return null;
+    if (!container) return null;
     if (this.resizeObserver) this.resizeObserver.disconnect();
 
     this.resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
-        if (entry.target === container.parentElement) {
-          // Update cached dimensions when the parent container resizes
-          this._cachedContainerRect = {
-            containerTop: container.getBoundingClientRect().top,
-            scrollContainerTop: container.parentElement.getBoundingClientRect().top
-          };
-          // Re-evaluate scroll position if not user-controlled
-          if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
-            this._scrollToActiveLine(this.currentPrimaryActiveLine, false);
-          }
+        if (entry.target === container) {
+          // Call the debounced handler
+          this._debouncedResizeHandler(container);
         }
       }
     });
-    this.resizeObserver.observe(container.parentElement);
+    this.resizeObserver.observe(container);
     return this.resizeObserver;
   }
 
@@ -1278,6 +1323,7 @@ class LyricsPlusRenderer {
     const container = this._getContainer();
     if (container) {
       container.innerHTML = `<span class="text-loading">${t("loading")}</span>`;
+      container.classList.add('lyrics-plus-message');
       container.classList.remove('user-scrolling');
     }
     this.activeLineIds.clear();
