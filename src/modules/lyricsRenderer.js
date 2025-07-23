@@ -22,6 +22,7 @@ class LyricsPlusRenderer {
     this.textWidthCanvas = null;
     this.visibilityObserver = null;
     this.resizeObserver = null;
+    this._cachedContainerRect = null; // New: Cache for container and parent dimensions
 
     // --- UI Elements ---
     this.translationButton = null;
@@ -1096,9 +1097,15 @@ class LyricsPlusRenderer {
     const paddingTop = this._getScrollPaddingTop();
     const targetTranslateY = paddingTop - activeLine.offsetTop;
 
-    if (!forceScroll && Math.abs((activeLine.getBoundingClientRect().top - scrollContainer.getBoundingClientRect().top) - paddingTop) < 5) {
+    // Use cached values if available, otherwise get them
+    const containerTop = this._cachedContainerRect ? this._cachedContainerRect.containerTop : this.lyricsContainer.getBoundingClientRect().top;
+    const scrollContainerTop = this._cachedContainerRect ? this._cachedContainerRect.scrollContainerTop : scrollContainer.getBoundingClientRect().top;
+
+    if (!forceScroll && Math.abs((activeLine.getBoundingClientRect().top - scrollContainerTop) - paddingTop) < 5) {
       return;
     }
+    // Clear the cache after using it, so it's re-calculated on next resize or forced scroll
+    this._cachedContainerRect = null;
 
     this.lyricsContainer.classList.remove('not-focused', 'user-scrolling');
     this.isProgrammaticScrolling = true;
@@ -1144,7 +1151,11 @@ class LyricsPlusRenderer {
     this.resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
         if (entry.target === container.parentElement) {
-          // The parent container (scrollable area) has resized
+          // Update cached dimensions when the parent container resizes
+          this._cachedContainerRect = {
+            containerTop: container.getBoundingClientRect().top,
+            scrollContainerTop: container.parentElement.getBoundingClientRect().top
+          };
           // Re-evaluate scroll position if not user-controlled
           if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
             this._scrollToActiveLine(this.currentPrimaryActiveLine, false);
