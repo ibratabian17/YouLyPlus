@@ -812,8 +812,12 @@ class LyricsPlusRenderer {
 
     // --- 1. SCROLLING LOGIC (Identical to OG) ---
     // Find the line we should be scrolled to based on a 300ms look-ahead.
+    const visibleLines = this.cachedLyricsLines.filter(line => this.visibleLineIds.has(line.id));
     let lineToScroll = null;
     let latestPredictiveLine = null;
+
+    // The logic to find lineToScroll can still iterate through all lines as it's less frequent
+    // and critical for correct scrolling behavior.
     for (const line of this.cachedLyricsLines) {
       if (currentTime >= line._startTimeMs - scrollLookAheadMs) {
         latestPredictiveLine = line;
@@ -829,7 +833,6 @@ class LyricsPlusRenderer {
 
       while (currentIndex > 0 && lookBehindCount < maxLookBehind) {
         const previousLine = this.cachedLyricsLines[currentIndex - 1];
-        // Check for a real overlap.
         if (blockStartLine._startTimeMs < previousLine._endTimeMs) {
           blockStartLine = previousLine; // The anchor is the previous line.
           currentIndex--;
@@ -849,7 +852,7 @@ class LyricsPlusRenderer {
 
     // --- 2. HIGHLIGHTING LOGIC ---
     // Determine which lines should have the '.active' class based on a 190ms look-ahead.
-    const activeLinesForHighlighting = this.cachedLyricsLines
+    const activeLinesForHighlighting = visibleLines
       .filter(line => line && currentTime >= line._startTimeMs - highlightLookAheadMs && currentTime <= line._endTimeMs)
       .sort((a, b) => b._startTimeMs - a._startTimeMs)
       .slice(0, 3);
@@ -869,8 +872,9 @@ class LyricsPlusRenderer {
     else if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
       this._scrollToActiveLine(this.currentPrimaryActiveLine, false); // Do not force scroll, let _scrollToActiveLine decide
     }
-    // Second, update the '.active' classes for the visual highlighting effect.
-    this.cachedLyricsLines.forEach(line => {
+
+    // --- OPTIMIZATION: Update classes only for visible lines ---
+    visibleLines.forEach(line => {
       if (!line) return;
       const wasActive = this.activeLineIds.has(line.id);
       const shouldBeActive = newActiveLineIds.has(line.id);
@@ -883,51 +887,47 @@ class LyricsPlusRenderer {
     });
     this.activeLineIds = newActiveLineIds;
 
-    // Third, update the fine-grained syllable highlighting.
     this._updateSyllables(currentTime);
 
-    // Finally, handle compatibility visibility updates.
-    const containerElement = this.lyricsContainer;
-    if (containerElement && containerElement.classList.contains('compability-visibility')) {
-      const scrollContainerElement = containerElement.parentElement;
-      if (scrollContainerElement) {
-        this.cachedLyricsLines.forEach(line => {
-          if (!line) return;
-          // A line is hidden if its ID is NOT in the set of visible IDs.
-          const isOutOfView = !this.visibleLineIds.has(line.id);
-          line.classList.toggle('viewport-hidden', isOutOfView);
-        });
-      }
+    if (this.lyricsContainer && this.lyricsContainer.classList.contains('compability-visibility')) {
+      this.cachedLyricsLines.forEach(line => {
+        if (!line) return;
+        const isOutOfView = !this.visibleLineIds.has(line.id);
+        line.classList.toggle('viewport-hidden', isOutOfView);
+      });
     }
   }
 
-  _updateSyllables(currentTime) { // currentTime is in ms
-    if (!this.cachedSyllables) return;
+  _updateSyllables(currentTime) {
+    if (!this.activeLineIds.size) return;
+
     let newHighlightedSyllableIds = new Set();
-    this.cachedSyllables.forEach(syllable => {
-      if (!syllable || typeof syllable._startTimeMs !== 'number' || typeof syllable._endTimeMs !== 'number') return;
+    this.activeLineIds.forEach(lineId => {
+      const parentLine = document.getElementById(lineId);
+      if (!parentLine) return;
 
-      const parentLine = syllable.closest('.lyrics-line'); // This is okay, happens per syllable
-      if (!parentLine || !this.activeLineIds.has(parentLine.id)) { // More efficient check using activeLineIds
-        if (syllable.classList.contains('highlight')) resetSyllable(syllable);
-        return;
-      }
+      // It's more efficient to get syllables once per active line
+      const syllables = parentLine.querySelectorAll('.lyrics-syllable');
 
-      const startTime = syllable._startTimeMs;
-      const endTime = syllable._endTimeMs; // Uses pre-parsed _endTimeMs
+      syllables.forEach(syllable => {
+        if (!syllable || typeof syllable._startTimeMs !== 'number' || typeof syllable._endTimeMs !== 'number') return;
 
-      if (currentTime >= startTime && currentTime <= endTime) {
-        newHighlightedSyllableIds.add(syllable.id);
-        if (!syllable.classList.contains('highlight')) this._updateSyllableAnimation(syllable, currentTime);
-      } else if (currentTime < startTime && syllable.classList.contains('highlight')) {
-        this._resetSyllable(syllable);
-      } else if (currentTime > startTime && !syllable.classList.contains('finished')) {
-        syllable.classList.add('finished');
-      } else if (currentTime > startTime && !syllable.classList.contains('highlight')) {
-        // This case means the syllable was missed, set it to its fully highlighted start state
-        this._updateSyllableAnimation(syllable, startTime);
-      }
+        const startTime = syllable._startTimeMs;
+        const endTime = syllable._endTimeMs;
+
+        if (currentTime >= startTime && currentTime <= endTime) {
+          newHighlightedSyllableIds.add(syllable.id);
+          if (!syllable.classList.contains('highlight')) this._updateSyllableAnimation(syllable, currentTime);
+        } else if (currentTime < startTime && syllable.classList.contains('highlight')) {
+          this._resetSyllable(syllable);
+        } else if (currentTime > startTime && !syllable.classList.contains('finished')) {
+          syllable.classList.add('finished');
+        } else if (currentTime > startTime && !syllable.classList.contains('highlight')) {
+          this._updateSyllableAnimation(syllable, startTime);
+        }
+      });
     });
+
     this.highlightedSyllableIds = newHighlightedSyllableIds;
   }
 
