@@ -8,6 +8,7 @@ class LyricsPlusRenderer {
     // --- State Variables ---
     this.lyricsAnimationFrameId = null;
     this.currentPrimaryActiveLine = null;
+    this.lastPrimaryActiveLine = null; // New: To store the last active line for delay calculation
     this.lastTime = 0;
     this.lastProcessedTime = 0;
 
@@ -869,6 +870,7 @@ class LyricsPlusRenderer {
     if (lineToScroll && (lineToScroll !== this.currentPrimaryActiveLine || isForceScroll)) {
       if (!this.isUserControllingScroll || isForceScroll) {
         this._updatePositionClassesAndScroll(lineToScroll, isForceScroll);
+        this.lastPrimaryActiveLine = this.currentPrimaryActiveLine; // Store the previous active line
         this.currentPrimaryActiveLine = lineToScroll;
       }
     }
@@ -1039,24 +1041,24 @@ class LyricsPlusRenderer {
     // This is far more performant than calling getBoundingClientRect() in a loop.
     let delayCounter = 0;
     const delayIncrement = 30; // 30ms stagger per line
-    let firstActiveLineFound = false; // Flag to track if the first active line has been found
 
-    this.cachedLyricsLines.forEach(line => {
+    // Determine the reference line for delay calculation.
+    // If there's a current active line, use it. Otherwise, use the last active line.
+    // If neither, default to the first line in the cache to ensure a delay is applied.
+    const referenceLine = this.currentPrimaryActiveLine || this.lastPrimaryActiveLine || (this.cachedLyricsLines.length > 0 ? this.cachedLyricsLines[0] : null);
+    const referenceLineIndex = referenceLine ? this.cachedLyricsLines.indexOf(referenceLine) : -1;
+
+    this.cachedLyricsLines.forEach((line, index) => {
       if (!line) return;
-
-      // Determine if this is the first active line in the visible set
-      if (!firstActiveLineFound && this.activeLineIds.has(line.id)) {
-        firstActiveLineFound = true;
-      }
 
       // Check if the line's ID is in the set of currently visible (or nearly visible) elements.
       // The _setupVisibilityTracking() method maintains this set.
       if (this.visibleLineIds.has(line.id)) {
         // Apply a staggered delay to visible lines for a smooth "follow" effect.
-        const delay = delayCounter * delayIncrement;
+        // The delay should only start incrementing from the reference line's position.
+        const delay = (index >= referenceLineIndex && referenceLineIndex !== -1) ? delayCounter * delayIncrement : 0;
         line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-        // Only increment delayCounter if we have passed or are at the first active line
-        if (firstActiveLineFound) {
+        if (index >= referenceLineIndex && referenceLineIndex !== -1) {
           delayCounter++;
         }
       } else {
