@@ -864,7 +864,11 @@ class LyricsPlusRenderer {
         this.currentPrimaryActiveLine = lineToScroll;
       }
     }
-
+    // Continuously adjust scroll for dynamic height changes if not user-controlled
+    // This will only scroll if the currentPrimaryActiveLine is off by more than 5px
+    else if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
+      this._scrollToActiveLine(this.currentPrimaryActiveLine, false); // Do not force scroll, let _scrollToActiveLine decide
+    }
     // Second, update the '.active' classes for the visual highlighting effect.
     this.cachedLyricsLines.forEach(line => {
       if (!line) return;
