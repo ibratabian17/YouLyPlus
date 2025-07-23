@@ -21,6 +21,7 @@ class LyricsPlusRenderer {
     this.fontCache = {};
     this.textWidthCanvas = null;
     this.visibilityObserver = null;
+    this.resizeObserver = null;
 
     // --- UI Elements ---
     this.translationButton = null;
@@ -785,8 +786,11 @@ class LyricsPlusRenderer {
     };
     this.lyricsAnimationFrameId = requestAnimationFrame(sync);
 
+    this._setupResizeObserver();
+
     return () => {
       if (this.visibilityObserver) this.visibilityObserver.disconnect();
+      if (this.resizeObserver) this.resizeObserver.disconnect();
       if (this.lyricsAnimationFrameId) {
         cancelAnimationFrame(this.lyricsAnimationFrameId);
         this.lyricsAnimationFrameId = null;
@@ -867,12 +871,6 @@ class LyricsPlusRenderer {
         this.currentPrimaryActiveLine = lineToScroll;
       }
     }
-    // Continuously adjust scroll for dynamic height changes if not user-controlled
-    // This will only scroll if the currentPrimaryActiveLine is off by more than 5px
-    else if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
-      this._scrollToActiveLine(this.currentPrimaryActiveLine, false); // Do not force scroll, let _scrollToActiveLine decide
-    }
-
     // --- OPTIMIZATION: Update classes only for visible lines ---
     visibleLines.forEach(line => {
       if (!line) return;
@@ -1138,6 +1136,26 @@ class LyricsPlusRenderer {
     return this.visibilityObserver;
   }
 
+  _setupResizeObserver() {
+    const container = this._getContainer();
+    if (!container || !container.parentElement) return null;
+    if (this.resizeObserver) this.resizeObserver.disconnect();
+
+    this.resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        if (entry.target === container.parentElement) {
+          // The parent container (scrollable area) has resized
+          // Re-evaluate scroll position if not user-controlled
+          if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
+            this._scrollToActiveLine(this.currentPrimaryActiveLine, false);
+          }
+        }
+      }
+    });
+    this.resizeObserver.observe(container.parentElement);
+    return this.resizeObserver;
+  }
+
   // --- Control Buttons & UI ---
 
   _createControlButtons(sourceDivElement) {
@@ -1262,6 +1280,10 @@ class LyricsPlusRenderer {
     this.currentScrollOffset = 0;
     this.isUserControllingScroll = false;
     clearTimeout(this.userScrollIdleTimer);
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
   }
 }
 
