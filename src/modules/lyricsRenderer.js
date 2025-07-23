@@ -1040,9 +1040,15 @@ class LyricsPlusRenderer {
     // This is far more performant than calling getBoundingClientRect() in a loop.
     let delayCounter = 0;
     const delayIncrement = 30; // 30ms stagger per line
+    let firstActiveLineFound = false; // Flag to track if the first active line has been found
 
     this.cachedLyricsLines.forEach(line => {
       if (!line) return;
+
+      // Determine if this is the first active line in the visible set
+      if (!firstActiveLineFound && this.activeLineIds.has(line.id)) {
+        firstActiveLineFound = true;
+      }
 
       // Check if the line's ID is in the set of currently visible (or nearly visible) elements.
       // The _setupVisibilityTracking() method maintains this set.
@@ -1050,7 +1056,10 @@ class LyricsPlusRenderer {
         // Apply a staggered delay to visible lines for a smooth "follow" effect.
         const delay = delayCounter * delayIncrement;
         line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-        delayCounter++;
+        // Only increment delayCounter if we have passed or are at the first active line
+        if (firstActiveLineFound) {
+          delayCounter++;
+        }
       } else {
         // Lines far outside the viewport should move instantly to their new position without animation delay.
         line.style.setProperty('--lyrics-line-delay', '0ms');
