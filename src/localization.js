@@ -904,16 +904,25 @@ const translations = {
 };
 
 function getUserLanguage() {
-    const lang = document.documentElement.lang;
-    // Fallback to a more generic language code if a specific one isn't found
-    if (lang in translations) {
-        return lang;
+    // Get the browser's language, default to 'en-US' if not available.
+    const userLang = document.documentElement.lang || 'en-US';
+
+    if (userLang in translations) {
+        return userLang;
     }
-    const baseLang = lang.split('-')[0];
+    const baseLang = userLang.split('-')[0];
+
     if (baseLang in translations) {
         return baseLang;
     }
-    // Default to English if no match is found
+
+    for (const key in translations) {
+        if (key.startsWith(baseLang + '-')) {
+            return key; // Return the first matching dialect we find.
+        }
+    }
+
+    //If no match could be found at all, return the ultimate default.
     return 'en-US';
 }
 
