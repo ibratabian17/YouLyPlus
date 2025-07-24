@@ -290,7 +290,8 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 
 /* Syllable Highlighting (Active Line, Excluding Gaps) */
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
-.lyrics-plus-integrated.compability-wipe .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable {
+.lyrics-plus-integrated.compability-wipe .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable,
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.pre-highlight  {
     background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-lyrics-pallete, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
     background-size: 0.5em 100%, 0% 100%;
     background-position: -0.5em 0%, -0.25em 0%;
@@ -301,10 +302,24 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     transform: translateY(-3%) translateZ(1px);
 }
 
-.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.rtl-text {
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.rtl-text,
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.pre-highlight.rtl-text {
     background-image: linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
     background-position: calc(100% + 0.5em) 0%, right;
     direction: rtl;
+}
+
+.lyrics-syllable.pre-highlight {
+    /* Duration and timing are controlled by CSS Variables set from JS */
+    animation-name: pre-wipe-universal;
+    animation-duration: var(--pre-wipe-duration);
+    animation-timing-function: var(--pre-wipe-timing-function);
+    animation-fill-mode: forwards; /* Ensure the final state is maintained */
+}
+
+.lyrics-syllable.pre-highlight.rtl-text {
+    /* Switch to the RTL animation if the syllable requires it */
+    animation-name: pre-wipe-universal-rtl;
 }
 
 
@@ -403,6 +418,12 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
 .lyrics-line.active .lyrics-syllable span.char.highlight {
     background-image: linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
     background-position: calc(100% + 0.5em) 0%, calc(100% + 0.25em) 0%;
+}
+
+.lyrics-line.active .lyrics-syllable.pre-highlight span.char{
+    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-lyrics-pallete, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
+    background-size: 0.5em 100%, 0% 100%;
+    background-position: -0.5em 0%, -0.25em 0%;
 }
 
 /* ===== BACKGROUND VOCALS (Syllable Specific) ===== */
@@ -564,6 +585,28 @@ span.lyrics-source-provider {
     to {
         background-size: 0.5em 100%, 0% 100%;
         background-position: -0.25em 0%, left;
+    }
+}
+
+@keyframes pre-wipe-universal {
+    from {
+        background-position: -0.5em 0%, left;
+        background-size: 0.5em 100%, 0% 100%;
+    }
+    to {
+        background-position: -0.25em 0%, left;
+        background-size: 0.5em 100%, 0% 100%;
+    }
+}
+
+@keyframes pre-wipe-universal-rtl {
+    from {
+        background-position: calc(100% + 0.5em) 0%, right;
+        background-size: 0.5em 100%, 0% 100%;
+    }
+    to {
+        background-position: calc(100% + 0.25em) 0%, right;
+        background-size: 0.5em 100%, 0% 100%;
     }
 }
 

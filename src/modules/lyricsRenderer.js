@@ -56,7 +56,7 @@ class LyricsPlusRenderer {
    */
   _debounce(func, delay) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
       const context = this;
       clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(context, args), delay);
@@ -74,7 +74,7 @@ class LyricsPlusRenderer {
       containerTop: container.getBoundingClientRect().top,
       scrollContainerTop: container.getBoundingClientRect().top
     };
-    
+
     // Re-evaluate scroll position if not user-controlled
     if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
       this._scrollToActiveLine(this.currentPrimaryActiveLine, false);
@@ -852,12 +852,12 @@ class LyricsPlusRenderer {
     };
   }
 
-    /**
-   * Updates the highlighted lyrics and syllables based on the current time.
-   * @param {number} currentTime - The current video time in milliseconds.
-   * @param {boolean} isForceScroll - Whether to force a scroll update.
-   * @param {object} currentSettings - The current user settings.
-   */
+  /**
+ * Updates the highlighted lyrics and syllables based on the current time.
+ * @param {number} currentTime - The current video time in milliseconds.
+ * @param {boolean} isForceScroll - Whether to force a scroll update.
+ * @param {object} currentSettings - The current user settings.
+ */
   _updateLyricsHighlight(currentTime, isForceScroll = false, currentSettings = {}) {
     // Guard clause: Do nothing if lyrics aren't loaded.
     if (!this.cachedLyricsLines || this.cachedLyricsLines.length === 0) {
@@ -875,24 +875,24 @@ class LyricsPlusRenderer {
 
     // Find all lines that are active during the predictive time window.
     const currentlyActiveAndPredictiveLines = this.cachedLyricsLines.filter(line =>
-        line && predictiveTime >= line._startTimeMs && predictiveTime < line._endTimeMs
+      line && predictiveTime >= line._startTimeMs && predictiveTime < line._endTimeMs
     );
 
     if (currentlyActiveAndPredictiveLines.length > 0) {
-        // From the set of active lines, find the one that started the earliest.
-        // This is our stable anchor for the current overlapping block.
-        lineToScroll = currentlyActiveAndPredictiveLines.reduce((earliest, current) => {
-            return current._startTimeMs < earliest._startTimeMs ? current : earliest;
-        }, currentlyActiveAndPredictiveLines[0]);
+      // From the set of active lines, find the one that started the earliest.
+      // This is our stable anchor for the current overlapping block.
+      lineToScroll = currentlyActiveAndPredictiveLines.reduce((earliest, current) => {
+        return current._startTimeMs < earliest._startTimeMs ? current : earliest;
+      }, currentlyActiveAndPredictiveLines[0]);
     } else {
-        // Fallback for gaps: find the most recent line that has passed.
-        let latestPastLine = null;
-        for (const line of this.cachedLyricsLines) {
-            if (currentTime >= line._startTimeMs - scrollLookAheadMs) {
-                latestPastLine = line;
-            }
+      // Fallback for gaps: find the most recent line that has passed.
+      let latestPastLine = null;
+      for (const line of this.cachedLyricsLines) {
+        if (currentTime >= line._startTimeMs - scrollLookAheadMs) {
+          latestPastLine = line;
         }
-        lineToScroll = latestPastLine;
+      }
+      lineToScroll = latestPastLine;
     }
 
     // Fallback: If song hasn't started, prepare to scroll to the first line.
@@ -980,55 +980,89 @@ class LyricsPlusRenderer {
 
   _updateSyllableAnimation(syllable, currentTime) {
     if (syllable.classList.contains('highlight')) return;
+    syllable.classList.remove('pre-highlight');
     syllable.classList.add('highlight');
 
-    let wipeAnimation = syllable.classList.contains('rtl-text') ? 'wipe-rtl' : 'wipe';
+    const wipeAnimation = syllable.classList.contains('rtl-text') ? 'wipe-rtl' : 'wipe';
     const charSpansNodeList = syllable.querySelectorAll('span.char');
+
+    // Find the next syllable in the same word/line
+    const nextSyllable = (syllable.nextElementSibling && syllable.nextElementSibling.classList.contains('lyrics-syllable') && syllable.parentElement === syllable.nextElementSibling.parentElement)
+      ? syllable.nextElementSibling
+      : null;
 
     if (charSpansNodeList.length > 0) {
       const wordElement = syllable.closest('.lyrics-word');
-      const finalDuration = syllable._wordDurationMs ?? syllable._durationMs;
-      const spansToAnimate = wordElement?.classList.contains('growable') ? (wordElement._cachedChars || (wordElement._cachedChars = Array.from(wordElement.querySelectorAll('span.char')))) : Array.from(charSpansNodeList);
-      const totalCharsInWord = spansToAnimate.length;
-
-      if (totalCharsInWord > 0) {
+      
+      // --- Apply GROW animation ---
+      if (wordElement?.classList.contains('growable') && syllable === wordElement.querySelector('.lyrics-syllable')) {
+        const spansToAnimate = wordElement._cachedChars || (wordElement._cachedChars = Array.from(wordElement.querySelectorAll('span.char')));
+        const finalDuration = syllable._wordDurationMs ?? syllable._durationMs;
         const baseDelayPerChar = finalDuration * 0.07;
-        const currentSyllableCharSpansArray = Array.from(charSpansNodeList);
-        for (let i = 0; i < totalCharsInWord; i++) {
-          const span = spansToAnimate[i];
-          const spanSyllable = span.closest('.lyrics-syllable');
-          const isCurrentSyllable = (spanSyllable === syllable);
+        
+        spansToAnimate.forEach(span => {
           const horizontalOffset = parseFloat(span.dataset.horizontalOffset) || 0;
           span.style.setProperty('--char-offset-x', `${horizontalOffset}`);
           const growDelay = baseDelayPerChar * (parseFloat(span.dataset.syllableCharIndex) || 0);
+          span.style.animation = `grow-dynamic ${finalDuration * 1.2}ms ease-in-out ${growDelay}ms forwards`;
+        });
+      }
 
-          if (isCurrentSyllable) {
-            const charIndexInSyllable = currentSyllableCharSpansArray.indexOf(span);
-            const charCountInSyllable = currentSyllableCharSpansArray.length;
-            if (charIndexInSyllable !== -1 && charCountInSyllable > 0) {
-              const wipeDelay = (syllable._durationMs / charCountInSyllable) * charIndexInSyllable;
-              const preWipeDelay = (syllable._durationMs / charCountInSyllable) * (charIndexInSyllable - 1);
-              span.style.animation = `pre-wipe-char ${syllable._durationMs / charCountInSyllable}ms linear ${preWipeDelay}ms, ${wipeAnimation} ${syllable._durationMs / charCountInSyllable}ms linear ${wipeDelay}ms forwards, grow-dynamic ${finalDuration * 1.2}ms ease-in-out ${growDelay}ms forwards`;
-            } else {
-              span.style.animation = `grow-dynamic ${finalDuration * 1.2}ms ease-in-out ${growDelay}ms forwards`;
-            }
-          } else if (!spanSyllable.classList.contains('highlight')) {
-            span.style.animation = `grow-dynamic ${finalDuration * 1.2}ms ease-in-out ${growDelay}ms forwards`;
-          }
-        }
+      // --- Apply WIPE animation to the CURRENT syllable's characters ---
+      const currentSyllableCharSpansArray = Array.from(charSpansNodeList);
+      currentSyllableCharSpansArray.forEach((span, charIndexInSyllable) => {
+        const wipeDurationPerChar = syllable._durationMs / currentSyllableCharSpansArray.length;
+        const wipeDelay = wipeDurationPerChar * charIndexInSyllable;
+        const preWipeDelay = wipeDurationPerChar * (charIndexInSyllable - 1);
+        
+        const wipeAnims = `pre-wipe-char ${wipeDurationPerChar}ms linear ${preWipeDelay}ms, ${wipeAnimation} ${wipeDurationPerChar}ms linear ${wipeDelay}ms forwards`;
+        span.style.animation += `, ${wipeAnims}`;
+      });
+
+    } else { // Handle non-char, simple syllables (including gaps)
+      let currentWipeAnimation = syllable.parentElement?.parentElement?.parentElement?.classList.contains('lyrics-gap')
+        ? "fade-gap"
+        : wipeAnimation;
+      syllable.style.animation = `${currentWipeAnimation} ${syllable._durationMs}ms linear forwards`;
+    }
+
+    // --- Logic for the NEXT syllable (character and syllable pre-highlight) ---
+    if (nextSyllable) {
+      const minDuration = 200;
+      const maxDuration = 1000;
+      const minDelayPercent = 0.60;
+      const maxDelayPercent = 0.99;
+      
+      const durationRange = maxDuration - minDuration;
+      const delayRange = maxDelayPercent - minDelayPercent;
+      const clampedDuration = Math.max(minDuration, Math.min(syllable._durationMs, maxDuration));
+      const progress = (clampedDuration - minDuration) / durationRange;
+      const delayPercent = minDelayPercent + (progress * delayRange);
+      
+      const timingFunction = `cubic-bezier(${delayPercent.toFixed(2)}, 0, 1, 1)`;
+
+      const nextCharSpan = nextSyllable.querySelector('span.char');
+      if (nextCharSpan) {
+        const preWipeAnim = `pre-wipe-char ${syllable._durationMs}ms ${timingFunction} forwards`;
+        
+        nextCharSpan.style.animation = (nextCharSpan.style.animation && !nextCharSpan.style.animation.includes('pre-wipe-char'))
+          ? `${nextCharSpan.style.animation}, ${preWipeAnim}`
+          : preWipeAnim;
       }
-    } else {
-      if (syllable.parentElement?.parentElement?.parentElement?.classList.contains('lyrics-gap')) {
-        wipeAnimation = "fade-gap";
-      }
-      syllable.style.animation = `${wipeAnimation} ${syllable._durationMs}ms linear forwards`;
+      
+      // --- Apply pre-highlight to the SYLLABLE using the same dynamic timing function ---
+      nextSyllable.style.setProperty('--pre-wipe-duration', `${syllable._durationMs}ms`);
+      nextSyllable.style.setProperty('--pre-wipe-timing-function', timingFunction);
+      nextSyllable.classList.add('pre-highlight');
     }
   }
 
   _resetSyllable(syllable) {
     if (!syllable) return;
     syllable.style.animation = '';
-    syllable.classList.remove('highlight', 'finished');
+    syllable.classList.remove('highlight', 'finished', 'pre-highlight');
+    syllable.style.removeProperty('--pre-wipe-duration');
+    syllable.style.removeProperty('--pre-wipe-timing-function');
     syllable.querySelectorAll('span.char').forEach(span => { span.style.animation = ''; });
   }
 
