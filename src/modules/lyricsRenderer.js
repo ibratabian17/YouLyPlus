@@ -852,7 +852,7 @@ class LyricsPlusRenderer {
     };
   }
 
-  /**
+    /**
    * Updates the highlighted lyrics and syllables based on the current time.
    * @param {number} currentTime - The current video time in milliseconds.
    * @param {boolean} isForceScroll - Whether to force a scroll update.
@@ -868,38 +868,31 @@ class LyricsPlusRenderer {
     const scrollLookAheadMs = 300;
     const highlightLookAheadMs = 190; // For adding the '.active' class
 
-    // --- 1. SCROLLING LOGIC (Identical to OG) ---
-    // Find the line we should be scrolled to based on a 300ms look-ahead.
+    // --- 1. SCROLLING LOGIC (Corrected) ---
     const visibleLines = this.cachedLyricsLines.filter(line => this.visibleLineIds.has(line.id));
+    const predictiveTime = currentTime + scrollLookAheadMs;
     let lineToScroll = null;
-    let latestPredictiveLine = null;
 
-    // The logic to find lineToScroll can still iterate through all lines as it's less frequent
-    // and critical for correct scrolling behavior.
-    for (const line of this.cachedLyricsLines) {
-      if (currentTime >= line._startTimeMs - scrollLookAheadMs) {
-        latestPredictiveLine = line;
-      }
-    }
+    // Find all lines that are active during the predictive time window.
+    const currentlyActiveAndPredictiveLines = this.cachedLyricsLines.filter(line =>
+        line && predictiveTime >= line._startTimeMs && predictiveTime < line._endTimeMs
+    );
 
-    if (latestPredictiveLine) {
-      // Find the beginning of a block of overlapping lines to use as a stable scroll anchor.
-      let blockStartLine = latestPredictiveLine;
-      let currentIndex = this.cachedLyricsLines.indexOf(blockStartLine);
-      const maxLookBehind = 2;
-      let lookBehindCount = 0;
-
-      while (currentIndex > 0 && lookBehindCount < maxLookBehind) {
-        const previousLine = this.cachedLyricsLines[currentIndex - 1];
-        if (blockStartLine._startTimeMs < previousLine._endTimeMs) {
-          blockStartLine = previousLine; // The anchor is the previous line.
-          currentIndex--;
-          lookBehindCount++;
-        } else {
-          break; // No more overlap, we found the block start.
+    if (currentlyActiveAndPredictiveLines.length > 0) {
+        // From the set of active lines, find the one that started the earliest.
+        // This is our stable anchor for the current overlapping block.
+        lineToScroll = currentlyActiveAndPredictiveLines.reduce((earliest, current) => {
+            return current._startTimeMs < earliest._startTimeMs ? current : earliest;
+        }, currentlyActiveAndPredictiveLines[0]);
+    } else {
+        // Fallback for gaps: find the most recent line that has passed.
+        let latestPastLine = null;
+        for (const line of this.cachedLyricsLines) {
+            if (currentTime >= line._startTimeMs - scrollLookAheadMs) {
+                latestPastLine = line;
+            }
         }
-      }
-      lineToScroll = blockStartLine;
+        lineToScroll = latestPastLine;
     }
 
     // Fallback: If song hasn't started, prepare to scroll to the first line.
