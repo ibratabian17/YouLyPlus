@@ -1028,16 +1028,16 @@ class LyricsPlusRenderer {
 
     // --- Logic for the NEXT syllable (character and syllable pre-highlight) ---
     if (nextSyllable) {
-      const minDuration = 200;
-      const maxDuration = 1000;
-      const minDelayPercent = 0.60;
-      const maxDelayPercent = 0.99;
-      
-      const durationRange = maxDuration - minDuration;
-      const delayRange = maxDelayPercent - minDelayPercent;
-      const clampedDuration = Math.max(minDuration, Math.min(syllable._durationMs, maxDuration));
-      const progress = (clampedDuration - minDuration) / durationRange;
-      const delayPercent = minDelayPercent + (progress * delayRange);
+
+      // Determine a delay factor based on character count if available
+      const charCount = charSpansNodeList.length || syllable.textContent.length;
+      let charBasedDelay = 0;
+      if (charCount > 1) {
+          // The pre-highlight should start its ramp-up around when the last character's wipe begins.
+          charBasedDelay = (charCount - 1) / charCount;
+      }
+
+      const delayPercent = charBasedDelay + 0.05;
       
       const timingFunction = `cubic-bezier(${delayPercent.toFixed(2)}, 0, 1, 1)`;
 
