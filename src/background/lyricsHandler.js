@@ -258,13 +258,14 @@ async function handleLyricsFetch(songInfo, sendResponse, forceReload = false) {
         }
     }
 
-    // Start a new fetch and store its promise.
+    // Start a new fetch and store its promise immediately.
     const fetchPromise = (async () => {
         try {
             // Determine provider and source order based on settings.
-            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,lyricsplus,musixmatch,spotify,musixmatch-word' });
+            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,lyricsplus,musixmatch,spotify,musixmatch-word', 'customKpoeUrl': '' });
             const lyricsProvider = settings.lyricsProvider;
             const lyricsSourceOrder = settings.lyricsSourceOrder;
+            const customKpoeUrl = settings.customKpoeUrl;
 
             let lyrics = null;
             let kpoeForceReload = forceReload;
@@ -278,16 +279,32 @@ async function handleLyricsFetch(songInfo, sendResponse, forceReload = false) {
             // Try the primary provider first.
             if (lyricsProvider === 'kpoe') {
                 lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, kpoeForceReload);
+            } else if (lyricsProvider === 'customKpoe') {
+                lyrics = await fetchCustomKPoeLyrics(songInfo, customKpoeUrl, lyricsSourceOrder, kpoeForceReload);
             } else if (lyricsProvider === 'lrclib') {
                 lyrics = await fetchLRCLibLyrics(songInfo);
             }
 
-            // If no result from primary, try the other provider as fallback.
+            // If no result from primary, try the other providers as fallback.
             if (isEmptyLyrics(lyrics)) {
                 if (lyricsProvider === 'kpoe') {
-                    lyrics = await fetchLRCLibLyrics(songInfo);
-                } else if (lyricsProvider === 'lrclib') {
+                    // Fallback to Custom KPoe if configured, then LRCLib
+                    lyrics = await fetchCustomKPoeLyrics(songInfo, customKpoeUrl, lyricsSourceOrder, kpoeForceReload);
+                    if (isEmptyLyrics(lyrics)) {
+                        lyrics = await fetchLRCLibLyrics(songInfo);
+                    }
+                } else if (lyricsProvider === 'customKpoe') {
+                    // Fallback to official KPoe, then LRCLib
                     lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, kpoeForceReload);
+                    if (isEmptyLyrics(lyrics)) {
+                        lyrics = await fetchLRCLibLyrics(songInfo);
+                    }
+                } else if (lyricsProvider === 'lrclib') {
+                    // Fallback to KPoe, then Custom KPoe if configured
+                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, kpoeForceReload);
+                    if (isEmptyLyrics(lyrics)) {
+                        lyrics = await fetchCustomKPoeLyrics(songInfo, customKpoeUrl, lyricsSourceOrder, kpoeForceReload);
+                    }
                 }
             }
 
@@ -446,14 +463,15 @@ async function getOrFetchLyrics(songInfo, forceReload = false) {
         }
     }
 
-    // Start a new fetch and store its promise.
+    // Start a new fetch and store its promise immediately.
     const fetchPromise = (async () => {
         try {
             // Determine provider and source order based on settings.
-            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,lyricsplus,musixmatch,spotify,musixmatch-word', 'cacheStrategy': 'aggressive' });
+            const settings = await storageLocalGet({ 'lyricsProvider': 'kpoe', 'lyricsSourceOrder': 'apple,lyricsplus,musixmatch,spotify,musixmatch-word', 'cacheStrategy': 'aggressive', 'customKpoeUrl': '' });
             const lyricsProvider = settings.lyricsProvider;
             const lyricsSourceOrder = settings.lyricsSourceOrder;
             const cacheStrategy = settings.cacheStrategy;
+            const customKpoeUrl = settings.customKpoeUrl;
 
             let lyrics = null;
             let fetchOptions = {};
@@ -465,16 +483,32 @@ async function getOrFetchLyrics(songInfo, forceReload = false) {
             // Try the primary provider first.
             if (lyricsProvider === 'kpoe') {
                 lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, forceReload);
+            } else if (lyricsProvider === 'customKpoe') {
+                lyrics = await fetchCustomKPoeLyrics(songInfo, customKpoeUrl, lyricsSourceOrder, forceReload);
             } else if (lyricsProvider === 'lrclib') {
                 lyrics = await fetchLRCLibLyrics(songInfo, fetchOptions);
             }
 
-            // If no result from primary, try the other provider as fallback.
+            // If no result from primary, try the other providers as fallback.
             if (isEmptyLyrics(lyrics)) {
                 if (lyricsProvider === 'kpoe') {
-                    lyrics = await fetchLRCLibLyrics(songInfo, fetchOptions);
-                } else if (lyricsProvider === 'lrclib') {
+                    // Fallback to Custom KPoe if configured, then LRCLib
+                    lyrics = await fetchCustomKPoeLyrics(songInfo, customKpoeUrl, lyricsSourceOrder, forceReload);
+                    if (isEmptyLyrics(lyrics)) {
+                        lyrics = await fetchLRCLibLyrics(songInfo, fetchOptions);
+                    }
+                } else if (lyricsProvider === 'customKpoe') {
+                    // Fallback to official KPoe, then LRCLib
                     lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, forceReload);
+                    if (isEmptyLyrics(lyrics)) {
+                        lyrics = await fetchLRCLibLyrics(songInfo, fetchOptions);
+                    }
+                } else if (lyricsProvider === 'lrclib') {
+                    // Fallback to KPoe, then Custom KPoe if configured
+                    lyrics = await fetchKPoeLyrics(songInfo, lyricsSourceOrder, forceReload);
+                    if (isEmptyLyrics(lyrics)) {
+                        lyrics = await fetchCustomKPoeLyrics(songInfo, customKpoeUrl, lyricsSourceOrder, forceReload);
+                    }
                 }
             }
 
@@ -703,6 +737,46 @@ async function fetchKPoeLyrics(songInfo, sourceOrder = '', forceReload = false) 
 
     const data = await response.json();
     return parseKPoeFormat(data);
+}
+
+async function fetchCustomKPoeLyrics(songInfo, customUrl, sourceOrder = '', forceReload = false) {
+    if (!customUrl) {
+        console.warn("Custom KPoe Server URL is not configured.");
+        return null;
+    }
+
+    const albumParam = (songInfo.album && songInfo.album !== songInfo.title)
+        ? `&album=${encodeURIComponent(songInfo.album)}`
+        : '';
+    const sourceParam = sourceOrder ? `&source=${encodeURIComponent(sourceOrder)}` : '';
+    let forceReloadParam = forceReload ? `&forceReload=true` : '';
+    let fetchOptions = {};
+
+    if (forceReload) {
+        fetchOptions = { cache: 'no-store' };
+        forceReloadParam = `&forceReload=true`;
+    }
+
+    // Ensure the custom URL ends with a slash if it's a base path, or handle it gracefully
+    const baseUrl = customUrl.endsWith('/') ? customUrl : `${customUrl}/`;
+    const url = `${baseUrl}v2/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}&duration=${songInfo.duration}${sourceParam}${forceReloadParam}`;
+
+    try {
+        const response = await fetch(url, fetchOptions);
+        if (!response.ok) {
+            console.error(`Error fetching from Custom KPoe Server (${url}): ${response.status} ${response.statusText}`);
+            return null;
+        }
+        const data = await response.json();
+        // Modify source metadata to indicate custom server
+        if (data && data.metadata) {
+            data.metadata.source = `${data.metadata.source}`;
+        }
+        return parseKPoeFormat(data);
+    } catch (error) {
+        console.error(`Network error fetching from Custom KPoe Server (${url}):`, error);
+        return null;
+    }
 }
 
 async function fetchLRCLibLyrics(songInfo) {

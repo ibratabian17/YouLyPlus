@@ -25,6 +25,7 @@ function setupAutoSaveListeners() {
         // General
         { id: 'enabled', key: 'isEnabled', type: 'checkbox' },
         { id: 'default-provider', key: 'lyricsProvider', type: 'value' },
+        { id: 'custom-kpoe-url', key: 'customKpoeUrl', type: 'value' }, // Add custom KPoe URL
         { id: 'sponsor-block', key: 'useSponsorBlock', type: 'checkbox' },
         { id: 'wordByWord', key: 'wordByWord', type: 'checkbox' },
         // Appearance
@@ -80,6 +81,12 @@ function updateUI(settings) {
     document.getElementById('useSongPaletteAllModes').checked = currentSettings.useSongPaletteAllModes;
     document.getElementById('overridePaletteColor').value = currentSettings.overridePaletteColor;
 
+    // Custom KPoe Server URL
+    const customKpoeUrlInput = document.getElementById('custom-kpoe-url');
+    if (customKpoeUrlInput) {
+        customKpoeUrlInput.value = currentSettings.customKpoeUrl || '';
+    }
+
     // Translation settings
     document.getElementById('translation-provider').value = currentSettings.translationProvider;
     const geminiApiKeyInput = document.getElementById('gemini-api-key');
@@ -95,6 +102,7 @@ function updateUI(settings) {
     toggleKpoeSourcesVisibility();
     toggleTranslateTargetVisibility();
     toggleGeminiPromptVisibility();
+    toggleCustomKpoeUrlVisibility(); // New visibility toggle
 
     // Populate draggable KPoe sources
     populateDraggableSources();
@@ -134,12 +142,13 @@ document.getElementById('save-general').addEventListener('click', () => {
         .map(item => item.dataset.source);
 
     const newGeneralSettings = {
-        // Switches and dropdowns are auto-saved. This button only saves the source order.
+        // Switches and dropdowns are auto-saved. This button only saves the source order and custom KPoe URL.
         lyricsSourceOrder: orderedSources.join(','),
+        customKpoeUrl: document.getElementById('custom-kpoe-url').value, // Save custom KPoe URL
     };
     updateSettings(newGeneralSettings);
     saveSettings();
-    showStatusMessage('Lyrics+ source order saved!', false, 'save-general');
+    showStatusMessage('General settings saved!', false, 'save-general');
 });
 
 document.getElementById('save-appearance').addEventListener('click', () => {
@@ -386,7 +395,7 @@ document.getElementById('add-source-button').addEventListener('click', addSource
 function toggleKpoeSourcesVisibility() {
     const kpoeSourcesGroup = document.getElementById('kpoe-sources-group');
     if (kpoeSourcesGroup) {
-        if (currentSettings.lyricsProvider === 'kpoe') {
+        if (currentSettings.lyricsProvider === 'kpoe' || currentSettings.lyricsProvider === 'customKpoe') {
             kpoeSourcesGroup.style.display = 'block';
         } else {
             kpoeSourcesGroup.style.display = 'none';
@@ -398,8 +407,21 @@ function toggleKpoeSourcesVisibility() {
 document.getElementById('default-provider').addEventListener('change', (e) => {
     currentSettings.lyricsProvider = e.target.value; // Update setting immediately for visibility toggle
     toggleKpoeSourcesVisibility();
+    toggleCustomKpoeUrlVisibility(); // Toggle custom KPoe URL visibility
     // actual saving happens automatically via setupAutoSaveListeners
 });
+
+// Function to toggle Custom KPoe URL visibility
+function toggleCustomKpoeUrlVisibility() {
+    const customKpoeUrlGroup = document.getElementById('custom-kpoe-url-group');
+    if (customKpoeUrlGroup) {
+        if (currentSettings.lyricsProvider === 'customKpoe') {
+            customKpoeUrlGroup.style.display = 'block';
+        } else {
+            customKpoeUrlGroup.style.display = 'none';
+        }
+    }
+}
 
 // Event listener for override-translate-target change
 document.getElementById('override-translate-target').addEventListener('change', (e) => {

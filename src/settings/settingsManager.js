@@ -26,7 +26,8 @@ let currentSettings = {
     customGeminiPrompt: '', // New setting for custom Gemini prompt
     useSongPaletteFullscreen: false,
     useSongPaletteAllModes: false,
-    overridePaletteColor: ''
+    overridePaletteColor: '',
+    customKpoeUrl: '' // New setting for Custom KPoe Server URL
 };
 
 // Storage helper function (using pBrowser.storage.local directly)
