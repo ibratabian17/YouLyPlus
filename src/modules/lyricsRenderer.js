@@ -657,6 +657,9 @@ class LyricsPlusRenderer {
         let isCurrentWordBackground = wordBuffer[0].isBackground || false;
         const characterData = [];
 
+        // Store syllable elements for pre-highlight calculation
+        const syllableElements = [];
+
         wordBuffer.forEach((s, syllableIndex) => {
           const sylSpan = elementPool.syllables.pop() || document.createElement('span');
           sylSpan.innerHTML = '';
@@ -671,6 +674,9 @@ class LyricsPlusRenderer {
             sylSpan.hasClickListener = true;
           }
           if (this._isRTL(s.text)) sylSpan.classList.add('rtl-text');
+
+          // Store syllable for pre-highlight calculation
+          syllableElements.push(sylSpan);
 
           if (s.isBackground) {
             sylSpan.textContent = s.text.replace(/[()]/g, '');
@@ -696,6 +702,33 @@ class LyricsPlusRenderer {
             }
           }
           wordSpan.appendChild(sylSpan);
+        });
+
+        // Pre-calculate pre-highlight relationships for syllables in the same word
+        syllableElements.forEach((syllable, index) => {
+          if (index < syllableElements.length - 1) {
+            const nextSyllable = syllableElements[index + 1];
+            const currentDuration = parseFloat(syllable.dataset.duration);
+            const charCount = syllable.querySelectorAll('span.char').length || syllable.textContent.length;
+
+            // Calculate delay factor based on character count
+            let charBasedDelay = 0;
+            if (charCount > 1) {
+              charBasedDelay = (charCount - 1) / charCount;
+            }
+            const delayPercent = charBasedDelay + 0.07;
+            const timingFunction = `cubic-bezier(${delayPercent.toFixed(3)}, 0, 1, 1)`;
+
+            // Store pre-highlight data on the current syllable
+            syllable.dataset.nextSyllableId = nextSyllable.id || `syllable-${Date.now()}-${Math.random()}`;
+            syllable.dataset.preHighlightDuration = currentDuration;
+            syllable.dataset.preHighlightTimingFunction = timingFunction;
+
+            // Ensure next syllable has an ID
+            if (!nextSyllable.id) {
+              nextSyllable.id = syllable.dataset.nextSyllableId;
+            }
+          }
         });
 
         if (shouldEmphasize && characterData.length > 0) {
@@ -986,20 +1019,15 @@ class LyricsPlusRenderer {
     const wipeAnimation = syllable.classList.contains('rtl-text') ? 'wipe-rtl' : 'wipe';
     const charSpansNodeList = syllable.querySelectorAll('span.char');
 
-    // Find the next syllable in the same word/line
-    const nextSyllable = (syllable.nextElementSibling && syllable.nextElementSibling.classList.contains('lyrics-syllable') && syllable.parentElement === syllable.nextElementSibling.parentElement)
-      ? syllable.nextElementSibling
-      : null;
-
     if (charSpansNodeList.length > 0) {
       const wordElement = syllable.closest('.lyrics-word');
-      
+
       // --- Apply GROW animation ---
       if (wordElement?.classList.contains('growable') && syllable === wordElement.querySelector('.lyrics-syllable')) {
         const spansToAnimate = wordElement._cachedChars || (wordElement._cachedChars = Array.from(wordElement.querySelectorAll('span.char')));
         const finalDuration = syllable._wordDurationMs ?? syllable._durationMs;
         const baseDelayPerChar = finalDuration * 0.07;
-        
+
         spansToAnimate.forEach(span => {
           const horizontalOffset = parseFloat(span.dataset.horizontalOffset) || 0;
           span.style.setProperty('--char-offset-x', `${horizontalOffset}`);
@@ -1014,7 +1042,7 @@ class LyricsPlusRenderer {
         const wipeDurationPerChar = syllable._durationMs / currentSyllableCharSpansArray.length;
         const wipeDelay = wipeDurationPerChar * charIndexInSyllable;
         const preWipeDelay = wipeDurationPerChar * (charIndexInSyllable - 1);
-        
+
         const wipeAnims = `pre-wipe-char ${wipeDurationPerChar}ms linear ${preWipeDelay}ms, ${wipeAnimation} ${wipeDurationPerChar}ms linear ${wipeDelay}ms forwards`;
         span.style.animation += `, ${wipeAnims}`;
       });
@@ -1026,34 +1054,28 @@ class LyricsPlusRenderer {
       syllable.style.animation = `${currentWipeAnimation} ${syllable._durationMs}ms linear forwards`;
     }
 
-    // --- Logic for the NEXT syllable (character and syllable pre-highlight) ---
-    if (nextSyllable) {
+    // --- Logic for the NEXT syllable using pre-calculated data ---
+    const nextSyllableId = syllable.dataset.nextSyllableId;
+    if (nextSyllableId) {
+      const nextSyllable = document.getElementById(nextSyllableId);
+      if (nextSyllable) {
+        const preHighlightDuration = parseFloat(syllable.dataset.preHighlightDuration);
+        const timingFunction = syllable.dataset.preHighlightTimingFunction;
 
-      // Determine a delay factor based on character count if available
-      const charCount = charSpansNodeList.length || syllable.textContent.length;
-      let charBasedDelay = 0;
-      if (charCount > 1) {
-          // The pre-highlight should start its ramp-up around when the last character's wipe begins.
-          charBasedDelay = (charCount - 1) / charCount;
+        const nextCharSpan = nextSyllable.querySelector('span.char');
+        if (nextCharSpan) {
+          const preWipeAnim = `pre-wipe-char ${preHighlightDuration}ms ${timingFunction} forwards`;
+
+          nextCharSpan.style.animation = (nextCharSpan.style.animation && !nextCharSpan.style.animation.includes('pre-wipe-char'))
+            ? `${nextCharSpan.style.animation}, ${preWipeAnim}`
+            : preWipeAnim;
+        }
+
+        // --- Apply pre-highlight to the SYLLABLE using pre-calculated timing ---
+        nextSyllable.style.setProperty('--pre-wipe-duration', `${preHighlightDuration}ms`);
+        nextSyllable.style.setProperty('--pre-wipe-timing-function', timingFunction);
+        nextSyllable.classList.add('pre-highlight');
       }
-
-      const delayPercent = charBasedDelay + 0.05;
-      
-      const timingFunction = `cubic-bezier(${delayPercent.toFixed(2)}, 0, 1, 1)`;
-
-      const nextCharSpan = nextSyllable.querySelector('span.char');
-      if (nextCharSpan) {
-        const preWipeAnim = `pre-wipe-char ${syllable._durationMs}ms ${timingFunction} forwards`;
-        
-        nextCharSpan.style.animation = (nextCharSpan.style.animation && !nextCharSpan.style.animation.includes('pre-wipe-char'))
-          ? `${nextCharSpan.style.animation}, ${preWipeAnim}`
-          : preWipeAnim;
-      }
-      
-      // --- Apply pre-highlight to the SYLLABLE using the same dynamic timing function ---
-      nextSyllable.style.setProperty('--pre-wipe-duration', `${syllable._durationMs}ms`);
-      nextSyllable.style.setProperty('--pre-wipe-timing-function', timingFunction);
-      nextSyllable.classList.add('pre-highlight');
     }
   }
 

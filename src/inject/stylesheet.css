@@ -410,7 +410,10 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     background-position: -0.5em 0%, -0.25em 0%;
     background-repeat: no-repeat;
     transform-origin: 50% 80%;
-    transform: scale3d(1.01, 1.01, 1.1);
+    transform: matrix3d(var(--min-scale), 0, 0, 0,
+            0, var(--min-scale), 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1);
     transition: transform 0.5s, color 0.18s;
     will-change: background, transform;
 }
@@ -1090,6 +1093,8 @@ ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) #lyric
         position: absolute;
         bottom: 0em;
         display: none;
+        transform: none!important;
+        top: 0;
     }
 
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(.lyrics-plus-integrated[style*="display: block"]) .lyrics-line.lyrics-activest,
