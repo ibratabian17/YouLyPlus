@@ -717,6 +717,12 @@ function isEmptyLyrics(lyrics) {
     return false;
 }
 
+const KPOE_SERVERS = [
+    "https://lyricsplus.prjktla.workers.dev",
+    "https://lyrics-plus-backend.vercel.app",
+    "https://lyricsplus.prjktla.online"
+];
+
 async function fetchKPoeLyrics(songInfo, sourceOrder = '', forceReload = false) {
     const albumParam = (songInfo.album && songInfo.album !== songInfo.title)
         ? `&album=${encodeURIComponent(songInfo.album)}`
@@ -730,13 +736,30 @@ async function fetchKPoeLyrics(songInfo, sourceOrder = '', forceReload = false) 
         forceReloadParam = `&forceReload=true`;
     }
 
-    const url = `https://lyricsplus.prjktla.workers.dev/v2/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}&duration=${songInfo.duration}${sourceParam}${forceReloadParam}`;
-
-    const response = await fetch(url, fetchOptions);
-    if (!response.ok) return null;
-
-    const data = await response.json();
-    return parseKPoeFormat(data);
+    for (const baseUrl of KPOE_SERVERS) {
+        const url = `${baseUrl}/v2/lyrics/get?title=${encodeURIComponent(songInfo.title)}&artist=${encodeURIComponent(songInfo.artist)}${albumParam}&duration=${songInfo.duration}${sourceParam}${forceReloadParam}`;
+        try {
+            const response = await fetch(url, fetchOptions);
+            if (response.ok) {
+                const data = await response.json();
+                // Modify source metadata to indicate which server provided the lyrics
+                if (data && data.metadata) {
+                    data.metadata.source = `${data.metadata.source} (KPoe via ${new URL(baseUrl).hostname})`;
+                }
+                return parseKPoeFormat(data);
+            } else if (response.status === 404 || response.status === 403) {
+                // If 404 or 403, it means lyrics are not found/forbidden, not a server issue.
+                // So, we should not try other mirrors for this specific lyric.
+                console.warn(`Lyrics not found or forbidden from KPoe server ${baseUrl}: ${response.status} ${response.statusText}`);
+                return null;
+            } else {
+                console.warn(`Failed to fetch from KPoe server ${baseUrl}: ${response.status} ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error(`Network error fetching from KPoe server ${baseUrl}:`, error);
+        }
+    }
+    return null; // Return null if all servers fail or lyrics not found/forbidden from any
 }
 
 async function fetchCustomKPoeLyrics(songInfo, customUrl, sourceOrder = '', forceReload = false) {
