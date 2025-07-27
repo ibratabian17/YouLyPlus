@@ -417,15 +417,15 @@ class LyricsPlusRenderer {
     container.classList.toggle('word-by-word-mode', isWordByWordMode);
     container.classList.toggle('line-by-line-mode', !isWordByWordMode);
 
-    container.classList.remove('lyrics-translated', 'lyrics-romanized');
-    if (displayMode === 'translate') container.classList.add('lyrics-translated');
-    else if (displayMode === 'romanize') container.classList.add('lyrics-romanized');
-
     container.classList.toggle('compability-visibility', !!currentSettings.compabilityVisibility);
     container.classList.toggle('compability-wipe', !!currentSettings.compabilityWipe);
 
-    container.innerHTML = '';
+    container.innerHTML = ''; // Clear existing content
 
+    // Call the new method to apply display mode classes
+    this._applyDisplayModeClasses(container, displayMode);
+
+    // Determine text direction and dual-side layout
     let hasRTL = false, hasLTR = false;
     if (lyrics && lyrics.data && lyrics.data.length > 0) {
       for (const line of lyrics.data) {
@@ -434,7 +434,6 @@ class LyricsPlusRenderer {
         if (hasRTL && hasLTR) break;
       }
     }
-
     container.classList.remove('mixed-direction-lyrics', 'dual-side-lyrics');
     if (hasRTL && hasLTR) container.classList.add('mixed-direction-lyrics');
 
@@ -632,12 +631,8 @@ class LyricsPlusRenderer {
       mainContainer.classList.add('main-vocal-container');
       currentLine.appendChild(mainContainer);
 
-      if (line.translatedText && (displayMode === 'translate' || displayMode === 'romanize') && line.text.trim() !== line.translatedText.trim()) {
-        const translationContainer = document.createElement('div');
-        translationContainer.classList.add('lyrics-translation-container');
-        translationContainer.textContent = line.translatedText;
-        currentLine.appendChild(translationContainer);
-      }
+      // Use the new helper for translation container
+      this._renderTranslationContainer(currentLine, line, displayMode);
 
       let backgroundContainer = null;
       let wordBuffer = [];
@@ -808,15 +803,326 @@ class LyricsPlusRenderer {
       mainContainer.className = 'main-vocal-container';
       mainContainer.textContent = line.text;
       lineDiv.appendChild(mainContainer);
-      if (line.translatedText && (displayMode === 'translate' || displayMode === 'romanize') && line.text.trim() !== line.translatedText.trim()) {
-        const translationContainer = document.createElement('div');
-        translationContainer.className = 'lyrics-translation-container';
-        translationContainer.textContent = line.translatedText;
-        lineDiv.appendChild(translationContainer);
-      }
+      // Use the new helper for translation container
+      this._renderTranslationContainer(lineDiv, line, displayMode);
       lineFragment.appendChild(lineDiv);
     });
     fragment.appendChild(lineFragment);
+  }
+
+  /**
+   * Applies the appropriate CSS classes to the container based on the display mode.
+   * @param {HTMLElement} container - The lyrics container element.
+   * @param {string} displayMode - The current display mode ('none', 'translate', 'romanize').
+   * @private
+   */
+  _applyDisplayModeClasses(container, displayMode) {
+    container.classList.remove('lyrics-translated', 'lyrics-romanized');
+    if (displayMode === 'translate') container.classList.add('lyrics-translated');
+    else if (displayMode === 'romanize') container.classList.add('lyrics-romanized');
+  }
+
+  /**
+   * Renders the translation/romanization container for a given lyric line.
+   * @param {HTMLElement} lineElement - The DOM element for the lyric line.
+   * @param {object} lineData - The data object for the lyric line (from lyrics.data).
+   * @param {string} displayMode - The current display mode ('none', 'translate', 'romanize').
+   * @private
+   */
+  _renderTranslationContainer(lineElement, lineData, displayMode) {
+    if (lineData.translatedText && (displayMode === 'translate' || displayMode === 'romanize') && lineData.text.trim() !== lineData.translatedText.trim()) {
+      const translationContainer = document.createElement('div');
+      translationContainer.classList.add('lyrics-translation-container');
+      translationContainer.textContent = lineData.translatedText;
+      lineElement.appendChild(translationContainer);
+    }
+  }
+
+  /**
+   * Updates the display of lyrics based on a new display mode (translation/romanization).
+   * This method re-renders the lyric lines without re-fetching the entire lyrics data.
+   * @param {object} lyrics - The lyrics data object.
+   * @param {string} displayMode - The new display mode ('none', 'translate', 'romanize').
+   * @param {object} currentSettings - The current user settings.
+   */
+  updateDisplayMode(lyrics, displayMode, currentSettings) {
+    this.currentDisplayMode = displayMode;
+    const container = this._getContainer();
+    if (!container) return;
+
+    container.innerHTML = ''; // Clear existing content
+
+    // Re-apply display mode classes
+    this._applyDisplayModeClasses(container, displayMode);
+
+    // Re-apply general settings that affect rendering
+    container.classList.toggle('use-song-palette-fullscreen', !!currentSettings.useSongPaletteFullscreen);
+    container.classList.toggle('use-song-palette-all-modes', !!currentSettings.useSongPaletteAllModes);
+
+    if (currentSettings.overridePaletteColor) {
+      container.classList.add('override-palette-color');
+      container.style.setProperty('--lyplus-override-pallete', currentSettings.overridePaletteColor);
+      container.style.setProperty('--lyplus-override-pallete-white', `${currentSettings.overridePaletteColor}85`);
+      container.classList.remove('use-song-palette-fullscreen', 'use-song-palette-all-modes');
+    } else {
+      container.classList.remove('override-palette-color');
+      if (currentSettings.useSongPaletteFullscreen || currentSettings.useSongPaletteAllModes) {
+        if (typeof LYPLUS_getSongPalette === 'function') {
+          const songPalette = LYPLUS_getSongPalette();
+          if (songPalette) {
+            const { r, g, b } = songPalette;
+            container.style.setProperty('--lyplus-song-pallete', `rgb(${r}, ${g}, ${b})`);
+            const alpha = 133 / 255;
+            const r_blend = Math.round(alpha * 255 + (1 - alpha) * r);
+            const g_blend = Math.round(alpha * 255 + (1 - alpha) * b);
+            const b_blend = Math.round(alpha * 255 + (1 - alpha) * b);
+            container.style.setProperty('--lyplus-song-white-pallete', `rgb(${r_blend}, ${g_blend}, ${b_blend})`);
+          }
+        }
+      }
+    }
+
+    container.classList.toggle('fullscreen', document.body.hasAttribute('player-fullscreened_'));
+    const isWordByWordMode = lyrics.type === "Word" && currentSettings.wordByWord;
+    container.classList.toggle('word-by-word-mode', isWordByWordMode);
+    container.classList.toggle('line-by-line-mode', !isWordByWordMode);
+
+    // Re-determine text direction and dual-side layout (copied from displayLyrics)
+    let hasRTL = false, hasLTR = false;
+    if (lyrics && lyrics.data && lyrics.data.length > 0) {
+      for (const line of lyrics.data) {
+        if (this._isRTL(line.text)) hasRTL = true;
+        else hasLTR = true;
+        if (hasRTL && hasLTR) break;
+      }
+    }
+    container.classList.remove('mixed-direction-lyrics', 'dual-side-lyrics');
+    if (hasRTL && hasLTR) container.classList.add('mixed-direction-lyrics');
+
+    const singerClassMap = {};
+    let isDualSide = false;
+    if (lyrics && lyrics.data && lyrics.data.length > 0) {
+      const allSingers = [...new Set(lyrics.data.map(line => line.element?.singer).filter(Boolean))];
+      const leftCandidates = allSingers.filter(s => s === 'v1' || s === 'v1000').sort();
+      const rightCandidates = allSingers.filter(s => s === 'v2' || s === 'v2000').sort();
+      if (leftCandidates.length > 0 && rightCandidates.length > 0) {
+        leftCandidates.forEach(s => singerClassMap[s] = 'singer-left');
+        rightCandidates.forEach(s => singerClassMap[s] = 'singer-right');
+        isDualSide = true;
+      } else if (leftCandidates.length > 1) {
+        singerClassMap[leftCandidates[0]] = 'singer-left';
+        for (let i = 1; i < leftCandidates.length; i++) singerClassMap[leftCandidates[i]] = 'singer-right';
+        isDualSide = true;
+      } else if (rightCandidates.length > 1) {
+        singerClassMap[rightCandidates[0]] = 'singer-left';
+        for (let i = 1; i < rightCandidates.length; i++) singerClassMap[rightCandidates[i]] = 'singer-right';
+        isDualSide = true;
+      }
+    }
+    if (isDualSide) container.classList.add('dual-side-lyrics');
+
+    const elementPool = { lines: [], syllables: [], chars: [] };
+
+    const createGapLine = (gapStart, gapEnd, classesToInherit = null) => {
+      const gapDuration = gapEnd - gapStart;
+      const gapLine = elementPool.lines.pop() || document.createElement('div');
+      gapLine.className = 'lyrics-line lyrics-gap';
+      gapLine.dataset.startTime = gapStart;
+      gapLine.dataset.endTime = gapEnd;
+      if (!gapLine.hasClickListener) {
+        gapLine.addEventListener('click', this._onLyricClick.bind(this));
+        gapLine.hasClickListener = true;
+      }
+      if (classesToInherit) {
+        if (classesToInherit.includes('rtl-text')) gapLine.classList.add('rtl-text');
+        if (classesToInherit.includes('singer-left')) gapLine.classList.add('singer-left');
+        if (classesToInherit.includes('singer-right')) gapLine.classList.add('singer-right');
+      }
+      const existingMainContainer = gapLine.querySelector('.main-vocal-container');
+      if (existingMainContainer) existingMainContainer.remove();
+      const mainContainer = document.createElement('div');
+      mainContainer.className = 'main-vocal-container';
+      const lyricsWord = document.createElement('div');
+      lyricsWord.className = 'lyrics-word';
+      for (let i = 0; i < 3; i++) {
+        const syllableSpan = elementPool.syllables.pop() || document.createElement('span');
+        syllableSpan.className = 'lyrics-syllable';
+        const syllableStart = (gapStart + (i * gapDuration / 3)) * 1000;
+        const syllableDuration = ((gapDuration / 3) / 0.9) * 1000;
+        syllableSpan.dataset.startTime = syllableStart;
+        syllableSpan.dataset.duration = syllableDuration;
+        syllableSpan.dataset.endTime = syllableStart + syllableDuration;
+        syllableSpan.textContent = "•";
+        if (!syllableSpan.hasClickListener) {
+          syllableSpan.addEventListener('click', this._onLyricClick.bind(this));
+          syllableSpan.hasClickListener = true;
+        }
+        lyricsWord.appendChild(syllableSpan);
+      }
+      mainContainer.appendChild(lyricsWord);
+      gapLine.appendChild(mainContainer);
+      return gapLine;
+    };
+
+    const fragment = document.createDocumentFragment();
+
+    if (isWordByWordMode) {
+      this._renderWordByWordLyrics(lyrics, displayMode, singerClassMap, currentSettings.lightweight, elementPool, fragment);
+    } else {
+      this._renderLineByLineLyrics(lyrics, displayMode, singerClassMap, elementPool, fragment);
+    }
+
+    container.appendChild(fragment);
+
+    // Post-rendering logic for gaps and timing adjustments
+    const originalLines = Array.from(container.querySelectorAll('.lyrics-line:not(.lyrics-gap)'));
+    if (originalLines.length > 0) {
+      const firstLine = originalLines[0];
+      const firstStartTime = parseFloat(firstLine.dataset.startTime);
+      if (firstStartTime >= 7.0) {
+        const classesToInherit = [...firstLine.classList].filter(c => ['rtl-text', 'singer-left', 'singer-right'].includes(c));
+        container.insertBefore(createGapLine(0, firstStartTime - 0.85, classesToInherit), firstLine);
+      }
+    }
+    const gapLinesToInsert = [];
+    originalLines.forEach((line, index) => {
+      if (index < originalLines.length - 1) {
+        const nextLine = originalLines[index + 1];
+        if (parseFloat(nextLine.dataset.startTime) - parseFloat(line.dataset.endTime) >= 7.0) {
+          const classesToInherit = [...nextLine.classList].filter(c => ['rtl-text', 'singer-left', 'singer-right'].includes(c));
+          gapLinesToInsert.push({ gapLine: createGapLine(parseFloat(line.dataset.endTime) + 0.4, parseFloat(nextLine.dataset.startTime) - 0.85, classesToInherit), nextLine });
+        }
+      }
+    });
+    gapLinesToInsert.forEach(({ gapLine, nextLine }) => container.insertBefore(gapLine, nextLine));
+    this._retimingActiveTimings(originalLines);
+
+    // Render metadata (assuming metadata doesn't change with display mode)
+    const metadataContainer = document.createElement('div');
+    metadataContainer.className = 'lyrics-plus-metadata';
+    metadataContainer.dataset.startTime = (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 0.5; // Approximate start time for metadata
+    metadataContainer.dataset.endTime = (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 10; // Approximate end time for metadata
+
+    // Note: songWriters and source are not available in updateDisplayMode,
+    // so this part might need to be handled differently if they are dynamic.
+    // For now, assuming they are set once by displayLyrics.
+    if (lyrics.metadata.songWriters) { // Use lyrics.metadata directly
+      const songWritersDiv = document.createElement('span');
+      songWritersDiv.className = 'lyrics-song-writters';
+      songWritersDiv.innerText = `${t("writtenBy")} ${lyrics.metadata.songWriters.join(', ')}`;
+      metadataContainer.appendChild(songWritersDiv);
+    }
+    const sourceDiv = document.createElement('span');
+    sourceDiv.className = 'lyrics-source-provider';
+    sourceDiv.innerText = `${t("source")} ${lyrics.metadata.source}`; // Use lyrics.metadata directly
+    metadataContainer.appendChild(sourceDiv);
+    container.appendChild(metadataContainer);
+
+    // Add an empty div at the end for bottom padding
+    const emptyDiv = document.createElement('div');
+    emptyDiv.className = 'lyrics-plus-empty';
+    container.appendChild(emptyDiv);
+
+    // Create the fixed empty div for avoiding detected by resizerObserver
+    const emptyFixedDiv = document.createElement('div');
+    emptyFixedDiv.className = 'lyrics-plus-empty-fixed';
+    container.appendChild(emptyFixedDiv);
+
+    // Cache and setup for sync
+    this.cachedLyricsLines = Array.from(container.querySelectorAll('.lyrics-line, .lyrics-plus-metadata, .lyrics-plus-empty')).map(line => {
+      if (line) {
+        line._startTimeMs = parseFloat(line.dataset.startTime) * 1000;
+        line._endTimeMs = parseFloat(line.dataset.endTime) * 1000;
+      }
+      return line;
+    }).filter(Boolean);
+
+    this.cachedSyllables = Array.from(container.getElementsByClassName('lyrics-syllable')).map(syllable => {
+      if (syllable) {
+        syllable._startTimeMs = parseFloat(syllable.dataset.startTime);
+        syllable._durationMs = parseFloat(syllable.dataset.duration);
+        syllable._endTimeMs = syllable._startTimeMs + syllable._durationMs;
+        const wordDuration = parseFloat(syllable.dataset.wordDuration);
+        syllable._wordDurationMs = isNaN(wordDuration) ? null : wordDuration;
+      }
+      return syllable;
+    }).filter(Boolean);
+
+    this._ensureElementIds();
+    this.activeLineIds.clear();
+    this.highlightedSyllableIds.clear();
+    this.visibleLineIds.clear();
+    this.currentPrimaryActiveLine = null;
+
+    if (this.cachedLyricsLines.length > 0) this._scrollToActiveLine(this.cachedLyricsLines[0], true);
+
+    this._startLyricsSync(currentSettings);
+    // Control buttons are created once by displayLyrics, not re-created here.
+    container.classList.toggle('blur-inactive-enabled', !!currentSettings.blurInactive);
+  }
+
+  /**
+   * Renders the lyrics, metadata, and control buttons inside the container.
+   * This is the main public method to update the display.
+   * @param {object} lyrics - The lyrics data object.
+   * @param {string} source - The source of the lyrics.
+   * @param {string} type - The type of lyrics ("Line" or "Word").
+   * @param {boolean} lightweight - Flag for lightweight mode.
+   * @param {string[]} songWriters - Array of songwriters.
+   * @param {object} songInfo - Information about the current song.
+   * @param {string} displayMode - The current display mode ('none', 'translate', 'romanize').
+   * @param {object} currentSettings - The current user settings.
+   * @param {Function} fetchAndDisplayLyricsFn - The function to fetch and display lyrics.
+   * @param {Function} setCurrentDisplayModeAndRefetchFn - The function to set display mode and refetch.
+   */
+  displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}, fetchAndDisplayLyricsFn, setCurrentDisplayModeAndRefetchFn) {
+    this.lastKnownSongInfo = songInfo;
+    this.fetchAndDisplayLyricsFn = fetchAndDisplayLyricsFn;
+    this.setCurrentDisplayModeAndRefetchFn = setCurrentDisplayModeAndRefetchFn;
+
+    const container = this._getContainer();
+    if (!container) return;
+
+    container.classList.remove('lyrics-plus-message'); // Remove the class when actual lyrics are displayed
+
+    // Apply visual settings that are independent of display mode
+    container.classList.toggle('use-song-palette-fullscreen', !!currentSettings.useSongPaletteFullscreen);
+    container.classList.toggle('use-song-palette-all-modes', !!currentSettings.useSongPaletteAllModes);
+
+    if (currentSettings.overridePaletteColor) {
+      container.classList.add('override-palette-color');
+      container.style.setProperty('--lyplus-override-pallete', currentSettings.overridePaletteColor);
+      container.style.setProperty('--lyplus-override-pallete-white', `${currentSettings.overridePaletteColor}85`);
+      container.classList.remove('use-song-palette-fullscreen', 'use-song-palette-all-modes');
+    } else {
+      container.classList.remove('override-palette-color');
+      if (currentSettings.useSongPaletteFullscreen || currentSettings.useSongPaletteAllModes) {
+        if (typeof LYPLUS_getSongPalette === 'function') {
+          const songPalette = LYPLUS_getSongPalette();
+          if (songPalette) {
+            const { r, g, b } = songPalette;
+            container.style.setProperty('--lyplus-song-pallete', `rgb(${r}, ${g}, ${b})`);
+            const alpha = 133 / 255;
+            const r_blend = Math.round(alpha * 255 + (1 - alpha) * r);
+            const g_blend = Math.round(alpha * 255 + (1 - alpha) * b);
+            const b_blend = Math.round(alpha * 255 + (1 - alpha) * b);
+            container.style.setProperty('--lyplus-song-white-pallete', `rgb(${r_blend}, ${g_blend}, ${b_blend})`);
+          }
+        }
+      }
+    }
+
+    container.classList.toggle('fullscreen', document.body.hasAttribute('player-fullscreened_'));
+    const isWordByWordMode = type === "Word" && currentSettings.wordByWord;
+    container.classList.toggle('word-by-word-mode', isWordByWordMode);
+    container.classList.toggle('line-by-line-mode', !isWordByWordMode);
+
+    // Call the new updateDisplayMode to handle the actual rendering of lyrics lines
+    this.updateDisplayMode(lyrics, displayMode, currentSettings);
+
+    // Create control buttons (only once)
+    this._createControlButtons();
+    container.classList.toggle('blur-inactive-enabled', !!currentSettings.blurInactive);
   }
 
   /**

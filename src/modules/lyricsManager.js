@@ -3,6 +3,7 @@ let currentFetchVideoId = null;
 let currentDisplayMode = 'none'; // Manages the active translation/romanization mode
 
 let lastKnownSongInfo = null; // Store last known song info for reload
+let lastFetchedLyrics = null; // Store the last successfully fetched lyrics object
 
 
 async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload = false) {
@@ -120,6 +121,8 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     }
     
 
+    lastFetchedLyrics = lyricsObjectToDisplay; // Store the fetched lyrics
+
     if (LyricsPlusAPI.displayLyrics) {
         LyricsPlusAPI.displayLyrics(
             lyricsObjectToDisplay,
@@ -131,7 +134,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
             finalDisplayModeForRenderer, // Pass the actual display mode
             currentSettings, // Pass currentSettings
             fetchAndDisplayLyrics, // Pass the function itself
-            setCurrentDisplayModeAndRefetch // Pass the function itself
+            setCurrentDisplayModeAndRender // Pass the function itself (renamed)
         );
     } else {
         console.error("displayLyrics is not available.");
@@ -202,16 +205,15 @@ function convertWordLyricsToLine(lyrics) {
 }
 
 // New API function for renderer to call
-setCurrentDisplayModeAndRefetch = async (mode, songInfoForRefetch) => {
+setCurrentDisplayModeAndRender = async (mode, songInfoForRefetch) => {
     currentDisplayMode = mode; // Update manager's internal state
 
-    // Immediately update renderer's UI state if possible
-
-    if (songInfoForRefetch) {
-        // Call fetchAndDisplayLyrics, isNewSong will be false.
-        // fetchAndDisplayLyrics will use the new `currentDisplayMode`.
-        // When called from translation/romanization buttons, forceReload should be false.
+    if (lastFetchedLyrics && LyricsPlusAPI.updateDisplayMode) {
+        // If lyrics are already fetched, just update the display mode in the renderer
+        // No need to re-fetch from the background script
+        LyricsPlusAPI.updateDisplayMode(lastFetchedLyrics, mode, currentSettings);
+    } else if (songInfoForRefetch) {
+        // Fallback: if no lyrics are cached in manager, re-fetch them
         await fetchAndDisplayLyrics(songInfoForRefetch, false, false);
-    } else {
     }
 };
