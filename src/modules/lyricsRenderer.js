@@ -371,8 +371,15 @@ class LyricsPlusRenderer {
    * @param {object} songInfo - Information about the current song.
    * @param {string} displayMode - The current display mode ('none', 'translate', 'romanize').
    * @param {object} currentSettings - The current user settings.
+   * @param {Function} fetchAndDisplayLyricsFn - The function to fetch and display lyrics.
+   * @param {Function} setCurrentDisplayModeAndRefetchFn - The function to set display mode and refetch.
    */
-  displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}) {
+  displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}, fetchAndDisplayLyricsFn, setCurrentDisplayModeAndRefetchFn) {
+    this.lastKnownSongInfo = songInfo;
+    this.currentDisplayMode = displayMode;
+    this.fetchAndDisplayLyricsFn = fetchAndDisplayLyricsFn;
+    this.setCurrentDisplayModeAndRefetchFn = setCurrentDisplayModeAndRefetchFn;
+
     const container = this._getContainer();
     if (!container) return;
 
@@ -588,7 +595,7 @@ class LyricsPlusRenderer {
     if (this.cachedLyricsLines.length > 0) this._scrollToActiveLine(this.cachedLyricsLines[0], true);
 
     this._startLyricsSync(currentSettings);
-    this._createControlButtons(sourceDiv);
+    this._createControlButtons();
     container.classList.toggle('blur-inactive-enabled', !!currentSettings.blurInactive);
   }
 
@@ -1264,18 +1271,18 @@ class LyricsPlusRenderer {
 
   // --- Control Buttons & UI ---
 
-  _createControlButtons(sourceDivElement) {
+  _createControlButtons() {
     let buttonsWrapper = document.getElementById('lyrics-plus-buttons-wrapper');
     if (!buttonsWrapper) {
       buttonsWrapper = document.createElement('div');
       buttonsWrapper.id = 'lyrics-plus-buttons-wrapper';
-      const parent = sourceDivElement?.parentNode || this._getContainer();
-      if (parent) {
-        parent.insertBefore(buttonsWrapper, sourceDivElement ? sourceDivElement.nextSibling : null);
+      const originalLyricsSection = document.querySelector('#tab-renderer');
+      if (originalLyricsSection) {
+        originalLyricsSection.appendChild(buttonsWrapper);
       }
     }
 
-    if (window.LyricsPlusAPI && typeof setCurrentDisplayModeAndRefetch === 'function') {
+    if (this.setCurrentDisplayModeAndRefetchFn) {
       if (!this.translationButton) {
         this.translationButton = document.createElement('button');
         this.translationButton.id = 'lyrics-plus-translate-button';
@@ -1301,8 +1308,8 @@ class LyricsPlusRenderer {
       this.reloadButton.title = t('Reload Lyrics');
       buttonsWrapper.appendChild(this.reloadButton);
       this.reloadButton.addEventListener('click', () => {
-        if (typeof lastKnownSongInfo !== 'undefined' && window.LyricsPlusAPI && typeof fetchAndDisplayLyrics === 'function') {
-          fetchAndDisplayLyrics(lastKnownSongInfo, true, true);
+        if (this.lastKnownSongInfo && this.fetchAndDisplayLyricsFn) {
+          this.fetchAndDisplayLyricsFn(this.lastKnownSongInfo, true, true);
         }
       });
     }
@@ -1318,11 +1325,11 @@ class LyricsPlusRenderer {
       parentWrapper?.appendChild(this.dropdownMenu);
     }
 
-    if (typeof currentDisplayMode === 'undefined') return;
+    if (typeof this.currentDisplayMode === 'undefined') return;
 
     const options = [];
-    if (currentDisplayMode !== 'translate') options.push({ text: t('showTranslation'), mode: 'translate' });
-    if (currentDisplayMode !== 'romanize') options.push({ text: t('showPronunciation'), mode: 'romanize' });
+    if (this.currentDisplayMode !== 'translate') options.push({ text: t('showTranslation'), mode: 'translate' });
+    if (this.currentDisplayMode !== 'romanize') options.push({ text: t('showPronunciation'), mode: 'romanize' });
 
     options.forEach(opt => {
       const optionDiv = document.createElement('div');
@@ -1330,22 +1337,22 @@ class LyricsPlusRenderer {
       optionDiv.textContent = opt.text;
       optionDiv.addEventListener('click', () => {
         this.dropdownMenu.classList.add('hidden');
-        if (typeof setCurrentDisplayModeAndRefetch === 'function' && typeof lastKnownSongInfo !== 'undefined') {
-          setCurrentDisplayModeAndRefetch(opt.mode, lastKnownSongInfo);
+        if (this.setCurrentDisplayModeAndRefetchFn && this.lastKnownSongInfo) {
+          this.setCurrentDisplayModeAndRefetchFn(opt.mode, this.lastKnownSongInfo);
         }
       });
       this.dropdownMenu.appendChild(optionDiv);
     });
 
-    if (currentDisplayMode !== 'none') {
+    if (this.currentDisplayMode !== 'none') {
       if (options.length > 0) this.dropdownMenu.appendChild(document.createElement('div')).className = 'dropdown-separator';
       const hideOption = document.createElement('div');
       hideOption.className = 'dropdown-option';
-      hideOption.textContent = currentDisplayMode === 'translate' ? t('hideTranslation') : t('hidePronunciation');
+      hideOption.textContent = this.currentDisplayMode === 'translate' ? t('hideTranslation') : t('hidePronunciation');
       hideOption.addEventListener('click', () => {
         this.dropdownMenu.classList.add('hidden');
-        if (typeof setCurrentDisplayModeAndRefetch === 'function' && typeof lastKnownSongInfo !== 'undefined') {
-          setCurrentDisplayModeAndRefetch('none', lastKnownSongInfo);
+        if (this.setCurrentDisplayModeAndRefetchFn && this.lastKnownSongInfo) {
+          this.setCurrentDisplayModeAndRefetchFn('none', this.lastKnownSongInfo);
         }
       });
       this.dropdownMenu.appendChild(hideOption);

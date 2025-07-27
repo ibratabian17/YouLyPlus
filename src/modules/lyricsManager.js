@@ -129,7 +129,9 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
             lyricsObjectToDisplay.metadata.songWriters,
             currentSong,
             finalDisplayModeForRenderer, // Pass the actual display mode
-            currentSettings // Pass currentSettings
+            currentSettings, // Pass currentSettings
+            fetchAndDisplayLyrics, // Pass the function itself
+            setCurrentDisplayModeAndRefetch // Pass the function itself
         );
     } else {
         console.error("displayLyrics is not available.");
