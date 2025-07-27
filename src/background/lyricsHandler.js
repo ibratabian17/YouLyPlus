@@ -744,7 +744,7 @@ async function fetchKPoeLyrics(songInfo, sourceOrder = '', forceReload = false) 
                 const data = await response.json();
                 // Modify source metadata to indicate which server provided the lyrics
                 if (data && data.metadata) {
-                    data.metadata.source = `${data.metadata.source} (KPoe via ${new URL(baseUrl).hostname})`;
+                    data.metadata.source = `${data.metadata.source}`;
                 }
                 return parseKPoeFormat(data);
             } else if (response.status === 404 || response.status === 403) {
