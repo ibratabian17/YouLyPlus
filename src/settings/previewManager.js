@@ -764,6 +764,52 @@ function resetPreviewSyllables(line) {
 
 // scrollActiveLine -> scrollPreviewActiveLine
 // Takes currentTimeMs and the current set of active lines for decision making
+
+function animatePreviewScroll(activeLine) {
+  const container = getPreviewContainer();
+  if (!container) return;
+
+  const paddingTop = 0; // No scroll padding in preview
+  // Calculate the target translateY for *all* lines
+  const targetTranslateY = paddingTop - activeLine.offsetTop;
+
+  const allLines = Array.from(container.querySelectorAll('.lyrics-line'));
+  const scrollContainer = container; // In preview, container is the scroll container
+
+  if (!scrollContainer) return;
+
+  const scrollRect = scrollContainer.getBoundingClientRect();
+  let visibleLines = [];
+
+  // Identify visible lines and store their original index
+  allLines.forEach((line, index) => {
+    const lineRect = line.getBoundingClientRect();
+    const isVisible = lineRect.bottom > scrollRect.top && lineRect.top < scrollRect.bottom;
+    if (isVisible) {
+      visibleLines.push({ line, index });
+    }
+  });
+
+  // Sort visible lines by their top position to ensure correct staggering order
+  visibleLines.sort((a, b) => a.line.getBoundingClientRect().top - b.line.getBoundingClientRect().top);
+
+  // Apply staggered delay and the final transform to visible lines
+  visibleLines.forEach((item, i) => {
+    const line = item.line;
+    const delay = i * 30; // 30ms stagger per visible line
+    line.style.transitionDelay = `${delay}ms`;
+    line.style.transform = `translateY(${targetTranslateY}px)`;
+  });
+
+  // For lines that are not visible, ensure their transitionDelay is reset and they snap to position
+  allLines.forEach(line => {
+    if (!visibleLines.some(item => item.line === line)) {
+      line.style.transitionDelay = '0ms';
+      line.style.transform = `translateY(${targetTranslateY}px)`;
+    }
+  });
+}
+
 function scrollPreviewActiveLine(currentTimeMs, forceScroll = false, currentActiveLines = []) {
   const container = getPreviewContainer(); // Use preview container
   // const activeLines = container.querySelectorAll('.lyrics-line.active'); // lyricsRenderer gets them from DOM
@@ -858,10 +904,7 @@ function scrollToPreviewView(activeLine, forceScroll = false) {
   }
 
   // Scroll the scroll container to the target position
-  activeLine.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start' // Match lyricsRenderer
-  });
+  animatePreviewScroll(activeLine);
 }
 
 // cleanupLyrics -> cleanupPreviewLyrics

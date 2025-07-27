@@ -71,12 +71,18 @@
                         <div class="select-wrapper">
                             <select id="default-provider">
                                 <option value="kpoe" selected>Lyrics+ (KPoe)</option>
+                                <option value="customKpoe">Custom KPoe Server</option>
                                 <option value="lrclib">LRCLIB</option>
                             </select>
                             <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
                         </div>
                     </div>
                     <p class="setting-description">Choose your preferred source for lyrics.</p>
+                </div>
+                <div class="setting-item form-group" id="custom-kpoe-url-group" style="display: none;">
+                    <label for="custom-kpoe-url">Custom KPoe Server URL</label>
+                    <input type="text" id="custom-kpoe-url" placeholder="e.g., https://your-kpoe-server.com">
+                    <p class="helper-text">Enter the base URL for your self-hosted KPoe server.</p>
                 </div>
                 <div class="setting-item" id="kpoe-sources-group">
                     <label class="form-group-label">Lyrics+ (KPoe) Source Order</label>
@@ -241,14 +247,12 @@
                 </div>
                 <div class="setting-item">
                     <label class="switch">
-                        <input type="checkbox" id="compability-visibility">
+                        <input type="checkbox" id="hide-offscreen">
                         <span class="slider"></span>
-                        <span class="switch-label">Alternative Lyric Visibility (JS)</span>
+                        <span class="switch-label">Hide Off-screen Lyrics Line</span>
                     </label>
                     <p class="setting-description">
-                        Switches from the default CSS-based visibility to JavaScript-driven handling for lyric lines.
-                        Enable
-                        this if lyrics scroll unexpectedly, disappear, or to try an alternative rendering method.
+                        Hides & remove all animation lyrics lines that are not currently visible on the screen.
                     </p>
                 </div>
                 <div class="setting-item">

@@ -12,7 +12,7 @@ let currentSettings = {
     autoHideLyrics: false,
     cacheStrategy: 'aggressive',
     fontSize: 16,
-    compabilityVisibility: false, // New compatibility setting
+    hideOffscreen: false, // New compatibility setting
     compabilityWipe: false, // New compatibility setting
     blurInactive: false,
     dynamicPlayer: false,
@@ -26,7 +26,8 @@ let currentSettings = {
     customGeminiPrompt: '', // New setting for custom Gemini prompt
     useSongPaletteFullscreen: false,
     useSongPaletteAllModes: false,
-    overridePaletteColor: ''
+    overridePaletteColor: '',
+    customKpoeUrl: '' // New setting for Custom KPoe Server URL
 };
 
 // Storage helper function (using pBrowser.storage.local directly)
