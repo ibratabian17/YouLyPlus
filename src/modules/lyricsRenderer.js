@@ -417,7 +417,7 @@ class LyricsPlusRenderer {
     container.classList.toggle('word-by-word-mode', isWordByWordMode);
     container.classList.toggle('line-by-line-mode', !isWordByWordMode);
 
-    container.classList.toggle('compability-visibility', !!currentSettings.compabilityVisibility);
+    container.classList.toggle('hide-offscreen', !!currentSettings.hideOffscreen);
     container.classList.toggle('compability-wipe', !!currentSettings.compabilityWipe);
 
     container.innerHTML = ''; // Clear existing content
@@ -1294,7 +1294,7 @@ class LyricsPlusRenderer {
 
     this._updateSyllables(currentTime);
 
-    if (this.lyricsContainer && this.lyricsContainer.classList.contains('compability-visibility')) {
+    if (this.lyricsContainer && this.lyricsContainer.classList.contains('hide-offscreen')) {
       this.cachedLyricsLines.forEach(line => {
         if (!line) return;
         const isOutOfView = !this.visibleLineIds.has(line.id);

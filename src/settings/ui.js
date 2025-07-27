@@ -30,7 +30,7 @@ function setupAutoSaveListeners() {
         { id: 'wordByWord', key: 'wordByWord', type: 'checkbox' },
         // Appearance
         { id: 'lightweight', key: 'lightweight', type: 'checkbox' },
-        { id: 'compability-visibility', key: 'compabilityVisibility', type: 'checkbox' },
+        { id: 'hide-offscreen', key: 'hideOffscreen', type: 'checkbox' },
         { id: 'compability-wipe', key: 'compabilityWipe', type: 'checkbox' },
         { id: 'blur-inactive', key: 'blurInactive', type: 'checkbox' },
         { id: 'dynamic-player', key: 'dynamicPlayer', type: 'checkbox' },
@@ -73,7 +73,7 @@ function updateUI(settings) {
     document.getElementById('sponsor-block').checked = currentSettings.useSponsorBlock;
     document.getElementById('lightweight').checked = currentSettings.lightweight;
     document.getElementById('wordByWord').checked = currentSettings.wordByWord;
-    document.getElementById('compability-visibility').checked = currentSettings.compabilityVisibility;
+    document.getElementById('hide-offscreen').checked = currentSettings.hideOffscreen;
     document.getElementById('compability-wipe').checked = currentSettings.compabilityWipe;
     document.getElementById('blur-inactive').checked = currentSettings.blurInactive;
     document.getElementById('dynamic-player').checked = currentSettings.dynamicPlayer;

@@ -20,7 +20,7 @@ let currentSettings = {
     autoHideLyrics: false,
     cacheStrategy: 'aggressive',
     fontSize: 16,
-    compabilityVisibility: false, // New compatibility setting
+    hideOffscreen: false, // New compatibility setting
     compabilityWipe: false, // New compatibility setting
     blurInactive: false,
     dynamicPlayer: false,
@@ -53,7 +53,7 @@ function loadSettings(callback) {
         autoHideLyrics: false,
         cacheStrategy: 'aggressive',
         fontSize: 16,
-        compabilityVisibility: false, // New compatibility setting
+        hideOffscreen: false, // New compatibility setting
         compabilityWipe: false, // New compatibility setting
         blurInactive: false,
         dynamicPlayer: false,

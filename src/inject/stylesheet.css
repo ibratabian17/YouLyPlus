@@ -123,12 +123,12 @@ ytmusic-app-layout[is-mweb-modernization-enabled] #lyrics-plus-container[style*=
     /*scroll-snap-align: center;*/
 }
 
-.lyrics-plus-integrated:not(.compability-visibility) .lyrics-line {
+.lyrics-plus-integrated .lyrics-line {
     content-visibility: auto;
     contain-intrinsic-size: 100% 3em;
 }
 
-.lyrics-plus-integrated.compability-visibility .lyrics-line.viewport-hidden * {
+.lyrics-plus-integrated.hide-offscreen .lyrics-line.viewport-hidden * {
     transition: none !important;
     animation: none !important;
     will-change: auto !important;
