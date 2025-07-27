@@ -441,20 +441,19 @@ class LyricsPlusRenderer {
     let isDualSide = false;
     if (lyrics && lyrics.data && lyrics.data.length > 0) {
       const allSingers = [...new Set(lyrics.data.map(line => line.element?.singer).filter(Boolean))];
-      const leftCandidates = allSingers.filter(s => s === 'v1' || s === 'v1000').sort();
-      const rightCandidates = allSingers.filter(s => s === 'v2' || s === 'v2000').sort();
-      if (leftCandidates.length > 0 && rightCandidates.length > 0) {
+      const leftCandidates = allSingers.filter(s => {
+        const num = parseInt(s.substring(1));
+        return s.startsWith('v') && !isNaN(num) && num !== 0 && num % 2 !== 0;
+      }).sort((a, b) => parseInt(a.substring(1)) - parseInt(b.substring(1)));
+      const rightCandidates = allSingers.filter(s => {
+        const num = parseInt(s.substring(1));
+        return s.startsWith('v') && !isNaN(num) && num % 2 === 0;
+      }).sort((a, b) => parseInt(a.substring(1)) - parseInt(b.substring(1)));
+
+      if (leftCandidates.length > 0 || rightCandidates.length > 0) {
         leftCandidates.forEach(s => singerClassMap[s] = 'singer-left');
         rightCandidates.forEach(s => singerClassMap[s] = 'singer-right');
-        isDualSide = true;
-      } else if (leftCandidates.length > 1) {
-        singerClassMap[leftCandidates[0]] = 'singer-left';
-        for (let i = 1; i < leftCandidates.length; i++) singerClassMap[leftCandidates[i]] = 'singer-right';
-        isDualSide = true;
-      } else if (rightCandidates.length > 1) {
-        singerClassMap[rightCandidates[0]] = 'singer-left';
-        for (let i = 1; i < rightCandidates.length; i++) singerClassMap[rightCandidates[i]] = 'singer-right';
-        isDualSide = true;
+        isDualSide = leftCandidates.length > 0 && rightCandidates.length > 0;
       }
     }
     if (isDualSide) container.classList.add('dual-side-lyrics');
@@ -914,20 +913,19 @@ class LyricsPlusRenderer {
     let isDualSide = false;
     if (lyrics && lyrics.data && lyrics.data.length > 0) {
       const allSingers = [...new Set(lyrics.data.map(line => line.element?.singer).filter(Boolean))];
-      const leftCandidates = allSingers.filter(s => s === 'v1' || s === 'v1000').sort();
-      const rightCandidates = allSingers.filter(s => s === 'v2' || s === 'v2000').sort();
-      if (leftCandidates.length > 0 && rightCandidates.length > 0) {
+      const leftCandidates = allSingers.filter(s => {
+        const num = parseInt(s.substring(1));
+        return s.startsWith('v') && !isNaN(num) && num !== 0 && num % 2 !== 0;
+      }).sort((a, b) => parseInt(a.substring(1)) - parseInt(b.substring(1)));
+      const rightCandidates = allSingers.filter(s => {
+        const num = parseInt(s.substring(1));
+        return s.startsWith('v') && !isNaN(num) && num % 2 === 0;
+      }).sort((a, b) => parseInt(a.substring(1)) - parseInt(b.substring(1)));
+
+      if (leftCandidates.length > 0 || rightCandidates.length > 0) {
         leftCandidates.forEach(s => singerClassMap[s] = 'singer-left');
         rightCandidates.forEach(s => singerClassMap[s] = 'singer-right');
-        isDualSide = true;
-      } else if (leftCandidates.length > 1) {
-        singerClassMap[leftCandidates[0]] = 'singer-left';
-        for (let i = 1; i < leftCandidates.length; i++) singerClassMap[leftCandidates[i]] = 'singer-right';
-        isDualSide = true;
-      } else if (rightCandidates.length > 1) {
-        singerClassMap[rightCandidates[0]] = 'singer-left';
-        for (let i = 1; i < rightCandidates.length; i++) singerClassMap[rightCandidates[i]] = 'singer-right';
-        isDualSide = true;
+        isDualSide = leftCandidates.length > 0 && rightCandidates.length > 0;
       }
     }
     if (isDualSide) container.classList.add('dual-side-lyrics');
