@@ -955,7 +955,7 @@ ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) #lyric
 
 
 /* Translated/Romanized Text Container */
-.lyrics-translation-container {
+.lyrics-translation-container, .lyrics-romanization-container  {
     font-size: 0.6em;
     color: #ffffff7a;
     padding-top: 0.2em;
@@ -970,16 +970,23 @@ ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) #lyric
 }
 
 /* Ensure translated text doesn't get active line styling effects */
-.lyrics-line.active .lyrics-translation-container {
+.lyrics-line.active .lyrics-translation-container, .lyrics-line.active .lyrics-romanization-container  {
     opacity: 0.8;
     transform: none;
+    color: #ffffffa4;
+}
+
+.lyrics-line.active .lyrics-romanization-container{
     color: #ffffff7a;
 }
 
 /* Reset highlighting/animation for translated text internals */
 .lyrics-translation-container .lyrics-syllable,
 .lyrics-translation-container .lyrics-word,
-.lyrics-translation-container .char {
+.lyrics-translation-container .char,
+.lyrics-romanization-container .lyrics-syllable,
+.lyrics-romanization-container .lyrics-word,
+.lyrics-romanization-container .char {
     background: none !important;
     -webkit-background-clip: unset !important;
     background-clip: unset !important;

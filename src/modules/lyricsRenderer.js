@@ -817,24 +817,35 @@ class LyricsPlusRenderer {
    * @private
    */
   _applyDisplayModeClasses(container, displayMode) {
-    container.classList.remove('lyrics-translated', 'lyrics-romanized');
+    container.classList.remove('lyrics-translated', 'lyrics-romanized', 'lyrics-both-modes');
     if (displayMode === 'translate') container.classList.add('lyrics-translated');
     else if (displayMode === 'romanize') container.classList.add('lyrics-romanized');
+    else if (displayMode === 'both') container.classList.add('lyrics-both-modes');
   }
 
   /**
    * Renders the translation/romanization container for a given lyric line.
    * @param {HTMLElement} lineElement - The DOM element for the lyric line.
    * @param {object} lineData - The data object for the lyric line (from lyrics.data).
-   * @param {string} displayMode - The current display mode ('none', 'translate', 'romanize').
+   * @param {string} displayMode - The current display mode ('none', 'translate', 'romanize', 'both').
    * @private
    */
   _renderTranslationContainer(lineElement, lineData, displayMode) {
-    if (lineData.translatedText && (displayMode === 'translate' || displayMode === 'romanize') && lineData.text.trim() !== lineData.translatedText.trim()) {
-      const translationContainer = document.createElement('div');
-      translationContainer.classList.add('lyrics-translation-container');
-      translationContainer.textContent = lineData.translatedText;
-      lineElement.appendChild(translationContainer);
+    if (displayMode === 'romanize' || displayMode === 'both') {
+      if (lineData.romanizedText && lineData.text.trim() !== lineData.romanizedText.trim()) {
+        const romanizationContainer = document.createElement('div');
+        romanizationContainer.classList.add('lyrics-romanization-container');
+        romanizationContainer.textContent = lineData.romanizedText;
+        lineElement.appendChild(romanizationContainer);
+      }
+    }
+    if (displayMode === 'translate' || displayMode === 'both') {
+      if (lineData.translatedText && lineData.text.trim() !== lineData.translatedText.trim()) {
+        const translationContainer = document.createElement('div');
+        translationContainer.classList.add('lyrics-translation-container');
+        translationContainer.textContent = lineData.translatedText;
+        lineElement.appendChild(translationContainer);
+      }
     }
   }
 
@@ -1633,35 +1644,83 @@ class LyricsPlusRenderer {
 
     if (typeof this.currentDisplayMode === 'undefined') return;
 
-    const options = [];
-    if (this.currentDisplayMode !== 'translate') options.push({ text: t('showTranslation'), mode: 'translate' });
-    if (this.currentDisplayMode !== 'romanize') options.push({ text: t('showPronunciation'), mode: 'romanize' });
+    // Determine which options to show based on currentDisplayMode
+    const showTranslationOption = (this.currentDisplayMode === 'none' || this.currentDisplayMode === 'romanize');
+    const showRomanizationOption = (this.currentDisplayMode === 'none' || this.currentDisplayMode === 'translate');
+    const hideTranslationOption = (this.currentDisplayMode === 'translate' || this.currentDisplayMode === 'both');
+    const hideRomanizationOption = (this.currentDisplayMode === 'romanize' || this.currentDisplayMode === 'both');
 
-    options.forEach(opt => {
+    if (showTranslationOption) {
       const optionDiv = document.createElement('div');
       optionDiv.className = 'dropdown-option';
-      optionDiv.textContent = opt.text;
+      optionDiv.textContent = t('showTranslation');
       optionDiv.addEventListener('click', () => {
         this.dropdownMenu.classList.add('hidden');
+        let newMode = 'translate';
+        if (this.currentDisplayMode === 'romanize') {
+          newMode = 'both';
+        }
         if (this.setCurrentDisplayModeAndRefetchFn && this.lastKnownSongInfo) {
-          this.setCurrentDisplayModeAndRefetchFn(opt.mode, this.lastKnownSongInfo);
+          this.setCurrentDisplayModeAndRefetchFn(newMode, this.lastKnownSongInfo);
         }
       });
       this.dropdownMenu.appendChild(optionDiv);
-    });
+    }
 
-    if (this.currentDisplayMode !== 'none') {
-      if (options.length > 0) this.dropdownMenu.appendChild(document.createElement('div')).className = 'dropdown-separator';
-      const hideOption = document.createElement('div');
-      hideOption.className = 'dropdown-option';
-      hideOption.textContent = this.currentDisplayMode === 'translate' ? t('hideTranslation') : t('hidePronunciation');
-      hideOption.addEventListener('click', () => {
+    if (showRomanizationOption) {
+      const optionDiv = document.createElement('div');
+      optionDiv.className = 'dropdown-option';
+      optionDiv.textContent = t('showPronunciation');
+      optionDiv.addEventListener('click', () => {
         this.dropdownMenu.classList.add('hidden');
+        let newMode = 'romanize';
+        if (this.currentDisplayMode === 'translate') {
+          newMode = 'both';
+        }
         if (this.setCurrentDisplayModeAndRefetchFn && this.lastKnownSongInfo) {
-          this.setCurrentDisplayModeAndRefetchFn('none', this.lastKnownSongInfo);
+          this.setCurrentDisplayModeAndRefetchFn(newMode, this.lastKnownSongInfo);
         }
       });
-      this.dropdownMenu.appendChild(hideOption);
+      this.dropdownMenu.appendChild(optionDiv);
+    }
+
+    // Add separator if both show and hide options are present
+    if ((showTranslationOption || showRomanizationOption) && (hideTranslationOption || hideRomanizationOption)) {
+      this.dropdownMenu.appendChild(document.createElement('div')).className = 'dropdown-separator';
+    }
+
+    if (hideTranslationOption) {
+      const optionDiv = document.createElement('div');
+      optionDiv.className = 'dropdown-option';
+      optionDiv.textContent = t('hideTranslation');
+      optionDiv.addEventListener('click', () => {
+        this.dropdownMenu.classList.add('hidden');
+        let newMode = 'none';
+        if (this.currentDisplayMode === 'both') {
+          newMode = 'romanize';
+        }
+        if (this.setCurrentDisplayModeAndRefetchFn && this.lastKnownSongInfo) {
+          this.setCurrentDisplayModeAndRefetchFn(newMode, this.lastKnownSongInfo);
+        }
+      });
+      this.dropdownMenu.appendChild(optionDiv);
+    }
+
+    if (hideRomanizationOption) {
+      const optionDiv = document.createElement('div');
+      optionDiv.className = 'dropdown-option';
+      optionDiv.textContent = t('hidePronunciation');
+      optionDiv.addEventListener('click', () => {
+        this.dropdownMenu.classList.add('hidden');
+        let newMode = 'none';
+        if (this.currentDisplayMode === 'both') {
+          newMode = 'translate';
+        }
+        if (this.setCurrentDisplayModeAndRefetchFn && this.lastKnownSongInfo) {
+          this.setCurrentDisplayModeAndRefetchFn(newMode, this.lastKnownSongInfo);
+        }
+      });
+      this.dropdownMenu.appendChild(optionDiv);
     }
   }
 

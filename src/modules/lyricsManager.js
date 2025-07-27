@@ -16,9 +16,14 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     let effectiveMode = currentDisplayMode; // Default to existing persisted mode
 
     if (isNewSong) {
-      if (currentSettings.translationEnabled) {
+      const translationEnabled = currentSettings.translationEnabled;
+      const romanizationEnabled = currentSettings.romanizationEnabled;
+
+      if (translationEnabled && romanizationEnabled) {
+        effectiveMode = 'both';
+      } else if (translationEnabled) {
         effectiveMode = 'translate';
-      } else if (currentSettings.romanizationEnabled) {
+      } else if (romanizationEnabled) {
         effectiveMode = 'romanize';
       } else {
         effectiveMode = 'none';
@@ -31,23 +36,57 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     const htmlLang = document.documentElement.getAttribute('lang');
 
     if (effectiveMode !== 'none') {
-      const translationResponse = await pBrowser.runtime.sendMessage({
-        type: 'TRANSLATE_LYRICS',
-        action: effectiveMode,
-        songInfo: currentSong,
-        targetLang: htmlLang
-      });
+      let translationResponse = null;
+      let romanizationResponse = null;
 
-      if (currentFetchVideoId !== localCurrentFetchVideoId) {
-        console.warn("Song changed during TRANSLATE_LYRICS. Aborting display.", currentSong);
-        return;
+      if (effectiveMode === 'translate' || effectiveMode === 'both') {
+        translationResponse = await pBrowser.runtime.sendMessage({
+          type: 'TRANSLATE_LYRICS',
+          action: 'translate',
+          songInfo: currentSong,
+          targetLang: htmlLang
+        });
+        if (currentFetchVideoId !== localCurrentFetchVideoId) {
+          console.warn("Song changed during TRANSLATE_LYRICS (translate). Aborting display.", currentSong);
+          return;
+        }
       }
 
-      if (translationResponse.success && translationResponse.translatedLyrics) {
+      if (effectiveMode === 'romanize' || effectiveMode === 'both') {
+        romanizationResponse = await pBrowser.runtime.sendMessage({
+          type: 'TRANSLATE_LYRICS',
+          action: 'romanize',
+          songInfo: currentSong,
+          targetLang: htmlLang
+        });
+        if (currentFetchVideoId !== localCurrentFetchVideoId) {
+          console.warn("Song changed during TRANSLATE_LYRICS (romanize). Aborting display.", currentSong);
+          return;
+        }
+      }
+
+      let hasTranslation = translationResponse && translationResponse.success && translationResponse.translatedLyrics;
+      let hasRomanization = romanizationResponse && romanizationResponse.success && romanizationResponse.translatedLyrics;
+
+      if (hasTranslation && hasRomanization) {
         lyricsObjectToDisplay = translationResponse.translatedLyrics;
-        finalDisplayModeForRenderer = effectiveMode;
+        // Merge romanization into the translation lyrics object
+        lyricsObjectToDisplay.data = lyricsObjectToDisplay.data.map((line, index) => {
+          const romanizedLine = romanizationResponse.translatedLyrics.data[index];
+          if (romanizedLine) {
+            return { ...line, romanizedText: romanizedLine.translatedText };
+          }
+          return line;
+        });
+        finalDisplayModeForRenderer = 'both';
+      } else if (hasTranslation) {
+        lyricsObjectToDisplay = translationResponse.translatedLyrics;
+        finalDisplayModeForRenderer = 'translate';
+      } else if (hasRomanization) {
+        lyricsObjectToDisplay = romanizationResponse.translatedLyrics;
+        finalDisplayModeForRenderer = 'romanize';
       } else {
-        console.warn(`${effectiveMode === 'translate' ? 'Translation' : 'Romanization'} failed: ${translationResponse.error}. Falling back to original lyrics.`);
+        console.warn(`Translation/Romanization failed. Falling back to original lyrics.`);
         // Fallback to fetching original lyrics
         const originalLyricsResponse = await pBrowser.runtime.sendMessage({
           type: 'FETCH_LYRICS',
@@ -163,12 +202,16 @@ function convertWordLyricsToLine(lyrics) {
   let element = {};
   // Capture translatedText if present from the first word of the line
   let lineTranslatedText = null; 
+  let lineRomanizedText = null; // New: Capture romanizedText
 
   words.forEach((word, index) => {
       if (currentLineWords.length === 0) {
           lineStartTime = word.startTime;
           if (word.translatedText) { 
               lineTranslatedText = word.translatedText;
+          }
+          if (word.romanizedText) { // New: Capture romanizedText
+              lineRomanizedText = word.romanizedText;
           }
       }
       currentLineWords.push(word.text);
@@ -187,11 +230,15 @@ function convertWordLyricsToLine(lyrics) {
           if (lineTranslatedText) { // Add translatedText to the converted line
               lineEntry.translatedText = lineTranslatedText;
           }
+          if (lineRomanizedText) { // New: Add romanizedText to the converted line
+              lineEntry.romanizedText = lineRomanizedText;
+          }
           lines.push(lineEntry);
           currentLineWords = [];
           lineStartTime = null;
           lineEndTime = null;
           lineTranslatedText = null; // Reset for next line
+          lineRomanizedText = null; // New: Reset for next line
       }
   });
 
