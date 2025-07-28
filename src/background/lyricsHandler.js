@@ -724,7 +724,7 @@ const KPOE_SERVERS = [
 ];
 
 async function fetchKPoeLyrics(songInfo, sourceOrder = '', forceReload = false) {
-    const albumParam = (songInfo.album && songInfo.album !== songInfo.title)
+    const albumParam = (songInfo.album)
         ? `&album=${encodeURIComponent(songInfo.album)}`
         : '';
     const sourceParam = sourceOrder ? `&source=${encodeURIComponent(sourceOrder)}` : '';
@@ -768,7 +768,7 @@ async function fetchCustomKPoeLyrics(songInfo, customUrl, sourceOrder = '', forc
         return null;
     }
 
-    const albumParam = (songInfo.album && songInfo.album !== songInfo.title)
+    const albumParam = (songInfo.album)
         ? `&album=${encodeURIComponent(songInfo.album)}`
         : '';
     const sourceParam = sourceOrder ? `&source=${encodeURIComponent(sourceOrder)}` : '';
@@ -803,7 +803,7 @@ async function fetchCustomKPoeLyrics(songInfo, customUrl, sourceOrder = '', forc
 }
 
 async function fetchLRCLibLyrics(songInfo) {
-    const albumParam = (songInfo.album && songInfo.album !== songInfo.title)
+    const albumParam = (songInfo.album)
         ? `&album_name=${encodeURIComponent(songInfo.album)}`
         : '';
     const url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(songInfo.artist)}&track_name=${encodeURIComponent(songInfo.title)}${albumParam}`;
