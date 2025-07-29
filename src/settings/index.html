@@ -185,6 +185,34 @@
             </div>
 
             <div class="settings-category">
+                <h3 class="category-title">Romanization Service (for non-Latin scripts)</h3>
+                <div class="setting-item">
+                    <div class="form-group">
+                        <label for="romanization-provider">Romanization Provider</label>
+                        <div class="select-wrapper">
+                            <select id="romanization-provider">
+                                <option value="google" selected>Google Translate</option>
+                                <option value="gemini">Gemini AI</option>
+                            </select>
+                            <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
+                        </div>
+                    </div>
+                    <p class="setting-description">Select the service for romanizing lyrics.</p>
+                </div>
+                <div class="setting-item form-group" id="gemini-romanization-model-group" style="display: none;">
+                    <label for="gemini-romanization-model">Gemini AI Romanization Model</label>
+                    <div class="select-wrapper">
+                        <select id="gemini-romanization-model">
+                            <option value="gemini-1.5-pro-latest" selected>Gemini 1.5 Pro</option>
+                            <option value="gemini-1.5-flash-latest">Gemini 1.5 Flash</option>
+                        </select>
+                        <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
+                    </div>
+                    <p class="setting-description">Choose the Gemini AI model for romanization.</p>
+                </div>
+            </div>
+
+            <div class="settings-category">
                 <h3 class="category-title">Translation Behavior</h3>
                 <div class="setting-item">
                     <label class="switch">
@@ -210,18 +238,33 @@
                     <label class="switch">
                         <input type="checkbox" id="override-gemini-prompt">
                         <span class="slider"></span>
-                        <span class="switch-label">Override Gemini AI Prompt</span>
+                        <span class="switch-label">Override Gemini AI Translation Prompt</span>
                     </label>
                     <p class="setting-description">Use a custom prompt for Gemini AI translations. Use
                         <code>{targetLang}</code> and <code>{lyrics}</code> placeholders.
                     </p>
                 </div>
                 <div class="setting-item form-group" id="custom-gemini-prompt-group" style="display: none;">
-                    <label for="custom-gemini-prompt">Custom Gemini AI Prompt</label>
+                    <label for="custom-gemini-prompt">Custom Gemini AI Translation Prompt</label>
                     <textarea id="custom-gemini-prompt"
                         placeholder="You are an expert AI Lyrical Translator..."></textarea>
-                    <p class="helper-text">Customize the prompt sent to Gemini AI. Use <code>{targetLang}</code> for the
+                    <p class="helper-text">Customize the prompt sent to Gemini AI for translations. Use <code>{targetLang}</code> for the
                         target language</p>
+                </div>
+                <div class="setting-item" id="override-gemini-romanize-prompt-group" style="display: none;">
+                    <label class="switch">
+                        <input type="checkbox" id="override-gemini-romanize-prompt">
+                        <span class="slider"></span>
+                        <span class="switch-label">Override Gemini AI Romanization Prompt</span>
+                    </label>
+                    <p class="setting-description">Use a custom prompt for Gemini AI romanization.
+                    </p>
+                </div>
+                <div class="setting-item form-group" id="custom-gemini-romanize-prompt-group" style="display: none;">
+                    <label for="custom-gemini-romanize-prompt">Custom Gemini AI Romanization Prompt</label>
+                    <textarea id="custom-gemini-romanize-prompt"
+                        placeholder="You are an expert AI Romanizer..."></textarea>
+                    <p class="helper-text">Customize the prompt sent to Gemini AI for romanization.</p>
                 </div>
             </div>
 

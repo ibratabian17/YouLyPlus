@@ -42,6 +42,7 @@ function setupAutoSaveListeners() {
         { id: 'gemini-model', key: 'geminiModel', type: 'value' },
         { id: 'override-translate-target', key: 'overrideTranslateTarget', type: 'checkbox' },
         { id: 'override-gemini-prompt', key: 'overrideGeminiPrompt', type: 'checkbox' },
+        { id: 'override-gemini-romanize-prompt', key: 'overrideGeminiRomanizePrompt', type: 'checkbox' }, // New auto-save for romanize prompt override
         // Cache
         { id: 'cache-strategy', key: 'cacheStrategy', type: 'value' },
     ];
@@ -98,10 +99,13 @@ function updateUI(settings) {
     document.getElementById('custom-translate-target').value = currentSettings.customTranslateTarget || '';
     document.getElementById('override-gemini-prompt').checked = currentSettings.overrideGeminiPrompt;
     document.getElementById('custom-gemini-prompt').value = currentSettings.customGeminiPrompt || '';
+    document.getElementById('override-gemini-romanize-prompt').checked = currentSettings.overrideGeminiRomanizePrompt; // Update UI for new setting
+    document.getElementById('custom-gemini-romanize-prompt').value = currentSettings.customGeminiRomanizePrompt || ''; // Update UI for new setting
     toggleGeminiSettingsVisibility();
     toggleKpoeSourcesVisibility();
     toggleTranslateTargetVisibility();
     toggleGeminiPromptVisibility();
+    toggleGeminiRomanizePromptVisibility(); // New visibility toggle for romanize prompt
     toggleCustomKpoeUrlVisibility(); // New visibility toggle
 
     // Populate draggable KPoe sources
@@ -166,7 +170,8 @@ document.getElementById('save-translation').addEventListener('click', () => {
         // Switches and dropdowns are auto-saved. This saves text inputs.
         geminiApiKey: document.getElementById('gemini-api-key').value,
         customTranslateTarget: document.getElementById('custom-translate-target').value,
-        customGeminiPrompt: document.getElementById('custom-gemini-prompt').value
+        customGeminiPrompt: document.getElementById('custom-gemini-prompt').value,
+        customGeminiRomanizePrompt: document.getElementById('custom-gemini-romanize-prompt').value // Save new romanization prompt
     };
     updateSettings(newTranslationSettings);
     saveSettings();
@@ -435,25 +440,35 @@ document.getElementById('override-gemini-prompt').addEventListener('change', (e)
     toggleGeminiPromptVisibility();
 });
 
+// Event listener for override-gemini-romanize-prompt change
+document.getElementById('override-gemini-romanize-prompt').addEventListener('change', (e) => {
+    currentSettings.overrideGeminiRomanizePrompt = e.target.checked;
+    toggleGeminiRomanizePromptVisibility();
+});
+
 // Function to toggle Gemini settings visibility (API key, model, prompt override)
 function toggleGeminiSettingsVisibility() {
     const translationProvider = document.getElementById('translation-provider').value;
     const geminiApiKeyGroup = document.getElementById('gemini-api-key-group');
-    const geminiModelGroup = document.getElementById('gemini-model-group'); // Get the new model group
+    const geminiModelGroup = document.getElementById('gemini-model-group');
     const overrideGeminiPromptGroup = document.getElementById('override-gemini-prompt-group');
+    const overrideGeminiRomanizePromptGroup = document.getElementById('override-gemini-romanize-prompt-group'); // Get the new romanize prompt group
 
-    if (geminiApiKeyGroup && geminiModelGroup && overrideGeminiPromptGroup) {
+    if (geminiApiKeyGroup && geminiModelGroup && overrideGeminiPromptGroup && overrideGeminiRomanizePromptGroup) {
         if (translationProvider === 'gemini') {
             geminiApiKeyGroup.style.display = 'block';
             geminiModelGroup.style.display = 'block'; // Show the model group
             overrideGeminiPromptGroup.style.display = 'block';
+            overrideGeminiRomanizePromptGroup.style.display = 'block'; // Show the romanize prompt group
         } else {
             geminiApiKeyGroup.style.display = 'none';
             geminiModelGroup.style.display = 'none'; // Hide the model group
             overrideGeminiPromptGroup.style.display = 'none';
+            overrideGeminiRomanizePromptGroup.style.display = 'none'; // Hide the romanize prompt group
         }
     }
     toggleGeminiPromptVisibility(); // Re-evaluate prompt visibility based on new provider
+    toggleGeminiRomanizePromptVisibility(); // Re-evaluate romanize prompt visibility
 }
 
 // Function to toggle custom translate target visibility
@@ -469,7 +484,7 @@ function toggleTranslateTargetVisibility() {
     }
 }
 
-// Function to toggle custom Gemini prompt visibility
+// Function to toggle custom Gemini translation prompt visibility
 function toggleGeminiPromptVisibility() {
     const translationProvider = document.getElementById('translation-provider').value;
     const overrideGeminiPrompt = document.getElementById('override-gemini-prompt').checked;
@@ -479,6 +494,20 @@ function toggleGeminiPromptVisibility() {
             customGeminiPromptGroup.style.display = 'block';
         } else {
             customGeminiPromptGroup.style.display = 'none';
+        }
+    }
+}
+
+// Function to toggle custom Gemini romanization prompt visibility
+function toggleGeminiRomanizePromptVisibility() {
+    const translationProvider = document.getElementById('translation-provider').value;
+    const overrideGeminiRomanizePrompt = document.getElementById('override-gemini-romanize-prompt').checked;
+    const customGeminiRomanizePromptGroup = document.getElementById('custom-gemini-romanize-prompt-group');
+    if (customGeminiRomanizePromptGroup) {
+        if (translationProvider === 'gemini' && overrideGeminiRomanizePrompt) {
+            customGeminiRomanizePromptGroup.style.display = 'block';
+        } else {
+            customGeminiRomanizePromptGroup.style.display = 'none';
         }
     }
 }

@@ -24,6 +24,10 @@ let currentSettings = {
     customTranslateTarget: '', // New setting for custom translation target
     overrideGeminiPrompt: false, // New setting for overriding Gemini prompt
     customGeminiPrompt: '', // New setting for custom Gemini prompt
+    overrideGeminiRomanizePrompt: false, // New setting for overriding Gemini romanization prompt
+    customGeminiRomanizePrompt: '', // New setting for custom Gemini romanization prompt
+    romanizationProvider: 'google',
+    geminiRomanizationModel: 'gemini-1.5-pro-latest',
     useSongPaletteFullscreen: false,
     useSongPaletteAllModes: false,
     overridePaletteColor: '',

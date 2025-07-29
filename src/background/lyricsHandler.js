@@ -369,7 +369,9 @@ async function handleTranslateLyrics(songInfo, action, targetLang, forceReload =
         'overrideTranslateTarget': false,
         'customTranslateTarget': '',
         'overrideGeminiPrompt': false,
-        'customGeminiPrompt': ''
+        'customGeminiPrompt': '',
+        'overrideGeminiRomanizePrompt': false, // New setting for romanization prompt override
+        'customGeminiRomanizePrompt': '' // New setting for custom romanization prompt
     });
     const translationProvider = settings.translationProvider;
     const geminiApiKey = settings.geminiApiKey;
@@ -378,10 +380,12 @@ async function handleTranslateLyrics(songInfo, action, targetLang, forceReload =
     const customTranslateTarget = settings.customTranslateTarget;
     const overrideGeminiPrompt = settings.overrideGeminiPrompt;
     const customGeminiPrompt = settings.customGeminiPrompt;
+    const overrideGeminiRomanizePrompt = settings.overrideGeminiRomanizePrompt; // Get new romanization prompt override
+    const customGeminiRomanizePrompt = settings.customGeminiRomanizePrompt; // Get new custom romanization prompt
 
     let actualTargetLang = overrideTranslateTarget && customTranslateTarget ? customTranslateTarget : targetLang;
 
-    let translatedTexts = [];
+    let translatedData = [];
 
     if (action === 'translate') {
         if (translationProvider === 'gemini') {
@@ -389,41 +393,122 @@ async function handleTranslateLyrics(songInfo, action, targetLang, forceReload =
                 throw new Error('Gemini AI API Key is not provided in settings.');
             }
             const textsToTranslate = originalLyrics.data.map(line => line.text);
-            translatedTexts = await fetchGeminiTranslate(textsToTranslate, actualTargetLang, geminiApiKey, geminiModel, overrideGeminiPrompt, customGeminiPrompt);
+            const translatedTexts = await fetchGeminiTranslate(textsToTranslate, actualTargetLang, geminiApiKey, geminiModel, overrideGeminiPrompt, customGeminiPrompt);
+            translatedData = originalLyrics.data.map((line, index) => ({
+                ...line,
+                translatedText: translatedTexts[index] || line.text
+            }));
         } else {
             const translationPromises = originalLyrics.data.map(line => fetchGoogleTranslate(line.text, actualTargetLang));
-            translatedTexts = await Promise.all(translationPromises);
+            const translatedTexts = await Promise.all(translationPromises);
+            translatedData = originalLyrics.data.map((line, index) => ({
+                ...line,
+                translatedText: translatedTexts[index] || line.text
+            }));
         }
     } else if (action === 'romanize') {
-        // Romanization is typically only available via Google Translate's unofficial API
-        // Gemini does not have a direct romanization endpoint.
-        // So, we'll always use Google for romanization for now.
-        const romanizationPromises = originalLyrics.data.map(line => fetchGoogleRomanize(line.text));
-        translatedTexts = await Promise.all(romanizationPromises);
-    } else {
-        translatedTexts = originalLyrics.data.map(line => line.text); // Return original text if no action
-    }
+        if (settings.romanizationProvider === 'gemini') {
+            if (!geminiApiKey) {
+                throw new Error('Gemini AI API Key is not provided in settings.');
+            }
+            if (originalLyrics.type === "Word") {
+                // Prepare structured input for Gemini romanization (Word type)
+                const structuredLyricsInput = originalLyrics.data.map((line, index) => {
+                    const lineObject = { original_line_index: index };
+                    if (line.text) {
+                        lineObject.text = line.text;
+                    }
+                    if (line.syllabus && line.syllabus.length > 0) {
+                        lineObject.syllable = line.syllabus.map(s => s.text);
+                    }
+                    return lineObject;
+                });
 
-    // Verify translatedTexts array length matches originalLyrics.data length
-    if (translatedTexts.length !== originalLyrics.data.length) {
-        console.error(`Translation failed: Mismatched array lengths. Original: ${originalLyrics.data.length}, Translated: ${translatedTexts.length}`);
-        throw new Error('Translation failed: The number of translated lines does not match the original.');
-    }
+                const romanizedStructuredLyrics = await fetchGeminiRomanize(structuredLyricsInput, geminiApiKey, geminiModel, overrideGeminiRomanizePrompt, customGeminiRomanizePrompt);
 
-    const translatedData = originalLyrics.data.map((line, index) => {
-        if (action === 'translate') {
-            return {
-                ...line,
-                translatedText: translatedTexts[index] || line.text // Use original text if translation fails for a line
-            };
-        } else if (action === 'romanize') {
-            return {
-                ...line,
-                romanizedText: translatedTexts[index] || line.text // Use original text if romanization fails for a line
-            };
+                // Map romanized results back to original structure
+                translatedData = originalLyrics.data.map((originalLine, index) => {
+                    const romanizedLine = romanizedStructuredLyrics.find(rl => rl.original_line_index === index);
+                    if (!romanizedLine) {
+                        console.warn(`No romanized data found for original line index ${index}. Returning original.`);
+                        return originalLine;
+                    }
+
+                    if (originalLine.syllabus && originalLine.syllabus.length > 0 && romanizedLine.syllable) {
+                        const newSyllabus = originalLine.syllabus.map((s, sylIndex) => ({
+                            ...s,
+                            romanizedText: romanizedLine.syllable[sylIndex] || s.text
+                        }));
+                        return {
+                            ...originalLine,
+                            syllabus: newSyllabus,
+                            romanizedText: romanizedLine.text || originalLine.text // Also update line-level romanized text if provided
+                        };
+                    } else {
+                        // Fallback for lines without syllabus or if Gemini only returned text
+                        return {
+                            ...originalLine,
+                            romanizedText: romanizedLine.text || originalLine.text
+                        };
+                    }
+                });
+            } else {
+                // Romanize line by line using Gemini (for Line type lyrics)
+                const structuredLyricsInput = originalLyrics.data.map((line, index) => ({
+                    text: line.text,
+                    original_line_index: index
+                }));
+                const romanizedStructuredLyrics = await fetchGeminiRomanize(structuredLyricsInput, geminiApiKey, geminiModel, overrideGeminiRomanizePrompt, customGeminiRomanizePrompt);
+
+                translatedData = originalLyrics.data.map((originalLine, index) => {
+                    const romanizedLine = romanizedStructuredLyrics.find(rl => rl.original_line_index === index);
+                    if (!romanizedLine) {
+                        console.warn(`No romanized data found for original line index ${index}. Returning original.`);
+                        return originalLine;
+                    }
+                    return {
+                        ...originalLine,
+                        romanizedText: romanizedLine.text || originalLine.text
+                    };
+                });
+            }
+        } else {
+            // Google Translate Romanization (existing logic)
+            if (originalLyrics.type === "Word") {
+                // Romanize syllable by syllable
+                translatedData = await Promise.all(originalLyrics.data.map(async (line) => {
+                    if (line.syllabus && line.syllabus.length > 0) {
+                        const syllableTexts = line.syllabus.map(s => s.text);
+                        const romanizedSyllableTexts = await fetchGoogleRomanize(syllableTexts);
+                        const newSyllabus = line.syllabus.map((s, index) => ({
+                            ...s,
+                            romanizedText: romanizedSyllableTexts[index] + " " || s.text
+                        }));
+                        return {
+                            ...line,
+                            syllabus: newSyllabus
+                        };
+                    }
+                    // Fallback for lines without syllabus (shouldn't happen for Word type, but for safety)
+                    const romanizedLineText = (await fetchGoogleRomanize([line.text]))[0];
+                    return {
+                        ...line,
+                        romanizedText: romanizedLineText || line.text
+                    };
+                }));
+            } else {
+                // Romanize line by line (for Line type lyrics)
+                const romanizationPromises = originalLyrics.data.map(line => fetchGoogleRomanize([line.text]));
+                const romanizedLineTexts = (await Promise.all(romanizationPromises)).flat(); // Flatten the array of arrays
+                translatedData = originalLyrics.data.map((line, index) => ({
+                    ...line,
+                    romanizedText: romanizedLineTexts[index] || line.text
+                }));
+            }
         }
-        return line; // Fallback, though should be covered by actions
-    });
+    } else {
+        translatedData = originalLyrics.data.map(line => line); // Return original data if no action
+    }
     const finalTranslatedLyrics = {
         ...originalLyrics,
         data: translatedData,
@@ -575,6 +660,38 @@ The "detected_source_languages_per_line" array should be parallel to "translated
 Now, translate the provided lyrics according to all rules and output instructions.
 `;
 
+const getStandardRomanizationInputOutputInstructionBlock = (lyricsDataArray) => `
+---
+You will receive the lyrics as a JSON array of objects. Each object represents a line of lyrics and may contain the full line text and/or an array of its syllables.
+---
+LYRICS TO ROMANIZE (each element in the array is one line of lyrics):
+\`\`\`json
+${JSON.stringify(lyricsDataArray)}\`\`\`
+---
+MANDATORY OUTPUT INSTRUCTIONS (MUST BE FOLLOWED PRECISELY):
+Produce ONLY a single, valid JSON string as your output. NO other text, explanation, or markdown formatting (like \`\`\`json) should precede or follow the JSON object.
+The JSON object MUST have the following structure:
+{
+  "romanized_lyrics": [
+    {
+      "text": "romanized_full_line_text_if_original_had_it",
+      "syllable": ["romanized_syl1", "romanized_syl2", ...],
+      "original_line_index": 0 // This field is for internal tracking and must be preserved from input
+    },
+    // ... more romanized lyric objects ...
+  ],
+  "detected_source_languages_per_line": ["array_indicating_identified_source_language(s)_for_each_original_line_e.g., 'ko', 'ja', 'zh', or an array like ['ko', 'ja'] if multiple distinct ones were clear"],
+  "romanization_target_script": "Latin"
+}
+The "romanized_lyrics" array MUST contain the romanized version of each corresponding input line, maintaining the original order and structure (i.e., if the input had 'text' and 'syllable', the output should have 'text' and 'syllable' with romanized content).
+The "original_line_index" field MUST be preserved from the input to ensure correct re-mapping.
+The "detected_source_languages_per_line" array should be parallel to "romanized_lyrics", indicating the language(s) you identified in each original line.
+The "romanization_target_script" should always be "Latin".
+The "syllable" must be same like the original ones, if you move the another syllable to make it one word, it will fail to parse
+---
+Now, romanize the provided lyrics according to all rules and output instructions.
+`;
+
 
 async function fetchGeminiTranslate(texts, targetLang, apiKey, model, overridePrompt, customPrompt) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
@@ -684,6 +801,123 @@ CRUCIAL TRANSLATION RULES (MUST BE FOLLOWED FOR EACH LINE OF LYRICS):
     throw new Error('Gemini AI translation failed: No valid content or parts in response candidates.');
 }
 
+async function fetchGeminiRomanize(lyricsDataArray, apiKey, model, overridePrompt, customPrompt) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    let romanizationRulesPart;
+
+    if (overridePrompt && customPrompt) {
+        romanizationRulesPart = customPrompt;
+    } else {
+        romanizationRulesPart = `
+You are an expert AI Romanizer and linguist, specializing in accurately converting non-Latin script song lyrics into Latin script (romanization) while preserving pronunciation, flow, and original intent.
+
+CRUCIAL ROMANIZATION RULES (MUST BE FOLLOWED FOR EACH LINE/SYLLABLE OF LYRICS):
+
+1.  **LANGUAGE IDENTIFICATION:** For each line of lyrics, identify the language(s) present. This is vital for applying the correct romanization rules.
+2.  **ACCURATE & STANDARD ROMANIZATION:**
+    *   Convert ALL non-Latin script words, phrases, or segments into their most accurate, standard, and commonly accepted Latin script romanization.
+    *   If the input object has a "syllable" array, you MUST romanize each syllable individually and return it in the "syllable" array of the output.
+    *   If the input object only has a "text" field, romanize the entire text content of that field.
+    *   Apply the most appropriate standard romanization system based on the identified language (e.g., Revised Romanization for Korean, Hepburn for Japanese, Hanyu Pinyin for Mandarin Chinese).
+3.  **STRICT PRESERVATION OF LATIN SCRIPT:**
+    *   If an entire line, word, or syllable is ALREADY in Latin script (e.g., English, Spanish, etc.), it MUST be copied EXACTLY AS IS into the output.
+    *   DO NOT romanize, translate, or alter existing Latin script characters in any way. This includes preserving original case, punctuation, and spacing.
+    *   For mixed-language lines, only the non-Latin parts should be romanized. The Latin parts must be left untouched and integrated seamlessly.
+4.  **HANDLE NUMBERS & SYMBOLS:**
+    *   Numbers (0-9) and common symbols (e.g., ?, !, ., ,) should be preserved in their original form and position.
+5.  **CONSISTENCY IS KEY:** Use the same romanization system consistently for the same language throughout the entire set of lyrics.
+`;
+    }
+
+    const finalInputOutputBlock = getStandardRomanizationInputOutputInstructionBlock(lyricsDataArray);
+    const mainPromptText = romanizationRulesPart + finalInputOutputBlock;
+
+    const requestBody = {
+        contents: [{
+            parts: [{
+                text: mainPromptText
+            }]
+        }],
+        generation_config: {
+            response_mime_type: "application/json",
+        }
+    };
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+        let errorDetails = 'Unknown error';
+        try {
+            const errorData = await response.json();
+            if (errorData.error && errorData.error.message) {
+                errorDetails = errorData.error.message;
+                if (errorData.error.details) {
+                    errorDetails += ` | Details: ${JSON.stringify(errorData.error.details)}`;
+                }
+            } else {
+                errorDetails = JSON.stringify(errorData);
+            }
+        } catch (e) {
+            errorDetails = await response.text();
+        }
+        throw new Error(`Gemini AI API error: ${response.status} - ${errorDetails}`);
+    }
+
+    const data = await response.json();
+
+    if (data.promptFeedback && data.promptFeedback.blockReason) {
+        throw new Error(`Gemini AI romanization blocked: ${data.promptFeedback.blockReason}. Details: ${JSON.stringify(data.promptFeedback.safetyRatings)}`);
+    }
+
+    if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+        let rawJsonText = data.candidates[0].content.parts[0].text.trim();
+
+        if (rawJsonText.startsWith('```json') && rawJsonText.endsWith('```')) {
+            rawJsonText = rawJsonText.substring(7, rawJsonText.length - 3).trim();
+        } else if (rawJsonText.startsWith('```') && rawJsonText.endsWith('```')) {
+            rawJsonText = rawJsonText.substring(3, rawJsonText.length - 3).trim();
+        }
+
+        try {
+            const parsedJson = JSON.parse(rawJsonText);
+            if (parsedJson && Array.isArray(parsedJson.romanized_lyrics) &&
+                parsedJson.romanization_target_script === "Latin" &&
+                (Array.isArray(parsedJson.detected_source_languages_per_line) || parsedJson.detected_source_languages_per_line === undefined)
+            ) {
+                // Return the structured romanized lyrics array
+                return parsedJson.romanized_lyrics;
+            } else {
+                console.warn("Gemini AI response JSON structure mismatch or missing vital fields for romanization. Expected structure not fully met. Raw:", rawJsonText, "Parsed:", parsedJson);
+                throw new Error('Gemini AI romanization: Invalid or incomplete JSON structure in response.');
+            }
+        } catch (e) {
+            console.error("Gemini AI response was not valid JSON or failed parsing for romanization:", e, "\nRaw text received:", rawJsonText);
+            // Fallback to returning original texts if parsing fails and it looks like a simple array of strings
+            const lines = rawJsonText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            if (lines.length === lyricsDataArray.length && !rawJsonText.includes("{") && !rawJsonText.includes("[")) {
+                console.warn("Attempting recovery by splitting lines as JSON parsing failed and response doesn't look like JSON.");
+                // Attempt to reconstruct the expected output format from simple lines
+                return lines.map((line, index) => {
+                    const originalLine = lyricsDataArray[index];
+                    const romanizedObj = { original_line_index: originalLine.original_line_index };
+                    if (originalLine.text) romanizedObj.text = line;
+                    if (originalLine.syllable) romanizedObj.syllable = line.split(' '); // Simple split, might not be accurate
+                    return romanizedObj;
+                });
+            }
+            throw new Error(`Gemini AI romanization failed: Response was not valid JSON. ${e.message}`);
+        }
+    }
+    throw new Error('Gemini AI romanization failed: No valid content or parts in response candidates.');
+}
+
 async function fetchGoogleTranslate(text, targetLang) {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
     const response = await fetch(url);
@@ -695,21 +929,47 @@ async function fetchGoogleTranslate(text, targetLang) {
     return data[0].map(item => item[0]).join('');
 }
 
-async function fetchGoogleRomanize(text) {
-    // Google Translate's transliteration (romanization) is available via dt=rm
-    // We set target language to English (or any Latin-based script) to ensure romanization
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&hl=en&dt=rm&q=${encodeURIComponent(text)}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Google Romanize API error: ${response.statusText}`);
+async function fetchGoogleRomanize(texts) {
+    const romanizedTexts = [];
+    for (const text of texts) {
+        // If the text is purely Latin script, return it as is, as per user feedback.
+        if (isPurelyLatinScript(text)) {
+            romanizedTexts.push(text);
+            continue;
+        }
+
+        // Google Translate's transliteration (romanization) is available via dt=rm
+        // We set target language to English (or any Latin-based script) to ensure romanization
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&hl=en&dt=rm&q=${encodeURIComponent(text)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.warn(`Google Romanize API error for text "${text}": ${response.statusText}`);
+            romanizedTexts.push(text); // Return original text if romanization fails for this syllable
+            continue;
+        }
+        const data = await response.json();
+        // Romanized text is typically in data[0][0][3] for the first segment
+        if (data[0] && data[0][0] && data[0][0][3]) {
+            romanizedTexts.push(`${data[0][0][3]}`);
+        } else {
+            romanizedTexts.push(text); // Return original text if romanization fails
+        }
     }
-    const data = await response.json();
-    // Romanized text is typically in data[0][0][3] for the first segment
-    // It's an array of arrays, so we need to map and join
-    if (data[0] && data[0][0] && data[0][0][3]) {
-        return data[0][0][3];
-    }
-    return text; // Return original text if romanization fails
+    return romanizedTexts;
+}
+
+// Helper function to determine if a string is purely Latin script (no non-Latin characters)
+function isPurelyLatinScript(text) {
+    // This regex checks if the entire string consists ONLY of characters from the Latin Unicode script,
+    // numbers, common punctuation, and whitespace.
+    // If any character outside of these categories is found, it means the text is NOT purely Latin script.
+    // \p{Script=Latin} or \p{sc=Latn} matches Latin letters.
+    // \p{N} matches any kind of numeric character.
+    // \p{P} matches any kind of punctuation character.
+    // \p{S} matches any kind of symbol character.
+    // \s matches any whitespace character.
+    // The `u` flag is for Unicode support.
+    return /^[\p{Script=Latin}\p{N}\p{P}\p{S}\s]*$/u.test(text);
 }
 
 // Helper function to check if lyrics object is empty

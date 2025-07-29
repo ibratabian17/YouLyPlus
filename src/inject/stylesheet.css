@@ -981,21 +981,10 @@ ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) #lyric
 }
 
 /* Reset highlighting/animation for translated text internals */
-.lyrics-translation-container .lyrics-syllable,
-.lyrics-translation-container .lyrics-word,
-.lyrics-translation-container .char,
-.lyrics-romanization-container .lyrics-syllable,
-.lyrics-romanization-container .lyrics-word,
-.lyrics-romanization-container .char {
-    background: none !important;
-    -webkit-background-clip: unset !important;
-    background-clip: unset !important;
-    color: inherit !important;
-    animation: none !important;
-    transform: none !important;
-    opacity: inherit !important;
+.lyrics-romanization-container {
+    direction: ltr!important;
+    
 }
-
 /* ===== RESPONSIVE & FULLSCREEN STYLES (Desktop) ===== */
 @media (min-width: 615px) {
 

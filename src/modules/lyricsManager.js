@@ -70,11 +70,24 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
 
       if (hasTranslation && hasRomanization) {
         lyricsObjectToDisplay = translationResponse.translatedLyrics;
-        // Merge romanization into the translation lyrics object
+        // Merge romanization into the translation lyrics object, prioritizing syllable-level if available
         lyricsObjectToDisplay.data = lyricsObjectToDisplay.data.map((line, index) => {
           const romanizedLine = romanizationResponse.translatedLyrics.data[index];
           if (romanizedLine) {
-            return { ...line, romanizedText: romanizedLine.translatedText };
+            // If romanization response has syllabus (syllable-level romanization)
+            if (romanizedLine.syllabus && romanizedLine.syllabus.length > 0) {
+              const newSyllabus = line.syllabus ? line.syllabus.map((syllable, sylIndex) => {
+                const romanizedSyllable = romanizedLine.syllabus[sylIndex];
+                return {
+                  ...syllable,
+                  romanizedText: romanizedSyllable ? romanizedSyllable.romanizedText : syllable.text
+                };
+              }) : [];
+              return { ...line, syllabus: newSyllabus };
+            } else {
+              // Fallback to line-level romanization if no syllabus in romanization response
+              return { ...line, romanizedText: romanizedLine.romanizedText || romanizedLine.translatedText };
+            }
           }
           return line;
         });
@@ -83,12 +96,8 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
         lyricsObjectToDisplay = translationResponse.translatedLyrics;
         finalDisplayModeForRenderer = 'translate';
       } else if (hasRomanization) {
-        // If only romanization is enabled, ensure translatedText is also present for renderer compatibility
+        // If only romanization is enabled, use the romanized lyrics directly
         lyricsObjectToDisplay = romanizationResponse.translatedLyrics;
-        lyricsObjectToDisplay.data = lyricsObjectToDisplay.data.map(line => ({
-            ...line,
-            translatedText: line.romanizedText || line.text // Use romanizedText as translatedText if only romanization
-        }));
         finalDisplayModeForRenderer = 'romanize';
       } else {
         console.warn(`Translation/Romanization failed. Falling back to original lyrics.`);
@@ -207,16 +216,12 @@ function convertWordLyricsToLine(lyrics) {
   let element = {};
   // Capture translatedText if present from the first word of the line
   let lineTranslatedText = null; 
-  let lineRomanizedText = null; // New: Capture romanizedText
 
   words.forEach((word, index) => {
       if (currentLineWords.length === 0) {
           lineStartTime = word.startTime;
           if (word.translatedText) { 
               lineTranslatedText = word.translatedText;
-          }
-          if (word.romanizedText) { // New: Capture romanizedText
-              lineRomanizedText = word.romanizedText;
           }
       }
       currentLineWords.push(word.text);
@@ -235,15 +240,11 @@ function convertWordLyricsToLine(lyrics) {
           if (lineTranslatedText) { // Add translatedText to the converted line
               lineEntry.translatedText = lineTranslatedText;
           }
-          if (lineRomanizedText) { // New: Add romanizedText to the converted line
-              lineEntry.romanizedText = lineRomanizedText;
-          }
           lines.push(lineEntry);
           currentLineWords = [];
           lineStartTime = null;
           lineEndTime = null;
           lineTranslatedText = null; // Reset for next line
-          lineRomanizedText = null; // New: Reset for next line
       }
   });
 

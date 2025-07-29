@@ -102,6 +102,25 @@ class LyricsPlusRenderer {
   }
 
   /**
+   * Helper function to determine if a string is purely Latin script (no non-Latin characters).
+   * This is used to prevent rendering romanization for lines already in Latin script.
+   * @param {string} text - The text to check.
+   * @returns {boolean} - True if the text contains only Latin letters, numbers, punctuation, symbols, or whitespace.
+   */
+  _isPurelyLatinScript(text) {
+    // This regex checks if the entire string consists ONLY of characters from the Latin Unicode script,
+    // numbers, common punctuation, and whitespace.
+    // If any character outside of these categories is found, it means the text is NOT purely Latin script.
+    // \p{Script=Latin} or \p{sc=Latn} matches Latin letters.
+    // \p{N} matches any kind of numeric character.
+    // \p{P} matches any kind of punctuation character.
+    // \p{S} matches any kind of symbol character.
+    // \s matches any whitespace character.
+    // The `u` flag is for Unicode support.
+    return /^[\p{Script=Latin}\p{N}\p{P}\p{S}\s]*$/u.test(text);
+  }
+
+  /**
    * Gets a reference to the lyrics container, creating it if it doesn't exist.
    * This method ensures the container and its scroll listeners are always ready.
    * @returns {HTMLElement | null} - The lyrics container element.
@@ -716,14 +735,42 @@ class LyricsPlusRenderer {
    */
   _renderTranslationContainer(lineElement, lineData, displayMode) {
     if (displayMode === 'romanize' || displayMode === 'both') {
-      if (lineData.romanizedText && lineData.text.trim() !== lineData.romanizedText.trim()) {
-        const romanizationContainer = document.createElement('div');
-        romanizationContainer.classList.add('lyrics-romanization-container');
-        romanizationContainer.textContent = lineData.romanizedText;
-        lineElement.appendChild(romanizationContainer);
+      // Only render romanization if the original text is NOT purely Latin script
+      if (!this._isPurelyLatinScript(lineData.text)) {
+        // Render romanization syllable by syllable if available, otherwise line by line
+        if (lineData.syllabus && lineData.syllabus.length > 0 && lineData.syllabus.some(s => s.romanizedText)) {
+          const romanizationContainer = document.createElement('div');
+          romanizationContainer.classList.add('lyrics-romanization-container');
+          lineData.syllabus.forEach(syllable => {
+            const romanizedText = syllable.romanizedText || syllable.text;
+            if (romanizedText) {
+              const sylSpan = document.createElement('span');
+              sylSpan.className = 'lyrics-syllable'; // Use lyrics-syllable class for highlighting
+              sylSpan.textContent = romanizedText;
+              // Copy timing data for highlighting
+              sylSpan.dataset.startTime = syllable.time;
+              sylSpan.dataset.duration = syllable.duration;
+              sylSpan.dataset.endTime = syllable.time + syllable.duration;
+              sylSpan._startTimeMs = syllable.time;
+              sylSpan._durationMs = syllable.duration;
+              sylSpan._endTimeMs = syllable.time + syllable.duration;
+              romanizationContainer.appendChild(sylSpan);
+            }
+          });
+          if (romanizationContainer.children.length > 0) {
+            lineElement.appendChild(romanizationContainer);
+          }
+        } else if (lineData.romanizedText && lineData.text.trim() !== lineData.romanizedText.trim()) {
+          // Fallback to line-level romanization if no syllable data
+          const romanizationContainer = document.createElement('div');
+          romanizationContainer.classList.add('lyrics-romanization-container');
+          romanizationContainer.textContent = lineData.romanizedText;
+          lineElement.appendChild(romanizationContainer);
+        }
       }
     }
     if (displayMode === 'translate' || displayMode === 'both') {
+      // Translation remains line-by-line
       if (lineData.translatedText && lineData.text.trim() !== lineData.translatedText.trim()) {
         const translationContainer = document.createElement('div');
         translationContainer.classList.add('lyrics-translation-container');
