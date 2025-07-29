@@ -483,243 +483,6 @@ class LyricsPlusRenderer {
   // --- Lyrics Display & Rendering Logic ---
 
   /**
-   * Renders the lyrics, metadata, and control buttons inside the container.
-   * This is the main public method to update the display.
-   * @param {object} lyrics - The lyrics data object.
-   * @param {string} source - The source of the lyrics.
-   * @param {string} type - The type of lyrics ("Line" or "Word").
-   * @param {boolean} lightweight - Flag for lightweight mode.
-   * @param {string[]} songWriters - Array of songwriters.
-   * @param {object} songInfo - Information about the current song.
-   * @param {string} displayMode - The current display mode ('none', 'translate', 'romanize').
-   * @param {object} currentSettings - The current user settings.
-   * @param {Function} fetchAndDisplayLyricsFn - The function to fetch and display lyrics.
-   * @param {Function} setCurrentDisplayModeAndRefetchFn - The function to set display mode and refetch.
-   */
-  displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}, fetchAndDisplayLyricsFn, setCurrentDisplayModeAndRefetchFn) {
-    this.lastKnownSongInfo = songInfo;
-    this.currentDisplayMode = displayMode;
-    this.fetchAndDisplayLyricsFn = fetchAndDisplayLyricsFn;
-    this.setCurrentDisplayModeAndRefetchFn = setCurrentDisplayModeAndRefetchFn;
-
-    const container = this._getContainer();
-    if (!container) return;
-
-    container.classList.remove('lyrics-plus-message'); // Remove the class when actual lyrics are displayed
-
-    // Apply visual settings
-    container.classList.toggle('use-song-palette-fullscreen', !!currentSettings.useSongPaletteFullscreen);
-    container.classList.toggle('use-song-palette-all-modes', !!currentSettings.useSongPaletteAllModes);
-
-    if (currentSettings.overridePaletteColor) {
-      container.classList.add('override-palette-color');
-      container.style.setProperty('--lyplus-override-pallete', currentSettings.overridePaletteColor);
-      container.style.setProperty('--lyplus-override-pallete-white', `${currentSettings.overridePaletteColor}85`);
-      container.classList.remove('use-song-palette-fullscreen', 'use-song-palette-all-modes');
-    } else {
-      container.classList.remove('override-palette-color');
-      if (currentSettings.useSongPaletteFullscreen || currentSettings.useSongPaletteAllModes) {
-        if (typeof LYPLUS_getSongPalette === 'function') {
-          const songPalette = LYPLUS_getSongPalette();
-          if (songPalette) {
-            const { r, g, b } = songPalette;
-            container.style.setProperty('--lyplus-song-pallete', `rgb(${r}, ${g}, ${b})`);
-            const alpha = 133 / 255;
-            const r_blend = Math.round(alpha * 255 + (1 - alpha) * r);
-            const g_blend = Math.round(alpha * 255 + (1 - alpha) * b);
-            const b_blend = Math.round(alpha * 255 + (1 - alpha) * b);
-            container.style.setProperty('--lyplus-song-white-pallete', `rgb(${r_blend}, ${g_blend}, ${b_blend})`);
-          }
-        }
-      }
-    }
-
-    container.classList.toggle('fullscreen', document.body.hasAttribute('player-fullscreened_'));
-    const isWordByWordMode = type === "Word" && currentSettings.wordByWord;
-    container.classList.toggle('word-by-word-mode', isWordByWordMode);
-    container.classList.toggle('line-by-line-mode', !isWordByWordMode);
-
-    container.classList.toggle('hide-offscreen', !!currentSettings.hideOffscreen);
-    container.classList.toggle('compability-wipe', !!currentSettings.compabilityWipe);
-
-    container.innerHTML = ''; // Clear existing content
-
-    // Call the new method to apply display mode classes
-    this._applyDisplayModeClasses(container, displayMode);
-
-    // Determine text direction and dual-side layout
-    let hasRTL = false, hasLTR = false;
-    if (lyrics && lyrics.data && lyrics.data.length > 0) {
-      for (const line of lyrics.data) {
-        if (this._isRTL(line.text)) hasRTL = true;
-        else hasLTR = true;
-        if (hasRTL && hasLTR) break;
-      }
-    }
-    container.classList.remove('mixed-direction-lyrics', 'dual-side-lyrics');
-    if (hasRTL && hasLTR) container.classList.add('mixed-direction-lyrics');
-
-    const singerClassMap = {};
-    let isDualSide = false;
-    if (lyrics && lyrics.data && lyrics.data.length > 0) {
-      const allSingers = [...new Set(lyrics.data.map(line => line.element?.singer).filter(Boolean))];
-      const leftCandidates = allSingers.filter(s => {
-        const num = parseInt(s.substring(1));
-        return s.startsWith('v') && !isNaN(num) && num !== 0 && num % 2 !== 0;
-      }).sort((a, b) => parseInt(a.substring(1)) - parseInt(b.substring(1)));
-      const rightCandidates = allSingers.filter(s => {
-        const num = parseInt(s.substring(1));
-        return s.startsWith('v') && !isNaN(num) && num % 2 === 0;
-      }).sort((a, b) => parseInt(a.substring(1)) - parseInt(b.substring(1)));
-
-      if (leftCandidates.length > 0 || rightCandidates.length > 0) {
-        leftCandidates.forEach(s => singerClassMap[s] = 'singer-left');
-        rightCandidates.forEach(s => singerClassMap[s] = 'singer-right');
-        isDualSide = leftCandidates.length > 0 && rightCandidates.length > 0;
-      }
-    }
-    if (isDualSide) container.classList.add('dual-side-lyrics');
-
-    const elementPool = { lines: [], syllables: [], chars: [] };
-
-    const createGapLine = (gapStart, gapEnd, classesToInherit = null) => {
-      const gapDuration = gapEnd - gapStart;
-      const gapLine = elementPool.lines.pop() || document.createElement('div');
-      gapLine.className = 'lyrics-line lyrics-gap';
-      gapLine.dataset.startTime = gapStart;
-      gapLine.dataset.endTime = gapEnd;
-      if (!gapLine.hasClickListener) {
-        gapLine.addEventListener('click', this._onLyricClick.bind(this));
-        gapLine.hasClickListener = true;
-      }
-      if (classesToInherit) {
-        if (classesToInherit.includes('rtl-text')) gapLine.classList.add('rtl-text');
-        if (classesToInherit.includes('singer-left')) gapLine.classList.add('singer-left');
-        if (classesToInherit.includes('singer-right')) gapLine.classList.add('singer-right');
-      }
-      const existingMainContainer = gapLine.querySelector('.main-vocal-container');
-      if (existingMainContainer) existingMainContainer.remove();
-      const mainContainer = document.createElement('div');
-      mainContainer.className = 'main-vocal-container';
-      const lyricsWord = document.createElement('div');
-      lyricsWord.className = 'lyrics-word';
-      for (let i = 0; i < 3; i++) {
-        const syllableSpan = elementPool.syllables.pop() || document.createElement('span');
-        syllableSpan.className = 'lyrics-syllable';
-        const syllableStart = (gapStart + (i * gapDuration / 3)) * 1000;
-        const syllableDuration = ((gapDuration / 3) / 0.9) * 1000;
-        syllableSpan.dataset.startTime = syllableStart;
-        syllableSpan.dataset.duration = syllableDuration;
-        syllableSpan.dataset.endTime = syllableStart + syllableDuration;
-        syllableSpan.textContent = "•";
-        if (!syllableSpan.hasClickListener) {
-          syllableSpan.addEventListener('click', this._onLyricClick.bind(this));
-          syllableSpan.hasClickListener = true;
-        }
-        lyricsWord.appendChild(syllableSpan);
-      }
-      mainContainer.appendChild(lyricsWord);
-      gapLine.appendChild(mainContainer);
-      return gapLine;
-    };
-
-    const fragment = document.createDocumentFragment();
-
-    if (isWordByWordMode) {
-      // Word-by-word rendering logic
-      this._renderWordByWordLyrics(lyrics, displayMode, singerClassMap, lightweight, elementPool, fragment);
-    } else {
-      // Line-by-line rendering logic
-      this._renderLineByLineLyrics(lyrics, displayMode, singerClassMap, elementPool, fragment);
-    }
-
-    container.appendChild(fragment);
-
-    // Post-rendering logic for gaps and timing adjustments
-    const originalLines = Array.from(container.querySelectorAll('.lyrics-line:not(.lyrics-gap)'));
-    if (originalLines.length > 0) {
-      const firstLine = originalLines[0];
-      const firstStartTime = parseFloat(firstLine.dataset.startTime);
-      if (firstStartTime >= 7.0) {
-        const classesToInherit = [...firstLine.classList].filter(c => ['rtl-text', 'singer-left', 'singer-right'].includes(c));
-        container.insertBefore(createGapLine(0, firstStartTime - 0.85, classesToInherit), firstLine);
-      }
-    }
-    const gapLinesToInsert = [];
-    originalLines.forEach((line, index) => {
-      if (index < originalLines.length - 1) {
-        const nextLine = originalLines[index + 1];
-        if (parseFloat(nextLine.dataset.startTime) - parseFloat(line.dataset.endTime) >= 7.0) {
-          const classesToInherit = [...nextLine.classList].filter(c => ['rtl-text', 'singer-left', 'singer-right'].includes(c));
-          gapLinesToInsert.push({ gapLine: createGapLine(parseFloat(line.dataset.endTime) + 0.4, parseFloat(nextLine.dataset.startTime) - 0.85, classesToInherit), nextLine });
-        }
-      }
-    });
-    gapLinesToInsert.forEach(({ gapLine, nextLine }) => container.insertBefore(gapLine, nextLine));
-    this._retimingActiveTimings(originalLines);
-
-    // Render metadata
-    const metadataContainer = document.createElement('div');
-    metadataContainer.className = 'lyrics-plus-metadata';
-    metadataContainer.dataset.startTime = (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 0.5; // Approximate start time for metadata
-    metadataContainer.dataset.endTime = (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 10; // Approximate end time for metadata
-
-    if (songWriters) {
-      const songWritersDiv = document.createElement('span');
-      songWritersDiv.className = 'lyrics-song-writters';
-      songWritersDiv.innerText = `${t("writtenBy")} ${songWriters.join(', ')}`;
-      metadataContainer.appendChild(songWritersDiv);
-    }
-    const sourceDiv = document.createElement('span');
-    sourceDiv.className = 'lyrics-source-provider';
-    sourceDiv.innerText = `${t("source")} ${source}`;
-    metadataContainer.appendChild(sourceDiv);
-    container.appendChild(metadataContainer);
-
-    // Add an empty div at the end for bottom padding
-    const emptyDiv = document.createElement('div');
-    emptyDiv.className = 'lyrics-plus-empty';
-    container.appendChild(emptyDiv);
-
-    // Create the fixed empty div for avoiding detected by resizerObserver
-    const emptyFixedDiv = document.createElement('div');
-    emptyFixedDiv.className = 'lyrics-plus-empty-fixed';
-    container.appendChild(emptyFixedDiv);
-
-    // Cache and setup for sync
-    this.cachedLyricsLines = Array.from(container.querySelectorAll('.lyrics-line, .lyrics-plus-metadata, .lyrics-plus-empty')).map(line => {
-      if (line) {
-        line._startTimeMs = parseFloat(line.dataset.startTime) * 1000;
-        line._endTimeMs = parseFloat(line.dataset.endTime) * 1000;
-      }
-      return line;
-    }).filter(Boolean);
-
-    this.cachedSyllables = Array.from(container.getElementsByClassName('lyrics-syllable')).map(syllable => {
-      if (syllable) {
-        syllable._startTimeMs = parseFloat(syllable.dataset.startTime);
-        syllable._durationMs = parseFloat(syllable.dataset.duration);
-        syllable._endTimeMs = syllable._startTimeMs + syllable._durationMs;
-        const wordDuration = parseFloat(syllable.dataset.wordDuration);
-        syllable._wordDurationMs = isNaN(wordDuration) ? null : wordDuration;
-      }
-      return syllable;
-    }).filter(Boolean);
-
-    this._ensureElementIds();
-    this.activeLineIds.clear();
-    this.highlightedSyllableIds.clear();
-    this.visibleLineIds.clear();
-    this.currentPrimaryActiveLine = null;
-
-    if (this.cachedLyricsLines.length > 0) this._scrollToActiveLine(this.cachedLyricsLines[0], true);
-
-    this._startLyricsSync(currentSettings);
-    this._createControlButtons();
-    container.classList.toggle('blur-inactive-enabled', !!currentSettings.blurInactive);
-  }
-
-  /**
    * Internal helper to render word-by-word lyrics.
    * @private
    */
@@ -1035,14 +798,33 @@ class LyricsPlusRenderer {
     let isDualSide = false;
     if (lyrics && lyrics.data && lyrics.data.length > 0) {
       const allSingers = [...new Set(lyrics.data.map(line => line.element?.singer).filter(Boolean))];
-      const leftCandidates = allSingers.filter(s => {
-        const num = parseInt(s.substring(1));
-        return s.startsWith('v') && !isNaN(num) && num !== 0 && num % 2 !== 0;
-      }).sort((a, b) => parseInt(a.substring(1)) - parseInt(b.substring(1)));
-      const rightCandidates = allSingers.filter(s => {
-        const num = parseInt(s.substring(1));
-        return s.startsWith('v') && !isNaN(num) && num % 2 === 0;
-      }).sort((a, b) => parseInt(a.substring(1)) - parseInt(b.substring(1)));
+      const leftCandidates = [];
+      const rightCandidates = [];
+
+      allSingers.forEach(s => {
+        if (!s.startsWith('v')) return;
+
+        const numericPart = s.substring(1);
+        if (numericPart.length === 0) return;
+
+        let processedNumericPart = numericPart.replaceAll("0", "");
+        if (processedNumericPart === "" && numericPart.length > 0) {
+          processedNumericPart = "0";
+        }
+
+        const num = parseInt(processedNumericPart, 10);
+        if (isNaN(num)) return;
+
+        if (num % 2 !== 0) {
+          leftCandidates.push(s); // Odd numbers to the left
+        } else {
+          rightCandidates.push(s); // Even numbers to the right
+        }
+      });
+
+      const sortByOriginalNumber = (a, b) => parseInt(a.substring(1)) - parseInt(b.substring(1));
+      leftCandidates.sort(sortByOriginalNumber);
+      rightCandidates.sort(sortByOriginalNumber);
 
       if (leftCandidates.length > 0 || rightCandidates.length > 0) {
         leftCandidates.forEach(s => singerClassMap[s] = 'singer-left');
