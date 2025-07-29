@@ -220,7 +220,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     opacity: 0;
     font-size: 0.6em;
     padding-top: 0.2em;
-    transition: max-height .6s 0s, opacity .6s, padding .6s;
+    transition: max-height .2s 0s, opacity .6s, padding .6s;
 }
 
 .lyrics-line.active .background-vocal-container {

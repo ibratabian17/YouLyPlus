@@ -1225,33 +1225,47 @@ class LyricsPlusRenderer {
 
     // Constants for predictive timing.
     const scrollLookAheadMs = 300;
-    const highlightLookAheadMs = 190; // For adding the '.active' class
+    const highlightLookAheadMs = 190;
 
-    // --- 1. SCROLLING LOGIC (Corrected) ---
-    const visibleLines = this.cachedLyricsLines.filter(line => this.visibleLineIds.has(line.id));
+    // --- 1. SCROLLING LOGIC (Optimized) ---
+    // Cache visible lines array to avoid repeated filtering
+    let visibleLines = this._cachedVisibleLines;
+    if (!visibleLines || this._visibleLinesCacheTime !== this.visibleLineIds.size) {
+      visibleLines = this.cachedLyricsLines.filter(line => this.visibleLineIds.has(line.id));
+      this._cachedVisibleLines = visibleLines;
+      this._visibleLinesCacheTime = this.visibleLineIds.size;
+    }
+
     const predictiveTime = currentTime + scrollLookAheadMs;
     let lineToScroll = null;
 
-    // Find all lines that are active during the predictive time window.
-    const currentlyActiveAndPredictiveLines = this.cachedLyricsLines.filter(line =>
-      line && predictiveTime >= line._startTimeMs && predictiveTime < line._endTimeMs
-    );
+    // Optimized active line finding - break early when possible
+    const currentlyActiveAndPredictiveLines = [];
+    for (let i = 0; i < this.cachedLyricsLines.length; i++) {
+      const line = this.cachedLyricsLines[i];
+      if (line && predictiveTime >= line._startTimeMs && predictiveTime < line._endTimeMs) {
+        currentlyActiveAndPredictiveLines.push(line);
+      }
+    }
 
     if (currentlyActiveAndPredictiveLines.length > 0) {
-      // From the set of active lines, find the one that started the earliest.
-      // This is our stable anchor for the current overlapping block.
-      lineToScroll = currentlyActiveAndPredictiveLines.reduce((earliest, current) => {
-        return current._startTimeMs < earliest._startTimeMs ? current : earliest;
-      }, currentlyActiveAndPredictiveLines[0]);
-    } else {
-      // Fallback for gaps: find the most recent line that has passed.
-      let latestPastLine = null;
-      for (const line of this.cachedLyricsLines) {
-        if (currentTime >= line._startTimeMs - scrollLookAheadMs) {
-          latestPastLine = line;
+      // Find earliest starting line more efficiently
+      lineToScroll = currentlyActiveAndPredictiveLines[0];
+      for (let i = 1; i < currentlyActiveAndPredictiveLines.length; i++) {
+        if (currentlyActiveAndPredictiveLines[i]._startTimeMs < lineToScroll._startTimeMs) {
+          lineToScroll = currentlyActiveAndPredictiveLines[i];
         }
       }
-      lineToScroll = latestPastLine;
+    } else {
+      // Optimized fallback - iterate backwards for most recent
+      const lookAheadTime = currentTime - scrollLookAheadMs;
+      for (let i = this.cachedLyricsLines.length - 1; i >= 0; i--) {
+        const line = this.cachedLyricsLines[i];
+        if (line && lookAheadTime >= line._startTimeMs) {
+          lineToScroll = line;
+          break;
+        }
+      }
     }
 
     // Fallback: If song hasn't started, prepare to scroll to the first line.
@@ -1259,79 +1273,130 @@ class LyricsPlusRenderer {
       lineToScroll = this.cachedLyricsLines[0];
     }
 
+    // --- 2. HIGHLIGHTING LOGIC (Optimized) ---
+    const highlightTime = currentTime - highlightLookAheadMs;
+    const activeLinesForHighlighting = [];
 
-    // --- 2. HIGHLIGHTING LOGIC ---
-    // Determine which lines should have the '.active' class based on a 190ms look-ahead.
-    const activeLinesForHighlighting = visibleLines
-      .filter(line => line && currentTime >= line._startTimeMs - highlightLookAheadMs && currentTime <= line._endTimeMs)
-      .sort((a, b) => b._startTimeMs - a._startTimeMs)
-      .slice(0, 3);
-    const newActiveLineIds = new Set(activeLinesForHighlighting.map(line => line.id));
+    // Only check visible lines and limit to 3 results
+    for (let i = 0; i < visibleLines.length && activeLinesForHighlighting.length < 3; i++) {
+      const line = visibleLines[i];
+      if (line && currentTime >= line._startTimeMs - highlightLookAheadMs && currentTime <= line._endTimeMs) {
+        activeLinesForHighlighting.push(line);
+      }
+    }
 
+    // Sort by start time (descending) - only if we have multiple lines
+    if (activeLinesForHighlighting.length > 1) {
+      activeLinesForHighlighting.sort((a, b) => b._startTimeMs - a._startTimeMs);
+    }
 
-    // --- 3. DOM & STATE UPDATES ---
-    // First, trigger the scroll if the target line has changed. This happens predictively.
+    const newActiveLineIds = new Set();
+    for (let i = 0; i < activeLinesForHighlighting.length; i++) {
+      newActiveLineIds.add(activeLinesForHighlighting[i].id);
+    }
+
+    // --- 3. DOM & STATE UPDATES (Optimized) ---
+    // Trigger scroll if needed
     if (lineToScroll && (lineToScroll !== this.currentPrimaryActiveLine || isForceScroll)) {
       if (!this.isUserControllingScroll || isForceScroll) {
         this._updatePositionClassesAndScroll(lineToScroll, isForceScroll);
-        this.lastPrimaryActiveLine = this.currentPrimaryActiveLine; // Store the previous active line
+        this.lastPrimaryActiveLine = this.currentPrimaryActiveLine;
         this.currentPrimaryActiveLine = lineToScroll;
       }
     }
-    // --- OPTIMIZATION: Update classes only for visible lines ---
-    visibleLines.forEach(line => {
-      if (!line) return;
-      const wasActive = this.activeLineIds.has(line.id);
-      const shouldBeActive = newActiveLineIds.has(line.id);
-      if (shouldBeActive && !wasActive) {
-        line.classList.add('active');
-      } else if (!shouldBeActive && wasActive) {
-        line.classList.remove('active');
-        this._resetSyllables(line);
-      }
-    });
-    this.activeLineIds = newActiveLineIds;
 
+    // --- OPTIMIZATION: Batch DOM updates for visible lines ---
+    const activeLineIdsArray = Array.from(this.activeLineIds);
+    const newActiveLineIdsArray = Array.from(newActiveLineIds);
+
+    // Process lines that need to be deactivated
+    for (let i = 0; i < activeLineIdsArray.length; i++) {
+      const lineId = activeLineIdsArray[i];
+      if (!newActiveLineIds.has(lineId)) {
+        const line = document.getElementById(lineId);
+        if (line) {
+          line.classList.remove('active');
+          this._resetSyllables(line);
+        }
+      }
+    }
+
+    // Process lines that need to be activated
+    for (let i = 0; i < newActiveLineIdsArray.length; i++) {
+      const lineId = newActiveLineIdsArray[i];
+      if (!this.activeLineIds.has(lineId)) {
+        const line = document.getElementById(lineId);
+        if (line) {
+          line.classList.add('active');
+        }
+      }
+    }
+
+    this.activeLineIds = newActiveLineIds;
     this._updateSyllables(currentTime);
 
+    // Batch viewport-hidden class updates if needed
     if (this.lyricsContainer && this.lyricsContainer.classList.contains('hide-offscreen')) {
-      this.cachedLyricsLines.forEach(line => {
-        if (!line) return;
-        const isOutOfView = !this.visibleLineIds.has(line.id);
-        line.classList.toggle('viewport-hidden', isOutOfView);
-      });
+      // Only update if visibility has changed
+      if (this._lastVisibilityUpdateSize !== this.visibleLineIds.size) {
+        for (let i = 0; i < this.cachedLyricsLines.length; i++) {
+          const line = this.cachedLyricsLines[i];
+          if (line) {
+            const isOutOfView = !this.visibleLineIds.has(line.id);
+            line.classList.toggle('viewport-hidden', isOutOfView);
+          }
+        }
+        this._lastVisibilityUpdateSize = this.visibleLineIds.size;
+      }
     }
   }
 
   _updateSyllables(currentTime) {
     if (!this.activeLineIds.size) return;
 
-    let newHighlightedSyllableIds = new Set();
-    this.activeLineIds.forEach(lineId => {
+    const newHighlightedSyllableIds = new Set();
+
+    // Convert Set to Array once for iteration
+    const activeLineIdsArray = Array.from(this.activeLineIds);
+
+    for (let i = 0; i < activeLineIdsArray.length; i++) {
+      const lineId = activeLineIdsArray[i];
       const parentLine = document.getElementById(lineId);
-      if (!parentLine) return;
+      if (!parentLine) continue;
 
-      // It's more efficient to get syllables once per active line
-      const syllables = parentLine.querySelectorAll('.lyrics-syllable');
+      // Cache syllables query result - use cached if available
+      let syllables = parentLine._cachedSyllableElements;
+      if (!syllables) {
+        syllables = parentLine.querySelectorAll('.lyrics-syllable');
+        parentLine._cachedSyllableElements = syllables; // Cache for next time
+      }
 
-      syllables.forEach(syllable => {
-        if (!syllable || typeof syllable._startTimeMs !== 'number' || typeof syllable._endTimeMs !== 'number') return;
+      for (let j = 0; j < syllables.length; j++) {
+        const syllable = syllables[j];
+        if (!syllable || typeof syllable._startTimeMs !== 'number' || typeof syllable._endTimeMs !== 'number') continue;
 
         const startTime = syllable._startTimeMs;
         const endTime = syllable._endTimeMs;
+        const classList = syllable.classList;
+        const hasHighlight = classList.contains('highlight');
+        const hasFinished = classList.contains('finished');
 
         if (currentTime >= startTime && currentTime <= endTime) {
           newHighlightedSyllableIds.add(syllable.id);
-          if (!syllable.classList.contains('highlight')) this._updateSyllableAnimation(syllable, currentTime);
-        } else if (currentTime < startTime && syllable.classList.contains('highlight')) {
+          if (!hasHighlight) {
+            this._updateSyllableAnimation(syllable, currentTime);
+          }
+        } else if (currentTime < startTime && hasHighlight) {
           this._resetSyllable(syllable);
-        } else if (currentTime > startTime && !syllable.classList.contains('finished')) {
-          syllable.classList.add('finished');
-        } else if (currentTime > startTime && !syllable.classList.contains('highlight')) {
-          this._updateSyllableAnimation(syllable, startTime);
+        } else if (currentTime > startTime) {
+          if (!hasFinished) {
+            classList.add('finished');
+          } else if (!hasHighlight) {
+            this._updateSyllableAnimation(syllable, startTime);
+          }
         }
-      });
-    });
+      }
+    }
 
     this.highlightedSyllableIds = newHighlightedSyllableIds;
   }
@@ -1339,47 +1404,63 @@ class LyricsPlusRenderer {
 
   _updateSyllableAnimation(syllable, currentTime) {
     if (syllable.classList.contains('highlight')) return;
-    syllable.classList.remove('pre-highlight');
-    syllable.classList.add('highlight');
 
-    const wipeAnimation = syllable.classList.contains('rtl-text') ? 'wipe-rtl' : 'wipe';
+    // Cache DOM operations
+    const classList = syllable.classList;
+    classList.remove('pre-highlight');
+    classList.add('highlight');
+
+    // Cache RTL check result
+    const isRTL = classList.contains('rtl-text');
+    const wipeAnimation = isRTL ? 'wipe-rtl' : 'wipe';
+
     const charSpans = syllable._cachedCharSpans;
 
     if (charSpans && charSpans.length > 0) {
-      const wordElement = syllable.parentElement; // Simple and reliable parent reference
+      const wordElement = syllable.parentElement;
+      const isGrowable = wordElement.classList.contains('growable');
+      const isFirstSyllable = syllable.dataset.syllableIndex === '0';
 
-      // --- Apply GROW animation ---
-      if (wordElement.classList.contains('growable') && syllable.dataset.syllableIndex === '0') {
+      // --- Apply GROW animation (only for first syllable of growable words) ---
+      if (isGrowable && isFirstSyllable) {
         const spansToAnimate = wordElement._cachedChars;
-        const finalDuration = syllable._wordDurationMs ?? syllable._durationMs;
-        const baseDelayPerChar = finalDuration * 0.07;
+        if (spansToAnimate) {
+          const finalDuration = syllable._wordDurationMs ?? syllable._durationMs;
+          const baseDelayPerChar = finalDuration * 0.07;
+          const growDurationMs = finalDuration * 1.2;
 
-        spansToAnimate.forEach(span => {
-          const horizontalOffset = parseFloat(span.dataset.horizontalOffset) || 0;
-          span.style.setProperty('--char-offset-x', `${horizontalOffset}`);
-          const growDelay = baseDelayPerChar * (parseFloat(span.dataset.syllableCharIndex) || 0);
-          span.style.animation = `grow-dynamic ${finalDuration * 1.2}ms ease-in-out ${growDelay}ms forwards`;
-        });
+          // Batch DOM operations
+          spansToAnimate.forEach(span => {
+            const horizontalOffset = parseFloat(span.dataset.horizontalOffset) || 0;
+            const growDelay = baseDelayPerChar * (parseFloat(span.dataset.syllableCharIndex) || 0);
+
+            span.style.setProperty('--char-offset-x', `${horizontalOffset}`);
+            span.style.animation = `grow-dynamic ${growDurationMs}ms ease-in-out ${growDelay}ms forwards`;
+          });
+        }
       }
 
-      // --- Apply WIPE animation to the CURRENT syllable's characters ---
-      charSpans.forEach((span, charIndexInSyllable) => {
-        const wipeDurationPerChar = syllable._durationMs / charSpans.length;
-        const wipeDelay = wipeDurationPerChar * charIndexInSyllable;
-        const preWipeDelay = wipeDurationPerChar * (charIndexInSyllable - 1);
+      // --- Apply WIPE animation to current syllable's characters ---
+      const syllableDuration = syllable._durationMs;
+      const wipeDurationPerChar = syllableDuration / charSpans.length;
 
+      charSpans.forEach((span, charIndex) => {
+        const wipeDelay = wipeDurationPerChar * charIndex;
+        const preWipeDelay = wipeDurationPerChar * (charIndex - 1);
+
+        // Combine animations in single assignment
         const wipeAnims = `pre-wipe-char ${wipeDurationPerChar}ms linear ${preWipeDelay}ms, ${wipeAnimation} ${wipeDurationPerChar}ms linear ${wipeDelay}ms forwards`;
         span.style.animation += `, ${wipeAnims}`;
       });
 
-    } else { // Handle non-char, simple syllables
-      let currentWipeAnimation = syllable.parentElement?.parentElement?.parentElement?.classList.contains('lyrics-gap')
-        ? "fade-gap"
-        : wipeAnimation;
+    } else {
+      // Handle non-char, simple syllables - check gap class once
+      const isGap = syllable.parentElement?.parentElement?.parentElement?.classList.contains('lyrics-gap');
+      const currentWipeAnimation = isGap ? "fade-gap" : wipeAnimation;
       syllable.style.animation = `${currentWipeAnimation} ${syllable._durationMs}ms linear forwards`;
     }
 
-    // --- Logic for the NEXT syllable's PRE-WIPE ---
+    // --- Logic for NEXT syllable's PRE-WIPE ---
     const nextSyllable = syllable._nextSyllableInWord;
     if (nextSyllable) {
       const preHighlightDuration = syllable._preHighlightDurationMs;
@@ -1388,14 +1469,18 @@ class LyricsPlusRenderer {
       const nextCharSpan = nextSyllable._cachedCharSpans?.[0];
       if (nextCharSpan) {
         const preWipeAnim = `pre-wipe-char ${preHighlightDuration}ms ${timingFunction} forwards`;
+        const currentAnim = nextCharSpan.style.animation;
 
-        nextCharSpan.style.animation = (nextCharSpan.style.animation && !nextCharSpan.style.animation.includes('pre-wipe-char'))
-          ? `${nextCharSpan.style.animation}, ${preWipeAnim}`
+        // More efficient string concatenation check
+        nextCharSpan.style.animation = (currentAnim && !currentAnim.includes('pre-wipe-char'))
+          ? `${currentAnim}, ${preWipeAnim}`
           : preWipeAnim;
       }
 
-      nextSyllable.style.setProperty('--pre-wipe-duration', `${preHighlightDuration}ms`);
-      nextSyllable.style.setProperty('--pre-wipe-timing-function', timingFunction);
+      // Batch style updates for next syllable
+      const nextSyllableStyle = nextSyllable.style;
+      nextSyllableStyle.setProperty('--pre-wipe-duration', `${preHighlightDuration}ms`);
+      nextSyllableStyle.setProperty('--pre-wipe-timing-function', timingFunction);
       nextSyllable.classList.add('pre-highlight');
     }
   }
@@ -1446,48 +1531,63 @@ class LyricsPlusRenderer {
   _animateScroll(newTranslateY, forceScroll = false) {
     if (!this.lyricsContainer) return;
 
+    // Early exit if position hasn't changed and not forced
+    if (!forceScroll && this.currentScrollOffset === newTranslateY) return;
+
     // Set the primary scroll offset for the entire container.
     this.currentScrollOffset = newTranslateY;
     this.lyricsContainer.style.setProperty('--lyrics-scroll-offset', `${newTranslateY}px`);
 
+    // Cache container classes check
+    const isUserScrolling = this.lyricsContainer.classList.contains('user-scrolling');
+
     // If this is a forced jump (seek/click) or a user-driven scroll,
     // make all line animations instant and exit early.
-    if (forceScroll || this.lyricsContainer.classList.contains('user-scrolling')) {
-      this.cachedLyricsLines.forEach(element => {
-        if (element) element.style.setProperty('--lyrics-line-delay', '0ms');
-      });
+    if (forceScroll || isUserScrolling) {
+      // Batch update all delays to 0ms
+      const elements = this.cachedLyricsLines;
+      for (let i = 0; i < elements.length; i++) {
+        if (elements[i]) {
+          elements[i].style.setProperty('--lyrics-line-delay', '0ms');
+        }
+      }
       return;
     }
 
-    // Leverage the pre-calculated visibility from the IntersectionObserver.
-    // This is far more performant than calling getBoundingClientRect() in a loop.
-    let delayCounter = 0;
+    // Cache reference line calculations
+    const referenceLine = this.currentPrimaryActiveLine || this.lastPrimaryActiveLine ||
+      (this.cachedLyricsLines.length > 0 ? this.cachedLyricsLines[0] : null);
+
+    if (!referenceLine) return;
+
+    const referenceLineIndex = this.cachedLyricsLines.indexOf(referenceLine);
+    if (referenceLineIndex === -1) return;
+
+    // Constants
     const delayIncrement = 30; // 30ms stagger per line
+    let delayCounter = 0;
 
-    // Determine the reference line for delay calculation.
-    // If there's a current active line, use it. Otherwise, use the last active line.
-    // If neither, default to the first line in the cache to ensure a delay is applied.
-    const referenceLine = this.currentPrimaryActiveLine || this.lastPrimaryActiveLine || (this.cachedLyricsLines.length > 0 ? this.cachedLyricsLines[0] : null);
-    const referenceLineIndex = referenceLine ? this.cachedLyricsLines.indexOf(referenceLine) : -1;
+    // Batch DOM updates for better performance
+    const elements = this.cachedLyricsLines;
+    const visibleIds = this.visibleLineIds; // Cache reference
 
-    this.cachedLyricsLines.forEach((element, index) => {
-      if (!element) return;
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      if (!element) continue;
 
-      // Check if the element's ID is in the set of currently visible (or nearly visible) elements.
-      // The _setupVisibilityTracking() method maintains this set.
-      if (this.visibleLineIds.has(element.id)) {
-        // Apply a staggered delay to visible elements for a smooth "follow" effect.
-        // The delay should only start incrementing from the reference line's position.
-        const delay = (index >= referenceLineIndex && referenceLineIndex !== -1) ? delayCounter * delayIncrement : 0;
+      // Check visibility using cached Set
+      if (visibleIds.has(element.id)) {
+        // Apply staggered delay only from reference line position onwards
+        const delay = (i >= referenceLineIndex) ? delayCounter * delayIncrement : 0;
         element.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-        if (index >= referenceLineIndex && referenceLineIndex !== -1) {
+        if (i >= referenceLineIndex) {
           delayCounter++;
         }
       } else {
-        // Elements far outside the viewport should move instantly to their new position without animation delay.
+        // Elements outside viewport move instantly
         element.style.setProperty('--lyrics-line-delay', '0ms');
       }
-    });
+    }
   }
 
   _updatePositionClassesAndScroll(lineToScroll, forceScroll = false) {
