@@ -150,6 +150,18 @@ class LyricsPlusRenderer {
     const scrollListeningElement = this.lyricsContainer;
     const parentScrollElement = this.lyricsContainer.parentElement;
 
+    // Touch scroll state
+    this.touchState = {
+      isActive: false,
+      startY: 0,
+      lastY: 0,
+      velocity: 0,
+      lastTime: 0,
+      momentum: null,
+      samples: [], // For velocity calculation
+      maxSamples: 5
+    };
+
     if (parentScrollElement) {
       parentScrollElement.addEventListener('scroll', () => {
         if (this.isProgrammaticScrolling) {
@@ -166,6 +178,7 @@ class LyricsPlusRenderer {
       }, { passive: true });
     }
 
+    // Wheel scrolling (keep existing logic)
     scrollListeningElement.addEventListener('wheel', (event) => {
       event.preventDefault();
       this.isProgrammaticScrolling = false;
@@ -183,9 +196,24 @@ class LyricsPlusRenderer {
       }, 200);
     }, { passive: false });
 
+    // Improved touch handling
     scrollListeningElement.addEventListener('touchstart', (event) => {
-      this.isTouching = true;
-      this.touchStartY = event.touches[0].clientY;
+      const touch = event.touches[0];
+      const now = performance.now();
+
+      // Cancel any ongoing momentum
+      if (this.touchState.momentum) {
+        cancelAnimationFrame(this.touchState.momentum);
+        this.touchState.momentum = null;
+      }
+
+      this.touchState.isActive = true;
+      this.touchState.startY = touch.clientY;
+      this.touchState.lastY = touch.clientY;
+      this.touchState.lastTime = now;
+      this.touchState.velocity = 0;
+      this.touchState.samples = [{ y: touch.clientY, time: now }];
+
       this.isProgrammaticScrolling = false;
       if (this.lyricsContainer) {
         this.lyricsContainer.classList.add('not-focused', 'user-scrolling', 'touch-scrolling');
@@ -195,22 +223,116 @@ class LyricsPlusRenderer {
     }, { passive: true });
 
     scrollListeningElement.addEventListener('touchmove', (event) => {
-      if (!this.isTouching) return;
+      if (!this.touchState.isActive) return;
+
       event.preventDefault();
-      const currentY = event.touches[0].clientY;
-      const deltaY = this.touchStartY - currentY;
-      this.touchStartY = currentY;
-      this._handleUserScroll(deltaY);
+      const touch = event.touches[0];
+      const now = performance.now();
+      const currentY = touch.clientY;
+      const deltaY = this.touchState.lastY - currentY;
+
+      // Update position
+      this.touchState.lastY = currentY;
+
+      // Add sample for velocity calculation
+      this.touchState.samples.push({ y: currentY, time: now });
+      if (this.touchState.samples.length > this.touchState.maxSamples) {
+        this.touchState.samples.shift();
+      }
+
+      // Apply immediate scroll with reduced sensitivity for smoother feel
+      this._handleUserScroll(deltaY * 0.8); // Reduced from default sensitivity
+
     }, { passive: false });
 
-    scrollListeningElement.addEventListener('touchend', () => {
-      this.isTouching = false;
-      if (this.lyricsContainer) {
-        this.lyricsContainer.classList.remove('user-scrolling', 'touch-scrolling');
+    scrollListeningElement.addEventListener('touchend', (event) => {
+      if (!this.touchState.isActive) return;
+
+      this.touchState.isActive = false;
+
+      // Calculate final velocity from recent samples
+      const now = performance.now();
+      const samples = this.touchState.samples;
+
+      if (samples.length >= 2) {
+        // Use samples from last 100ms for velocity calculation
+        const recentSamples = samples.filter(sample => now - sample.time <= 100);
+
+        if (recentSamples.length >= 2) {
+          const newest = recentSamples[recentSamples.length - 1];
+          const oldest = recentSamples[0];
+          const timeDelta = newest.time - oldest.time;
+          const yDelta = oldest.y - newest.y; // Inverted for scroll direction
+
+          if (timeDelta > 0) {
+            this.touchState.velocity = yDelta / timeDelta; // pixels per ms
+          }
+        }
+      }
+
+      // Start momentum scrolling if velocity is significant
+      const minVelocity = 0.1; // pixels per ms
+      if (Math.abs(this.touchState.velocity) > minVelocity) {
+        this._startMomentumScroll();
+      } else {
+        // No momentum, just clean up
+        this._endTouchScrolling();
       }
     }, { passive: true });
 
+    // Handle touch cancel
+    scrollListeningElement.addEventListener('touchcancel', () => {
+      this.touchState.isActive = false;
+      if (this.touchState.momentum) {
+        cancelAnimationFrame(this.touchState.momentum);
+        this.touchState.momentum = null;
+      }
+      this._endTouchScrolling();
+    }, { passive: true });
+
     this.scrollEventHandlerAttached = true;
+  }
+
+  /**
+   * Starts momentum scrolling after touch end
+   * @private
+   */
+  _startMomentumScroll() {
+    const deceleration = 0.95; // Deceleration factor per frame
+    const minVelocity = 0.01; // Stop when velocity gets too small
+
+    const animate = () => {
+      // Apply velocity to scroll
+      const scrollDelta = this.touchState.velocity * 16; // Convert to per-frame (assuming 60fps)
+      this._handleUserScroll(scrollDelta);
+
+      // Reduce velocity
+      this.touchState.velocity *= deceleration;
+
+      // Continue if velocity is still significant
+      if (Math.abs(this.touchState.velocity) > minVelocity) {
+        this.touchState.momentum = requestAnimationFrame(animate);
+      } else {
+        this.touchState.momentum = null;
+        this._endTouchScrolling();
+      }
+    };
+
+    this.touchState.momentum = requestAnimationFrame(animate);
+  }
+
+  /**
+   * Cleans up touch scrolling state
+   * @private
+   */
+  _endTouchScrolling() {
+    if (this.lyricsContainer) {
+      this.lyricsContainer.classList.remove('user-scrolling', 'touch-scrolling');
+    }
+
+    // Reset touch state
+    this.touchState.velocity = 0;
+    this.touchState.samples = [];
   }
 
   /**
@@ -1228,12 +1350,14 @@ class LyricsPlusRenderer {
     const highlightLookAheadMs = 190;
 
     // --- 1. SCROLLING LOGIC (Optimized) ---
-    // Cache visible lines array to avoid repeated filtering
+    // Cache visible lines array, but invalidate when visibility actually changes
     let visibleLines = this._cachedVisibleLines;
-    if (!visibleLines || this._visibleLinesCacheTime !== this.visibleLineIds.size) {
+    const currentVisibilityHash = Array.from(this.visibleLineIds).sort().join(',');
+
+    if (!visibleLines || this._lastVisibilityHash !== currentVisibilityHash) {
       visibleLines = this.cachedLyricsLines.filter(line => this.visibleLineIds.has(line.id));
       this._cachedVisibleLines = visibleLines;
-      this._visibleLinesCacheTime = this.visibleLineIds.size;
+      this._lastVisibilityHash = currentVisibilityHash;
     }
 
     const predictiveTime = currentTime + scrollLookAheadMs;
