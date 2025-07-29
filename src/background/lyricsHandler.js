@@ -410,10 +410,20 @@ async function handleTranslateLyrics(songInfo, action, targetLang, forceReload =
         throw new Error('Translation failed: The number of translated lines does not match the original.');
     }
 
-    const translatedData = originalLyrics.data.map((line, index) => ({
-        ...line,
-        translatedText: translatedTexts[index] || line.text // Use original text if translation fails for a line
-    }));
+    const translatedData = originalLyrics.data.map((line, index) => {
+        if (action === 'translate') {
+            return {
+                ...line,
+                translatedText: translatedTexts[index] || line.text // Use original text if translation fails for a line
+            };
+        } else if (action === 'romanize') {
+            return {
+                ...line,
+                romanizedText: translatedTexts[index] || line.text // Use original text if romanization fails for a line
+            };
+        }
+        return line; // Fallback, though should be covered by actions
+    });
     const finalTranslatedLyrics = {
         ...originalLyrics,
         data: translatedData,

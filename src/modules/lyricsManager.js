@@ -83,7 +83,12 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
         lyricsObjectToDisplay = translationResponse.translatedLyrics;
         finalDisplayModeForRenderer = 'translate';
       } else if (hasRomanization) {
+        // If only romanization is enabled, ensure translatedText is also present for renderer compatibility
         lyricsObjectToDisplay = romanizationResponse.translatedLyrics;
+        lyricsObjectToDisplay.data = lyricsObjectToDisplay.data.map(line => ({
+            ...line,
+            translatedText: line.romanizedText || line.text // Use romanizedText as translatedText if only romanization
+        }));
         finalDisplayModeForRenderer = 'romanize';
       } else {
         console.warn(`Translation/Romanization failed. Falling back to original lyrics.`);
