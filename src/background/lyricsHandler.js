@@ -930,29 +930,60 @@ async function fetchGoogleTranslate(text, targetLang) {
 }
 
 async function fetchGoogleRomanize(texts) {
+    // Join the texts to create a single string. This provides context for accurate language detection.
+    // For a single line, it's just the line. For syllables, it reconstructs the line.
+    const contextText = texts.join(' ');
+    let sourceLang = 'auto'; // Default to auto-detection
+
+    // Step 1: Detect the language from the full context string first.
+    // This avoids API calls if the text is already Latin-based.
+    if (!isPurelyLatinScript(contextText)) {
+        // We use the standard translation endpoint just to get the detected source language.
+        const detectUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(contextText)}`;
+        try {
+            const detectResponse = await fetch(detectUrl);
+            if (detectResponse.ok) {
+                const detectData = await detectResponse.json();
+                // The detected language code (e.g., 'ja', 'ko', 'ar') is in the third element of the response array.
+                if (detectData && detectData[2] && typeof detectData[2] === 'string') {
+                    sourceLang = detectData[2];
+                }
+            }
+        } catch (e) {
+            console.error("Language detection for romanization failed, falling back to 'auto'.", e);
+        }
+    }
+
     const romanizedTexts = [];
+
+    // Step 2: Loop through the original texts (lines or syllables) and romanize each one
+    // using the language code we detected in the first step.
     for (const text of texts) {
-        // If the text is purely Latin script, return it as is, as per user feedback.
+        // If an individual part is already Latin script, don't change it.
         if (isPurelyLatinScript(text)) {
             romanizedTexts.push(text);
             continue;
         }
 
-        // Google Translate's transliteration (romanization) is available via dt=rm
-        // We set target language to English (or any Latin-based script) to ensure romanization
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&hl=en&dt=rm&q=${encodeURIComponent(text)}`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            console.warn(`Google Romanize API error for text "${text}": ${response.statusText}`);
-            romanizedTexts.push(text); // Return original text if romanization fails for this syllable
-            continue;
-        }
-        const data = await response.json();
-        // Romanized text is typically in data[0][0][3] for the first segment
-        if (data[0] && data[0][0] && data[0][0][3]) {
-            romanizedTexts.push(`${data[0][0][3]}`);
-        } else {
-            romanizedTexts.push(text); // Return original text if romanization fails
+        // Request romanization (dt=rm) for this specific text part, providing the detected source language (sl=...).
+        const romanizeUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=en&hl=en&dt=rm&q=${encodeURIComponent(text)}`;
+        try {
+            const romanizeResponse = await fetch(romanizeUrl);
+            if (!romanizeResponse.ok) {
+                console.warn(`Google Romanize API error for text "${text}": ${romanizeResponse.statusText}`);
+                romanizedTexts.push(text); // Fallback to original text on error
+                continue;
+            }
+            const romanizeData = await romanizeResponse.json();
+            // The romanized text is usually in data[0][0][3].
+            if (romanizeData[0] && romanizeData[0][0] && romanizeData[0][0][3]) {
+                romanizedTexts.push(`${romanizeData[0][0][3]}`);
+            } else {
+                romanizedTexts.push(text); // Fallback if no romanization is returned
+            }
+        } catch (error) {
+            console.error(`Network error during romanization for text "${text}":`, error);
+            romanizedTexts.push(text); // Fallback on network error
         }
     }
     return romanizedTexts;
