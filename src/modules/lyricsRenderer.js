@@ -1742,13 +1742,12 @@ class LyricsPlusRenderer {
 
     if (typeof this.currentDisplayMode === 'undefined') return;
 
-    // Determine which options to show based on currentDisplayMode
-    const showTranslationOption = (this.currentDisplayMode === 'none' || this.currentDisplayMode === 'romanize');
-    const showRomanizationOption = (this.currentDisplayMode === 'none' || this.currentDisplayMode === 'translate');
-    const hideTranslationOption = (this.currentDisplayMode === 'translate' || this.currentDisplayMode === 'both');
-    const hideRomanizationOption = (this.currentDisplayMode === 'romanize' || this.currentDisplayMode === 'both');
+    // Show options that are NOT currently active
+    const hasTranslation = (this.currentDisplayMode === 'translate' || this.currentDisplayMode === 'both');
+    const hasRomanization = (this.currentDisplayMode === 'romanize' || this.currentDisplayMode === 'both');
 
-    if (showTranslationOption) {
+    // Show "Show Translation" if translation is not currently displayed
+    if (!hasTranslation) {
       const optionDiv = document.createElement('div');
       optionDiv.className = 'dropdown-option';
       optionDiv.textContent = t('showTranslation');
@@ -1765,7 +1764,8 @@ class LyricsPlusRenderer {
       this.dropdownMenu.appendChild(optionDiv);
     }
 
-    if (showRomanizationOption) {
+    // Show "Show Pronunciation" if romanization is not currently displayed
+    if (!hasRomanization) {
       const optionDiv = document.createElement('div');
       optionDiv.className = 'dropdown-option';
       optionDiv.textContent = t('showPronunciation');
@@ -1782,12 +1782,16 @@ class LyricsPlusRenderer {
       this.dropdownMenu.appendChild(optionDiv);
     }
 
-    // Add separator if both show and hide options are present
-    if ((showTranslationOption || showRomanizationOption) && (hideTranslationOption || hideRomanizationOption)) {
+    // Add separator if we have both show and hide options
+    const hasShowOptions = !hasTranslation || !hasRomanization;
+    const hasHideOptions = hasTranslation || hasRomanization;
+
+    if (hasShowOptions && hasHideOptions) {
       this.dropdownMenu.appendChild(document.createElement('div')).className = 'dropdown-separator';
     }
 
-    if (hideTranslationOption) {
+    // Show "Hide Translation" if translation is currently displayed
+    if (hasTranslation) {
       const optionDiv = document.createElement('div');
       optionDiv.className = 'dropdown-option';
       optionDiv.textContent = t('hideTranslation');
@@ -1804,7 +1808,8 @@ class LyricsPlusRenderer {
       this.dropdownMenu.appendChild(optionDiv);
     }
 
-    if (hideRomanizationOption) {
+    // Show "Hide Pronunciation" if romanization is currently displayed
+    if (hasRomanization) {
       const optionDiv = document.createElement('div');
       optionDiv.className = 'dropdown-option';
       optionDiv.textContent = t('hidePronunciation');
