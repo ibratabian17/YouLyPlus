@@ -5,8 +5,28 @@ let currentDisplayMode = 'none'; // Manages the active translation/romanization 
 let lastKnownSongInfo = null; // Store last known song info for reload
 let lastFetchedLyrics = null; // Store the last successfully fetched lyrics object
 
+// New variables for debouncing/preventing duplicate requests from content script
+let lyricsFetchDebounceTimer = null;
+let lastRequestedSongKey = null;
+const DEBOUNCE_TIME_MS = 200; // Adjust as needed, a small delay to prevent rapid duplicates
 
 async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload = false) {
+  const songKey = `${currentSong.title}-${currentSong.artist}-${currentSong.album}`;
+
+  // If a request for the same song is already pending or recently completed, debounce it.
+  if (lyricsFetchDebounceTimer && lastRequestedSongKey === songKey && !forceReload) {
+    console.log(`Debouncing duplicate fetch request for ${songKey}`);
+    return; // Abort this duplicate call
+  }
+
+  // Clear any existing debounce timer and set a new one
+  clearTimeout(lyricsFetchDebounceTimer);
+  lyricsFetchDebounceTimer = setTimeout(() => {
+    lyricsFetchDebounceTimer = null;
+    lastRequestedSongKey = null;
+  }, DEBOUNCE_TIME_MS);
+  lastRequestedSongKey = songKey;
+
   try {
     const localCurrentFetchVideoId = currentSong.videoId;
     currentFetchVideoId = localCurrentFetchVideoId; // Set the latest videoId being processed globally for this manager
