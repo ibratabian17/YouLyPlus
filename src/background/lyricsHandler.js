@@ -371,7 +371,9 @@ async function handleTranslateLyrics(songInfo, action, targetLang, forceReload =
         'overrideGeminiPrompt': false,
         'customGeminiPrompt': '',
         'overrideGeminiRomanizePrompt': false, // New setting for romanization prompt override
-        'customGeminiRomanizePrompt': '' // New setting for custom romanization prompt
+        'customGeminiRomanizePrompt': '', // New setting for custom romanization prompt
+        'romanizationProvider': 'google', // Include romanizationProvider
+        'geminiRomanizationModel': 'gemini-2.0-flash' // Include geminiRomanizationModel
     });
     const translationProvider = settings.translationProvider;
     const geminiApiKey = settings.geminiApiKey;
@@ -407,7 +409,7 @@ async function handleTranslateLyrics(songInfo, action, targetLang, forceReload =
             }));
         }
     } else if (action === 'romanize') {
-        if (settings.romanizationProvider === 'gemini') {
+        if (settings.romanizationProvider === 'gemini') { // Use the local romanizationProvider variable
             if (!geminiApiKey) {
                 throw new Error('Gemini AI API Key is not provided in settings.');
             }
@@ -419,12 +421,16 @@ async function handleTranslateLyrics(songInfo, action, targetLang, forceReload =
                         lineObject.text = line.text;
                     }
                     if (line.syllabus && line.syllabus.length > 0) {
-                        lineObject.syllable = line.syllabus.map(s => s.text);
+                        lineObject.totalSyllable = line.syllabus.length;
+                        lineObject.syllabus = line.syllabus.map((s, sylIndex) => ({
+                            text: s.text,
+                            syllableIndex: sylIndex
+                        }));
                     }
                     return lineObject;
                 });
 
-                const romanizedStructuredLyrics = await fetchGeminiRomanize(structuredLyricsInput, geminiApiKey, geminiModel, overrideGeminiRomanizePrompt, customGeminiRomanizePrompt);
+                const romanizedStructuredLyrics = await fetchGeminiRomanize(structuredLyricsInput, geminiApiKey, settings.geminiRomanizationModel, overrideGeminiRomanizePrompt, customGeminiRomanizePrompt); // Use geminiRomanizationModel
 
                 // Map romanized results back to original structure
                 translatedData = originalLyrics.data.map((originalLine, index) => {
@@ -434,23 +440,30 @@ async function handleTranslateLyrics(songInfo, action, targetLang, forceReload =
                         return originalLine;
                     }
 
-                    if (originalLine.syllabus && originalLine.syllabus.length > 0 && romanizedLine.syllable) {
-                        const newSyllabus = originalLine.syllabus.map((s, sylIndex) => ({
-                            ...s,
-                            romanizedText: romanizedLine.syllable[sylIndex] || s.text
-                        }));
-                        return {
-                            ...originalLine,
-                            syllabus: newSyllabus,
-                            romanizedText: romanizedLine.text || originalLine.text // Also update line-level romanized text if provided
-                        };
-                    } else {
-                        // Fallback for lines without syllabus or if Gemini only returned text
-                        return {
-                            ...originalLine,
-                            romanizedText: romanizedLine.text || originalLine.text
-                        };
+                    let newSyllabus = originalLine.syllabus; // Default to original syllabus
+
+                    if (originalLine.syllabus && originalLine.syllabus.length > 0) {
+                        if (romanizedLine.syllabus && Array.isArray(romanizedLine.syllabus) && romanizedLine.syllabus.length > 0) {
+                            // If Gemini provided romanized syllables, map them to the original structure
+                            newSyllabus = originalLine.syllabus.map((s, sylIndex) => ({
+                                ...s,
+                                romanizedText: `${romanizedLine.syllabus[sylIndex]?.text || s.text} `
+                            }));
+                        } else {
+                            // If original had syllables but Gemini did not provide romanized syllables (e.g., English line),
+                            // retain the original syllable structure and use original text as romanizedText.
+                            newSyllabus = originalLine.syllabus.map(s => ({
+                                ...s,
+                                romanizedText: s.text
+                            }));
+                        }
                     }
+
+                    return {
+                        ...originalLine,
+                        syllabus: newSyllabus,
+                        romanizedText: romanizedLine.text || originalLine.text // Line-level romanized text
+                    };
                 });
             } else {
                 // Romanize line by line using Gemini (for Line type lyrics)
@@ -458,7 +471,7 @@ async function handleTranslateLyrics(songInfo, action, targetLang, forceReload =
                     text: line.text,
                     original_line_index: index
                 }));
-                const romanizedStructuredLyrics = await fetchGeminiRomanize(structuredLyricsInput, geminiApiKey, geminiModel, overrideGeminiRomanizePrompt, customGeminiRomanizePrompt);
+                const romanizedStructuredLyrics = await fetchGeminiRomanize(structuredLyricsInput, geminiApiKey, settings.geminiRomanizationModel, overrideGeminiRomanizePrompt, customGeminiRomanizePrompt); // Use geminiRomanizationModel
 
                 translatedData = originalLyrics.data.map((originalLine, index) => {
                     const romanizedLine = romanizedStructuredLyrics.find(rl => rl.original_line_index === index);
@@ -662,7 +675,7 @@ Now, translate the provided lyrics according to all rules and output instruction
 
 const getStandardRomanizationInputOutputInstructionBlock = (lyricsDataArray) => `
 ---
-You will receive the lyrics as a JSON array of objects. Each object represents a line of lyrics and may contain the full line text and/or an array of its syllables.
+You will receive the lyrics as a JSON array of objects. Each object represents a line of lyrics and may contain the full line text, total syllable count, and/or an array of its syllables with their indices.
 ---
 LYRICS TO ROMANIZE (each element in the array is one line of lyrics):
 \`\`\`json
@@ -675,7 +688,18 @@ The JSON object MUST have the following structure:
   "romanized_lyrics": [
     {
       "text": "romanized_full_line_text_if_original_had_it",
-      "syllable": ["romanized_syl1", "romanized_syl2", ...],
+      "totalSyllable": 9, // MUST be present if original had it, and match the count
+      "syllabus": [
+        {
+          "text": "romanized_syl1",
+          "syllableIndex": 0 // MUST be preserved from input
+        },
+        {
+          "text": "romanized_syl2",
+          "syllableIndex": 1 // MUST be preserved from input
+        }
+        // ... more romanized syllable objects ...
+      ],
       "original_line_index": 0 // This field is for internal tracking and must be preserved from input
     },
     // ... more romanized lyric objects ...
@@ -683,11 +707,11 @@ The JSON object MUST have the following structure:
   "detected_source_languages_per_line": ["array_indicating_identified_source_language(s)_for_each_original_line_e.g., 'ko', 'ja', 'zh', or an array like ['ko', 'ja'] if multiple distinct ones were clear"],
   "romanization_target_script": "Latin"
 }
-The "romanized_lyrics" array MUST contain the romanized version of each corresponding input line, maintaining the original order and structure (i.e., if the input had 'text' and 'syllable', the output should have 'text' and 'syllable' with romanized content).
+The "romanized_lyrics" array MUST contain the romanized version of each corresponding input line, maintaining the original order and structure (i.e., if the input had 'text', 'totalSyllable', and 'syllabus', the output should have 'text', 'totalSyllable', and 'syllabus' with romanized content).
 The "original_line_index" field MUST be preserved from the input to ensure correct re-mapping.
 The "detected_source_languages_per_line" array should be parallel to "romanized_lyrics", indicating the language(s) you identified in each original line.
 The "romanization_target_script" should always be "Latin".
-The "syllable" must be same like the original ones, if you move the another syllable to make it one word, it will fail to parse
+The "syllabus" array in the output MUST maintain the exact same number of syllable objects as the input, and each syllable object MUST retain its original "syllableIndex". Do NOT combine or split syllables. Do NOT duplicate text within the "text" field of syllable objects. Be extremely careful to only provide the romanized text for each syllable.
 ---
 Now, romanize the provided lyrics according to all rules and output instructions.
 `;
@@ -891,8 +915,16 @@ CRUCIAL ROMANIZATION RULES (MUST BE FOLLOWED FOR EACH LINE/SYLLABLE OF LYRICS):
                 parsedJson.romanization_target_script === "Latin" &&
                 (Array.isArray(parsedJson.detected_source_languages_per_line) || parsedJson.detected_source_languages_per_line === undefined)
             ) {
-                // Return the structured romanized lyrics array
-                return parsedJson.romanized_lyrics;
+                // Ensure that if original had syllabus, the romanized output also has it in the correct format
+                return parsedJson.romanized_lyrics.map(romanizedLine => {
+                    // If Gemini returned 'syllable' (singular) instead of 'syllabus' (plural) as requested,
+                    // rename it to 'syllabus' to match the expected structure.
+                    if (romanizedLine.syllable && Array.isArray(romanizedLine.syllable)) {
+                        romanizedLine.syllabus = romanizedLine.syllable;
+                        delete romanizedLine.syllable; // Remove the singular 'syllable' key
+                    }
+                    return romanizedLine;
+                });
             } else {
                 console.warn("Gemini AI response JSON structure mismatch or missing vital fields for romanization. Expected structure not fully met. Raw:", rawJsonText, "Parsed:", parsedJson);
                 throw new Error('Gemini AI romanization: Invalid or incomplete JSON structure in response.');
@@ -908,7 +940,14 @@ CRUCIAL ROMANIZATION RULES (MUST BE FOLLOWED FOR EACH LINE/SYLLABLE OF LYRICS):
                     const originalLine = lyricsDataArray[index];
                     const romanizedObj = { original_line_index: originalLine.original_line_index };
                     if (originalLine.text) romanizedObj.text = line;
-                    if (originalLine.syllable) romanizedObj.syllable = line.split(' '); // Simple split, might not be accurate
+                    if (originalLine.syllabus) {
+                        // Reconstruct syllabus array of objects
+                        romanizedObj.syllabus = originalLine.syllabus.map((s, sylIndex) => ({
+                            text: line.split(' ')[sylIndex] || s.text, // This is a very rough guess for recovery
+                            syllableIndex: s.syllableIndex
+                        }));
+                        romanizedObj.totalSyllable = romanizedObj.syllabus.length;
+                    }
                     return romanizedObj;
                 });
             }

@@ -43,6 +43,8 @@ function setupAutoSaveListeners() {
         { id: 'override-translate-target', key: 'overrideTranslateTarget', type: 'checkbox' },
         { id: 'override-gemini-prompt', key: 'overrideGeminiPrompt', type: 'checkbox' },
         { id: 'override-gemini-romanize-prompt', key: 'overrideGeminiRomanizePrompt', type: 'checkbox' }, // New auto-save for romanize prompt override
+        { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' }, // Auto-save romanization provider
+        { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' }, // Auto-save Gemini romanization model
         // Cache
         { id: 'cache-strategy', key: 'cacheStrategy', type: 'value' },
     ];
@@ -88,6 +90,10 @@ function updateUI(settings) {
         customKpoeUrlInput.value = currentSettings.customKpoeUrl || '';
     }
 
+    // Romanization settings
+    document.getElementById('romanization-provider').value = currentSettings.romanizationProvider;
+    document.getElementById('gemini-romanization-model').value = currentSettings.geminiRomanizationModel || 'gemini-1.5-pro-latest';
+
     // Translation settings
     document.getElementById('translation-provider').value = currentSettings.translationProvider;
     const geminiApiKeyInput = document.getElementById('gemini-api-key');
@@ -107,6 +113,7 @@ function updateUI(settings) {
     toggleGeminiPromptVisibility();
     toggleGeminiRomanizePromptVisibility(); // New visibility toggle for romanize prompt
     toggleCustomKpoeUrlVisibility(); // New visibility toggle
+    toggleRomanizationModelVisibility(); // New visibility toggle for romanization model
 
     // Populate draggable KPoe sources
     populateDraggableSources();
@@ -498,6 +505,19 @@ function toggleGeminiPromptVisibility() {
     }
 }
 
+// Function to toggle Gemini Romanization Model visibility
+function toggleRomanizationModelVisibility() {
+    const romanizationProvider = document.getElementById('romanization-provider').value;
+    const geminiRomanizationModelGroup = document.getElementById('gemini-romanization-model-group');
+    if (geminiRomanizationModelGroup) {
+        if (romanizationProvider === 'gemini') {
+            geminiRomanizationModelGroup.style.display = 'block';
+        } else {
+            geminiRomanizationModelGroup.style.display = 'none';
+        }
+    }
+}
+
 // Function to toggle custom Gemini romanization prompt visibility
 function toggleGeminiRomanizePromptVisibility() {
     const translationProvider = document.getElementById('translation-provider').value;
@@ -511,6 +531,13 @@ function toggleGeminiRomanizePromptVisibility() {
         }
     }
 }
+
+// Event listener for romanization-provider change
+document.getElementById('romanization-provider').addEventListener('change', (e) => {
+    // currentSettings.romanizationProvider is updated via auto-save listener
+    toggleRomanizationModelVisibility(); // Call the new function
+    // actual saving happens automatically via setupAutoSaveListeners
+});
 
 // Event listener for translation-provider change
 document.getElementById('translation-provider').addEventListener('change', (e) => {

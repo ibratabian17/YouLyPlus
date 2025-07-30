@@ -27,7 +27,7 @@ let currentSettings = {
     overrideGeminiRomanizePrompt: false, // New setting for overriding Gemini romanization prompt
     customGeminiRomanizePrompt: '', // New setting for custom Gemini romanization prompt
     romanizationProvider: 'google',
-    geminiRomanizationModel: 'gemini-1.5-pro-latest',
+    geminiRomanizationModel: 'gemini-2.0-flash',
     useSongPaletteFullscreen: false,
     useSongPaletteAllModes: false,
     overridePaletteColor: '',
