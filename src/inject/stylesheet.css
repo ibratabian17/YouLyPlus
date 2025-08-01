@@ -278,6 +278,10 @@ ytmusic-player-page:not([player-fullscreened]) .lyrics-plus-integrated.blur-inac
     transform: translateY(-4%) translateZ(1px);
 }
 
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.finished {
+    background-image: none;
+}
+
 /* JS controls animation timing via CSS variables */
 .lyrics-syllable.pre-highlight {
     animation-name: pre-wipe-universal;
