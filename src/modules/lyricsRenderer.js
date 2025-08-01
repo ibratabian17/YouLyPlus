@@ -505,6 +505,10 @@ class LyricsPlusRenderer {
    * Internal helper to render word-by-word lyrics.
    * @private
    */
+    /**
+   * Internal helper to render word-by-word lyrics.
+   * @private
+   */
   _renderWordByWordLyrics(lyrics, displayMode, singerClassMap, lightweight, elementPool, fragment) {
     const getComputedFont = (element) => {
       if (!element) return '400 16px sans-serif';
@@ -552,13 +556,29 @@ class LyricsPlusRenderer {
         const totalDuration = currentWordEndTime - currentWordStartTime;
         const shouldEmphasize = !lightweight && !this._isRTL(combinedText) && !this._isCJK(combinedText) && combinedText.trim().length <= 7 && totalDuration >= 1000;
 
-        // Animation property calculations
-        const durationFactor = Math.min(1.0, Math.max(0.5, (totalDuration - 1000) / 1000));
-        wordSpan.style.setProperty('--max-scale', Math.min(1.2, 1.0 + durationFactor * 0.15));
+        let maxScale = 1.07; // Default scale
+
+        if (shouldEmphasize) {
+          const minDuration = 1000; // The duration (in ms) at which the effect starts.
+          const maxDuration = 3000; // The duration at which the effect reaches its maximum.
+          const easingPower = 3.0;  // The power for the ease-in curve.
+
+          const progress = Math.min(1, Math.max(0, (totalDuration - minDuration) / (maxDuration - minDuration)));
+          const easedProgress = Math.pow(progress, easingPower);
+
+          // 3. Map the eased progress to the final CSS variable values.
+          maxScale = 1.0 + 0.05 + easedProgress * 0.13; // Used for both scale and offset calculation
+          const shadowIntensity = 0.4 + easedProgress * 0.4;
+          const normalizedGrowth = (maxScale - 1.0) / 0.13; // Remaps [1.07, 1.20] to [0, 1]
+          const translateYPeak = -normalizedGrowth * 3.0; // Map [0, 1] to [0, -3.0]
+
+          wordSpan.style.setProperty('--max-scale', maxScale.toFixed(3));
+          wordSpan.style.setProperty('--shadow-intensity', shadowIntensity.toFixed(3));
+          wordSpan.style.setProperty('--translate-y-peak', translateYPeak.toFixed(3));
+        }
         wordSpan.style.setProperty('--min-scale', Math.max(1.0, Math.min(1.06, 1.02)));
-        wordSpan.style.setProperty('--shadow-intensity', Math.min(0.8, 0.4 + (durationFactor * 0.4)));
-        wordSpan.style.setProperty('--translate-y-peak', -Math.min(3.0, 0.0 + (durationFactor * 3.0)));
         wordSpan.dataset.totalDuration = totalDuration;
+
         let isCurrentWordBackground = wordBuffer[0].isBackground || false;
         const characterData = [];
 
@@ -591,6 +611,7 @@ class LyricsPlusRenderer {
           syllableElements.push(sylSpan);
 
           const charSpansForSyllable = [];
+
           if (s.isBackground) {
             sylSpan.textContent = s.text.replace(/[()]/g, '');
           } else {
@@ -649,7 +670,7 @@ class LyricsPlusRenderer {
           wordSpan._cachedChars.forEach(span => {
             const charWidth = this._getTextWidth(span.textContent, referenceFont);
             const position = (cumulativeWidth + (charWidth / 2)) / wordWidth;
-            const horizontalOffset = Math.sign((position - 0.5) * 2) * Math.pow(Math.abs((position - 0.5) * 2), 1.3) * ((Math.min(1.2, 1.0 + durationFactor * 0.15) - 1.0) * 40);
+            const horizontalOffset = Math.sign((position - 0.5) * 2) * Math.pow(Math.abs((position - 0.5) * 2), 1.3) * ((maxScale - 1.0) * 40);
             span.dataset.horizontalOffset = horizontalOffset;
             span.dataset.position = position;
             cumulativeWidth += charWidth;
