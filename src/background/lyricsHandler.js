@@ -266,7 +266,7 @@ async function getOrFetchLyrics(songInfo, forceReload = false) {
                         break;
                     case PROVIDERS.CUSTOM_KPOE:
                         if (settings.customKpoeUrl) {
-                           lyrics = await fetchCustomKPoeLyrics(songInfo, settings.customKpoeUrl, settings.lyricsSourceOrder, forceReload, fetchOptions);
+                            lyrics = await fetchCustomKPoeLyrics(songInfo, settings.customKpoeUrl, settings.lyricsSourceOrder, forceReload, fetchOptions);
                         }
                         break;
                     case PROVIDERS.LRCLIB:
@@ -386,31 +386,39 @@ async function romanizeWithGoogle(originalLyrics) {
 async function romanizeWithGemini(originalLyrics, settings) {
     if (!settings.geminiApiKey) throw new Error('Gemini API Key is not provided.');
 
+    // 1. Prepare data for the API: map 'syllabus' to 'chunk'
     const structuredInput = originalLyrics.data.map((line, index) => {
         const lineObject = { original_line_index: index, text: line.text };
         if (line.syllabus?.length) {
-            lineObject.totalSyllable = line.syllabus.length;
-            lineObject.syllabus = line.syllabus.map((s, sylIndex) => ({
+            lineObject.chunk = line.syllabus.map((s, sylIndex) => ({
                 text: s.text,
-                syllableIndex: sylIndex
+                chunkIndex: sylIndex
             }));
         }
         return lineObject;
     });
 
+    // 2. Fetch the full-length, reconstructed romanized data
     const romanizedResult = await fetchGeminiRomanize(structuredInput, settings);
-    const romanizedMap = new Map(romanizedResult.map(item => [item.original_line_index, item]));
 
+    // 3. Map the result back to the application's original data structure
     return originalLyrics.data.map((originalLine, index) => {
-        const romanizedLine = romanizedMap.get(index);
+        const romanizedLine = romanizedResult[index];
+
         if (!romanizedLine) {
-            console.warn(`No romanized data from Gemini for line index ${index}.`);
+            console.warn(`No romanized data returned for line index ${index}.`);
             return originalLine;
         }
 
-        const newSyllabus = originalLine.syllabus ? originalLine.syllabus.map((syl, sylIndex) => {
-            const romanizedSyllable = romanizedLine.syllabus?.find(rs => rs.syllableIndex === sylIndex);
-            return { ...syl, romanizedText: `${romanizedSyllable?.text || syl.text} ` };
+        // Map 'chunk' array from Gemini back to 'syllabus' for internal use.
+        const newSyllabus = romanizedLine.chunk ? romanizedLine.chunk.map((chunk, chunkIndex) => {
+            const originalSyllable = originalLine.syllabus?.[chunkIndex] || {};
+            const romanizedSyllableText = chunk.text || originalSyllable.text || '';
+            return {
+                ...originalSyllable,
+                text: originalSyllable.text,
+                romanizedText: `${romanizedSyllableText} `
+            };
         }) : undefined;
 
         return {
@@ -493,19 +501,18 @@ async function fetchGeminiTranslate(texts, targetLang, settings) {
             throw new Error('Invalid JSON structure in Gemini response.');
         }
     } catch (e) {
-        console.error("Gemini response parsing failed:", e, "\nRaw response:", data.candidates.content.parts.text);
+        console.error("Gemini response parsing failed:", e, "\nRaw response:", data.candidates[0].content.parts[0].text);
         throw new Error(`Gemini translation failed: Could not parse valid JSON. ${e.message}`);
     }
 }
 
 /**
- * Validates the structural integrity of the Gemini romanization response against the original request.
- * This is the core of the "reflection" feature.
- * @param {Object[]} originalLyrics - The original array of lyric objects sent to the API.
+ * Validates the structural integrity of the Gemini romanization response.
+ * @param {Object[]} originalLyricsForApi - The compacted array of lyric objects sent to the API.
  * @param {Object} geminiResponse - The parsed JSON object received from Gemini.
- * @returns {{isValid: boolean, errors: string[]}} An object indicating if the validation passed and a list of specific errors if it failed.
+ * @returns {{isValid: boolean, errors: string[]}} Validation result.
  */
-function validateRomanizationResponse(originalLyrics, geminiResponse) {
+function validateRomanizationResponse(originalLyricsForApi, geminiResponse) {
     const errors = [];
 
     if (!geminiResponse || !Array.isArray(geminiResponse.romanized_lyrics)) {
@@ -513,13 +520,13 @@ function validateRomanizationResponse(originalLyrics, geminiResponse) {
         return { isValid: false, errors };
     }
 
-    if (geminiResponse.romanized_lyrics.length !== originalLyrics.length) {
-        errors.push(`The number of lines in the response (${geminiResponse.romanized_lyrics.length}) does not match the original request (${originalLyrics.length}).`);
+    if (geminiResponse.romanized_lyrics.length !== originalLyricsForApi.length) {
+        errors.push(`The number of lines in the response (${geminiResponse.romanized_lyrics.length}) does not match the request (${originalLyricsForApi.length}).`);
         return { isValid: false, errors }; // Fatal error.
     }
 
     geminiResponse.romanized_lyrics.forEach((romanizedLine, index) => {
-        const originalLine = originalLyrics[index];
+        const originalLine = originalLyricsForApi[index];
         if (romanizedLine.original_line_index !== index) {
             errors.push(`Line ${index}: 'original_line_index' is incorrect. Expected ${index}, got ${romanizedLine.original_line_index}.`);
         }
@@ -527,48 +534,141 @@ function validateRomanizationResponse(originalLyrics, geminiResponse) {
             errors.push(`Line ${index}: The required 'text' field is missing or not a string.`);
         }
 
-        const originalHasSyllabus = Array.isArray(originalLine.syllabus) && originalLine.syllabus.length > 0;
-        const romanizedHasSyllabus = Array.isArray(romanizedLine.syllabus);
+        const originalHasChunks = Array.isArray(originalLine.chunk) && originalLine.chunk.length > 0;
+        const romanizedHasChunks = Array.isArray(romanizedLine.chunk);
 
-        if (originalHasSyllabus) {
-            if (!romanizedHasSyllabus) {
-                errors.push(`Line ${index}: A 'syllabus' array was expected but is missing.`);
-            } else if (romanizedLine.syllabus.length !== originalLine.syllabus.length) {
-                errors.push(`Line ${index}: Syllable count mismatch. Original had ${originalLine.syllabus.length}, response has ${romanizedLine.syllabus.length}.`);
+        if (originalHasChunks) {
+            if (!romanizedHasChunks) {
+                errors.push(`Line ${index}: A 'chunk' array was expected but is missing.`);
+            } else if (romanizedLine.chunk.length !== originalLine.chunk.length) {
+                errors.push(`Line ${index}: Chunk count mismatch. Original had ${originalLine.chunk.length}, response has ${romanizedLine.chunk.length}.`);
+            } else {
+                const mergedChunkText = romanizedLine.chunk.map(c => c.text).join('');
+                //less strictier checker
+                const cleanedMergedChunkText = mergedChunkText.replace(/\s/g, '').toLowerCase();
+                const cleanedRomanizedLineText = romanizedLine.text.replace(/\s/g, '').toLowerCase();
+
+                const distance = levenshteinDistance(cleanedMergedChunkText, cleanedRomanizedLineText);
+                const maxLength = Math.max(cleanedMergedChunkText.length, cleanedRomanizedLineText.length);
+                const percentageDifference = (maxLength === 0) ? 0 : (distance / maxLength) * 100;
+
+                if (percentageDifference > 15) {
+                    errors.push(`Line ${index}: Text mismatch. The combined text from 'chunk' array does not match the line 'text' by more than 15%. Merged: "${mergedChunkText}", Line Text: "${romanizedLine.text}". Difference: ${percentageDifference.toFixed(2)}%.`);
+                }
             }
-        } else if (romanizedHasSyllabus) {
-            errors.push(`Line ${index}: A 'syllabus' array was provided, but the original did not have one.`);
+        } else if (romanizedHasChunks) {
+            errors.push(`Line ${index}: A 'chunk' array was provided, but the original did not have one.`);
         }
     });
 
     return { isValid: errors.length === 0, errors };
 }
 
+
+/**
+ * Pre-processes lyrics for Gemini:
+ * 1. Skips purely Latin lines (which don't need romanization).
+ * 2. Compacts repeated non-Latin lines to save API tokens.
+ * 3. Creates a plan to reconstruct the full list later.
+ * @param {Object[]} structuredInput - The original array of lyric objects.
+ * @returns {{lyricsForApi: Object[], reconstructionPlan: Object[]}}
+ */
+function prepareLyricsForGemini(structuredInput) {
+    const lyricsForApi = [];
+    const reconstructionPlan = [];
+    const contentToApiIndexMap = new Map();
+
+    structuredInput.forEach((line, originalIndex) => {
+        if (isPurelyLatinScript(line.text)) {
+            reconstructionPlan.push({ type: 'latin', data: line, originalIndex });
+            return;
+        }
+
+        const contentKey = JSON.stringify({ text: line.text, chunk: line.chunk });
+        if (contentToApiIndexMap.has(contentKey)) {
+            reconstructionPlan.push({ type: 'api', apiIndex: contentToApiIndexMap.get(contentKey), originalIndex });
+        } else {
+            const newApiIndex = lyricsForApi.length;
+            lyricsForApi.push({ ...line, original_line_index: newApiIndex });
+            contentToApiIndexMap.set(contentKey, newApiIndex);
+            reconstructionPlan.push({ type: 'api', apiIndex: newApiIndex, originalIndex });
+        }
+    });
+
+    return { lyricsForApi, reconstructionPlan };
+}
+
+/**
+ * Reconstructs the full-length romanized lyric array from the API's compacted response
+ * and the pre-computed reconstruction plan.
+ * @param {Object[]} romanizedApiLyrics - The romanized data from the API (for unique non-Latin lines).
+ * @param {Object[]} reconstructionPlan - The plan to rebuild the original list structure.
+ * @returns {Object[]} The full-length array of romanized lyrics.
+ */
+function reconstructRomanizedLyrics(romanizedApiLyrics, reconstructionPlan) {
+    const fullList = [];
+    reconstructionPlan.forEach(planItem => {
+        let reconstructedLine;
+        if (planItem.type === 'latin') {
+            reconstructedLine = {
+                ...planItem.data,
+                text: planItem.data.text,
+                chunk: planItem.data.chunk ? planItem.data.chunk.map(c => ({ ...c, text: c.text })) : undefined,
+                original_line_index: planItem.originalIndex,
+            };
+        } else {
+            const apiResult = romanizedApiLyrics[planItem.apiIndex];
+            reconstructedLine = {
+                ...apiResult,
+                original_line_index: planItem.originalIndex, // Restore original index
+            };
+        }
+        fullList[planItem.originalIndex] = reconstructedLine;
+    });
+    return fullList;
+}
+
 /**
  * Fetches romanizations from Gemini.
- * It uses a proper multi-turn conversation context for the reflection step, showing the model its own
- * previous flawed output and the user's correction.
- * @param {Object[]} lyricsDataArray - Array of structured lyric lines.
+ * This version is optimized to skip Latin lines and compact duplicates before calling the API.
+ * It uses a multi-turn conversation for a "reflection" step if the first response is invalid.
+ * @param {Object[]} structuredInput - Array of structured lyric lines using 'chunk'.
  * @param {Object} settings - User settings including API key and custom prompts.
- * @returns {Promise<Object[]>} Array of romanized lyric objects.
+ * @returns {Promise<Object[]>} The full-length, reconstructed array of romanized lyric objects.
  */
-async function fetchGeminiRomanize(lyricsDataArray, settings) {
-    const { geminiApiKey, geminiRomanizationModel } = settings;
+async function fetchGeminiRomanize(structuredInput, settings) {
+    const { geminiApiKey, geminiRomanizationModel, overrideGeminiRomanizePrompt, customGeminiRomanizePrompt } = settings;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiRomanizationModel}:generateContent?key=${geminiApiKey}`;
 
-    // --- Define the initial user prompt once ---
-    const initialUserPrompt = `You are an expert AI Romanizer. Your task is to convert non-Latin script song lyrics into standard Latin script, preserving pronunciation and structure with extreme precision.
-    CRUCIAL ROMANIZATION RULES:
-    1. PRESERVE LATIN SCRIPT: If any text is ALREADY in Latin script, it MUST be copied EXACTLY AS IS.
-    2. PRESERVE STRUCTURE:
-        - SYLLABLE-FOR-SYLLABLE MAPPING: If an input line has a "syllabus" array, your output MUST have a "syllabus" array with the EXACT SAME NUMBER OF SYLLABLES. Do not merge or split syllables.
-        - OMIT SYLLABLES WHEN ABSENT: If an input line does NOT have a "syllabus" array, your output MUST also NOT have a "syllabus" array.
-    3. ACCURATE ROMANIZATION: Convert non-Latin text to its standard romanization.
-    4. PRESERVE PUNCTUATION & NUMBERS: All numbers and punctuation must be preserved.
+    const { lyricsForApi, reconstructionPlan } = prepareLyricsForGemini(structuredInput);
 
-    Now, process the following lyrics based on these strict rules.
+    if (lyricsForApi.length === 0) {
+        return reconstructRomanizedLyrics([], reconstructionPlan);
+    }
+
+    const initialUserPrompt = (overrideGeminiRomanizePrompt && customGeminiRomanizePrompt)
+        ? customGeminiRomanizePrompt : `You are a linguistic expert AI specializing in precise, context-aware romanization. Your task is to follow these rules with extreme accuracy.
+
+    **THE GOLDEN RULE: The full line 'text' is the source of truth, and 'chunks' must be derived from it.**
+    This is the most critical instruction. Some languages have contextual rules where words change form when placed together. You must first determine the most natural, flowing romanization for the **entire line** of text. Then, and only then, you must partition that final romanized string into the chunks. The chunks are a breakdown of the final result, not independently romanized words.
+
+    **Hypothetical Example of the GOLDEN RULE:**
+    Imagine a language where "luma" + "ina" becomes "lumina".
+    - Original Input: \`{ "text": "luma ina", "chunk": [{"text": "luma"}, {"text": "ina"}] }\`
+    - Your internal process:
+        1. Romanize the full text "luma ina" according to its contextual rule, resulting in: "lumina".
+        2. Now, intelligently split "lumina" back into the original number of chunks.
+    - Correct Output: \`{ "text": "lumina", "chunk": [{"text": "lum"}, {"text": "ina"}] }\` (Note: the split is logical based on the source)
+    - **INCORRECT** Output (This is what you must avoid): \`{ "text": "lumina", "chunk": [{"text": "luma"}, {"text": "ina"}] }\` - This is wrong because the chunks were romanized in isolation and do not sum to the correct final text.
+
+    **ADDITIONAL STRICT RULES:**
+    1.  **CHUNK-FOR-CHUNK MAPPING:** If an input line has a "chunk" array, your output MUST have a "chunk" array with the EXACT SAME NUMBER OF CHUNKS.
+    2.  **OMIT CHUNKS WHEN ABSENT:** If an input line does NOT have a "chunk" array, your output MUST also NOT have a "chunk" array.
+    3.  **ACCURATE ROMANIZATION:** Convert all non-Latin text to its standard, phonetically accurate romanization for the detected language.
+
+    Now, process the following real lyrics, applying the Golden Rule and all other rules strictly.
     Lyrics to romanize:
-    ${JSON.stringify(lyricsDataArray, null, 2)}`;
+    ${JSON.stringify(lyricsForApi, null, 2)}`;
 
     const schema = {
         type: "OBJECT",
@@ -580,18 +680,17 @@ async function fetchGeminiRomanize(lyricsDataArray, settings) {
                     type: "OBJECT",
                     properties: {
                         text: { type: "STRING", description: "The fully romanized text of the entire line." },
-                        original_line_index: { type: "INTEGER", description: "The original index of the line, which must be preserved from the input." },
-                        syllabus: {
+                        original_line_index: { type: "INTEGER", description: "The original index of the line from the input, which must be preserved." },
+                        chunk: {
                             type: "ARRAY",
                             nullable: true,
-                            description: "An array of individual romanized syllables. MUST ONLY be present if the corresponding input object had a syllabus. Its length MUST match the input syllabus length.",
                             items: {
                                 type: "OBJECT",
                                 properties: {
-                                    text: { type: "STRING", description: "The text of a single romanized syllable." },
-                                    syllableIndex: { type: "INTEGER", description: "The original index of the syllable, which must be preserved." }
+                                    text: { type: "STRING", description: "The text of a single romanized chunk." },
+                                    chunkIndex: { type: "INTEGER", description: "The original index of the chunk, which must be preserved." }
                                 },
-                                required: ["text", "syllableIndex"]
+                                required: ["text", "chunkIndex"]
                             }
                         }
                     },
@@ -602,87 +701,78 @@ async function fetchGeminiRomanize(lyricsDataArray, settings) {
         required: ["romanized_lyrics"]
     };
 
-    // --- First Attempt ---
-    const firstRequestBody = {
-        contents: [{ role: 'user', parts: [{ text: initialUserPrompt }] }],
-        generation_config: {
-            response_mime_type: "application/json",
-            responseSchema: schema
+    let currentContents = [{ role: 'user', parts: [{ text: initialUserPrompt }] }];
+    let lastResponseText = '';
+    const MAX_RETRIES = 3;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        let responseText;
+        try {
+            const requestBody = {
+                contents: currentContents,
+                generation_config: { response_mime_type: "application/json", responseSchema: schema }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: { message: response.statusText } }));
+                throw new Error(`Gemini API call failed with status ${response.status}: ${errorData.error.message}`);
+            }
+
+            const data = await response.json();
+
+            if (data.promptFeedback?.blockReason) {
+                throw new Error(`Gemini blocked the request: ${data.promptFeedback.blockReason}`);
+            }
+
+            responseText = data.candidates[0].content.parts[0].text;
+            lastResponseText = responseText; // Store the last successful response text
+
+        } catch (e) {
+            console.error(`Gemini romanization failed on attempt ${attempt}: ${e.message}`);
+            if (attempt === MAX_RETRIES) {
+                throw new Error(`Gemini romanization failed after ${MAX_RETRIES} attempts: ${e.message}`);
+            }
+            continue; // Try again
         }
-    };
-    
-    let responseText;
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(firstRequestBody)
-        });
-        if (!response.ok) throw new Error(`Initial API call failed with status ${response.status}`);
-        const data = await response.json();
-        if (data.promptFeedback?.blockReason) throw new Error(`Gemini blocked the request: ${data.promptFeedback.blockReason}`);
-        responseText = data.candidates[0].content.parts[0].text;
-    } catch(e) {
-        throw new Error(`Gemini romanization failed on initial request: ${e.message}`);
-    }
 
-    const parsedJson = JSON.parse(responseText);
-    const validationResult = validateRomanizationResponse(lyricsDataArray, parsedJson);
-
-    if (validationResult.isValid) {
-        console.log("Gemini romanization succeeded on the first attempt.");
-        return parsedJson.romanized_lyrics; // Success!
-    }
-
-    // --- Second Attempt (Reflection) ---
-    console.warn("First attempt failed validation. Building multi-turn context for reflection...");
-    
-    const reflectionPrompt = `Your previous response had structural errors and did not adhere to the rules.
-    
-    Here are the specific errors that you MUST fix:
-    - ${validationResult.errors.join('\n- ')}
-    
-    Please analyze our conversation history, re-read the original rules, and provide a new, corrected JSON object that fixes all the listed errors.
-    Here the original lyrics:
-    ${JSON.stringify(lyricsDataArray, null, 2)}`;
-
-    // Build the conversational history for the reflection call
-    const secondRequestBody = {
-        contents: [
-            { role: 'user', parts: [{ text: initialUserPrompt }] }, // Turn 1: Original request
-            { role: 'model', parts: [{ text: responseText }] },    // Turn 2: Model's flawed response
-            { role: 'user', parts: [{ text: reflectionPrompt }] }  // Turn 3: User's correction
-        ],
-        generation_config: {
-            response_mime_type: "application/json",
-            responseSchema: schema // Apply the same schema constraint to the correction
+        let parsedJson;
+        try {
+            parsedJson = JSON.parse(responseText);
+        } catch (e) {
+            console.error(`Attempt ${attempt}: Failed to parse JSON response from Gemini: ${e.message}. Raw response: ${responseText}`);
+            if (attempt === MAX_RETRIES) {
+                throw new Error(`Gemini romanization failed after ${MAX_RETRIES} attempts: Could not parse valid JSON.`);
+            }
+            // Add reflection for JSON parsing error
+            currentContents.push({ role: 'model', parts: [{ text: responseText }] });
+            currentContents.push({ role: 'user', parts: [{ text: `Your previous response was not valid JSON. Please provide a corrected JSON. Error: ${e.message}. Raw response: ${responseText}` }] });
+            continue; // Try again
         }
-    };
 
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(secondRequestBody)
-        });
-        if (!response.ok) throw new Error(`Reflection API call failed with status ${response.status}`);
-        const data = await response.json();
-        if (data.promptFeedback?.blockReason) throw new Error(`Gemini blocked the reflection request: ${data.promptFeedback.blockReason}`);
-        
-        const finalResponseText = data.candidates[0].content.parts[0].text;
-        const finalParsedJson = JSON.parse(finalResponseText);
-        const finalValidation = validateRomanizationResponse(lyricsDataArray, finalParsedJson);
+        const validationResult = validateRomanizationResponse(lyricsForApi, parsedJson);
 
-        if (finalValidation.isValid) {
-            console.log("Gemini romanization succeeded on the reflection attempt.");
-            return finalParsedJson.romanized_lyrics; // Success on the second try!
+        if (validationResult.isValid) {
+            console.log(`Gemini romanization succeeded on attempt ${attempt}.`);
+            return reconstructRomanizedLyrics(parsedJson.romanized_lyrics, reconstructionPlan);
         } else {
-            // If it's still wrong, we give up and report the final errors.
-            throw new Error(`Reflection attempt also failed validation. Final errors: ${finalValidation.errors.join(', ')}`);
+            console.warn(`Attempt ${attempt} failed validation. Errors: ${validationResult.errors.join(', ')}`);
+            if (attempt === MAX_RETRIES) {
+                throw new Error(`Gemini romanization failed after ${MAX_RETRIES} attempts. Final validation errors: ${validationResult.errors.join(', ')}`);
+            }
+            // Add reflection for validation errors
+            currentContents.push({ role: 'model', parts: [{ text: responseText }] });
+            currentContents.push({ role: 'user', parts: [{ text: `Your previous response had structural errors. Fix them. ERRORS: ${validationResult.errors.join('\n- ')}\n\nRe-read the rules and provide a corrected JSON for these original lyrics:\n${JSON.stringify(lyricsForApi, null, 2)}` }] });
         }
-    } catch(e) {
-        throw new Error(`Gemini romanization failed during reflection: ${e.message}`);
     }
+
+    // Should not reach here if MAX_RETRIES is handled correctly
+    throw new Error("Unexpected error: Gemini romanization process completed without success or explicit failure.");
 }
 
 async function fetchGoogleTranslate(text, targetLang) {
@@ -691,7 +781,7 @@ async function fetchGoogleTranslate(text, targetLang) {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Google Translate API error: ${response.statusText}`);
     const data = await response.json();
-    return data?.map(item => item).join('') || text;
+    return data?.map(item => item?.[0]).join('') || text;
 }
 
 async function fetchGoogleRomanize(texts) {
@@ -704,12 +794,12 @@ async function fetchGoogleRomanize(texts) {
         const detectResponse = await fetch(detectUrl);
         if (detectResponse.ok) {
             const detectData = await detectResponse.json();
-            sourceLang = detectData || 'auto';
+            sourceLang = detectData[2] || 'auto';
         }
     } catch (e) {
         console.error("Language detection for romanization failed, falling back to 'auto'.", e);
     }
-    
+
     const romanizedTexts = [];
     for (const text of texts) {
         if (isPurelyLatinScript(text)) {
@@ -720,7 +810,7 @@ async function fetchGoogleRomanize(texts) {
             const romanizeUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=en&hl=en&dt=rm&q=${encodeURIComponent(text)}`;
             const romanizeResponse = await fetch(romanizeUrl);
             const romanizeData = await romanizeResponse.json();
-            romanizedTexts.push(romanizeData?.[0]?.[0]?.[0] || text);
+            romanizedTexts.push(romanizeData?.[0]?.[0]?.[3] || text);
         } catch (error) {
             console.error(`Error romanizing text "${text}":`, error);
             romanizedTexts.push(text);
@@ -747,6 +837,9 @@ async function fetchFromKPoeAPI(baseUrl, songInfo, sourceOrder, forceReload, fet
             const data = await response.json();
             return parseKPoeFormat(data);
         }
+        if (response.status == 404 || response.status == 403) {
+            return null;
+        }
         console.warn(`Failed to fetch from ${baseUrl} (${response.status}): ${response.statusText}`);
         return null;
     } catch (error) {
@@ -771,7 +864,7 @@ async function fetchCustomKPoeLyrics(songInfo, customUrl, sourceOrder, forceRelo
 async function fetchLRCLibLyrics(songInfo, fetchOptions = {}) {
     const params = new URLSearchParams({ artist_name: songInfo.artist, track_name: songInfo.title });
     if (songInfo.album) params.append('album_name', songInfo.album);
-    
+
     const url = `https://lrclib.net/api/get?${params.toString()}`;
 
     try {
@@ -791,11 +884,11 @@ async function fetchYouTubeSubtitles(songInfo) {
         if (!subtitleInfo?.captionTracks?.length) return null;
 
         const validTracks = subtitleInfo.captionTracks.filter(t => t.kind !== 'asr' && !t.vssId?.startsWith('a.'));
-        const selectedTrack = validTracks.find(t => t.isDefault) || validTracks;
+        const selectedTrack = validTracks.find(t => t.isDefault) || validTracks[0];
 
         if (!selectedTrack) return null;
 
-        const url = new URL(selectedTrack.url);
+        const url = new URL(selectedTrack.baseUrl);
         url.searchParams.set('fmt', 'json3');
 
         const response = await fetch(url.toString());
@@ -827,17 +920,18 @@ function parseYouTubeSubtitles(data, songInfo) {
 
 function parseLRCLibFormat(data) {
     if (!data.syncedLyrics) return null;
-    const timeRegex = /\[(\d{2}):(\d{2})\.(\d{2})\](.*)/;
-    const matches = data.syncedLyrics.split('\n')
+    const timeRegex = /\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
+    const lines = data.syncedLyrics.split('\n');
+    const matches = lines
         .map(line => timeRegex.exec(line))
         .filter(Boolean)
         .map(match => ({
-            startTime: parseInt(match, 10) * 60 + parseInt(match, 10) + parseInt(match, 10) / 100,
-            text: match.trim()
+            startTime: parseInt(match[1], 10) * 60 + parseInt(match[2], 10) + parseInt(match[3], 10) / (match[3].length === 2 ? 100 : 1000),
+            text: match[4].trim()
         }));
-    
+
     if (matches.length === 0) return null;
-    
+
     const parsedLines = matches.map((current, i) => {
         const endTime = (i < matches.length - 1) ? matches[i + 1].startTime : current.startTime + 5;
         return { ...current, endTime, duration: endTime - current.startTime };
@@ -877,4 +971,26 @@ function isEmptyLyrics(lyrics) {
 
 function isPurelyLatinScript(text) {
     return /^[\p{Script=Latin}\p{N}\p{P}\p{S}\s]*$/u.test(text);
+}
+
+function levenshteinDistance(s1, s2) {
+    const track = Array(s2.length + 1).fill(null).map(() =>
+        Array(s1.length + 1).fill(null));
+    for (let i = 0; i <= s1.length; i++) {
+        track[0][i] = i;
+    }
+    for (let j = 0; j <= s2.length; j++) {
+        track[j][0] = j;
+    }
+    for (let j = 1; j <= s2.length; j++) {
+        for (let i = 1; i <= s1.length; i++) {
+            const indicator = (s1[i - 1] === s2[j - 1]) ? 0 : 1;
+            track[j][i] = Math.min(
+                track[j][i - 1] + 1, // deletion
+                track[j - 1][i] + 1, // insertion
+                track[j - 1][i - 1] + indicator // substitution
+            );
+        }
+    }
+    return track[s2.length][s1.length];
 }
