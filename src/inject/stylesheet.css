@@ -648,7 +648,8 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #guide-wrapper,
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-player-page#player-page,
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #player-bar-background,
-#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-player-bar {
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-player-bar,
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #nav-bar-divider.ytmusic-app-layout {
     background: transparent !important;
 }
 
