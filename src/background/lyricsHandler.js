@@ -1060,6 +1060,7 @@ function isEmptyLyrics(lyrics) {
 const KPOE_SERVERS = [
     "https://lyricsplus.prjktla.workers.dev",
     "https://lyrics-plus-backend.vercel.app",
+    "https://lyricsplus.onrender.com",
     "https://lyricsplus.prjktla.online"
 ];
 

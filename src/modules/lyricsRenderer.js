@@ -502,13 +502,9 @@ class LyricsPlusRenderer {
   // --- Lyrics Display & Rendering Logic ---
 
   /**
-   * Internal helper to render word-by-word lyrics.
-   * @private
-   */
-    /**
-   * Internal helper to render word-by-word lyrics.
-   * @private
-   */
+ * Internal helper to render word-by-word lyrics.
+ * @private
+ */
   _renderWordByWordLyrics(lyrics, displayMode, singerClassMap, lightweight, elementPool, fragment) {
     const getComputedFont = (element) => {
       if (!element) return '400 16px sans-serif';
