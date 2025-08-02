@@ -1241,7 +1241,8 @@ function parseKPoeFormat(data) {
                 duration: Number(syl.duration || 0),
                 isBackground: syl.isBackground || false
             }));
-            return { text: item.text || '', startTime, duration, endTime: startTime + duration, syllabus };
+            const element = item.element || []
+            return { text: item.text || '', startTime, duration, endTime: startTime + duration, syllabus, element };
         }),
         metadata: { ...data.metadata, source: `${data.metadata.source} (KPoe)` }
     };
