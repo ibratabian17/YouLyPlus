@@ -24,6 +24,39 @@ let blurFramebuffer = null;
 let renderTexture = null;
 let blurTextureA = null;
 
+// --- WebGL Context Management ---
+function handleContextLost(event) {
+    event.preventDefault(); // Prevent the default context loss handling
+    console.warn("LYPLUS: WebGL context lost. Attempting to restore...");
+    if (globalAnimationId) {
+        cancelAnimationFrame(globalAnimationId);
+        globalAnimationId = null;
+    }
+    // Clean up WebGL resources (optional, as context is lost, but good practice)
+    // Setting gl to null will prevent further WebGL operations until restored
+    gl = null;
+    glProgram = null;
+    updateStateProgram = null;
+    blurProgram = null;
+    paletteTexture = null;
+    stateTextureA = null;
+    stateTextureB = null;
+    cellStateFramebuffer = null;
+    renderFramebuffer = null;
+    blurFramebuffer = null;
+    renderTexture = null;
+    blurTextureA = null;
+    positionBuffer = null;
+    // No need to remove canvas or container, as they might be reused
+}
+
+function handleContextRestored() {
+    console.log("LYPLUS: WebGL context restored. Re-initializing...");
+    // Re-initialize everything. LYPLUS_setupBlurEffect handles cleanup of old elements.
+    LYPLUS_setupBlurEffect();
+    // The IntersectionObserver inside LYPLUS_setupBlurEffect will restart the animation if visible.
+}
+
 // --- Performance & State Management ---
 // Store size-dependent values to avoid DOM reads in the animation loop
 let blurDimensions = { width: 0, height: 0 };
@@ -235,6 +268,10 @@ function LYPLUS_setupBlurEffect() {
         gl = webglCanvas.getContext('webgl', ctxAttribs) || webglCanvas.getContext('experimental-webgl', ctxAttribs);
     } catch (e) { console.error("LYPLUS: WebGL context creation failed.", e); }
     if (!gl) { console.error("LYPLUS: WebGL not supported!"); return null; }
+
+    // Add context lost/restored event listeners
+    webglCanvas.addEventListener('webglcontextlost', handleContextLost, false);
+    webglCanvas.addEventListener('webglcontextrestored', handleContextRestored, false);
 
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const displayFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
