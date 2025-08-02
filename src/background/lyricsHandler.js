@@ -1219,7 +1219,7 @@ function parseLRCLibFormat(data) {
     const parsedLines = matches.map((current, i) => {
         const endTime = (i < matches.length - 1) ? matches[i + 1].startTime : current.startTime + 5;
         return { ...current, endTime, duration: endTime - current.startTime };
-    }).filter(line => line.text);
+    }).filter(line => line.text.trim() !== "♪");
 
     return {
         type: 'Line',
