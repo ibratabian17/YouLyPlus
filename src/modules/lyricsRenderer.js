@@ -563,10 +563,10 @@ class LyricsPlusRenderer {
           const easedProgress = Math.pow(progress, easingPower);
 
           // 3. Map the eased progress to the final CSS variable values.
-          maxScale = 1.0 + 0.05 + easedProgress * 0.13; // Used for both scale and offset calculation
+          maxScale = 1.0 + 0.05 + easedProgress * 0.10; // Used for both scale and offset calculation
           const shadowIntensity = 0.4 + easedProgress * 0.4;
           const normalizedGrowth = (maxScale - 1.0) / 0.13; // Remaps [1.07, 1.20] to [0, 1]
-          const translateYPeak = -normalizedGrowth * 3.0; // Map [0, 1] to [0, -3.0]
+          const translateYPeak = -normalizedGrowth * 2.85; // Map [0, 1] to [0, -3.0]
 
           wordSpan.style.setProperty('--max-scale', maxScale.toFixed(3));
           wordSpan.style.setProperty('--shadow-intensity', shadowIntensity.toFixed(3));
