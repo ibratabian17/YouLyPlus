@@ -1,7 +1,7 @@
 //src/lib/sponsorblock.js
 
 /**
- * Compute the SHA‑256 hash prefix for a given video ID.
+ * Compute the SHA-256 hash prefix for a given video ID.
  * @param {string} videoID - The YouTube video ID.
  * @param {number} prefixLength - How many hex characters to take (default is 4).
  * @returns {Promise<string>} The computed hash prefix.
@@ -39,31 +39,21 @@ async function computeHashPrefix(videoID, prefixLength = 4) {
  */
 async function buildSponsorBlockUrl(options) {
     let baseUrl = 'https://sponsor.ajay.app/api/skipSegments';
+    const params = new URLSearchParams();
 
-    // If no sha256HashPrefix is provided but videoID exists, compute it.
-    if (!options.sha256HashPrefix && options.videoID) {
-        const prefixLength = options.prefixLength || 4;
-        const computedPrefix = await computeHashPrefix(options.videoID, prefixLength);
-        options.sha256HashPrefix = computedPrefix;
-    }
-
+    // Handle hash prefix vs direct videoID
     if (options.sha256HashPrefix) {
         baseUrl += '/' + encodeURIComponent(options.sha256HashPrefix);
     } else if (options.videoID) {
-        // Fallback: use videoID as a query parameter if no prefix is computed.
-        // (Not recommended since using the hash prefix is more private.)
+        // Compute hash prefix automatically for privacy
+        const prefixLength = options.prefixLength || 4;
+        const computedPrefix = await computeHashPrefix(options.videoID, prefixLength);
+        baseUrl += '/' + encodeURIComponent(computedPrefix);
     } else {
         throw new Error('Either sha256HashPrefix or videoID must be provided.');
     }
 
-    const params = new URLSearchParams();
-
-    // Only add videoID if prefix is not used (should not happen with our auto-compute).
-    if (!options.sha256HashPrefix && options.videoID) {
-        params.set('videoID', options.videoID);
-    }
-
-    // Combine category/categories.
+    // Combine category/categories with proper validation
     const cats = [];
     if (options.category) {
         Array.isArray(options.category)
@@ -75,16 +65,17 @@ async function buildSponsorBlockUrl(options) {
             ? cats.push(...options.categories)
             : cats.push(options.categories);
     }
-    // Default to common segment categories if none are provided.
-    if (cats.length === 0) {
-        cats.push(
-            "sponsor", "selfpromo", "exclusive_access", "interaction", "poi_highlight",
-            "intro", "outro", "preview", "filler", "chapter", "music_offtopic"
-        );
-    }
-    params.set('categories', JSON.stringify(cats));
 
-    // Combine requiredSegment/requiredSegments.
+    // Use more comprehensive default categories
+    if (cats.length === 0) {
+        cats.push("sponsor", "selfpromo", "interaction", "intro", "outro", "preview", "music_offtopic");
+    }
+
+    // Remove duplicates and validate categories
+    const uniqueCats = [...new Set(cats)];
+    params.set('categories', JSON.stringify(uniqueCats));
+
+    // Combine requiredSegment/requiredSegments
     const reqSegs = [];
     if (options.requiredSegment) {
         Array.isArray(options.requiredSegment)
@@ -97,10 +88,11 @@ async function buildSponsorBlockUrl(options) {
             : reqSegs.push(options.requiredSegments);
     }
     if (reqSegs.length) {
-        params.set('requiredSegments', JSON.stringify(reqSegs));
+        const uniqueReqSegs = [...new Set(reqSegs)];
+        params.set('requiredSegments', JSON.stringify(uniqueReqSegs));
     }
 
-    // Combine actionType/actionTypes.
+    // Combine actionType/actionTypes with proper validation
     const actions = [];
     if (options.actionType) {
         Array.isArray(options.actionType)
@@ -112,20 +104,19 @@ async function buildSponsorBlockUrl(options) {
             ? actions.push(...options.actionTypes)
             : actions.push(options.actionTypes);
     }
-    // Default to common action types if none are provided.
+
+    // Use valid default action types
     if (actions.length === 0) {
-        actions.push("skip", "mute", "chapter", "full", "poi");
-    }
-    params.set('actionTypes', JSON.stringify(actions));
-
-    // Set service.
-    if (options.service) {
-        params.set('service', options.service);
-    } else {
-        params.set('service', 'YouTube');
+        actions.push("skip", "mute", "full");
     }
 
-    // Optional: set trimUUIDs.
+    const uniqueActions = [...new Set(actions)];
+    params.set('actionTypes', JSON.stringify(uniqueActions));
+
+    // Set service (YouTube is default)
+    params.set('service', options.service || 'YouTube');
+
+    // Optional: set trimUUIDs
     if (options.trimUUIDs !== undefined) {
         params.set('trimUUIDs', options.trimUUIDs.toString());
     }
@@ -144,79 +135,100 @@ async function buildSponsorBlockUrl(options) {
  */
 async function fetchSponsorSegments(videoID, customOptions = {}) {
     try {
-        // Merge videoID into options.
+        // Validate videoID
+        if (!videoID || typeof videoID !== 'string') {
+            console.warn('Invalid videoID provided to fetchSponsorSegments');
+            return [];
+        }
+
+        // Merge videoID into options
         const options = { videoID, ...customOptions };
-        // Build the URL, which will auto-compute the sha256HashPrefix.
+
+        // Build the URL, which will auto-compute the sha256HashPrefix
         const url = await buildSponsorBlockUrl(options);
-        const response = await fetch(url);
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'SponsorBlock-Client/1.0'
+            }
+        });
 
         if (response.status === 404) {
-            console.warn("SponsorBlock returned 404; no segments available for this video.");
+            console.info("SponsorBlock returned 404; no segments available for this video.");
             return [];
         }
 
         if (!response.ok) {
-            console.warn(`SponsorBlock fetch failed with status: ${response.status}`);
+            console.warn(`SponsorBlock fetch failed with status: ${response.status} ${response.statusText}`);
             return [];
         }
 
         const data = await response.json();
 
-        // If the API returns an array of objects, search for the one matching our videoID.
-        // This happens when querying with a hash prefix.
-        if (Array.isArray(data) && data.length > 0 && data[0].hasOwnProperty('videoID')) {
+        // Handle hash prefix response (array of video objects)
+        if (Array.isArray(data) && data.length > 0) {
+            // Look for our specific videoID in the response
             const videoObj = data.find(item => item.videoID === videoID);
-            if (videoObj && videoObj.segments) {
+            if (videoObj && Array.isArray(videoObj.segments)) {
                 return videoObj.segments;
             }
-            return []; // videoID not found in the hashed response, or no segments for it
+
+            // If no exact match found, return empty array
+            console.info(`No segments found for videoID ${videoID} in SponsorBlock response`);
+            return [];
         }
 
-        // Fallback: if data is already an array of segments, return it.
-        // This can happen if videoID was passed as a query param (though less private).
+        // Handle direct response (when not using hash prefix - shouldn't happen with current implementation)
         if (Array.isArray(data)) {
             return data;
         }
 
-        console.warn("SponsorBlock response format not recognized or empty:", data);
+        console.warn("SponsorBlock response format not recognized:", data);
         return [];
+
     } catch (error) {
-        console.warn('Error fetching SponsorBlock segments:', error);
+        console.error('Error fetching SponsorBlock segments:', error);
         return [];
     }
 }
 
 /**
- * Adjusts the timing of lyrics by adding a delay (offset) based on the total duration of the segment
- * SponsorBlock that has started before the lyrics appear. This function merges overlapping segments
- * and calculates the offset for each lyric item (line or syllable).
+ * Adjusts the timing of lyrics by adding a delay (offset) based on the total duration of
+ * SponsorBlock segments that occur before each lyric timestamp. This function merges 
+ * overlapping segments and calculates the offset for each lyric item.
  * Supports V1 (individual items) and V2 (lines with nested syllables) lyric formats.
  *
- * @param {Array<Object>} lyricsData
- * @param {Array<Object>} segments
- * @param {string} [timeUnit="s"] 
- * @returns {Array<Object>}
+ * @param {Array<Object>} lyricsData - Array of lyric objects with timing information
+ * @param {Array<Object>} segments - Array of SponsorBlock segment objects
+ * @param {string} [timeUnit="ms"] - Time unit for input/output ("s" for seconds, "ms" for milliseconds)
+ * @returns {Array<Object>} Adjusted lyrics data with updated timing
  */
-function adjustLyricTiming(lyricsData, segments, timeUnit = "s") {
-    if (!lyricsData || lyricsData.length === 0) {
+function adjustLyricTiming(lyricsData, segments, timeUnit = "ms") {
+    if (!Array.isArray(lyricsData) || lyricsData.length === 0) {
         return [];
     }
-    // If no segments, return a deep copy of lyricsData without adjustments.
-    if (!segments || segments.length === 0) {
+
+    // If no segments, return a deep copy of lyricsData without adjustments
+    if (!Array.isArray(segments) || segments.length === 0) {
         return lyricsData.map(lyric => JSON.parse(JSON.stringify(lyric)));
     }
 
-    // 1. Filter valid segments (start < end) and sort by start time
+    // 1. Extract and validate segment intervals
     const intervals = segments
         .map(s => s.segment)
         .filter(segment =>
-            segment && segment.length === 2 &&
-            typeof segment[0] === 'number' && typeof segment[1] === 'number' &&
-            segment[0] < segment[1] // Ensure start time is less than end time
+            Array.isArray(segment) &&
+            segment.length === 2 &&
+            typeof segment[0] === 'number' &&
+            typeof segment[1] === 'number' &&
+            segment[0] < segment[1] && // Ensure start < end
+            segment[0] >= 0 // Ensure non-negative timestamps
         )
-        .sort((a, b) => a[0] - b[0]);
+        .sort((a, b) => a[0] - b[0]); // Sort by start time
 
-    // If no valid segments after filtering, return a deep copy.
+    // If no valid segments after filtering, return a deep copy
     if (intervals.length === 0) {
         return lyricsData.map(lyric => JSON.parse(JSON.stringify(lyric)));
     }
@@ -230,82 +242,77 @@ function adjustLyricTiming(lyricsData, segments, timeUnit = "s") {
         const lastMerged = mergedIntervals[mergedIntervals.length - 1];
 
         if (currentInterval[0] <= lastMerged[1]) { // Overlap or adjacent
-            lastMerged[1] = Math.max(lastMerged[1], currentInterval[1]); // Extend the last merged interval
+            lastMerged[1] = Math.max(lastMerged[1], currentInterval[1]);
         } else {
-            mergedIntervals.push([...currentInterval]); // No overlap, add as a new interval (copy)
+            mergedIntervals.push([...currentInterval]); // No overlap, add as new interval
         }
     }
 
+    // 3. Process each lyric item
     const adjustedLyrics = lyricsData.map(originalLyricItem => {
         // Deep copy each lyric item to prevent modifying original objects
         const lyricItem = JSON.parse(JSON.stringify(originalLyricItem));
 
-        let itemOriginalStartTimeMs;
+        // Determine the original start time of the lyric item
+        let itemOriginalStartTime;
 
-        // Determine the original start time of the lyric item in milliseconds
-        // Prioritize 'time' as it's common in V1/V2 examples, then 'startTime'.
         if (lyricItem.hasOwnProperty('time')) {
-            itemOriginalStartTimeMs = (timeUnit === "ms") ? lyricItem.time : Math.round(lyricItem.time * 1000);
+            itemOriginalStartTime = lyricItem.time;
         } else if (lyricItem.hasOwnProperty('startTime')) {
-            itemOriginalStartTimeMs = (timeUnit === "ms") ? lyricItem.startTime : Math.round(lyricItem.startTime * 1000);
+            itemOriginalStartTime = lyricItem.startTime;
         } else {
-            // If no time property, return the item as is (already a copy)
-            // console.warn("Lyric item missing 'time' or 'startTime' property:", lyricItem);
+            // If no time property, return the item as is
             return lyricItem;
         }
 
-        const itemOriginalStartSec = itemOriginalStartTimeMs / 1000;
+        // Convert to seconds for calculation
+        const itemOriginalStartSec = (timeUnit === "ms") ? itemOriginalStartTime / 1000 : itemOriginalStartTime;
 
-        // Calculate cumulative offset in seconds
-        let cumulativeOffsetSec = 0;
+        // Calculate cumulative delay from all sponsor segments that start before or at this lyric
+        let cumulativeDelaySec = 0;
         for (const [segmentStartSec, segmentEndSec] of mergedIntervals) {
-            if (itemOriginalStartSec >= segmentStartSec) {
-                cumulativeOffsetSec += (segmentEndSec - segmentStartSec);
+            if (segmentStartSec <= itemOriginalStartSec) {
+                // Sponsor segment starts before or at the lyric time - add its duration to delay
+                cumulativeDelaySec += (segmentEndSec - segmentStartSec);
             } else {
-                break; // Intervals sorted, no need to check further
+                // Sponsor segment starts after lyric - no more delays to add
+                break;
             }
         }
 
-        const cumulativeOffsetMs = Math.round(cumulativeOffsetSec * 1000);
+        // Convert delay back to original time unit
+        const cumulativeDelay = (timeUnit === "ms") ? Math.round(cumulativeDelaySec * 1000) : cumulativeDelaySec;
 
-        // Apply offset if there is any
-        if (cumulativeOffsetMs !== 0) {
+        // Apply delay if there is any
+        if (cumulativeDelay !== 0) {
             // Adjust 'time' property if it exists
             if (lyricItem.hasOwnProperty('time')) {
-                const originalTimeMs = (timeUnit === "ms") ? lyricItem.time : Math.round(lyricItem.time * 1000);
-                const newTimeMs = originalTimeMs + cumulativeOffsetMs;
-                lyricItem.time = (timeUnit === "ms") ? newTimeMs : (newTimeMs / 1000);
+                lyricItem.time += offsetToApply;
             }
 
             // Adjust 'startTime' and 'endTime' properties if they exist
             if (lyricItem.hasOwnProperty('startTime')) {
-                const originalStartMs = (timeUnit === "ms") ? lyricItem.startTime : Math.round(lyricItem.startTime * 1000);
-                const newStartMs = originalStartMs + cumulativeOffsetMs;
-                lyricItem.startTime = (timeUnit === "ms") ? newStartMs : (newStartMs / 1000);
+                lyricItem.startTime += offsetToApply;
 
                 if (lyricItem.hasOwnProperty('endTime')) {
-                    const originalEndMs = (timeUnit === "ms") ? lyricItem.endTime : Math.round(lyricItem.endTime * 1000);
-                    const newEndMs = originalEndMs + cumulativeOffsetMs;
-                    lyricItem.endTime = (timeUnit === "ms") ? newEndMs : (newEndMs / 1000);
+                    lyricItem.endTime += offsetToApply;
                 }
             }
 
-            // Adjust 'syllabus' times if it's a V2 line with a syllabus array
-            // Assumption: Syllabus times are always in milliseconds.
+            // Adjust 'syllabus' times if it's a V2 line with syllable data
             if (lyricItem.hasOwnProperty('syllabus') && Array.isArray(lyricItem.syllabus)) {
-                lyricItem.syllabus = lyricItem.syllabus.map(syl => {
-                    // newSyl is already a part of the deep-copied lyricItem
+                lyricItem.syllabus.forEach(syl => {
                     if (syl.hasOwnProperty('time')) {
-                        // Assuming syl.time is in MS
-                        syl.time += cumulativeOffsetMs;
+                        // Assume syllable times are always in milliseconds
+                        const syllableOffsetMs = (timeUnit === "ms") ? offsetToApply : Math.round(offsetToApply * 1000);
+                        syl.time += syllableOffsetMs;
                     }
-                    return syl; // syl is modified in place from the copied lyricItem
                 });
             }
         }
+
         return lyricItem;
     });
 
     return adjustedLyrics;
 }
-
