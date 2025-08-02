@@ -1239,6 +1239,7 @@ function parseKPoeFormat(data) {
                 text: syl.text || '',
                 time: Number(syl.time || 0),
                 duration: Number(syl.duration || 0),
+                isBackground: syl.isBackground || false
             }));
             return { text: item.text || '', startTime, duration, endTime: startTime + duration, syllabus };
         }),
