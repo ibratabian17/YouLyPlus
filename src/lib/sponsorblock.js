@@ -287,15 +287,15 @@ function adjustLyricTiming(lyricsData, segments, timeUnit = "ms") {
         if (cumulativeDelay !== 0) {
             // Adjust 'time' property if it exists
             if (lyricItem.hasOwnProperty('time')) {
-                lyricItem.time += offsetToApply;
+                lyricItem.time += cumulativeDelay;
             }
 
             // Adjust 'startTime' and 'endTime' properties if they exist
             if (lyricItem.hasOwnProperty('startTime')) {
-                lyricItem.startTime += offsetToApply;
+                lyricItem.startTime += cumulativeDelay;
 
                 if (lyricItem.hasOwnProperty('endTime')) {
-                    lyricItem.endTime += offsetToApply;
+                    lyricItem.endTime += cumulativeDelay;
                 }
             }
 
@@ -304,7 +304,7 @@ function adjustLyricTiming(lyricsData, segments, timeUnit = "ms") {
                 lyricItem.syllabus.forEach(syl => {
                     if (syl.hasOwnProperty('time')) {
                         // Assume syllable times are always in milliseconds
-                        const syllableOffsetMs = (timeUnit === "ms") ? offsetToApply : Math.round(offsetToApply * 1000);
+                        const syllableOffsetMs = (timeUnit === "ms") ? cumulativeDelay : Math.round(cumulativeDelay * 1000);
                         syl.time += syllableOffsetMs;
                     }
                 });
