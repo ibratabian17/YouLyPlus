@@ -28,27 +28,27 @@ YouLy+ is packed with features designed to enhance your YouTube Music lyrics exp
 -   **Advanced Synchronized Lyrics:** Enjoy real-time, accurately synced lyrics with line-by-line highlighting.
 -   **Word-by-Word Highlighting:** Dive into an immersive karaoke-style experience with precise word highlighting.
 -   **Official Subtitle Fallback:** Automatically uses YouTube's official subtitles if synced lyrics aren't available.
--   **Multiple Providers:** Choose your preferred lyrics source from Lyrics+ (KPoe), LRCLIB, or even your own custom server. Re-order internal sources (Musixmatch, Apple Music, etc.) to prioritize your favorites.
+-   **Multiple Providers:** Choose where your lyrics come from! YouLy+ can get lyrics from popular sources like Lyrics+ (KPoe) and LRCLIB, or even a source you set up yourself. You can also arrange the order of built-in sources (like Musixmatch, Apple Music, etc.) to use your favorites first.
 -   **Native Integration:** Replaces default YouTube Music lyrics with custom, interactive elements. Click-to-seek, scroll to find lines, and more!
 
-### 🌐 Translation & AI Power
+### 🌐 Translation & Romanization
 
--   **Instant Translation:** Translate lyrics on the fly using **Google Translate** or the powerful **Gemini AI**.
--   **Romanization:** Get romanized lyrics for non-Latin scripts (e.g., Japanese, Korean, Cyrillic).
--   **Full Gemini AI Control:** Power users can add their own Gemini API key, select specific AI models, and write custom prompts for tailored translations.
+-   **Instant Translation:** Translate lyrics on the fly using **Google Translate** or the powerful **Gemini AI** (need API KEY).
+-   **Romanization:** See lyrics written in the familiar English alphabet, even for languages that use different writing systems (like Japanese, Korean, or Russian).
+-   **Full Gemini AI Control:** For advanced users, you can connect your own Gemini AI account, choose different AI settings, and even create your own instructions for how translations should work.
 
 ### 🎨 Appearance & Customization
 
 -   **Dynamic Theming:** Lyrics and backgrounds automatically adapt to the **song's color palette**.
 -   **Visual Effects:** Enable an Apple Music-style **blur for inactive lines** to improve focus.
--   **Custom CSS:** Apply your own CSS for complete visual control and personalization.
+-   **Custom Look:** If you know a bit about web design, you can use custom code (CSS) to make the lyrics look exactly how you want them.
 
 ### ⚙️ Performance & Integration
 
--   **Lightweight & Performant:** Built for speed and efficiency, running at a smooth **60 FPS on modest hardware** (tested on AMD FX-6350 & NVIDIA GT 620 with minimal CPU/GPU impact).
+-   **Fast & Smooth:** YouLy+ is designed to run quickly and smoothly, even on older computers, without slowing down your system.
 -   **Performance Modes:** Utilize **Lightweight Mode** or **Compatibility Mode** for smooth animations on any machine.
 -   **SponsorBlock Integration:** Automatically skip non-music segments like intros, outros, and sponsor messages.
--   **Intelligent Caching:** Smart caching reduces load times and API calls, with strategies from aggressive to none.
+-   **Smart Saving:** YouLy+ remembers lyrics it has already found, so they load faster next time and use less internet data.
 
 ## ⬇️ Installation
 
@@ -94,7 +94,7 @@ For the safest and easiest experience, install YouLy+ directly from your browser
 
 ## 🚀 Usage
 
-Once installed, simply open [YouTube Music](https://music.youtube.com/) and play any song. The lyrics panel will automatically be enhanced by YouLy+.
+Once installed, simply open [YouTube Music](https://music.youtube.com/) and play any song. The lyrics panel will automatically be enhanced by YouLy+ with custom lyrics, no external API setup required (except for Gemini AI features).
 
 -   **Quick Settings:** Access quick toggles by clicking the YouLy+ icon in your browser's toolbar.
 -   **Full Settings:** For comprehensive customization, click **"More Settings"** from the popup to open the dedicated settings page.
@@ -103,8 +103,8 @@ Once installed, simply open [YouTube Music](https://music.youtube.com/) and play
 
 YouLy+ is proudly open-source, offering full transparency and control to its users.
 
--   **Client:** The extension's codebase in this repository is fully open for inspection and modification.
--   **Server:** The default `Lyrics+` provider backend is also open-source! You can review its code and even deploy your own instance for personal use. Explore the server repository here:
+-   **Client (The Extension):** The code for the YouLy+ extension itself is completely open for anyone to look at and change.
+-   **Server (Lyrics+ Provider):** The main source for lyrics (Lyrics+) is also open for anyone to see its code. You can even set up your own version of it if you want! Find the server code here:
     -   [**ibratabian17/lyricsplus**](https://github.com/ibratabian17/lyricsplus)
 
 ## 🧑‍💻 Development
