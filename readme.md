@@ -7,24 +7,17 @@
 [![GitHub Stars](https://img.shields.io/github/stars/ibratabian17/YouLyPlus?style=for-the-badge&color=yellow)](https://github.com/ibratabian17/YouLyPlus/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/ibratabian17/YouLyPlus?style=for-the-badge&color=blue)](https://github.com/ibratabian17/YouLyPlus/network/members)
 
-YouLy+ transforms YouTube Music's default static lyrics into a dynamic, immersive, and highly customizable karaoke-style experience. Designed for music lovers, it offers more than just words on a screen – it's a complete lyrical enhancement.
+<p align="center">
+<img src="https://ibratabian17.github.io/youlyplus-page/assets/screenshot-4.png" alt="The Screenshot">
+</p>
 
 ---
 
-## Table of Contents
-
--   [🌟 Why YouLy+?](#-why-youly)
--   [Features](#-features)
--   [Installation](#-installation)
--   [Usage](#-usage)
--   [Self-Hosting & Open Source](#-self-hosting--open-source)
--   [Development](#-development)
--   [Packaging](#-packaging)
--   [Contributing](#-contributing)
-
 ## 🌟 Why YouLy+?
 
-While YouTube Music excels at audio, its native lyrics often fall short. YouLy+ fills this gap by providing the rich, interactive lyrics experience that music deserves. It's lightweight, open-source, and designed to make your music sessions more engaging and enjoyable.
+YouTube Music is great for listening, but its default lyrics are just static, plain text. YouLy+ completely transforms this by injecting a rich, interactive, and beautifully animated karaoke-style experience directly into the YouTube Music interface.
+
+It's lightweight, fully open-source, and designed to make your music sessions more engaging and fun.
 
 ## ✨ Features
 
