@@ -14,13 +14,13 @@ YouLy+ transforms YouTube Music's default static lyrics into a dynamic, immersiv
 ## Table of Contents
 
 -   [🌟 Why YouLy+?](#-why-youly)
--   [Features](#features)
--   [Installation](#installation)
--   [Usage](#usage)
--   [Self-Hosting & Open Source](#self-hosting--open-source)
--   [Development](#development)
--   [Packaging](#packaging)
--   [Contributing](#contributing)
+-   [Features](#-features)
+-   [Installation](#-installation)
+-   [Usage](#-usage)
+-   [Self-Hosting & Open Source](#-self-hosting--open-source)
+-   [Development](#-development)
+-   [Packaging](#-packaging)
+-   [Contributing](#-contributing)
 
 ## 🌟 Why YouLy+?
 
