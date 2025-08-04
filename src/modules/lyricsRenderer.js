@@ -649,7 +649,8 @@ class LyricsPlusRenderer {
             const currentDuration = syllable._durationMs;
             const charCount = syllable._cachedCharSpans?.length || syllable.textContent.length;
 
-            let charBasedDelay = (charCount > 1) ? (charCount - 1) / charCount : 0;
+            let charBasedDelay = (charCount > 1) ?
+              ((charCount - 1) / charCount) + (1 / charCount / 2) : 0.25;
             const delayPercent = charBasedDelay + 0.07;
             const timingFunction = `cubic-bezier(${delayPercent.toFixed(3)}, 0, 1, 1)`;
 
