@@ -43,7 +43,6 @@ class LyricsPlusRenderer {
     this.userScrollRevertTimer = null; // Timer to revert control to the player
 
     // --- Initial Setup ---
-    this._injectCssFile();
     // This call ensures the container is found or created and listeners are attached.
     this._getContainer();
   }
@@ -415,20 +414,6 @@ class LyricsPlusRenderer {
     newScrollOffset = Math.min(newScrollOffset, minAllowedScroll);
 
     this._animateScroll(newScrollOffset);
-  }
-
-  /**
-   * Injects the necessary CSS file for styling the lyrics container.
-   */
-  _injectCssFile() {
-    if (document.querySelector('link[data-lyrics-plus-style]')) return;
-    const pBrowser = chrome || browser;
-    const linkElement = document.createElement('link');
-    linkElement.rel = 'stylesheet';
-    linkElement.type = 'text/css';
-    linkElement.href = pBrowser.runtime.getURL('src/inject/stylesheet.css');
-    linkElement.setAttribute('data-lyrics-plus-style', 'true');
-    document.head.appendChild(linkElement);
   }
 
   /**

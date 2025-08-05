@@ -1,5 +1,7 @@
 loadSettings(() => {
+    if (currentSettings.isEnabled) {
     initializeLyricsPlus();
+    }
 });
 
 // Expose fetchAndDisplayLyrics and t globally for other modules to use
@@ -19,6 +21,7 @@ window.LyricsPlusAPI = {
 function initializeLyricsPlus() {
     // Inject the DOM script
     injectDOMScript();
+    injectCssFile() ;
     
     // Listen for messages from the injected script
     window.addEventListener('message', function(event) {
@@ -56,3 +59,15 @@ function injectDOMScript() {
     };
     (document.head || document.documentElement).appendChild(script);
 }
+
+
+function injectCssFile() {
+    if (document.querySelector('link[data-lyrics-plus-style]')) return;
+    const pBrowser = chrome || browser;
+    const linkElement = document.createElement('link');
+    linkElement.rel = 'stylesheet';
+    linkElement.type = 'text/css';
+    linkElement.href = pBrowser.runtime.getURL('src/inject/stylesheet.css');
+    linkElement.setAttribute('data-lyrics-plus-style', 'true');
+    document.head.appendChild(linkElement);
+  }
