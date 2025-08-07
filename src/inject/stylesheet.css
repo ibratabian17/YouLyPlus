@@ -798,7 +798,7 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(.lyrics-plus-integrated[style*="display: block"]) .lyrics-line.pre-active-line {
         display: block;
     }
-    ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(.lyrics-plus-integrated[style*="display: block"]) .lyrics-line.lyrics-activest.active {
+    ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(.lyrics-plus-integrated[style*="display: block"]) .lyrics-line.fullscreen-focused.active {
         opacity: 1;
         filter: drop-shadow(0 0 0.1em rgba(0, 0, 0, 1));
     }

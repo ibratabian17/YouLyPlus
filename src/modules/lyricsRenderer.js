@@ -9,6 +9,7 @@ class LyricsPlusRenderer {
     this.lyricsAnimationFrameId = null;
     this.currentPrimaryActiveLine = null;
     this.lastPrimaryActiveLine = null; // New: To store the last active line for delay calculation
+    this.currentFullscreenFocusedLine = null;
     this.lastTime = 0;
     this.lastProcessedTime = 0;
 
@@ -452,7 +453,14 @@ class LyricsPlusRenderer {
       if (currentLine.isHandledByPrecursorPass) continue;
 
       if (nextLine.startTime < currentLine.originalEndTime) {
-        currentLine.newEndTime = nextLine.newEndTime;
+        const overlap = currentLine.originalEndTime - nextLine.startTime;
+        // Only extend if overlap is >= 5ms (0.005 seconds), otherwise don't overlap
+        if (overlap >= 0.005) {
+          currentLine.newEndTime = nextLine.newEndTime;
+        } else {
+          // Overlap is less than 5ms, don't extend - keep original end time
+          currentLine.newEndTime = currentLine.originalEndTime;
+        }
       } else {
         const gap = nextLine.startTime - currentLine.originalEndTime;
         const nextElement = currentLine.element.nextElementSibling;
@@ -1289,6 +1297,18 @@ class LyricsPlusRenderer {
     }
 
     this.activeLineIds = newActiveLineIds;
+
+    const mostRecentActiveLine = activeLinesForHighlighting.length > 0 ? activeLinesForHighlighting[0] : null;
+    if (this.currentFullscreenFocusedLine !== mostRecentActiveLine) {
+      if (this.currentFullscreenFocusedLine) {
+        this.currentFullscreenFocusedLine.classList.remove('fullscreen-focused');
+      }
+      if (mostRecentActiveLine) {
+        mostRecentActiveLine.classList.add('fullscreen-focused');
+      }
+      this.currentFullscreenFocusedLine = mostRecentActiveLine;
+    }
+
     this._updateSyllables(currentTime);
 
     // Batch viewport-hidden class updates if needed
@@ -1809,6 +1829,7 @@ class LyricsPlusRenderer {
     this.highlightedSyllableIds.clear();
     this.visibleLineIds.clear();
     this.currentPrimaryActiveLine = null;
+    this.currentFullscreenFocusedLine = null;
     if (this.visibilityObserver) {
       this.visibilityObserver.disconnect();
       this.visibilityObserver = null;
