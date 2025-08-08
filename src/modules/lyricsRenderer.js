@@ -535,8 +535,13 @@ class LyricsPlusRenderer {
       let currentWordStartTime = null;
       let currentWordEndTime = null;
 
+      // MODIFICATION: Variables to hold the last syllable of the previous word to link across words.
+      let pendingSyllable = null;
+      let pendingSyllableFont = null;
+
       const flushWordBuffer = () => {
         if (!wordBuffer.length) return;
+
         const wordSpan = elementPool.syllables.pop() || document.createElement('span');
         wordSpan.innerHTML = '';
         wordSpan.className = 'lyrics-word';
@@ -631,6 +636,21 @@ class LyricsPlusRenderer {
           wordSpan.appendChild(sylSpan);
         });
 
+        if (pendingSyllable && syllableElements.length > 0) {
+          const nextSyllable = syllableElements[0];
+          const currentDuration = pendingSyllable._durationMs;
+          const syllableWidth = this._getTextWidth(pendingSyllable.textContent, pendingSyllableFont);
+          const emWidth = this._getTextWidth('m', pendingSyllableFont);
+          const relativeUnits = syllableWidth / emWidth;
+          let charBasedDelay = (relativeUnits - 0.25) / relativeUnits;
+          const delayPercent = charBasedDelay;
+          const timingFunction = `cubic-bezier(${delayPercent.toFixed(3)}, 0, 1, 1)`;
+
+          pendingSyllable._nextSyllableInWord = nextSyllable;
+          pendingSyllable._preHighlightDurationMs = currentDuration;
+          pendingSyllable._preHighlightTimingFunction = timingFunction;
+        }
+
         if (shouldEmphasize) {
           wordSpan._cachedChars = characterData.map(cd => cd.charSpan);
         }
@@ -675,6 +695,11 @@ class LyricsPlusRenderer {
 
         const targetContainer = isCurrentWordBackground ? (backgroundContainer || (backgroundContainer = document.createElement('div'), backgroundContainer.className = 'background-vocal-container', currentLine.appendChild(backgroundContainer))) : mainContainer;
         targetContainer.appendChild(wordSpan);
+
+        // MODIFICATION: Save the last syllable of the current word to be connected to the next word.
+        pendingSyllable = syllableElements.length > 0 ? syllableElements[syllableElements.length - 1] : null;
+        pendingSyllableFont = referenceFont;
+
         wordBuffer = [];
         currentWordStartTime = null;
         currentWordEndTime = null;
