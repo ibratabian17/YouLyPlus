@@ -63,7 +63,7 @@ ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fu
 /* --- Scroll Behavior & Performance --- */
 ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
     --lyrics-scroll-padding-top: 25%;
-    overflow: hidden !important;
+    overflow: hidden;
     scrollbar-width: none;
     will-change: scroll-position; /* Hint to browser for scroll optimization */
 }
@@ -766,7 +766,7 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
     }
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(.lyrics-plus-integrated[style*="display: block"]) #side-panel {
         position: absolute;
-        bottom: 7rem;
+        bottom: 9rem;
         left: 0;
         z-index: 2;
         width: 100vw !important;
@@ -780,7 +780,7 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
         mask-image: none;
     }
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(.lyrics-plus-integrated[style*="display: block"]) ytmusic-tab-renderer {
-        overflow: visible;
+        overflow: visible!important;
     }
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(.lyrics-plus-integrated[style*="display: block"]) .lyrics-line {
         display: none; /* Hide all lines by default */
