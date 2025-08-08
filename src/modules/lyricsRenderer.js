@@ -642,7 +642,7 @@ class LyricsPlusRenderer {
           const syllableWidth = this._getTextWidth(pendingSyllable.textContent, pendingSyllableFont);
           const emWidth = this._getTextWidth('m', pendingSyllableFont);
           const relativeUnits = syllableWidth / emWidth;
-          let charBasedDelay = (relativeUnits - 0.25) / relativeUnits;
+          let charBasedDelay = (relativeUnits) / relativeUnits;
           const delayPercent = charBasedDelay;
           const timingFunction = `cubic-bezier(${delayPercent.toFixed(3)}, 0, 1, 1)`;
 
