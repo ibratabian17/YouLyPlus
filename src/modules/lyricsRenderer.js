@@ -638,16 +638,22 @@ class LyricsPlusRenderer {
         syllableElements.forEach((syllable, index) => {
           if (index < syllableElements.length - 1) {
             const nextSyllable = syllableElements[index + 1];
-            // Use the direct _durationMs property we just cached
             const currentDuration = syllable._durationMs;
-            const charCount = syllable._cachedCharSpans?.length || syllable.textContent.length;
 
-            let charBasedDelay = (charCount > 1) ?
-              ((charCount - 1) / charCount) + (1 / charCount / 2) : 0.25;
-            const delayPercent = charBasedDelay + 0.07;
+            const syllableWidth = this._getTextWidth(syllable.textContent, referenceFont);
+            const emWidth = this._getTextWidth('m', referenceFont);
+
+            // Convert syllable width to "em" units
+            const relativeUnits = syllableWidth / emWidth;
+
+            // Delay until the 0.5em wipe block's right edge reaches the syllable's right edge.
+            // 0.25em is subtracted because the wipe block starts with 0.25em already visible.
+            // Allow negative values for thin letters so the next syllable starts immediately if needed.
+            let charBasedDelay = (relativeUnits - 0.25) / relativeUnits;
+
+            const delayPercent = charBasedDelay;
             const timingFunction = `cubic-bezier(${delayPercent.toFixed(3)}, 0, 1, 1)`;
 
-            // Cache all required properties on the CURRENT syllable for the animation loop
             syllable._nextSyllableInWord = nextSyllable;
             syllable._preHighlightDurationMs = currentDuration;
             syllable._preHighlightTimingFunction = timingFunction;
