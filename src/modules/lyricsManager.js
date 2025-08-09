@@ -228,44 +228,9 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
 function convertWordLyricsToLine(lyrics) {
   if (lyrics.type === "Line") return lyrics; 
 
-  const words = lyrics.data;
-  const lines = [];
-  let currentLineWords = [];
-  let lineStartTime = null;
-  let lineEndTime = null;
-  let element = {};
-  // Capture translatedText if present from the first word of the line
-  let lineTranslatedText = null; 
-
-  words.forEach((word, index) => {
-      if (currentLineWords.length === 0) {
-          lineStartTime = word.startTime;
-          if (word.translatedText) { 
-              lineTranslatedText = word.translatedText;
-          }
-      }
-      currentLineWords.push(word.text);
-      lineEndTime = word.endTime;
-      element = word.element || {};
-      element.isBackground = false;
-
-      if (word.isLineEnding || index === words.length - 1) {
-          const lineText = currentLineWords.join('');
-          const lineEntry = {
-              text: lineText,
-              startTime: lineStartTime / 1000,
-              endTime: lineEndTime / 1000,
-              element: element
-          };
-          if (lineTranslatedText) { // Add translatedText to the converted line
-              lineEntry.translatedText = lineTranslatedText;
-          }
-          lines.push(lineEntry);
-          currentLineWords = [];
-          lineStartTime = null;
-          lineEndTime = null;
-          lineTranslatedText = null; // Reset for next line
-      }
+  const lines = lyrics.data;
+  lines.forEach((line, index) => {
+    line.syllables = []
   });
 
   return {
