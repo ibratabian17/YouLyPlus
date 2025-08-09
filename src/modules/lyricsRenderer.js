@@ -1274,7 +1274,7 @@ class LyricsPlusRenderer {
     // Only check visible lines and limit to 3 results
     for (let i = 0; i < visibleLines.length && activeLinesForHighlighting.length < 3; i++) {
       const line = visibleLines[i];
-      if (line && currentTime >= line._startTimeMs - highlightLookAheadMs && currentTime <= line._endTimeMs) {
+      if (line && currentTime >= line._startTimeMs - highlightLookAheadMs && currentTime <= line._endTimeMs - highlightLookAheadMs) {
         activeLinesForHighlighting.push(line);
       }
     }
@@ -1524,6 +1524,10 @@ class LyricsPlusRenderer {
   _resetSyllable(syllable) {
     if (!syllable) return;
     syllable.style.animation = '';
+    if(!syllable.classList.contains('finished')){
+      syllable.classList.add("finished")
+      syllable.offsetHeight;
+    }
     syllable.classList.remove('highlight', 'finished', 'pre-highlight');
     syllable.style.removeProperty('--pre-wipe-duration');
     syllable.style.removeProperty('--pre-wipe-timing-function');

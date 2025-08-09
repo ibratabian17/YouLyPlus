@@ -189,12 +189,13 @@ ytmusic-player-page:not([player-fullscreened]) .lyrics-plus-integrated.blur-inac
     overflow-wrap: break-word;
     transform-origin: left;
     transform: scale3d(0.93, 0.93, 0.95);
-    transition: transform 0.5s ease, color 0.18s;
+    transition: transform 0.7s ease, color 0.7s;
 }
 
 .lyrics-line.active .main-vocal-container {
     transform: scale3d(1.001, 1.001, 1);
     will-change: transform;
+    transition: transform 0.5s ease, color 0.18s;
 }
 
 .lyrics-line .background-vocal-container {
@@ -231,7 +232,7 @@ ytmusic-player-page:not([player-fullscreened]) .lyrics-plus-integrated.blur-inac
     font-feature-settings: "liga" 0;
     background-clip: text;
     -webkit-background-clip: text;
-    transition: color 0.18s, background-color 0.18s;
+    transition: color 0.7s, background-color 0.7s;
 }
 
 .lyrics-syllable.rtl-text {
