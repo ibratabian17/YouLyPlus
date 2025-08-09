@@ -1065,7 +1065,7 @@ async function fetchGoogleTranslate(text, targetLang) {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Google Translate API error: ${response.statusText}`);
     const data = await response.json();
-    return data?.map(item => item?.[0]).join('') || text;
+    return data?.[0]?.map(segment => segment?.[0]).join('') || text;
 }
 
 async function fetchGoogleRomanize(texts) {
