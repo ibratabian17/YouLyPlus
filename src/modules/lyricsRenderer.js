@@ -668,7 +668,7 @@ class LyricsPlusRenderer {
 
             // Delay until the 0.5em wipe block's right edge reaches the syllable's right edge.
             // Allow negative values for thin letters so the next syllable starts immediately if needed.
-            let charBasedDelay = (relativeUnits) / relativeUnits;
+            let charBasedDelay = (relativeUnits - 0.25) / relativeUnits;
 
             const delayPercent = charBasedDelay;
             const timingFunction = `cubic-bezier(${delayPercent.toFixed(3)}, 0, 1, 1)`;
