@@ -1,6 +1,6 @@
 # YouLy+
 
-**Elevate Your YouTube Music Experience with Dynamic, Karaoke-Style Lyrics.**
+**Elevate Your YouTube Music & Tidal Experience with Dynamic, Karaoke-Style Lyrics.**
 
 [![License](https://img.shields.io/github/license/ibratabian17/YouLyPlus?style=for-the-badge)](https://github.com/ibratabian17/YouLyPlus/blob/main/LICENSE)
 [![Latest Version](https://img.shields.io/github/v/release/ibratabian17/YouLyPlus?style=for-the-badge)](https://github.com/ibratabian17/YouLyPlus/releases)
@@ -15,21 +15,22 @@
 
 ## 🌟 Why YouLy+?
 
-YouTube Music is great for listening, but its default lyrics are just static, plain text. YouLy+ completely transforms this by injecting a rich, interactive, and beautifully animated karaoke-style experience directly into the YouTube Music interface.
+YouTube Music & Tidal are great for listening, but their default lyrics are often just static, plain text.  
+YouLy+ completely transforms this by injecting a rich, interactive, and beautifully animated karaoke-style experience directly into the player interface.
 
 It's lightweight, fully open-source, and designed to make your music sessions more engaging and fun.
 
 ## ✨ Features
 
-YouLy+ is packed with features designed to enhance your YouTube Music lyrics experience:
+YouLy+ is packed with features designed to enhance your lyrics experience:
 
 ### 🎤 Core Lyrics Experience
 
 -   **Advanced Synchronized Lyrics:** Enjoy real-time, accurately synced lyrics with line-by-line highlighting.
--   **Word-by-Word Highlighting:** Dive into an immersive karaoke-style experience with precise word highlighting.
--   **Official Subtitle Fallback:** Automatically uses YouTube's official subtitles if synced lyrics aren't available.
--   **Multiple Providers:** Choose where your lyrics come from! YouLy+ can get lyrics from popular sources like Lyrics+ (KPoe) and LRCLIB, or even a source you set up yourself. You can also arrange the order of built-in sources (like Musixmatch, Apple Music, etc.) to use your favorites first.
--   **Native Integration:** Replaces default YouTube Music lyrics with custom, interactive elements. Click-to-seek, scroll to find lines, and more!
+-   **Word-by-Word Highlighting:** Immersive karaoke-style experience with precise word highlighting.
+-   **Official Subtitle Fallback:** Automatically uses official subtitles if synced lyrics aren't available.
+-   **Multiple Providers:** Choose where your lyrics come from! Works seamlessly for both YouTube Music and Tidal.
+-   **Native Integration:** Replaces default lyrics panel with custom, interactive elements. Click-to-seek, scroll to find lines, and more!
 
 ### 🌐 Translation & Romanization
 
@@ -94,10 +95,11 @@ For the safest and easiest experience, install YouLy+ directly from your browser
 
 ## 🚀 Usage
 
-Once installed, simply open [YouTube Music](https://music.youtube.com/) and play any song. The lyrics panel will automatically be enhanced by YouLy+ with custom lyrics, no external API setup required (except for Gemini AI features).
+Once installed, simply open [YouTube Music](https://music.youtube.com/) **or [Tidal Web Player](https://listen.tidal.com/)** and play any song.  
+The lyrics panel will automatically be enhanced by YouLy+ with custom lyrics — no external API setup required (except for Gemini AI features).
 
 -   **Quick Settings:** Access quick toggles by clicking the YouLy+ icon in your browser's toolbar.
--   **Full Settings:** For comprehensive customization, click **"More Settings"** from the popup to open the dedicated settings page.
+-   **Full Settings:** For comprehensive customization, click **"More Settings"** from the popup.
 
 ## ☁️ Self-Hosting & Open Source
 

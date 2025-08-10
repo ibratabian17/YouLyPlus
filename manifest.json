@@ -4,7 +4,7 @@
   "version": "3.1.5",
   "description": "Enhanced lyrics feature for YouTube Music with line-by-line and word-by-word sync",
   "permissions": ["activeTab", "storage", "scripting"],
-  "host_permissions": ["*://*.music.youtube.com/*"],
+  "host_permissions": ["*://*.music.youtube.com/*", "*://*.tidal.com/*"],
   "action": {
     "default_popup": "src/popup/ui.html",
     "default_icon": {
@@ -62,8 +62,7 @@
     {
       "resources": [
         "src/modules/lyrics/lyrics.css",
-        "src/modules/tidal/style.css",
-        "src/inject/tidal/songTracker.js"
+        "src/modules/tidal/style.css"
       ],
       "matches": ["*://*.tidal.com/*"]
     }

@@ -1,0 +1,25 @@
+/* Hide original Tidal lyrics content if present */
+[data-test="lyrics-container-provider-info"] {
+    display: none !important;
+}
+
+[data-test="lyrics-content-container"] {
+    display: none !important;
+}
+
+/* Style for our injected lyrics container */
+#lyrics-plus-panel #lyrics-plus-container {
+    display: block;
+}
+
+#lyrics-plus-panel{
+    height: 100%;
+    width: 100%;
+    min-height:285px; max-height: 66vh;
+    --scroll-padding-top: 25%;
+    --lyplus-font-family:  var(--market-core-type-display-font-family);
+}
+
+#lyrics-plus-panel .lyrics-line {
+font-size: 30px;
+}
