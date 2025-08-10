@@ -1,0 +1,693 @@
+/* ==========================================================================
+   LYRICS PLUS - BASE CONTAINER & LAYOUT
+   ========================================================================== */
+
+/* --- Base Variables & Palette --- */
+#lyrics-plus-container {
+    --lyplus-song-pallete: #ffffff;
+    --lyplus-song-white-pallete: #ffffff85;
+    --lyplus-lyrics-pallete: #fff; /* Default palette */
+}
+
+/* Allow JS to force an override color */
+#lyrics-plus-container.override-palette-color {
+    --lyplus-lyrics-pallete: var(--lyplus-override-pallete) !important;
+}
+
+/* --- Main Container --- */
+#lyrics-plus-container {
+    display: none;
+    width: 100%;
+    height: max-content;
+    padding-top: 1em;
+    box-sizing: border-box;
+    color: var(--yt-spec-text-primary, #fff);
+    font-family: var(--lyplus-font-family), Roboto, Noto Naskh Arabic UI, Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-weight: bolder;
+    direction: ltr;
+    transform: translateZ(0); /* Promotes to its own layer */
+}
+
+#lyrics-plus-container.lyrics-plus-message {
+    height: 100%;
+}
+
+/* --- Scroll Behavior & Performance --- */
+#lyrics-plus-container-parent {
+    --lyrics-scroll-padding-top: 25%;
+    overflow: hidden;
+    scrollbar-width: none;
+    will-change: scroll-position; /* Hint to browser for scroll optimization */
+}
+
+/* Disable transitions during touch-scrolling for 1:1 feedback */
+#lyrics-plus-container.touch-scrolling .lyrics-line,
+#lyrics-plus-container.touch-scrolling .lyrics-plus-metadata {
+    transition: none !important;
+}
+
+/* Apply smooth gliding transition for mouse-wheel scrolling */
+#lyrics-plus-container.wheel-scrolling .lyrics-line,
+#lyrics-plus-container.wheel-scrolling .lyrics-plus-metadata {
+    transition: transform 0.3s ease-out !important;
+}
+
+/* --- Selection Styles --- */
+#lyrics-plus-container *::selection,
+#lyrics-plus-container *::-moz-selection {
+    background: #ffffff21;
+    color: #FFF;
+}
+
+/* ==========================================================================
+   LYRICS LINE & CONTENT
+   ========================================================================== */
+
+/* --- Base Line Styles --- */
+.lyrics-line {
+    padding: 10px;
+    opacity: 0.7;
+    color: #ffffff85;
+    font-size: 25px;
+    line-height: 1.1;
+    cursor: pointer;
+    transform-origin: left;
+    transform: translateY(var(--lyrics-scroll-offset, 0px)) translateZ(1px);
+    transition: opacity 0.3s ease, transform 0.4s ease var(--lyrics-line-delay, 0ms), filter 0.3s ease;
+    will-change: transform, filter, opacity;
+    /* Performance: only render lines when they are close to the viewport */
+    content-visibility: auto;
+    contain-intrinsic-size: 100% 3em;
+}
+
+/* --- Line States & Modifiers --- */
+.lyrics-line.active {
+    opacity: 1;
+    color: var(--lyplus-lyrics-pallete, #fff);
+    will-change: transform, opacity; /* Refine will-change for active state */
+}
+
+.lyrics-line.singer-right {
+    text-align: end;
+}
+
+.lyrics-line.rtl-text {
+    direction: rtl;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .lyrics-line:hover {
+        background: #ffffff21;
+        border-radius: 0.6em;
+    }
+}
+
+/* --- Inactive Line Blurring --- */
+#lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line:not(.active):not(.lyrics-gap) {
+    filter: blur(0.07em);
+}
+
+#lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line:not(.active)[class*="next-"]:not(.lyrics-gap),
+#lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line.pre-active-line:not(.lyrics-gap):not(.active),
+#lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line.next-active-line:not(.lyrics-gap):not(.active),
+#lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line.lyrics-activest:not(.active):not(.lyrics-gap) {
+    filter: blur(0.035em);
+}
+
+/* --- Offscreen Performance Optimization --- */
+#lyrics-plus-container.hide-offscreen .lyrics-line.viewport-hidden * {
+    visibility: hidden;
+    background: none;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+}
+
+/* --- Directionality & Text Alignment --- */
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-left {
+    text-align: left;
+}
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-right {
+    text-align: right;
+}
+
+.lyrics-line.singer-right:not(.rtl-text) .main-vocal-container,
+.lyrics-line.rtl-text:not(.singer-right) .main-vocal-container,
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-right .main-vocal-container {
+    transform-origin: right;
+}
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-left .main-vocal-container {
+    transform-origin: left;
+}
+
+/* ==========================================================================
+   VOCAL & WORD/SYLLABLE STYLES
+   ========================================================================== */
+
+/* --- Vocal Containers --- */
+.lyrics-line .main-vocal-container {
+    overflow-wrap: break-word;
+    transform-origin: left;
+    transform: scale3d(0.93, 0.93, 0.95);
+    transition: transform 0.7s ease, color 0.7s;
+}
+
+.lyrics-line.active .main-vocal-container {
+    transform: scale3d(1.001, 1.001, 1);
+    will-change: transform;
+    transition: transform 0.5s ease, color 0.18s;
+}
+
+.lyrics-line .background-vocal-container {
+    max-height: 0;
+    padding-top: 0.2em;
+    overflow: hidden;
+    opacity: 0;
+    font-size: 0.6em;
+    transition: max-height .2s, opacity .6s, padding .6s;
+}
+
+.lyrics-line.active .background-vocal-container {
+    max-height: 10em; /* Large enough to not clip */
+    opacity: 1;
+    transition: max-height .6s, opacity .6s, padding .6s;
+    will-change: max-height, opacity, padding;
+}
+.lyrics-line.active .background-vocal {
+    opacity: 1;
+}
+
+/* --- Word & Syllable Base Styles --- */
+.lyrics-word {
+    display: inline-block;
+    vertical-align: baseline;
+}
+
+.lyrics-line .lyrics-syllable {
+    display: inline-block;
+    color: #ffffff85;
+    white-space: break-spaces;
+    font-kerning: none;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0;
+    background-clip: text;
+    -webkit-background-clip: text;
+    transition: color 0.7s, background-color 0.7s;
+}
+
+.lyrics-syllable.rtl-text {
+    line-height: 1.5em; /* Specific adjustment for RTL scripts */
+}
+
+/* --- Syllable States (Finished, Highlight, etc.) --- */
+.lyrics-line .lyrics-syllable.finished {
+    background-color: var(--lyplus-lyrics-pallete, #fff);
+}
+.lyrics-line.active .lyrics-syllable.finished {
+    transition: transform 0.8s ease !important;
+}
+.lyrics-line:not(.active) .lyrics-syllable.finished {
+    transition: color 0.18s;
+}
+
+/* --- Syllable Wipe Animation Setup (on Active Line) --- */
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable {
+    transform: translateY(0.001%) translateZ(1px); /* Subtle transform to trigger GPU */
+    transition: transform 0.8s ease, background-color 0.5s, color 0.5s;
+    will-change: transform, background;
+}
+
+#lyrics-plus-container.compability-wipe .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable,
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.pre-highlight {
+    background-repeat: no-repeat;
+    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-lyrics-pallete, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
+    background-size: 0.5em 100%, 0% 100%;
+    background-position: -0.5em 0%, -0.25em 0%;
+}
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.rtl-text,
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.pre-highlight.rtl-text {
+    direction: rtl;
+    background-image: linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
+    background-position: calc(100% + 0.5em) 0%, right;
+}
+
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
+.lyrics-word.growable:has(.lyrics-syllable.highlight) .lyrics-syllable {
+    transform: translateY(-4%) translateZ(1px);
+}
+
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.finished {
+    background-image: none;
+}
+
+.lyrics-syllable.pre-highlight {
+    animation-name: pre-wipe-universal;
+    animation-duration: var(--pre-wipe-duration);
+    animation-timing-function: var(--pre-wipe-timing-function);
+    animation-fill-mode: forwards;
+}
+.lyrics-syllable.pre-highlight.rtl-text {
+    animation-name: pre-wipe-universal-rtl;
+}
+
+/* ===== CHARACTER-LEVEL ANIMATION ===== */
+.lyrics-line .lyrics-syllable span.char {
+    display: inline-block;
+    color: #ffffff85;
+    white-space: break-spaces;
+    font-kerning: none;
+    background-clip: text;
+    -webkit-background-clip: text;
+    transition: color 0.18s, background-color 0.18s;
+}
+
+.lyrics-line .lyrics-syllable.finished span.char {
+    transition: none;
+    background-color: var(--lyplus-lyrics-pallete, #fff);
+}
+
+.lyrics-line.active .lyrics-syllable span.char {
+    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-lyrics-pallete, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    background-size: 0.5em 100%, 0% 100%;
+    background-position: -0.5em 0%, -0.25em 0%;
+    background-repeat: no-repeat;
+    transform-origin: 50% 80%;
+    transform: matrix3d(var(--min-scale), 0, 0, 0,
+            0, var(--min-scale), 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1);
+    transition: transform 0.5s, color 0.18s;
+    will-change: background, transform;
+}
+
+.lyrics-line.active .lyrics-syllable span.char.highlight {
+    background-image: linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
+    background-position: calc(100% + 0.5em) 0%, calc(100% + 0.25em) 0%;
+}
+
+.lyrics-line.active .lyrics-syllable.pre-highlight span.char {
+    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-lyrics-pallete, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
+    background-size: 0.5em 100%, 0% 100%;
+    background-position: -0.5em 0%, -0.25em 0%;
+}
+
+/* ==========================================================================
+   LYRICS GAP (INSTRUMENTAL) STYLES
+   ========================================================================== */
+
+.lyrics-line.lyrics-gap {
+    height: 0;
+    padding: 0 0.4em;
+    overflow: hidden;
+    opacity: 0;
+    box-sizing: content-box;
+    background-clip: unset;
+    transition: padding .3s .5s, height .3s .5s, opacity .2s .5s, transform .3s var(--lyrics-line-delay, 0ms);
+}
+.lyrics-line.lyrics-gap.active {
+    height: 1em;
+    padding: 0.4em;
+    opacity: 1;
+    transition: padding .3s, height .3s, opacity .2s .3s, transform .3s;
+    will-change: height, opacity, padding;
+}
+
+.lyrics-line.lyrics-gap .main-vocal-container {
+    transform: translateY(-25%) scale(1) translateZ(0);
+}
+.lyrics-line.lyrics-gap:not(.active) .main-vocal-container {
+    animation: gap-ended 0.8s ease;
+    transform: translateY(-25%) scale(0) translateZ(0);
+}
+.lyrics-line.lyrics-gap.active .main-vocal-container .lyrics-word {
+    animation: gap-loop 4s ease infinite alternate;
+    will-change: transform;
+}
+
+.lyrics-line.lyrics-gap .lyrics-syllable {
+    display: inline-block;
+    width: 0.4em;
+    height: 0.4em;
+    margin: 0 0.1em;
+    overflow: hidden;
+    border-radius: 1em;
+    background-color: rgba(255, 255, 255, 0.36);
+    background-clip: unset;
+}
+.lyrics-line.lyrics-gap.active .lyrics-syllable.highlight,
+.lyrics-line.lyrics-gap.active .lyrics-syllable.finished,
+.lyrics-line.lyrics-gap:not(.active) .lyrics-syllable {
+    background-color: #ffffff;
+}
+.lyrics-line.lyrics-gap.active .lyrics-syllable.finished {
+    animation: none !important;
+}
+
+
+/* ==========================================================================
+   METADATA & STATUS MESSAGES
+   ========================================================================== */
+
+/* --- Song Writers & Source Provider --- */
+.lyrics-plus-metadata {
+    display: block;
+    position: relative;
+    box-sizing: border-box;
+    font-weight: normal;
+    transform: translateY(var(--lyrics-scroll-offset, 0px)) translateZ(1px);
+    transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1) var(--lyrics-line-delay, 0ms), filter 0.3s ease;
+    transition-delay: var(--lyrics-line-delay, 0ms);
+}
+span.lyrics-song-writters {
+    display: block;
+    margin-top: 1em;
+    color: #ffffff7a;
+    font-size: 1.6em;
+}
+span.lyrics-source-provider {
+    display: block;
+    height: 150%;
+    margin-bottom: 1em;
+    color: #ffffff31;
+    font-size: 1.5em;
+}
+
+/* --- Placeholders for scrolling --- */
+.lyrics-plus-empty {
+    display: block;
+    height: 100vh;
+    transform: translateY(var(--lyrics-scroll-offset, 0px)) translateZ(1px);
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1) var(--lyrics-line-delay, 0ms);
+    transition-delay: var(--lyrics-line-delay, 0ms);
+}
+.lyrics-plus-empty-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    pointer-events: none;
+    transform: none !important;
+}
+
+/* --- Status Messages (Loading, Not Found) --- */
+#lyrics-plus-container .text-loading,
+#lyrics-plus-container .text-not-found {
+    display: block;
+    position: absolute;
+    top: 30%;
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+    transition: opacity 0.3s ease;
+}
+#lyrics-plus-container .text-not-found {
+    opacity: 0.7;
+    animation: fadeInUp 0.6s ease-out;
+}
+#lyrics-plus-container .text-loading {
+    opacity: 0.8;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+#lyrics-plus-container .text-loading:after {
+    content: "...";
+    display: inline-block;
+    width: 0;
+    overflow: hidden;
+    vertical-align: bottom;
+    text-overflow: clip;
+    mask-image: linear-gradient(to right, #FFF 90%, transparent 100%);
+    mask-size: 200% 100%;
+    mask-repeat: no-repeat;
+    animation: ellipsis 3s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   TRANSLATION & ROMANIZATION FEATURE
+   ========================================================================== */
+
+/* --- Buttons --- */
+#lyrics-plus-buttons-wrapper {
+    display: none; /* Hidden by default */
+    position: absolute;
+    bottom: 1em;
+    right: 1em;
+    width: 20%;
+    box-sizing: border-box;
+    justify-content: center;
+    gap: 10px;
+}
+
+#lyrics-plus-translate-button,
+#lyrics-plus-reload-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(6px);
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+#lyrics-plus-translate-button:hover,
+#lyrics-plus-reload-button:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+    transform: scale(1.1);
+}
+#lyrics-plus-translate-button:active,
+#lyrics-plus-reload-button:active {
+    background-color: rgba(255, 255, 255, 0.24);
+    transform: scale(0.95);
+}
+
+/* --- Dropdown Menu --- */
+#lyrics-plus-translation-dropdown {
+    position: absolute;
+    top: -10em; /* Positioned above the button */
+    left: 50%;
+    z-index: 999;
+    min-width: 140px;
+    padding: 4px 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    background-color: rgba(24, 24, 24, 0.96);
+    backdrop-filter: blur(4px);
+    font-family: Roboto, Arial, sans-serif;
+    transform: translateX(-50%);
+}
+#lyrics-plus-translation-dropdown.hidden {
+    display: none;
+}
+.dropdown-option {
+    padding: 8px 12px;
+    color: rgba(255, 255, 255, 0.87);
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.dropdown-option:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* --- Translated/Romanized Text --- */
+.lyrics-translation-container,
+.lyrics-romanization-container {
+    padding-top: 0.2em;
+    opacity: 0.8;
+    font-size: 0.6em;
+    overflow-wrap: break-word;
+    color: #ffffff7a;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    transition: opacity 0.3s ease;
+}
+.lyrics-line.active .lyrics-translation-container {
+    color: #ffffffa4;
+}
+.lyrics-line.active .lyrics-romanization-container {
+    color: #ffffff7a;
+}
+.lyrics-romanization-container {
+    direction: ltr !important; /* Always force LTR for romanization */
+}
+
+/* ==========================================================================
+   ENHANCED BACKGROUND & DYNAMIC PLAYER LAYOUT
+   ========================================================================== */
+
+.lyplus-blur-container {
+    display: none; /* Hidden by default, activated by player state */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    content-visibility: auto;
+    contain-intrinsic-size: 100% 100%;
+}
+.lyplus-blur-background {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px) brightness(0.4);
+    transform: scale(1.1);
+}
+.lyplus-gradient-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.8) 100%);
+}
+.lyplus-blur-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 29;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: brightness(0.7) saturate(1.2) contrast(1.1);
+}
+canvas#lyplus-webgl-canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100vw;
+    min-height: 100vh;
+    aspect-ratio: 16 / 9;
+    transform: translate(-50%, -50%);
+}
+
+/* ==========================================================================
+   KEYFRAME ANIMATIONS
+   ========================================================================== */
+
+:root {
+    --max-scale: 1.12;
+    --min-scale: 1.01;
+    --shadow-intensity: 0.6;
+}
+
+@keyframes wipe {
+    from {
+        background-size: 0.5em 100%, 0% 100%;
+        background-position: -0.25em 0%, left;
+    }
+    to {
+        background-size: 0.5em 100%, 100% 100%;
+        background-position: calc(100% + 0.25em) 0%, left;
+    }
+}
+@keyframes wipe-rtl {
+    from {
+        background-size: 0.5em 100%, 0% 100%;
+        background-position: calc(100% + 0.25em) 0%, right;
+    }
+    to {
+        background-size: 0.5em 100%, 100% 100%;
+        background-position: -0.5em 0%, right;
+    }
+}
+@keyframes pre-wipe-universal {
+    from {
+        background-size: 0.5em 100%, 0% 100%;
+        background-position: -0.5em 0%, left;
+    }
+    to {
+        background-size: 0.5em 100%, 0% 100%;
+        background-position: -0.25em 0%, left;
+    }
+}
+@keyframes pre-wipe-universal-rtl {
+    from {
+        background-size: 0.5em 100%, 0% 100%;
+        background-position: calc(100% + 0.5em) 0%, right;
+    }
+    to {
+        background-size: 0.5em 100%, 0% 100%;
+        background-position: calc(100% + 0.25em) 0%, right;
+    }
+}
+@keyframes gap-loop {
+    from { transform: scale(1.1); }
+    to { transform: scale(0.9); }
+}
+@keyframes gap-ended {
+    0% { transform: translateY(-25%) scale(1) translateZ(0); }
+    35% { transform: translateY(-25%) scale(1.2) translateZ(0); }
+    100% { transform: translateY(-25%) scale(0) translateZ(0); }
+}
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: scale(0.98); }
+    50% { opacity: 0.8; transform: scale(1); }
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 0.7; transform: translateY(0); }
+}
+@keyframes ellipsis {
+    0% { width: 0; opacity: 1; mask-position: 0% 0%; }
+    60% { width: 0.8em; opacity: 1; mask-position: 10% 0%; }
+    80%, 82% { width: 0.8em; opacity: 0; }
+    100% { width: 0; opacity: 0; }
+}
+@keyframes pre-wipe-char {
+    from { background-size: 0.5em 100%, 0% 100%; background-position: -0.5em 0%, left; }
+    to { background-size: 0.5em 100%, 0% 100%; background-position: -0.25em 0%, left; }
+}
+@keyframes grow-dynamic {
+    0% {
+        transform: matrix3d(var(--min-scale), 0, 0, 0, 0, var(--min-scale), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+        filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+    }
+    25%, 30% {
+        transform: matrix3d(var(--max-scale), 0, 0, 0, 0, var(--max-scale), 0, 0, 0, 0, 1, 0, var(--char-offset-x, 0), var(--translate-y-peak, -2%), 0, 1);
+        filter: drop-shadow(0 0 0.1em rgba(255, 255, 255, var(--shadow-intensity)));
+    }
+    100% {
+        transform: matrix3d(var(--min-scale), 0, 0, 0, 0, var(--min-scale), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    }
+}
+@keyframes grow-static {
+    0%, 100% {
+        transform: scale3d(1.01, 1.01, 1.1) translateY(-0.05%);
+        text-shadow: 0 0 0 rgba(255, 255, 255, 0);
+    }
+    30%, 40% {
+        transform: scale3d(1.10, 1.10, 1.1) translateY(-0.05%);
+        text-shadow: 0 0 0.3em rgba(255, 255, 255, 0.5);
+    }
+}
+
+@keyframes fade-gap {
+    from { background-color: rgba(255, 255, 255, 0.36); }
+    to { background-color: #FFF; }
+}

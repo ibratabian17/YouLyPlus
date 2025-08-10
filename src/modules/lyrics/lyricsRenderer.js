@@ -4,7 +4,7 @@ class LyricsPlusRenderer {
    * Constructor for the LyricsPlusRenderer.
    * Initializes state variables and sets up the initial environment for the lyrics display.
    */
-  constructor() {
+  constructor(uiConfig) {
     // --- State Variables ---
     this.lyricsAnimationFrameId = null;
     this.currentPrimaryActiveLine = null;
@@ -14,6 +14,7 @@ class LyricsPlusRenderer {
     this.lastProcessedTime = 0;
 
     // --- DOM & Cache ---
+    this.uiConfig = uiConfig;
     this.lyricsContainer = null;
     this.cachedLyricsLines = [];
     this.cachedSyllables = [];
@@ -143,8 +144,9 @@ class LyricsPlusRenderer {
    * @returns {HTMLElement | null} - The newly created container element.
    */
   _createLyricsContainer() {
-    const originalLyricsSection = document.querySelector('#tab-renderer');
+    const originalLyricsSection = document.querySelector(this.uiConfig.patchParent);
     if (!originalLyricsSection) {
+      console.log("Unable to find "+ this.uiConfig.patchParent)
       this.lyricsContainer = null;
       return null;
     }
@@ -487,7 +489,7 @@ class LyricsPlusRenderer {
    */
   _onLyricClick(e) {
     const time = parseFloat(e.currentTarget.dataset.startTime);
-    const player = document.querySelector("video");
+    const player = document.querySelector(this.uiConfig.player);
     if (player) player.currentTime = time - 0.05;
     this._scrollToActiveLine(e.currentTarget, true);
   }
@@ -1171,7 +1173,7 @@ class LyricsPlusRenderer {
    * @returns {Function} - A cleanup function to stop the sync.
    */
   _startLyricsSync(currentSettings = {}) {
-    const videoElement = document.querySelector('video');
+    const videoElement = document.querySelector(this.uiConfig.player);
     if (!videoElement) return () => { };
     this._ensureElementIds();
     if (this.visibilityObserver) this.visibilityObserver.disconnect();
@@ -1524,7 +1526,7 @@ class LyricsPlusRenderer {
   _resetSyllable(syllable) {
     if (!syllable) return;
     syllable.style.animation = '';
-    if(!syllable.classList.contains('finished')){
+    if (!syllable.classList.contains('finished')) {
       syllable.classList.add("finished")
       syllable.offsetHeight;
     }
@@ -1542,11 +1544,7 @@ class LyricsPlusRenderer {
   // --- Scrolling Logic ---
 
   _getScrollPaddingTop() {
-    const selectors = [
-      'ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
-      'ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
-      'ytmusic-player-page:not([is-video-truncation-fix-enabled])[player-fullscreened] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])'
-    ];
+    const selectors = this.uiConfig.selectors;
     for (const selector of selectors) {
       const element = document.querySelector(selector);
       if (element) {
@@ -1731,7 +1729,7 @@ class LyricsPlusRenderer {
     if (!buttonsWrapper) {
       buttonsWrapper = document.createElement('div');
       buttonsWrapper.id = 'lyrics-plus-buttons-wrapper';
-      const originalLyricsSection = document.querySelector('#tab-renderer');
+      const originalLyricsSection = document.querySelector(this.uiConfig.patchParent);
       if (originalLyricsSection) {
         originalLyricsSection.appendChild(buttonsWrapper);
       }
@@ -1909,32 +1907,3 @@ class LyricsPlusRenderer {
     }
   }
 }
-
-const lyricsRendererInstance = new LyricsPlusRenderer();
-
-
-// 2. Create a controlled, global API object to bridge the manager and the renderer.
-// This is much cleaner than putting many functions on `window` directly. The manager
-// will interact with this single `LyricsPlusAPI` object.
-const LyricsPlusAPI = {
-  /**
-   * Forwards the call to the renderer instance's displayLyrics method.
-   * The arrow function `(...args) => ...` preserves the correct `this` context.
-   */
-  displayLyrics: (...args) => lyricsRendererInstance.displayLyrics(...args),
-
-  /**
-   * Forwards the call to the renderer instance's method to show a "not found" message.
-   */
-  displaySongNotFound: () => lyricsRendererInstance.displaySongNotFound(),
-
-  /**
-   * Forwards the call to the renderer instance's method to show an error message.
-   */
-  displaySongError: () => lyricsRendererInstance.displaySongError(),
-
-  /**
-   * Forwards the call to the renderer instance's cleanup method.
-   */
-  cleanupLyrics: () => lyricsRendererInstance.cleanupLyrics()
-};

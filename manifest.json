@@ -27,11 +27,12 @@
         "src/lib/sponsorblock.js",
         "src/lib/polyfill.js",
         "src/localization.js",
-        "src/modules/settings.js",
-        "src/modules/lyricsManager.js",
-        "src/modules/lyricsRenderer.js",
-        "src/modules/forceTab.js",
-        "src/modules/dynamicBkg.js",
+        "src/modules/lyrics/settings.js",
+        "src/modules/lyrics/lyricsManager.js",
+        "src/modules/lyrics/lyricsRenderer.js",
+        "src/modules/ytmusic/forceTab.js",
+        "src/modules/lyrics/dynamicBkg.js",
+        "src/modules/ytmusic/index.js",
         "src/content.js"
       ]
     }
@@ -39,8 +40,9 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "src/inject/stylesheet.css",
-        "src/inject/songTracker.js"
+        "src/modules/lyrics/lyrics.css",
+        "src/modules/ytmusic/style.css",
+        "src/inject/ytmusic/songTracker.js"
       ],
       "matches": ["*://*.music.youtube.com/*"]
     }
