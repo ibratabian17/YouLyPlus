@@ -19,7 +19,7 @@ function injectPlatformCSS() {
 }
 
 function injectDOMScript() {
-    
+    // Empty for now
 }
 
 // --- UI LOGIC ---
@@ -30,13 +30,16 @@ function ensureLyricsTab() {
 
     if (!tablist || !panelContainer) return;
 
+    // Hide original lyrics tab if it exists
     const originalLyricsTab = tablist.querySelector('[data-test="tabs-lyrics"]');
     if (originalLyricsTab) {
         originalLyricsTab.style.display = 'none';
     }
 
+    // Don't create duplicate tab
     if (document.getElementById('lyrics-plus-tab')) return;
 
+    // Create custom lyrics tab
     const customLyricsTab = document.createElement('li');
     customLyricsTab.className = '_tabItem_8436610';
     customLyricsTab.dataset.test = 'tabs-lyrics-plus';
@@ -47,53 +50,131 @@ function ensureLyricsTab() {
     customLyricsTab.setAttribute('data-rttab', 'true');
     customLyricsTab.innerHTML = `<svg class="_icon_77f3f89" viewBox="0 0 20 20"><use href="#general__lyrics"></use></svg><span data-wave-color="textDefault" class="wave-text-description-demi">Lyrics</span>`;
 
+    // Create lyrics panel
     const lyricsPanel = document.createElement('div');
     lyricsPanel.id = 'lyrics-plus-panel';
     lyricsPanel.className = firstPanel.className;
+    lyricsPanel.setAttribute('role', 'tabpanel');
     lyricsPanel.style.display = 'none';
+    
+    // Add some basic content to the panel
+    lyricsPanel.innerHTML = `
+    `;
+    
     panelContainer.appendChild(lyricsPanel);
 
+    // Initialize lyrics renderer if not already done
     if (!lyricsRendererInstance) {
         const uiConfig = {
             player: 'video',
             patchParent: '#lyrics-plus-panel',
             selectors: ['#lyrics-plus-panel']
         };
-        lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
+        // Assuming LyricsPlusRenderer is available globally
+        if (typeof LyricsPlusRenderer !== 'undefined') {
+            lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
+        }
     }
 
+    // Set proper aria-controls
     customLyricsTab.setAttribute('aria-controls', 'lyrics-plus-panel');
+    lyricsPanel.setAttribute('aria-labelledby', 'lyrics-plus-tab');
+    
+    // Add tab to tablist
     tablist.appendChild(customLyricsTab);
 
-    customLyricsTab.addEventListener('click', () => {
-        tablist.querySelectorAll('[role="tab"]').forEach(t => t.setAttribute('aria-selected', 'false'));
+    // Add click handler for custom lyrics tab
+    customLyricsTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Deactivate all tabs
+        tablist.querySelectorAll('[role="tab"]').forEach(tab => {
+            tab.setAttribute('aria-selected', 'false');
+            tab.classList.remove('_activeTab_f47dafa');
+        });
+        
+        // Hide all original panels (but keep their original display logic intact)
+        panelContainer.querySelectorAll('[role="tabpanel"]:not(#lyrics-plus-panel)').forEach(panel => {
+            panel.style.display = 'none';
+            panel.classList.remove('react-tabs__tab-panel--selected');
+        });
+        
+        // Activate lyrics tab
         customLyricsTab.setAttribute('aria-selected', 'true');
-        panelContainer.querySelectorAll('[role="tabpanel"]').forEach(p => { p.style.display = 'none'; });
+        customLyricsTab.classList.add('_activeTab_f47dafa');
+        
+        // Show lyrics panel
         lyricsPanel.style.display = 'block';
+        lyricsPanel.classList.add('react-tabs__tab-panel--selected');
+        
+        console.log('LYPLUS: Lyrics tab activated');
     });
 
+    // Add click handlers to existing tabs to deactivate lyrics tab (without breaking existing functionality)
     tablist.querySelectorAll('[role="tab"]:not(#lyrics-plus-tab)').forEach(tab => {
-        tab.addEventListener('click', () => {
-            const controlledPanelId = tab.getAttribute('aria-controls');
-            if (controlledPanelId) {
-                const controlledPanel = document.getElementById(controlledPanelId);
-                if (controlledPanel) controlledPanel.style.display = 'block';
-            }
-            customLyricsTab.setAttribute('aria-selected', 'false');
-            lyricsPanel.style.display = 'none';
-        });
+        // Only add our listener if we haven't already added it
+        if (!tab.hasAttribute('data-lyrics-plus-listener')) {
+            tab.setAttribute('data-lyrics-plus-listener', 'true');
+            
+            tab.addEventListener('click', (e) => {
+                // Let the original tab logic handle the switch first
+                setTimeout(() => {
+                    // Then deactivate our lyrics tab
+                    customLyricsTab.setAttribute('aria-selected', 'false');
+                    customLyricsTab.classList.remove('_activeTab_f47dafa');
+                    lyricsPanel.style.display = 'none';
+                    lyricsPanel.classList.remove('react-tabs__tab-panel--selected');
+                }, 10);
+            });
+        }
     });
+
+    console.log('LYPLUS: Custom lyrics tab created and attached');
 }
 
-const uiObserver = new MutationObserver(ensureLyricsTab);
-const uiObserverConfig = { childList: true, subtree: true };
+// Improved observer with better targeting
+const uiObserver = new MutationObserver((mutations) => {
+    let shouldCheck = false;
+    mutations.forEach(mutation => {
+        if (mutation.type === 'childList') {
+            // Check if tablist or panels were modified
+            const addedNodes = Array.from(mutation.addedNodes);
+            const hasRelevantChanges = addedNodes.some(node => 
+                node.nodeType === 1 && (
+                    node.querySelector?.('[role="tablist"]') ||
+                    node.querySelector?.('[role="tabpanel"]') ||
+                    node.matches?.('[role="tablist"]') ||
+                    node.matches?.('[role="tabpanel"]')
+                )
+            );
+            if (hasRelevantChanges) {
+                shouldCheck = true;
+            }
+        }
+    });
+    
+    if (shouldCheck) {
+        setTimeout(ensureLyricsTab, 100);
+    }
+});
+
+const uiObserverConfig = { 
+    childList: true, 
+    subtree: true,
+    attributes: false,
+    characterData: false
+};
 
 function startUiObserver() {
-    const appRoot = document.getElementById('wimp');
+    const appRoot = document.getElementById('wimp') || document.body;
     if (appRoot) {
         uiObserver.observe(appRoot, uiObserverConfig);
+        // Initial check
+        setTimeout(ensureLyricsTab, 500);
+        console.log('LYPLUS: UI Observer started');
     } else {
-        setTimeout(startUiObserver, 500);
+        setTimeout(startUiObserver, 1000);
     }
 }
 
@@ -101,73 +182,158 @@ function startUiObserver() {
 let LYPLUS_currentSong = {};
 
 function setupSongTracker() {
-    const targetNode = document.querySelector('div[data-test="left-column-footer-player"]');
+    // Try multiple possible selectors for the player
+    const possibleSelectors = [
+        'div[data-test="left-column-footer-player"]',
+        '#nowPlaying',
+        '[data-test="footer-track-title"]',
+        '[data-test="now-playing-title"]'
+    ];
+    
+    let targetNode = null;
+    for (const selector of possibleSelectors) {
+        targetNode = document.querySelector(selector);
+        if (targetNode) break;
+    }
+    
     if (targetNode) {
         const songTrackerObserver = new MutationObserver(debounceCheckForSongChange);
-        const observerOptions = { characterData: true, childList: true, subtree: true };
+        const observerOptions = { 
+            characterData: true, 
+            childList: true, 
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['title', 'aria-label']
+        };
         songTrackerObserver.observe(targetNode, observerOptions);
+        console.log('LYPLUS: Song tracker observer attached to:', targetNode);
     } else {
-        const nowPlayingNode = document.getElementById('nowPlaying');
-        if(nowPlayingNode) {
-            const songTrackerObserver = new MutationObserver(debounceCheckForSongChange);
-            const observerOptions = { characterData: true, childList: true, subtree: true };
-            songTrackerObserver.observe(nowPlayingNode, observerOptions);
-        } else {
-             setTimeout(setupSongTracker, 1000);
-        }
+        console.log('LYPLUS: No suitable target found for song tracking, retrying...');
+        setTimeout(setupSongTracker, 2000);
+        return;
     }
+    
+    // Periodic check as backup
     setInterval(checkForSongChange, 5000);
+    
+    // Initial check
+    setTimeout(checkForSongChange, 1000);
 }
 
 let debounceTimer = null;
 function debounceCheckForSongChange() {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(checkForSongChange, 500);
+    debounceTimer = setTimeout(checkForSongChange, 300);
 }
 
 function checkForSongChange() {
     const newSongInfo = getSongInfo();
-    // console.log('LYPLUS_TRACKER: Checking for song change. New info found:', newSongInfo, 'Current song:', LYPLUS_currentSong);
+    
+    if (!newSongInfo || !newSongInfo.title.trim() || !newSongInfo.artist.trim()) {
+        return;
+    }
 
-    if (!newSongInfo || !newSongInfo.title.trim() || !newSongInfo.artist.trim()) return;
+    // Check if current src has changed (for video/audio elements)
+    const videoElement = document.querySelector('video');
+    const audioElement = document.querySelector('audio');
+    const currentSrc = videoElement?.currentSrc || audioElement?.currentSrc || '';
+    
+    const hasChanged = (
+        newSongInfo.title !== LYPLUS_currentSong.title || 
+        newSongInfo.artist !== LYPLUS_currentSong.artist || 
+        newSongInfo.duration !== LYPLUS_currentSong.duration ||
+        currentSrc !== LYPLUS_currentSong.currentSrc
+    );
 
-    if (newSongInfo.title !== LYPLUS_currentSong.title || newSongInfo.artist !== LYPLUS_currentSong.artist || newSongInfo.duration !== LYPLUS_currentSong.duration) {
-        console.log('LYPLUS_TRACKER: Song change detected!', newSongInfo);
-        LYPLUS_currentSong = newSongInfo;
-        window.postMessage({ type: 'LYPLUS_SONG_CHANGED', songInfo: LYPLUS_currentSong }, '*');
-        window.postMessage({ type: 'LYPLUS_updateFullScreenAnimatedBg' }, '*');
+    if (hasChanged) {
+        console.log('LYPLUS: Song change detected!', newSongInfo);
+        LYPLUS_currentSong = { ...newSongInfo, currentSrc };
+        
+        // Dispatch events
+        window.postMessage({ 
+            type: 'LYPLUS_SONG_CHANGED', 
+            songInfo: LYPLUS_currentSong 
+        }, '*');
+        
+        window.postMessage({ 
+            type: 'LYPLUS_updateFullScreenAnimatedBg' 
+        }, '*');
     }
 }
 
 function getSongInfo() {
-    // console.log('LYPLUS_TRACKER: getSongInfo called.');
-    const selectors = [
-        { title: 'div[data-test="left-column-footer-player"] div[data-test="footer-track-title"] a span', artist: 'div[data-test="left-column-footer-player"] a[data-test="grid-item-detail-text-title-artist"]' }, // Mini-player
-        { title: 'div[data-test="now-playing-title"]', artist: 'a[data-test="now-playing-artist"]' } // Full-screen player (still a guess)
+    // Enhanced selectors with fallbacks
+    const selectorSets = [
+        {
+            title: 'div[data-test="left-column-footer-player"] div[data-test="footer-track-title"] a span',
+            artist: 'div[data-test="left-column-footer-player"] a[data-test="grid-item-detail-text-title-artist"]'
+        },
+        {
+            title: 'div[data-test="footer-track-title"] span',
+            artist: 'a[data-test="grid-item-detail-text-title-artist"]'
+        },
+        {
+            title: 'div[data-test="now-playing-title"]',
+            artist: 'a[data-test="now-playing-artist"]'
+        },
+        {
+            title: '[data-test="playqueue-item-title"] span',
+            artist: '[data-test="grid-item-detail-text-title-artist"]'
+        }
     ];
-    for (let i = 0; i < selectors.length; i++) {
-        const s = selectors[i];
-        const titleElement = document.querySelector(s.title);
-        const artistElement = document.querySelector(s.artist);
-
+    
+    for (const selectors of selectorSets) {
+        const titleElement = document.querySelector(selectors.title);
+        const artistElement = document.querySelector(selectors.artist);
+        
         if (titleElement && artistElement) {
-            const durationElement = document.querySelector('video').duration;
-            const songInfo = {
-                title: titleElement.textContent.trim(),
-                artist: artistElement.textContent.trim(),
-                album: '',
-                duration: durationElement,
-                cover: '',
-                isVideo: false
-            };
-            if(songInfo.title != "" && songInfo.artist != "" && !Number.isNaN(songInfo.duration))
-            return songInfo;
+            const title = titleElement.textContent?.trim() || '';
+            const artist = artistElement.textContent?.trim() || '';
+            
+            if (title && artist) {
+                // Try to get duration from video element
+                let duration = 0;
+                const videoElement = document.querySelector('video');
+                if (videoElement && !isNaN(videoElement.duration)) {
+                    duration = videoElement.duration;
+                }
+                
+                const songInfo = {
+                    title,
+                    artist,
+                    album: '', // Could be enhanced to get album info
+                    duration,
+                    cover: '', // Could be enhanced to get cover art
+                    isVideo: !!videoElement
+                };
+                
+                return songInfo;
+            }
         }
     }
-    // console.log('LYPLUS_TRACKER: No song info found with any selector set.');
+    
     return null;
 }
 
 // --- INITIALIZATION ---
-startUiObserver();
-setupSongTracker();
+function initialize() {
+    console.log('LYPLUS: Initializing Tidal injector...');
+    
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initialize);
+        return;
+    }
+    
+    // Inject CSS
+    // injectPlatformCSS();
+    
+    // Start observers
+    startUiObserver();
+    setupSongTracker();
+    
+    console.log('LYPLUS: Tidal injector initialized');
+}
+
+// Start initialization
+initialize();
