@@ -1,4 +1,6 @@
 let lyricsRendererInstance = null;
+let pendingSongInfo = null;
+let pendingCheckCount = 0;
 
 const LyricsPlusAPI = {
   displayLyrics: (...args) => lyricsRendererInstance?.displayLyrics(...args),
@@ -237,29 +239,54 @@ function checkForSongChange() {
     const videoElement = document.querySelector('video');
     const audioElement = document.querySelector('audio');
     const currentSrc = videoElement?.currentSrc || audioElement?.currentSrc || '';
-    
+
     const hasChanged = (
         newSongInfo.title !== LYPLUS_currentSong.title || 
         newSongInfo.artist !== LYPLUS_currentSong.artist || 
-        newSongInfo.duration !== LYPLUS_currentSong.duration ||
         currentSrc !== LYPLUS_currentSong.currentSrc
     );
 
     if (hasChanged) {
-        console.log('LYPLUS: Song change detected!', newSongInfo);
-        LYPLUS_currentSong = { ...newSongInfo, currentSrc };
-        
-        // Dispatch events
-        window.postMessage({ 
-            type: 'LYPLUS_SONG_CHANGED', 
-            songInfo: LYPLUS_currentSong 
-        }, '*');
-        
-        window.postMessage({ 
-            type: 'LYPLUS_updateFullScreenAnimatedBg' 
-        }, '*');
+        if (!pendingSongInfo) {
+            pendingSongInfo = { ...newSongInfo, currentSrc };
+            pendingCheckCount = 0;
+            return;
+        }
+
+        if (
+            pendingSongInfo.title === newSongInfo.title &&
+            pendingSongInfo.artist === newSongInfo.artist &&
+            pendingSongInfo.currentSrc === currentSrc
+        ) {
+            pendingCheckCount++;
+
+            const validDuration = newSongInfo.duration && !isNaN(newSongInfo.duration) && newSongInfo.duration > 0;
+            const differentFromOld = newSongInfo.duration !== LYPLUS_currentSong.duration;
+
+            if (validDuration && differentFromOld) {
+                LYPLUS_currentSong = { ...newSongInfo, currentSrc };
+                pendingSongInfo = null;
+                pendingCheckCount = 0;
+
+                window.postMessage({ type: 'LYPLUS_SONG_CHANGED', songInfo: LYPLUS_currentSong }, '*');
+                window.postMessage({ type: 'LYPLUS_updateFullScreenAnimatedBg' }, '*');
+            } 
+            else if (pendingCheckCount >= 3) {
+                LYPLUS_currentSong = { ...newSongInfo, currentSrc };
+                pendingSongInfo = null;
+                pendingCheckCount = 0;
+
+                window.postMessage({ type: 'LYPLUS_SONG_CHANGED', songInfo: LYPLUS_currentSong }, '*');
+                window.postMessage({ type: 'LYPLUS_updateFullScreenAnimatedBg' }, '*');
+            }
+        } else {
+            pendingSongInfo = { ...newSongInfo, currentSrc };
+            pendingCheckCount = 0;
+            console.log('LYPLUS: New pending song', pendingSongInfo);
+        }
     }
 }
+
 
 function getSongInfo() {
     // Enhanced selectors with fallbacks
