@@ -146,7 +146,7 @@ class LyricsPlusRenderer {
   _createLyricsContainer() {
     const originalLyricsSection = document.querySelector(this.uiConfig.patchParent);
     if (!originalLyricsSection) {
-      console.log("Unable to find "+ this.uiConfig.patchParent)
+      console.log("Unable to find " + this.uiConfig.patchParent)
       this.lyricsContainer = null;
       return null;
     }
@@ -643,9 +643,11 @@ class LyricsPlusRenderer {
           const currentDuration = pendingSyllable._durationMs;
           const syllableWidth = this._getTextWidth(pendingSyllable.textContent, pendingSyllableFont);
           const emWidth = this._getTextWidth('m', pendingSyllableFont);
-          const relativeUnits = syllableWidth / emWidth;
-          let charBasedDelay = (relativeUnits) / relativeUnits;
-          const delayPercent = charBasedDelay;
+          const syllableWidthEm = syllableWidth / emWidth; // convert px → em
+          const totalTravelEm = syllableWidthEm + 0.25; // block 0.5em size
+          const travelUntilEdgeEm = syllableWidthEm; // when touching edge
+          const delayFraction = travelUntilEdgeEm / totalTravelEm;
+          const delayPercent = Math.min(1, Math.max(0, delayFraction));
           const timingFunction = `cubic-bezier(${delayPercent.toFixed(3)}, 0, 1, 1)`;
 
           pendingSyllable._nextSyllableInWord = nextSyllable;
@@ -664,15 +666,11 @@ class LyricsPlusRenderer {
 
             const syllableWidth = this._getTextWidth(syllable.textContent, referenceFont);
             const emWidth = this._getTextWidth('m', referenceFont);
-
-            // Convert syllable width to "em" units
-            const relativeUnits = syllableWidth / emWidth;
-
-            // Delay until the 0.5em wipe block's right edge reaches the syllable's right edge.
-            // Allow negative values for thin letters so the next syllable starts immediately if needed.
-            let charBasedDelay = (relativeUnits - 0.25) / relativeUnits;
-
-            const delayPercent = charBasedDelay;
+            const syllableWidthEm = syllableWidth / emWidth; // convert px → em
+            const totalTravelEm = syllableWidthEm + 0.25; // block 0.5em size
+            const travelUntilEdgeEm = syllableWidthEm; // when touching edge
+            const delayFraction = travelUntilEdgeEm / totalTravelEm;
+            const delayPercent = Math.min(1, Math.max(0, delayFraction));
             const timingFunction = `cubic-bezier(${delayPercent.toFixed(3)}, 0, 1, 1)`;
 
             syllable._nextSyllableInWord = nextSyllable;
