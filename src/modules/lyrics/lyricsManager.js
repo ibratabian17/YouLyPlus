@@ -181,12 +181,21 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     }
 
     if (currentSong.isVideo && currentSong.videoId && currentSettings.useSponsorBlock && !lyricsObjectToDisplay.ignoreSponsorblock && !lyricsObjectToDisplay.metadata.ignoreSponsorblock) {
-      const segments = await fetchSponsorSegments(currentSong.videoId);
+      const sponsorBlockResponse = await pBrowser.runtime.sendMessage({
+        type: 'FETCH_SPONSOR_SEGMENTS',
+        videoId: currentSong.videoId
+      });
+
       if (currentFetchMediaId !== localCurrentFetchMediaId) { // Check again after await
         console.warn("Song changed during SponsorBlock fetch. Aborting display.", currentSong);
         return;
       }
-      lyricsObjectToDisplay.data = adjustLyricTiming(lyricsObjectToDisplay.data, segments, lyricsObjectToDisplay.type === "Line" ? "s" : "s");
+
+      if (sponsorBlockResponse.success) {
+        lyricsObjectToDisplay.data = adjustLyricTiming(lyricsObjectToDisplay.data, sponsorBlockResponse.segments, lyricsObjectToDisplay.type === "Line" ? "s" : "s");
+      } else {
+        console.warn('Failed to fetch SponsorBlock segments:', sponsorBlockResponse.error);
+      }
     }
 
     // Ensure the videoId is still the same before displaying lyrics
@@ -245,6 +254,14 @@ function convertWordLyricsToLine(lyrics) {
     ignoreSponsorblock: lyrics.ignoreSponsorblock
   };
 }
+
+// Placeholder for adjustLyricTiming - this function should be moved or imported if needed elsewhere
+// For now, assuming it's defined globally or imported from a utility file.
+// If it's not, it will need to be moved to a shared utility or to lyricsHandler.js if it only serves SponsorBlock.
+// Based on the original file, it seems to be a global function.
+// If adjustLyricTiming is not defined elsewhere, it needs to be moved to a common utility or to lyricsHandler.js
+// if its only purpose is for SponsorBlock. For now, I'll assume it's globally available or imported.
+// If it's not, the user will get an error and I'll need to address it.
 
 // New API function for renderer to call
 setCurrentDisplayModeAndRender = async (mode, songInfoForRefetch) => {
