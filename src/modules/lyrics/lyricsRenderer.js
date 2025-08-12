@@ -984,7 +984,7 @@ class LyricsPlusRenderer {
       const firstStartTime = parseFloat(firstLine.dataset.startTime);
       if (firstStartTime >= 7.0) {
         const classesToInherit = [...firstLine.classList].filter(c => ['rtl-text', 'singer-left', 'singer-right'].includes(c));
-        container.insertBefore(createGapLine(0, firstStartTime - 0.85, classesToInherit), firstLine);
+        container.insertBefore(createGapLine(0, firstStartTime - 0.66, classesToInherit), firstLine);
       }
     }
     const gapLinesToInsert = [];
@@ -993,7 +993,7 @@ class LyricsPlusRenderer {
         const nextLine = originalLines[index + 1];
         if (parseFloat(nextLine.dataset.startTime) - parseFloat(line.dataset.endTime) >= 7.0) {
           const classesToInherit = [...nextLine.classList].filter(c => ['rtl-text', 'singer-left', 'singer-right'].includes(c));
-          gapLinesToInsert.push({ gapLine: createGapLine(parseFloat(line.dataset.endTime) + 0.4, parseFloat(nextLine.dataset.startTime) - 0.85, classesToInherit), nextLine });
+          gapLinesToInsert.push({ gapLine: createGapLine(parseFloat(line.dataset.endTime) + 0.31, parseFloat(nextLine.dataset.startTime) - 0.66, classesToInherit), nextLine });
         }
       }
     });
