@@ -1,6 +1,7 @@
 // lyricsManager.js
 let currentFetchMediaId = null;
 let currentDisplayMode = 'none'; // Manages the active translation/romanization mode
+let lastProcessedDisplayMode = 'none'; // Store the mode that was actually rendered
 
 let lastKnownSongInfo = null; // Store last known song info for reload
 let lastFetchedLyrics = null; // Store the last successfully fetched lyrics object
@@ -14,8 +15,9 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
   const songKey = `${currentSong.title}-${currentSong.artist}-${currentSong.album}`;
 
   // If a request for the same song is already pending or recently completed, debounce it.
-  if (lyricsFetchDebounceTimer && lastRequestedSongKey === songKey && !forceReload) {
-    console.log(`Debouncing duplicate fetch request for ${songKey}`);
+  // Do not debounce if it's a forceReload (explicit bypass) or if the display mode has changed.
+  if (lyricsFetchDebounceTimer && lastRequestedSongKey === songKey && !forceReload && currentDisplayMode === lastProcessedDisplayMode) {
+    console.log(`Debouncing duplicate fetch request for ${songKey} with same display mode.`);
     return; // Abort this duplicate call
   }
 
@@ -214,10 +216,12 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     }
 
     lastKnownSongInfo = currentSong; // Update last known song info
+    lastProcessedDisplayMode = finalDisplayModeForRenderer; // Update after successful display
 
   } catch (error) {
     console.warn('Error in fetchAndDisplayLyrics:', error);
     currentDisplayMode = 'none'; // Reset manager's mode on error
+    lastProcessedDisplayMode = 'none'; // Reset processed mode on error
 
     if (currentFetchMediaId === (currentSong ? currentSong.videoId : null)) { // Check if error is for current song
       if (LyricsPlusAPI.displaySongError) LyricsPlusAPI.displaySongError();
@@ -246,12 +250,21 @@ function convertWordLyricsToLine(lyrics) {
 setCurrentDisplayModeAndRender = async (mode, songInfoForRefetch) => {
   currentDisplayMode = mode; // Update manager's internal state
 
-  if (lastFetchedLyrics && LyricsPlusAPI.updateDisplayMode) {
-    // If lyrics are already fetched, just update the display mode in the renderer
-    // No need to re-fetch from the background script
-    LyricsPlusAPI.updateDisplayMode(lastFetchedLyrics, mode, currentSettings);
-  } else if (songInfoForRefetch) {
-    // Fallback: if no lyrics are cached in manager, re-fetch them
+  // When the display mode is explicitly changed by the user, always trigger a fetch.
+  // The debounce logic in fetchAndDisplayLyrics will now intelligently decide whether to debounce
+  // based on whether the display mode itself has changed for the same song.
+  if (songInfoForRefetch) {
+    // Pass isNewSong=false as it's not a new song, but a mode change.
+    // Pass forceReload=false, as the debounce logic will handle it.
     await fetchAndDisplayLyrics(songInfoForRefetch, false, false);
+  } else {
+    // Fallback: if no songInfoForRefetch is available, try to use lastKnownSongInfo.
+    if (lastKnownSongInfo) {
+      await fetchAndDisplayLyrics(lastKnownSongInfo, false, false);
+    } else {
+      console.error("Cannot update display mode: No song information available for refetch.");
+      currentDisplayMode = 'none';
+      if (LyricsPlusAPI.displaySongError) LyricsPlusAPI.displaySongError();
+    }
   }
 };
