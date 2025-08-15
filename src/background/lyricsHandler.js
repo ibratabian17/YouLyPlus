@@ -607,26 +607,32 @@ async function fetchGeminiRomanize(structuredInput, settings) {
     const initialUserPrompt = (overrideGeminiRomanizePrompt && customGeminiRomanizePrompt)
         ? customGeminiRomanizePrompt : `You are a linguistic expert AI specializing in precise, context-aware romanization. Your task is to follow these rules with extreme accuracy.
 
-    **THE GOLDEN RULE: The full line 'text' is the source of truth, and 'chunks' must be derived from it.**
-    This is the most critical instruction. Some languages have contextual rules where words change form when placed together. You must first determine the most natural, flowing romanization for the **entire line** of text. Then, and only then, you must partition that final romanized string into the chunks. The chunks are a breakdown of the final result, not independently romanized words.
+**THE GOLDEN RULE: The full line 'text' is the source of truth, and 'chunks' must be derived from it.**
+This is the most critical instruction. Some languages have contextual rules where words change form when placed together. You must first determine the most natural, flowing romanization for the **entire line** of text. Then, and only then, you must partition that final romanized string into the chunks. The chunks are a breakdown of the final result, not independently romanized words.
 
-    **Hypothetical Example of the GOLDEN RULE:**
-    Imagine a language where "luma" + "ina" becomes "lumina".
-    - Original Input: \`{ "text": "luma ina", "chunk": [{"text": "luma"}, {"text": "ina"}] }\`
-    - Your internal process:
-        1. Romanize the full text "luma ina" according to its contextual rule, resulting in: "lumina".
-        2. Now, intelligently split "lumina" back into the original number of chunks.
-    - Correct Output: \`{ "text": "lumina", "chunk": [{"text": "lum"}, {"text": "ina"}] }\` (Note: the split is logical based on the source)
-    - **INCORRECT** Output (This is what you must avoid): \`{ "text": "lumina", "chunk": [{"text": "luma"}, {"text": "ina"}] }\` - This is wrong because the chunks were romanized in isolation and do not sum to the correct final text.
+**CRITICAL CHUNK DISTRIBUTION RULES:**
+1. **NEVER leave any chunk with empty text** - every chunk must have meaningful content
+2. **DISTRIBUTE text proportionally** - if original has 3 chunks of similar length, romanized should too
+3. **NO CHUNK MERGING** - don't put all text in one chunk and leave others empty
+4. **PRESERVE WORD BOUNDARIES** - chunks should align with natural word/syllable breaks
 
-    **ADDITIONAL STRICT RULES:**
-    1.  **CHUNK-FOR-CHUNK MAPPING:** If an input line has a "chunk" array, your output MUST have a "chunk" array with the EXACT SAME NUMBER OF CHUNKS.
-    2.  **OMIT CHUNKS WHEN ABSENT:** If an input line does NOT have a "chunk" array, your output MUST also NOT have a "chunk" array.
-    3.  **ACCURATE ROMANIZATION:** Convert all non-Latin text to its standard, phonetically accurate romanization for the detected language.
+**EXAMPLES OF CORRECT BEHAVIOR:**
+❌ WRONG: Original: ["안녕", "하세요"] → Romanized: ["annyeong haseyo", ""]
+✅ CORRECT: Original: ["안녕", "하세요"] → Romanized: ["annyeong", "haseyo"]
 
-    Now, process the following real lyrics, applying the Golden Rule and all other rules strictly.
-    Lyrics to romanize:
-    ${JSON.stringify(lyricsForApi, null, 2)}`;
+❌ WRONG: Original: ["こん", "にち", "は"] → Romanized: ["konnichiwa", "", ""]
+✅ CORRECT: Original: ["こん", "にち", "は"] → Romanized: ["kon", "nichi", "wa"]
+
+**ADDITIONAL STRICT RULES:**
+1. **CHUNK-FOR-CHUNK MAPPING:** If an input line has a "chunk" array, your output MUST have a "chunk" array with the EXACT SAME NUMBER OF CHUNKS.
+2. **OMIT CHUNKS WHEN ABSENT:** If an input line does NOT have a "chunk" array, your output MUST also NOT have a "chunk" array.
+3. **ACCURATE ROMANIZATION:** Convert all non-Latin text to its standard, phonetically accurate romanization for the detected language.
+4. **MAINTAIN PROPORTIONS:** If original chunks are roughly equal length, romanized chunks should be too.
+
+Now, process the following lyrics, applying the Golden Rule and all other rules strictly:
+
+Lyrics to romanize:
+${JSON.stringify(lyricsForApi, null, 2)}`;
 
     const schema = {
         type: "OBJECT",
@@ -645,7 +651,7 @@ async function fetchGeminiRomanize(structuredInput, settings) {
                             items: {
                                 type: "OBJECT",
                                 properties: {
-                                    text: { type: "STRING", description: "The text of a single romanized chunk." },
+                                    text: { type: "STRING", description: "The text of a single romanized chunk. MUST NOT be empty." },
                                     chunkIndex: { type: "INTEGER", description: "The original index of the chunk, which must be preserved." }
                                 },
                                 required: ["text", "chunkIndex"]
@@ -659,7 +665,6 @@ async function fetchGeminiRomanize(structuredInput, settings) {
         required: ["romanized_lyrics"]
     };
 
-    // Schema for selective fixes - only includes the problematic lines
     const selectiveSchema = {
         type: "OBJECT",
         properties: {
@@ -677,7 +682,7 @@ async function fetchGeminiRomanize(structuredInput, settings) {
                             items: {
                                 type: "OBJECT",
                                 properties: {
-                                    text: { type: "STRING", description: "The text of a single romanized chunk." },
+                                    text: { type: "STRING", description: "The text of a single romanized chunk. MUST NOT be empty." },
                                     chunkIndex: { type: "INTEGER", description: "The original index of the chunk, which must be preserved." }
                                 },
                                 required: ["text", "chunkIndex"]
@@ -732,7 +737,7 @@ async function fetchGeminiRomanize(structuredInput, settings) {
             if (attempt === MAX_RETRIES) {
                 throw new Error(`Gemini romanization failed after ${MAX_RETRIES} attempts: ${e.message}`);
             }
-            continue; // Try again
+            continue;
         }
 
         let parsedJson;
@@ -743,20 +748,17 @@ async function fetchGeminiRomanize(structuredInput, settings) {
             if (attempt === MAX_RETRIES) {
                 throw new Error(`Gemini romanization failed after ${MAX_RETRIES} attempts: Could not parse valid JSON.`);
             }
-            // Add reflection for JSON parsing error
             currentContents.push({ role: 'model', parts: [{ text: responseText }] });
             currentContents.push({ role: 'user', parts: [{ text: `Your previous response was not valid JSON. Please provide a corrected JSON response. Error: ${e.message}` }] });
-            continue; // Try again
+            continue;
         }
 
         let finalResponse;
 
         if (isSelectiveFix && parsedJson.fixed_lines) {
-            // Merge selective fixes with the last valid response
             finalResponse = mergeSelectiveFixes(lastValidResponse, parsedJson.fixed_lines);
         } else {
             finalResponse = parsedJson;
-            // Only store as lastValidResponse if it's the first attempt or if it has fewer errors
             if (attempt === 1) {
                 lastValidResponse = parsedJson;
             }
@@ -773,60 +775,68 @@ async function fetchGeminiRomanize(structuredInput, settings) {
                 throw new Error(`Gemini romanization failed after ${MAX_RETRIES} attempts. Final validation errors: ${validationResult.errors.join(', ')}`);
             }
 
-            // Prepare selective reflection - only ask to fix problematic lines
             const problematicLines = getProblematicLines(lyricsForApi, finalResponse, validationResult.detailedErrors);
 
             currentContents.push({ role: 'model', parts: [{ text: responseText }] });
 
             if (problematicLines.length > 0 && problematicLines.length < lyricsForApi.length * 0.8) {
-                // Only use selective fix if less than 80% of lines are problematic
-                const selectivePrompt = `IMPORTANT: Your previous response had errors in ${problematicLines.length} specific lines. I need you to provide ONLY the corrected versions of these problematic lines. DO NOT touch the lines that were correct.
+                // IMPROVED: More specific selective fix prompt
+                const selectivePrompt = `CRITICAL ERROR CORRECTION NEEDED: Your previous response had structural errors in ${problematicLines.length} specific lines.
 
-CRITICAL INSTRUCTIONS:
-1. ONLY provide corrections for the lines listed below
-2. DO NOT include any other lines in your response
-3. Each corrected line MUST have the exact same number of chunks as specified
-4. Return in the exact format shown
+**MOST COMMON ERRORS TO FIX:**
+1. Empty chunks - chunks with "" or no text
+2. Uneven distribution - one chunk gets all text, others empty  
+3. Chunk count mismatch
 
-PROBLEMATIC LINES REQUIRING FIXES:
+**SPECIFIC LINES THAT NEED FIXING:**
 ${JSON.stringify(problematicLines.map(line => ({
-                    ...line,
+                    original_line_index: line.original_line_index,
+                    original_text: line.text,
                     required_chunk_count: line.chunk ? line.chunk.length : 0,
+                    original_chunks: line.chunk ? line.chunk.map(c => c.text) : null,
                     errors: validationResult.detailedErrors.find(e => e.lineIndex === line.original_line_index)?.errors || []
                 })), null, 2)}
 
-REQUIRED RESPONSE FORMAT:
+**CORRECTION RULES:**
+1. Every chunk MUST have non-empty text
+2. Distribute text proportionally across chunks
+3. Never leave chunks empty while others have all the text
+4. Match the exact chunk count specified
+
+PROVIDE ONLY THE CORRECTED LINES in this format:
 {
   "fixed_lines": [
-    // ONLY the corrected lines with proper chunk counts
+    // Only the corrected lines with proper chunk distribution
   ]
-}
-
-Remember: Each line must have EXACTLY the number of chunks specified in 'required_chunk_count'.`;
+}`;
 
                 currentContents.push({ role: 'user', parts: [{ text: selectivePrompt }] });
             } else {
-                // Fallback to full re-generation if too many lines are problematic
-                const fullPrompt = `Your previous response had structural errors in ${validationResult.errors.length} places. This is a critical issue with chunk count matching.
+                // Full re-generation prompt with better guidance
+                const fullPrompt = `CRITICAL STRUCTURAL ERRORS DETECTED: Your previous response had major issues with chunk distribution and text partitioning.
 
-CRITICAL RULE REMINDER: Each output line must have the EXACT SAME NUMBER of chunks as the corresponding input line.
-
-ERRORS TO FIX:
+**MOST SERIOUS ERRORS:**
 ${validationResult.errors.slice(0, 10).join('\n- ')}${validationResult.errors.length > 10 ? '\n- ... and more' : ''}
 
-Here are the original lyrics again. Pay special attention to the chunk count for each line:
+**REMEMBER THE GOLDEN RULE:** 
+1. Romanize the FULL LINE text first
+2. Then intelligently split that romanized text into chunks
+3. NEVER leave any chunk empty
+4. Distribute text proportionally
+
+**Original lyrics for reference:**
 ${JSON.stringify(lyricsForApi, null, 2)}
 
-PROVIDE A COMPLETE CORRECTED RESPONSE.`;
+PROVIDE A COMPLETE CORRECTED RESPONSE with proper chunk distribution.`;
 
                 currentContents.push({ role: 'user', parts: [{ text: fullPrompt }] });
             }
         }
     }
 
-    // Should not reach here if MAX_RETRIES is handled correctly
     throw new Error("Unexpected error: Gemini romanization process completed without success or explicit failure.");
 }
+
 /**
  * Extracts problematic lines based on validation errors
  * @param {Object[]} originalLyricsForApi - The original lyrics sent to API
@@ -838,7 +848,7 @@ function getProblematicLines(originalLyricsForApi, response, detailedErrors = []
     const problematicLines = [];
     const problematicIndices = new Set();
 
-    // Extract line indices from detailed errors (most reliable)
+    // Extract line indices from detailed errors
     if (detailedErrors && detailedErrors.length > 0) {
         detailedErrors.forEach(error => {
             if (error.lineIndex !== undefined) {
@@ -847,7 +857,7 @@ function getProblematicLines(originalLyricsForApi, response, detailedErrors = []
         });
     }
 
-    // Always validate all lines to catch edge cases like empty chunks
+    // validation with specific focus on empty chunks and distribution
     if (response.romanized_lyrics) {
         response.romanized_lyrics.forEach((line, index) => {
             const originalLine = originalLyricsForApi[index];
@@ -856,88 +866,39 @@ function getProblematicLines(originalLyricsForApi, response, detailedErrors = []
             let hasIssue = false;
             const issues = [];
 
-            // 1. Check basic structural issues
+            // Check for empty chunks (high priority issue)
+            if (Array.isArray(line.chunk) && line.chunk.length > 0) {
+                const emptyChunks = line.chunk.filter(chunk => !chunk.text || chunk.text.trim() === '');
+                if (emptyChunks.length > 0) {
+                    hasIssue = true;
+                    issues.push(`${emptyChunks.length} empty chunk(s) detected`);
+                    console.log(`Line ${index}: Empty chunks detected:`, line.chunk.map(c => `"${c.text}"`));
+                }
+
+                // Check for uneven distribution (another high priority issue)
+                const nonEmptyChunks = line.chunk.filter(chunk => chunk.text && chunk.text.trim() !== '');
+                if (nonEmptyChunks.length === 1 && line.chunk.length > 1) {
+                    hasIssue = true;
+                    issues.push('text concentrated in single chunk');
+                    console.log(`Line ${index}: Uneven distribution:`, line.chunk.map(c => `"${c.text}"`));
+                }
+
+                // Check for chunk count mismatch
+                if (originalLine.chunk && originalLine.chunk.length !== line.chunk.length) {
+                    hasIssue = true;
+                    issues.push(`chunk count mismatch (expected ${originalLine.chunk.length}, got ${line.chunk.length})`);
+                }
+            }
+
+            // Add other validation checks...
             if (line.original_line_index !== index) {
                 hasIssue = true;
-                issues.push(`incorrect line index (expected ${index}, got ${line.original_line_index})`);
+                issues.push(`incorrect line index`);
             }
 
             if (typeof line.text !== 'string') {
                 hasIssue = true;
                 issues.push('missing or invalid text field');
-            }
-
-            // 2. Check chunk array presence mismatch
-            const originalHasChunks = Array.isArray(originalLine.chunk) && originalLine.chunk.length > 0;
-            const responseHasChunks = Array.isArray(line.chunk);
-
-            if (originalHasChunks && !responseHasChunks) {
-                hasIssue = true;
-                issues.push('missing chunk array');
-            } else if (!originalHasChunks && responseHasChunks) {
-                hasIssue = true;
-                issues.push('unexpected chunk array');
-            }
-
-            // 3. Check chunk count mismatch
-            if (originalHasChunks && responseHasChunks) {
-                if (originalLine.chunk.length !== line.chunk.length) {
-                    hasIssue = true;
-                    issues.push(`chunk count mismatch (expected ${originalLine.chunk.length}, got ${line.chunk.length})`);
-                } else {
-                    // 4. Check for empty chunks or chunk distribution issues
-                    const emptyChunks = line.chunk.filter(chunk => !chunk.text || chunk.text.trim() === '');
-                    if (emptyChunks.length > 0) {
-                        hasIssue = true;
-                        issues.push(`${emptyChunks.length} empty chunk(s) found`);
-                    }
-
-                    // 5. Check for chunk index mismatches
-                    const hasChunkIndexIssues = line.chunk.some((chunk, chunkIdx) => {
-                        return chunk.chunkIndex !== chunkIdx;
-                    });
-                    if (hasChunkIndexIssues) {
-                        hasIssue = true;
-                        issues.push('chunk index mismatch');
-                    }
-
-                    // 6. Check text coherence (chunks should sum to line text)
-                    const mergedChunkText = line.chunk.map(c => c.text || '').join('');
-                    const cleanedMerged = mergedChunkText.replace(/\s+/g, ' ').trim().toLowerCase();
-                    const cleanedLine = (line.text || '').replace(/\s+/g, ' ').trim().toLowerCase();
-
-                    if (cleanedMerged !== cleanedLine) {
-                        // Use Levenshtein distance for more nuanced comparison
-                        const distance = levenshteinDistance(cleanedMerged, cleanedLine);
-                        const maxLength = Math.max(cleanedMerged.length, cleanedLine.length);
-                        const percentageDifference = (maxLength === 0) ? 0 : (distance / maxLength) * 100;
-
-                        if (percentageDifference > 15) {
-                            hasIssue = true;
-                            issues.push(`text mismatch (${percentageDifference.toFixed(1)}% difference): merged="${mergedChunkText}" vs line="${line.text}"`);
-                        }
-                    }
-
-                    // 7. Check for suspicious chunk patterns (like one chunk having all the text)
-                    const nonEmptyChunks = line.chunk.filter(chunk => chunk.text && chunk.text.trim() !== '');
-                    if (nonEmptyChunks.length === 1 && line.chunk.length > 1) {
-                        hasIssue = true;
-                        issues.push('all text concentrated in one chunk while others are empty');
-                    }
-
-                    // 8. Check for overly long chunks that suggest merging occurred
-                    const averageOriginalChunkLength = originalLine.chunk.reduce((sum, chunk) =>
-                        sum + (chunk.text || '').length, 0) / originalLine.chunk.length;
-
-                    const hasOversizedChunks = line.chunk.some(chunk =>
-                        chunk.text && chunk.text.length > averageOriginalChunkLength * 2.5
-                    );
-
-                    if (hasOversizedChunks) {
-                        hasIssue = true;
-                        issues.push('detected oversized chunks suggesting improper merging');
-                    }
-                }
             }
 
             if (hasIssue) {
@@ -947,7 +908,7 @@ function getProblematicLines(originalLyricsForApi, response, detailedErrors = []
         });
     }
 
-    // Create problematic lines array with original structure preserved
+    // Create problematic lines array
     problematicIndices.forEach(index => {
         if (originalLyricsForApi[index]) {
             problematicLines.push({
@@ -1012,18 +973,20 @@ function validateRomanizationResponse(originalLyricsForApi, geminiResponse) {
 
     if (geminiResponse.romanized_lyrics.length !== originalLyricsForApi.length) {
         errors.push(`The number of lines in the response (${geminiResponse.romanized_lyrics.length}) does not match the request (${originalLyricsForApi.length}).`);
-        return { isValid: false, errors, detailedErrors }; // Fatal error.
+        return { isValid: false, errors, detailedErrors };
     }
 
     geminiResponse.romanized_lyrics.forEach((romanizedLine, index) => {
         const originalLine = originalLyricsForApi[index];
         const lineErrors = [];
 
+        // Basic validation
         if (romanizedLine.original_line_index !== index) {
             const error = `Line ${index}: 'original_line_index' is incorrect. Expected ${index}, got ${romanizedLine.original_line_index}.`;
             errors.push(error);
             lineErrors.push(error);
         }
+
         if (typeof romanizedLine.text !== 'string') {
             const error = `Line ${index}: The required 'text' field is missing or not a string.`;
             errors.push(error);
@@ -1043,18 +1006,10 @@ function validateRomanizationResponse(originalLyricsForApi, geminiResponse) {
                 errors.push(error);
                 lineErrors.push(error);
             } else {
-                const mergedChunkText = romanizedLine.chunk.map(c => c.text).join('');
-                const cleanedMergedChunkText = mergedChunkText.replace(/\s/g, '').toLowerCase();
-                const cleanedRomanizedLineText = romanizedLine.text.replace(/\s/g, '').toLowerCase();
-
-                const distance = levenshteinDistance(cleanedMergedChunkText, cleanedRomanizedLineText);
-                const maxLength = Math.max(cleanedMergedChunkText.length, cleanedRomanizedLineText.length);
-                const percentageDifference = (maxLength === 0) ? 0 : (distance / maxLength) * 100;
-
-                if (percentageDifference > 15) {
-                    const error = `Line ${index}: Text mismatch. The combined text from 'chunk' array does not match the line 'text' by more than 15%. Merged: "${mergedChunkText}", Line Text: "${romanizedLine.text}". Difference: ${percentageDifference.toFixed(2)}%.`;
-                    errors.push(error);
-                    lineErrors.push(error);
+                const chunkValidationResult = validateChunkDistribution(originalLine, romanizedLine, index);
+                if (!chunkValidationResult.isValid) {
+                    errors.push(...chunkValidationResult.errors);
+                    lineErrors.push(...chunkValidationResult.errors);
                 }
             }
         } else if (romanizedHasChunks) {
@@ -1073,6 +1028,77 @@ function validateRomanizationResponse(originalLyricsForApi, geminiResponse) {
 
     return { isValid: errors.length === 0, errors, detailedErrors };
 }
+
+function validateChunkDistribution(originalLine, romanizedLine, lineIndex) {
+    const errors = [];
+
+    // Check for empty chunks
+    const emptyChunks = romanizedLine.chunk.filter((chunk, idx) =>
+        !chunk.text || chunk.text.trim() === ''
+    );
+
+    if (emptyChunks.length > 0) {
+        errors.push(`Line ${lineIndex}: Found ${emptyChunks.length} empty chunk(s)`);
+    }
+
+    // Check for uneven distribution (one chunk gets all text, others empty)
+    const nonEmptyChunks = romanizedLine.chunk.filter(chunk =>
+        chunk.text && chunk.text.trim() !== ''
+    );
+
+    if (nonEmptyChunks.length === 1 && romanizedLine.chunk.length > 1) {
+        errors.push(`Line ${lineIndex}: All text concentrated in one chunk while others are empty`);
+    }
+    
+    // Advanced text coherence check with better algorithm
+    const coherenceResult = validateTextCoherence(romanizedLine, lineIndex);
+    if (!coherenceResult.isValid) {
+        errors.push(...coherenceResult.errors);
+    }
+
+    return { isValid: errors.length === 0, errors };
+}
+
+function validateTextCoherence(romanizedLine, lineIndex) {
+    const errors = [];
+
+    // Get texts
+    const mergedChunkText = romanizedLine.chunk.map(c => c.text || '').join('');
+    const lineText = romanizedLine.text || '';
+
+    // Normalize for comparison (remove extra spaces, convert to lowercase)
+    const normalizedMerged = normalizeTextForComparison(mergedChunkText);
+    const normalizedLine = normalizeTextForComparison(lineText);
+
+    if (normalizedMerged !== normalizedLine) {
+        // Calculate similarity using multiple metrics
+        const distance = levenshteinDistance(normalizedMerged, normalizedLine);
+        const maxLength = Math.max(normalizedMerged.length, normalizedLine.length);
+        const percentageDifference = (maxLength === 0) ? 0 : (distance / maxLength) * 100;
+
+        // More lenient threshold for romanization differences
+        if (percentageDifference > 20) {
+            errors.push(`Line ${lineIndex}: Significant text mismatch (${percentageDifference.toFixed(1)}% difference)`);
+            console.log(`Text mismatch details:
+                Merged chunks: "${mergedChunkText}"
+                Line text: "${lineText}"
+                Normalized merged: "${normalizedMerged}"
+                Normalized line: "${normalizedLine}"`);
+        }
+    }
+
+    return { isValid: errors.length === 0, errors };
+}
+
+function normalizeTextForComparison(text) {
+    return text
+        .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+        .trim()
+        .toLowerCase()
+        .replace(/[^\w\s]/g, ''); // Remove punctuation for better comparison
+}
+
+
 
 async function fetchGoogleTranslate(text, targetLang) {
     if (!text.trim()) return "";
