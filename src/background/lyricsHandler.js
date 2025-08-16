@@ -395,7 +395,7 @@ async function romanizeWithGoogle(originalLyrics) {
             const romanizedSyllableTexts = await fetchGoogleRomanize(syllableTexts);
             const newSyllabus = line.syllabus.map((s, index) => ({
                 ...s,
-                romanizedText: `${romanizedSyllableTexts[index] || s.text} `
+                romanizedText: `${romanizedSyllableTexts[index]} ` || s.text
             }));
             return { ...line, syllabus: newSyllabus };
         }));
@@ -443,7 +443,7 @@ async function romanizeWithGemini(originalLyrics, settings) {
             return {
                 ...originalSyllable,
                 text: originalSyllable.text,
-                romanizedText: `${romanizedSyllableText} `
+                romanizedText: romanizedSyllableText
             };
         }) : undefined;
 

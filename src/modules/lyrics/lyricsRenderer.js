@@ -64,6 +64,29 @@ class LyricsPlusRenderer {
     };
   }
 
+  _getDataText(normal, isOriginal = true) {
+    if (!normal) return ''; // Handle null/undefined 'normal' object
+    console.debug(this.largerTextMode, normal)
+
+    if (this.largerTextMode === "romanization") {
+      if (isOriginal) {
+        // Main/background container in romanization mode: show romanized
+        return normal.romanizedText || normal.text || '';
+      } else {
+        // Romanization container in romanization mode: show original
+        return normal.text || '';
+      }
+    } else {
+      if (isOriginal) {
+        // Main/background container in normal mode: show original
+        return normal.text || '';
+      } else {
+        // Romanization container in normal mode: show romanized (if available)
+        return normal.romanizedText || normal.text || '';
+      }
+    }
+  }
+
   /**
    * Handles the actual logic for container resize, debounced by _debouncedResizeHandler.
    * @param {HTMLElement} container - The lyrics container element.
@@ -609,12 +632,12 @@ class LyricsPlusRenderer {
           const charSpansForSyllable = [];
 
           if (s.isBackground) {
-            sylSpan.textContent = s.text.replace(/[()]/g, '');
+            sylSpan.textContent = this._getDataText(s, false).replace(/[()]/g, '');
           } else {
             if (shouldEmphasize) {
               wordSpan.classList.add('growable');
               let charIndex = 0;
-              s.text.split('').forEach(char => {
+              this._getDataText(s).split('').forEach(char => {
                 if (char === ' ') {
                   sylSpan.appendChild(document.createTextNode(' '));
                 } else {
@@ -629,7 +652,7 @@ class LyricsPlusRenderer {
                 }
               });
             } else {
-              sylSpan.textContent = s.text;
+              sylSpan.textContent = this._getDataText(s);
             }
           }
           if (charSpansForSyllable.length > 0) {
@@ -745,7 +768,7 @@ class LyricsPlusRenderer {
       }
       const mainContainer = document.createElement('div');
       mainContainer.className = 'main-vocal-container';
-      mainContainer.textContent = line.text;
+      mainContainer.textContent = this._getDataText(line);
       lineDiv.appendChild(mainContainer);
       // Use the new helper for translation container
       this._renderTranslationContainer(lineDiv, line, displayMode);
@@ -783,11 +806,10 @@ class LyricsPlusRenderer {
           const romanizationContainer = document.createElement('div');
           romanizationContainer.classList.add('lyrics-romanization-container');
           lineData.syllabus.forEach(syllable => {
-            const romanizedText = syllable.romanizedText || syllable.text;
-            if (romanizedText) {
+            if (this._getDataText(syllable, false)) {
               const sylSpan = document.createElement('span');
               sylSpan.className = 'lyrics-syllable'; // Use lyrics-syllable class for highlighting
-              sylSpan.textContent = romanizedText;
+              sylSpan.textContent = this._getDataText(syllable, false);
               // Copy timing data for highlighting
               sylSpan.dataset.startTime = syllable.time;
               sylSpan.dataset.duration = syllable.duration;
@@ -805,7 +827,7 @@ class LyricsPlusRenderer {
           // Fallback to line-level romanization if no syllable data
           const romanizationContainer = document.createElement('div');
           romanizationContainer.classList.add('lyrics-romanization-container');
-          romanizationContainer.textContent = lineData.romanizedText;
+          romanizationContainer.textContent = this._getDataText(lineData, false);
           lineElement.appendChild(romanizationContainer);
         }
       }
@@ -1076,10 +1098,11 @@ class LyricsPlusRenderer {
    * @param {Function} fetchAndDisplayLyricsFn - The function to fetch and display lyrics.
    * @param {Function} setCurrentDisplayModeAndRefetchFn - The function to set display mode and refetch.
    */
-  displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}, fetchAndDisplayLyricsFn, setCurrentDisplayModeAndRefetchFn) {
+  displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}, fetchAndDisplayLyricsFn, setCurrentDisplayModeAndRefetchFn, largerTextMode="lyrics") {
     this.lastKnownSongInfo = songInfo;
     this.fetchAndDisplayLyricsFn = fetchAndDisplayLyricsFn;
     this.setCurrentDisplayModeAndRefetchFn = setCurrentDisplayModeAndRefetchFn;
+    this.largerTextMode = largerTextMode;
 
     const container = this._getContainer();
     if (!container) return;
@@ -1804,7 +1827,7 @@ class LyricsPlusRenderer {
     if (!hasRomanization) {
       const optionDiv = document.createElement('div');
       optionDiv.className = 'dropdown-option';
-      optionDiv.textContent = t('showPronunciation');
+      optionDiv.textContent = this.largerTextMode == "romanization" ? t('showOriginal') : t('showPronunciation');
       optionDiv.addEventListener('click', () => {
         this.dropdownMenu.classList.add('hidden');
         let newMode = 'romanize';
@@ -1848,7 +1871,7 @@ class LyricsPlusRenderer {
     if (hasRomanization) {
       const optionDiv = document.createElement('div');
       optionDiv.className = 'dropdown-option';
-      optionDiv.textContent = t('hidePronunciation');
+      optionDiv.textContent = this.largerTextMode == "romanization" ? t('hideOriginal') : t('hidePronunciation');
       optionDiv.addEventListener('click', () => {
         this.dropdownMenu.classList.add('hidden');
         let newMode = 'none';

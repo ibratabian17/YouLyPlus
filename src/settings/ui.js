@@ -37,6 +37,7 @@ function setupAutoSaveListeners() {
         { id: 'useSongPaletteFullscreen', key: 'useSongPaletteFullscreen', type: 'checkbox' },
         { id: 'useSongPaletteAllModes', key: 'useSongPaletteAllModes', type: 'checkbox' },
         { id: 'overridePaletteColor', key: 'overridePaletteColor', type: 'value' },
+        { id: 'larger-text-mode', key: 'largerTextMode', type: 'value' },
         // Translation
         { id: 'translation-provider', key: 'translationProvider', type: 'value' },
         { id: 'gemini-model', key: 'geminiModel', type: 'value' },
@@ -83,6 +84,7 @@ function updateUI(settings) {
     document.getElementById('useSongPaletteFullscreen').checked = currentSettings.useSongPaletteFullscreen;
     document.getElementById('useSongPaletteAllModes').checked = currentSettings.useSongPaletteAllModes;
     document.getElementById('overridePaletteColor').value = currentSettings.overridePaletteColor;
+    document.getElementById('larger-text-mode').value = currentSettings.largerTextMode;
 
     // Custom KPoe Server URL
     const customKpoeUrlInput = document.getElementById('custom-kpoe-url');

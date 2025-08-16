@@ -31,6 +31,7 @@ let currentSettings = {
     useSongPaletteFullscreen: false,
     useSongPaletteAllModes: false,
     overridePaletteColor: '',
+    largerTextMode: 'lyrics', // 'lyrics' or 'romanization'
     customKpoeUrl: '' // New setting for Custom KPoe Server URL
 };
 

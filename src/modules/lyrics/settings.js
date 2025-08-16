@@ -39,6 +39,7 @@ After ensuring the meaning is preserved, try to make the translation sound natur
     // New settings for translation/romanization toggle
     translationEnabled: false,
     romanizationEnabled: false,
+    largerTextMode: "lyrics" // "lyrics" or "romanization"
 };
 
 function loadSettings(callback) {
@@ -73,6 +74,7 @@ After ensuring the meaning is preserved, try to make the translation sound natur
         useSongPaletteFullscreen: false, // Ensure this is loaded
         useSongPaletteAllModes: false, // Ensure this is loaded
         overridePaletteColor: '', // Add this to be loaded from storage
+        largerTextMode: "lyrics" // "lyrics" or "romanization"
     }).then((items) => {
         currentSettings = items;
         console.log(currentSettings);

@@ -218,7 +218,8 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
         finalDisplayModeForRenderer, // Pass the actual display mode
         currentSettings, // Pass currentSettings
         fetchAndDisplayLyrics, // Pass the function itself
-        setCurrentDisplayModeAndRender // Pass the function itself (renamed)
+        setCurrentDisplayModeAndRender, // Pass the function itself (renamed)
+        currentSettings.largerTextMode // Pass the new setting
       );
     } else {
       console.error("displayLyrics is not available.");
