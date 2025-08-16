@@ -251,7 +251,8 @@
 .lyrics-syllable.pre-highlight {
     animation-name: pre-wipe-universal;
     animation-duration: var(--pre-wipe-duration);
-    animation-timing-function: var(--pre-wipe-timing-function);
+    animation-delay: var(--pre-wipe-delay);
+    animation-timing-function: linear;
     animation-fill-mode: forwards;
 }
 

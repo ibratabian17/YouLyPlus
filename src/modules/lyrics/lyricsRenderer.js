@@ -534,6 +534,50 @@ class LyricsPlusRenderer {
       return font;
     };
 
+    /**
+     * Calculate pre-highlight delay based on exact wipe effect positioning
+     * @param {HTMLElement} syllable - The current syllable element
+     * @param {string} font - The computed font string
+     * @param {number} currentDuration - Duration of current syllable in ms
+     * @returns {number} Delay in milliseconds (negative for early start)
+     */
+    const calculatePreHighlightDelay = (syllable, font, currentDuration) => {
+      // Get syllable width in pixels
+      const syllableWidthPx = this._getTextWidth(syllable.textContent, font);
+      const emWidthPx = this._getTextWidth('M', font);
+
+      // Convert to em units
+      const syllableWidthEm = syllableWidthPx / emWidthPx;
+
+      const gradientWidth = 0.5; // em
+      const edgeOffset = 0.25; // em - how far from text end to trigger next
+
+      // Initial position of gradient's leading edge
+      const initialPosition = -0.25; // em
+
+      // Final position where gradient fully clears the text
+      const finalPosition = syllableWidthEm + gradientWidth; // em
+
+      // Position we want to trigger the next syllable (0.25em before text end)
+      const triggerPosition = syllableWidthEm - edgeOffset; // em
+
+      // Total travel distance for the animation
+      const totalTravelDistance = finalPosition - initialPosition;
+
+      // Distance traveled when we reach the trigger point
+      const distanceToTrigger = triggerPosition - initialPosition;
+
+      // Calculate timing: what fraction of the animation completes when we hit trigger
+      let timingFraction = 0;
+      if (totalTravelDistance > 0) {
+        timingFraction = Math.max(0, Math.min(1, distanceToTrigger / totalTravelDistance));
+      }
+      // next syllable should delay for that amount of time
+      const delayMs = Math.round(timingFraction * currentDuration);
+
+      return delayMs;
+    };
+
     lyrics.data.forEach((line) => {
       let currentLine = elementPool.lines.pop() || document.createElement('div');
       currentLine.innerHTML = '';
@@ -560,7 +604,7 @@ class LyricsPlusRenderer {
       let currentWordStartTime = null;
       let currentWordEndTime = null;
 
-      // MODIFICATION: Variables to hold the last syllable of the previous word to link across words.
+      // Variables to hold the last syllable of the previous word to link across words
       let pendingSyllable = null;
       let pendingSyllableFont = null;
 
@@ -585,7 +629,7 @@ class LyricsPlusRenderer {
           const progress = Math.min(1, Math.max(0, (totalDuration - minDuration) / (maxDuration - minDuration)));
           const easedProgress = Math.pow(progress, easingPower);
 
-          // 3. Map the eased progress to the final CSS variable values.
+          // Map the eased progress to the final CSS variable values.
           maxScale = 1.0 + 0.05 + easedProgress * 0.10; // Used for both scale and offset calculation
           const shadowIntensity = 0.4 + easedProgress * 0.4;
           const normalizedGrowth = (maxScale - 1.0) / 0.13; // Remaps [1.07, 1.20] to [0, 1]
@@ -661,44 +705,35 @@ class LyricsPlusRenderer {
           wordSpan.appendChild(sylSpan);
         });
 
+        // Handle pending syllable from previous word (cross-word linking)
         if (pendingSyllable && syllableElements.length > 0) {
           const nextSyllable = syllableElements[0];
           const currentDuration = pendingSyllable._durationMs;
-          const syllableWidth = this._getTextWidth(pendingSyllable.textContent, pendingSyllableFont);
-          const emWidth = this._getTextWidth('m', pendingSyllableFont);
-          const syllableWidthEm = syllableWidth / emWidth; // convert px → em
-          const totalTravelEm = syllableWidthEm + 0.25; // block 0.5em size
-          const travelUntilEdgeEm = syllableWidthEm; // when touching edge
-          const delayFraction = travelUntilEdgeEm / totalTravelEm;
-          const delayPercent = Math.min(1, Math.max(0, delayFraction));
-          const timingFunction = `cubic-bezier(${delayPercent.toFixed(3)}, 0, 1, 1)`;
+
+          const delayMs = calculatePreHighlightDelay(pendingSyllable, pendingSyllableFont, currentDuration);
 
           pendingSyllable._nextSyllableInWord = nextSyllable;
-          pendingSyllable._preHighlightDurationMs = currentDuration;
-          pendingSyllable._preHighlightTimingFunction = timingFunction;
+          // Adjust the pre-highlight duration based on the delay
+          pendingSyllable._preHighlightDurationMs = currentDuration - delayMs;
+          pendingSyllable._preHighlightDelayMs = delayMs;
         }
 
         if (shouldEmphasize) {
           wordSpan._cachedChars = characterData.map(cd => cd.charSpan);
         }
 
+        // Handle syllables within the same word (intra-word linking)
         syllableElements.forEach((syllable, index) => {
           if (index < syllableElements.length - 1) {
             const nextSyllable = syllableElements[index + 1];
             const currentDuration = syllable._durationMs;
 
-            const syllableWidth = this._getTextWidth(syllable.textContent, referenceFont);
-            const emWidth = this._getTextWidth('m', referenceFont);
-            const syllableWidthEm = syllableWidth / emWidth; // convert px → em
-            const totalTravelEm = syllableWidthEm + 0.25; // block 0.5em size
-            const travelUntilEdgeEm = syllableWidthEm; // when touching edge
-            const delayFraction = travelUntilEdgeEm / totalTravelEm;
-            const delayPercent = Math.min(1, Math.max(0, delayFraction));
-            const timingFunction = `cubic-bezier(${delayPercent.toFixed(3)}, 0, 1, 1)`;
+            const delayMs = calculatePreHighlightDelay(syllable, referenceFont, currentDuration);
 
             syllable._nextSyllableInWord = nextSyllable;
-            syllable._preHighlightDurationMs = currentDuration;
-            syllable._preHighlightTimingFunction = timingFunction;
+            // Adjust the pre-highlight duration based on the delay
+            syllable._preHighlightDurationMs = currentDuration - delayMs;
+            syllable._preHighlightDelayMs = delayMs;
           }
         });
 
@@ -718,7 +753,7 @@ class LyricsPlusRenderer {
         const targetContainer = isCurrentWordBackground ? (backgroundContainer || (backgroundContainer = document.createElement('div'), backgroundContainer.className = 'background-vocal-container', currentLine.appendChild(backgroundContainer))) : mainContainer;
         targetContainer.appendChild(wordSpan);
 
-        // MODIFICATION: Save the last syllable of the current word to be connected to the next word.
+        // Save the last syllable of the current word to be connected to the next word
         pendingSyllable = syllableElements.length > 0 ? syllableElements[syllableElements.length - 1] : null;
         pendingSyllableFont = referenceFont;
 
@@ -1098,7 +1133,7 @@ class LyricsPlusRenderer {
    * @param {Function} fetchAndDisplayLyricsFn - The function to fetch and display lyrics.
    * @param {Function} setCurrentDisplayModeAndRefetchFn - The function to set display mode and refetch.
    */
-  displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}, fetchAndDisplayLyricsFn, setCurrentDisplayModeAndRefetchFn, largerTextMode="lyrics") {
+  displayLyrics(lyrics, source = "Unknown", type = "Line", lightweight = false, songWriters, songInfo, displayMode = 'none', currentSettings = {}, fetchAndDisplayLyricsFn, setCurrentDisplayModeAndRefetchFn, largerTextMode = "lyrics") {
     this.lastKnownSongInfo = songInfo;
     this.fetchAndDisplayLyricsFn = fetchAndDisplayLyricsFn;
     this.setCurrentDisplayModeAndRefetchFn = setCurrentDisplayModeAndRefetchFn;
@@ -1508,15 +1543,15 @@ class LyricsPlusRenderer {
     // Step 3: Pre-Wipe Pass.
     if (nextSyllable) {
       const preHighlightDuration = syllable._preHighlightDurationMs;
-      const timingFunction = syllable._preHighlightTimingFunction;
+      const preHighlightDelay = syllable._preHighlightDelayMs;
 
       pendingStyleUpdates.push({ element: nextSyllable, property: 'class', action: 'add', value: 'pre-highlight' });
       pendingStyleUpdates.push({ element: nextSyllable, property: '--pre-wipe-duration', value: `${preHighlightDuration}ms` });
-      pendingStyleUpdates.push({ element: nextSyllable, property: '--pre-wipe-timing-function', value: timingFunction });
+      pendingStyleUpdates.push({ element: nextSyllable, property: '--pre-wipe-delay', value: `${preHighlightDelay}ms` });
 
       const nextCharSpan = nextSyllable._cachedCharSpans?.[0];
       if (nextCharSpan) {
-        const preWipeAnim = `pre-wipe-char ${preHighlightDuration}ms ${timingFunction} forwards`;
+        const preWipeAnim = `pre-wipe-char ${preHighlightDuration}ms ${preHighlightDelay}ms forwards`;
         const existingAnimation = charAnimationsMap.get(nextCharSpan) || nextCharSpan.style.animation || '';
         const combinedAnimation = (existingAnimation && !existingAnimation.includes('pre-wipe-char'))
           ? `${existingAnimation}, ${preWipeAnim}`
@@ -1553,7 +1588,7 @@ class LyricsPlusRenderer {
     }
     syllable.classList.remove('highlight', 'finished', 'pre-highlight');
     syllable.style.removeProperty('--pre-wipe-duration');
-    syllable.style.removeProperty('--pre-wipe-timing-function');
+    syllable.style.removeProperty('--pre-wipe-delay');
     syllable.querySelectorAll('span.char').forEach(span => { span.style.animation = ''; });
   }
 
