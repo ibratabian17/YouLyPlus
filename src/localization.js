@@ -10,7 +10,9 @@ const translations = {
         showPronunciation: "Wys Uitspraak",
         hidePronunciation: "Versteek Uitspraak",
         showOriginal: "Wys oorspronklike",
-        hideOriginal: "Versteek oorspronklike"
+        hideOriginal: "Versteek oorspronklike",
+        refreshLyrics: "Verfris lirieke",
+        showTranslationOptions: "Wys vertaalopsies"
     },
     'az-AZ': {
         loading: "Mahnı sözləri yüklənir",
@@ -23,7 +25,9 @@ const translations = {
         showPronunciation: "Tələffüzü Göstər",
         hidePronunciation: "Tələffüzü Gizlət",
         showOriginal: "Orijinalı göstər",
-        hideOriginal: "Orijinalı gizlət"
+        hideOriginal: "Orijinalı gizlət",
+        refreshLyrics: "Mahnı sözlərini yenilə",
+        showTranslationOptions: "Tərcümə seçimlərini göstər"
     },
     'id-ID': {
         loading: "Memuat lirik",
@@ -36,7 +40,9 @@ const translations = {
         showPronunciation: "Tampilkan Pelafalan",
         hidePronunciation: "Sembunyikan Pelafalan",
         showOriginal: "Tampilkan asli",
-        hideOriginal: "Sembunyikan asli"
+        hideOriginal: "Sembunyikan asli",
+        refreshLyrics: "Muat ulang lirik",
+        showTranslationOptions: "Tampilkan opsi terjemahan"
     },
     'ms-MY': {
         loading: "Memuatkan lirik",
@@ -49,7 +55,9 @@ const translations = {
         showPronunciation: "Tunjukkan Sebutan",
         hidePronunciation: "Sembunyikan Sebutan",
         showOriginal: "Tunjukkan asal",
-        hideOriginal: "Sembunyikan asal"
+        hideOriginal: "Sembunyikan asal",
+        refreshLyrics: "Muat semula lirik",
+        showTranslationOptions: "Tunjukkan pilihan terjemahan"
     },
     'bs-BA': {
         loading: "Učitavanje teksta",
@@ -62,7 +70,9 @@ const translations = {
         showPronunciation: "Prikaži izgovor",
         hidePronunciation: "Sakrij izgovor",
         showOriginal: "Prikaži original",
-        hideOriginal: "Sakrij original"
+        hideOriginal: "Sakrij original",
+        refreshLyrics: "Osvježi tekst",
+        showTranslationOptions: "Prikaži opcije prijevoda"
     },
     'ca-ES': {
         loading: "Carregant lletres",
@@ -75,7 +85,9 @@ const translations = {
         showPronunciation: "Mostra la pronunciació",
         hidePronunciation: "Amaga la pronunciació",
         showOriginal: "Mostra original",
-        hideOriginal: "Amaga original"
+        hideOriginal: "Amaga original",
+        refreshLyrics: "Actualitza lletres",
+        showTranslationOptions: "Mostra opcions de traducció"
     },
     'cs-CZ': {
         loading: "Načítání textů",
@@ -88,7 +100,9 @@ const translations = {
         showPronunciation: "Zobrazit výslovnost",
         hidePronunciation: "Skrýt výslovnost",
         showOriginal: "Zobrazit originál",
-        hideOriginal: "Skrýt originál"
+        hideOriginal: "Skrýt originál",
+        refreshLyrics: "Obnovit texty",
+        showTranslationOptions: "Zobrazit možnosti překladu"
     },
     'da-DK': {
         loading: "Indlæser sangtekster",
@@ -101,7 +115,9 @@ const translations = {
         showPronunciation: "Vis udtale",
         hidePronunciation: "Skjul udtale",
         showOriginal: "Vis original",
-        hideOriginal: "Skjul original"
+        hideOriginal: "Skjul original",
+        refreshLyrics: "Genindlæs sangtekster",
+        showTranslationOptions: "Vis oversættelsesmuligheder"
     },
     'de-DE': {
         loading: "Lade Liedtexte",
@@ -114,7 +130,9 @@ const translations = {
         showPronunciation: "Aussprache anzeigen",
         hidePronunciation: "Aussprache ausblenden",
         showOriginal: "Original anzeigen",
-        hideOriginal: "Original ausblenden"
+        hideOriginal: "Original ausblenden",
+        refreshLyrics: "Liedtexte aktualisieren",
+        showTranslationOptions: "Übersetzungsoptionen anzeigen"
     },
     'et-EE': {
         loading: "Laulude sõnade laadimine",
@@ -127,7 +145,9 @@ const translations = {
         showPronunciation: "Kuva hääldus",
         hidePronunciation: "Peida hääldus",
         showOriginal: "Kuva originaal",
-        hideOriginal: "Peida originaal"
+        hideOriginal: "Peida originaal",
+        refreshLyrics: "Värskenda laulusõnad",
+        showTranslationOptions: "Kuva tõlkevalikud"
     },
     'en-IN': {
         loading: "Loading lyrics",
@@ -140,7 +160,9 @@ const translations = {
         showPronunciation: "Show Pronunciation",
         hidePronunciation: "Hide Pronunciation",
         showOriginal: "Show original",
-        hideOriginal: "Hide original"
+        hideOriginal: "Hide original",
+        refreshLyrics: "Refresh Lyrics",
+        showTranslationOptions: "Show Translation Options"
     },
     'en-GB': {
         loading: "Loading lyrics",
@@ -153,7 +175,9 @@ const translations = {
         showPronunciation: "Show Pronunciation",
         hidePronunciation: "Hide Pronunciation",
         showOriginal: "Show original",
-        hideOriginal: "Hide original"
+        hideOriginal: "Hide original",
+        refreshLyrics: "Refresh Lyrics",
+        showTranslationOptions: "Show Translation Options"
     },
     'en-US': {
         loading: "Loading lyrics",
@@ -166,7 +190,9 @@ const translations = {
         showPronunciation: "Show Pronunciation",
         hidePronunciation: "Hide Pronunciation",
         showOriginal: "Show original",
-        hideOriginal: "Hide original"
+        hideOriginal: "Hide original",
+        refreshLyrics: "Refresh Lyrics",
+        showTranslationOptions: "Show Translation Options"
     },
     'es-ES': {
         loading: "Cargando letras",
@@ -179,7 +205,9 @@ const translations = {
         showPronunciation: "Mostrar Pronunciación",
         hidePronunciation: "Ocultar Pronunciación",
         showOriginal: "Mostrar original",
-        hideOriginal: "Ocultar original"
+        hideOriginal: "Ocultar original",
+        refreshLyrics: "Actualizar letras",
+        showTranslationOptions: "Mostrar opciones de traducción"
     },
     'es-419': {
         loading: "Cargando letras",
@@ -192,7 +220,9 @@ const translations = {
         showPronunciation: "Mostrar Pronunciación",
         hidePronunciation: "Ocultar Pronunciación",
         showOriginal: "Mostrar original",
-        hideOriginal: "Ocultar original"
+        hideOriginal: "Ocultar original",
+        refreshLyrics: "Actualizar letras",
+        showTranslationOptions: "Mostrar opciones de traducción"
     },
     'es-US': {
         loading: "Cargando letras",
@@ -205,7 +235,9 @@ const translations = {
         showPronunciation: "Mostrar Pronunciación",
         hidePronunciation: "Ocultar Pronunciación",
         showOriginal: "Mostrar original",
-        hideOriginal: "Ocultar original"
+        hideOriginal: "Ocultar original",
+        refreshLyrics: "Actualizar letras",
+        showTranslationOptions: "Mostrar opciones de traducción"
     },
     'eu-ES': {
         loading: "Letrak kargatzen",
@@ -218,7 +250,9 @@ const translations = {
         showPronunciation: "Erakutsi ahoskera",
         hidePronunciation: "Ezkutatu ahoskera",
         showOriginal: "Erakutsi originala",
-        hideOriginal: "Ezkutatu originala"
+        hideOriginal: "Ezkutatu originala",
+        refreshLyrics: "Letrak freskatu",
+        showTranslationOptions: "Itzulpen aukerak erakutsi"
     },
     'fil-PH': {
         loading: "Nilo-load ang lyrics",
@@ -231,7 +265,9 @@ const translations = {
         showPronunciation: "Ipakita ang Pagbigkas",
         hidePronunciation: "Itago ang Pagbigkas",
         showOriginal: "Ipakita ang orihinal",
-        hideOriginal: "Itago ang orihinal"
+        hideOriginal: "Itago ang orihinal",
+        refreshLyrics: "I-refresh ang lyrics",
+        showTranslationOptions: "Ipakita ang mga opsyon sa pagsasalin"
     },
     'fr-FR': {
         loading: "Chargement des paroles",
@@ -244,7 +280,9 @@ const translations = {
         showPronunciation: "Afficher la Prononciation",
         hidePronunciation: "Masquer la Prononciation",
         showOriginal: "Afficher l'original",
-        hideOriginal: "Masquer l'original"
+        hideOriginal: "Masquer l'original",
+        refreshLyrics: "Actualiser les paroles",
+        showTranslationOptions: "Afficher les options de traduction"
     },
     'fr-CA': {
         loading: "Chargement des paroles",
@@ -257,7 +295,9 @@ const translations = {
         showPronunciation: "Afficher la prononciation",
         hidePronunciation: "Masquer la prononciation",
         showOriginal: "Afficher l'original",
-        hideOriginal: "Masquer l'original"
+        hideOriginal: "Masquer l'original",
+        refreshLyrics: "Actualiser les paroles",
+        showTranslationOptions: "Afficher les options de traduction"
     },
     'gl-ES': {
         loading: "Cargando letras",
@@ -270,7 +310,9 @@ const translations = {
         showPronunciation: "Mostrar pronunciación",
         hidePronunciation: "Ocultar pronunciación",
         showOriginal: "Mostrar orixinal",
-        hideOriginal: "Ocultar orixinal"
+        hideOriginal: "Ocultar orixinal",
+        refreshLyrics: "Actualizar letras",
+        showTranslationOptions: "Mostrar opcións de tradución"
     },
     'hr-HR': {
         loading: "Učitavanje stihova",
@@ -283,7 +325,9 @@ const translations = {
         showPronunciation: "Prikaži izgovor",
         hidePronunciation: "Sakrij izgovor",
         showOriginal: "Prikaži original",
-        hideOriginal: "Sakrij original"
+        hideOriginal: "Sakrij original",
+        refreshLyrics: "Osvježi stihove",
+        showTranslationOptions: "Prikaži opcije prijevoda"
     },
     'zu-ZA': {
         loading: "Iyalayisha amagama",
@@ -296,7 +340,9 @@ const translations = {
         showPronunciation: "Bonisa Ukuphimisela",
         hidePronunciation: "Fihla Ukuphimisela",
         showOriginal: "Bonisa okwangempela",
-        hideOriginal: "Fihla okwangempela"
+        hideOriginal: "Fihla okwangempela",
+        refreshLyrics: "Vuselela Amagama",
+        showTranslationOptions: "Bonisa Izinketho Zokuhumusha"
     },
     'is-IS': {
         loading: "Hleð textum",
@@ -309,7 +355,9 @@ const translations = {
         showPronunciation: "Sýna framburð",
         hidePronunciation: "Fela framburð",
         showOriginal: "Sýna frumrit",
-        hideOriginal: "Fela frumrit"
+        hideOriginal: "Fela frumrit",
+        refreshLyrics: "Endurhlaða texta",
+        showTranslationOptions: "Sýna þýðingarvalkosti"
     },
     'it-IT': {
         loading: "Caricamento dei testi",
@@ -322,7 +370,9 @@ const translations = {
         showPronunciation: "Mostra Pronuncia",
         hidePronunciation: "Nascondi Pronuncia",
         showOriginal: "Mostra originale",
-        hideOriginal: "Nascondi originale"
+        hideOriginal: "Nascondi originale",
+        refreshLyrics: "Aggiorna testi",
+        showTranslationOptions: "Mostra opzioni di traduzione"
     },
     'sw-KE': {
         loading: "Inapakia maneno ya wimbo",
@@ -335,7 +385,9 @@ const translations = {
         showPronunciation: "Onyesha Matamshi",
         hidePronunciation: "Ficha Matamshi",
         showOriginal: "Onyesha asili",
-        hideOriginal: "Ficha asili"
+        hideOriginal: "Ficha asili",
+        refreshLyrics: "Onyesha upya maneno ya wimbo",
+        showTranslationOptions: "Onyesha chaguo za tafsiri"
     },
     'lv-LV': {
         loading: "Notiek dziesmu vārdu ielāde",
@@ -348,7 +400,9 @@ const translations = {
         showPronunciation: "Rādīt izrunu",
         hidePronunciation: "Slēpt izrunu",
         showOriginal: "Rādīt oriģinālu",
-        hideOriginal: "Slēpt oriģinālu"
+        hideOriginal: "Slēpt oriģinālu",
+        refreshLyrics: "Atsvaidzināt dziesmu vārdus",
+        showTranslationOptions: "Rādīt tulkošanas iespējas"
     },
     'lt-LT': {
         loading: "Įkeliami dainų žodžiai",
@@ -361,7 +415,9 @@ const translations = {
         showPronunciation: "Rodyti tarimą",
         hidePronunciation: "Slėpti tarimą",
         showOriginal: "Rodyti originalą",
-        hideOriginal: "Slėpti originalą"
+        hideOriginal: "Slėpti originalą",
+        refreshLyrics: "Atnaujinti dainų žodžius",
+        showTranslationOptions: "Rodyti vertimo parinktis"
     },
     'hu-HU': {
         loading: "Dalszövegek betöltése",
@@ -374,7 +430,9 @@ const translations = {
         showPronunciation: "Kiejtés megjelenítése",
         hidePronunciation: "Kiejtés elrejtése",
         showOriginal: "Eredeti megjelenítése",
-        hideOriginal: "Eredeti elrejtése"
+        hideOriginal: "Eredeti elrejtése",
+        refreshLyrics: "Dalszövegek frissítése",
+        showTranslationOptions: "Fordítási lehetőségek megjelenítése"
     },
     'nl-NL': {
         loading: "Songtekst laden",
@@ -387,7 +445,9 @@ const translations = {
         showPronunciation: "Uitspraak weergeven",
         hidePronunciation: "Uitspraak verbergen",
         showOriginal: "Origineel weergeven",
-        hideOriginal: "Origineel verbergen"
+        hideOriginal: "Origineel verbergen",
+        refreshLyrics: "Songtekst vernieuwen",
+        showTranslationOptions: "Vertalingsopties weergeven"
     },
     'no-NO': {
         loading: "Laster inn sangtekster",
@@ -400,7 +460,9 @@ const translations = {
         showPronunciation: "Vis uttale",
         hidePronunciation: "Skjul uttale",
         showOriginal: "Vis original",
-        hideOriginal: "Skjul original"
+        hideOriginal: "Skjul original",
+        refreshLyrics: "Last inn sangtekster på nytt",
+        showTranslationOptions: "Vis oversettelsesalternativer"
     },
     'uz-UZ': {
         loading: "Qo'shiq matnlari yuklanmoqda",
@@ -413,7 +475,9 @@ const translations = {
         showPronunciation: "Talaffuzni ko'rsatish",
         hidePronunciation: "Talaffuzni yashirish",
         showOriginal: "Aslini ko'rsatish",
-        hideOriginal: "Aslini yashirish"
+        hideOriginal: "Aslini yashirish",
+        refreshLyrics: "Qo'shiq matnlarini yangilash",
+        showTranslationOptions: "Tarjima variantlarini ko'rsatish"
     },
     'pl-PL': {
         loading: "Ładowanie tekstu piosenki",
@@ -426,7 +490,9 @@ const translations = {
         showPronunciation: "Pokaż wymowę",
         hidePronunciation: "Ukryj wymowę",
         showOriginal: "Pokaż oryginał",
-        hideOriginal: "Ukryj oryginał"
+        hideOriginal: "Ukryj oryginał",
+        refreshLyrics: "Odśwież tekst piosenki",
+        showTranslationOptions: "Pokaż opcje tłumaczenia"
     },
     'pt-PT': {
         loading: "A carregar letras",
@@ -439,7 +505,9 @@ const translations = {
         showPronunciation: "Mostrar Pronúncia",
         hidePronunciation: "Ocultar Pronúncia",
         showOriginal: "Mostrar Original",
-        hideOriginal: "Ocultar Original"
+        hideOriginal: "Ocultar Original",
+        refreshLyrics: "Atualizar Letras",
+        showTranslationOptions: "Mostrar Opções de Tradução"
     },
     'pt-BR': {
         loading: "Carregando letras",
@@ -452,7 +520,9 @@ const translations = {
         showPronunciation: "Mostrar Pronúncia",
         hidePronunciation: "Ocultar Pronúncia",
         showOriginal: "Mostrar Original",
-        hideOriginal: "Ocultar Original"
+        hideOriginal: "Ocultar Original",
+        refreshLyrics: "Atualizar Letras",
+        showTranslationOptions: "Mostrar Opções de Tradução"
     },
     'ro-RO': {
         loading: "Se încarcă versurile",
@@ -465,7 +535,9 @@ const translations = {
         showPronunciation: "Afișează pronunția",
         hidePronunciation: "Ascunde pronunția",
         showOriginal: "Afișează originalul",
-        hideOriginal: "Ascunde originalul"
+        hideOriginal: "Ascunde originalul",
+        refreshLyrics: "Reîmprospătează versurile",
+        showTranslationOptions: "Afișează opțiunile de traducere"
     },
     'sq-AL': {
         loading: "Po ngarkohen tekstet",
@@ -478,7 +550,9 @@ const translations = {
         showPronunciation: "Shfaq Bigkasimin",
         hidePronunciation: "Fshih Bigkasimin",
         showOriginal: "Shfaq origjinalin",
-        hideOriginal: "Fshih origjinalin"
+        hideOriginal: "Fshih origjinalin",
+        refreshLyrics: "Rifresko tekstet",
+        showTranslationOptions: "Shfaq opsionet e përkthimit"
     },
     'sk-SK': {
         loading: "Načítavajú sa texty",
@@ -491,7 +565,9 @@ const translations = {
         showPronunciation: "Zobraziť výslovnosť",
         hidePronunciation: "Skryť výslovnosť",
         showOriginal: "Zobraziť originál",
-        hideOriginal: "Skryť originál"
+        hideOriginal: "Skryť originál",
+        refreshLyrics: "Obnoviť texty",
+        showTranslationOptions: "Zobraziť možnosti prekladu"
     },
     'sl-SI': {
         loading: "Nalaganje besedil",
@@ -504,7 +580,9 @@ const translations = {
         showPronunciation: "Prikaži izgovorjavo",
         hidePronunciation: "Skrij izgovorjavo",
         showOriginal: "Prikaži izvirnik",
-        hideOriginal: "Skrij izvirnik"
+        hideOriginal: "Skrij izvirnik",
+        refreshLyrics: "Osveži besedila",
+        showTranslationOptions: "Prikaži možnosti prevajanja"
     },
     'sr-Latn': {
         loading: "Učitavanje teksta",
@@ -517,7 +595,9 @@ const translations = {
         showPronunciation: "Prikaži izgovor",
         hidePronunciation: "Sakrij izgovor",
         showOriginal: "Prikaži original",
-        hideOriginal: "Sakrij original"
+        hideOriginal: "Sakrij original",
+        refreshLyrics: "Osveži tekst",
+        showTranslationOptions: "Prikaži opcije prevoda"
     },
     'fi-FI': {
         loading: "Ladataan sanoituksia",
@@ -530,7 +610,9 @@ const translations = {
         showPronunciation: "Näytä ääntäminen",
         hidePronunciation: "Piilota ääntäminen",
         showOriginal: "Näytä alkuperäinen",
-        hideOriginal: "Piilota alkuperäinen"
+        hideOriginal: "Piilota alkuperäinen",
+        refreshLyrics: "Päivitä sanoitukset",
+        showTranslationOptions: "Näytä käännösvaihtoehdot"
     },
     'sv-SE': {
         loading: "Laddar låttexter",
@@ -543,7 +625,9 @@ const translations = {
         showPronunciation: "Visa uttal",
         hidePronunciation: "Dölj uttal",
         showOriginal: "Visa original",
-        hideOriginal: "Dölj original"
+        hideOriginal: "Dölj original",
+        refreshLyrics: "Uppdatera låttexter",
+        showTranslationOptions: "Visa översättningsalternativ"
     },
     'vi-VN': {
         loading: "Đang tải lời bài hát",
@@ -556,7 +640,9 @@ const translations = {
         showPronunciation: "Hiển thị cách phát âm",
         hidePronunciation: "Ẩn cách phát âm",
         showOriginal: "Hiển thị bản gốc",
-        hideOriginal: "Ẩn bản gốc"
+        hideOriginal: "Ẩn bản gốc",
+        refreshLyrics: "Làm mới lời bài hát",
+        showTranslationOptions: "Hiển thị tùy chọn dịch"
     },
     'tr-TR': {
         loading: "Şarkı sözleri yükleniyor",
@@ -569,7 +655,9 @@ const translations = {
         showPronunciation: "Telaffuzu Göster",
         hidePronunciation: "Telaffuzu Gizle",
         showOriginal: "Orijinali Göster",
-        hideOriginal: "Orijinali Gizle"
+        hideOriginal: "Orijinali Gizle",
+        refreshLyrics: "Şarkı Sözlerini Yenile",
+        showTranslationOptions: "Çeviri Seçeneklerini Göster"
     },
     'be-BY': {
         loading: "Загрузка тэкстаў",
@@ -582,7 +670,9 @@ const translations = {
         showPronunciation: "Паказаць вымаўленне",
         hidePronunciation: "Схаваць вымаўленне",
         showOriginal: "Паказаць арыгінал",
-        hideOriginal: "Схаваць арыгінал"
+        hideOriginal: "Схаваць арыгінал",
+        refreshLyrics: "Абнавіць тэксты",
+        showTranslationOptions: "Паказаць параметры перакладу"
     },
     'bg-BG': {
         loading: "Зареждане на текстове",
@@ -595,7 +685,9 @@ const translations = {
         showPronunciation: "Показване на произношението",
         hidePronunciation: "Скриване на произношението",
         showOriginal: "Показване на оригинала",
-        hideOriginal: "Скриване на оригинала"
+        hideOriginal: "Скриване на оригинала",
+        refreshLyrics: "Опресняване на текстове",
+        showTranslationOptions: "Показване на опции за превод"
     },
     'ky-KG': {
         loading: "Ырдын текстин жүктөө",
@@ -608,7 +700,9 @@ const translations = {
         showPronunciation: "Айтылышын көрсөтүү",
         hidePronunciation: "Айтылышын жашыруу",
         showOriginal: "Түпнұсқаны көрсөтүү",
-        hideOriginal: "Түпнұсқаны жашыруу"
+        hideOriginal: "Түпнұсқаны жашыруу",
+        refreshLyrics: "Ырдын текстин жаңыртуу",
+        showTranslationOptions: "Котормо параметрлерин көрсөтүү"
     },
     'kk-KZ': {
         loading: "Мәтіндерді жүктеу",
@@ -621,7 +715,9 @@ const translations = {
         showPronunciation: "Айтылуын көрсету",
         hidePronunciation: "Айтылуын жасыру",
         showOriginal: "Түпнұсқаны көрсету",
-        hideOriginal: "Түпнұсқаны жасыру"
+        hideOriginal: "Түпнұсқаны жасыру",
+        refreshLyrics: "Мәтіндерді жаңарту",
+        showTranslationOptions: "Аударма опцияларын көрсету"
     },
     'mk-MK': {
         loading: "Вчитување на текстови",
@@ -634,7 +730,9 @@ const translations = {
         showPronunciation: "Прикажи изговор",
         hidePronunciation: "Сокриј изговор",
         showOriginal: "Прикажи оригинал",
-        hideOriginal: "Сокриј оригинал"
+        hideOriginal: "Сокриј оригинал",
+        refreshLyrics: "Освежи текстови",
+        showTranslationOptions: "Прикажи опции за превод"
     },
     'mn-MN': {
         loading: "Дууны үг ачааллаж байна",
@@ -647,7 +745,9 @@ const translations = {
         showPronunciation: "Дуудлага харуулах",
         hidePronunciation: "Дуудлага нуух",
         showOriginal: "Эх хувийг харуулах",
-        hideOriginal: "Эх хувийг нуух"
+        hideOriginal: "Эх хувийг нуух",
+        refreshLyrics: "Дууны үгийг шинэчлэх",
+        showTranslationOptions: "Орчуулгын сонголтуудыг харуулах"
     },
     'ru-RU': {
         loading: "Загрузка текста песни",
@@ -660,7 +760,9 @@ const translations = {
         showPronunciation: "Показать произношение",
         hidePronunciation: "Скрыть произношение",
         showOriginal: "Показать оригинал",
-        hideOriginal: "Скрыть оригинал"
+        hideOriginal: "Скрыть оригинал",
+        refreshLyrics: "Обновить текст песни",
+        showTranslationOptions: "Показать параметры перевода"
     },
     'uk-UA': {
         loading: "Завантаження текстів",
@@ -673,7 +775,9 @@ const translations = {
         showPronunciation: "Показати вимову",
         hidePronunciation: "Сховати вимову",
         showOriginal: "Показати оригінал",
-        hideOriginal: "Сховати оригінал"
+        hideOriginal: "Сховати оригінал",
+        refreshLyrics: "Оновити тексти",
+        showTranslationOptions: "Показати параметри перекладу"
     },
     'el-GR': {
         loading: "Φόρτωση στίχων",
@@ -686,7 +790,9 @@ const translations = {
         showPronunciation: "Εμφάνιση προφοράς",
         hidePronunciation: "Απόκρυψη προφοράς",
         showOriginal: "Εμφάνιση πρωτότυπου",
-        hideOriginal: "Απόκρυψη πρωτότυπου"
+        hideOriginal: "Απόκρυψη πρωτότυπου",
+        refreshLyrics: "Ανανέωση στίχων",
+        showTranslationOptions: "Εμφάνιση επιλογών μετάφρασης"
     },
     'hy-AM': {
         loading: "Բեռնվում են բառերը",
@@ -699,7 +805,9 @@ const translations = {
         showPronunciation: "Ցուցադրել արտասանությունը",
         hidePronunciation: "Թաքցնել արտասանությունը",
         showOriginal: "Ցուցադրել բնօրինակը",
-        hideOriginal: "Թաքցնել բնօրինակը"
+        hideOriginal: "Թաքցնել բնօրինակը",
+        refreshLyrics: "Թարմացնել բառերը",
+        showTranslationOptions: "Ցուցադրել թարգմանության ընտրանքները"
     },
     'he-IL': {
         loading: "טוען מילים",
@@ -712,7 +820,9 @@ const translations = {
         showPronunciation: "הצג הגייה",
         hidePronunciation: "הסתר הגייה",
         showOriginal: "הצג מקור",
-        hideOriginal: "הסתר מקור"
+        hideOriginal: "הסתר מקור",
+        refreshLyrics: "רענן מילים",
+        showTranslationOptions: "הצג אפשרויות תרגום"
     },
     'ur-PK': {
         loading: "دھن لوڈ ہو رہی ہے",
@@ -725,7 +835,9 @@ const translations = {
         showPronunciation: "تلفظ دکھائیں",
         hidePronunciation: "تلفظ چھپائیں",
         showOriginal: "اصل دکھائیں",
-        hideOriginal: "اصل چھپائیں"
+        hideOriginal: "اصل چھپائیں",
+        refreshLyrics: "دھن تازہ کریں",
+        showTranslationOptions: "ترجمہ کے اختیارات دکھائیں"
     },
     'ar-SA': {
         loading: "جارٍ تحميل كلمات الأغنية",
@@ -738,7 +850,9 @@ const translations = {
         showPronunciation: "عرض النطق",
         hidePronunciation: "إخفاء النطق",
         showOriginal: "عرض الأصل",
-        hideOriginal: "إخفاء الأصل"
+        hideOriginal: "إخفاء الأصل",
+        refreshLyrics: "تحديث كلمات الأغنية",
+        showTranslationOptions: "إظهار خيارات الترجمة"
     },
     'fa-IR': {
         loading: "در حال بارگیری متن ترانه",
@@ -751,7 +865,9 @@ const translations = {
         showPronunciation: "نمایش تلفظ",
         hidePronunciation: "پنهان کردن تلفظ",
         showOriginal: "نمایش اصلی",
-        hideOriginal: "پنهان کردن اصلی"
+        hideOriginal: "پنهان کردن اصلی",
+        refreshLyrics: "بازخوانی متن ترانه",
+        showTranslationOptions: "نمایش گزینه های ترجمه"
     },
     'ne-NP': {
         loading: "गीतको बोल लोड हुँदैछ",
@@ -764,7 +880,9 @@ const translations = {
         showPronunciation: "उच्चारण देखाउनुहोस्",
         hidePronunciation: "उच्चारण लुकाउनुहोस्",
         showOriginal: "मूल देखाउनुहोस्",
-        hideOriginal: "मूल लुकाउनुहोस्"
+        hideOriginal: "मूल लुकाउनुहोस्",
+        refreshLyrics: "गीतको बोल रिफ्रेस गर्नुहोस्",
+        showTranslationOptions: "अनुवाद विकल्पहरू देखाउनुहोस्"
     },
     'mr-IN': {
         loading: "गीत लोड होत आहे",
@@ -777,7 +895,9 @@ const translations = {
         showPronunciation: "उच्चार दर्शवा",
         hidePronunciation: "उच्चार लपवा",
         showOriginal: "मूळ दर्शवा",
-        hideOriginal: "मूळ लपवा"
+        hideOriginal: "मूळ लपवा",
+        refreshLyrics: "गीत रीफ्रेश करा",
+        showTranslationOptions: "अनुवाद पर्याय दर्शवा"
     },
     'hi-IN': {
         loading: "गीत लोड हो रहा है",
@@ -790,7 +910,9 @@ const translations = {
         showPronunciation: "उच्चारण दिखाएँ",
         hidePronunciation: "उच्चारण छिपाएँ",
         showOriginal: "मूल दिखाएँ",
-        hideOriginal: "मूल छिपाएँ"
+        hideOriginal: "मूल छिपाएँ",
+        refreshLyrics: "गीत रीफ्रेश करें",
+        showTranslationOptions: "अनुवाद विकल्प दिखाएँ"
     },
     'as-IN': {
         loading: "गीতৰ কথা লোড হৈ আছে",
@@ -803,7 +925,9 @@ const translations = {
         showPronunciation: "উচ্চাৰণ দেখুৱাওক",
         hidePronunciation: "উচ্চাৰণ লুকুৱাওক",
         showOriginal: "মূল দেখুৱাওক",
-        hideOriginal: "মূল লুকুৱাওক"
+        hideOriginal: "মূল লুকুৱাওক",
+        refreshLyrics: "গানের কথা সতেজ কৰক",
+        showTranslationOptions: "অনুবাদ বিকল্প দেখুৱাওক"
     },
     'bn-IN': {
         loading: "গানের কথা লোড হচ্ছে",
@@ -816,7 +940,9 @@ const translations = {
         showPronunciation: "উচ্চারণ দেখান",
         hidePronunciation: "উচ্চারণ লুকান",
         showOriginal: "মূল দেখান",
-        hideOriginal: "মূল লুকান"
+        hideOriginal: "মূল লুকান",
+        refreshLyrics: "গানের কথা রিফ্রেশ করুন",
+        showTranslationOptions: "অনুবাদ বিকল্প দেখান"
     },
     'pa-IN': {
         loading: "ਬੋਲ ਲੋਡ ਹੋ ਰਹੇ ਹਨ",
@@ -829,7 +955,9 @@ const translations = {
         showPronunciation: "ਉਚਾਰਨ ਦਿਖਾਓ",
         hidePronunciation: "ਉਚਾਰਨ ਛੁਪਾਓ",
         showOriginal: "ਮੂਲ ਦਿਖਾਓ",
-        hideOriginal: "ਮੂਲ ਛੁਪਾਓ"
+        hideOriginal: "ਮੂਲ ਛੁਪਾਓ",
+        refreshLyrics: "ਬੋਲ ਤਾਜ਼ਾ ਕਰੋ",
+        showTranslationOptions: "ਅਨੁਵਾਦ ਵਿਕਲਪ ਦਿਖਾਓ"
     },
     'gu-IN': {
         loading: "ગીતના બોલ લોડ થઈ રહ્યા છે",
@@ -842,7 +970,9 @@ const translations = {
         showPronunciation: "ઉચ્ચાર બતાવો",
         hidePronunciation: "ઉચ્ચાર છુપાવો",
         showOriginal: "મૂળ બતાવો",
-        hideOriginal: "મૂળ છુપાવો"
+        hideOriginal: "મૂળ છુપાવો",
+        refreshLyrics: "ગીતના બોલ તાજા કરો",
+        showTranslationOptions: "અનુવાદ વિકલ્પો બતાવો"
     },
     'or-IN': {
         loading: "ଗୀତର ବୋଲ ଲୋଡ୍ କରୁଛି",
@@ -855,7 +985,9 @@ const translations = {
         showPronunciation: "ଉଚ୍ଚାରଣ ଦେଖାନ୍ତୁ",
         hidePronunciation: "ଉଚ୍ଚାରଣ ଲୁଚାନ୍ତୁ",
         showOriginal: "ମୂଳ ଦେଖାନ୍ତୁ",
-        hideOriginal: "ମୂଳ ଲୁଚାନ୍ତୁ"
+        hideOriginal: "ମୂଳ ଲୁଚାନ୍ତୁ",
+        refreshLyrics: "ଗୀତର ବୋଲ ରିଫ୍ରେସ୍ କରନ୍ତୁ",
+        showTranslationOptions: "ଅନୁବାଦ ବିକଳ୍ପ ଦେଖାନ୍ତୁ"
     },
     'ta-IN': {
         loading: "பாடல் வரிகள் ஏற்றಲಾಗುತ್ತಿದೆ",
@@ -868,7 +1000,9 @@ const translations = {
         showPronunciation: "உச்சரிப்பைக் காட்டு",
         hidePronunciation: "உச்சரிப்பை மறை",
         showOriginal: "அசல் காட்டு",
-        hideOriginal: "அசல் மறை"
+        hideOriginal: "அசல் மறை",
+        refreshLyrics: "பாடல் வரிகளைப் புதுப்பி",
+        showTranslationOptions: "மொழிபெயர்ப்பு விருப்பங்களைக் காட்டு"
     },
     'te-IN': {
         loading: "సాహిత్యం లోడ్ అవుతోంది",
@@ -881,7 +1015,9 @@ const translations = {
         showPronunciation: "ఉచ్చారణను చూపించు",
         hidePronunciation: "ఉచ్చారణను దాచు",
         showOriginal: "అసలు చూపించు",
-        hideOriginal: "అసలు దాచు"
+        hideOriginal: "అసలు దాచు",
+        refreshLyrics: "సాహిత్యాన్ని రిఫ్రెష్ చేయండి",
+        showTranslationOptions: "అనువాద ఎంపికలను చూపించు"
     },
     'kn-IN': {
         loading: "ಸಾಹಿತ್ಯವನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ",
@@ -894,7 +1030,9 @@ const translations = {
         showPronunciation: "ಉಚ್ಚಾರಣೆಯನ್ನು ತೋರಿಸಿ",
         hidePronunciation: "ಉಚ್ಚಾರಣೆಯನ್ನು ಮರೆಮಾಡಿ",
         showOriginal: "ಮೂಲವನ್ನು ತೋರಿಸಿ",
-        hideOriginal: "ಮೂಲವನ್ನು ಮರೆಮಾಡಿ"
+        hideOriginal: "ಮೂಲವನ್ನು ಮರೆಮಾಡಿ",
+        refreshLyrics: "ಸಾಹಿತ್ಯವನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+        showTranslationOptions: "ಅನುವಾದ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸಿ"
     },
     'ml-IN': {
         loading: "വരികൾ ലോഡുചെയ്യുന്നു",
@@ -907,7 +1045,9 @@ const translations = {
         showPronunciation: "ഉച്ചാരണം കാണിക്കുക",
         hidePronunciation: "ഉച്ചാരണം മറയ്ക്കുക",
         showOriginal: "യഥാർത്ഥ കാണിക്കുക",
-        hideOriginal: "യഥാർത്ഥ മറയ്ക്കുക"
+        hideOriginal: "യഥാർത്ഥ മറയ്ക്കുക",
+        refreshLyrics: "വരികൾ പുതുക്കുക",
+        showTranslationOptions: "വിവർത്തന ഓപ്ഷനുകൾ കാണിക്കുക"
     },
     'si-LK': {
         loading: "පද රචනය පූරණය වෙමින් පවතී",
@@ -920,7 +1060,9 @@ const translations = {
         showPronunciation: "උච්චාරණය පෙන්වන්න",
         hidePronunciation: "උච්චාරණය සඟවන්න",
         showOriginal: "මුල් පිටපත පෙන්වන්න",
-        hideOriginal: "මුල් පිටපත සඟවන්න"
+        hideOriginal: "මුල් පිටපත සඟවන්න",
+        refreshLyrics: "පද රචනය නැවත පූරණය කරන්න",
+        showTranslationOptions: "පරිවර්තන විකල්ප පෙන්වන්න"
     },
     'th-TH': {
         loading: "กำลังโหลดเนื้อเพลง",
@@ -933,7 +1075,9 @@ const translations = {
         showPronunciation: "แสดงการออกเสียง",
         hidePronunciation: "ซ่อนการออกเสียง",
         showOriginal: "แสดงต้นฉบับ",
-        hideOriginal: "ซ่อนต้นฉบับ"
+        hideOriginal: "ซ่อนต้นฉบับ",
+        refreshLyrics: "รีเฟรชเนื้อเพลง",
+        showTranslationOptions: "แสดงตัวเลือกการแปล"
     },
     'lo-LA': {
         loading: "ກຳລັງໂຫລດເນື້ອເພງ",
@@ -946,7 +1090,9 @@ const translations = {
         showPronunciation: "ສະແດງການອອກສຽງ",
         hidePronunciation: "ເຊື່ອງການອອກສຽງ",
         showOriginal: "ສະແດງຕົ້ນສະບັບ",
-        hideOriginal: "ເຊື່ອງຕົ້ນສະບັບ"
+        hideOriginal: "ເຊື່ອງຕົ້ນສະບັບ",
+        refreshLyrics: "ໂຫຼດເນື້ອເພງຄືນໃໝ່",
+        showTranslationOptions: "ສະແດງຕົວເລືອກການແປ"
     },
     'my-MM': {
         loading: "စာသားများအား တင်နေသည်",
@@ -959,7 +1105,9 @@ const translations = {
         showPronunciation: "အသံထွက်ကို ပြပါ",
         hidePronunciation: "အသံထွက်ကို ဖျောက်ပါ",
         showOriginal: "မူရင်းကို ပြပါ",
-        hideOriginal: "မူရင်းကို ဖျောက်ပါ"
+        hideOriginal: "မူရင်းကို ဖျောက်ပါ",
+        refreshLyrics: "စာသားများအား ပြန်လည်စတင်ပါ",
+        showTranslationOptions: "ဘာသာပြန်ရွေးချယ်စရာများကို ပြပါ"
     },
     'ka-GE': {
         loading: "იტვირთება ტექსტები",
@@ -972,7 +1120,9 @@ const translations = {
         showPronunciation: "წარმოთქმის ჩვენება",
         hidePronunciation: "წარმოთქმის დამალვა",
         showOriginal: "ორიგინალის ჩვენება",
-        hideOriginal: "ორიგინალის დამალვა"
+        hideOriginal: "ორიგინალის დამალვა",
+        refreshLyrics: "ტექსტების განახლება",
+        showTranslationOptions: "თარგმანის პარამეტრების ჩვენება"
     },
     'am-ET': {
         loading: "ግጥሞችን በመጫን ላይ",
@@ -985,7 +1135,9 @@ const translations = {
         showPronunciation: "አነባበብ አሳይ",
         hidePronunciation: "አነባበብ ደብቅ",
         showOriginal: "ዋናውን አሳይ",
-        hideOriginal: "ዋናውን ደብቅ"
+        hideOriginal: "ዋናውን ደብቅ",
+        refreshLyrics: "ግጥሞችን አድስ",
+        showTranslationOptions: "የትርጉም አማራጮችን አሳይ"
     },
     'km-KH': {
         loading: "កំពុង​ផ្ទុក​អត្ថបទ​ចម្រៀង",
@@ -998,7 +1150,9 @@ const translations = {
         showPronunciation: "បង្ហាញ​ការ​បញ្ចេញ​សំឡេង",
         hidePronunciation: "លាក់​ការ​បញ្ចេញ​សំឡេង",
         showOriginal: "បង្ហាញ​ដើម",
-        hideOriginal: "លាក់​ដើម"
+        hideOriginal: "លាក់​ដើម",
+        refreshLyrics: "ផ្ទុក​អត្ថបទ​ចម្រៀង​ឡើងវិញ",
+        showTranslationOptions: "បង្ហាញ​ជម្រើស​បកប្រែ"
     },
     'zh-CN': {
         loading: "加载歌词",
@@ -1011,7 +1165,9 @@ const translations = {
         showPronunciation: "显示发音",
         hidePronunciation: "隐藏发音",
         showOriginal: "显示原文",
-        hideOriginal: "隐藏原文"
+        hideOriginal: "隐藏原文",
+        refreshLyrics: "刷新歌词",
+        showTranslationOptions: "显示翻译选项"
     },
     'zh-TW': {
         loading: "載入歌詞",
@@ -1024,7 +1180,9 @@ const translations = {
         showPronunciation: "顯示發音",
         hidePronunciation: "隱藏發音",
         showOriginal: "顯示原文",
-        hideOriginal: "隱藏原文"
+        hideOriginal: "隱藏原文",
+        refreshLyrics: "重新整理歌詞",
+        showTranslationOptions: "顯示翻譯選項"
     },
     'zh-HK': {
         loading: "載入歌詞",
@@ -1037,7 +1195,9 @@ const translations = {
         showPronunciation: "顯示發音",
         hidePronunciation: "隱藏發音",
         showOriginal: "顯示原文",
-        hideOriginal: "隱藏原文"
+        hideOriginal: "隱藏原文",
+        refreshLyrics: "重新整理歌詞",
+        showTranslationOptions: "顯示翻譯選項"
     },
     'ja-JP': {
         loading: "歌詞を読み込んでいます",
@@ -1050,7 +1210,9 @@ const translations = {
         showPronunciation: "発音を表示",
         hidePronunciation: "発音を非表示",
         showOriginal: "オリジナルを表示",
-        hideOriginal: "オリジナルを非表示"
+        hideOriginal: "オリジナルを非表示",
+        refreshLyrics: "歌詞を更新",
+        showTranslationOptions: "翻訳オプションを表示"
     },
     'ko-KR': {
         loading: "가사 불러오는 중",
@@ -1063,7 +1225,9 @@ const translations = {
         showPronunciation: "발음 보기",
         hidePronunciation: "발음 숨기기",
         showOriginal: "원본 보기",
-        hideOriginal: "원본 숨기기"
+        hideOriginal: "원본 숨기기",
+        refreshLyrics: "가사 새로고침",
+        showTranslationOptions: "번역 옵션 표시"
     }
 };
 
