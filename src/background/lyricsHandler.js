@@ -359,8 +359,19 @@ async function getOrFetchTranslatedLyrics(songInfo, action, targetLang, forceRel
             translatedData = originalLyrics.data.map((line, index) => ({ ...line, translatedText: translatedTexts[index] || line.text }));
         }
     } else if (action === 'romanize') {
-        const provider = settings.romanizationProvider === PROVIDERS.GEMINI && settings.geminiApiKey ? PROVIDERS.GEMINI : PROVIDERS.GOOGLE;
-        translatedData = await (provider === PROVIDERS.GEMINI ? romanizeWithGemini(originalLyrics, settings) : romanizeWithGoogle(originalLyrics));
+        // Check if lyrics already contain romanization from backend (applied in parseKPoeFormat)
+        const hasPrebuiltRomanization = originalLyrics.data.some(line =>
+            line.romanizedText || (line.syllabus && line.syllabus.some(syl => syl.romanizedText))
+        );
+
+        if (hasPrebuiltRomanization) {
+            console.log("Using prebuilt romanization from backend.");
+            translatedData = originalLyrics.data; // Use the lyrics as they are, with prebuilt romanization
+        } else {
+            // If no prebuilt romanization, proceed with external providers
+            const provider = settings.romanizationProvider === PROVIDERS.GEMINI && settings.geminiApiKey ? PROVIDERS.GEMINI : PROVIDERS.GOOGLE;
+            translatedData = await (provider === PROVIDERS.GEMINI ? romanizeWithGemini(originalLyrics, settings) : romanizeWithGoogle(originalLyrics));
+        }
     } else {
         translatedData = originalLyrics.data;
     }
@@ -1282,8 +1293,35 @@ function parseKPoeFormat(data) {
                 duration: Number(syl.duration || 0),
                 isBackground: syl.isBackground || false
             }));
-            const element = item.element || []
-            return { text: item.text || '', startTime, duration, endTime: startTime + duration, syllabus, element };
+            const element = item.element || [];
+
+            let lineRomanizedText = undefined;
+            let romanizedSyllabus = undefined;
+
+            // Check for prebuilt transliteration from backend
+            if (item.transliteration) {
+                // Prioritize syllabus-level transliteration if available and lengths match
+                if (item.transliteration.syllabus && item.transliteration.syllabus.length === syllabus.length) {
+                    romanizedSyllabus = syllabus.map((syl, index) => ({
+                        ...syl,
+                        romanizedText: item.transliteration.syllabus[index].text || syl.text
+                    }));
+                    lineRomanizedText = item.transliteration.text || item.text; // Use line-level transliteration text
+                } else if (item.transliteration.text) {
+                    // Fallback to line-level transliteration if syllabus doesn't match or is missing
+                    lineRomanizedText = item.transliteration.text;
+                }
+            }
+
+            return {
+                text: item.text || '',
+                startTime,
+                duration,
+                endTime: startTime + duration,
+                syllabus: romanizedSyllabus || syllabus, // Use romanizedSyllabus if available, otherwise original
+                element,
+                romanizedText: lineRomanizedText // Add line-level romanized text
+            };
         }),
         metadata: { ...data.metadata, source: `${data.metadata.source} (KPoe)` }
     };
