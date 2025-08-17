@@ -1323,7 +1323,8 @@ function parseKPoeFormat(data) {
                 romanizedText: lineRomanizedText // Add line-level romanized text
             };
         }),
-        metadata: { ...data.metadata, source: `${data.metadata.source} (KPoe)` }
+        metadata: { ...data.metadata, source: `${data.metadata.source} (KPoe)` },
+        ignoreSponsorblock: data.ignoreSponsorblock || data.metadata.ignoreSponsorblock
     };
 }
 

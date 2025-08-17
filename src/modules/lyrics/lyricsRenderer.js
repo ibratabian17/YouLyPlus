@@ -570,7 +570,7 @@ class LyricsPlusRenderer {
       // Calculate timing: what fraction of the animation completes when we hit trigger
       let timingFraction = 0;
       if (totalTravelDistance > 0) {
-        timingFraction = Math.max(0, Math.min(1, distanceToTrigger / totalTravelDistance));
+        timingFraction = distanceToTrigger / totalTravelDistance;
       }
       // next syllable should delay for that amount of time
       const delayMs = Math.round(timingFraction * currentDuration);
