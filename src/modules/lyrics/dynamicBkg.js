@@ -4,6 +4,7 @@ let glProgram = null; // For rendering the initial grid
 let updateStateProgram = null; // For GPGPU state updates
 let blurProgram = null; // For the high-performance Gaussian blur
 let webglCanvas = null;
+let needsAnimation = false;
 
 // Uniform locations
 let u_paletteTextureLocation, u_cellStateTextureLocation, u_songPaletteTransitionProgressLocation;
@@ -527,7 +528,17 @@ function processNextArtworkFromQueue() {
     const finishProcessing = (newTargetPalette) => {
         currentTargetMasterArtworkPalette = newTargetPalette;
         updateMasterPaletteTexture(previousPaletteForTransition, currentTargetMasterArtworkPalette);
-        songPaletteTransitionProgress = currentSettings.lightweight ? 1.0 : 0.0;
+
+        songPaletteTransitionProgress = 0.0;
+        needsAnimation = true;
+
+        // Start animation if not already running
+        if (!globalAnimationId) {
+            console.log("LYPLUS: Starting animation for palette transition.");
+            lastFrameTime = performance.now();
+            globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+        }
+
         lastAppliedArtworkIdentifier = currentProcessingArtworkIdentifier;
         isProcessingArtwork = false;
         currentProcessingArtworkIdentifier = null;
@@ -650,6 +661,28 @@ function animateWebGLBackground() {
     const deltaTime = (now - lastFrameTime) / 1000.0;
     lastFrameTime = now;
 
+    // Handle palette transition animation
+    if (songPaletteTransitionProgress < 1.0) {
+        songPaletteTransitionProgress = Math.min(1.0, songPaletteTransitionProgress + SONG_PALETTE_TRANSITION_SPEED);
+        
+        // Check if transition just completed
+        if (songPaletteTransitionProgress >= 1.0) {
+            console.log("LYPLUS: Palette transition completed.");
+            needsAnimation = false;
+        }
+    }
+
+    // Determine if we should continue animation
+    let shouldContinueAnimation;
+    if (currentSettings.lightweight === true) {
+        // In lightweight mode, only continue if we need animation for transitions
+        shouldContinueAnimation = needsAnimation;
+    } else {
+        // In non-lightweight mode, always animate (cell state updates + transitions)
+        shouldContinueAnimation = true;
+    }
+
+    // GPGPU Cell State Update (only in non-lightweight mode)
     if (currentSettings.lightweight !== true) {
         // Pass 1: GPGPU Update 8x5 Cell States (A -> B)
         gl.bindFramebuffer(gl.FRAMEBUFFER, cellStateFramebuffer);
@@ -673,20 +706,17 @@ function animateWebGLBackground() {
     // Pass 2: Render 8x5 Grid to an Off-screen 16:9 Texture, stretching it.
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTexture, 0);
-    // FIX: Set the viewport to the 16:9 texture's dimensions.
     gl.viewport(0, 0, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT);
     gl.useProgram(glProgram);
     gl.enableVertexAttribArray(a_positionLocation);
     gl.vertexAttribPointer(a_positionLocation, 2, gl.FLOAT, false, 0, 0);
-    if (songPaletteTransitionProgress < 1.0 && currentSettings.lightweight !== true) {
-        songPaletteTransitionProgress = Math.min(1.0, songPaletteTransitionProgress + SONG_PALETTE_TRANSITION_SPEED);
-    }
+    
     gl.uniform1f(u_songPaletteTransitionProgressLocation, songPaletteTransitionProgress);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, paletteTexture);
     gl.uniform1i(u_paletteTextureLocation, 0);
     gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, stateTextureA); // Read from newly updated 8x5 state
+    gl.bindTexture(gl.TEXTURE_2D, stateTextureA);
     gl.uniform1i(u_cellStateTextureLocation, 1);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
@@ -695,15 +725,11 @@ function animateWebGLBackground() {
     gl.enableVertexAttribArray(a_blur_positionLocation);
     gl.vertexAttribPointer(a_blur_positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    // --- PERFORMANCE FIX ---
-    // Use pre-calculated values instead of accessing DOM/re-calculating in the loop.
-
     // Pass 3: Horizontal Blur (stretched texture -> blurTextureA)
     gl.bindFramebuffer(gl.FRAMEBUFFER, blurFramebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, blurTextureA, 0);
-    gl.viewport(0, 0, blurDimensions.width, blurDimensions.height); // Use stored value
+    gl.viewport(0, 0, blurDimensions.width, blurDimensions.height);
     gl.uniform2f(u_blur_directionLocation, 1.0, 0.0);
-    // The blur shader's source is the fixed-size 16:9 stretched texture.
     gl.uniform2f(u_blur_resolutionLocation, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, renderTexture);
@@ -712,15 +738,21 @@ function animateWebGLBackground() {
 
     // Pass 4: Vertical Blur & Render to Screen (blurTextureA -> Canvas)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height); // Use stored value
+    gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
     gl.uniform2f(u_blur_directionLocation, 0.0, 1.0);
-    gl.uniform2f(u_blur_resolutionLocation, blurDimensions.width, blurDimensions.height); // Use stored values
+    gl.uniform2f(u_blur_resolutionLocation, blurDimensions.width, blurDimensions.height);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
     gl.uniform1i(u_blur_imageLocation, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+    // Continue animation only if needed
+    if (shouldContinueAnimation) {
+        globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+    } else {
+        console.log("LYPLUS: Animation stopped - no changes needed.");
+        globalAnimationId = null;
+    }
 }
 
 
