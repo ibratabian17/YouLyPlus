@@ -585,7 +585,8 @@ class LyricsPlusRenderer {
       currentLine.dataset.endTime = line.endTime;
       const singerClass = line.element?.singer ? (singerClassMap[line.element.singer] || 'singer-left') : 'singer-left';
       currentLine.classList.add(singerClass);
-      if (this._isRTL(line.text)) currentLine.classList.add('rtl-text');
+      // Apply rtl-text to the line itself based on the "big" text direction for overall flex-direction control.
+      if (this._isRTL(this._getDataText(line, true))) currentLine.classList.add('rtl-text');
       if (!currentLine.hasClickListener) {
         currentLine.addEventListener('click', this._onLyricClick.bind(this));
         currentLine.hasClickListener = true;
@@ -593,6 +594,8 @@ class LyricsPlusRenderer {
 
       const mainContainer = document.createElement('div');
       mainContainer.classList.add('main-vocal-container');
+      // Apply rtl-text to mainContainer for its internal text alignment.
+      if (this._isRTL(this._getDataText(line, true))) mainContainer.classList.add('rtl-text');
       currentLine.appendChild(mainContainer);
 
       // Use the new helper for translation container
@@ -667,7 +670,8 @@ class LyricsPlusRenderer {
             sylSpan.addEventListener('click', this._onLyricClick.bind(this));
             sylSpan.hasClickListener = true;
           }
-          if (this._isRTL(s.text)) sylSpan.classList.add('rtl-text');
+          // Apply rtl-text to syllable spans for their internal text alignment.
+          if (this._isRTL(this._getDataText(s))) sylSpan.classList.add('rtl-text');
 
           // Store syllable for pre-highlight calculation
           syllableElements.push(sylSpan);
@@ -795,7 +799,8 @@ class LyricsPlusRenderer {
       lineDiv.dataset.endTime = line.endTime;
       const singerClass = line.element?.singer ? (singerClassMap[line.element.singer] || 'singer-left') : 'singer-left';
       lineDiv.classList.add(singerClass);
-      if (this._isRTL(line.text)) lineDiv.classList.add('rtl-text');
+      // Apply rtl-text to the line itself based on the "big" text direction for overall flex-direction control.
+      if (this._isRTL(this._getDataText(line, true))) lineDiv.classList.add('rtl-text');
       if (!lineDiv.hasClickListener) {
         lineDiv.addEventListener('click', this._onLyricClick.bind(this));
         lineDiv.hasClickListener = true;
@@ -803,6 +808,8 @@ class LyricsPlusRenderer {
       const mainContainer = document.createElement('div');
       mainContainer.className = 'main-vocal-container';
       mainContainer.textContent = this._getDataText(line);
+      // Apply rtl-text to mainContainer for its internal text alignment.
+      if (this._isRTL(this._getDataText(line, true))) mainContainer.classList.add('rtl-text');
       lineDiv.appendChild(mainContainer);
       // Use the new helper for translation container
       this._renderTranslationContainer(lineDiv, line, displayMode);
@@ -839,11 +846,17 @@ class LyricsPlusRenderer {
         if (lineData.syllabus && lineData.syllabus.length > 0 && lineData.syllabus.some(s => s.romanizedText)) {
           const romanizationContainer = document.createElement('div');
           romanizationContainer.classList.add('lyrics-romanization-container');
+          // Apply rtl-text to the container itself based on the original text direction (lineData.text)
+          // This ensures the container's overall directionality is correct.
+          if (this._isRTL(lineData.text)) romanizationContainer.classList.add('rtl-text');
           lineData.syllabus.forEach(syllable => {
-            if (this._getDataText(syllable, false)) {
+            const romanizedText = this._getDataText(syllable, false); // This is syllable.text (original text of syllable)
+            if (romanizedText) {
               const sylSpan = document.createElement('span');
               sylSpan.className = 'lyrics-syllable'; // Use lyrics-syllable class for highlighting
-              sylSpan.textContent = this._getDataText(syllable, false);
+              sylSpan.textContent = romanizedText;
+              // Apply rtl-text to individual syllable spans for their internal text alignment.
+              if (this._isRTL(romanizedText)) sylSpan.classList.add('rtl-text');
               // Copy timing data for highlighting
               sylSpan.dataset.startTime = syllable.time;
               sylSpan.dataset.duration = syllable.duration;
@@ -861,7 +874,11 @@ class LyricsPlusRenderer {
           // Fallback to line-level romanization if no syllable data
           const romanizationContainer = document.createElement('div');
           romanizationContainer.classList.add('lyrics-romanization-container');
-          romanizationContainer.textContent = this._getDataText(lineData, false);
+          const romanizedText = this._getDataText(lineData, false); // This is lineData.text (original text of line)
+          romanizationContainer.textContent = romanizedText;
+          // Apply rtl-text to the container itself based on the original text direction (lineData.text)
+          // This ensures the container's overall directionality is correct.
+          if (this._isRTL(lineData.text)) romanizationContainer.classList.add('rtl-text');
           lineElement.appendChild(romanizationContainer);
         }
       }
@@ -1174,6 +1191,8 @@ class LyricsPlusRenderer {
     const isWordByWordMode = type === "Word" && currentSettings.wordByWord;
     container.classList.toggle('word-by-word-mode', isWordByWordMode);
     container.classList.toggle('line-by-line-mode', !isWordByWordMode);
+
+    container.classList.toggle('romanized-big-mode', largerTextMode != "lyrics")
 
     // Call the new updateDisplayMode to handle the actual rendering of lyrics lines
     this.updateDisplayMode(lyrics, displayMode, currentSettings);
@@ -2018,7 +2037,7 @@ class LyricsPlusRenderer {
         'word-by-word-mode', 'line-by-line-mode', 'mixed-direction-lyrics',
         'dual-side-lyrics', 'fullscreen', 'blur-inactive-enabled',
         'use-song-palette-fullscreen', 'use-song-palette-all-modes',
-        'override-palette-color', 'hide-offscreen'
+        'override-palette-color', 'hide-offscreen', 'romanized-big-mode'
       ];
       container.classList.remove(...classesToRemove);
 

@@ -616,33 +616,78 @@ async function fetchGeminiRomanize(structuredInput, settings) {
     }
 
     const initialUserPrompt = (overrideGeminiRomanizePrompt && customGeminiRomanizePrompt)
-        ? customGeminiRomanizePrompt : `You are a linguistic expert AI specializing in precise, context-aware romanization. Your task is to follow these rules with extreme accuracy.
+        ? customGeminiRomanizePrompt : `You are a linguistic expert AI specializing ONLY in precise **natural phonetic romanization** (NOT translation).
+You MUST follow these rules like a strict compiler. Any violation is an error.
 
-**THE GOLDEN RULE: The full line 'text' is the source of truth, and 'chunks' must be derived from it.**
-This is the most critical instruction. Some languages have contextual rules where words change form when placed together. You must first determine the most natural, flowing romanization for the **entire line** of text. Then, and only then, you must partition that final romanized string into the chunks. The chunks are a breakdown of the final result, not independently romanized words.
+# GLOBAL PRINCIPLES
+1. **Romanization only** – never translate or explain meaning.
+2. **Natural phonetic style for ALL languages**:
+   - Arabic → assimilate natural sounds: e.g. "fi al-fasl" → "fil fasl", "al-shams" → "ash shams".
+   - Japanese → Hepburn phonetic: "こんにちは" → "konnichiwa".
+   - Korean → spoken style Revised Romanization: "안녕하세요" → "annyeong haseyo".
+   - Chinese → Pinyin without tone marks, natural spacing: "你好" → "ni hao".
+   - Other languages → their most widely recognized **natural phonetic pronunciation**, not academic strict forms.
+3. **Preserve original segmentation** – do not merge or drop words.
+4. **No extra text** – never add explanations, notes, or translation.
+5. **Case & style** – all output in lowercase Latin letters, unless capitalization is required in the source (e.g. names).
 
-**CRITICAL CHUNK DISTRIBUTION RULES:**
-1. **NEVER leave any chunk with empty text** - every chunk must have meaningful content
-2. **DISTRIBUTE text proportionally** - if original has 3 chunks of similar length, romanized should too
-3. **NO CHUNK MERGING** - don't put all text in one chunk and leave others empty
-4. **PRESERVE WORD BOUNDARIES** - chunks should align with natural word/syllable breaks
+# GOLDEN RULE
+- Romanize the **entire line** naturally first.  
+- THEN split the romanized line into chunks matching the input.  
+- Chunks are subdivisions of the final romanized line, NOT independent romanizations.  
+- Always preserve final vowel sounds from the original script if they exist.
+- Add space if it was a different word, do not trim them.
 
-**EXAMPLES OF CORRECT BEHAVIOR:**
-❌ WRONG: Original: ["안녕", "하세요"] → Romanized: ["annyeong haseyo", ""]
-✅ CORRECT: Original: ["안녕", "하세요"] → Romanized: ["annyeong", "haseyo"]
+# CHUNK RULES
+1. Chunk count must **exactly** match input.  
+2. Every chunk must contain some text (never empty).  
+3. Distribute text proportionally. Do not merge all into one chunk.  
+4. Preserve \`chunkIndex\` values strictly.  
+5. Preserve line order with \`original_line_index\`.  
 
-❌ WRONG: Original: ["こん", "にち", "は"] → Romanized: ["konnichiwa", "", ""]
-✅ CORRECT: Original: ["こん", "にち", "は"] → Romanized: ["kon", "nichi", "wa"]
+# VALIDATION CHECKLIST
+Before finalizing, you MUST ensure for every line:
+- The number of chunks matches input.  
+- No chunk has empty text.  
+- Romanization is natural, flowing, and phonetically correct.  
+- Distribution across chunks is proportional.  
 
-**ADDITIONAL STRICT RULES:**
-1. **CHUNK-FOR-CHUNK MAPPING:** If an input line has a "chunk" array, your output MUST have a "chunk" array with the EXACT SAME NUMBER OF CHUNKS.
-2. **OMIT CHUNKS WHEN ABSENT:** If an input line does NOT have a "chunk" array, your output MUST also NOT have a "chunk" array.
-3. **ACCURATE ROMANIZATION:** Convert all non-Latin text to its standard, phonetically accurate romanization for the detected language.
-4. **MAINTAIN PROPORTIONS:** If original chunks are roughly equal length, romanized chunks should be too.
+# EXAMPLES
 
-Now, process the following lyrics, applying the Golden Rule and all other rules strictly:
+### Arabic (natural phonetic)
+Input: ["أَنْتَ ", "فِي ", "الْفَصْلِ"]  
+❌ Wrong: ["anta", "fi", "al-fasli"]  
+✅ Correct: ["anta", "fil", "fasli"]
 
-Lyrics to romanize:
+Input: ["السلام", "عليكم"]  
+❌ Wrong: ["as", "salamualaikum"]  
+✅ Correct: ["assalam", "alaikum"]
+
+---
+
+### Japanese (natural phonetic)
+Input: ["こん", "にち", "は"]  
+❌ Wrong: ["konnichiwa", "", ""]  
+✅ Correct: ["kon", "nichi", "wa"]
+
+---
+
+### Korean (natural phonetic)
+Input: ["안녕", "하세요"]  
+❌ Wrong: ["annyeong haseyo", ""]  
+✅ Correct: ["annyeong", "haseyo"]
+
+---
+
+### Chinese (natural phonetic)
+Input: ["你", "好"]  
+❌ Wrong: ["nihao", ""]  
+✅ Correct: ["ni", "hao"]
+
+---
+
+# TASK
+Now, romanize the following lyrics **strictly following all rules above**:
 ${JSON.stringify(lyricsForApi, null, 2)}`;
 
     const schema = {
@@ -1060,7 +1105,7 @@ function validateChunkDistribution(originalLine, romanizedLine, lineIndex) {
     if (nonEmptyChunks.length === 1 && romanizedLine.chunk.length > 1) {
         errors.push(`Line ${lineIndex}: All text concentrated in one chunk while others are empty`);
     }
-    
+
     // Advanced text coherence check with better algorithm
     const coherenceResult = validateTextCoherence(romanizedLine, lineIndex);
     if (!coherenceResult.isValid) {
