@@ -66,7 +66,6 @@ class LyricsPlusRenderer {
 
   _getDataText(normal, isOriginal = true) {
     if (!normal) return ''; // Handle null/undefined 'normal' object
-    console.debug(this.largerTextMode, normal)
 
     if (this.largerTextMode === "romanization") {
       if (isOriginal) {
@@ -479,8 +478,8 @@ class LyricsPlusRenderer {
 
       if (nextLine.startTime < currentLine.originalEndTime) {
         const overlap = currentLine.originalEndTime - nextLine.startTime;
-        // Only extend if overlap is >= 5ms (0.005 seconds), otherwise don't overlap
-        if (overlap >= 0.005) {
+        // Only extend if overlap is >= 100ms (0.1 seconds), otherwise don't overlap
+        if (overlap >= 0.1) {
           currentLine.newEndTime = nextLine.newEndTime;
         } else {
           // Overlap is less than 5ms, don't extend - keep original end time
@@ -676,7 +675,7 @@ class LyricsPlusRenderer {
           const charSpansForSyllable = [];
 
           if (s.isBackground) {
-            sylSpan.textContent = this._getDataText(s, false).replace(/[()]/g, '');
+            sylSpan.textContent = this._getDataText(s).replace(/[()]/g, '');
           } else {
             if (shouldEmphasize) {
               wordSpan.classList.add('growable');
@@ -1932,34 +1931,140 @@ class LyricsPlusRenderer {
   /**
    * Cleans up the lyrics container and resets the state for the next song.
    */
+
   cleanupLyrics() {
+    // --- Animation Frame Cleanup ---
     if (this.lyricsAnimationFrameId) {
       cancelAnimationFrame(this.lyricsAnimationFrameId);
       this.lyricsAnimationFrameId = null;
     }
-    const container = this._getContainer();
-    if (container) {
-      container.innerHTML = `<span class="text-loading">${t("loading")}</span>`;
-      container.classList.add('lyrics-plus-message');
-      container.classList.remove('user-scrolling');
+
+    // --- Touch State Cleanup ---
+    if (this.touchState) {
+      if (this.touchState.momentum) {
+        cancelAnimationFrame(this.touchState.momentum);
+        this.touchState.momentum = null;
+      }
+      // Reset touch state
+      this.touchState.isActive = false;
+      this.touchState.startY = 0;
+      this.touchState.lastY = 0;
+      this.touchState.velocity = 0;
+      this.touchState.lastTime = 0;
+      this.touchState.samples = [];
     }
-    this.activeLineIds.clear();
-    this.highlightedSyllableIds.clear();
-    this.visibleLineIds.clear();
-    this.currentPrimaryActiveLine = null;
-    this.currentFullscreenFocusedLine = null;
+
+    // --- Timer Cleanup ---
+    if (this.endProgrammaticScrollTimer) {
+      clearTimeout(this.endProgrammaticScrollTimer);
+      this.endProgrammaticScrollTimer = null;
+    }
+
+    if (this.userScrollIdleTimer) {
+      clearTimeout(this.userScrollIdleTimer);
+      this.userScrollIdleTimer = null;
+    }
+
+    if (this.userScrollRevertTimer) {
+      clearTimeout(this.userScrollRevertTimer);
+      this.userScrollRevertTimer = null;
+    }
+
+    // --- Observer Cleanup ---
     if (this.visibilityObserver) {
       this.visibilityObserver.disconnect();
       this.visibilityObserver = null;
     }
-    this.cachedLyricsLines = [];
-    this.cachedSyllables = [];
-    this.currentScrollOffset = 0;
-    this.isUserControllingScroll = false;
-    clearTimeout(this.userScrollIdleTimer);
+
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
     }
+
+    // --- DOM Elements Cleanup ---
+    const container = this._getContainer();
+    if (container) {
+      // Remove all event listeners from cached elements before clearing
+      if (this.cachedLyricsLines) {
+        this.cachedLyricsLines.forEach(line => {
+          if (line && line._cachedSyllableElements) {
+            // Clear syllable cache to prevent memory leaks
+            line._cachedSyllableElements = null;
+          }
+        });
+      }
+
+      if (this.cachedSyllables) {
+        this.cachedSyllables.forEach(syllable => {
+          if (syllable) {
+            // Clear cached char spans
+            syllable._cachedCharSpans = null;
+            // Reset any inline styles
+            syllable.style.animation = '';
+            syllable.style.removeProperty('--pre-wipe-duration');
+            syllable.style.removeProperty('--pre-wipe-delay');
+          }
+        });
+      }
+
+      // Clear container content and reset classes
+      container.innerHTML = `<span class="text-loading">${t("loading")}</span>`;
+      container.classList.add('lyrics-plus-message');
+
+      // Remove all dynamic classes that might have been added
+      const classesToRemove = [
+        'user-scrolling', 'wheel-scrolling', 'touch-scrolling', 'not-focused',
+        'lyrics-translated', 'lyrics-romanized', 'lyrics-both-modes',
+        'word-by-word-mode', 'line-by-line-mode', 'mixed-direction-lyrics',
+        'dual-side-lyrics', 'fullscreen', 'blur-inactive-enabled',
+        'use-song-palette-fullscreen', 'use-song-palette-all-modes',
+        'override-palette-color', 'hide-offscreen'
+      ];
+      container.classList.remove(...classesToRemove);
+
+      // Reset CSS custom properties
+      container.style.removeProperty('--lyrics-scroll-offset');
+      container.style.removeProperty('--lyplus-override-pallete');
+      container.style.removeProperty('--lyplus-override-pallete-white');
+      container.style.removeProperty('--lyplus-song-pallete');
+      container.style.removeProperty('--lyplus-song-white-pallete');
+    }
+
+    // --- State Variables Reset ---
+    this.currentPrimaryActiveLine = null;
+    this.lastPrimaryActiveLine = null;
+    this.currentFullscreenFocusedLine = null;
+    this.lastTime = 0;
+    this.lastProcessedTime = 0;
+
+    // --- Collections Reset ---
+    this.activeLineIds.clear();
+    this.highlightedSyllableIds.clear();
+    this.visibleLineIds.clear();
+    this.cachedLyricsLines = [];
+    this.cachedSyllables = [];
+
+    // --- Cache Reset ---
+    this._cachedContainerRect = null;
+    this._cachedVisibleLines = null;
+    this._lastVisibilityHash = null;
+    this._lastVisibilityUpdateSize = null;
+
+    // --- Scroll State Reset ---
+    this.currentScrollOffset = 0;
+    this.isProgrammaticScrolling = false;
+    this.isUserControllingScroll = false;
+
+    // --- Display Mode Reset ---
+    this.currentDisplayMode = undefined;
+    this.largerTextMode = "lyrics";
+
+    // --- Reference Reset ---
+    this.lastKnownSongInfo = null;
+    this.fetchAndDisplayLyricsFn = null;
+    this.setCurrentDisplayModeAndRefetchFn = null;
+
+    // --- Font Cache Cleanup ---
+    this.fontCache = {};
   }
 }
