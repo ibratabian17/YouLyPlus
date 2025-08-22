@@ -32,16 +32,13 @@ function ensureLyricsTab() {
 
     if (!tablist || !panelContainer) return;
 
-    // Hide original lyrics tab if it exists
     const originalLyricsTab = tablist.querySelector('[data-test="tabs-lyrics"]');
     if (originalLyricsTab) {
         originalLyricsTab.style.display = 'none';
     }
 
-    // Don't create duplicate tab
     if (document.getElementById('lyrics-plus-tab')) return;
 
-    // Create custom lyrics tab
     const customLyricsTab = document.createElement('li');
     customLyricsTab.className = '_tabItem_8436610';
     customLyricsTab.dataset.test = 'tabs-lyrics-plus';
@@ -52,50 +49,41 @@ function ensureLyricsTab() {
     customLyricsTab.setAttribute('data-rttab', 'true');
     customLyricsTab.innerHTML = `<svg class="_icon_77f3f89" viewBox="0 0 20 20"><use href="#general__lyrics"></use></svg><span data-wave-color="textDefault" class="wave-text-description-demi">Lyrics</span>`;
 
-    // Create lyrics panel
     const lyricsPanel = document.createElement('div');
     lyricsPanel.id = 'lyrics-plus-panel';
     lyricsPanel.className = firstPanel.className;
     lyricsPanel.setAttribute('role', 'tabpanel');
     lyricsPanel.style.display = 'none';
     
-    // Add some basic content to the panel
     lyricsPanel.innerHTML = `
     `;
     
     panelContainer.appendChild(lyricsPanel);
 
-    // Initialize lyrics renderer if not already done
     if (!lyricsRendererInstance) {
         const uiConfig = {
             player: 'video',
             patchParent: '#lyrics-plus-panel',
             selectors: ['#lyrics-plus-panel']
         };
-        // Assuming LyricsPlusRenderer is available globally
         if (typeof LyricsPlusRenderer !== 'undefined') {
             lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
         }
     }
 
-    // Set proper aria-controls
     customLyricsTab.setAttribute('aria-controls', 'lyrics-plus-panel');
     lyricsPanel.setAttribute('aria-labelledby', 'lyrics-plus-tab');
     
-    // Add tab to tablist
     tablist.appendChild(customLyricsTab);
 
-    // Add click handler for custom lyrics tab
     customLyricsTab.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         
-        // Don't do anything if already active
         if (customLyricsTab.getAttribute('aria-selected') === 'true') {
             return;
         }
         
-        // Deactivate all tabs
         tablist.querySelectorAll('[role="tab"]').forEach(tab => {
             tab.setAttribute('aria-selected', 'false');
             tab.classList.remove('_activeTab_f47dafa');
@@ -107,25 +95,20 @@ function ensureLyricsTab() {
             panel.classList.remove('react-tabs__tab-panel--selected');
         });
         
-        // Activate lyrics tab
         customLyricsTab.setAttribute('aria-selected', 'true');
         customLyricsTab.classList.add('_activeTab_f47dafa');
         
-        // Show lyrics panel
         lyricsPanel.style.display = 'block';
         lyricsPanel.classList.add('react-tabs__tab-panel--selected');
         
         console.log('LYPLUS: Lyrics tab activated');
     });
 
-    // Add click handlers to existing tabs to deactivate lyrics tab (without breaking existing functionality)
     tablist.querySelectorAll('[role="tab"]:not(#lyrics-plus-tab)').forEach(tab => {
-        // Only add our listener if we haven't already added it
         if (!tab.hasAttribute('data-lyrics-plus-listener')) {
             tab.setAttribute('data-lyrics-plus-listener', 'true');
             
             tab.addEventListener('click', (e) => {
-                // Let the original tab logic handle the switch first
                 setTimeout(() => {
                     // Deactivate our lyrics tab
                     customLyricsTab.setAttribute('aria-selected', 'false');
@@ -133,7 +116,6 @@ function ensureLyricsTab() {
                     lyricsPanel.style.display = 'none';
                     lyricsPanel.classList.remove('react-tabs__tab-panel--selected');
                     
-                    // Fix: Find the currently selected tab and ensure its panel is visible
                     const selectedTab = tablist.querySelector('[role="tab"][aria-selected="true"]:not(#lyrics-plus-tab)');
                     if (selectedTab) {
                         const panelId = selectedTab.getAttribute('aria-controls');
@@ -141,9 +123,7 @@ function ensureLyricsTab() {
                         if (targetPanel) {
                             // Remove our forced display:none and let React's logic take over
                             targetPanel.style.display = '';
-                            // Give React time to apply its own styles
                             setTimeout(() => {
-                                // If React hasn't made it visible, force it
                                 if (targetPanel.style.display === 'none' || 
                                     getComputedStyle(targetPanel).display === 'none') {
                                     targetPanel.style.display = 'block';
@@ -159,12 +139,10 @@ function ensureLyricsTab() {
     console.log('LYPLUS: Custom lyrics tab created and attached');
 }
 
-// Improved observer with better targeting
 const uiObserver = new MutationObserver((mutations) => {
     let shouldCheck = false;
     mutations.forEach(mutation => {
         if (mutation.type === 'childList') {
-            // Check if tablist or panels were modified
             const addedNodes = Array.from(mutation.addedNodes);
             const hasRelevantChanges = addedNodes.some(node => 
                 node.nodeType === 1 && (

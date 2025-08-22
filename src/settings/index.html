@@ -42,7 +42,7 @@
     </aside>
 
     <main class="content-area">
-        <!-- NEW: Notification bar for reloading -->
+        <!-- Notification bar for reloading -->
         <div id="reload-notification" class="reload-notification">
             <span>Settings saved. Reload your YouTube Music tab for changes to take effect.</span>
             <button id="reload-button" class="btn btn-tonal">
@@ -56,8 +56,8 @@
             <h2 class="card-title">General Settings</h2>
 
             <div class="settings-category">
-                <h3 class="category-title">Core Functionality</h3>
-                <div class="setting-item">
+                <h3 class="category-title">Core Functionallity</h3>
+                 <div class="setting-item">
                     <label class="switch">
                         <input type="checkbox" id="enabled" checked>
                         <span class="slider"></span>
@@ -65,6 +65,27 @@
                     </label>
                     <p class="setting-description">Globally enable or disable the extension.</p>
                 </div>
+                <div class="setting-item">
+                    <label class="switch">
+                        <input type="checkbox" id="wordByWord">
+                        <span class="slider"></span>
+                        <span class="switch-label">Word-by-Word Highlighting</span>
+                    </label>
+                    <p class="setting-description">Enable karaoke-style word highlighting if available.</p>
+                </div>
+
+                <div class="setting-item">
+                    <label class="switch">
+                        <input type="checkbox" id="sponsor-block">
+                        <span class="slider"></span>
+                        <span class="switch-label">Use SponsorBlock API</span>
+                    </label>
+                    <p class="setting-description">Skip non-music sections like intros, outros, or sponsor segments.</p>
+                </div>
+            </div>
+
+            <div class="settings-category">
+                <h3 class="category-title">Sources</h3>
                 <div class="setting-item">
                     <div class="form-group">
                         <label for="default-provider">Default Lyrics Provider</label>
@@ -104,27 +125,6 @@
                         </button>
                     </div>
                     <p id="add-source-status" class="status-message"></p>
-                </div>
-            </div>
-
-            <div class="settings-category">
-                <h3 class="category-title">Enhancements</h3>
-                <div class="setting-item">
-                    <label class="switch">
-                        <input type="checkbox" id="wordByWord">
-                        <span class="slider"></span>
-                        <span class="switch-label">Word-by-Word Highlighting</span>
-                    </label>
-                    <p class="setting-description">Enable karaoke-style word highlighting if available.</p>
-                </div>
-
-                <div class="setting-item">
-                    <label class="switch">
-                        <input type="checkbox" id="sponsor-block">
-                        <span class="slider"></span>
-                        <span class="switch-label">Use SponsorBlock API</span>
-                    </label>
-                    <p class="setting-description">Skip non-music sections like intros, outros, or sponsor segments.</p>
                 </div>
             </div>
 
@@ -383,22 +383,9 @@
                     <div class="form-group">
                         <label for="custom-css">Custom CSS</label>
                         <textarea id="custom-css" placeholder=".lyrics-container { ... }"></textarea>
-                        <p class="helper-text">Apply your own styles to the lyrics display. Use with caution.</p>
+                        <p class="helper-text">Apply your own styles to the lyrics display. Use with caution. To create or testing, it is recommended to use UserStyles</p>
                     </div>
                 </div>
-                <div class="setting-item">
-                    <label class="form-group-label">CSS Preview</label>
-                    <div class="preview-box-container">
-                        <div id="lyrics-plus-container-preview" class="lyrics-plus-integrated">
-                            <!-- ... PREVIEW STRUCTURE ... -->
-                        </div>
-                    </div>
-                    <button id="play-example" class="btn btn-outlined">
-                        <span class="material-symbols-outlined">play_arrow</span>
-                        Play Example
-                    </button>
-                </div>
-            </div>
 
             <div class="card-actions">
                 <button id="save-appearance" class="btn btn-filled">Save Appearance</button>
@@ -485,11 +472,10 @@
         </section>
 
         <footer class="content-footer">
-            <p>YouLy+ Settings</p>
+            <p>Made with love</p>
         </footer>
     </main>
     <script type="module" src="settingsManager.js"></script>
-    <script type="module" src="previewManager.js"></script>
     <script type="module" src="ui.js"></script>
 </body>
 

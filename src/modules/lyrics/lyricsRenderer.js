@@ -3,17 +3,16 @@ class LyricsPlusRenderer {
   /**
    * Constructor for the LyricsPlusRenderer.
    * Initializes state variables and sets up the initial environment for the lyrics display.
+   * @param {object} uiConfig - Configuration for UI element selectors.
    */
   constructor(uiConfig) {
-    // --- State Variables ---
     this.lyricsAnimationFrameId = null;
     this.currentPrimaryActiveLine = null;
-    this.lastPrimaryActiveLine = null; // New: To store the last active line for delay calculation
+    this.lastPrimaryActiveLine = null;
     this.currentFullscreenFocusedLine = null;
     this.lastTime = 0;
     this.lastProcessedTime = 0;
 
-    // --- DOM & Cache ---
     this.uiConfig = uiConfig;
     this.lyricsContainer = null;
     this.cachedLyricsLines = [];
@@ -25,15 +24,13 @@ class LyricsPlusRenderer {
     this.textWidthCanvas = null;
     this.visibilityObserver = null;
     this.resizeObserver = null;
-    this._cachedContainerRect = null; // New: Cache for container and parent dimensions
-    this._debouncedResizeHandler = this._debounce(this._handleContainerResize, 1); // Initialize debounced handler
+    this._cachedContainerRect = null;
+    this._debouncedResizeHandler = this._debounce(this._handleContainerResize, 1);
 
-    // --- UI Elements ---
     this.translationButton = null;
     this.reloadButton = null;
     this.dropdownMenu = null;
 
-    // --- Scrolling & Interaction State ---
     this.isProgrammaticScrolling = false;
     this.endProgrammaticScrollTimer = null;
     this.scrollEventHandlerAttached = false;
@@ -42,10 +39,8 @@ class LyricsPlusRenderer {
     this.isTouching = false;
     this.userScrollIdleTimer = null;
     this.isUserControllingScroll = false;
-    this.userScrollRevertTimer = null; // Timer to revert control to the player
+    this.userScrollRevertTimer = null;
 
-    // --- Initial Setup ---
-    // This call ensures the container is found or created and listeners are attached.
     this._getContainer();
   }
 
@@ -65,7 +60,7 @@ class LyricsPlusRenderer {
   }
 
   _getDataText(normal, isOriginal = true) {
-    if (!normal) return ''; // Handle null/undefined 'normal' object
+    if (!normal) return '';
 
     if (this.largerTextMode === "romanization") {
       if (isOriginal) {
@@ -92,19 +87,15 @@ class LyricsPlusRenderer {
    * @private
    */
   _handleContainerResize(container) {
-    // Update cached dimensions when the parent container resizes
     this._cachedContainerRect = {
       containerTop: container.getBoundingClientRect().top,
       scrollContainerTop: container.getBoundingClientRect().top
     };
 
-    // Re-evaluate scroll position if not user-controlled
     if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
       this._scrollToActiveLine(this.currentPrimaryActiveLine, false);
     }
   }
-
-  // --- Core DOM Manipulation & Setup ---
 
   /**
    * A helper method to determine if a text string contains Right-to-Left characters.
@@ -133,13 +124,6 @@ class LyricsPlusRenderer {
   _isPurelyLatinScript(text) {
     // This regex checks if the entire string consists ONLY of characters from the Latin Unicode script,
     // numbers, common punctuation, and whitespace.
-    // If any character outside of these categories is found, it means the text is NOT purely Latin script.
-    // \p{Script=Latin} or \p{sc=Latn} matches Latin letters.
-    // \p{N} matches any kind of numeric character.
-    // \p{P} matches any kind of punctuation character.
-    // \p{S} matches any kind of symbol character.
-    // \s matches any whitespace character.
-    // The `u` flag is for Unicode support.
     return /^[\p{Script=Latin}\p{N}\p{P}\p{S}\s]*$/u.test(text);
   }
 
@@ -193,7 +177,6 @@ class LyricsPlusRenderer {
     const scrollListeningElement = this.lyricsContainer;
     const parentScrollElement = this.lyricsContainer.parentElement;
 
-    // Touch scroll state
     this.touchState = {
       isActive: false,
       startY: 0,
@@ -201,7 +184,7 @@ class LyricsPlusRenderer {
       velocity: 0,
       lastTime: 0,
       momentum: null,
-      samples: [], // For velocity calculation
+      samples: [],
       maxSamples: 5
     };
 
@@ -221,7 +204,6 @@ class LyricsPlusRenderer {
       }, { passive: true });
     }
 
-    // Wheel scrolling (keep existing logic)
     scrollListeningElement.addEventListener('wheel', (event) => {
       event.preventDefault();
       this.isProgrammaticScrolling = false;
@@ -239,12 +221,10 @@ class LyricsPlusRenderer {
       }, 200);
     }, { passive: false });
 
-    // Improved touch handling
     scrollListeningElement.addEventListener('touchstart', (event) => {
       const touch = event.touches[0];
       const now = performance.now();
 
-      // Cancel any ongoing momentum
       if (this.touchState.momentum) {
         cancelAnimationFrame(this.touchState.momentum);
         this.touchState.momentum = null;
@@ -274,17 +254,15 @@ class LyricsPlusRenderer {
       const currentY = touch.clientY;
       const deltaY = this.touchState.lastY - currentY;
 
-      // Update position
       this.touchState.lastY = currentY;
 
-      // Add sample for velocity calculation
       this.touchState.samples.push({ y: currentY, time: now });
       if (this.touchState.samples.length > this.touchState.maxSamples) {
         this.touchState.samples.shift();
       }
 
       // Apply immediate scroll with reduced sensitivity for smoother feel
-      this._handleUserScroll(deltaY * 0.8); // Reduced from default sensitivity
+      this._handleUserScroll(deltaY * 0.8);
 
     }, { passive: false });
 
@@ -293,7 +271,6 @@ class LyricsPlusRenderer {
 
       this.touchState.isActive = false;
 
-      // Calculate final velocity from recent samples
       const now = performance.now();
       const samples = this.touchState.samples;
 
@@ -305,25 +282,22 @@ class LyricsPlusRenderer {
           const newest = recentSamples[recentSamples.length - 1];
           const oldest = recentSamples[0];
           const timeDelta = newest.time - oldest.time;
-          const yDelta = oldest.y - newest.y; // Inverted for scroll direction
+          const yDelta = oldest.y - newest.y;
 
           if (timeDelta > 0) {
-            this.touchState.velocity = yDelta / timeDelta; // pixels per ms
+            this.touchState.velocity = yDelta / timeDelta;
           }
         }
       }
 
-      // Start momentum scrolling if velocity is significant
-      const minVelocity = 0.1; // pixels per ms
+      const minVelocity = 0.1;
       if (Math.abs(this.touchState.velocity) > minVelocity) {
         this._startMomentumScroll();
       } else {
-        // No momentum, just clean up
         this._endTouchScrolling();
       }
     }, { passive: true });
 
-    // Handle touch cancel
     scrollListeningElement.addEventListener('touchcancel', () => {
       this.touchState.isActive = false;
       if (this.touchState.momentum) {
@@ -337,22 +311,19 @@ class LyricsPlusRenderer {
   }
 
   /**
-   * Starts momentum scrolling after touch end
+   * Starts momentum scrolling after touch end.
    * @private
    */
   _startMomentumScroll() {
-    const deceleration = 0.95; // Deceleration factor per frame
-    const minVelocity = 0.01; // Stop when velocity gets too small
+    const deceleration = 0.95;
+    const minVelocity = 0.01;
 
     const animate = () => {
-      // Apply velocity to scroll
-      const scrollDelta = this.touchState.velocity * 16; // Convert to per-frame (assuming 60fps)
+      const scrollDelta = this.touchState.velocity * 16;
       this._handleUserScroll(scrollDelta);
 
-      // Reduce velocity
       this.touchState.velocity *= deceleration;
 
-      // Continue if velocity is still significant
       if (Math.abs(this.touchState.velocity) > minVelocity) {
         this.touchState.momentum = requestAnimationFrame(animate);
       } else {
@@ -365,7 +336,7 @@ class LyricsPlusRenderer {
   }
 
   /**
-   * Cleans up touch scrolling state
+   * Cleans up touch scrolling state.
    * @private
    */
   _endTouchScrolling() {
@@ -373,7 +344,6 @@ class LyricsPlusRenderer {
       this.lyricsContainer.classList.remove('user-scrolling', 'touch-scrolling');
     }
 
-    // Reset touch state
     this.touchState.velocity = 0;
     this.touchState.samples = [];
   }
@@ -384,22 +354,16 @@ class LyricsPlusRenderer {
    * @param {number} delta - The amount to scroll by.
    */
   _handleUserScroll(delta) {
-    // 1. Set the flag to indicate user is in control.
     this.isUserControllingScroll = true;
-
-    // 2. Clear any existing timer. This ensures the timer resets every time the user scrolls.
     clearTimeout(this.userScrollRevertTimer);
 
-    // 3. Set a new timer. After 4 seconds of inactivity, control will be given back to the player.
     this.userScrollRevertTimer = setTimeout(() => {
       this.isUserControllingScroll = false;
-      // When reverting, force a scroll to the currently active line to re-sync the view.
       if (this.currentPrimaryActiveLine) {
         this._scrollToActiveLine(this.currentPrimaryActiveLine, true);
       }
-    }, 4000); // 4-second delay before reverting. Adjust as needed.
+    }, 4000);
 
-    // --- The rest of the original function's logic remains the same ---
     const scrollSensitivity = 0.7;
     let newScrollOffset = this.currentScrollOffset - (delta * scrollSensitivity);
 
@@ -478,11 +442,9 @@ class LyricsPlusRenderer {
 
       if (nextLine.startTime < currentLine.originalEndTime) {
         const overlap = currentLine.originalEndTime - nextLine.startTime;
-        // Only extend if overlap is >= 100ms (0.1 seconds), otherwise don't overlap
         if (overlap >= 0.1) {
           currentLine.newEndTime = nextLine.newEndTime;
         } else {
-          // Overlap is less than 5ms, don't extend - keep original end time
           currentLine.newEndTime = currentLine.originalEndTime;
         }
       } else {
@@ -516,12 +478,10 @@ class LyricsPlusRenderer {
     this._scrollToActiveLine(e.currentTarget, true);
   }
 
-  // --- Lyrics Display & Rendering Logic ---
-
   /**
- * Internal helper to render word-by-word lyrics.
- * @private
- */
+   * Internal helper to render word-by-word lyrics.
+   * @private
+   */
   _renderWordByWordLyrics(lyrics, displayMode, singerClassMap, lightweight, elementPool, fragment) {
     const getComputedFont = (element) => {
       if (!element) return '400 16px sans-serif';
@@ -534,11 +494,11 @@ class LyricsPlusRenderer {
     };
 
     /**
-     * Calculate pre-highlight delay based on exact wipe effect positioning
-     * @param {HTMLElement} syllable - The current syllable element
-     * @param {string} font - The computed font string
-     * @param {number} currentDuration - Duration of current syllable in ms
-     * @returns {number} Delay in milliseconds (negative for early start)
+     * Calculate pre-highlight delay based on exact wipe effect positioning.
+     * @param {HTMLElement} syllable - The current syllable element.
+     * @param {string} font - The computed font string.
+     * @param {number} currentDuration - Duration of current syllable in ms.
+     * @returns {number} Delay in milliseconds (negative for early start).
      */
     const calculatePreHighlightDelay = (syllable, font, currentDuration) => {
       const syllableWidthPx = this._getTextWidth(syllable.textContent, font);
@@ -580,7 +540,6 @@ class LyricsPlusRenderer {
       currentLine.dataset.endTime = line.endTime;
       const singerClass = line.element?.singer ? (singerClassMap[line.element.singer] || 'singer-left') : 'singer-left';
       currentLine.classList.add(singerClass);
-      // Apply rtl-text to the line itself based on the "big" text direction for overall flex-direction control.
       if (this._isRTL(this._getDataText(line, true))) currentLine.classList.add('rtl-text');
       if (!currentLine.hasClickListener) {
         currentLine.addEventListener('click', this._onLyricClick.bind(this));
@@ -589,11 +548,9 @@ class LyricsPlusRenderer {
 
       const mainContainer = document.createElement('div');
       mainContainer.classList.add('main-vocal-container');
-      // Apply rtl-text to mainContainer for its internal text alignment.
       if (this._isRTL(this._getDataText(line, true))) mainContainer.classList.add('rtl-text');
       currentLine.appendChild(mainContainer);
 
-      // Use the new helper for translation container
       this._renderTranslationContainer(currentLine, line, displayMode);
 
       let backgroundContainer = null;
@@ -616,19 +573,19 @@ class LyricsPlusRenderer {
         const totalDuration = currentWordEndTime - currentWordStartTime;
         const shouldEmphasize = !lightweight && !this._isRTL(combinedText) && !this._isCJK(combinedText) && combinedText.trim().length <= 7 && totalDuration >= 1000;
 
-        let maxScale = 1.07; // Default scale, so we can see the difference
+        let maxScale = 1.07;
 
         if (shouldEmphasize) {
-          const minDuration = 1000; 
-          const maxDuration = 3000; 
-          const easingPower = 3.0; 
+          const minDuration = 1000;
+          const maxDuration = 3000;
+          const easingPower = 3.0;
           const progress = Math.min(1, Math.max(0, (totalDuration - minDuration) / (maxDuration - minDuration)));
           const easedProgress = Math.pow(progress, easingPower);
 
-          maxScale = 1.0 + 0.05 + easedProgress * 0.10; 
+          maxScale = 1.0 + 0.05 + easedProgress * 0.10;
           const shadowIntensity = 0.4 + easedProgress * 0.4;
-          const normalizedGrowth = (maxScale - 1.0) / 0.13; 
-          const translateYPeak = -normalizedGrowth * 2.5; 
+          const normalizedGrowth = (maxScale - 1.0) / 0.13;
+          const translateYPeak = -normalizedGrowth * 2.5;
 
           wordSpan.style.setProperty('--max-scale', maxScale.toFixed(3));
           wordSpan.style.setProperty('--shadow-intensity', shadowIntensity.toFixed(3));
@@ -640,7 +597,6 @@ class LyricsPlusRenderer {
         let isCurrentWordBackground = wordBuffer[0].isBackground || false;
         const characterData = [];
 
-        // Store syllable elements for pre-highlight calculation
         const syllableElements = [];
 
         wordBuffer.forEach((s, syllableIndex) => {
@@ -663,10 +619,8 @@ class LyricsPlusRenderer {
             sylSpan.addEventListener('click', this._onLyricClick.bind(this));
             sylSpan.hasClickListener = true;
           }
-          // Apply rtl-text to syllable spans for their internal text alignment.
           if (this._isRTL(this._getDataText(s))) sylSpan.classList.add('rtl-text');
 
-          // Store syllable for pre-highlight calculation
           syllableElements.push(sylSpan);
 
           const charSpansForSyllable = [];
@@ -709,7 +663,6 @@ class LyricsPlusRenderer {
           const delayMs = calculatePreHighlightDelay(pendingSyllable, pendingSyllableFont, currentDuration);
 
           pendingSyllable._nextSyllableInWord = nextSyllable;
-          // Adjust the pre-highlight duration based on the delay
           pendingSyllable._preHighlightDurationMs = currentDuration - delayMs;
           pendingSyllable._preHighlightDelayMs = delayMs;
         }
@@ -727,7 +680,6 @@ class LyricsPlusRenderer {
             const delayMs = calculatePreHighlightDelay(syllable, referenceFont, currentDuration);
 
             syllable._nextSyllableInWord = nextSyllable;
-            // Adjust the pre-highlight duration based on the delay
             syllable._preHighlightDurationMs = currentDuration - delayMs;
             syllable._preHighlightDelayMs = delayMs;
           }
@@ -747,11 +699,9 @@ class LyricsPlusRenderer {
           });
         }
 
-
         const targetContainer = isCurrentWordBackground ? (backgroundContainer || (backgroundContainer = document.createElement('div'), backgroundContainer.className = 'background-vocal-container', currentLine.appendChild(backgroundContainer))) : mainContainer;
         targetContainer.appendChild(wordSpan);
 
-        // Save the last syllable of the current word to be connected to the next word
         pendingSyllable = syllableElements.length > 0 ? syllableElements[syllableElements.length - 1] : null;
         pendingSyllableFont = referenceFont;
 
@@ -794,7 +744,6 @@ class LyricsPlusRenderer {
       lineDiv.dataset.endTime = line.endTime;
       const singerClass = line.element?.singer ? (singerClassMap[line.element.singer] || 'singer-left') : 'singer-left';
       lineDiv.classList.add(singerClass);
-      // Apply rtl-text to the line itself based on the "big" text direction for overall flex-direction control.
       if (this._isRTL(this._getDataText(line, true))) lineDiv.classList.add('rtl-text');
       if (!lineDiv.hasClickListener) {
         lineDiv.addEventListener('click', this._onLyricClick.bind(this));
@@ -803,10 +752,8 @@ class LyricsPlusRenderer {
       const mainContainer = document.createElement('div');
       mainContainer.className = 'main-vocal-container';
       mainContainer.textContent = this._getDataText(line);
-      // Apply rtl-text to mainContainer for its internal text alignment.
       if (this._isRTL(this._getDataText(line, true))) mainContainer.classList.add('rtl-text');
       lineDiv.appendChild(mainContainer);
-      // Use the new helper for translation container
       this._renderTranslationContainer(lineDiv, line, displayMode);
       lineFragment.appendChild(lineDiv);
     });
@@ -835,24 +782,18 @@ class LyricsPlusRenderer {
    */
   _renderTranslationContainer(lineElement, lineData, displayMode) {
     if (displayMode === 'romanize' || displayMode === 'both') {
-      // Only render romanization if the original text is NOT purely Latin script
       if (!this._isPurelyLatinScript(lineData.text)) {
-        // Render romanization syllable by syllable if available, otherwise line by line
         if (lineData.syllabus && lineData.syllabus.length > 0 && lineData.syllabus.some(s => s.romanizedText)) {
           const romanizationContainer = document.createElement('div');
           romanizationContainer.classList.add('lyrics-romanization-container');
-          // Apply rtl-text to the container itself based on the original text direction (lineData.text)
-          // This ensures the container's overall directionality is correct.
           if (this._isRTL(lineData.text)) romanizationContainer.classList.add('rtl-text');
           lineData.syllabus.forEach(syllable => {
-            const romanizedText = this._getDataText(syllable, false); // This is syllable.text (original text of syllable)
+            const romanizedText = this._getDataText(syllable, false);
             if (romanizedText) {
               const sylSpan = document.createElement('span');
-              sylSpan.className = 'lyrics-syllable'; // Use lyrics-syllable class for highlighting
+              sylSpan.className = 'lyrics-syllable';
               sylSpan.textContent = romanizedText;
-              // Apply rtl-text to individual syllable spans for their internal text alignment.
               if (this._isRTL(romanizedText)) sylSpan.classList.add('rtl-text');
-              // Copy timing data for highlighting
               sylSpan.dataset.startTime = syllable.time;
               sylSpan.dataset.duration = syllable.duration;
               sylSpan.dataset.endTime = syllable.time + syllable.duration;
@@ -866,20 +807,16 @@ class LyricsPlusRenderer {
             lineElement.appendChild(romanizationContainer);
           }
         } else if (lineData.romanizedText && lineData.text.trim() !== lineData.romanizedText.trim()) {
-          // Fallback to line-level romanization if no syllable data
           const romanizationContainer = document.createElement('div');
           romanizationContainer.classList.add('lyrics-romanization-container');
-          const romanizedText = this._getDataText(lineData, false); // This is lineData.text (original text of line)
+          const romanizedText = this._getDataText(lineData, false);
           romanizationContainer.textContent = romanizedText;
-          // Apply rtl-text to the container itself based on the original text direction (lineData.text)
-          // This ensures the container's overall directionality is correct.
           if (this._isRTL(lineData.text)) romanizationContainer.classList.add('rtl-text');
           lineElement.appendChild(romanizationContainer);
         }
       }
     }
     if (displayMode === 'translate' || displayMode === 'both') {
-      // Translation remains line-by-line
       if (lineData.translatedText && lineData.text.trim() !== lineData.translatedText.trim()) {
         const translationContainer = document.createElement('div');
         translationContainer.classList.add('lyrics-translation-container');
@@ -901,12 +838,10 @@ class LyricsPlusRenderer {
     const container = this._getContainer();
     if (!container) return;
 
-    container.innerHTML = ''; // Clear existing content
+    container.innerHTML = '';
 
-    // Re-apply display mode classes
     this._applyDisplayModeClasses(container, displayMode);
 
-    // Re-apply general settings that affect rendering
     container.classList.toggle('use-song-palette-fullscreen', !!currentSettings.useSongPaletteFullscreen);
     container.classList.toggle('use-song-palette-all-modes', !!currentSettings.useSongPaletteAllModes);
 
@@ -938,7 +873,7 @@ class LyricsPlusRenderer {
     container.classList.toggle('word-by-word-mode', isWordByWordMode);
     container.classList.toggle('line-by-line-mode', !isWordByWordMode);
 
-    // Re-determine text direction and dual-side layout (copied from displayLyrics)
+    // Re-determine text direction and dual-side layout
     let hasRTL = false, hasLTR = false;
     if (lyrics && lyrics.data && lyrics.data.length > 0) {
       for (const line of lyrics.data) {
@@ -972,9 +907,9 @@ class LyricsPlusRenderer {
         if (isNaN(num)) return;
 
         if (num % 2 !== 0) {
-          leftCandidates.push(s); // Odd numbers to the left
+          leftCandidates.push(s);
         } else {
-          rightCandidates.push(s); // Even numbers to the right
+          rightCandidates.push(s);
         }
       });
 
@@ -1043,7 +978,6 @@ class LyricsPlusRenderer {
 
     container.appendChild(fragment);
 
-    // Post-rendering logic for gaps and timing adjustments
     const originalLines = Array.from(container.querySelectorAll('.lyrics-line:not(.lyrics-gap)'));
     if (originalLines.length > 0) {
       const firstLine = originalLines[0];
@@ -1066,16 +1000,14 @@ class LyricsPlusRenderer {
     gapLinesToInsert.forEach(({ gapLine, nextLine }) => container.insertBefore(gapLine, nextLine));
     this._retimingActiveTimings(originalLines);
 
-    // Render metadata (assuming metadata doesn't change with display mode)
     const metadataContainer = document.createElement('div');
     metadataContainer.className = 'lyrics-plus-metadata';
-    metadataContainer.dataset.startTime = (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 0.5; // Approximate start time for metadata
-    metadataContainer.dataset.endTime = (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 10; // Approximate end time for metadata
+    metadataContainer.dataset.startTime = (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 0.5;
+    metadataContainer.dataset.endTime = (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 10;
 
-    // Note: songWriters and source are not available in updateDisplayMode,
-    // so this part might need to be handled differently if they are dynamic.
-    // For now, assuming they are set once by displayLyrics.
-    if (lyrics.metadata.songWriters) { // Use lyrics.metadata directly
+    // Note: songWriters and source may not be available on subsequent updates.
+    // They should ideally be part of the main 'lyrics' object if they can change.
+    if (lyrics.metadata.songWriters) {
       const songWritersDiv = document.createElement('span');
       songWritersDiv.className = 'lyrics-song-writters';
       songWritersDiv.innerText = `${t("writtenBy")} ${lyrics.metadata.songWriters.join(', ')}`;
@@ -1083,21 +1015,19 @@ class LyricsPlusRenderer {
     }
     const sourceDiv = document.createElement('span');
     sourceDiv.className = 'lyrics-source-provider';
-    sourceDiv.innerText = `${t("source")} ${lyrics.metadata.source}`; // Use lyrics.metadata directly
+    sourceDiv.innerText = `${t("source")} ${lyrics.metadata.source}`;
     metadataContainer.appendChild(sourceDiv);
     container.appendChild(metadataContainer);
 
-    // Add an empty div at the end for bottom padding
     const emptyDiv = document.createElement('div');
     emptyDiv.className = 'lyrics-plus-empty';
     container.appendChild(emptyDiv);
 
-    // Create the fixed empty div for avoiding detected by resizerObserver
+    // This fixed div prevents the resize observer from firing due to the main empty div changing size.
     const emptyFixedDiv = document.createElement('div');
     emptyFixedDiv.className = 'lyrics-plus-empty-fixed';
     container.appendChild(emptyFixedDiv);
 
-    // Cache and setup for sync
     this.cachedLyricsLines = Array.from(container.querySelectorAll('.lyrics-line, .lyrics-plus-metadata, .lyrics-plus-empty')).map(line => {
       if (line) {
         line._startTimeMs = parseFloat(line.dataset.startTime) * 1000;
@@ -1126,7 +1056,6 @@ class LyricsPlusRenderer {
     if (this.cachedLyricsLines.length > 0) this._scrollToActiveLine(this.cachedLyricsLines[0], true);
 
     this._startLyricsSync(currentSettings);
-    // Control buttons are created once by displayLyrics, not re-created here.
     container.classList.toggle('blur-inactive-enabled', !!currentSettings.blurInactive);
   }
 
@@ -1153,9 +1082,8 @@ class LyricsPlusRenderer {
     const container = this._getContainer();
     if (!container) return;
 
-    container.classList.remove('lyrics-plus-message'); // Remove the class when actual lyrics are displayed
+    container.classList.remove('lyrics-plus-message');
 
-    // Apply visual settings that are independent of display mode
     container.classList.toggle('use-song-palette-fullscreen', !!currentSettings.useSongPaletteFullscreen);
     container.classList.toggle('use-song-palette-all-modes', !!currentSettings.useSongPaletteAllModes);
 
@@ -1189,10 +1117,9 @@ class LyricsPlusRenderer {
 
     container.classList.toggle('romanized-big-mode', largerTextMode != "lyrics")
 
-    // Call the new updateDisplayMode to handle the actual rendering of lyrics lines
     this.updateDisplayMode(lyrics, displayMode, currentSettings);
 
-    // Create control buttons (only once)
+    // Control buttons are created once to avoid re-rendering them.
     this._createControlButtons();
     container.classList.toggle('blur-inactive-enabled', !!currentSettings.blurInactive);
   }
@@ -1219,8 +1146,6 @@ class LyricsPlusRenderer {
     }
   }
 
-  // --- Text, Style, and ID Utilities ---
-
   _getTextWidth(text, font) {
     const canvas = this.textWidthCanvas || (this.textWidthCanvas = document.createElement("canvas"));
     const context = canvas.getContext("2d");
@@ -1233,8 +1158,6 @@ class LyricsPlusRenderer {
     this.cachedLyricsLines.forEach((line, i) => { if (line && !line.id) line.id = `line-${i}`; });
     this.cachedSyllables.forEach((syllable, i) => { if (syllable && !syllable.id) syllable.id = `syllable-${i}`; });
   }
-
-  // --- Lyrics Synchronization & Highlighting ---
 
   /**
    * Starts the synchronization loop for highlighting lyrics based on video time.
@@ -1275,23 +1198,20 @@ class LyricsPlusRenderer {
   }
 
   /**
- * Updates the highlighted lyrics and syllables based on the current time.
- * @param {number} currentTime - The current video time in milliseconds.
- * @param {boolean} isForceScroll - Whether to force a scroll update.
- * @param {object} currentSettings - The current user settings.
- */
+   * Updates the highlighted lyrics and syllables based on the current time.
+   * @param {number} currentTime - The current video time in milliseconds.
+   * @param {boolean} isForceScroll - Whether to force a scroll update.
+   * @param {object} currentSettings - The current user settings.
+   */
   _updateLyricsHighlight(currentTime, isForceScroll = false, currentSettings = {}) {
-    // Guard clause: Do nothing if lyrics aren't loaded.
     if (!this.cachedLyricsLines || this.cachedLyricsLines.length === 0) {
       return;
     }
 
-    // Constants for predictive timing.
     const scrollLookAheadMs = 300;
     const highlightLookAheadMs = 190;
 
-    // --- 1. SCROLLING LOGIC (Optimized) ---
-    // Cache visible lines array, but invalidate when visibility actually changes
+    // --- 1. SCROLLING LOGIC  ---
     let visibleLines = this._cachedVisibleLines;
     const currentVisibilityHash = Array.from(this.visibleLineIds).sort().join(',');
 
@@ -1304,7 +1224,6 @@ class LyricsPlusRenderer {
     const predictiveTime = currentTime + scrollLookAheadMs;
     let lineToScroll = null;
 
-    // Optimized active line finding - break early when possible
     const currentlyActiveAndPredictiveLines = [];
     for (let i = 0; i < this.cachedLyricsLines.length; i++) {
       const line = this.cachedLyricsLines[i];
@@ -1314,7 +1233,6 @@ class LyricsPlusRenderer {
     }
 
     if (currentlyActiveAndPredictiveLines.length > 0) {
-      // Find earliest starting line more efficiently
       lineToScroll = currentlyActiveAndPredictiveLines[0];
       for (let i = 1; i < currentlyActiveAndPredictiveLines.length; i++) {
         if (currentlyActiveAndPredictiveLines[i]._startTimeMs < lineToScroll._startTimeMs) {
@@ -1322,7 +1240,6 @@ class LyricsPlusRenderer {
         }
       }
     } else {
-      // Optimized fallback - iterate backwards for most recent
       const lookAheadTime = currentTime - scrollLookAheadMs;
       for (let i = this.cachedLyricsLines.length - 1; i >= 0; i--) {
         const line = this.cachedLyricsLines[i];
@@ -1333,16 +1250,14 @@ class LyricsPlusRenderer {
       }
     }
 
-    // Fallback: If song hasn't started, prepare to scroll to the first line.
     if (!lineToScroll && this.cachedLyricsLines.length > 0) {
       lineToScroll = this.cachedLyricsLines[0];
     }
 
-    // --- 2. HIGHLIGHTING LOGIC (Optimized) ---
+    // --- 2. HIGHLIGHTING LOGIC  ---
     const highlightTime = currentTime - highlightLookAheadMs;
     const activeLinesForHighlighting = [];
 
-    // Only check visible lines and limit to 3 results
     for (let i = 0; i < visibleLines.length && activeLinesForHighlighting.length < 3; i++) {
       const line = visibleLines[i];
       if (line && currentTime >= line._startTimeMs - highlightLookAheadMs && currentTime <= line._endTimeMs - highlightLookAheadMs) {
@@ -1350,7 +1265,6 @@ class LyricsPlusRenderer {
       }
     }
 
-    // Sort by start time (descending) - only if we have multiple lines
     if (activeLinesForHighlighting.length > 1) {
       activeLinesForHighlighting.sort((a, b) => b._startTimeMs - a._startTimeMs);
     }
@@ -1360,8 +1274,7 @@ class LyricsPlusRenderer {
       newActiveLineIds.add(activeLinesForHighlighting[i].id);
     }
 
-    // --- 3. DOM & STATE UPDATES (Optimized) ---
-    // Trigger scroll if needed
+    // --- 3. DOM & STATE UPDATES  ---
     if (lineToScroll && (lineToScroll !== this.currentPrimaryActiveLine || isForceScroll)) {
       if (!this.isUserControllingScroll || isForceScroll) {
         this._updatePositionClassesAndScroll(lineToScroll, isForceScroll);
@@ -1370,7 +1283,6 @@ class LyricsPlusRenderer {
       }
     }
 
-    // --- OPTIMIZATION (Plan 2): More efficient comparison to reduce DOM operations ---
     // Find lines that need to be deactivated
     for (const lineId of this.activeLineIds) {
       if (!newActiveLineIds.has(lineId)) {
@@ -1392,8 +1304,6 @@ class LyricsPlusRenderer {
       }
     }
 
-    // MODIFICATION (Plan 2): Update the state Set without creating a new object.
-    // This reduces pressure on the Garbage Collector.
     this.activeLineIds = newActiveLineIds;
 
     const mostRecentActiveLine = activeLinesForHighlighting.length > 0 ? activeLinesForHighlighting[0] : null;
@@ -1409,9 +1319,7 @@ class LyricsPlusRenderer {
 
     this._updateSyllables(currentTime);
 
-    // Batch viewport-hidden class updates if needed
     if (this.lyricsContainer && this.lyricsContainer.classList.contains('hide-offscreen')) {
-      // Only update if visibility has changed
       if (this._lastVisibilityUpdateSize !== this.visibleLineIds.size) {
         for (let i = 0; i < this.cachedLyricsLines.length; i++) {
           const line = this.cachedLyricsLines[i];
@@ -1426,20 +1334,16 @@ class LyricsPlusRenderer {
   }
 
   _updateSyllables(currentTime) {
-    // If there are no active lines, we don't need to do anything.
-    // The cleanup of syllables is handled when a line is deactivated in _updateLyricsHighlight.
     if (!this.activeLineIds.size) return;
 
-    // Iterate through each currently active line.
     for (const lineId of this.activeLineIds) {
       const parentLine = document.getElementById(lineId);
       if (!parentLine) continue;
 
-      // Get syllables for the line (from cache if possible).
       let syllables = parentLine._cachedSyllableElements;
       if (!syllables) {
         syllables = parentLine.querySelectorAll('.lyrics-syllable');
-        parentLine._cachedSyllableElements = syllables; // Cache for next time.
+        parentLine._cachedSyllableElements = syllables;
       }
 
       for (let j = 0; j < syllables.length; j++) {
@@ -1452,35 +1356,26 @@ class LyricsPlusRenderer {
         const hasHighlight = classList.contains('highlight');
         const hasFinished = classList.contains('finished');
 
-        // Case 1: The syllable should be actively playing right now.
+        // Case 1: The syllable should be actively playing.
         if (currentTime >= startTime && currentTime <= endTime) {
-          // If it's not highlighted, it's becoming active for the first time.
-          // Trigger its animation.
           if (!hasHighlight) {
             this._updateSyllableAnimation(syllable);
           }
-          // If we seek backward into an already finished syllable, remove the 'finished' state.
           if (hasFinished) {
             classList.remove('finished');
           }
         }
         // Case 2: The syllable's time has passed.
         else if (currentTime > endTime) {
-          // If it's not marked as 'finished' yet, we need to update its state.
           if (!hasFinished) {
-            // If it was skipped (e.g., by seeking forward), it might not have the highlight class.
-            // We must run the animation once to put it in its final "filled" state.
             if (!hasHighlight) {
               this._updateSyllableAnimation(syllable);
             }
-            // Add the 'finished' class to indicate it's done.
-            // Crucially, we DO NOT remove the 'highlight' class here.
             classList.add('finished');
           }
         }
-        // Case 3: The syllable is in the future (we seeked backward past it).
-        else { // currentTime < startTime
-          // If it has any active or finished state, it needs a full reset.
+        // Case 3: The syllable is in the future (seeked backward).
+        else {
           if (hasHighlight || hasFinished) {
             this._resetSyllable(syllable);
           }
@@ -1610,8 +1505,6 @@ class LyricsPlusRenderer {
     Array.from(line.getElementsByClassName('lyrics-syllable')).forEach(this._resetSyllable);
   }
 
-  // --- Scrolling Logic ---
-
   _getScrollPaddingTop() {
     const selectors = this.uiConfig.selectors;
     for (const selector of selectors) {
@@ -1638,20 +1531,14 @@ class LyricsPlusRenderer {
   _animateScroll(newTranslateY, forceScroll = false) {
     if (!this.lyricsContainer) return;
 
-    // Early exit if position hasn't changed and not forced
     if (!forceScroll && this.currentScrollOffset === newTranslateY) return;
 
-    // Set the primary scroll offset for the entire container.
     this.currentScrollOffset = newTranslateY;
     this.lyricsContainer.style.setProperty('--lyrics-scroll-offset', `${newTranslateY}px`);
 
-    // Cache container classes check
     const isUserScrolling = this.lyricsContainer.classList.contains('user-scrolling');
 
-    // If this is a forced jump (seek/click) or a user-driven scroll,
-    // make all line animations instant and exit early.
     if (forceScroll || isUserScrolling) {
-      // Batch update all delays to 0ms
       const elements = this.cachedLyricsLines;
       for (let i = 0; i < elements.length; i++) {
         if (elements[i]) {
@@ -1661,7 +1548,6 @@ class LyricsPlusRenderer {
       return;
     }
 
-    // Cache reference line calculations
     const referenceLine = this.currentPrimaryActiveLine || this.lastPrimaryActiveLine ||
       (this.cachedLyricsLines.length > 0 ? this.cachedLyricsLines[0] : null);
 
@@ -1670,28 +1556,23 @@ class LyricsPlusRenderer {
     const referenceLineIndex = this.cachedLyricsLines.indexOf(referenceLine);
     if (referenceLineIndex === -1) return;
 
-    // Constants
-    const delayIncrement = 30; // 30ms stagger per line
+    const delayIncrement = 30;
     let delayCounter = 0;
 
-    // Batch DOM updates for better performance
     const elements = this.cachedLyricsLines;
-    const visibleIds = this.visibleLineIds; // Cache reference
+    const visibleIds = this.visibleLineIds;
 
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       if (!element) continue;
 
-      // Check visibility using cached Set
       if (visibleIds.has(element.id)) {
-        // Apply staggered delay only from reference line position onwards
         const delay = (i >= referenceLineIndex) ? delayCounter * delayIncrement : 0;
         element.style.setProperty('--lyrics-line-delay', `${delay}ms`);
         if (i >= referenceLineIndex) {
           delayCounter++;
         }
       } else {
-        // Elements outside viewport move instantly
         element.style.setProperty('--lyrics-line-delay', '0ms');
       }
     }
@@ -1706,7 +1587,7 @@ class LyricsPlusRenderer {
     this.lyricsContainer.querySelectorAll('.' + positionClasses.join(', .')).forEach(el => el.classList.remove(...positionClasses));
 
     lineToScroll.classList.add('lyrics-activest');
-    const elements = this.cachedLyricsLines; // Renamed for clarity, as it now includes metadata/empty divs
+    const elements = this.cachedLyricsLines;
     for (let i = Math.max(0, scrollLineIndex - 4); i <= Math.min(elements.length - 1, scrollLineIndex + 4); i++) {
       const position = i - scrollLineIndex;
       if (position === 0) continue;
@@ -1728,14 +1609,12 @@ class LyricsPlusRenderer {
     const paddingTop = this._getScrollPaddingTop();
     const targetTranslateY = paddingTop - activeLine.offsetTop;
 
-    // Use cached values if available, otherwise get them
     const containerTop = this._cachedContainerRect ? this._cachedContainerRect.containerTop : this.lyricsContainer.getBoundingClientRect().top;
     const scrollContainerTop = this._cachedContainerRect ? this._cachedContainerRect.scrollContainerTop : scrollContainer.getBoundingClientRect().top;
 
     if (!forceScroll && Math.abs((activeLine.getBoundingClientRect().top - scrollContainerTop) - paddingTop) < 5) {
       return;
     }
-    // Clear the cache after using it, so it's re-calculated on next resize or forced scroll
     this._cachedContainerRect = null;
 
     this.lyricsContainer.classList.remove('not-focused', 'user-scrolling');
@@ -1750,8 +1629,6 @@ class LyricsPlusRenderer {
 
     this._animateScroll(targetTranslateY);
   }
-
-  // --- Visibility Tracking ---
 
   _setupVisibilityTracking() {
     const container = this._getContainer();
@@ -1782,7 +1659,6 @@ class LyricsPlusRenderer {
     this.resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
         if (entry.target === container) {
-          // Call the debounced handler
           this._debouncedResizeHandler(container);
         }
       }
@@ -1790,8 +1666,6 @@ class LyricsPlusRenderer {
     this.resizeObserver.observe(container);
     return this.resizeObserver;
   }
-
-  // --- Control Buttons & UI ---
 
   _createControlButtons() {
     let buttonsWrapper = document.getElementById('lyrics-plus-buttons-wrapper');
@@ -1849,11 +1723,9 @@ class LyricsPlusRenderer {
 
     if (typeof this.currentDisplayMode === 'undefined') return;
 
-    // Show options that are NOT currently active
     const hasTranslation = (this.currentDisplayMode === 'translate' || this.currentDisplayMode === 'both');
     const hasRomanization = (this.currentDisplayMode === 'romanize' || this.currentDisplayMode === 'both');
 
-    // Show "Show Translation" if translation is not currently displayed
     if (!hasTranslation) {
       const optionDiv = document.createElement('div');
       optionDiv.className = 'dropdown-option';
@@ -1871,7 +1743,6 @@ class LyricsPlusRenderer {
       this.dropdownMenu.appendChild(optionDiv);
     }
 
-    // Show "Show Pronunciation" if romanization is not currently displayed
     if (!hasRomanization) {
       const optionDiv = document.createElement('div');
       optionDiv.className = 'dropdown-option';
@@ -1889,7 +1760,6 @@ class LyricsPlusRenderer {
       this.dropdownMenu.appendChild(optionDiv);
     }
 
-    // Add separator if we have both show and hide options
     const hasShowOptions = !hasTranslation || !hasRomanization;
     const hasHideOptions = hasTranslation || hasRomanization;
 
@@ -1897,7 +1767,6 @@ class LyricsPlusRenderer {
       this.dropdownMenu.appendChild(document.createElement('div')).className = 'dropdown-separator';
     }
 
-    // Show "Hide Translation" if translation is currently displayed
     if (hasTranslation) {
       const optionDiv = document.createElement('div');
       optionDiv.className = 'dropdown-option';
@@ -1915,7 +1784,6 @@ class LyricsPlusRenderer {
       this.dropdownMenu.appendChild(optionDiv);
     }
 
-    // Show "Hide Pronunciation" if romanization is currently displayed
     if (hasRomanization) {
       const optionDiv = document.createElement('div');
       optionDiv.className = 'dropdown-option';
@@ -1940,12 +1808,9 @@ class LyricsPlusRenderer {
     this.translationButton.title = t('showTranslationOptions') || "Translation";
   }
 
-  // --- Cleanup ---
-
   /**
    * Cleans up the lyrics container and resets the state for the next song.
    */
-
   cleanupLyrics() {
     // --- Animation Frame Cleanup ---
     if (this.lyricsAnimationFrameId) {
@@ -1959,7 +1824,6 @@ class LyricsPlusRenderer {
         cancelAnimationFrame(this.touchState.momentum);
         this.touchState.momentum = null;
       }
-      // Reset touch state
       this.touchState.isActive = false;
       this.touchState.startY = 0;
       this.touchState.lastY = 0;
@@ -1969,40 +1833,25 @@ class LyricsPlusRenderer {
     }
 
     // --- Timer Cleanup ---
-    if (this.endProgrammaticScrollTimer) {
-      clearTimeout(this.endProgrammaticScrollTimer);
-      this.endProgrammaticScrollTimer = null;
-    }
-
-    if (this.userScrollIdleTimer) {
-      clearTimeout(this.userScrollIdleTimer);
-      this.userScrollIdleTimer = null;
-    }
-
-    if (this.userScrollRevertTimer) {
-      clearTimeout(this.userScrollRevertTimer);
-      this.userScrollRevertTimer = null;
-    }
+    if (this.endProgrammaticScrollTimer) clearTimeout(this.endProgrammaticScrollTimer);
+    if (this.userScrollIdleTimer) clearTimeout(this.userScrollIdleTimer);
+    if (this.userScrollRevertTimer) clearTimeout(this.userScrollRevertTimer);
+    this.endProgrammaticScrollTimer = null;
+    this.userScrollIdleTimer = null;
+    this.userScrollRevertTimer = null;
 
     // --- Observer Cleanup ---
-    if (this.visibilityObserver) {
-      this.visibilityObserver.disconnect();
-      this.visibilityObserver = null;
-    }
-
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-      this.resizeObserver = null;
-    }
+    if (this.visibilityObserver) this.visibilityObserver.disconnect();
+    if (this.resizeObserver) this.resizeObserver.disconnect();
+    this.visibilityObserver = null;
+    this.resizeObserver = null;
 
     // --- DOM Elements Cleanup ---
     const container = this._getContainer();
     if (container) {
-      // Remove all event listeners from cached elements before clearing
       if (this.cachedLyricsLines) {
         this.cachedLyricsLines.forEach(line => {
           if (line && line._cachedSyllableElements) {
-            // Clear syllable cache to prevent memory leaks
             line._cachedSyllableElements = null;
           }
         });
@@ -2011,9 +1860,7 @@ class LyricsPlusRenderer {
       if (this.cachedSyllables) {
         this.cachedSyllables.forEach(syllable => {
           if (syllable) {
-            // Clear cached char spans
             syllable._cachedCharSpans = null;
-            // Reset any inline styles
             syllable.style.animation = '';
             syllable.style.removeProperty('--pre-wipe-duration');
             syllable.style.removeProperty('--pre-wipe-delay');
@@ -2021,11 +1868,9 @@ class LyricsPlusRenderer {
         });
       }
 
-      // Clear container content and reset classes
       container.innerHTML = `<span class="text-loading">${t("loading")}</span>`;
       container.classList.add('lyrics-plus-message');
 
-      // Remove all dynamic classes that might have been added
       const classesToRemove = [
         'user-scrolling', 'wheel-scrolling', 'touch-scrolling', 'not-focused',
         'lyrics-translated', 'lyrics-romanized', 'lyrics-both-modes',
@@ -2036,7 +1881,6 @@ class LyricsPlusRenderer {
       ];
       container.classList.remove(...classesToRemove);
 
-      // Reset CSS custom properties
       container.style.removeProperty('--lyrics-scroll-offset');
       container.style.removeProperty('--lyplus-override-pallete');
       container.style.removeProperty('--lyplus-override-pallete-white');
@@ -2051,34 +1895,28 @@ class LyricsPlusRenderer {
     this.lastTime = 0;
     this.lastProcessedTime = 0;
 
-    // --- Collections Reset ---
     this.activeLineIds.clear();
     this.highlightedSyllableIds.clear();
     this.visibleLineIds.clear();
     this.cachedLyricsLines = [];
     this.cachedSyllables = [];
 
-    // --- Cache Reset ---
     this._cachedContainerRect = null;
     this._cachedVisibleLines = null;
     this._lastVisibilityHash = null;
     this._lastVisibilityUpdateSize = null;
 
-    // --- Scroll State Reset ---
     this.currentScrollOffset = 0;
     this.isProgrammaticScrolling = false;
     this.isUserControllingScroll = false;
 
-    // --- Display Mode Reset ---
     this.currentDisplayMode = undefined;
     this.largerTextMode = "lyrics";
 
-    // --- Reference Reset ---
     this.lastKnownSongInfo = null;
     this.fetchAndDisplayLyricsFn = null;
     this.setCurrentDisplayModeAndRefetchFn = null;
 
-    // --- Font Cache Cleanup ---
     this.fontCache = {};
   }
 }

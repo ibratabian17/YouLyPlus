@@ -1,17 +1,14 @@
 import { loadSettings, saveSettings, updateSettings, getSettings, updateCacheSize, clearCache, setupSettingsMessageListener } from './settingsManager.js';
-import { startFullPreviewSync } from './previewManager.js';
 
-let currentSettings = getSettings(); // Initialize with default settings
+let currentSettings = getSettings();
 
-// Shows a notification bar telling the user to reload their YTM tab
 function showReloadNotification() {
     const notification = document.getElementById('reload-notification');
     if (notification) {
-        notification.style.display = 'flex'; // Use flex to align items
+        notification.style.display = 'flex';
     }
 }
 
-// Hides the notification bar
 function hideReloadNotification() {
     const notification = document.getElementById('reload-notification');
     if (notification) {
@@ -19,16 +16,13 @@ function hideReloadNotification() {
     }
 }
 
-// Sets up listeners for controls that should save automatically on change
 function setupAutoSaveListeners() {
     const autoSaveControls = [
-        // General
         { id: 'enabled', key: 'isEnabled', type: 'checkbox' },
         { id: 'default-provider', key: 'lyricsProvider', type: 'value' },
-        { id: 'custom-kpoe-url', key: 'customKpoeUrl', type: 'value' }, // Add custom KPoe URL
+        { id: 'custom-kpoe-url', key: 'customKpoeUrl', type: 'value' },
         { id: 'sponsor-block', key: 'useSponsorBlock', type: 'checkbox' },
         { id: 'wordByWord', key: 'wordByWord', type: 'checkbox' },
-        // Appearance
         { id: 'lightweight', key: 'lightweight', type: 'checkbox' },
         { id: 'hide-offscreen', key: 'hideOffscreen', type: 'checkbox' },
         { id: 'compability-wipe', key: 'compabilityWipe', type: 'checkbox' },
@@ -38,15 +32,13 @@ function setupAutoSaveListeners() {
         { id: 'useSongPaletteAllModes', key: 'useSongPaletteAllModes', type: 'checkbox' },
         { id: 'overridePaletteColor', key: 'overridePaletteColor', type: 'value' },
         { id: 'larger-text-mode', key: 'largerTextMode', type: 'value' },
-        // Translation
         { id: 'translation-provider', key: 'translationProvider', type: 'value' },
         { id: 'gemini-model', key: 'geminiModel', type: 'value' },
         { id: 'override-translate-target', key: 'overrideTranslateTarget', type: 'checkbox' },
         { id: 'override-gemini-prompt', key: 'overrideGeminiPrompt', type: 'checkbox' },
-        { id: 'override-gemini-romanize-prompt', key: 'overrideGeminiRomanizePrompt', type: 'checkbox' }, // New auto-save for romanize prompt override
-        { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' }, // Auto-save romanization provider
-        { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' }, // Auto-save Gemini romanization model
-        // Cache
+        { id: 'override-gemini-romanize-prompt', key: 'overrideGeminiRomanizePrompt', type: 'checkbox' },
+        { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' },
+        { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' },
         { id: 'cache-strategy', key: 'cacheStrategy', type: 'value' },
     ];
 
@@ -55,9 +47,7 @@ function setupAutoSaveListeners() {
         if (element) {
             element.addEventListener('change', (e) => {
                 const value = control.type === 'checkbox' ? e.target.checked : e.target.value;
-                const newSetting = { [control.key]: value };
-
-                updateSettings(newSetting);
+                updateSettings({ [control.key]: value });
                 saveSettings();
                 showReloadNotification();
             });
@@ -65,18 +55,16 @@ function setupAutoSaveListeners() {
     });
 }
 
-
-// Update UI elements to reflect current settings
 function updateUI(settings) {
-    currentSettings = settings; // Update local reference
+    currentSettings = settings;
     console.log("Updating UI with settings:", currentSettings);
 
-    // General settings
     document.getElementById('enabled').checked = currentSettings.isEnabled;
     document.getElementById('default-provider').value = currentSettings.lyricsProvider;
+    document.getElementById('custom-kpoe-url').value = currentSettings.customKpoeUrl || '';
     document.getElementById('sponsor-block').checked = currentSettings.useSponsorBlock;
-    document.getElementById('lightweight').checked = currentSettings.lightweight;
     document.getElementById('wordByWord').checked = currentSettings.wordByWord;
+    document.getElementById('lightweight').checked = currentSettings.lightweight;
     document.getElementById('hide-offscreen').checked = currentSettings.hideOffscreen;
     document.getElementById('compability-wipe').checked = currentSettings.compabilityWipe;
     document.getElementById('blur-inactive').checked = currentSettings.blurInactive;
@@ -85,126 +73,88 @@ function updateUI(settings) {
     document.getElementById('useSongPaletteAllModes').checked = currentSettings.useSongPaletteAllModes;
     document.getElementById('overridePaletteColor').value = currentSettings.overridePaletteColor;
     document.getElementById('larger-text-mode').value = currentSettings.largerTextMode;
-
-    // Custom KPoe Server URL
-    const customKpoeUrlInput = document.getElementById('custom-kpoe-url');
-    if (customKpoeUrlInput) {
-        customKpoeUrlInput.value = currentSettings.customKpoeUrl || '';
-    }
-
-    // Romanization settings
     document.getElementById('romanization-provider').value = currentSettings.romanizationProvider;
     document.getElementById('gemini-romanization-model').value = currentSettings.geminiRomanizationModel || 'gemini-1.5-pro-latest';
-
-    // Translation settings
     document.getElementById('translation-provider').value = currentSettings.translationProvider;
-    const geminiApiKeyInput = document.getElementById('gemini-api-key');
-    geminiApiKeyInput.value = currentSettings.geminiApiKey || '';
-    geminiApiKeyInput.type = 'password'; // Ensure it's hidden by default
-
-    document.getElementById('gemini-model').value = currentSettings.geminiModel || 'gemini-2.5-flash'; // Default to gemini-2.5-flash
+    document.getElementById('gemini-api-key').value = currentSettings.geminiApiKey || '';
+    document.getElementById('gemini-api-key').type = 'password';
+    document.getElementById('gemini-model').value = currentSettings.geminiModel || 'gemini-1.5-flash';
     document.getElementById('override-translate-target').checked = currentSettings.overrideTranslateTarget;
     document.getElementById('custom-translate-target').value = currentSettings.customTranslateTarget || '';
     document.getElementById('override-gemini-prompt').checked = currentSettings.overrideGeminiPrompt;
     document.getElementById('custom-gemini-prompt').value = currentSettings.customGeminiPrompt || '';
-    document.getElementById('override-gemini-romanize-prompt').checked = currentSettings.overrideGeminiRomanizePrompt; // Update UI for new setting
-    document.getElementById('custom-gemini-romanize-prompt').value = currentSettings.customGeminiRomanizePrompt || ''; // Update UI for new setting
-    toggleGeminiSettingsVisibility();
+    document.getElementById('override-gemini-romanize-prompt').checked = currentSettings.overrideGeminiRomanizePrompt;
+    document.getElementById('custom-gemini-romanize-prompt').value = currentSettings.customGeminiRomanizePrompt || '';
+    document.getElementById('custom-css').value = currentSettings.customCSS;
+    document.getElementById('cache-strategy').value = currentSettings.cacheStrategy;
+
     toggleKpoeSourcesVisibility();
+    toggleCustomKpoeUrlVisibility();
+    toggleGeminiSettingsVisibility();
     toggleTranslateTargetVisibility();
     toggleGeminiPromptVisibility();
-    toggleGeminiRomanizePromptVisibility(); // New visibility toggle for romanize prompt
-    toggleCustomKpoeUrlVisibility(); // New visibility toggle
-    toggleRomanizationModelVisibility(); // New visibility toggle for romanization model
+    toggleGeminiRomanizePromptVisibility();
+    toggleRomanizationModelVisibility();
 
-    // Populate draggable KPoe sources
     populateDraggableSources();
-
-    // Appearance settings
-    document.getElementById('custom-css').value = currentSettings.customCSS;
-
-    // Cache settings
-    document.getElementById('cache-strategy').value = currentSettings.cacheStrategy;
-    updateCacheSize(); // This function is now in settingsManager.js
+    updateCacheSize();
 }
 
-// Tab navigation
 document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
     item.addEventListener('click', (e) => {
         e.preventDefault();
-        // Update active menu item
         document.querySelectorAll('.navigation-drawer .nav-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
 
-        // Show corresponding section
         const sectionId = item.getAttribute('data-section');
         document.querySelectorAll('.settings-card').forEach(section => section.classList.remove('active'));
-        const activeSection = document.getElementById(sectionId);
-        if (activeSection) {
-            activeSection.classList.add('active');
-        } else {
-            console.warn(`Section with id "${sectionId}" not found.`);
-        }
+        document.getElementById(sectionId)?.classList.add('active');
     });
 });
 
-// Event listeners for save buttons (now only for manual input fields)
 document.getElementById('save-general').addEventListener('click', () => {
-    const draggableList = document.getElementById('lyrics-source-order-draggable');
-    const orderedSources = Array.from(draggableList.children)
+    const orderedSources = Array.from(document.getElementById('lyrics-source-order-draggable').children)
         .map(item => item.dataset.source);
 
-    const newGeneralSettings = {
-        // Switches and dropdowns are auto-saved. This button only saves the source order and custom KPoe URL.
+    // Switches and dropdowns are auto-saved. This button only saves manually ordered or entered fields.
+    updateSettings({
         lyricsSourceOrder: orderedSources.join(','),
-        customKpoeUrl: document.getElementById('custom-kpoe-url').value, // Save custom KPoe URL
-    };
-    updateSettings(newGeneralSettings);
+        customKpoeUrl: document.getElementById('custom-kpoe-url').value,
+    });
     saveSettings();
     showStatusMessage('General settings saved!', false, 'save-general');
 });
 
 document.getElementById('save-appearance').addEventListener('click', () => {
-    const newAppearanceSettings = {
-        // Switches are auto-saved. This button only saves the Custom CSS.
-        customCSS: document.getElementById('custom-css').value,
-    };
-    updateSettings(newAppearanceSettings);
+    // This button only saves the Custom CSS.
+    updateSettings({ customCSS: document.getElementById('custom-css').value });
     saveSettings();
     showStatusMessage('Custom CSS saved!', false, 'save-appearance');
 });
 
 document.getElementById('save-translation').addEventListener('click', () => {
-    const newTranslationSettings = {
-        // Switches and dropdowns are auto-saved. This saves text inputs.
+    // This button saves text inputs related to translation.
+    updateSettings({
         geminiApiKey: document.getElementById('gemini-api-key').value,
         customTranslateTarget: document.getElementById('custom-translate-target').value,
         customGeminiPrompt: document.getElementById('custom-gemini-prompt').value,
-        customGeminiRomanizePrompt: document.getElementById('custom-gemini-romanize-prompt').value // Save new romanization prompt
-    };
-    updateSettings(newTranslationSettings);
+        customGeminiRomanizePrompt: document.getElementById('custom-gemini-romanize-prompt').value
+    });
     saveSettings();
     showStatusMessage('Translation input fields saved!', false, 'save-translation');
 });
 
-// REMOVED: save-cache event listener is no longer needed.
-
-// Clear cache button
 document.getElementById('clear-cache').addEventListener('click', clearCache);
 
-// Message listener for updates (e.g., from background script if settings are changed elsewhere)
 setupSettingsMessageListener(updateUI);
 
-
-// --- Drag and Drop Functionality for KPoe Sources ---
 let draggedItem = null;
 
-// Helper to get display name for a source
 function getSourceDisplayName(sourceName) {
     switch (sourceName) {
         case 'lyricsplus': return 'Lyrics+ (User Gen.)'; // Shorter for UI
         case 'apple': return 'Apple Music';
-        case 'spotify': return 'Musixmatch (Spotify)'; // Clarified
+        case 'spotify': return 'Musixmatch (Spotify)'; // Clarified provider
         case 'musixmatch': return 'Musixmatch (Direct)';
         case 'musixmatch-word': return 'Musixmatch (Word)'; // Shorter
         default: return sourceName.charAt(0).toUpperCase() + sourceName.slice(1).replace('-', ' ');
@@ -213,10 +163,9 @@ function getSourceDisplayName(sourceName) {
 
 function createDraggableSourceItem(sourceName) {
     const item = document.createElement('div');
-    item.classList.add('draggable-source-item');
+    item.className = 'draggable-source-item';
     item.setAttribute('draggable', 'true');
     item.dataset.source = sourceName;
-
     item.innerHTML = `
         <span class="material-symbols-outlined drag-handle">drag_indicator</span>
         <span class="source-name">${getSourceDisplayName(sourceName)}</span>
@@ -224,13 +173,10 @@ function createDraggableSourceItem(sourceName) {
             <span class="material-symbols-outlined">delete</span>
         </button>
     `;
-
-    const removeButton = item.querySelector('.remove-source-button');
-    removeButton.addEventListener('click', (e) => {
+    item.querySelector('.remove-source-button').addEventListener('click', (e) => {
         e.stopPropagation();
         removeSource(sourceName);
     });
-
     return item;
 }
 
@@ -244,10 +190,9 @@ function populateDraggableSources() {
     draggableContainer.innerHTML = '';
     availableSourcesDropdown.innerHTML = '';
 
-    const currentActiveSources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s && s.trim() !== '');
-
+    const currentActiveSources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s?.trim());
     currentActiveSources.forEach(source => {
-        if (allowedSources.includes(source.trim())) { // Only add if it's a known allowed source
+        if (allowedSources.includes(source.trim())) {
             draggableContainer.appendChild(createDraggableSourceItem(source.trim()));
         }
     });
@@ -256,11 +201,7 @@ function populateDraggableSources() {
     const addSourceButton = document.getElementById('add-source-button');
 
     if (sourcesToAdd.length === 0) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'All sources added';
-        option.disabled = true;
-        availableSourcesDropdown.appendChild(option);
+        availableSourcesDropdown.innerHTML = '<option value="" disabled>All sources added</option>';
         if (addSourceButton) addSourceButton.disabled = true;
     } else {
         if (addSourceButton) addSourceButton.disabled = false;
@@ -271,60 +212,48 @@ function populateDraggableSources() {
             availableSourcesDropdown.appendChild(option);
         });
     }
-
     addDragDropListeners();
 }
 
 let statusMessageTimeout;
 function showStatusMessage(message, isError = false, buttonIdToAppendAfter = null) {
-    const statusElement = document.getElementById('add-source-status'); // General status for draggable list
-    let targetStatusElement = statusElement;
+    let targetStatusElement = document.getElementById('add-source-status');
 
-    // If a buttonId is provided, try to find a place near that button for more specific feedback
     if (buttonIdToAppendAfter) {
         const button = document.getElementById(buttonIdToAppendAfter);
-        if (button && button.parentElement && button.parentElement.classList.contains('card-actions')) {
-            let specificStatus = button.parentElement.querySelector('.save-status-message');
+        const parentActions = button?.parentElement;
+        if (parentActions?.classList.contains('card-actions')) {
+            let specificStatus = parentActions.querySelector('.save-status-message');
             if (!specificStatus) {
                 specificStatus = document.createElement('p');
                 specificStatus.className = 'status-message save-status-message';
-                button.parentElement.insertBefore(specificStatus, button); // Insert before the button
+                parentActions.insertBefore(specificStatus, button);
             }
             targetStatusElement = specificStatus;
         }
     }
 
-    if (targetStatusElement) {
-        clearTimeout(statusMessageTimeout); // Clear existing timeout
-        targetStatusElement.textContent = message;
-        targetStatusElement.style.color = isError ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)';
-        targetStatusElement.style.opacity = '1';
+    if (!targetStatusElement) return;
 
-        statusMessageTimeout = setTimeout(() => {
-            targetStatusElement.style.opacity = '0';
-            setTimeout(() => { // Ensure text is cleared after fade out
-                if (targetStatusElement.classList.contains('save-status-message')) {
-                    // Only clear if it's a temporary message, not the general add-source-status
-                    targetStatusElement.textContent = '';
-                } else if (targetStatusElement === statusElement) {
-                    statusElement.textContent = ''; // Clear general add-source-status as well
-                }
-            }, 300);
-        }, 3000);
-    }
+    clearTimeout(statusMessageTimeout);
+    targetStatusElement.textContent = message;
+    targetStatusElement.style.color = isError ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)';
+    targetStatusElement.style.opacity = '1';
+
+    statusMessageTimeout = setTimeout(() => {
+        targetStatusElement.style.opacity = '0';
+        setTimeout(() => { targetStatusElement.textContent = ''; }, 300);
+    }, 3000);
 }
 
-
 function addSource() {
-    const availableSourcesDropdown = document.getElementById('available-sources-dropdown');
-    const sourceName = availableSourcesDropdown.value;
-
+    const sourceName = document.getElementById('available-sources-dropdown').value;
     if (!sourceName) {
         showStatusMessage('Please select a source to add.', true);
         return;
     }
 
-    const sources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s && s !== '');
+    const sources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s?.trim());
     if (sources.includes(sourceName)) {
         showStatusMessage(`Source "${getSourceDisplayName(sourceName)}" already exists.`, true);
         return;
@@ -332,31 +261,36 @@ function addSource() {
 
     sources.push(sourceName);
     currentSettings.lyricsSourceOrder = sources.join(',');
-    // No saveSettings() here, will be saved with "Save General"
     populateDraggableSources();
-    showStatusMessage(`"${getSourceDisplayName(sourceName)}" added. Save general settings to apply.`, false);
+    showStatusMessage(`"${getSourceDisplayName(sourceName)}" added. Save to apply.`, false);
 }
 
 function removeSource(sourceName) {
-    const sources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s && s !== '');
-    const updatedSources = sources.filter(s => s !== sourceName);
-    currentSettings.lyricsSourceOrder = updatedSources.join(',');
-    // No saveSettings() here
+    const sources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s?.trim());
+    currentSettings.lyricsSourceOrder = sources.filter(s => s !== sourceName).join(',');
     populateDraggableSources();
-    showStatusMessage(`"${getSourceDisplayName(sourceName)}" removed. Save general settings to apply.`, false);
+    showStatusMessage(`"${getSourceDisplayName(sourceName)}" removed. Save to apply.`, false);
 }
-
 
 function addDragDropListeners() {
     const draggableContainer = document.getElementById('lyrics-source-order-draggable');
     if (!draggableContainer) return;
 
+    const onDragEnd = () => {
+        if (draggedItem) {
+            draggedItem.classList.remove('dragging');
+        }
+        draggedItem = null;
+        const orderedSources = Array.from(draggableContainer.children).map(item => item.dataset.source);
+        currentSettings.lyricsSourceOrder = orderedSources.join(',');
+        showStatusMessage('Source order updated. Save to apply.', false);
+    };
+
+    // Mouse Events
     draggableContainer.addEventListener('dragstart', (e) => {
         if (e.target.classList.contains('draggable-source-item')) {
             draggedItem = e.target;
-            setTimeout(() => {
-                if (draggedItem) draggedItem.classList.add('dragging');
-            }, 0);
+            setTimeout(() => draggedItem?.classList.add('dragging'), 0);
         }
     });
 
@@ -365,31 +299,41 @@ function addDragDropListeners() {
         const afterElement = getDragAfterElement(draggableContainer, e.clientY);
         const currentDraggable = document.querySelector('.draggable-source-item.dragging');
         if (currentDraggable) {
-            if (afterElement == null) {
-                draggableContainer.appendChild(currentDraggable);
-            } else {
+            if (afterElement) {
                 draggableContainer.insertBefore(currentDraggable, afterElement);
+            } else {
+                draggableContainer.appendChild(currentDraggable);
             }
         }
     });
 
-    draggableContainer.addEventListener('dragend', () => {
-        if (draggedItem) {
-            draggedItem.classList.remove('dragging');
+    draggableContainer.addEventListener('dragend', onDragEnd);
+
+    // Touch Events for Mobile/Tablet
+    draggableContainer.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.drag-handle')) {
+            draggedItem = e.target.closest('.draggable-source-item');
+            draggedItem?.classList.add('dragging');
         }
-        draggedItem = null;
-        // Update currentSettings.lyricsSourceOrder immediately but don't save to storage yet
-        const orderedSources = Array.from(draggableContainer.children)
-            .map(item => item.dataset.source);
-        currentSettings.lyricsSourceOrder = orderedSources.join(',');
-        // User will click "Save General" to persist this
-        showStatusMessage('Source order updated. Save general settings to apply.', false);
-    });
+    }, { passive: true });
+
+    draggableContainer.addEventListener('touchmove', (e) => {
+        if (!draggedItem) return;
+        e.preventDefault(); // Prevent page scroll while dragging
+        const touchY = e.touches[0].clientY;
+        const afterElement = getDragAfterElement(draggableContainer, touchY);
+        if (afterElement) {
+            draggableContainer.insertBefore(draggedItem, afterElement);
+        } else {
+            draggableContainer.appendChild(draggedItem);
+        }
+    }, { passive: false });
+
+    draggableContainer.addEventListener('touchend', onDragEnd);
 }
 
 function getDragAfterElement(container, y) {
     const draggableElements = [...container.querySelectorAll('.draggable-source-item:not(.dragging)')];
-
     return draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
         const offset = y - box.top - box.height / 2;
@@ -401,195 +345,120 @@ function getDragAfterElement(container, y) {
     }, { offset: -Infinity }).element;
 }
 
-
-// Event listener for Add Source button
 document.getElementById('add-source-button').addEventListener('click', addSource);
 
-// Function to toggle KPoe sources visibility
-function toggleKpoeSourcesVisibility() {
-    const kpoeSourcesGroup = document.getElementById('kpoe-sources-group');
-    if (kpoeSourcesGroup) {
-        if (currentSettings.lyricsProvider === 'kpoe' || currentSettings.lyricsProvider === 'customKpoe') {
-            kpoeSourcesGroup.style.display = 'block';
-        } else {
-            kpoeSourcesGroup.style.display = 'none';
-        }
-    }
-}
-
-// Event listener for default-provider change
 document.getElementById('default-provider').addEventListener('change', (e) => {
-    currentSettings.lyricsProvider = e.target.value; // Update setting immediately for visibility toggle
+    currentSettings.lyricsProvider = e.target.value;
     toggleKpoeSourcesVisibility();
-    toggleCustomKpoeUrlVisibility(); // Toggle custom KPoe URL visibility
-    // actual saving happens automatically via setupAutoSaveListeners
+    toggleCustomKpoeUrlVisibility();
 });
 
-// Function to toggle Custom KPoe URL visibility
-function toggleCustomKpoeUrlVisibility() {
-    const customKpoeUrlGroup = document.getElementById('custom-kpoe-url-group');
-    if (customKpoeUrlGroup) {
-        if (currentSettings.lyricsProvider === 'customKpoe') {
-            customKpoeUrlGroup.style.display = 'block';
-        } else {
-            customKpoeUrlGroup.style.display = 'none';
-        }
-    }
-}
-
-// Event listener for override-translate-target change
 document.getElementById('override-translate-target').addEventListener('change', (e) => {
     currentSettings.overrideTranslateTarget = e.target.checked;
     toggleTranslateTargetVisibility();
 });
 
-// Event listener for override-gemini-prompt change
 document.getElementById('override-gemini-prompt').addEventListener('change', (e) => {
     currentSettings.overrideGeminiPrompt = e.target.checked;
     toggleGeminiPromptVisibility();
 });
 
-// Event listener for override-gemini-romanize-prompt change
 document.getElementById('override-gemini-romanize-prompt').addEventListener('change', (e) => {
     currentSettings.overrideGeminiRomanizePrompt = e.target.checked;
     toggleGeminiRomanizePromptVisibility();
 });
 
-// Function to toggle Gemini settings visibility (API key, model, prompt override)
-function toggleGeminiSettingsVisibility() {
-    const translationProvider = document.getElementById('translation-provider').value;
-    const geminiApiKeyGroup = document.getElementById('gemini-api-key-group');
-    const geminiModelGroup = document.getElementById('gemini-model-group');
-    const overrideGeminiPromptGroup = document.getElementById('override-gemini-prompt-group');
-    const overrideGeminiRomanizePromptGroup = document.getElementById('override-gemini-romanize-prompt-group'); // Get the new romanize prompt group
-
-    if (geminiApiKeyGroup && geminiModelGroup && overrideGeminiPromptGroup && overrideGeminiRomanizePromptGroup) {
-        if (translationProvider === 'gemini') {
-            geminiApiKeyGroup.style.display = 'block';
-            geminiModelGroup.style.display = 'block'; // Show the model group
-            overrideGeminiPromptGroup.style.display = 'block';
-            overrideGeminiRomanizePromptGroup.style.display = 'block'; // Show the romanize prompt group
-        } else {
-            geminiApiKeyGroup.style.display = 'none';
-            geminiModelGroup.style.display = 'none'; // Hide the model group
-            overrideGeminiPromptGroup.style.display = 'none';
-            overrideGeminiRomanizePromptGroup.style.display = 'none'; // Hide the romanize prompt group
-        }
-    }
-    toggleGeminiPromptVisibility(); // Re-evaluate prompt visibility based on new provider
-    toggleGeminiRomanizePromptVisibility(); // Re-evaluate romanize prompt visibility
-}
-
-// Function to toggle custom translate target visibility
-function toggleTranslateTargetVisibility() {
-    const overrideTranslateTarget = document.getElementById('override-translate-target').checked;
-    const customTranslateTargetGroup = document.getElementById('custom-translate-target-group');
-    if (customTranslateTargetGroup) {
-        if (overrideTranslateTarget) {
-            customTranslateTargetGroup.style.display = 'block';
-        } else {
-            customTranslateTargetGroup.style.display = 'none';
-        }
-    }
-}
-
-// Function to toggle custom Gemini translation prompt visibility
-function toggleGeminiPromptVisibility() {
-    const translationProvider = document.getElementById('translation-provider').value;
-    const overrideGeminiPrompt = document.getElementById('override-gemini-prompt').checked;
-    const customGeminiPromptGroup = document.getElementById('custom-gemini-prompt-group');
-    if (customGeminiPromptGroup) {
-        if (translationProvider === 'gemini' && overrideGeminiPrompt) {
-            customGeminiPromptGroup.style.display = 'block';
-        } else {
-            customGeminiPromptGroup.style.display = 'none';
-        }
-    }
-}
-
-// Function to toggle Gemini Romanization Model visibility
-function toggleRomanizationModelVisibility() {
-    const romanizationProvider = document.getElementById('romanization-provider').value;
-    const geminiRomanizationModelGroup = document.getElementById('gemini-romanization-model-group');
-    if (geminiRomanizationModelGroup) {
-        if (romanizationProvider === 'gemini') {
-            geminiRomanizationModelGroup.style.display = 'block';
-        } else {
-            geminiRomanizationModelGroup.style.display = 'none';
-        }
-    }
-}
-
-// Function to toggle custom Gemini romanization prompt visibility
-function toggleGeminiRomanizePromptVisibility() {
-    const translationProvider = document.getElementById('translation-provider').value;
-    const overrideGeminiRomanizePrompt = document.getElementById('override-gemini-romanize-prompt').checked;
-    const customGeminiRomanizePromptGroup = document.getElementById('custom-gemini-romanize-prompt-group');
-    if (customGeminiRomanizePromptGroup) {
-        if (translationProvider === 'gemini' && overrideGeminiRomanizePrompt) {
-            customGeminiRomanizePromptGroup.style.display = 'block';
-        } else {
-            customGeminiRomanizePromptGroup.style.display = 'none';
-        }
-    }
-}
-
-// Event listener for romanization-provider change
-document.getElementById('romanization-provider').addEventListener('change', (e) => {
-    // currentSettings.romanizationProvider is updated via auto-save listener
-    toggleRomanizationModelVisibility(); // Call the new function
-    // actual saving happens automatically via setupAutoSaveListeners
+document.getElementById('romanization-provider').addEventListener('change', () => {
+    toggleRomanizationModelVisibility();
 });
 
-// Event listener for translation-provider change
 document.getElementById('translation-provider').addEventListener('change', (e) => {
-    currentSettings.translationProvider = e.target.value; // Update setting immediately
-    toggleGeminiSettingsVisibility(); // Call the renamed function
-    // actual saving happens automatically via setupAutoSaveListeners
+    currentSettings.translationProvider = e.target.value;
+    toggleGeminiSettingsVisibility();
 });
+
+function toggleElementVisibility(elementId, isVisible) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.style.display = isVisible ? 'block' : 'none';
+    }
+}
+
+function toggleKpoeSourcesVisibility() {
+    const isVisible = ['kpoe', 'customKpoe'].includes(document.getElementById('default-provider').value);
+    toggleElementVisibility('kpoe-sources-group', isVisible);
+}
+
+function toggleCustomKpoeUrlVisibility() {
+    const isVisible = document.getElementById('default-provider').value === 'customKpoe';
+    toggleElementVisibility('custom-kpoe-url-group', isVisible);
+}
+
+function toggleGeminiSettingsVisibility() {
+    const isGemini = document.getElementById('translation-provider').value === 'gemini';
+    toggleElementVisibility('gemini-api-key-group', isGemini);
+    toggleElementVisibility('gemini-model-group', isGemini);
+    toggleElementVisibility('override-gemini-prompt-group', isGemini);
+    toggleElementVisibility('override-gemini-romanize-prompt-group', isGemini);
+    toggleGeminiPromptVisibility();
+    toggleGeminiRomanizePromptVisibility();
+}
+
+function toggleTranslateTargetVisibility() {
+    const isVisible = document.getElementById('override-translate-target').checked;
+    toggleElementVisibility('custom-translate-target-group', isVisible);
+}
+
+function toggleGeminiPromptVisibility() {
+    const isVisible = document.getElementById('translation-provider').value === 'gemini' && document.getElementById('override-gemini-prompt').checked;
+    toggleElementVisibility('custom-gemini-prompt-group', isVisible);
+}
+
+function toggleGeminiRomanizePromptVisibility() {
+    const isVisible = document.getElementById('translation-provider').value === 'gemini' && document.getElementById('override-gemini-romanize-prompt').checked;
+    toggleElementVisibility('custom-gemini-romanize-prompt-group', isVisible);
+}
+
+function toggleRomanizationModelVisibility() {
+    const isVisible = document.getElementById('romanization-provider').value === 'gemini';
+    toggleElementVisibility('gemini-romanization-model-group', isVisible);
+}
 
 document.getElementById('play-example').addEventListener('click', () => {
     startFullPreviewSync(currentSettings);
 });
 
-// Event listener for API key visibility toggle button
 document.getElementById('toggle-gemini-api-key-visibility').addEventListener('click', () => {
     const apiKeyInput = document.getElementById('gemini-api-key');
-    const toggleButtonIcon = document.querySelector('#toggle-gemini-api-key-visibility .material-symbols-outlined');
+    const icon = document.querySelector('#toggle-gemini-api-key-visibility .material-symbols-outlined');
     if (apiKeyInput.type === 'password') {
         apiKeyInput.type = 'text';
-        toggleButtonIcon.textContent = 'visibility_off';
+        icon.textContent = 'visibility_off';
     } else {
         apiKeyInput.type = 'password';
-        toggleButtonIcon.textContent = 'visibility';
+        icon.textContent = 'visibility';
     }
 });
+
 function setAppVersion() {
     try {
-        const manifest = chrome.runtime.getManifest();
-        const version = manifest.version;
+        const version = chrome.runtime.getManifest().version;
         const versionElement = document.querySelector('.version');
         if (versionElement) {
             versionElement.textContent = `Version ${version}`;
         }
     } catch (e) {
         console.error("Could not retrieve extension version from manifest:", e);
-        const versionElement = document.querySelector('.version');
-        if (versionElement) {
-            versionElement.textContent = 'Version unavailable';
-        }
     }
 }
 
-// Initial load
 document.addEventListener('DOMContentLoaded', () => {
     loadSettings((settings) => {
-        currentSettings = settings; // Ensure currentSettings is updated after load
-        updateUI(currentSettings);
-        setupAutoSaveListeners(); // Setup auto-saving for switches and selects
+        updateUI(settings);
+        setupAutoSaveListeners();
 
         const firstNavItem = document.querySelector('.navigation-drawer .nav-item');
-        const activeSectionId = firstNavItem ? firstNavItem.getAttribute('data-section') : 'general';
+        const activeSectionId = firstNavItem?.getAttribute('data-section') || 'general';
 
         document.querySelectorAll('.navigation-drawer .nav-item').forEach(i => i.classList.remove('active'));
         document.querySelector(`.navigation-drawer .nav-item[data-section="${activeSectionId}"]`)?.classList.add('active');
@@ -599,26 +468,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     setAppVersion();
-    
-    // Add event listener for the new reload button
-    const reloadButton = document.getElementById('reload-button');
-    if (reloadButton) {
-        reloadButton.addEventListener('click', () => {
-            // Find the YouTube Music tab and reload it
-            chrome.tabs.query({ url: "*://music.youtube.com/*" }, (tabs) => {
-                if (tabs.length > 0) {
-                    const ytmTab = tabs[0];
-                    chrome.tabs.reload(ytmTab.id, () => {
-                        // After reloading, hide the notification and maybe show a success message
-                        hideReloadNotification();
-                        // Optionally, show a temporary success message
-                        showStatusMessage('YouTube Music tab reloaded!', false, 'save-general');
-                    });
-                } else {
-                    // Handle case where no YTM tab is open
-                    alert("No YouTube Music tab found. Please open one and try again.");
-                }
-            });
+
+    document.getElementById('reload-button')?.addEventListener('click', () => {
+        chrome.tabs.query({ url: "*://music.youtube.com/*" }, (tabs) => {
+            if (tabs.length > 0) {
+                chrome.tabs.reload(tabs[0].id, () => {
+                    hideReloadNotification();
+                    showStatusMessage('YouTube Music tab reloaded!', false, 'save-general');
+                });
+            } else {
+                alert("No YouTube Music tab found. Please open one and try again.");
+            }
         });
-    }
+    });
 });

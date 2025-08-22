@@ -1,8 +1,8 @@
 // --- WebGL & Animation State Variables ---
 let gl = null;
-let glProgram = null; // For rendering the initial grid
-let updateStateProgram = null; // For GPGPU state updates
-let blurProgram = null; // For the high-performance Gaussian blur
+let glProgram = null; 
+let updateStateProgram = null; 
+let blurProgram = null; 
 let webglCanvas = null;
 let needsAnimation = false;
 
@@ -15,8 +15,8 @@ let a_positionLocation, a_update_positionLocation, a_blur_positionLocation;
 // WebGL objects
 let positionBuffer;
 let paletteTexture = null;
-let stateTextureA = null; // Ping-pong texture for cell state
-let stateTextureB = null; // Pong
+let stateTextureA = null; 
+let stateTextureB = null; 
 
 // Framebuffers and textures for multi-pass rendering
 let cellStateFramebuffer = null;
@@ -25,16 +25,14 @@ let blurFramebuffer = null;
 let renderTexture = null;
 let blurTextureA = null;
 
-// --- WebGL Context Management ---
 function handleContextLost(event) {
-    event.preventDefault(); // Prevent the default context loss handling
+    event.preventDefault();
     console.warn("LYPLUS: WebGL context lost. Attempting to restore...");
     if (globalAnimationId) {
         cancelAnimationFrame(globalAnimationId);
         globalAnimationId = null;
     }
-    // Clean up WebGL resources (optional, as context is lost, but good practice)
-    // Setting gl to null will prevent further WebGL operations until restored
+    // Clean up WebGL resources
     gl = null;
     glProgram = null;
     updateStateProgram = null;
@@ -48,21 +46,18 @@ function handleContextLost(event) {
     renderTexture = null;
     blurTextureA = null;
     positionBuffer = null;
-    // No need to remove canvas or container, as they might be reused
 }
 
 function handleContextRestored() {
     console.log("LYPLUS: WebGL context restored. Re-initializing...");
-    // Re-initialize everything. LYPLUS_setupBlurEffect handles cleanup of old elements.
     LYPLUS_setupBlurEffect();
-    // The IntersectionObserver inside LYPLUS_setupBlurEffect will restart the animation if visible.
 }
 
-// --- Performance & State Management ---
-// Store size-dependent values to avoid DOM reads in the animation loop
-let blurDimensions = { width: 0, height: 0 };
-let canvasDimensions = { width: 0, height: 0 };
+//
+let blurDimensions = { width: 0, height: 0 }; 
+let canvasDimensions = { width: 0, height: 0 }; 
 
+// The factor by which to reduce the canvas resolution for the blur pass. Higher is more blurry and performant.
 const BLUR_DOWNSAMPLE_FACTOR = 22;
 
 // Palette and Cell State Constants
@@ -70,22 +65,21 @@ const MASTER_PALETTE_TEX_WIDTH = 8;
 const MASTER_PALETTE_TEX_HEIGHT = 5;
 const MASTER_PALETTE_SIZE = MASTER_PALETTE_TEX_WIDTH * MASTER_PALETTE_TEX_HEIGHT;
 
-// The DATA grid remains 8x5, as you originally had.
 const DISPLAY_GRID_WIDTH = 8;
 const DISPLAY_GRID_HEIGHT = 5;
 const TOTAL_DISPLAY_CELLS = DISPLAY_GRID_WIDTH * DISPLAY_GRID_HEIGHT;
 
-// FIX: Define a 16:9 aspect ratio for the intermediate texture we stretch the 8x5 grid onto.
-const STRETCHED_GRID_WIDTH = 32;
-const STRETCHED_GRID_HEIGHT = 18;
+// this will stretch the DISPLAY_GRID to STRETCHED_GRID (plz use 16x9 if possible)
+const STRETCHED_GRID_WIDTH = 32; 
+const STRETCHED_GRID_HEIGHT = 18; 
 
 
 // Master artwork palettes for transition
 let currentTargetMasterArtworkPalette = [];
 
 // Animation speed & progress
-const SONG_PALETTE_TRANSITION_SPEED = 0.015;
-let songPaletteTransitionProgress = 1.0;
+const SONG_PALETTE_TRANSITION_SPEED = 0.015; // Normalized progress per frame.
+let songPaletteTransitionProgress = 1.0; // Normalized progress (0.0 to 1.0).
 let globalAnimationId = null;
 let lastFrameTime = 0;
 
@@ -95,11 +89,11 @@ let pendingArtworkUrl = null;
 let currentProcessingArtworkIdentifier = null;
 let lastAppliedArtworkIdentifier = null;
 let artworkCheckTimeoutId = null;
-const ARTWORK_RECHECK_DELAY = 300;
+const ARTWORK_RECHECK_DELAY = 300; // this are on ms
 const NO_ARTWORK_IDENTIFIER = 'LYPLUS_NO_ARTWORK';
-const OVERSAMPLE_GRID_WIDTH = 12;
-const OVERSAMPLE_GRID_HEIGHT = 8;
-
+// To get the sampled color
+const OVERSAMPLE_GRID_WIDTH = 24; 
+const OVERSAMPLE_GRID_HEIGHT = 16; 
 
 // --- Shader Sources ---
 
@@ -214,7 +208,6 @@ const blurFragmentShaderSource = `
     }
 `;
 
-// --- WebGL Helper Functions ---
 function createShader(glCtx, type, source) {
     const shader = glCtx.createShader(type);
     glCtx.shaderSource(shader, source);
@@ -248,7 +241,6 @@ function getDefaultMasterPalette() {
     });
 }
 
-// --- Main Setup Function ---
 function LYPLUS_setupBlurEffect() {
     console.log("LYPLUS: Setting up WebGL with GPU blur...");
     if (typeof currentSettings !== 'undefined' && currentSettings.dynamicPlayer) {
@@ -270,7 +262,6 @@ function LYPLUS_setupBlurEffect() {
     } catch (e) { console.error("LYPLUS: WebGL context creation failed.", e); }
     if (!gl) { console.error("LYPLUS: WebGL not supported!"); return null; }
 
-    // Add context lost/restored event listeners
     webglCanvas.addEventListener('webglcontextlost', handleContextLost, false);
     webglCanvas.addEventListener('webglcontextrestored', handleContextRestored, false);
 
@@ -326,7 +317,7 @@ function LYPLUS_setupBlurEffect() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    // FIX: Initialize the render texture with the 16:9 stretched dimensions.
+    // Initialize the render texture with the 16:9 stretched dimensions.
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
     blurTextureA = gl.createTexture();
@@ -341,7 +332,7 @@ function LYPLUS_setupBlurEffect() {
     updateMasterPaletteTexture(initialPalette, initialPalette);
 
     handleResize(); // Initial size calculation
-    window.addEventListener('resize', handleResize, { passive: true }); // Re-calculate on resize
+    window.addEventListener('resize', handleResize, { passive: true });
 
     // Use IntersectionObserver to start/stop animation when canvas is on/off screen
     const observer = new IntersectionObserver((entries) => {
@@ -360,7 +351,7 @@ function LYPLUS_setupBlurEffect() {
                 }
             }
         });
-    }, { threshold: 0.01 }); // Trigger when at least 1% is visible
+    }, { threshold: 0.01 });
 
     observer.observe(webglCanvas);
 
@@ -371,37 +362,32 @@ function LYPLUS_setupBlurEffect() {
 function handleResize() {
     if (!gl || !webglCanvas) return;
 
-    // Restore fixed size logic as per feedback
+    // The fixed resolution for the canvas in pixels.
     const displayWidth = 512;
     const displayHeight = 512;
 
-    // Only perform resize operations if the size has actually changed
+    // Only perform resize operations if the size has actually changed to avoid unnecessary texture re-allocations
     if (displayWidth === canvasDimensions.width && displayHeight === canvasDimensions.height) {
-        return false; // No resize needed
+        return false;
     }
 
     canvasDimensions.width = displayWidth;
     canvasDimensions.height = displayHeight;
 
-    // Set the canvas drawing buffer size
     webglCanvas.width = canvasDimensions.width;
     webglCanvas.height = canvasDimensions.height;
 
-    // Recalculate blur dimensions based on the new canvas size
     blurDimensions.width = Math.round(canvasDimensions.width / BLUR_DOWNSAMPLE_FACTOR);
     blurDimensions.height = Math.round(canvasDimensions.height / BLUR_DOWNSAMPLE_FACTOR);
 
-    // Resize the WebGL texture used for blurring
     gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, blurDimensions.width, blurDimensions.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
-    // Set the main viewport to the new canvas size
     gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
 
-    return true; // Indicate a resize happened
+    return true;
 }
 
-// --- Texture Creation/Update Functions ---
 function createCellStateTexture() {
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -409,7 +395,6 @@ function createCellStateTexture() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    // The state texture remains the original 8x5 data size.
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, DISPLAY_GRID_WIDTH, DISPLAY_GRID_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     return texture;
 }
@@ -459,7 +444,6 @@ function updateMasterPaletteTexture(previousPalette, targetPalette) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, textureWidth, textureHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, textureData);
 }
 
-// --- Artwork Processing Queue and Update Logic (Unchanged) ---
 function LYPLUS_requestProcessNewArtwork(artworkUrlFromEvent) {
     if (!glProgram && !LYPLUS_setupBlurEffect()) {
         console.warn("LYPLUS: WebGL setup failed, cannot process artwork.");
@@ -532,7 +516,6 @@ function processNextArtworkFromQueue() {
         songPaletteTransitionProgress = 0.0;
         needsAnimation = true;
 
-        // Start animation if not already running
         if (!globalAnimationId) {
             console.log("LYPLUS: Starting animation for palette transition.");
             lastFrameTime = performance.now();
@@ -554,6 +537,7 @@ function processNextArtworkFromQueue() {
     const onImageLoadSuccess = (img) => {
         const tempCanvas = document.createElement('canvas');
         const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+        // Draw the image onto a larger canvas to ensure quality sampling.
         tempCanvas.width = OVERSAMPLE_GRID_WIDTH * 10;
         tempCanvas.height = OVERSAMPLE_GRID_HEIGHT * 10;
         try {
@@ -583,7 +567,6 @@ function processNextArtworkFromQueue() {
             color.luminance = calculateLuminance(color);
             const lumFactor = 1.0 - Math.abs(color.luminance - 0.5) * 1.8;
             const freqNorm = color.frequency / (OVERSAMPLE_GRID_WIDTH * OVERSAMPLE_GRID_HEIGHT);
-            // Adjusted vibrancy calculation to prioritize frequency and luminance more
             color.vibrancy = (color.saturation * 0.5) + (Math.max(0, lumFactor) * 0.25) + (freqNorm * 0.25);
         });
         let sortedCandidates = [...sampledColors].sort((a, b) => b.vibrancy - a.vibrancy);
@@ -650,7 +633,6 @@ function processNextArtworkFromQueue() {
     }
 }
 
-// --- Animation Loop ---
 function animateWebGLBackground() {
     if (!gl || !glProgram) {
         globalAnimationId = null;
@@ -661,30 +643,24 @@ function animateWebGLBackground() {
     const deltaTime = (now - lastFrameTime) / 1000.0;
     lastFrameTime = now;
 
-    // Handle palette transition animation
     if (songPaletteTransitionProgress < 1.0) {
         songPaletteTransitionProgress = Math.min(1.0, songPaletteTransitionProgress + SONG_PALETTE_TRANSITION_SPEED);
-        
-        // Check if transition just completed
         if (songPaletteTransitionProgress >= 1.0) {
             console.log("LYPLUS: Palette transition completed.");
             needsAnimation = false;
         }
     }
 
-    // Determine if we should continue animation
     let shouldContinueAnimation;
     if (currentSettings.lightweight === true) {
-        // In lightweight mode, only continue if we need animation for transitions
+        // In lightweight mode, only continue if a palette transition is active.
         shouldContinueAnimation = needsAnimation;
     } else {
-        // In non-lightweight mode, always animate (cell state updates + transitions)
         shouldContinueAnimation = true;
     }
 
-    // GPGPU Cell State Update (only in non-lightweight mode)
     if (currentSettings.lightweight !== true) {
-        // Pass 1: GPGPU Update 8x5 Cell States (A -> B)
+        // Pass 1: Update the 8x5 cell state texture using GPGPU (A -> B).
         gl.bindFramebuffer(gl.FRAMEBUFFER, cellStateFramebuffer);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, stateTextureB, 0);
         gl.viewport(0, 0, DISPLAY_GRID_WIDTH, DISPLAY_GRID_HEIGHT);
@@ -699,11 +675,11 @@ function animateWebGLBackground() {
         gl.uniform2f(u_update_randomLocation, Math.random(), Math.random());
         gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-        // Swap textures. B has the new state. A is now the old state.
+        // Swap textures for the next frame. B now holds the new state.
         [stateTextureA, stateTextureB] = [stateTextureB, stateTextureA];
     }
 
-    // Pass 2: Render 8x5 Grid to an Off-screen 16:9 Texture, stretching it.
+    // Pass 2: Render the 8x5 grid, stretching it to the off-screen 16:9 texture.
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTexture, 0);
     gl.viewport(0, 0, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT);
@@ -746,7 +722,6 @@ function animateWebGLBackground() {
     gl.uniform1i(u_blur_imageLocation, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    // Continue animation only if needed
     if (shouldContinueAnimation) {
         globalAnimationId = requestAnimationFrame(animateWebGLBackground);
     } else {
@@ -755,8 +730,7 @@ function animateWebGLBackground() {
     }
 }
 
-
-// --- Helper Functions (Color Math etc.) ---
+// --- Color Math Helper Functions ---
 function calculateLuminance(color) {
     const a = [color.r, color.g, color.b].map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
     return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
@@ -793,10 +767,16 @@ function calculateSaturation(color) {
     return delta / max;
 }
 
-// Converts an RGB color value to HSL. Conversion formula
-// adapted from http://en.wikipedia.org/wiki/HSL_color_space.
-// Assumes r, g, and b are contained in the set [0, 255] and
-// returns h, s, and l in the set [0, 1].
+/**
+ * Converts an RGB color value to HSL.
+ * Assumes r, g, and b are contained in the set [0, 255] and
+ * returns h, s, and l in the set [0, 1].
+ *
+ * @param   Number  r       The red color value
+ * @param   Number  g       The green color value
+ * @param   Number  b       The blue color value
+ * @return  Array           The HSL representation
+ */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -817,10 +797,16 @@ function rgbToHsl(r, g, b) {
     return [h, s, l];
 }
 
-// Converts an HSL color value to RGB. Conversion formula
-// adapted from http://en.wikipedia.org/wiki/HSL_color_space.
-// Assumes h, s, and l are contained in the set [0, 1] and
-// returns r, g, and b in the set [0, 255].
+/**
+ * Converts an HSL color value to RGB.
+ * Assumes h, s, and l are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 255].
+ *
+ * @param   Number  h       The hue
+ * @param   Number  s       The saturation
+ * @param   Number  l       The lightness
+ * @return  Array           The RGB representation
+ */
 function hslToRgb(h, s, l) {
     let r, g, b;
 
@@ -854,29 +840,25 @@ function LYPLUS_getSongPalette() {
         return null;
     }
 
-    // Filter out dark colors and then sort by vibrancy
-    const MIN_LUMINANCE_THRESHOLD = 0.15; // Adjust as needed, 0.15 is a common starting point
+    const MIN_LUMINANCE_THRESHOLD = 0.15;
     const filteredPalette = currentTargetMasterArtworkPalette.filter(color => calculateLuminance(color) > MIN_LUMINANCE_THRESHOLD);
 
     let selectedColor;
     if (filteredPalette.length > 0) {
-        // Sort by vibrancy and get the most vibrant color from the filtered list
+        // Sort by the calculated vibrancy and get the most vibrant color from the filtered list.
         selectedColor = filteredPalette.sort((a, b) => b.vibrancy - a.vibrancy)[0];
     } else {
-        // If all colors are too dark, fall back to the original most vibrant color without filtering
         console.warn("LYPLUS: All colors in palette are too dark. Using original most vibrant color.");
         selectedColor = currentTargetMasterArtworkPalette.sort((a, b) => b.vibrancy - a.vibrancy)[0];
     }
 
-    // Increase saturation of the selected color
     const [h, s, l] = rgbToHsl(selectedColor.r, selectedColor.g, selectedColor.b);
-    const increasedSaturation = Math.min(1.0, s * 1.2); // Increase saturation by 20%, cap at 1.0
+    const increasedSaturation = Math.min(1.0, s * 1.2);
     const [r, g, b] = hslToRgb(h, increasedSaturation, l);
 
     return { r, g, b, a: selectedColor.a };
 }
 
-// --- Event Listener to Trigger Update ---
 window.addEventListener('message', (event) => {
     if (event.source === window && event.data && event.data.type === 'LYPLUS_updateFullScreenAnimatedBg') {
         const artworkElement = document.querySelector('.image.ytmusic-player-bar');

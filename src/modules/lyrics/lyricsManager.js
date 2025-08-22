@@ -1,27 +1,32 @@
 // lyricsManager.js
+
+/* =================================================================
+   VARIABLE
+   ================================================================= */
+
 let currentFetchMediaId = null;
-let currentDisplayMode = 'none'; // Manages the active translation/romanization mode
-let lastProcessedDisplayMode = 'none'; // Store the mode that was actually rendered
+let currentDisplayMode = 'none';
+let lastProcessedDisplayMode = 'none';
 
-let lastKnownSongInfo = null; // Store last known song info for reload
-let lastFetchedLyrics = null; // Store the last successfully fetched lyrics object
+let lastKnownSongInfo = null;
+let lastFetchedLyrics = null;
 
-// New variables for debouncing/preventing duplicate requests from content script
 let lyricsFetchDebounceTimer = null;
 let lastRequestedSongKey = null;
-const DEBOUNCE_TIME_MS = 200; // Adjust as needed, a small delay to prevent rapid duplicates
+const DEBOUNCE_TIME_MS = 200;
+
+/* =================================================================
+   FETCHING AND PROCESSIGN 
+   ================================================================= */
 
 async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload = false) {
   const songKey = `${currentSong.title}-${currentSong.artist}-${currentSong.album}`;
 
-  // If a request for the same song is already pending or recently completed, debounce it.
-  // Do not debounce if it's a forceReload (explicit bypass) or if the display mode has changed.
   if (lyricsFetchDebounceTimer && lastRequestedSongKey === songKey && !forceReload && currentDisplayMode === lastProcessedDisplayMode) {
     console.log(`Debouncing duplicate fetch request for ${songKey} with same display mode.`);
-    return; // Abort this duplicate call
+    return;
   }
 
-  // Clear any existing debounce timer and set a new one
   clearTimeout(lyricsFetchDebounceTimer);
   lyricsFetchDebounceTimer = setTimeout(() => {
     lyricsFetchDebounceTimer = null;
@@ -31,11 +36,11 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
 
   try {
     const localCurrentFetchMediaId = currentSong.videoId || currentSong.songId;
-    currentFetchMediaId = localCurrentFetchMediaId; // Set the latest videoId being processed globally for this manager
+    currentFetchMediaId = localCurrentFetchMediaId;
 
     LyricsPlusAPI.cleanupLyrics();
 
-    let effectiveMode = currentDisplayMode; // Default to existing persisted mode
+    let effectiveMode = currentDisplayMode;
 
     if (isNewSong) {
       const translationEnabled = currentSettings.translationEnabled;
@@ -50,7 +55,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
       } else {
         effectiveMode = 'none';
       }
-      currentDisplayMode = effectiveMode; // Persist auto-applied mode for this song session
+      currentDisplayMode = effectiveMode;
     }
 
     let lyricsObjectToDisplay;
@@ -92,11 +97,9 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
 
       if (hasTranslation && hasRomanization) {
         lyricsObjectToDisplay = translationResponse.translatedLyrics;
-        // Merge romanization into the translation lyrics object, prioritizing syllable-level if available
         lyricsObjectToDisplay.data = lyricsObjectToDisplay.data.map((line, index) => {
           const romanizedLine = romanizationResponse.translatedLyrics.data[index];
           if (romanizedLine) {
-            // If romanization response has syllabus (syllable-level romanization)
             if (romanizedLine.syllabus && romanizedLine.syllabus.length > 0) {
               const newSyllabus = line.syllabus ? line.syllabus.map((syllable, sylIndex) => {
                 const romanizedSyllable = romanizedLine.syllabus[sylIndex];
@@ -107,7 +110,6 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
               }) : [];
               return { ...line, syllabus: newSyllabus };
             } else {
-              // Fallback to line-level romanization if no syllabus in romanization response
               return { ...line, romanizedText: romanizedLine.romanizedText || romanizedLine.translatedText };
             }
           }
@@ -118,16 +120,14 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
         lyricsObjectToDisplay = translationResponse.translatedLyrics;
         finalDisplayModeForRenderer = 'translate';
       } else if (hasRomanization) {
-        // If only romanization is enabled, use the romanized lyrics directly
         lyricsObjectToDisplay = romanizationResponse.translatedLyrics;
         finalDisplayModeForRenderer = 'romanize';
       } else {
         console.warn(`Translation/Romanization failed. Falling back to original lyrics.`);
-        // Fallback to fetching original lyrics
         const originalLyricsResponse = await pBrowser.runtime.sendMessage({
           type: 'FETCH_LYRICS',
           songInfo: currentSong,
-          forceReload: forceReload // Pass forceReload to background script
+          forceReload: forceReload
         });
 
         if (currentFetchMediaId !== localCurrentFetchMediaId) {
@@ -137,20 +137,18 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
 
         if (originalLyricsResponse.success) {
           lyricsObjectToDisplay = originalLyricsResponse.lyrics;
-          // finalDisplayModeForRenderer remains 'none'
         } else {
           console.warn('Failed to fetch original lyrics after translation/romanization fallback:', originalLyricsResponse.error);
           if (LyricsPlusAPI.displaySongNotFound) LyricsPlusAPI.displaySongNotFound();
-          currentDisplayMode = 'none'; // Reset mode
+          currentDisplayMode = 'none';
           return;
         }
       }
     } else {
-      // No translation/romanization mode active, fetch original lyrics
       const originalLyricsResponse = await pBrowser.runtime.sendMessage({
         type: 'FETCH_LYRICS',
         songInfo: currentSong,
-        forceReload: forceReload // Pass forceReload to background script
+        forceReload: forceReload
       });
 
       if (currentFetchMediaId !== localCurrentFetchMediaId) {
@@ -160,22 +158,19 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
 
       if (originalLyricsResponse.success) {
         lyricsObjectToDisplay = originalLyricsResponse.lyrics;
-        // finalDisplayModeForRenderer remains 'none'
       } else {
         console.warn('Failed to fetch lyrics:', originalLyricsResponse.error);
         if (LyricsPlusAPI.displaySongNotFound) LyricsPlusAPI.displaySongNotFound();
-        currentDisplayMode = 'none'; // Reset mode
+        currentDisplayMode = 'none';
         return;
       }
     }
 
-    // If the videoId changed at any point during async operations, abort.
     if (currentFetchMediaId !== localCurrentFetchMediaId) {
       console.warn("Song changed while fetching lyrics. Aborting display.", currentSong);
       return;
     }
 
-    // Process lyrics (convert, adjust timing)
     if (lyricsObjectToDisplay.type === "Word" && !currentSettings.wordByWord) {
       lyricsObjectToDisplay = convertWordLyricsToLine(lyricsObjectToDisplay);
     }
@@ -186,7 +181,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
         videoId: currentSong.videoId
       });
 
-      if (currentFetchMediaId !== localCurrentFetchMediaId) { // Check again after await
+      if (currentFetchMediaId !== localCurrentFetchMediaId) {
         console.warn("Song changed during SponsorBlock fetch. Aborting display.", currentSong);
         return;
       }
@@ -198,14 +193,12 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
       }
     }
 
-    // Ensure the videoId is still the same before displaying lyrics
     if (currentFetchMediaId !== localCurrentFetchMediaId) {
       console.warn("Song changed just before displaying lyrics. Aborting display.", currentSong);
       return;
     }
 
-
-    lastFetchedLyrics = lyricsObjectToDisplay; // Store the fetched lyrics
+    lastFetchedLyrics = lyricsObjectToDisplay;
 
     if (LyricsPlusAPI.displayLyrics) {
       LyricsPlusAPI.displayLyrics(
@@ -215,29 +208,53 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
         currentSettings.lightweight,
         lyricsObjectToDisplay.metadata.songWriters,
         currentSong,
-        finalDisplayModeForRenderer, // Pass the actual display mode
-        currentSettings, // Pass currentSettings
-        fetchAndDisplayLyrics, // Pass the function itself
-        setCurrentDisplayModeAndRender, // Pass the function itself (renamed)
-        currentSettings.largerTextMode // Pass the new setting
+        finalDisplayModeForRenderer,
+        currentSettings,
+        fetchAndDisplayLyrics,
+        setCurrentDisplayModeAndRender,
+        currentSettings.largerTextMode
       );
     } else {
       console.error("displayLyrics is not available.");
     }
 
-    lastKnownSongInfo = currentSong; // Update last known song info
-    lastProcessedDisplayMode = finalDisplayModeForRenderer; // Update after successful display
+    lastKnownSongInfo = currentSong;
+    lastProcessedDisplayMode = finalDisplayModeForRenderer;
 
   } catch (error) {
     console.warn('Error in fetchAndDisplayLyrics:', error);
-    currentDisplayMode = 'none'; // Reset manager's mode on error
-    lastProcessedDisplayMode = 'none'; // Reset processed mode on error
+    currentDisplayMode = 'none';
+    lastProcessedDisplayMode = 'none';
 
-    if (currentFetchMediaId === (currentSong ? currentSong.videoId : null)) { // Check if error is for current song
+    if (currentFetchMediaId === (currentSong ? currentSong.videoId : null)) {
       if (LyricsPlusAPI.displaySongError) LyricsPlusAPI.displaySongError();
     }
   }
 }
+
+/* =================================================================
+   PUBLIC API AND RENDERRR
+   ================================================================= */
+
+setCurrentDisplayModeAndRender = async (mode, songInfoForRefetch) => {
+  currentDisplayMode = mode;
+
+  if (songInfoForRefetch) {
+    await fetchAndDisplayLyrics(songInfoForRefetch, false, false);
+  } else {
+    if (lastKnownSongInfo) {
+      await fetchAndDisplayLyrics(lastKnownSongInfo, false, false);
+    } else {
+      console.error("Cannot update display mode: No song information available for refetch.");
+      currentDisplayMode = 'none';
+      if (LyricsPlusAPI.displaySongError) LyricsPlusAPI.displaySongError();
+    }
+  }
+};
+
+/* =================================================================
+   UTILITY
+   ================================================================= */
 
 function convertWordLyricsToLine(lyrics) {
   if (lyrics.type === "Line") return lyrics;
@@ -251,38 +268,6 @@ function convertWordLyricsToLine(lyrics) {
     type: "Line",
     data: lines,
     metadata: lyrics.metadata,
-    // Carry over other potential top-level properties if necessary
     ignoreSponsorblock: lyrics.ignoreSponsorblock
   };
 }
-
-// Placeholder for adjustLyricTiming - this function should be moved or imported if needed elsewhere
-// For now, assuming it's defined globally or imported from a utility file.
-// If it's not, it will need to be moved to a shared utility or to lyricsHandler.js if it only serves SponsorBlock.
-// Based on the original file, it seems to be a global function.
-// If adjustLyricTiming is not defined elsewhere, it needs to be moved to a common utility or to lyricsHandler.js
-// if its only purpose is for SponsorBlock. For now, I'll assume it's globally available or imported.
-// If it's not, the user will get an error and I'll need to address it.
-
-// New API function for renderer to call
-setCurrentDisplayModeAndRender = async (mode, songInfoForRefetch) => {
-  currentDisplayMode = mode; // Update manager's internal state
-
-  // When the display mode is explicitly changed by the user, always trigger a fetch.
-  // The debounce logic in fetchAndDisplayLyrics will now intelligently decide whether to debounce
-  // based on whether the display mode itself has changed for the same song.
-  if (songInfoForRefetch) {
-    // Pass isNewSong=false as it's not a new song, but a mode change.
-    // Pass forceReload=false, as the debounce logic will handle it.
-    await fetchAndDisplayLyrics(songInfoForRefetch, false, false);
-  } else {
-    // Fallback: if no songInfoForRefetch is available, try to use lastKnownSongInfo.
-    if (lastKnownSongInfo) {
-      await fetchAndDisplayLyrics(lastKnownSongInfo, false, false);
-    } else {
-      console.error("Cannot update display mode: No song information available for refetch.");
-      currentDisplayMode = 'none';
-      if (LyricsPlusAPI.displaySongError) LyricsPlusAPI.displaySongError();
-    }
-  }
-};

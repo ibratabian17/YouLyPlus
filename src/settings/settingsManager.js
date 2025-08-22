@@ -1,10 +1,9 @@
 // Browser compatibility
 const pBrowser = window.chrome || window.browser;
 
-// Current settings object (default values)
 let currentSettings = {
-    lyricsProvider: 'kpoe', // Can be 'kpoe' or 'lrclib'
-    lyricsSourceOrder: 'apple,lyricsplus,musixmatch,spotify,musixmatch-word', // For KPoe provider
+    lyricsProvider: 'kpoe',
+    lyricsSourceOrder: 'apple,lyricsplus,musixmatch,spotify,musixmatch-word', 
     wordByWord: true,
     lightweight: false,
     isEnabled: true,
@@ -12,27 +11,27 @@ let currentSettings = {
     autoHideLyrics: false,
     cacheStrategy: 'aggressive',
     fontSize: 16,
-    hideOffscreen: false, // New compatibility setting
-    compabilityWipe: false, // New compatibility setting
+    hideOffscreen: false,
+    compabilityWipe: false, 
     blurInactive: false,
     dynamicPlayer: false,
     customCSS: '',
-    translationProvider: 'google', // Default translation provider
-    geminiApiKey: '', // Default Gemini API key
-    geminiModel: 'gemini-pro', // Default Gemini model
-    overrideTranslateTarget: false, // New setting for overriding translation target
-    customTranslateTarget: '', // New setting for custom translation target
-    overrideGeminiPrompt: false, // New setting for overriding Gemini prompt
-    customGeminiPrompt: '', // New setting for custom Gemini prompt
-    overrideGeminiRomanizePrompt: false, // New setting for overriding Gemini romanization prompt
-    customGeminiRomanizePrompt: '', // New setting for custom Gemini romanization prompt
+    translationProvider: 'google',
+    geminiApiKey: '', 
+    geminiModel: 'gemini-2.5-flash-lite', 
+    overrideTranslateTarget: false, 
+    customTranslateTarget: '', 
+    overrideGeminiPrompt: false,
+    customGeminiPrompt: '', 
+    overrideGeminiRomanizePrompt: false, 
+    customGeminiRomanizePrompt: '',
     romanizationProvider: 'google',
     geminiRomanizationModel: 'gemini-2.0-flash',
     useSongPaletteFullscreen: false,
     useSongPaletteAllModes: false,
     overridePaletteColor: '',
     largerTextMode: 'lyrics', // 'lyrics' or 'romanization'
-    customKpoeUrl: '' // New setting for Custom KPoe Server URL
+    customKpoeUrl: '' 
 };
 
 // Storage helper function (using pBrowser.storage.local directly)
@@ -69,11 +68,10 @@ export function loadSettings(callback) {
         if (callback) callback(currentSettings);
     }).catch(error => {
         console.error("Error loading settings:", error);
-        if (callback) callback(currentSettings); // Fallback to default settings
+        if (callback) callback(currentSettings);
     });
 }
 
-// Update settings in storage
 export function saveSettings() {
     storageLocalSet(currentSettings).then(() => {
         console.log("Saving settings:", currentSettings);
@@ -88,7 +86,6 @@ export function saveSettings() {
     });
 }
 
-// Update settings object with new values
 export function updateSettings(newSettings) {
     currentSettings = { ...currentSettings, ...newSettings };
     console.log("Updated settings object:", currentSettings);
@@ -96,7 +93,7 @@ export function updateSettings(newSettings) {
 
 // Get current settings
 export function getSettings() {
-    return { ...currentSettings }; // Return a copy to prevent direct modification
+    return { ...currentSettings };
 }
 
 // Function to update the cache size display.
@@ -145,15 +142,14 @@ export function clearCache() {
     }
 }
 
-// Message listener for updates (e.g., from background script if settings are changed elsewhere)
 export function setupSettingsMessageListener(callback) {
     if (typeof window.addEventListener === 'function') {
         window.addEventListener('message', (event) => {
             if (event.source !== window || !event.data || event.data.type !== 'UPDATE_SETTINGS') return;
 
             console.log("Received settings update via window message:", event.data.settings);
-            updateSettings(event.data.settings); // Update internal state
-            if (callback) callback(currentSettings); // Notify UI to update
+            updateSettings(event.data.settings);
+            if (callback) callback(currentSettings);
         });
     }
 }
