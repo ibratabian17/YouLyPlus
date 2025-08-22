@@ -541,40 +541,35 @@ class LyricsPlusRenderer {
      * @returns {number} Delay in milliseconds (negative for early start)
      */
     const calculatePreHighlightDelay = (syllable, font, currentDuration) => {
-      // Get syllable width in pixels
       const syllableWidthPx = this._getTextWidth(syllable.textContent, font);
       const emWidthPx = this._getTextWidth('M', font);
-
-      // Convert to em units
       const syllableWidthEm = syllableWidthPx / emWidthPx;
 
-      const gradientWidth = 0.75; // em
-      const edgeOffset = 0.375; // em - how far from text end to trigger next
+      const gradientWidth = 0.75;
+      const gradientHalfWidth = gradientWidth / 2;
+      const initialGradientPosition = -gradientHalfWidth;
+      const finalGradientPosition = syllableWidthEm + gradientHalfWidth;
+      const totalAnimationDistance = finalGradientPosition - initialGradientPosition;
 
-      // Initial position of gradient's leading edge
-      const initialPosition = -0.375; // em
+      const triggerPointFromTextEnd = gradientHalfWidth;
 
-      // Final position where gradient fully clears the text
-      const finalPosition = syllableWidthEm + gradientWidth; // em
-
-      // Position we want to trigger the next syllable (0.25em before text end)
-      const triggerPosition = syllableWidthEm - edgeOffset; // em
-
-      // Total travel distance for the animation
-      const totalTravelDistance = finalPosition - initialPosition;
-
-      // Distance traveled when we reach the trigger point
-      const distanceToTrigger = triggerPosition - initialPosition;
-
-      // Calculate timing: what fraction of the animation completes when we hit trigger
-      let timingFraction = 0;
-      if (totalTravelDistance > 0) {
-        timingFraction = distanceToTrigger / totalTravelDistance;
+      let triggerPosition;
+      if (syllableWidthEm <= gradientWidth) {
+        triggerPosition = -gradientHalfWidth * 0.5;
+      } else {
+        triggerPosition = syllableWidthEm - triggerPointFromTextEnd;
       }
-      // next syllable should delay for that amount of time
-      const delayMs = Math.round(timingFraction * currentDuration);
 
-      return delayMs;
+      const distanceToTrigger = triggerPosition - initialGradientPosition;
+
+      let triggerTimingFraction = 0;
+      if (totalAnimationDistance > 0) {
+        triggerTimingFraction = distanceToTrigger / totalAnimationDistance;
+      }
+
+      const rawDelayMs = triggerTimingFraction * currentDuration;
+
+      return Math.round(rawDelayMs);
     };
 
     lyrics.data.forEach((line) => {
@@ -621,21 +616,19 @@ class LyricsPlusRenderer {
         const totalDuration = currentWordEndTime - currentWordStartTime;
         const shouldEmphasize = !lightweight && !this._isRTL(combinedText) && !this._isCJK(combinedText) && combinedText.trim().length <= 7 && totalDuration >= 1000;
 
-        let maxScale = 1.07; // Default scale
+        let maxScale = 1.07; // Default scale, so we can see the difference
 
         if (shouldEmphasize) {
-          const minDuration = 1000; // The duration (in ms) at which the effect starts.
-          const maxDuration = 3000; // The duration at which the effect reaches its maximum.
-          const easingPower = 3.0;  // The power for the ease-in curve.
-
+          const minDuration = 1000; 
+          const maxDuration = 3000; 
+          const easingPower = 3.0; 
           const progress = Math.min(1, Math.max(0, (totalDuration - minDuration) / (maxDuration - minDuration)));
           const easedProgress = Math.pow(progress, easingPower);
 
-          // Map the eased progress to the final CSS variable values.
-          maxScale = 1.0 + 0.05 + easedProgress * 0.10; // Used for both scale and offset calculation
+          maxScale = 1.0 + 0.05 + easedProgress * 0.10; 
           const shadowIntensity = 0.4 + easedProgress * 0.4;
-          const normalizedGrowth = (maxScale - 1.0) / 0.13; // Remaps [1.07, 1.20] to [0, 1]
-          const translateYPeak = -normalizedGrowth * 2.85; // Map [0, 1] to [0, -3.0]
+          const normalizedGrowth = (maxScale - 1.0) / 0.13; 
+          const translateYPeak = -normalizedGrowth * 2.5; 
 
           wordSpan.style.setProperty('--max-scale', maxScale.toFixed(3));
           wordSpan.style.setProperty('--shadow-intensity', shadowIntensity.toFixed(3));
@@ -746,12 +739,14 @@ class LyricsPlusRenderer {
           wordSpan._cachedChars.forEach(span => {
             const charWidth = this._getTextWidth(span.textContent, referenceFont);
             const position = (cumulativeWidth + (charWidth / 2)) / wordWidth;
-            const horizontalOffset = Math.sign((position - 0.5) * 2) * Math.pow(Math.abs((position - 0.5) * 2), 1.3) * ((maxScale - 1.0) * 40);
+            const horizontalOffset = (position - 0.5) * 2 * ((maxScale - 1.0) * 25);
+
             span.dataset.horizontalOffset = horizontalOffset;
             span.dataset.position = position;
             cumulativeWidth += charWidth;
           });
         }
+
 
         const targetContainer = isCurrentWordBackground ? (backgroundContainer || (backgroundContainer = document.createElement('div'), backgroundContainer.className = 'background-vocal-container', currentLine.appendChild(backgroundContainer))) : mainContainer;
         targetContainer.appendChild(wordSpan);
