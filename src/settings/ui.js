@@ -424,10 +424,6 @@ function toggleRomanizationModelVisibility() {
     toggleElementVisibility('gemini-romanization-model-group', isVisible);
 }
 
-document.getElementById('play-example').addEventListener('click', () => {
-    startFullPreviewSync(currentSettings);
-});
-
 document.getElementById('toggle-gemini-api-key-visibility').addEventListener('click', () => {
     const apiKeyInput = document.getElementById('gemini-api-key');
     const icon = document.querySelector('#toggle-gemini-api-key-visibility .material-symbols-outlined');
