@@ -639,49 +639,49 @@ canvas#lyplus-webgl-canvas {
 
 @keyframes wipe {
     from {
-        background-size: 0.5em 100%, 0% 100%;
-        background-position: -0.25em 0%, left;
+        background-size: 0.75em 100%, 0% 100%;
+        background-position: -0.375em 0%, left;
     }
 
     to {
-        background-size: 0.5em 100%, 100% 100%;
-        background-position: calc(100% + 0.25em) 0%, left;
+        background-size: 0.75em 100%, 100% 100%;
+        background-position: calc(100% + 0.375em) 0%, left;
     }
 }
 
 @keyframes wipe-rtl {
     from {
-        background-size: 0.5em 100%, 0% 100%;
-        background-position: calc(100% + 0.25em) 0%, right;
+        background-size: 0.75em 100%, 0% 100%;
+        background-position: calc(100% + 0.375em) 0%, right;
     }
 
     to {
-        background-size: 0.5em 100%, 100% 100%;
-        background-position: -0.5em 0%, right;
+        background-size: 0.75em 100%, 100% 100%;
+        background-position: -0.75em 0%, right;
     }
 }
 
 @keyframes pre-wipe-universal {
     from {
-        background-size: 0.5em 100%, 0% 100%;
-        background-position: -0.5em 0%, left;
+        background-size: 0.75em 100%, 0% 100%;
+        background-position: -0.75em 0%, left;
     }
 
     to {
-        background-size: 0.5em 100%, 0% 100%;
-        background-position: -0.25em 0%, left;
+        background-size: 0.75em 100%, 0% 100%;
+        background-position: -0.375em 0%, left;
     }
 }
 
 @keyframes pre-wipe-universal-rtl {
     from {
-        background-size: 0.5em 100%, 0% 100%;
-        background-position: calc(100% + 0.5em) 0%, right;
+        background-size: 0.75em 100%, 0% 100%;
+        background-position: calc(100% + 0.75em) 0%, right;
     }
 
     to {
-        background-size: 0.5em 100%, 0% 100%;
-        background-position: calc(100% + 0.25em) 0%, right;
+        background-size: 0.75em 100%, 0% 100%;
+        background-position: calc(100% + 0.375em) 0%, right;
     }
 }
 
@@ -762,13 +762,13 @@ canvas#lyplus-webgl-canvas {
 
 @keyframes pre-wipe-char {
     from {
-        background-size: 0.5em 100%, 0% 100%;
-        background-position: -0.5em 0%, left;
+        background-size: 0.75em 100%, 0% 100%;
+        background-position: -0.75em 0%, left;
     }
 
     to {
-        background-size: 0.5em 100%, 0% 100%;
-        background-position: -0.25em 0%, left;
+        background-size: 0.75em 100%, 0% 100%;
+        background-position: -0.375em 0%, left;
     }
 }
 

@@ -548,11 +548,11 @@ class LyricsPlusRenderer {
       // Convert to em units
       const syllableWidthEm = syllableWidthPx / emWidthPx;
 
-      const gradientWidth = 0.5; // em
-      const edgeOffset = 0.25; // em - how far from text end to trigger next
+      const gradientWidth = 0.75; // em
+      const edgeOffset = 0.375; // em - how far from text end to trigger next
 
       // Initial position of gradient's leading edge
-      const initialPosition = -0.25; // em
+      const initialPosition = -0.375; // em
 
       // Final position where gradient fully clears the text
       const finalPosition = syllableWidthEm + gradientWidth; // em
