@@ -1,8 +1,8 @@
 // --- WebGL & Animation State Variables ---
 let gl = null;
-let glProgram = null; 
-let updateStateProgram = null; 
-let blurProgram = null; 
+let glProgram = null;
+let updateStateProgram = null;
+let blurProgram = null;
 let webglCanvas = null;
 let needsAnimation = false;
 
@@ -15,8 +15,8 @@ let a_positionLocation, a_update_positionLocation, a_blur_positionLocation;
 // WebGL objects
 let positionBuffer;
 let paletteTexture = null;
-let stateTextureA = null; 
-let stateTextureB = null; 
+let stateTextureA = null;
+let stateTextureB = null;
 
 // Framebuffers and textures for multi-pass rendering
 let cellStateFramebuffer = null;
@@ -54,8 +54,8 @@ function handleContextRestored() {
 }
 
 //
-let blurDimensions = { width: 0, height: 0 }; 
-let canvasDimensions = { width: 0, height: 0 }; 
+let blurDimensions = { width: 0, height: 0 };
+let canvasDimensions = { width: 0, height: 0 };
 
 // The factor by which to reduce the canvas resolution for the blur pass. Higher is more blurry and performant.
 const BLUR_DOWNSAMPLE_FACTOR = 22;
@@ -70,8 +70,8 @@ const DISPLAY_GRID_HEIGHT = 5;
 const TOTAL_DISPLAY_CELLS = DISPLAY_GRID_WIDTH * DISPLAY_GRID_HEIGHT;
 
 // this will stretch the DISPLAY_GRID to STRETCHED_GRID (plz use 16x9 if possible)
-const STRETCHED_GRID_WIDTH = 32; 
-const STRETCHED_GRID_HEIGHT = 18; 
+const STRETCHED_GRID_WIDTH = 32;
+const STRETCHED_GRID_HEIGHT = 18;
 
 
 // Master artwork palettes for transition
@@ -92,8 +92,8 @@ let artworkCheckTimeoutId = null;
 const ARTWORK_RECHECK_DELAY = 300; // this are on ms
 const NO_ARTWORK_IDENTIFIER = 'LYPLUS_NO_ARTWORK';
 // To get the sampled color
-const OVERSAMPLE_GRID_WIDTH = 24; 
-const OVERSAMPLE_GRID_HEIGHT = 16; 
+const OVERSAMPLE_GRID_WIDTH = 24;
+const OVERSAMPLE_GRID_HEIGHT = 16;
 
 // --- Shader Sources ---
 
@@ -537,77 +537,42 @@ function processNextArtworkFromQueue() {
     const onImageLoadSuccess = (img) => {
         const tempCanvas = document.createElement('canvas');
         const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-        // Draw the image onto a larger canvas to ensure quality sampling.
-        tempCanvas.width = OVERSAMPLE_GRID_WIDTH * 10;
-        tempCanvas.height = OVERSAMPLE_GRID_HEIGHT * 10;
+
+        tempCanvas.width = STRETCHED_GRID_WIDTH;
+        tempCanvas.height = STRETCHED_GRID_HEIGHT;
+
         try {
-            tempCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
+            tempCtx.drawImage(img, 0, 0, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT);
         } catch (e) {
             console.error("LYPLUS: Error drawing image to temp canvas.", e);
             onImageLoadError(e);
             return;
         }
-        const sampledColors = [];
-        const regionImgWidth = Math.floor(tempCanvas.width / OVERSAMPLE_GRID_WIDTH);
-        const regionImgHeight = Math.floor(tempCanvas.height / OVERSAMPLE_GRID_HEIGHT);
-        for (let y = 0; y < OVERSAMPLE_GRID_HEIGHT; y++) {
-            for (let x = 0; x < OVERSAMPLE_GRID_WIDTH; x++) {
-                const color = getAverageColor(tempCtx, x * regionImgWidth, y * regionImgHeight, regionImgWidth, regionImgHeight);
-                let existingColor = sampledColors.find(c => c.r === color.r && c.g === color.g && c.b === color.b);
-                if (existingColor) {
-                    existingColor.frequency = (existingColor.frequency || 1) + 1;
-                } else {
-                    color.frequency = 1;
-                    sampledColors.push(color);
-                }
+
+        const palette = [];
+        const cellW = STRETCHED_GRID_WIDTH / MASTER_PALETTE_TEX_WIDTH;
+        const cellH = STRETCHED_GRID_HEIGHT / MASTER_PALETTE_TEX_HEIGHT;
+
+        for (let j = 0; j < MASTER_PALETTE_TEX_HEIGHT; j++) {
+            for (let i = 0; i < MASTER_PALETTE_TEX_WIDTH; i++) {
+                const x = Math.floor(i * cellW);
+                const y = Math.floor(j * cellH);
+                const w = Math.ceil(cellW);
+                const h = Math.ceil(cellH);
+
+                const c = getAverageColor(tempCtx, x, y, w, h);
+                palette.push({
+                    r: c.r,
+                    g: c.g,
+                    b: c.b,
+                    a: c.a !== undefined ? c.a : 255
+                });
             }
         }
-        sampledColors.forEach(color => {
-            color.saturation = calculateSaturation(color);
-            color.luminance = calculateLuminance(color);
-            const lumFactor = 1.0 - Math.abs(color.luminance - 0.5) * 1.8;
-            const freqNorm = color.frequency / (OVERSAMPLE_GRID_WIDTH * OVERSAMPLE_GRID_HEIGHT);
-            color.vibrancy = (color.saturation * 0.5) + (Math.max(0, lumFactor) * 0.25) + (freqNorm * 0.25);
-        });
-        let sortedCandidates = [...sampledColors].sort((a, b) => b.vibrancy - a.vibrancy);
-        const newMasterPalette = [];
-        const MIN_COLOR_DIFFERENCE_THRESHOLD = 85;
-        for (const candidate of sortedCandidates) {
-            if (newMasterPalette.length >= MASTER_PALETTE_SIZE) break;
-            if (newMasterPalette.length === 0) {
-                newMasterPalette.push(candidate);
-                continue;
-            }
-            let isDifferentEnough = true;
-            for (const selectedColor of newMasterPalette) {
-                if (calculateColorDifference(candidate, selectedColor) < MIN_COLOR_DIFFERENCE_THRESHOLD) {
-                    isDifferentEnough = false;
-                    break;
-                }
-            }
-            if (isDifferentEnough) {
-                newMasterPalette.push(candidate);
-            }
-        }
-        if (newMasterPalette.length < MASTER_PALETTE_SIZE) {
-            const alreadySelectedIdentifiers = new Set(newMasterPalette.map(c => `${c.r}-${c.g}-${c.b}`));
-            for (const candidate of sortedCandidates) {
-                if (newMasterPalette.length >= MASTER_PALETTE_SIZE) break;
-                const candidateIdentifier = `${candidate.r}-${candidate.g}-${candidate.b}`;
-                if (!alreadySelectedIdentifiers.has(candidateIdentifier)) {
-                    newMasterPalette.push(candidate);
-                    alreadySelectedIdentifiers.add(candidateIdentifier);
-                }
-            }
-        }
-        while (newMasterPalette.length < MASTER_PALETTE_SIZE) {
-            newMasterPalette.push({ r: 20, g: 20, b: 30, a: 255 });
-        }
-        const finalTargetPalette = newMasterPalette.slice(0, MASTER_PALETTE_SIZE).map(c => ({
-            r: c.r, g: c.g, b: c.b, a: c.a !== undefined ? c.a : 255
-        }));
-        finishProcessing(finalTargetPalette);
+
+        finishProcessing(palette.slice(0, MASTER_PALETTE_SIZE));
     };
+
     const onImageLoadError = (error) => {
         console.error(`LYPLUS: Error loading/processing image. Using default palette.`, error);
         finishProcessing(getDefaultMasterPalette());
@@ -686,7 +651,7 @@ function animateWebGLBackground() {
     gl.useProgram(glProgram);
     gl.enableVertexAttribArray(a_positionLocation);
     gl.vertexAttribPointer(a_positionLocation, 2, gl.FLOAT, false, 0, 0);
-    
+
     gl.uniform1f(u_songPaletteTransitionProgressLocation, songPaletteTransitionProgress);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, paletteTexture);
@@ -735,30 +700,101 @@ function calculateLuminance(color) {
     const a = [color.r, color.g, color.b].map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
     return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
 }
-function getAverageColor(ctx, x, y, width, height) {
-    if (width <= 0 || height <= 0) return { r: 0, g: 0, b: 0, a: 0 };
-    try {
-        const imageData = ctx.getImageData(x, y, Math.max(1, width), Math.max(1, height));
-        const data = imageData.data;
-        let r = 0, g = 0, b = 0;
-        const pixelCount = data.length / 4;
-        if (pixelCount === 0) return { r: 0, g: 0, b: 0, a: 255 };
-        for (let i = 0; i < data.length; i += 4) {
-            r += data[i];
-            g += data[i + 1];
-            b += data[i + 2];
+function boostSaturation(r, g, b, factor = 1.2) {
+    // convert rgb ke hsl
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+        h = s = 0;
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
         }
-        return {
-            r: Math.round(r / pixelCount),
-            g: Math.round(g / pixelCount),
-            b: Math.round(b / pixelCount),
-            a: 255
-        };
-    } catch (e) {
-        console.error("LYPLUS: Error in getAverageColor:", e, { x, y, width, height });
-        return { r: 0, g: 0, b: 0, a: 255 };
+        h /= 6;
     }
+
+    s = Math.min(1, s * factor);
+
+    function hue2rgb(p, q, t) {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+    }
+
+    let r2, g2, b2;
+    if (s === 0) {
+        r2 = g2 = b2 = l;
+    } else {
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r2 = hue2rgb(p, q, h + 1/3);
+        g2 = hue2rgb(p, q, h);
+        b2 = hue2rgb(p, q, h - 1/3);
+    }
+
+    return [Math.round(r2 * 255), Math.round(g2 * 255), Math.round(b2 * 255)];
 }
+
+function getAverageColor(ctx, x, y, w, h) {
+    const imageData = ctx.getImageData(x, y, w, h);
+    const data = imageData.data;
+
+    let totalR = 0, totalG = 0, totalB = 0, totalCount = 0;
+    const samples = [];
+
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        if (a < 128) continue;
+
+        const color = { r, g, b, a };
+        color.saturation = calculateSaturation(color);
+        color.luminance = calculateLuminance(color);
+        const lumFactor = 1.0 - Math.abs(color.luminance - 0.5) * 1.8;
+        color.vibrancy = (color.saturation * 0.5) + (Math.max(0, lumFactor) * 0.5);
+
+        samples.push(color);
+
+        totalR += r;
+        totalG += g;
+        totalB += b;
+        totalCount++;
+    }
+
+    if (totalCount === 0) return { r: 0, g: 0, b: 0, a: 255 };
+
+    const avgColor = {
+        r: Math.round(totalR / totalCount),
+        g: Math.round(totalG / totalCount),
+        b: Math.round(totalB / totalCount),
+        a: 255
+    };
+    avgColor.saturation = calculateSaturation(avgColor);
+    avgColor.luminance = calculateLuminance(avgColor);
+    const lumFactor = 1.0 - Math.abs(avgColor.luminance - 0.5) * 1.8;
+    avgColor.vibrancy = (avgColor.saturation * 0.5) + (Math.max(0, lumFactor) * 0.5);
+
+    let best = avgColor;
+    for (const s of samples) {
+        if (s.vibrancy > best.vibrancy * 1.2) {
+            best = s;
+        }
+    }
+
+    return best;
+}
+
 function calculateSaturation(color) {
     const r_norm = color.r / 255; const g_norm = color.g / 255; const b_norm = color.b / 255;
     const max = Math.max(r_norm, g_norm, b_norm); const min = Math.min(r_norm, g_norm, b_norm);
