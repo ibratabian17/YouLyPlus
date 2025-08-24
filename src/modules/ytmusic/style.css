@@ -97,17 +97,20 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
 #layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="PLAYER_PAGE_OPEN"] #mini-guide {
     background: none !important;
 }
+
 /* Hide the default image to prevent conflict with our blur container */
 #layout.dynamic-player .background-image {
     visibility: hidden !important;
 }
 
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container::after {
-    backdrop-filter: brightness(0.5) saturate(1.2) contrast(1.1);
+    backdrop-filter: brightness(0.5) saturate(1.3) contrast(1);
 }
+
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-player-bar {
     backdrop-filter: blur(20px);
 }
+
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] :not([player-fullscreened]) ytmusic-player {
     border: 1px solid #afafaf2c;
     border-radius: 2em;
@@ -119,11 +122,13 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
    ========================================================================== */
 
 @media (min-width: 615px) {
+
     /* --- General Adjustments --- */
     ytmusic-player-page[player-fullscreened] #lyrics-plus-buttons-wrapper {
         display: none !important;
     }
-    ytmusic-app-layout[player-fullscreened][show-fullscreen-controls] > [slot="player-bar"] {
+
+    ytmusic-app-layout[player-fullscreened][show-fullscreen-controls]>[slot="player-bar"] {
         width: 100%;
     }
 
@@ -133,6 +138,7 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
         max-width: 400px !important;
         transform: translateX(-55%);
     }
+
     ytmusic-player-page:not([is-mweb-modernization-enabled])[player-fullscreened] .av.ytmusic-player-page {
         width: 40% !important;
     }
@@ -149,34 +155,42 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
         mask-image: none !important;
         transform: translate(-60%, -50%);
     }
-    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened] > [slot="player-page"] {
+
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] {
         width: 100% !important;
         height: 100% !important;
         background: none !important;
     }
-    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened] > [slot="player-page"] .tab-header-container {
+
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] .tab-header-container {
         display: none !important;
     }
-    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened] > [slot="player-page"] #side-panel {
+
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #side-panel {
         min-width: 50%;
         mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
         transform: translateY(-8.8rem);
-        interactivity: auto!important;
+        interactivity: auto !important;
     }
+
     ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened] .lyplus-blur-container .lyplus-gradient-overlay {
         opacity: 0;
     }
-    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened] > [slot="player-page"] #lyrics-plus-container {
+
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #lyrics-plus-container {
         margin-top: 10%;
         padding-top: calc(1em + 40%);
     }
-    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened] > [slot="player-page"] #side-panel .lyrics-line {
+
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #side-panel .lyrics-line {
         margin-bottom: .5rem;
         font-size: 4.5rem;
     }
-    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened] > [slot="player-page"] .lyrics-line:not(.active) .main-vocal-container {
+
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] .lyrics-line:not(.active) .main-vocal-container {
         transform: scale3d(0.8, 0.8, 0.95);
     }
+
     ytmusic-player-page:not([is-video-truncation-fix-enabled])[player-fullscreened] #lyrics-plus-container[style*="display: block"] {
         scroll-padding-top: 35%;
         scroll-padding-block-start: 35%;
@@ -187,6 +201,7 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
         margin-top: 0;
         padding-top: 0;
     }
+
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) #side-panel {
         position: absolute;
         bottom: 9rem;
@@ -202,11 +217,14 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
         overflow: visible;
         mask-image: none;
     }
+
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) ytmusic-tab-renderer {
-        overflow: visible!important;
+        overflow: visible !important;
     }
+
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line {
-        display: none; /* Hide all lines by default */
+        display: none;
+        /* Hide all lines by default */
         position: absolute;
         top: 0;
         bottom: 0;
@@ -215,21 +233,25 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
         text-align: center !important;
         transform: none !important;
     }
+
     /* Only show the active and adjacent lines */
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line.lyrics-activest,
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line.next-active-line,
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line.pre-active-line {
         display: block;
     }
+
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line.fullscreen-focused.active {
         opacity: 1;
         filter: drop-shadow(0 0 0.1em rgba(0, 0, 0, 1));
     }
+
     /* Hide metadata in video mode */
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) span.lyrics-song-writters,
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) span.lyrics-source-provider {
         display: none;
     }
+
     ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line.lyrics-gap .main-vocal-container {
         transform-origin: center !important;
     }
@@ -237,4 +259,42 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
 
 #lyrics-plus-container {
     --lyplus-font-family: YouTube Sans;
+}
+
+/* Fix UI when user using ThemeSong Extension, so using this css will aloow them to use
+Lyrics+ without any visual bug*/
+#songDivContainer {
+    display: none !important;
+}
+:root:has(#ThemeSong-MainContainer) {
+#thumbnail>img {
+    object-fit: contain !important;
+}
+
+    #layout.dynamic-player #player-page,
+    #player-page[player-fullscreened] {
+        background: none !important;
+    }
+
+    ytmusic-app-layout[player-fullscreened] #player-bar-background.ytmusic-app-layout {
+        display: block;
+        backdrop-filter: none !important;
+        background: transparent !important;
+    }
+
+    body:has(#ThemeSong-MainContainer #DynamicLight) ytmusic-player-page:not([player-fullscreened]) #lyrics-plus-container,
+    body:has(#ThemeSong-MainContainer #StaticLight) ytmusic-player-page:not([player-fullscreened]) #lyrics-plus-container {
+        --lyplus-lyrics-pallete: var(--ts-palette-darkmuted-hex, #111) !important;
+        --lyplus-text-secondary: #1116;
+        --lyplus-text-tertiary: #ffffff7a;
+        --lyplus-text-inactive: #ffffff31;
+    }
+
+    body:has(#ThemeSong-MainContainer #DynamicLight) #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container::after {
+        backdrop-filter: saturate(1.2) ;
+    }
+    body:has(#ThemeSong-MainContainer #DynamicLight) #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container canvas {
+        opacity: .4;
+        filter: brightness(1.8) contrast(0.6);
+    }
 }
