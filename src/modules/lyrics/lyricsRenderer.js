@@ -615,10 +615,6 @@ class LyricsPlusRenderer {
           sylSpan._endTimeMs = s.time + s.duration;
           sylSpan._wordDurationMs = totalDuration;
 
-          if (!sylSpan.hasClickListener) {
-            sylSpan.addEventListener('click', this._onLyricClick.bind(this));
-            sylSpan.hasClickListener = true;
-          }
           if (this._isRTL(this._getDataText(s))) sylSpan.classList.add('rtl-text');
 
           syllableElements.push(sylSpan);
@@ -957,10 +953,6 @@ class LyricsPlusRenderer {
         syllableSpan.dataset.duration = syllableDuration;
         syllableSpan.dataset.endTime = syllableStart + syllableDuration;
         syllableSpan.textContent = "•";
-        if (!syllableSpan.hasClickListener) {
-          syllableSpan.addEventListener('click', this._onLyricClick.bind(this));
-          syllableSpan.hasClickListener = true;
-        }
         lyricsWord.appendChild(syllableSpan);
       }
       mainContainer.appendChild(lyricsWord);
