@@ -107,6 +107,7 @@
     will-change: transform, filter, opacity;
     content-visibility: auto;
     contain-intrinsic-size: 100% 3em;
+    text-rendering: optimizeLegibility;
 }
 
 /* --- Line States & Modifiers --- */
