@@ -473,8 +473,7 @@ class LyricsPlusRenderer {
    */
   _onLyricClick(e) {
     const time = parseFloat(e.currentTarget.dataset.startTime);
-    const player = document.querySelector(this.uiConfig.player);
-    if (player) player.currentTime = time - 0.05;
+    this._seekPlayerTo(time - 0.05);
     this._scrollToActiveLine(e.currentTarget, true);
   }
 
@@ -1138,6 +1137,47 @@ class LyricsPlusRenderer {
     }
   }
 
+  /**
+   * Gets a reference to the player element, caching it for performance.
+   * @returns {HTMLVideoElement | null} - The player element.
+   * @private
+   */
+  _getPlayerElement() {
+    if (this._playerElement === undefined) {
+      this._playerElement = document.querySelector(this.uiConfig.player) || null;
+    }
+    return this._playerElement;
+  }
+
+  /**
+   * Gets the current playback time, using a custom function from uiConfig if provided, otherwise falling back to the player element.
+   * @returns {number} - The current time in seconds.
+   * @private
+   */
+  _getCurrentPlayerTime() {
+    if (typeof this.uiConfig.getCurrentTime === 'function') {
+      return this.uiConfig.getCurrentTime();
+    }
+    const player = this._getPlayerElement();
+    return player ? player.currentTime : 0;
+  }
+
+  /**
+   * Seeks the player to a specific time, using a custom function from uiConfig if provided.
+   * @param {number} time - The time to seek to in seconds.
+   * @private
+   */
+  _seekPlayerTo(time) {
+    if (typeof this.uiConfig.seekTo === 'function') {
+      this.uiConfig.seekTo(time);
+      return;
+    }
+    const player = this._getPlayerElement();
+    if (player) {
+      player.currentTime = time;
+    }
+  }
+
   _getTextWidth(text, font) {
     const canvas = this.textWidthCanvas || (this.textWidthCanvas = document.createElement("canvas"));
     const context = canvas.getContext("2d");
@@ -1152,13 +1192,17 @@ class LyricsPlusRenderer {
   }
 
   /**
-   * Starts the synchronization loop for highlighting lyrics based on video time.
-   * @param {object} currentSettings - The current user settings.
-   * @returns {Function} - A cleanup function to stop the sync.
-   */
+ * Starts the synchronization loop for highlighting lyrics based on video time.
+ * @param {object} currentSettings - The current user settings.
+ * @returns {Function} - A cleanup function to stop the sync.
+ */
   _startLyricsSync(currentSettings = {}) {
-    const videoElement = document.querySelector(this.uiConfig.player);
-    if (!videoElement) return () => { };
+    const canGetTime = typeof this.uiConfig.getCurrentTime === 'function' || this._getPlayerElement();
+    if (!canGetTime) {
+      console.warn("LyricsPlusRenderer: Cannot start sync. No player element found and no custom getCurrentTime function provided in uiConfig.");
+      return () => { };
+    }
+
     this._ensureElementIds();
     if (this.visibilityObserver) this.visibilityObserver.disconnect();
     this.visibilityObserver = this._setupVisibilityTracking();
@@ -1166,10 +1210,10 @@ class LyricsPlusRenderer {
     if (this.lyricsAnimationFrameId) {
       cancelAnimationFrame(this.lyricsAnimationFrameId);
     }
-    this.lastTime = videoElement.currentTime * 1000;
+    this.lastTime = this._getCurrentPlayerTime() * 1000;
 
     const sync = () => {
-      const currentTime = videoElement.currentTime * 1000;
+      const currentTime = this._getCurrentPlayerTime() * 1000;
       const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
       this._updateLyricsHighlight(currentTime, isForceScroll, currentSettings);
       this.lastTime = currentTime;
@@ -1910,5 +1954,7 @@ class LyricsPlusRenderer {
     this.setCurrentDisplayModeAndRefetchFn = null;
 
     this.fontCache = {};
+
+    this._playerElement = undefined; 
   }
 }

@@ -1,14 +1,32 @@
+// ytmusic/index.js
+
 // This script is the bridge between the generic renderer and the YouTube Music UI
+
+let latestPlayerTime = 0;
+
+window.addEventListener('message', (event) => {
+    if (event.source !== window || !event.data) {
+        return;
+    }
+
+    if (event.data.type === 'LYPLUS_TIME_UPDATE' && typeof event.data.currentTime === 'number') {
+        latestPlayerTime = event.data.currentTime;
+    }
+});
 
 // 1. Platform-specific implementations
 const uiConfig = {
     player: 'video',
     patchParent: '#tab-renderer',
     selectors: [
-            'ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
-            'ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
-            'ytmusic-player-page:not([is-video-truncation-fix-enabled])[player-fullscreened] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])'
-        ]
+        'ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
+        'ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
+        'ytmusic-player-page:not([is-video-truncation-fix-enabled])[player-fullscreened] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])'
+    ],
+    getCurrentTime: () => latestPlayerTime,
+    seekTo: (time) => {
+        window.dispatchEvent(new CustomEvent('LYPLUS_SEEK_TO', { detail: { time } }));
+    }
 };
 
 // 2. Create the renderer instance
