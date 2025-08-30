@@ -101,9 +101,9 @@ function LYPLUS_checkForSongChange() {
         return;
     }
 
-    const hasChanged = newSongInfo.title !== LYPLUS_currentSong.title || 
+    const hasChanged = (newSongInfo.title !== LYPLUS_currentSong.title || 
                        newSongInfo.artist !== LYPLUS_currentSong.artist || 
-                       Math.round(newSongInfo.duration) !== Math.round(LYPLUS_currentSong.duration) || 
+                       Math.round(newSongInfo.duration) !== Math.round(LYPLUS_currentSong.duration)) && 
                        newSongInfo.videoId !== LYPLUS_currentSong.videoId;
 
     if (hasChanged) {
