@@ -2,18 +2,6 @@
 
 // This script is the bridge between the generic renderer and the YouTube Music UI
 
-let latestPlayerTime = 0;
-
-window.addEventListener('message', (event) => {
-    if (event.source !== window || !event.data) {
-        return;
-    }
-
-    if (event.data.type === 'LYPLUS_TIME_UPDATE' && typeof event.data.currentTime === 'number') {
-        latestPlayerTime = event.data.currentTime;
-    }
-});
-
 // 1. Platform-specific implementations
 const uiConfig = {
     player: 'video',
@@ -23,7 +11,7 @@ const uiConfig = {
         'ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
         'ytmusic-player-page:not([is-video-truncation-fix-enabled])[player-fullscreened] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])'
     ],
-    getCurrentTime: () => latestPlayerTime,
+    disableNativeTick: true,
     seekTo: (time) => {
         window.dispatchEvent(new CustomEvent('LYPLUS_SEEK_TO', { detail: { time } }));
     }
@@ -38,7 +26,8 @@ const LyricsPlusAPI = {
   displaySongNotFound: () => lyricsRendererInstance.displaySongNotFound(),
   displaySongError: () => lyricsRendererInstance.displaySongError(),
   cleanupLyrics: () => lyricsRendererInstance.cleanupLyrics(),
-  updateDisplayMode: (...args) => lyricsRendererInstance.updateDisplayMode(...args)
+  updateDisplayMode: (...args) => lyricsRendererInstance.updateDisplayMode(...args),
+  updateCurrentTick: (...args) => lyricsRendererInstance.updateCurrentTick(...args)
 };
 
 function injectPlatformCSS() {
@@ -61,3 +50,13 @@ function injectDOMScript() {
     };
     (document.head || document.documentElement).appendChild(script);
 }
+
+window.addEventListener('message', (event) => {
+    if (event.source !== window || !event.data) {
+        return;
+    }
+
+    if (event.data.type === 'LYPLUS_TIME_UPDATE' && typeof event.data.currentTime === 'number') {
+        LyricsPlusAPI.updateCurrentTick(event.data.currentTime)
+    }
+});

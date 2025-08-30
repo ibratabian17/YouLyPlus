@@ -55,7 +55,7 @@ function startTimeUpdater() {
                 stopTimeUpdater();
             }
         }
-    }, 50); // 20 updates per second is plenty for smooth lyrics
+    }, 16); //60FPS timing
 }
 
 // Callback for MutationObserver

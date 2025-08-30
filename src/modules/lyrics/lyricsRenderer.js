@@ -1208,18 +1208,19 @@ class LyricsPlusRenderer {
     this.visibilityObserver = this._setupVisibilityTracking();
 
     if (this.lyricsAnimationFrameId) {
-      cancelAnimationFrame(this.lyricsAnimationFrameId);
+      if (this.uiConfig.disableNativeTick) cancelAnimationFrame(this.lyricsAnimationFrameId);
     }
     this.lastTime = this._getCurrentPlayerTime() * 1000;
-
-    const sync = () => {
-      const currentTime = this._getCurrentPlayerTime() * 1000;
-      const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
-      this._updateLyricsHighlight(currentTime, isForceScroll, currentSettings);
-      this.lastTime = currentTime;
+    if (this.uiConfig.disableNativeTick) {
+      const sync = () => {
+        const currentTime = this._getCurrentPlayerTime() * 1000;
+        const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
+        this._updateLyricsHighlight(currentTime, isForceScroll, currentSettings);
+        this.lastTime = currentTime;
+        this.lyricsAnimationFrameId = requestAnimationFrame(sync);
+      };
       this.lyricsAnimationFrameId = requestAnimationFrame(sync);
-    };
-    this.lyricsAnimationFrameId = requestAnimationFrame(sync);
+    }
 
     this._setupResizeObserver();
 
@@ -1231,6 +1232,17 @@ class LyricsPlusRenderer {
         this.lyricsAnimationFrameId = null;
       }
     };
+  }
+
+  /**
+   * Updates the current time
+   * @param {number} currentTime - The current video time in seconds.
+   */
+  updateCurrentTick(currentTime){
+    currentTime = currentTime * 1000;
+    const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
+    this._updateLyricsHighlight(currentTime, isForceScroll, currentSettings);
+    this.lastTime = currentTime;
   }
 
   /**
@@ -1955,6 +1967,6 @@ class LyricsPlusRenderer {
 
     this.fontCache = {};
 
-    this._playerElement = undefined; 
+    this._playerElement = undefined;
   }
 }
