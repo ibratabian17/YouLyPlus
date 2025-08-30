@@ -1208,10 +1208,10 @@ class LyricsPlusRenderer {
     this.visibilityObserver = this._setupVisibilityTracking();
 
     if (this.lyricsAnimationFrameId) {
-      if (this.uiConfig.disableNativeTick) cancelAnimationFrame(this.lyricsAnimationFrameId);
+      if (!this.uiConfig.disableNativeTick) cancelAnimationFrame(this.lyricsAnimationFrameId);
     }
     this.lastTime = this._getCurrentPlayerTime() * 1000;
-    if (this.uiConfig.disableNativeTick) {
+    if (!this.uiConfig.disableNativeTick) {
       const sync = () => {
         const currentTime = this._getCurrentPlayerTime() * 1000;
         const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
