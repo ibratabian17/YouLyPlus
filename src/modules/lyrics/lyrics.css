@@ -660,7 +660,7 @@ canvas#lyplus-webgl-canvas {
 @keyframes wipe-rtl {
     from {
         background-size: 0.75em 100%, 0% 100%;
-        background-position: calc(100% + 0.375em) 0%, right;
+        background-position: calc(100% + 0.375em) 0%, calc(100% + 0.375em);
     }
 
     to {
