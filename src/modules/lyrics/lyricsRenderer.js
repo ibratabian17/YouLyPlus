@@ -1465,6 +1465,11 @@ class LyricsPlusRenderer {
       "blur-inactive-enabled",
       !!currentSettings.blurInactive
     );
+    container.classList.toggle(
+      "hide-offscreen",
+      !!currentSettings.hideOffscreen
+    );
+    this._injectCustomCSS(currentSettings.customCSS);
   }
 
   /**
@@ -2592,5 +2597,20 @@ class LyricsPlusRenderer {
     this.fontCache = {};
 
     this._playerElement = undefined;
+    this._customCssStyleTag = null;
+  }
+
+  /**
+   * Injects custom CSS from settings into the document.
+   * @param {string} customCSS - The custom CSS string to inject.
+   * @private
+   */
+  _injectCustomCSS(customCSS) {
+    if (!this._customCssStyleTag) {
+      this._customCssStyleTag = document.createElement('style');
+      this._customCssStyleTag.id = 'lyrics-plus-custom-css';
+      document.head.appendChild(this._customCssStyleTag);
+    }
+    this._customCssStyleTag.textContent = customCSS || '';
   }
 }
