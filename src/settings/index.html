@@ -34,6 +34,10 @@
                 <span class="material-symbols-outlined">cached</span>
                 Cache
             </a>
+            <a href="#" class="nav-item" data-section="local-lyrics">
+                <span class="material-symbols-outlined">folder_open</span>
+                Local Lyrics
+            </a>
             <a href="#" class="nav-item" data-section="about">
                 <span class="material-symbols-outlined">info</span>
                 About
@@ -94,6 +98,7 @@
                                 <option value="kpoe" selected>Lyrics+ (KPoe)</option>
                                 <option value="customKpoe">Custom KPoe Server</option>
                                 <option value="lrclib">LRCLIB</option>
+                                <option value="local">Local Lyrics</option>
                             </select>
                             <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
                         </div>
@@ -131,6 +136,74 @@
             <div class="card-actions">
                 <button id="save-general" class="btn btn-filled">Save General</button>
             </div>
+        </section>
+
+        <!-- Local Lyrics Section -->
+        <section class="settings-card" id="local-lyrics">
+            <h2 class="card-title">Local Lyrics Management</h2>
+
+            <div class="settings-category">
+                <h3 class="category-title">Manage Uploaded Lyrics</h3>
+                <div id="local-lyrics-list" class="draggable-list">
+                    <p class="helper-text" id="no-local-lyrics-message">No local lyrics uploaded yet.</p>
+                </div>
+                <div class="card-actions">
+                    <button id="refresh-local-lyrics-list" class="btn btn-outlined">
+                        <span class="material-symbols-outlined">refresh</span>
+                        Refresh List
+                    </button>
+                </div>
+            </div>
+
+            <button class="fab" id="add-lyrics-fab" title="Add New Local Lyrics">
+                <span class="material-symbols-outlined">add</span>
+            </button>
+
+            <div id="upload-lyrics-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close-button material-symbols-outlined">close</span>
+                    <h2 class="card-title">Upload New Local Lyrics</h2>
+                    <div class="setting-item form-group">
+                        <label for="modal-upload-song-title">Song Title</label>
+                        <input type="text" id="modal-upload-song-title" placeholder="e.g., Hype Boy">
+                    </div>
+                    <div class="setting-item form-group">
+                        <label for="modal-upload-artist-name">Artist Name</label>
+                        <input type="text" id="modal-upload-artist-name" placeholder="e.g., NewJeans">
+                    </div>
+                    <div class="setting-item form-group">
+                        <label for="modal-upload-album-name">Album Name (Optional)</label>
+                        <input type="text" id="modal-upload-album-name" placeholder="e.g., New Jeans 1st EP">
+                    </div>
+                    <div class="setting-item">
+                        <div class="form-group">
+                            <label for="modal-upload-lyrics-format">Lyrics Format</label>
+                            <div class="select-wrapper">
+                                <select id="modal-upload-lyrics-format">
+                                    <option value="lrc" selected>Lyrics (.lrc)</option>
+                                    <option value="elrc">Enhanced Lyrics (.elrc)</option>
+                                    <option value="ttml">Apple Music Time Markup (.ttml)</option>
+                                    <option value="json">Kpoe Lyrics (.json)</option>
+                                </select>
+                                <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
+                            </div>
+                            <p class="setting-description">Select the format of the lyrics file you are uploading.</p>
+                        </div>
+                    </div>
+                    <div class="setting-item form-group">
+                        <label for="modal-upload-lyrics-file">Lyrics File</label>
+                        <input type="file" id="modal-upload-lyrics-file" accept=".lrc,.elrc,.ttml,.json">
+                        <p class="helper-text">Upload your LRC, ELRC, Apple TTML, or JSON file.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button id="modal-upload-lyrics-button" class="btn btn-filled">
+                            <span class="material-symbols-outlined">upload_file</span>
+                            Upload Lyrics
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
         <!-- Translation Settings Section -->

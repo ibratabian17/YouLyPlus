@@ -1,4 +1,5 @@
-import { loadSettings, saveSettings, updateSettings, getSettings, updateCacheSize, clearCache, setupSettingsMessageListener } from './settingsManager.js';
+import { loadSettings, saveSettings, updateSettings, getSettings, updateCacheSize, clearCache, setupSettingsMessageListener, uploadLocalLyrics, getLocalLyricsList, deleteLocalLyrics } from './settingsManager.js';
+import { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2 } from './parser.js';
 
 let currentSettings = getSettings();
 
@@ -98,6 +99,7 @@ function updateUI(settings) {
 
     populateDraggableSources();
     updateCacheSize();
+    populateLocalLyricsList(); // Populate local lyrics list on UI update
 }
 
 document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
@@ -183,7 +185,7 @@ function createDraggableSourceItem(sourceName) {
 function populateDraggableSources() {
     const draggableContainer = document.getElementById('lyrics-source-order-draggable');
     const availableSourcesDropdown = document.getElementById('available-sources-dropdown');
-    const allowedSources = ['lyricsplus', 'apple', 'spotify', 'musixmatch', 'musixmatch-word'];
+    const allowedSources = ['lyricsplus', 'apple', 'spotify', 'musixmatch', 'musixmatch-word', 'local'];
 
     if (!draggableContainer || !availableSourcesDropdown) return;
 
@@ -351,7 +353,26 @@ document.getElementById('default-provider').addEventListener('change', (e) => {
     currentSettings.lyricsProvider = e.target.value;
     toggleKpoeSourcesVisibility();
     toggleCustomKpoeUrlVisibility();
+    toggleLocalLyricsVisibility(); // New: Toggle local lyrics visibility
 });
+
+document.getElementById('add-lyrics-fab').addEventListener('click', () => {
+    document.getElementById('upload-lyrics-modal').style.display = 'block';
+});
+
+document.querySelector('#upload-lyrics-modal .close-button').addEventListener('click', () => {
+    document.getElementById('upload-lyrics-modal').style.display = 'none';
+});
+
+window.addEventListener('click', (event) => {
+    const modal = document.getElementById('upload-lyrics-modal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+});
+
+document.getElementById('modal-upload-lyrics-button').addEventListener('click', handleUploadLocalLyrics);
+document.getElementById('refresh-local-lyrics-list').addEventListener('click', populateLocalLyricsList);
 
 document.getElementById('override-translate-target').addEventListener('change', (e) => {
     currentSettings.overrideTranslateTarget = e.target.checked;
@@ -422,6 +443,120 @@ function toggleGeminiRomanizePromptVisibility() {
 function toggleRomanizationModelVisibility() {
     const isVisible = document.getElementById('romanization-provider').value === 'gemini';
     toggleElementVisibility('gemini-romanization-model-group', isVisible);
+}
+
+function toggleLocalLyricsVisibility() {
+    const isVisible = document.getElementById('default-provider').value === 'local';
+    toggleElementVisibility('local-lyrics', isVisible);
+}
+
+async function handleUploadLocalLyrics() {
+    const title = document.getElementById('modal-upload-song-title').value.trim();
+    const artist = document.getElementById('modal-upload-artist-name').value.trim();
+    const album = document.getElementById('modal-upload-album-name').value.trim();
+    const format = document.getElementById('modal-upload-lyrics-format').value;
+    const lyricsFile = document.getElementById('modal-upload-lyrics-file').files[0];
+
+    if (!title || !artist || !lyricsFile) {
+        showStatusMessage('Song Title, Artist Name, and a Lyrics File are required.', true, 'modal-upload-lyrics-button');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const lyricsContent = e.target.result;
+        const songInfo = { title, artist, album };
+
+        try {
+            let parsedLyrics;
+            switch (format) {
+                case 'lrc': // Both LRC and ELRC will use parseSyncedLyrics
+                case 'elrc':
+                    parsedLyrics = parseSyncedLyrics(lyricsContent);
+                    break;
+                case 'ttml':
+                    parsedLyrics = parseAppleTTML(lyricsContent);
+                    break;
+                case 'json':
+                    parsedLyrics = JSON.parse(lyricsContent);
+                    if (parsedLyrics && parsedLyrics.KpoeTools && !parsedLyrics.KpoeTools.includes('1.31R2-LPlusBcknd')) {
+                        console.log("Converting V1 JSON to V2 format.");
+                        parsedLyrics = v1Tov2(parsedLyrics);
+                    } else if (parsedLyrics && !parsedLyrics.KpoeTools && parsedLyrics.lyrics && parsedLyrics.lyrics.length > 0 && parsedLyrics.lyrics[0].isLineEnding !== undefined) {
+                        console.log("Converting older V1 JSON (no KpoeTools) to V2 format.");
+                        parsedLyrics = v1Tov2(parsedLyrics);
+                    }
+                    break;
+                default:
+                    throw new Error('Unsupported lyrics format.');
+            }
+            const jsonLyrics = format === 'json' ? parsedLyrics : convertToStandardJson(parsedLyrics);
+
+            await uploadLocalLyrics(songInfo, jsonLyrics);
+            showStatusMessage('Lyrics uploaded successfully!', false, 'modal-upload-lyrics-button');
+            document.getElementById('modal-upload-song-title').value = '';
+            document.getElementById('modal-upload-artist-name').value = '';
+            document.getElementById('modal-upload-album-name').value = '';
+            document.getElementById('modal-upload-lyrics-file').value = ''; // Clear file input
+            document.getElementById('upload-lyrics-modal').style.display = 'none'; // Close modal
+            populateLocalLyricsList(); // Refresh the list after upload
+        } catch (error) {
+            showStatusMessage(`Error uploading lyrics: ${error}`, true, 'modal-upload-lyrics-button');
+        }
+    };
+    reader.onerror = () => {
+        showStatusMessage('Error reading file.', true, 'modal-upload-lyrics-button');
+    };
+    reader.readAsText(lyricsFile);
+}
+
+async function populateLocalLyricsList() {
+    const localLyricsListContainer = document.getElementById('local-lyrics-list');
+    const noLyricsMessage = document.getElementById('no-local-lyrics-message');
+    if (!localLyricsListContainer) return;
+
+    localLyricsListContainer.innerHTML = ''; // Clear existing list
+    localLyricsListContainer.appendChild(noLyricsMessage); // Re-add the message placeholder
+
+    try {
+        const lyricsList = await getLocalLyricsList();
+        if (lyricsList.length === 0) {
+            noLyricsMessage.style.display = 'block';
+            return;
+        } else {
+            noLyricsMessage.style.display = 'none';
+        }
+
+        lyricsList.forEach(item => {
+            const listItem = document.createElement('div');
+            listItem.className = 'draggable-source-item'; // Reusing style
+            listItem.dataset.songId = item.songId;
+            listItem.innerHTML = `
+                <span class="material-symbols-outlined drag-handle">music_note</span>
+                <span class="source-name">${item.songInfo.title} - ${item.songInfo.artist}</span>
+                <button class="remove-source-button btn-icon btn-icon-error" title="Delete local lyrics">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            `;
+            listItem.querySelector('.remove-source-button').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (confirm(`Are you sure you want to delete "${item.songInfo.title} - ${item.songInfo.artist}"?`)) {
+                    try {
+                        await deleteLocalLyrics(item.songId);
+                        showStatusMessage('Local lyrics deleted.', false, 'refresh-local-lyrics-list');
+                        populateLocalLyricsList(); // Refresh list after deletion
+                    } catch (error) {
+                        showStatusMessage(`Error deleting lyrics: ${error}`, true, 'refresh-local-lyrics-list');
+                    }
+                }
+            });
+            localLyricsListContainer.appendChild(listItem);
+        });
+    } catch (error) {
+        console.error("Failed to load local lyrics list:", error);
+        noLyricsMessage.textContent = `Error loading local lyrics: ${error.message || error}`;
+        noLyricsMessage.style.display = 'block';
+    }
 }
 
 document.getElementById('toggle-gemini-api-key-visibility').addEventListener('click', () => {

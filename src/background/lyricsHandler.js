@@ -9,12 +9,20 @@ const CACHE_DB_NAME = "LyricsCacheDB";
 const CACHE_DB_VERSION = 1;
 const LYRICS_OBJECT_STORE = "lyrics";
 
+const LOCAL_LYRICS_DB_NAME = "LocalLyricsDB";
+const LOCAL_LYRICS_DB_VERSION = 1;
+const LOCAL_LYRICS_OBJECT_STORE = "localLyrics";
+
 const MESSAGE_TYPES = {
     FETCH_LYRICS: 'FETCH_LYRICS',
     RESET_CACHE: 'RESET_CACHE',
     GET_CACHED_SIZE: 'GET_CACHED_SIZE',
     TRANSLATE_LYRICS: 'TRANSLATE_LYRICS',
-    FETCH_SPONSOR_SEGMENTS: 'FETCH_SPONSOR_SEGMENTS'
+    FETCH_SPONSOR_SEGMENTS: 'FETCH_SPONSOR_SEGMENTS',
+    UPLOAD_LOCAL_LYRICS: 'UPLOAD_LOCAL_LYRICS',
+    GET_LOCAL_LYRICS_LIST: 'GET_LOCAL_LYRICS_LIST',
+    DELETE_LOCAL_LYRICS: 'DELETE_LOCAL_LYRICS',
+    FETCH_LOCAL_LYRICS: 'FETCH_LOCAL_LYRICS'
 };
 
 const CACHE_STRATEGIES = {
@@ -27,6 +35,7 @@ const PROVIDERS = {
     KPOE: 'kpoe',
     CUSTOM_KPOE: 'customKpoe',
     LRCLIB: 'lrclib',
+    LOCAL: 'local', // New provider for local lyrics
     GEMINI: 'gemini',
     GOOGLE: 'google'
 };
@@ -71,6 +80,22 @@ pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         case MESSAGE_TYPES.FETCH_SPONSOR_SEGMENTS:
             handleFetchSponsorSegments(message.videoId, sendResponse);
+            return true;
+
+        case MESSAGE_TYPES.UPLOAD_LOCAL_LYRICS:
+            handleUploadLocalLyrics(message.songInfo, message.jsonLyrics, sendResponse);
+            return true;
+
+        case MESSAGE_TYPES.GET_LOCAL_LYRICS_LIST:
+            handleGetLocalLyricsList(sendResponse);
+            return true;
+
+        case MESSAGE_TYPES.DELETE_LOCAL_LYRICS:
+            handleDeleteLocalLyrics(message.songId, sendResponse);
+            return true;
+
+        case MESSAGE_TYPES.FETCH_LOCAL_LYRICS:
+            handleFetchLocalLyrics(message.songId, sendResponse);
             return true;
 
         default:
@@ -141,6 +166,51 @@ async function handleGetCacheSize(sendResponse) {
     }
 }
 
+async function handleUploadLocalLyrics(songInfo, jsonLyrics, sendResponse) {
+    try {
+        const songId = `${songInfo.title}-${songInfo.artist}-${Date.now()}`; // Unique ID for local songs
+        await saveLocalLyricsToDB(songId, songInfo, jsonLyrics);
+        sendResponse({ success: true, message: "Local lyrics uploaded successfully.", songId });
+    } catch (error) {
+        console.error("Error uploading local lyrics:", error);
+        sendResponse({ success: false, error: error.message });
+    }
+}
+
+async function handleGetLocalLyricsList(sendResponse) {
+    try {
+        const lyricsList = await getLocalLyricsListFromDB();
+        sendResponse({ success: true, lyricsList });
+    } catch (error) {
+        console.error("Error getting local lyrics list:", error);
+        sendResponse({ success: false, error: error.message });
+    }
+}
+
+async function handleDeleteLocalLyrics(songId, sendResponse) {
+    try {
+        await deleteLocalLyricsFromDB(songId);
+        sendResponse({ success: true, message: "Local lyrics deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting local lyrics:", error);
+        sendResponse({ success: false, error: error.message });
+    }
+}
+
+async function handleFetchLocalLyrics(songId, sendResponse) {
+    try {
+        const localLyrics = await getLocalLyricsFromDB(songId);
+        if (localLyrics) {
+            sendResponse({ success: true, lyrics: localLyrics.lyrics, metadata: localLyrics.songInfo });
+        } else {
+            sendResponse({ success: false, error: "Local lyrics not found." });
+        }
+    } catch (error) {
+        console.error("Error fetching local lyrics:", error);
+        sendResponse({ success: false, error: error.message });
+    }
+}
+
 /* =================================================================
    CORE LYRICS & TRANSLATION LOGIC
    ================================================================= */
@@ -191,6 +261,19 @@ async function getOrFetchLyrics(songInfo, forceReload = false) {
                         break;
                     case PROVIDERS.LRCLIB:
                         lyrics = await fetchLRCLibLyrics(songInfo, fetchOptions);
+                        break;
+                    case PROVIDERS.LOCAL:
+                        // For local lyrics, we need to find a match based on songInfo
+                        const localLyricsList = await getLocalLyricsListFromDB();
+                        const matchedLocalSong = localLyricsList.find(item =>
+                            item.songInfo.title === songInfo.title && item.songInfo.artist === songInfo.artist
+                        );
+                        if (matchedLocalSong) {
+                            const fetchedLocalLyrics = await getLocalLyricsFromDB(matchedLocalSong.songId);
+                            if (fetchedLocalLyrics) {
+                                lyrics = fetchedLocalLyrics.lyrics;
+                            }
+                        }
                         break;
                 }
                 if (!isEmptyLyrics(lyrics)) break;
@@ -303,6 +386,60 @@ function openDB() {
         request.onsuccess = event => resolve(event.target.result);
         request.onerror = event => reject(event.target.error);
     });
+}
+
+function openLocalLyricsDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(LOCAL_LYRICS_DB_NAME, LOCAL_LYRICS_DB_VERSION);
+        request.onupgradeneeded = event => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(LOCAL_LYRICS_OBJECT_STORE)) {
+                db.createObjectStore(LOCAL_LYRICS_OBJECT_STORE, { keyPath: "songId" });
+            }
+        };
+        request.onsuccess = event => resolve(event.target.result);
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
+async function saveLocalLyricsToDB(songId, songInfo, lyrics) {
+    const db = await openLocalLyricsDB();
+    const transaction = db.transaction([LOCAL_LYRICS_OBJECT_STORE], "readwrite");
+    const store = transaction.objectStore(LOCAL_LYRICS_OBJECT_STORE);
+    store.put({ songId, songInfo, lyrics, timestamp: Date.now() });
+}
+
+async function getLocalLyricsFromDB(songId) {
+    const db = await openLocalLyricsDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([LOCAL_LYRICS_OBJECT_STORE], "readonly");
+        const store = transaction.objectStore(LOCAL_LYRICS_OBJECT_STORE);
+        const request = store.get(songId);
+        request.onsuccess = event => resolve(event.target.result);
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
+async function getLocalLyricsListFromDB() {
+    const db = await openLocalLyricsDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([LOCAL_LYRICS_OBJECT_STORE], "readonly");
+        const store = transaction.objectStore(LOCAL_LYRICS_OBJECT_STORE);
+        const request = store.getAll();
+        request.onsuccess = event => resolve(event.target.result.map(item => ({
+            songId: item.songId,
+            songInfo: item.songInfo,
+            timestamp: item.timestamp
+        })));
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
+async function deleteLocalLyricsFromDB(songId) {
+    const db = await openLocalLyricsDB();
+    const transaction = db.transaction([LOCAL_LYRICS_OBJECT_STORE], "readwrite");
+    const store = transaction.objectStore(LOCAL_LYRICS_OBJECT_STORE);
+    store.delete(songId);
 }
 
 async function getLyricsFromDB(key) {

@@ -914,8 +914,158 @@ select:focus {
         align-items: stretch;
     }
 
+    /* Local Lyrics specific adjustments */
+    #local-lyrics .draggable-source-item .drag-handle {
+        color: var(--md-sys-color-on-surface-variant);
+    }
+
     .add-source-container .btn {
         width: 100%;
+    }
+}
+
+/* FAB (Floating Action Button) */
+.fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border: none;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: var(--md-sys-elevation-level-3);
+    transition: background-color var(--animation-duration) var(--animation-timing-function), transform var(--animation-duration) var(--animation-timing-function);
+    z-index: 1000;
+}
+
+.fab:hover {
+    background-color: color-mix(in srgb, var(--md-sys-color-primary) 92%, var(--md-sys-color-on-primary) 8%);
+    transform: translateY(-2px);
+}
+
+.fab:active {
+    background-color: color-mix(in srgb, var(--md-sys-color-primary) 88%, var(--md-sys-color-on-primary) 12%);
+    transform: translateY(0);
+    box-shadow: var(--md-sys-elevation-level-1);
+}
+
+.fab .material-symbols-outlined {
+    font-size: 24px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1001; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    backdrop-filter: blur(5px); /* Blur background */
+    -webkit-backdrop-filter: blur(5px); /* Safari support */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInModal 0.3s ease-out;
+}
+
+.modal-content {
+    background-color: var(--md-sys-color-surface-container);
+    margin: auto;
+    padding: 24px;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--md-sys-elevation-level-3);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    animation: slideInModal 0.3s ease-out;
+}
+
+.modal .card-title {
+    margin-top: 0;
+}
+
+.close-button {
+    color: var(--md-sys-color-on-surface-variant);
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 28px;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--md-sys-color-primary);
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInModal {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive adjustments for FAB and modal */
+@media (max-width: 768px) {
+    .fab {
+        width: 56px; /* Keep original size for 768px, only change for 480px */
+        height: 56px;
+        bottom: 24px;
+        right: 24px;
+    }
+
+    .fab .material-symbols-outlined {
+        font-size: 24px;
+    }
+
+    .modal-content {
+        width: 90%;
+        padding: 24px;
+    }
+
+    .close-button {
+        font-size: 28px;
+        top: 16px;
+        right: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fab {
+        width: 48px;
+        height: 48px;
+        bottom: 16px;
+        right: 16px;
+    }
+
+    .fab .material-symbols-outlined {
+        font-size: 20px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 16px;
+    }
+
+    .close-button {
+        font-size: 24px;
+        top: 12px;
+        right: 12px;
     }
 }
 

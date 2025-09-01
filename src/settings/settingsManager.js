@@ -3,7 +3,7 @@ const pBrowser = window.chrome || window.browser;
 
 let currentSettings = {
     lyricsProvider: 'kpoe',
-    lyricsSourceOrder: 'apple,lyricsplus,musixmatch,spotify,musixmatch-word', 
+    lyricsSourceOrder: 'apple,lyricsplus,musixmatch,spotify,musixmatch-word',
     wordByWord: true,
     lightweight: false,
     isEnabled: true,
@@ -12,18 +12,18 @@ let currentSettings = {
     cacheStrategy: 'aggressive',
     fontSize: 16,
     hideOffscreen: false,
-    compabilityWipe: false, 
+    compabilityWipe: false,
     blurInactive: false,
     dynamicPlayer: false,
     customCSS: '',
     translationProvider: 'google',
-    geminiApiKey: '', 
-    geminiModel: 'gemini-2.5-flash-lite', 
-    overrideTranslateTarget: false, 
-    customTranslateTarget: '', 
+    geminiApiKey: '',
+    geminiModel: 'gemini-2.5-flash-lite',
+    overrideTranslateTarget: false,
+    customTranslateTarget: '',
     overrideGeminiPrompt: false,
-    customGeminiPrompt: '', 
-    overrideGeminiRomanizePrompt: false, 
+    customGeminiPrompt: '',
+    overrideGeminiRomanizePrompt: false,
     customGeminiRomanizePrompt: '',
     romanizationProvider: 'google',
     geminiRomanizationModel: 'gemini-2.0-flash',
@@ -31,7 +31,8 @@ let currentSettings = {
     useSongPaletteAllModes: false,
     overridePaletteColor: '',
     largerTextMode: 'lyrics', // 'lyrics' or 'romanization'
-    customKpoeUrl: '' 
+    customKpoeUrl: '',
+    localLyrics: [] // New setting for local lyrics list
 };
 
 // Storage helper function (using pBrowser.storage.local directly)
@@ -140,6 +141,76 @@ export function clearCache() {
         console.warn("pBrowser.runtime.sendMessage is not available. Skipping cache clear.");
         alert('Cache clearing feature is unavailable in this context.');
     }
+}
+
+export function uploadLocalLyrics(songInfo, jsonLyrics) {
+    return new Promise((resolve, reject) => {
+        if (pBrowser && pBrowser.runtime && typeof pBrowser.runtime.sendMessage === 'function') {
+            pBrowser.runtime.sendMessage({
+                type: 'UPLOAD_LOCAL_LYRICS',
+                songInfo,
+                jsonLyrics
+            }, (response) => {
+                if (pBrowser.runtime.lastError) {
+                    console.error("Error uploading local lyrics:", pBrowser.runtime.lastError.message);
+                    return reject(pBrowser.runtime.lastError.message);
+                }
+                if (response && response.success) {
+                    resolve(response);
+                } else {
+                    console.error("Error uploading local lyrics from response:", response ? response.error : "No response");
+                    reject(response ? response.error : 'Unknown error');
+                }
+            });
+        } else {
+            console.warn("pBrowser.runtime.sendMessage is not available. Skipping local lyrics upload.");
+            reject('Local lyrics upload feature is unavailable in this context.');
+        }
+    });
+}
+
+export function getLocalLyricsList() {
+    return new Promise((resolve, reject) => {
+        if (pBrowser && pBrowser.runtime && typeof pBrowser.runtime.sendMessage === 'function') {
+            pBrowser.runtime.sendMessage({ type: 'GET_LOCAL_LYRICS_LIST' }, (response) => {
+                if (pBrowser.runtime.lastError) {
+                    console.error("Error getting local lyrics list:", pBrowser.runtime.lastError.message);
+                    return reject(pBrowser.runtime.lastError.message);
+                }
+                if (response && response.success) {
+                    resolve(response.lyricsList);
+                } else {
+                    console.error("Error getting local lyrics list from response:", response ? response.error : "No response");
+                    reject(response ? response.error : 'Unknown error');
+                }
+            });
+        } else {
+            console.warn("pBrowser.runtime.sendMessage is not available. Skipping local lyrics list retrieval.");
+            reject('Local lyrics list feature is unavailable in this context.');
+        }
+    });
+}
+
+export function deleteLocalLyrics(songId) {
+    return new Promise((resolve, reject) => {
+        if (pBrowser && pBrowser.runtime && typeof pBrowser.runtime.sendMessage === 'function') {
+            pBrowser.runtime.sendMessage({ type: 'DELETE_LOCAL_LYRICS', songId }, (response) => {
+                if (pBrowser.runtime.lastError) {
+                    console.error("Error deleting local lyrics:", pBrowser.runtime.lastError.message);
+                    return reject(pBrowser.runtime.lastError.message);
+                }
+                if (response && response.success) {
+                    resolve(response);
+                } else {
+                    console.error("Error deleting local lyrics from response:", response ? response.error : "No response");
+                    reject(response ? response.error : 'Unknown error');
+                }
+            });
+        } else {
+            console.warn("pBrowser.runtime.sendMessage is not available. Skipping local lyrics deletion.");
+            reject('Local lyrics deletion feature is unavailable in this context.');
+        }
+    });
 }
 
 export function setupSettingsMessageListener(callback) {
