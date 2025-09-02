@@ -236,7 +236,7 @@ async function getOrFetchLyrics(songInfo, forceReload = false) {
             const fetchedLocalLyrics = await getLocalLyricsFromDB(matchedLocalSong.songId);
             if (fetchedLocalLyrics) {
                 console.log(`Found and returning local lyrics for "${songInfo.title}"`);
-                return fetchedLocalLyrics.lyrics;
+                return parseKPoeFormat(fetchedLocalLyrics.lyrics);
             }
         }
     }
