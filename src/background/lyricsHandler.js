@@ -226,6 +226,19 @@ async function getOrFetchLyrics(songInfo, forceReload = false) {
             lyricsCache.set(cacheKey, dbCachedLyrics);
             return dbCachedLyrics;
         }
+
+        // Explicitly check for local lyrics before attempting any external fetches
+        const localLyricsList = await getLocalLyricsListFromDB();
+        const matchedLocalSong = localLyricsList.find(item =>
+            item.songInfo.title === songInfo.title && item.songInfo.artist === songInfo.artist
+        );
+        if (matchedLocalSong) {
+            const fetchedLocalLyrics = await getLocalLyricsFromDB(matchedLocalSong.songId);
+            if (fetchedLocalLyrics) {
+                console.log(`Found and returning local lyrics for "${songInfo.title}"`);
+                return fetchedLocalLyrics.lyrics;
+            }
+        }
     }
 
     if (ongoingFetches.has(cacheKey)) {
