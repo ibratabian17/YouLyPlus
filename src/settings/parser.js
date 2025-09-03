@@ -1,146 +1,122 @@
-function parseLRCInternal(lrcContent) {
-    const lines = lrcContent.split('\n');
-    const parsedLyrics = [];
-    const timeRegex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/g;
 
-    lines.forEach(line => {
-        let match;
-        const timestamps = [];
-        let text = line;
+export function parseSyncedLyrics(lrcContent) {
+  const lineTimeRegex = /\[(\d+):(\d{2})(?:[.,](\d+))?\]/g;
+  const wordTimeRegex = /<(\d+):(\d{2})(?:[.,](\d+))?>/g;
 
-        while ((match = timeRegex.exec(line)) !== null) {
-            const minutes = parseInt(match[1], 10);
-            const seconds = parseInt(match[2], 10);
-            const milliseconds = parseInt(match[3], 10);
-            const totalSeconds = minutes * 60 + seconds + milliseconds / (match[3].length === 2 ? 100 : 1000);
-            timestamps.push(totalSeconds);
-            text = text.replace(match[0], '').trim();
+  const parseTime = (match) => {
+    if (!match) return 0;
+    const minutes = parseInt(match[1], 10);
+    const seconds = parseInt(match[2], 10);
+    let milliseconds = 0;
+    if (match[3]) {
+      // Normalizes millisecond part (e.g., "52" -> 520)
+      const msStr = match[3].padEnd(3, '0').substring(0, 3);
+      milliseconds = parseInt(msStr, 10);
+    }
+    return (minutes * 60 * 1000) + (seconds * 1000) + milliseconds;
+  };
+
+  const lines = lrcContent.split('\n');
+  const parsedLyrics = [];
+  const isEnhanced = /<(\d+):(\d{2})/.test(lrcContent);
+
+  lines.forEach(line => {
+    const lineTimeMatches = [...line.matchAll(lineTimeRegex)];
+    if (lineTimeMatches.length === 0) return;
+
+    const textContent = line.replace(lineTimeRegex, '').trim();
+    if (!textContent) return; // Skip empty lines
+
+    let syllabus = [];
+    if (isEnhanced && textContent) {
+      wordTimeRegex.lastIndex = 0;
+      
+      const parts = textContent.split(wordTimeRegex);
+      const wordMatches = [...textContent.matchAll(wordTimeRegex)];
+      
+      let textParts = [parts[0] || ''];
+      
+      for (let i = 1; i < parts.length; i++) {
+        textParts.push(parts[i] || '');
+      }
+      
+      wordMatches.forEach((wordMatch, index) => {
+        const text = textParts[index + 1]; 
+        if (text) {
+          syllabus.push({
+            text: text,
+            time: parseTime(wordMatch),
+            duration: 0
+          });
         }
-
-        timestamps.forEach(startTime => {
-            parsedLyrics.push({
-                text: text,
-                startTime: startTime,
-                duration: 0,
-                endTime: 0
-            });
+      });
+      
+      const initialText = textParts[0];
+      if (initialText && syllabus.length === 0) {
+        syllabus.push({ 
+          text: initialText, 
+          time: 0, 
+          duration: 0 
         });
+      }
+
+      for (let i = 0; i < syllabus.length - 1; i++) {
+        syllabus[i].duration = syllabus[i + 1].time - syllabus[i].time;
+      }
+      
+      if (syllabus.length > 0) {
+        syllabus[syllabus.length - 1].duration = 500;
+      }
+    }
+
+    lineTimeMatches.forEach(match => {
+      parsedLyrics.push({
+        time: parseTime(match),
+        duration: 0, // Will be calculated later
+        text: textContent.replace(wordTimeRegex, ''),
+        syllabus: isEnhanced ? [...syllabus] : [],
+        element: { 
+          key: "", 
+          songPart: "", 
+          singer: "" 
+        }
+      });
     });
+  });
 
-    parsedLyrics.sort((a, b) => a.startTime - b.startTime);
+  parsedLyrics.sort((a, b) => a.time - b.time);
 
-    for (let i = 0; i < parsedLyrics.length; i++) {
-        if (i < parsedLyrics.length - 1) {
-            parsedLyrics[i].endTime = parsedLyrics[i + 1].startTime;
-            parsedLyrics[i].duration = parsedLyrics[i].endTime - parsedLyrics[i].startTime;
-        } else {
-            parsedLyrics[i].duration = 5;
-            parsedLyrics[i].endTime = parsedLyrics[i].startTime + parsedLyrics[i].duration;
-        }
+  for (let i = 0; i < parsedLyrics.length; i++) {
+    if (i < parsedLyrics.length - 1) {
+      parsedLyrics[i].duration = parsedLyrics[i + 1].time - parsedLyrics[i].time;
+    } else {
+      const lastSyllable = parsedLyrics[i].syllabus?.[parsedLyrics[i].syllabus.length - 1];
+      parsedLyrics[i].duration = lastSyllable 
+        ? (lastSyllable.time + lastSyllable.duration) - parsedLyrics[i].time
+        : 5000;
     }
+  }
 
-    return {
-        type: 'Line',
-        data: parsedLyrics.filter(line => line.text.trim() !== ''),
-        metadata: { source: "Local Files" }
-    };
-}
+  const validLyrics = parsedLyrics.filter(line => 
+    line.text.trim() !== '' && 
+    line.time >= 0 && 
+    !isNaN(line.time)
+  );
 
-function parseELRCInternal(elrcContent) {
-    const lines = elrcContent.split('\n');
-    const parsedLyrics = [];
-    const lineTimeRegex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/g;
-    const wordTimeRegex = /<(\d{2}):(\d{2})\.(\d{2,3})>/g;
-
-    lines.forEach(line => {
-        const lineTimeMatch = lineTimeRegex.exec(line);
-        if (!lineTimeMatch) return;
-
-        const lineMinutes = parseInt(lineTimeMatch[1], 10);
-        const lineSeconds = parseInt(lineTimeMatch[2], 10);
-        const lineMilliseconds = parseInt(lineTimeMatch[3], 10);
-        const lineStartTime = lineMinutes * 60 + lineSeconds + lineMilliseconds / (lineTimeMatch[3].length === 2 ? 100 : 1000);
-
-        let textContent = line.substring(lineTimeRegex.lastIndex);
-        let currentWordIndex = 0;
-        const syllabus = [];
-        let wordMatch;
-
-        wordTimeRegex.lastIndex = 0;
-        while ((wordMatch = wordTimeRegex.exec(textContent)) !== null) {
-            const wordMinutes = parseInt(wordMatch[1], 10);
-            const wordSeconds = parseInt(wordMatch[2], 10);
-            const wordMilliseconds = parseInt(wordMatch[3], 10);
-            const wordStartTime = wordMinutes * 60 + wordSeconds + wordMilliseconds / (wordMatch[3].length === 2 ? 100 : 1000);
-
-            const wordText = textContent.substring(currentWordIndex, wordMatch.index).trim();
-            if (wordText) {
-                syllabus.push({
-                    text: wordText,
-                    time: wordStartTime,
-                    duration: 0
-                });
-            }
-            currentWordIndex = wordTimeRegex.lastIndex;
-        }
-
-        const lastWordText = textContent.substring(currentWordIndex).trim();
-        if (lastWordText && syllabus.length > 0) {
-            syllabus[syllabus.length - 1].text += ` ${lastWordText}`;
-        } else if (lastWordText) {
-            syllabus.push({
-                text: lastWordText,
-                time: lineStartTime,
-                duration: 0
-            });
-        }
-
-        for (let i = 0; i < syllabus.length; i++) {
-            if (i < syllabus.length - 1) {
-                syllabus[i].duration = syllabus[i + 1].time - syllabus[i].time;
-            } else {
-                syllabus[i].duration = 0.5;
-            }
-        }
-
-        parsedLyrics.push({
-            text: textContent.replace(wordTimeRegex, ''), 
-            startTime: lineStartTime,
-            duration: 0,
-            endTime: 0,
-            syllabus: syllabus.filter(syl => syl.text.trim() !== '')
-        });
-    });
-
-    parsedLyrics.sort((a, b) => a.startTime - b.startTime);
-
-    for (let i = 0; i < parsedLyrics.length; i++) {
-        if (i < parsedLyrics.length - 1) {
-            parsedLyrics[i].endTime = parsedLyrics[i + 1].startTime;
-            parsedLyrics[i].duration = parsedLyrics[i].endTime - parsedLyrics[i].startTime;
-        } else {
-            parsedLyrics[i].duration = 2;
-            parsedLyrics[i].endTime = parsedLyrics[i].startTime + parsedLyrics[i].duration;
-        }
-    }
-
-    return {
-        type: 'Word',
-        data: parsedLyrics.filter(line => line.text.trim() !== ''),
-        metadata: { source: "Local Files" }
-    };
-}
-
-export function parseSyncedLyrics(lyricsContent) {
-    if (/<(\d{2}):(\d{2})\.(\d{2,3})>/.test(lyricsContent)) {
-        console.log("Attempting to parse as ELRC.");
-        const elrcResult = parseELRCInternal(lyricsContent);
-        if (elrcResult.data.some(line => line.syllabus && line.syllabus.length > 0)) {
-            return elrcResult;
-        }
-    }
-    console.log("Attempting to parse as LRC.");
-    return parseLRCInternal(lyricsContent);
+  return {
+    KpoeTools: '1.0-parseSyncedLyrics-LRC',
+    type: isEnhanced ? 'Word' : 'Line',
+    metadata: {
+      source: "Local Files",
+      songWriters: [],
+      title: '',
+      language: '',
+      agents: {},
+      totalDuration: ''
+    },
+    lyrics: validLyrics,
+    cached: 'None'
+  };
 }
 
 export function parseAppleTTML(ttml, offset = 0, separate = false) {
