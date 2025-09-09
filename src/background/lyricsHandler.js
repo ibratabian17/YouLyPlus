@@ -604,7 +604,7 @@ async function fetchYouTubeSubtitles(songInfo) {
 
         if (!selectedTrack) return null;
 
-        const url = new URL(selectedTrack.baseUrl);
+        const url = new URL(selectedTrack.baseUrl || selectedTrack.url);
         url.searchParams.set('fmt', 'json3');
 
         const response = await fetch(url.toString());

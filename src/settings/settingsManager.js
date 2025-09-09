@@ -32,7 +32,6 @@ let currentSettings = {
     overridePaletteColor: '',
     largerTextMode: 'lyrics', // 'lyrics' or 'romanization'
     customKpoeUrl: '',
-    localLyrics: [] // New setting for local lyrics list
 };
 
 // Storage helper function (using pBrowser.storage.local directly)
