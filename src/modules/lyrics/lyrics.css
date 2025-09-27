@@ -194,7 +194,7 @@
     overflow: hidden;
     opacity: 0;
     font-size: var(--lyplus-font-size-subtext);
-    transition: max-height .2s, opacity .6s, padding .6s;
+    transition: max-height .3s, opacity .6s, padding .6s;
 }
 
 .lyrics-line.active .background-vocal-container {

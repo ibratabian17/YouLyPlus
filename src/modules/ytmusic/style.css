@@ -43,11 +43,6 @@ ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyric
     font-size: 34px;
 }
 
-/* Apply a lesser blur to lines immediately adjacent to the active one */
-ytmusic-player-page:not([player-fullscreened]) #lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line:not(.active)[class*="next-"]:not(.lyrics-gap) {
-    filter: blur(0.035em);
-}
-
 
 /* Show buttons only when lyrics are visible */
 ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) #lyrics-plus-buttons-wrapper {
@@ -250,6 +245,15 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
     ytmusic-player-page[video-mode]:not(:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line.lyrics-gap .main-vocal-container {
         transform-origin: center !important;
     }
+
+
+    ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-line.lyrics-activest) .background-vocal-container{
+        max-height: 10em;
+    }
+    ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-line.lyrics-activest){
+        opacity: 0;
+        transition: opacity 0.3s ease 0.3s, transform 0.4s ease var(--lyrics-line-delay, 0ms), filter 0.3s ease;
+    }
 }
 
 #lyrics-plus-container {
@@ -261,10 +265,11 @@ Lyrics+ without any visual bug*/
 #songDivContainer {
     display: none !important;
 }
+
 :root:has(#ThemeSong-MainContainer) {
-#thumbnail>img {
-    object-fit: contain !important;
-}
+    #thumbnail>img {
+        object-fit: contain !important;
+    }
 
     #layout.dynamic-player #player-page,
     #player-page[player-fullscreened] {
@@ -286,8 +291,9 @@ Lyrics+ without any visual bug*/
     }
 
     body:has(#ThemeSong-MainContainer #DynamicLight) #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container::after {
-        backdrop-filter: saturate(1.2) ;
+        backdrop-filter: saturate(1.2);
     }
+
     body:has(#ThemeSong-MainContainer #DynamicLight) #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container canvas {
         opacity: .4;
         filter: brightness(1.8) contrast(0.6);

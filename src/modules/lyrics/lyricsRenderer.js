@@ -137,8 +137,8 @@ class LyricsPlusRenderer {
         : container.getBoundingClientRect().top;
 
     this._cachedContainerRect = {
-      containerTop,
-      scrollContainerTop: containerTop,
+      containerTop: containerTop - 50,
+      scrollContainerTop: containerTop - 50,
     };
 
     if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
@@ -559,7 +559,7 @@ class LyricsPlusRenderer {
         const isFollowedByManualGap =
           nextElement && nextElement.classList.contains("lyrics-gap");
         if (gap > 0 && !isFollowedByManualGap) {
-          const extension = Math.min(0.5, gap);
+          const extension = Math.min(1.3, gap);
           currentLine.newEndTime = currentLine.originalEndTime + extension;
         }
       }
@@ -692,7 +692,7 @@ class LyricsPlusRenderer {
         let referenceFont = mainContainer.firstChild
           ? getComputedFont(mainContainer.firstChild)
           : "400 16px sans-serif";
-        const combinedText = wordBuffer.map((s) => s.text).join("");
+        const combinedText = wordBuffer.map((s) => this._getDataText(s)).join("");
         const totalDuration = currentWordEndTime - currentWordStartTime;
         const shouldEmphasize =
           !lightweight &&
@@ -1929,8 +1929,8 @@ class LyricsPlusRenderer {
     // Step 1: Grow Pass.
     if (isGrowable && isFirstSyllable && allWordCharSpans) {
       const finalDuration = syllable._wordDurationMs ?? syllable._durationMs;
-      const baseDelayPerChar = finalDuration * 0.07;
-      const growDurationMs = finalDuration * 1.2;
+      const baseDelayPerChar = finalDuration * 0.09;
+      const growDurationMs = finalDuration * 1.5;
 
       allWordCharSpans.forEach((span) => {
         const horizontalOffset = parseFloat(span.dataset.horizontalOffset) || 0;
@@ -2239,7 +2239,7 @@ class LyricsPlusRenderer {
       !forceScroll &&
       Math.abs(
         activeLine.getBoundingClientRect().top - scrollContainerTop - paddingTop
-      ) < 5
+      ) < 1
     ) {
       return;
     }
