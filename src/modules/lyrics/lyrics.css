@@ -218,7 +218,7 @@
 .lyrics-line .lyrics-syllable {
     display: inline-block;
     color: var(--lyplus-text-secondary);
-    white-space: break-spaces;
+    white-space: normal;
     font-kerning: none;
     font-variant-ligatures: none;
     font-feature-settings: "liga" 0;

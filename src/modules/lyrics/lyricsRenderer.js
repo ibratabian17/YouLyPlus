@@ -812,9 +812,10 @@ class LyricsPlusRenderer {
             pendingSyllable,
             pendingSyllableFont,
             currentDuration
-          );
+          ) * 1.03;
 
           pendingSyllable._nextSyllableInWord = nextSyllable;
+          //avoid bleeding lmao
           pendingSyllable._preHighlightDurationMs = currentDuration - delayMs;
           pendingSyllable._preHighlightDelayMs = delayMs;
         }
@@ -869,6 +870,7 @@ class LyricsPlusRenderer {
             currentLine.appendChild(backgroundContainer))
           : mainContainer;
         targetContainer.appendChild(wordSpan);
+        targetContainer.appendChild(document.createTextNode(" "));
 
         pendingSyllable =
           syllableElements.length > 0
