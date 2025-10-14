@@ -108,6 +108,8 @@
     content-visibility: auto;
     contain-intrinsic-size: 100% 3em;
     text-rendering: optimizeLegibility;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
 }
 
 /* --- Line States & Modifiers --- */
@@ -262,8 +264,8 @@
     background-position: calc(100% + 0.5em) 0%, right;
 }
 
-.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
-.lyrics-word.growable:has(.lyrics-syllable.highlight) .lyrics-syllable {
+#lyrics-plus-container:not(.lightweight-mode) .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
+#lyrics-plus-container:not(.lightweight-mode) .lyrics-word.growable:has(.lyrics-syllable.highlight) .lyrics-syllable {
     transform: translateY(-4%) translateZ(1px);
 }
 

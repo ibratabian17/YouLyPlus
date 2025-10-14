@@ -870,7 +870,8 @@ class LyricsPlusRenderer {
             currentLine.appendChild(backgroundContainer))
           : mainContainer;
         targetContainer.appendChild(wordSpan);
-        targetContainer.appendChild(document.createTextNode(" "));
+        const trailText = combinedText.match(/\s+$/)
+        if (trailText) targetContainer.appendChild(document.createTextNode(trailText));
 
         pendingSyllable =
           syllableElements.length > 0
@@ -892,7 +893,7 @@ class LyricsPlusRenderer {
             syllableIndex === line.syllabus.length - 1;
           const nextSyllable = line.syllabus[syllableIndex + 1];
           const endsWithExplicitDelimiter =
-            s.isLineEnding || /\s$/.test(s.text);
+            s.isLineEnding || /\s$/.test(this._getDataText(s));
           const isBackgroundStatusChanging =
             nextSyllable &&
             s.isBackground !== nextSyllable.isBackground &&
@@ -1005,6 +1006,8 @@ class LyricsPlusRenderer {
               sylSpan._durationMs = syllable.duration;
               sylSpan._endTimeMs = syllable.time + syllable.duration;
               romanizationContainer.appendChild(sylSpan);
+              const trailText = romanizedText.match(/\s+$/)
+              if (trailText) romanizationContainer.appendChild(document.createTextNode(trailText));
             }
           });
           if (romanizationContainer.children.length > 0) {
@@ -1406,6 +1409,10 @@ class LyricsPlusRenderer {
     container.classList.toggle(
       "use-song-palette-all-modes",
       !!currentSettings.useSongPaletteAllModes
+    );
+    container.classList.toggle(
+      "lightweight-mode",
+      lightweight
     );
 
     if (currentSettings.overridePaletteColor) {
