@@ -132,16 +132,17 @@
     }
 }
 
-#lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line:not(.active):not(.lyrics-gap) {
+#lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line:not(.active):not(.lyrics-gap),
+#lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-plus-metadata:not(.lyrics-activest) {
     filter: blur(var(--lyplus-blur-amount));
 }
 
-#lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line:not(.active)[class*="next-"]:not(.lyrics-gap),
 #lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line.pre-active-line:not(.lyrics-gap):not(.active),
 #lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line.next-active-line:not(.lyrics-gap):not(.active),
 #lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line.lyrics-activest:not(.active):not(.lyrics-gap) {
     filter: blur(var(--lyplus-blur-amount-near));
 }
+
 
 #lyrics-plus-container.hide-offscreen .lyrics-line.viewport-hidden * {
     visibility: hidden;

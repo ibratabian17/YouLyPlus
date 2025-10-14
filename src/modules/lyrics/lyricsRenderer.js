@@ -1282,14 +1282,17 @@ class LyricsPlusRenderer {
 
     const metadataContainer = document.createElement("div");
     metadataContainer.className = "lyrics-plus-metadata";
-    metadataContainer.dataset.startTime =
-      (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 0.5;
-    metadataContainer.dataset.endTime =
-      (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 10;
+    if (lyrics.data[lyrics.data.length - 1]?.endTime != 0) {
+      // musixmatch sometimes returning plainText duh
+      metadataContainer.dataset.startTime =
+        (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 0.8;
+      metadataContainer.dataset.endTime =
+        (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 10;
+    }
 
     // Note: songWriters and source may not be available on subsequent updates.
     // They should ideally be part of the main 'lyrics' object if they can change.
-    if (lyrics.metadata.songWriters) {
+    if (lyrics.metadata.songWriters && lyrics.metadata.songWriters.length > 0) {
       const songWritersDiv = document.createElement("span");
       songWritersDiv.className = "lyrics-song-writters";
       songWritersDiv.innerText = `${t(
