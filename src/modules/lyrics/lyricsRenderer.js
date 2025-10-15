@@ -658,8 +658,6 @@ class LyricsPlusRenderer {
         ? singerClassMap[line.element.singer] || "singer-left"
         : "singer-left";
       currentLine.classList.add(singerClass);
-      if (this._isRTL(this._getDataText(line, true)))
-        currentLine.classList.add("rtl-text");
       if (!currentLine.hasClickListener) {
         currentLine.addEventListener("click", this._onLyricClick.bind(this));
         currentLine.hasClickListener = true;
@@ -667,8 +665,6 @@ class LyricsPlusRenderer {
 
       const mainContainer = document.createElement("div");
       mainContainer.classList.add("main-vocal-container");
-      if (this._isRTL(this._getDataText(line, true)))
-        mainContainer.classList.add("rtl-text");
       currentLine.appendChild(mainContainer);
 
       this._renderTranslationContainer(currentLine, line, displayMode);
@@ -759,7 +755,7 @@ class LyricsPlusRenderer {
           sylSpan._endTimeMs = s.time + s.duration;
           sylSpan._wordDurationMs = totalDuration;
 
-          if (this._isRTL(this._getDataText(s)))
+          if (this._isRTL(this._getDataText(s, true)))
             sylSpan.classList.add("rtl-text");
 
           syllableElements.push(sylSpan);
@@ -909,6 +905,10 @@ class LyricsPlusRenderer {
       } else {
         mainContainer.textContent = line.text;
       }
+      if (this._isRTL(mainContainer.textContent))
+        mainContainer.classList.add("rtl-text");
+       if (this._isRTL(mainContainer.textContent))
+        currentLine.classList.add("rtl-text");
       fragment.appendChild(currentLine);
     });
   }
@@ -990,8 +990,6 @@ class LyricsPlusRenderer {
         ) {
           const romanizationContainer = document.createElement("div");
           romanizationContainer.classList.add("lyrics-romanization-container");
-          if (this._isRTL(lineData.text))
-            romanizationContainer.classList.add("rtl-text");
           lineData.syllabus.forEach((syllable) => {
             const romanizedText = this._getDataText(syllable, false);
             if (romanizedText) {
@@ -1010,6 +1008,9 @@ class LyricsPlusRenderer {
               if (trailText) romanizationContainer.appendChild(document.createTextNode(trailText));
             }
           });
+
+          if (this._isRTL(romanizationContainer.textContent))
+            romanizationContainer.classList.add("rtl-text");
           if (romanizationContainer.children.length > 0) {
             lineElement.appendChild(romanizationContainer);
           }
@@ -1021,7 +1022,7 @@ class LyricsPlusRenderer {
           romanizationContainer.classList.add("lyrics-romanization-container");
           const romanizedText = this._getDataText(lineData, false);
           romanizationContainer.textContent = romanizedText;
-          if (this._isRTL(lineData.text))
+          if (this._isRTL(romanizationContainer.textContent))
             romanizationContainer.classList.add("rtl-text");
           lineElement.appendChild(romanizationContainer);
         }
