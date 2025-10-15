@@ -263,7 +263,8 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
 }
 
 #lyrics-plus-container {
-    --lyplus-font-family: YouTube Sans;
+    --lyplus-font-family: Roboto;
+    /*Yt sans are ugly i swear*/
 }
 
 /* Fix UI when user using ThemeSong Extension, so using this css will aloow them to use
