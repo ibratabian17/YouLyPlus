@@ -35,7 +35,7 @@ YouLy+ is packed with features designed to enhance your lyrics experience:
 ### 🌐 Translation & Romanization
 
 -   **Instant Translation:** Translate lyrics on the fly using **Google Translate** or the powerful **Gemini AI** (need API KEY).
--   **Romanization:** See lyrics written in the familiar English alphabet, even for languages that use different writing systems (like Japanese, Korean, or Russian).
+-   **Romanization:** See lyrics written in the familiar English alphabet, even for languages that use different writing systems (like Japanese, Korean, or Russian). (Only for some songs, if it doesn't exist, it will use lyrics-on-the-fly romanization)
 -   **Full Gemini AI Control:** For advanced users, you can connect your own Gemini AI account, choose different AI settings, and even create your own instructions for how translations should work.
 
 ### 🎨 Appearance & Customization
