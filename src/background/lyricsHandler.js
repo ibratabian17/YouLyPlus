@@ -1,5 +1,6 @@
 // Universal Browser API handle
 const pBrowser = chrome || browser;
+import { createRomanizationPrompt } from "./geminiHandler.js"
 
 /* =================================================================
    CONSTANTS
@@ -711,6 +712,7 @@ async function fetchGeminiTranslate(texts, targetLang, settings) {
     const requestBody = {
         contents: [{ parts: [{ text: prompt }] }],
         generation_config: {
+            temperature: 0.0,
             response_mime_type: "application/json",
             responseSchema: {
                 type: "OBJECT",
@@ -758,292 +760,6 @@ async function fetchGeminiTranslate(texts, targetLang, settings) {
         console.error("Gemini response parsing failed:", e, "\nRaw response:", data.candidates[0].content.parts[0].text);
         throw new Error(`Gemini translation failed: Could not parse valid JSON. ${e.message}`);
     }
-}
-
-async function fetchGeminiRomanize(structuredInput, settings) {
-    const { geminiApiKey, geminiRomanizationModel, overrideGeminiRomanizePrompt, customGeminiRomanizePrompt } = settings;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiRomanizationModel}:generateContent?key=${geminiApiKey}`;
-
-    const { lyricsForApi, reconstructionPlan } = prepareLyricsForGemini(structuredInput);
-
-    if (lyricsForApi.length === 0) {
-        return reconstructRomanizedLyrics([], reconstructionPlan);
-    }
-
-    const initialUserPrompt = (overrideGeminiRomanizePrompt && customGeminiRomanizePrompt) ?
-        customGeminiRomanizePrompt : `You are a linguistic expert AI specializing ONLY in precise **natural phonetic romanization** (NOT translation).
-You MUST follow these rules like a strict compiler. Any violation is an error.
-
-# GLOBAL PRINCIPLES
-1. **Romanization only** – never translate or explain meaning.
-2. **Natural phonetic style for ALL languages**:
-   - Arabic → assimilate natural sounds: e.g. "fi al-fasl" → "fil fasl", "al-shams" → "ash shams".
-   - Japanese → Hepburn phonetic: "こんにちは" → "konnichiwa".
-   - Korean → spoken style Revised Romanization: "안녕하세요" → "annyeong haseyo".
-   - Chinese → Pinyin without tone marks, natural spacing: "你好" → "ni hao".
-   - Other languages → their most widely recognized **natural phonetic pronunciation**, not academic strict forms.
-3. **Preserve original segmentation** – do not merge or drop words.
-4. **No extra text** – never add explanations, notes, or translation.
-5. **Case & style** – all output in lowercase Latin letters, unless capitalization is required in the source (e.g. names).
-
-# GOLDEN RULE
-- Romanize the **entire line** naturally first.  
-- THEN split the romanized line into chunks matching the input.  
-- Chunks are subdivisions of the final romanized line, NOT independent romanizations.  
-- Always preserve final vowel sounds from the original script if they exist.
-- Add space if it was a different word, do not trim them.
-
-# CHUNK RULES
-1. Chunk count must **exactly** match input.  
-2. Every chunk must contain some text (never empty).  
-3. Distribute text proportionally. Do not merge all into one chunk.  
-4. Preserve \`chunkIndex\` values strictly.  
-5. Preserve line order with \`original_line_index\`.  
-
-# VALIDATION CHECKLIST
-Before finalizing, you MUST ensure for every line:
-- The number of chunks matches input.  
-- No chunk has empty text.  
-- Romanization is natural, flowing, and phonetically correct.  
-- Distribution across chunks is proportional.  
-
-# EXAMPLES
-
-### Arabic (natural phonetic)
-Input: ["أَنْتَ ", "فِي ", "الْفَصْلِ"]  
-❌ Wrong: ["anta", "fi", "al-fasli"]  
-✅ Correct: ["anta", "fil", "fasli"]
-
-Input: ["السلام", "عليكم"]  
-❌ Wrong: ["as", "salamualaikum"]  
-✅ Correct: ["assalam", "alaikum"]
-
----
-
-### Japanese (natural phonetic)
-Input: ["こん", "にち", "は"]  
-❌ Wrong: ["konnichiwa", "", ""]  
-✅ Correct: ["kon", "nichi", "wa"]
-
----
-
-### Korean (natural phonetic)
-Input: ["안녕", "하세요"]  
-❌ Wrong: ["annyeong haseyo", ""]  
-✅ Correct: ["annyeong", "haseyo"]
-
----
-
-### Chinese (natural phonetic)
-Input: ["你", "好"]  
-❌ Wrong: ["nihao", ""]  
-✅ Correct: ["ni", "hao"]
-
----
-
-# TASK
-Now, romanize the following lyrics **strictly following all rules above**:
-${JSON.stringify(lyricsForApi, null, 2)}`;
-
-    const schema = {
-        type: "OBJECT",
-        properties: {
-            romanized_lyrics: {
-                type: "ARRAY",
-                description: "An array of romanized lyric line objects, matching the input array's order and length.",
-                items: {
-                    type: "OBJECT",
-                    properties: {
-                        text: { type: "STRING", description: "The fully romanized text of the entire line." },
-                        original_line_index: { type: "INTEGER", description: "The original index of the line from the input, which must be preserved." },
-                        chunk: {
-                            type: "ARRAY",
-                            nullable: true,
-                            items: {
-                                type: "OBJECT",
-                                properties: {
-                                    text: { type: "STRING", description: "The text of a single romanized chunk. MUST NOT be empty." },
-                                    chunkIndex: { type: "INTEGER", description: "The original index of the chunk, which must be preserved." }
-                                },
-                                required: ["text", "chunkIndex"]
-                            }
-                        }
-                    },
-                    required: ["text", "original_line_index"]
-                }
-            }
-        },
-        required: ["romanized_lyrics"]
-    };
-
-    const selectiveSchema = {
-        type: "OBJECT",
-        properties: {
-            fixed_lines: {
-                type: "ARRAY",
-                description: "An array of corrected romanized lyric line objects for only the problematic lines.",
-                items: {
-                    type: "OBJECT",
-                    properties: {
-                        text: { type: "STRING", description: "The fully romanized text of the entire line." },
-                        original_line_index: { type: "INTEGER", description: "The original index of the line from the input, which must be preserved." },
-                        chunk: {
-                            type: "ARRAY",
-                            nullable: true,
-                            items: {
-                                type: "OBJECT",
-                                properties: {
-                                    text: { type: "STRING", description: "The text of a single romanized chunk. MUST NOT be empty." },
-                                    chunkIndex: { type: "INTEGER", description: "The original index of the chunk, which must be preserved." }
-                                },
-                                required: ["text", "chunkIndex"]
-                            }
-                        }
-                    },
-                    required: ["text", "original_line_index"]
-                }
-            }
-        },
-        required: ["fixed_lines"]
-    };
-
-    let currentContents = [{ role: 'user', parts: [{ text: initialUserPrompt }] }];
-    let lastValidResponse = null;
-    const MAX_RETRIES = 5;
-
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        let responseText;
-        const isSelectiveFix = attempt > 1 && lastValidResponse !== null;
-
-        try {
-            const requestBody = {
-                contents: currentContents,
-                generation_config: {
-                    response_mime_type: "application/json",
-                    responseSchema: isSelectiveFix ? selectiveSchema : schema
-                }
-            };
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: { message: response.statusText } }));
-                throw new Error(`Gemini API call failed with status ${response.status}: ${errorData.error.message}`);
-            }
-
-            const data = await response.json();
-
-            if (data.promptFeedback?.blockReason) {
-                throw new Error(`Gemini blocked the request: ${data.promptFeedback.blockReason}`);
-            }
-
-            responseText = data.candidates[0].content.parts[0].text;
-
-        } catch (e) {
-            console.error(`Gemini romanization failed on attempt ${attempt}: ${e.message}`);
-            if (attempt === MAX_RETRIES) {
-                throw new Error(`Gemini romanization failed after ${MAX_RETRIES} attempts: ${e.message}`);
-            }
-            continue;
-        }
-
-        let parsedJson;
-        try {
-            parsedJson = JSON.parse(responseText);
-        } catch (e) {
-            console.error(`Attempt ${attempt}: Failed to parse JSON response from Gemini: ${e.message}. Raw response: ${responseText}`);
-            if (attempt === MAX_RETRIES) {
-                throw new Error(`Gemini romanization failed after ${MAX_RETRIES} attempts: Could not parse valid JSON.`);
-            }
-            currentContents.push({ role: 'model', parts: [{ text: responseText }] });
-            currentContents.push({ role: 'user', parts: [{ text: `Your previous response was not valid JSON. Please provide a corrected JSON response. Error: ${e.message}` }] });
-            continue;
-        }
-
-        let finalResponse;
-
-        if (isSelectiveFix && parsedJson.fixed_lines) {
-            finalResponse = mergeSelectiveFixes(lastValidResponse, parsedJson.fixed_lines);
-        } else {
-            finalResponse = parsedJson;
-            if (attempt === 1) {
-                lastValidResponse = parsedJson;
-            }
-        }
-
-        const validationResult = validateRomanizationResponse(lyricsForApi, finalResponse);
-
-        if (validationResult.isValid) {
-            console.log(`Gemini romanization succeeded on attempt ${attempt}.`);
-            return reconstructRomanizedLyrics(finalResponse.romanized_lyrics, reconstructionPlan);
-        } else {
-            console.warn(`Attempt ${attempt} failed validation. Errors: ${validationResult.errors.join(', ')}`);
-            if (attempt === MAX_RETRIES) {
-                throw new Error(`Gemini romanization failed after ${MAX_RETRIES} attempts. Final validation errors: ${validationResult.errors.join(', ')}`);
-            }
-
-            const problematicLines = getProblematicLines(lyricsForApi, finalResponse, validationResult.detailedErrors);
-
-            currentContents.push({ role: 'model', parts: [{ text: responseText }] });
-
-            if (problematicLines.length > 0 && problematicLines.length < lyricsForApi.length * 0.8) {
-                const selectivePrompt = `CRITICAL ERROR CORRECTION NEEDED: Your previous response had structural errors in ${problematicLines.length} specific lines.
-
-**MOST COMMON ERRORS TO FIX:**
-1. Empty chunks - chunks with "" or no text
-2. Uneven distribution - one chunk gets all text, others empty  
-3. Chunk count mismatch
-
-**SPECIFIC LINES THAT NEED FIXING:**
-${JSON.stringify(problematicLines.map(line => ({
-                    original_line_index: line.original_line_index,
-                    original_text: line.text,
-                    required_chunk_count: line.chunk ? line.chunk.length : 0,
-                    original_chunks: line.chunk ? line.chunk.map(c => c.text) : null,
-                    errors: validationResult.detailedErrors.find(e => e.lineIndex === line.original_line_index)?.errors || []
-                })), null, 2)}
-
-**CORRECTION RULES:**
-1. Every chunk MUST have non-empty text
-2. Distribute text proportionally across chunks
-3. Never leave chunks empty while others have all the text
-4. Match the exact chunk count specified
-
-PROVIDE ONLY THE CORRECTED LINES in this format:
-{
-  "fixed_lines": [
-    // Only the corrected lines with proper chunk distribution
-  ]
-}`;
-
-                currentContents.push({ role: 'user', parts: [{ text: selectivePrompt }] });
-            } else {
-                const fullPrompt = `CRITICAL STRUCTURAL ERRORS DETECTED: Your previous response had major issues with chunk distribution and text partitioning.
-
-**MOST SERIOUS ERRORS:**
-${validationResult.errors.slice(0, 10).join('\n- ')}${validationResult.errors.length > 10 ? '\n- ... and more' : ''}
-
-**REMEMBER THE GOLDEN RULE:** 
-1. Romanize the FULL LINE text first
-2. Then intelligently split that romanized text into chunks
-3. NEVER leave any chunk empty
-4. Distribute text proportionally
-
-**Original lyrics for reference:**
-${JSON.stringify(lyricsForApi, null, 2)}
-
-PROVIDE A COMPLETE CORRECTED RESPONSE with proper chunk distribution.`;
-
-                currentContents.push({ role: 'user', parts: [{ text: fullPrompt }] });
-            }
-        }
-    }
-
-    throw new Error("Unexpected error: Gemini romanization process completed without success or explicit failure.");
 }
 
 async function fetchGoogleTranslate(text, targetLang) {
@@ -1151,7 +867,7 @@ function prepareLyricsForGemini(structuredInput) {
     return { lyricsForApi, reconstructionPlan };
 }
 
-function reconstructRomanizedLyrics(romanizedApiLyrics, reconstructionPlan, hasAnyChunks=false) {
+function reconstructRomanizedLyrics(romanizedApiLyrics, reconstructionPlan, hasAnyChunks = false) {
     const fullList = [];
     reconstructionPlan.forEach(planItem => {
         let reconstructedLine;
@@ -1208,6 +924,7 @@ async function fetchGeminiRomanize(structuredInput, settings) {
             const requestBody = {
                 contents: currentContents,
                 generation_config: {
+                    temperature: 0.0,
                     response_mime_type: "application/json",
                     responseSchema: isSelectiveFix ? selectiveSchema : schema
                 }
@@ -1311,28 +1028,6 @@ async function fetchGeminiRomanize(structuredInput, settings) {
     throw new Error("Unexpected error: Gemini romanization process completed without success or explicit failure.");
 }
 
-function createRomanizationPrompt(lyricsForApi, hasAnyChunks) {
-    const basePrompt = `You are a linguistic expert AI specializing ONLY in precise **natural phonetic romanization** (NOT translation).
-
-# GLOBAL PRINCIPLES
-1. **Romanization only** – never translate or explain meaning.
-2. **Natural phonetic style for ALL languages**
-3. **Preserve original segmentation** – do not merge or drop words.
-4. **No extra text** – never add explanations, notes, or translation.
-5. **Case & style** – all output in lowercase Latin letters, unless capitalization is required in the source.
-
-# CRITICAL STRUCTURE RULE
-${hasAnyChunks ?
-            '- Some lines have chunks (syllables), some do not. ONLY provide chunks for lines that originally had them.' :
-            '- These lyrics are LINE-SYNCED only. DO NOT add any chunk arrays to any lines.'
-        }
-
-# TASK
-Romanize the following lyrics strictly following all rules above:
-${JSON.stringify(lyricsForApi, null, 2)}`;
-
-    return basePrompt;
-}
 
 function createRomanizationSchema(hasAnyChunks) {
     const baseSchema = {

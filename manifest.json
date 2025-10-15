@@ -69,6 +69,7 @@
   ],
   "background": {
     "service_worker": "src/background/lyricsHandler.js",
+    "type": "module",
     "scripts": ["src/background/lyricsHandler.js"]
   }
 }
