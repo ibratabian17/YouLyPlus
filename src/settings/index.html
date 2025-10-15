@@ -136,6 +136,7 @@
             <div class="card-actions">
                 <button id="save-general" class="btn btn-filled">Save General</button>
             </div>
+            <p id="general-save-status" class="status-message"></p>
         </section>
 
         <!-- Local Lyrics Section -->
@@ -153,6 +154,7 @@
                         Refresh List
                     </button>
                 </div>
+                <p id="local-lyrics-status" class="status-message"></p>
             </div>
 
             <button class="fab" id="add-lyrics-fab" title="Add New Local Lyrics">
@@ -175,21 +177,6 @@
                         <label for="modal-upload-album-name">Album Name (Optional)</label>
                         <input type="text" id="modal-upload-album-name" placeholder="e.g., New Jeans 1st EP">
                     </div>
-                    <div class="setting-item">
-                        <div class="form-group">
-                            <label for="modal-upload-lyrics-format">Lyrics Format</label>
-                            <div class="select-wrapper">
-                                <select id="modal-upload-lyrics-format">
-                                    <option value="lrc" selected>Lyrics (.lrc)</option>
-                                    <option value="elrc">Enhanced Lyrics (.elrc)</option>
-                                    <option value="ttml">Apple Music Time Markup (.ttml)</option>
-                                    <option value="json">Kpoe Lyrics (.json)</option>
-                                </select>
-                                <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
-                            </div>
-                            <p class="setting-description">Select the format of the lyrics file you are uploading.</p>
-                        </div>
-                    </div>
                     <div class="setting-item form-group">
                         <label for="modal-upload-lyrics-file">Lyrics File</label>
                         <input type="file" id="modal-upload-lyrics-file" accept=".lrc,.elrc,.ttml,.json">
@@ -201,6 +188,7 @@
                             Upload Lyrics
                         </button>
                     </div>
+                    <p id="modal-upload-status" class="status-message"></p>
                 </div>
             </div>
 
@@ -350,6 +338,7 @@
             <div class="card-actions">
                 <button id="save-translation" class="btn btn-filled">Save Translation</button>
             </div>
+            <p id="translation-save-status" class="status-message"></p>
         </section>
 
         <!-- Appearance Section -->
@@ -463,6 +452,7 @@
             <div class="card-actions">
                 <button id="save-appearance" class="btn btn-filled">Save Appearance</button>
             </div>
+            <p id="appearance-save-status" class="status-message"></p>
         </section>
 
         <!-- Cache Options Section -->

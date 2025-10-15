@@ -235,7 +235,7 @@
 }
 
 .lyrics-line.active .lyrics-syllable.finished {
-    transition: transform 0.8s ease !important;
+    transition: transform 1s ease !important;
 }
 
 .lyrics-line:not(.active) .lyrics-syllable.finished {
@@ -244,7 +244,7 @@
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable {
     transform: translateY(0.001%) translateZ(1px);
-    transition: transform 0.8s ease, background-color 0.5s, color 0.5s;
+    transition: transform 1s ease, background-color 0.5s, color 0.5s;
     will-change: transform, background;
 }
 
@@ -266,7 +266,7 @@
 
 #lyrics-plus-container:not(.lightweight-mode) .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
 #lyrics-plus-container:not(.lightweight-mode) .lyrics-word.growable:has(.lyrics-syllable.highlight) .lyrics-syllable {
-    transform: translateY(-4%) translateZ(1px);
+    transform: translateY(-3.5%) translateZ(1px);
 }
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.finished {

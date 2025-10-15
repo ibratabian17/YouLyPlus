@@ -124,14 +124,14 @@ document.getElementById('save-general').addEventListener('click', () => {
         customKpoeUrl: document.getElementById('custom-kpoe-url').value,
     });
     saveSettings();
-    showStatusMessage('General settings saved!', false, 'save-general');
+    showStatusMessage('general-save-status', 'General settings saved!', false);
 });
 
 document.getElementById('save-appearance').addEventListener('click', () => {
     // This button only saves the Custom CSS.
     updateSettings({ customCSS: document.getElementById('custom-css').value });
     saveSettings();
-    showStatusMessage('Custom CSS saved!', false, 'save-appearance');
+    showStatusMessage('appearance-save-status', 'Custom CSS saved!', false);
 });
 
 document.getElementById('save-translation').addEventListener('click', () => {
@@ -143,7 +143,7 @@ document.getElementById('save-translation').addEventListener('click', () => {
         customGeminiRomanizePrompt: document.getElementById('custom-gemini-romanize-prompt').value
     });
     saveSettings();
-    showStatusMessage('Translation input fields saved!', false, 'save-translation');
+    showStatusMessage('translation-save-status', 'Translation input fields saved!', false);
 });
 
 document.getElementById('clear-cache').addEventListener('click', clearCache);
@@ -217,32 +217,18 @@ function populateDraggableSources() {
     addDragDropListeners();
 }
 
-let statusMessageTimeout;
-function showStatusMessage(message, isError = false, buttonIdToAppendAfter = null) {
-    let targetStatusElement = document.getElementById('add-source-status');
+let statusMessageTimeout = {}; // Use an object to store timeouts for different elements
 
-    if (buttonIdToAppendAfter) {
-        const button = document.getElementById(buttonIdToAppendAfter);
-        const parentActions = button?.parentElement;
-        if (parentActions?.classList.contains('card-actions')) {
-            let specificStatus = parentActions.querySelector('.save-status-message');
-            if (!specificStatus) {
-                specificStatus = document.createElement('p');
-                specificStatus.className = 'status-message save-status-message';
-                parentActions.insertBefore(specificStatus, button);
-            }
-            targetStatusElement = specificStatus;
-        }
-    }
-
+function showStatusMessage(elementId, message, isError = false) {
+    const targetStatusElement = document.getElementById(elementId);
     if (!targetStatusElement) return;
 
-    clearTimeout(statusMessageTimeout);
+    clearTimeout(statusMessageTimeout[elementId]);
     targetStatusElement.textContent = message;
     targetStatusElement.style.color = isError ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)';
     targetStatusElement.style.opacity = '1';
 
-    statusMessageTimeout = setTimeout(() => {
+    statusMessageTimeout[elementId] = setTimeout(() => {
         targetStatusElement.style.opacity = '0';
         setTimeout(() => { targetStatusElement.textContent = ''; }, 300);
     }, 3000);
@@ -251,27 +237,27 @@ function showStatusMessage(message, isError = false, buttonIdToAppendAfter = nul
 function addSource() {
     const sourceName = document.getElementById('available-sources-dropdown').value;
     if (!sourceName) {
-        showStatusMessage('Please select a source to add.', true);
+        showStatusMessage('add-source-status', 'Please select a source to add.', true);
         return;
     }
 
     const sources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s?.trim());
     if (sources.includes(sourceName)) {
-        showStatusMessage(`Source "${getSourceDisplayName(sourceName)}" already exists.`, true);
+        showStatusMessage('add-source-status', `Source "${getSourceDisplayName(sourceName)}" already exists.`, true);
         return;
     }
 
     sources.push(sourceName);
     currentSettings.lyricsSourceOrder = sources.join(',');
     populateDraggableSources();
-    showStatusMessage(`"${getSourceDisplayName(sourceName)}" added. Save to apply.`, false);
+    showStatusMessage('add-source-status', `"${getSourceDisplayName(sourceName)}" added. Save to apply.`, false);
 }
 
 function removeSource(sourceName) {
     const sources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s?.trim());
     currentSettings.lyricsSourceOrder = sources.filter(s => s !== sourceName).join(',');
     populateDraggableSources();
-    showStatusMessage(`"${getSourceDisplayName(sourceName)}" removed. Save to apply.`, false);
+    showStatusMessage('add-source-status', `"${getSourceDisplayName(sourceName)}" removed. Save to apply.`, false);
 }
 
 function addDragDropListeners() {
@@ -285,7 +271,7 @@ function addDragDropListeners() {
         draggedItem = null;
         const orderedSources = Array.from(draggableContainer.children).map(item => item.dataset.source);
         currentSettings.lyricsSourceOrder = orderedSources.join(',');
-        showStatusMessage('Source order updated. Save to apply.', false);
+        showStatusMessage('add-source-status', 'Source order updated. Save to apply.', false);
     };
 
     // Mouse Events
@@ -353,7 +339,7 @@ document.getElementById('default-provider').addEventListener('change', (e) => {
     currentSettings.lyricsProvider = e.target.value;
     toggleKpoeSourcesVisibility();
     toggleCustomKpoeUrlVisibility();
-    toggleLocalLyricsVisibility(); // New: Toggle local lyrics visibility
+    toggleLocalLyricsVisibility();
 });
 
 document.getElementById('add-lyrics-fab').addEventListener('click', () => {
@@ -451,16 +437,33 @@ function toggleLocalLyricsVisibility() {
 }
 
 async function handleUploadLocalLyrics() {
-    const title = document.getElementById('modal-upload-song-title').value.trim();
-    const artist = document.getElementById('modal-upload-artist-name').value.trim();
-    const album = document.getElementById('modal-upload-album-name').value.trim();
-    const format = document.getElementById('modal-upload-lyrics-format').value;
-    const lyricsFile = document.getElementById('modal-upload-lyrics-file').files[0];
+    const titleInput = document.getElementById('modal-upload-song-title');
+    const artistInput = document.getElementById('modal-upload-artist-name');
+    const albumInput = document.getElementById('modal-upload-album-name');
+    const lyricsFileInput = document.getElementById('modal-upload-lyrics-file');
+    const uploadButton = document.getElementById('modal-upload-lyrics-button');
+    const uploadButtonIcon = uploadButton.querySelector('.material-symbols-outlined');
+
+    const title = titleInput.value.trim();
+    const artist = artistInput.value.trim();
+    const album = albumInput.value.trim();
+    const lyricsFile = lyricsFileInput.files[0];
 
     if (!title || !artist || !lyricsFile) {
-        showStatusMessage('Song Title, Artist Name, and a Lyrics File are required.', true, 'modal-upload-lyrics-button');
+        showStatusMessage('modal-upload-status', 'Song Title, Artist Name, and a Lyrics File are required.', true);
         return;
     }
+
+    const getFileExtension = (filename) => {
+        return filename.split('.').pop().toLowerCase();
+    };
+
+    const format = getFileExtension(lyricsFile.name);
+
+    // Show loading state
+    uploadButton.disabled = true;
+    uploadButtonIcon.textContent = 'hourglass_empty';
+    showStatusMessage('modal-upload-status', 'Uploading lyrics...', false);
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -493,19 +496,24 @@ async function handleUploadLocalLyrics() {
             const jsonLyrics = format === 'json' ? parsedLyrics : convertToStandardJson(parsedLyrics);
 
             await uploadLocalLyrics(songInfo, jsonLyrics);
-            showStatusMessage('Lyrics uploaded successfully!', false, 'modal-upload-lyrics-button');
-            document.getElementById('modal-upload-song-title').value = '';
-            document.getElementById('modal-upload-artist-name').value = '';
-            document.getElementById('modal-upload-album-name').value = '';
-            document.getElementById('modal-upload-lyrics-file').value = ''; // Clear file input
+            showStatusMessage('modal-upload-status', 'Lyrics uploaded successfully!', false);
+            titleInput.value = '';
+            artistInput.value = '';
+            albumInput.value = '';
+            lyricsFileInput.value = ''; // Clear file input
             document.getElementById('upload-lyrics-modal').style.display = 'none'; // Close modal
             populateLocalLyricsList(); // Refresh the list after upload
         } catch (error) {
-            showStatusMessage(`Error uploading lyrics: ${error}`, true, 'modal-upload-lyrics-button');
+            showStatusMessage('modal-upload-status', `Error uploading lyrics: ${error.message || error}`, true);
+        } finally {
+            uploadButton.disabled = false;
+            uploadButtonIcon.textContent = 'upload_file';
         }
     };
     reader.onerror = () => {
-        showStatusMessage('Error reading file.', true, 'modal-upload-lyrics-button');
+        showStatusMessage('modal-upload-status', 'Error reading file.', true);
+        uploadButton.disabled = false;
+        uploadButtonIcon.textContent = 'upload_file';
     };
     reader.readAsText(lyricsFile);
 }
@@ -543,10 +551,10 @@ async function populateLocalLyricsList() {
                 if (confirm(`Are you sure you want to delete "${item.songInfo.title} - ${item.songInfo.artist}"?`)) {
                     try {
                         await deleteLocalLyrics(item.songId);
-                        showStatusMessage('Local lyrics deleted.', false, 'refresh-local-lyrics-list');
+                        showStatusMessage('local-lyrics-status', 'Local lyrics deleted.', false);
                         populateLocalLyricsList(); // Refresh list after deletion
                     } catch (error) {
-                        showStatusMessage(`Error deleting lyrics: ${error}`, true, 'refresh-local-lyrics-list');
+                        showStatusMessage('local-lyrics-status', `Error deleting lyrics: ${error}`, true);
                     }
                 }
             });
@@ -605,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tabs.length > 0) {
                 chrome.tabs.reload(tabs[0].id, () => {
                     hideReloadNotification();
-                    showStatusMessage('YouTube Music tab reloaded!', false, 'save-general');
+                    showStatusMessage('general-save-status', 'YouTube Music tab reloaded!', false);
                 });
             } else {
                 alert("No YouTube Music tab found. Please open one and try again.");
