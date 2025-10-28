@@ -974,12 +974,12 @@ async function fetchGeminiRomanize(structuredInput, settings) {
 
     const { lyricsForApi, reconstructionPlan } = prepareLyricsForGemini(structuredInput);
 
+    // Check if any lines have chunks to determine schema type
+    const hasAnyChunks = lyricsForApi.some(line => line.chunk && line.chunk.length > 0);
+
     if (lyricsForApi.length === 0) {
         return reconstructRomanizedLyrics([], reconstructionPlan, hasAnyChunks);
     }
-
-    // Check if any lines have chunks to determine schema type
-    const hasAnyChunks = lyricsForApi.some(line => line.chunk && line.chunk.length > 0);
 
     const initialUserPrompt = (overrideGeminiRomanizePrompt && customGeminiRomanizePrompt) ?
         customGeminiRomanizePrompt :
