@@ -1,6 +1,6 @@
 // Universal Browser API handle
 const pBrowser = chrome || browser;
-import { createRomanizationPrompt } from "./geminiHandler.js"
+import { createRomanizationPrompt, createTranslationPrompt } from "./geminiHandler.js"
 
 /* =================================================================
    CONSTANTS
@@ -777,26 +777,10 @@ async function romanizeWithGemini(originalLyrics, settings) {
 }
 
 async function fetchGeminiTranslate(texts, targetLang, settings) {
-    const { geminiApiKey, geminiModel, overrideGeminiPrompt, customGeminiPrompt } = settings;
+    const { geminiApiKey, geminiModel } = settings;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`;
 
-    const translationRules = (overrideGeminiPrompt && customGeminiPrompt) ?
-        customGeminiPrompt :
-        `You are an expert AI Lyrical Translator. Your task is to translate song lyrics into {targetLang}, preserving the original meaning, emotion, and natural flow.
-        RULES:
-        1.  Internally identify the language of each line.
-        2.  Translate ALL non-{targetLang} words/phrases into {targetLang}. Do not just romanize them.
-        3.  If a line is already entirely in {targetLang}, copy it to the output exactly as is.
-        4.  For mixed-language lines, translate the non-{targetLang} parts and integrate them naturally.
-        5.  The final output for each line must sound natural in {targetLang}.`;
-
-    const prompt = `
-        ${translationRules.replace(/{targetLang}/g, targetLang)}
-        
-        Now, process the following lyrics based on these rules.
-        Lyrics to translate:
-        ${JSON.stringify(texts)}
-    `;
+    const prompt = createTranslationPrompt(settings, texts, targetLang);
 
     const requestBody = {
         contents: [{ parts: [{ text: prompt }] }],
@@ -808,7 +792,7 @@ async function fetchGeminiTranslate(texts, targetLang, settings) {
                 properties: {
                     translated_lyrics: {
                         type: "ARRAY",
-                        description: "An array of translated lyric lines, maintaining the original order.",
+                        description: "An array of translated lyric lines, maintaining the original order and count.",
                         items: { type: "STRING" }
                     },
                     target_language: {
@@ -840,11 +824,16 @@ async function fetchGeminiTranslate(texts, targetLang, settings) {
 
     try {
         const parsedJson = JSON.parse(data.candidates[0].content.parts[0].text);
-        if (Array.isArray(parsedJson.translated_lyrics)) {
-            return parsedJson.translated_lyrics;
-        } else {
-            throw new Error('Invalid JSON structure in Gemini response.');
+        
+        if (!Array.isArray(parsedJson.translated_lyrics)) {
+            throw new Error('Invalid JSON structure: translated_lyrics is not an array.');
         }
+        
+        if (parsedJson.translated_lyrics.length !== texts.length) {
+            throw new Error(`Length mismatch: expected ${texts.length} lines, got ${parsedJson.translated_lyrics.length}`);
+        }
+        
+        return parsedJson.translated_lyrics;
     } catch (e) {
         console.error("Gemini response parsing failed:", e, "\nRaw response:", data.candidates[0].content.parts[0].text);
         throw new Error(`Gemini translation failed: Could not parse valid JSON. ${e.message}`);

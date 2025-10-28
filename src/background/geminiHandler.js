@@ -406,3 +406,41 @@ Analyze the language(s) in the input, apply appropriate phonetic rules, preserve
 
     return basePrompt;
 }
+
+export function createTranslationPrompt(settings = {overrideGeminiPrompt: false, customGeminiPrompt: ''}, texts, targetLang) {
+  const translationRules = (settings.overrideGeminiPrompt && settings.customGeminiPrompt) ?
+        settings.customGeminiPrompt :
+        `You are a professional translator specializing in song lyrics. Your task is to translate lyrics into ${targetLang} with precision and consistency.
+
+CRITICAL INSTRUCTIONS:
+1. LANGUAGE DETECTION:
+   - Analyze each line to identify its source language(s)
+   - Mark mixed-language segments internally before translating
+
+2. TRANSLATION REQUIREMENTS:
+   - Translate ALL non-${targetLang} text into ${targetLang}
+   - Do NOT romanize or transliterate - always translate the meaning
+   - If a line is 100% already in ${targetLang}, output it unchanged
+   - For mixed-language lines: translate foreign parts, keep ${targetLang} parts intact
+
+3. OUTPUT QUALITY STANDARDS:
+   - Maintain natural ${targetLang} grammar and word order
+   - Preserve the original emotional tone and meaning
+   - Ensure each line flows naturally when read aloud
+   - Use contemporary, conversational ${targetLang}
+   - Avoid awkward literal translations
+
+5. CONSISTENCY RULES:
+   - Use consistent terminology throughout all lines
+   - Maintain consistent pronouns and perspective
+   - Keep proper nouns consistent unless culturally adapted
+
+INPUT DATA:
+${JSON.stringify(texts, null, 2)}
+
+OUTPUT REQUIREMENT:
+Respond with ONLY the JSON array of ${texts.length} translated strings, no other text.`;
+
+    const prompt = translationRules;
+    return prompt;
+}
