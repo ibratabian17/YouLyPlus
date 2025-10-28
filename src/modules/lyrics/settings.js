@@ -1,8 +1,8 @@
 const pBrowser = chrome || browser;
 
 const defaultSettings = {
-    lyricsProvider: 'kpoe', // Can be 'kpoe' or 'lrclib'
-    lyricsSourceOrder: 'lyricsplus,apple,musixmatch,spotify,musixmatch-word', // For KPoe provider
+    lyricsProvider: 'kpoe',
+    lyricsSourceOrder: 'apple,lyricsplus,musixmatch,spotify,musixmatch-word',
     wordByWord: true,
     lightweight: false,
     isEnabled: true,
@@ -15,24 +15,22 @@ const defaultSettings = {
     blurInactive: false,
     dynamicPlayer: false,
     customCSS: '',
-    // Translation settings
-    translationProvider: 'google', // 'google' or 'gemini'
+    translationProvider: 'google',
     geminiApiKey: '',
-    geminiModel: 'gemini-2.5-flash',
+    geminiModel: 'gemini-flash-lite-latest',
     overrideTranslateTarget: false,
     customTranslateTarget: '',
     overrideGeminiPrompt: false,
-    customGeminiPrompt: `You are a professional translator for song lyrics.
-Translate the following lines into {targetLang}.
-Your most important task is to preserve the original meaning, emotion, and tone of each line.
-After ensuring the meaning is preserved, try to make the translation sound natural in {targetLang}.`,
-    // Settings for translation/romanization toggle
-    translationEnabled: false,
-    romanizationEnabled: false,
-    largerTextMode: "lyrics", // "lyrics" or "romanization"
+    customGeminiPrompt: '',
+    overrideGeminiRomanizePrompt: false,
+    customGeminiRomanizePrompt: '',
+    romanizationProvider: 'google',
+    geminiRomanizationModel: 'gemini-flash-latest',
     useSongPaletteFullscreen: false,
     useSongPaletteAllModes: false,
     overridePaletteColor: '',
+    largerTextMode: 'lyrics', // 'lyrics' or 'romanization'
+    customKpoeUrl: '',
 };
 
 let currentSettings = { ...defaultSettings };
