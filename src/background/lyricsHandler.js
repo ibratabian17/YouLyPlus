@@ -10,6 +10,10 @@ const CACHE_DB_NAME = "LyricsCacheDB";
 const CACHE_DB_VERSION = 1;
 const LYRICS_OBJECT_STORE = "lyrics";
 
+const TRANSLATIONS_DB_NAME = "TranslationsDB";
+const TRANSLATIONS_DB_VERSION = 1;
+const TRANSLATIONS_OBJECT_STORE = "translations";
+
 const LOCAL_LYRICS_DB_NAME = "LocalLyricsDB";
 const LOCAL_LYRICS_DB_VERSION = 1;
 const LOCAL_LYRICS_OBJECT_STORE = "localLyrics";
@@ -111,7 +115,7 @@ pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 async function handleLyricsFetch(songInfo, sendResponse, forceReload) {
     try {
-        const lyrics = await getOrFetchLyrics(songInfo, forceReload);
+        const { lyrics } = await getOrFetchLyrics(songInfo, forceReload);
         sendResponse({ success: true, lyrics, metadata: songInfo });
     } catch (error) {
         console.error(`Failed to fetch lyrics for "${songInfo.title}":`, error);
@@ -144,6 +148,7 @@ async function handleResetCache(sendResponse) {
         lyricsCache.clear();
         ongoingFetches.clear();
         await clearCacheDB();
+        await clearTranslationsDB();
         sendResponse({ success: true, message: "Cache reset successfully" });
     } catch (error) {
         sendResponse({ success: false, error: error.message });
@@ -152,15 +157,10 @@ async function handleResetCache(sendResponse) {
 
 async function handleGetCacheSize(sendResponse) {
     try {
-        const sizeKB = await estimateIndexedDBSizeInKB();
-        const db = await openDB();
-        const transaction = db.transaction([LYRICS_OBJECT_STORE], "readonly");
-        const store = transaction.objectStore(LYRICS_OBJECT_STORE);
-        const countRequest = store.count();
-        const cacheCount = await new Promise((resolve, reject) => {
-            countRequest.onsuccess = () => resolve(countRequest.result);
-            countRequest.onerror = () => reject(countRequest.error);
-        });
+        const lyricsStats = await estimateDBSizeInKB(CACHE_DB_NAME, LYRICS_OBJECT_STORE);
+        const translationsStats = await estimateDBSizeInKB(TRANSLATIONS_DB_NAME, TRANSLATIONS_OBJECT_STORE);
+        const sizeKB = lyricsStats.sizeKB + translationsStats.sizeKB;
+        const cacheCount = lyricsStats.count + translationsStats.count;
         sendResponse({ success: true, sizeKB, cacheCount });
     } catch (error) {
         sendResponse({ success: false, error: error.message });
@@ -222,13 +222,13 @@ async function getOrFetchLyrics(songInfo, forceReload = false) {
     if (!forceReload) {
         if (lyricsCache.has(cacheKey)) return lyricsCache.get(cacheKey);
 
-        const dbCachedLyrics = await getLyricsFromDB(cacheKey);
-        if (dbCachedLyrics) {
-            lyricsCache.set(cacheKey, dbCachedLyrics);
-            return dbCachedLyrics;
+        const dbCacheRecord = await getLyricsFromDB(cacheKey);
+        if (dbCacheRecord) {
+            const result = { lyrics: dbCacheRecord.lyrics, version: dbCacheRecord.version };
+            lyricsCache.set(cacheKey, result);
+            return result;
         }
 
-        // Explicitly check for local lyrics before attempting any external fetches
         const localLyricsList = await getLocalLyricsListFromDB();
         const matchedLocalSong = localLyricsList.find(item =>
             item.songInfo.title === songInfo.title && item.songInfo.artist === songInfo.artist
@@ -237,7 +237,11 @@ async function getOrFetchLyrics(songInfo, forceReload = false) {
             const fetchedLocalLyrics = await getLocalLyricsFromDB(matchedLocalSong.songId);
             if (fetchedLocalLyrics) {
                 console.log(`Found and returning local lyrics for "${songInfo.title}"`);
-                return parseKPoeFormat(fetchedLocalLyrics.lyrics);
+                const lyrics = parseKPoeFormat(fetchedLocalLyrics.lyrics);
+                const version = fetchedLocalLyrics.timestamp || matchedLocalSong.songId;
+                const result = { lyrics, version };
+                lyricsCache.set(cacheKey, result);
+                return result;
             }
         }
     }
@@ -277,7 +281,6 @@ async function getOrFetchLyrics(songInfo, forceReload = false) {
                         lyrics = await fetchLRCLibLyrics(songInfo, fetchOptions);
                         break;
                     case PROVIDERS.LOCAL:
-                        // For local lyrics, we need to find a match based on songInfo
                         const localLyricsList = await getLocalLyricsListFromDB();
                         const matchedLocalSong = localLyricsList.find(item =>
                             item.songInfo.title === songInfo.title && item.songInfo.artist === songInfo.artist
@@ -301,9 +304,12 @@ async function getOrFetchLyrics(songInfo, forceReload = false) {
                 throw new Error('No lyrics found from any provider.');
             }
 
-            lyricsCache.set(cacheKey, lyrics);
-            await saveLyricsToDB(cacheKey, lyrics);
-            return lyrics;
+            const version = Date.now();
+            const result = { lyrics, version };
+
+            lyricsCache.set(cacheKey, result);
+            await saveLyricsToDB(cacheKey, lyrics, version);
+            return result;
 
         } finally {
             ongoingFetches.delete(cacheKey);
@@ -318,18 +324,26 @@ async function getOrFetchTranslatedLyrics(songInfo, action, targetLang, forceRel
     const originalLyricsCacheKey = `${songInfo.title} - ${songInfo.artist} - ${songInfo.album}`;
     const translatedLyricsCacheKey = `${originalLyricsCacheKey} - ${action} - ${targetLang}`;
 
-    if (!forceReload) {
-        if (lyricsCache.has(translatedLyricsCacheKey)) return lyricsCache.get(translatedLyricsCacheKey);
-        const dbCached = await getLyricsFromDB(translatedLyricsCacheKey);
-        if (dbCached) {
-            lyricsCache.set(translatedLyricsCacheKey, dbCached);
-            return dbCached;
-        }
-    }
-
-    const originalLyrics = await getOrFetchLyrics(songInfo, forceReload);
+    const { lyrics: originalLyrics, version: originalLyricsVersion } = await getOrFetchLyrics(songInfo, forceReload);
     if (isEmptyLyrics(originalLyrics)) {
         throw new Error('Original lyrics not found or empty, cannot perform translation/romanization.');
+    }
+
+    if (!forceReload) {
+        if (lyricsCache.has(translatedLyricsCacheKey)) {
+            const cached = lyricsCache.get(translatedLyricsCacheKey);
+            if (cached.originalVersion === originalLyricsVersion) {
+                return cached.translatedLyrics;
+            }
+        }
+        const dbCached = await getTranslationFromDB(translatedLyricsCacheKey);
+        if (dbCached && dbCached.originalVersion === originalLyricsVersion) {
+            const resultForMemoryCache = { translatedLyrics: dbCached.translatedLyrics, originalVersion: dbCached.originalVersion };
+            lyricsCache.set(translatedLyricsCacheKey, resultForMemoryCache);
+            return dbCached.translatedLyrics;
+        } else if (dbCached) {
+            await deleteTranslationFromDB(translatedLyricsCacheKey);
+        }
     }
 
     const settings = await storageLocalGet({
@@ -378,8 +392,9 @@ async function getOrFetchTranslatedLyrics(songInfo, action, targetLang, forceRel
 
     const finalTranslatedLyrics = { ...originalLyrics, data: translatedData };
 
-    lyricsCache.set(translatedLyricsCacheKey, finalTranslatedLyrics);
-    await saveLyricsToDB(translatedLyricsCacheKey, finalTranslatedLyrics);
+    const resultForMemoryCache = { translatedLyrics: finalTranslatedLyrics, originalVersion: originalLyricsVersion };
+    lyricsCache.set(translatedLyricsCacheKey, resultForMemoryCache);
+    await saveTranslationToDB(translatedLyricsCacheKey, finalTranslatedLyrics, originalLyricsVersion);
 
     return finalTranslatedLyrics;
 }
@@ -395,6 +410,20 @@ function openDB() {
             const db = event.target.result;
             if (!db.objectStoreNames.contains(LYRICS_OBJECT_STORE)) {
                 db.createObjectStore(LYRICS_OBJECT_STORE, { keyPath: "key" });
+            }
+        };
+        request.onsuccess = event => resolve(event.target.result);
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
+function openTranslationsDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(TRANSLATIONS_DB_NAME, TRANSLATIONS_DB_VERSION);
+        request.onupgradeneeded = event => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(TRANSLATIONS_OBJECT_STORE)) {
+                db.createObjectStore(TRANSLATIONS_OBJECT_STORE, { keyPath: "key" });
             }
         };
         request.onsuccess = event => resolve(event.target.result);
@@ -465,7 +494,7 @@ async function getLyricsFromDB(key) {
     }
 
     return new Promise((resolve, reject) => {
-        const transaction = db.transaction([LYRICS_OBJECT_STORE], "readonly");
+        const transaction = db.transaction([LYRICS_OBJECT_STORE], "readwrite");
         const store = transaction.objectStore(LYRICS_OBJECT_STORE);
         const request = store.get(key);
 
@@ -481,9 +510,9 @@ async function getLyricsFromDB(key) {
                 const age = now - result.timestamp;
 
                 if (age < expirationTime) {
-                    resolve(result.lyrics);
+                    resolve(result);
                 } else {
-                    deleteLyricsFromDB(key);
+                    store.delete(key);
                     resolve(null);
                 }
             } else {
@@ -494,7 +523,7 @@ async function getLyricsFromDB(key) {
     });
 }
 
-async function saveLyricsToDB(key, lyrics) {
+async function saveLyricsToDB(key, lyrics, version) {
     const { cacheStrategy = CACHE_STRATEGIES.AGGRESSIVE } = await storageLocalGet('cacheStrategy');
     if (cacheStrategy === CACHE_STRATEGIES.NONE) {
         return;
@@ -502,13 +531,31 @@ async function saveLyricsToDB(key, lyrics) {
     const db = await openDB();
     const transaction = db.transaction([LYRICS_OBJECT_STORE], "readwrite");
     const store = transaction.objectStore(LYRICS_OBJECT_STORE);
-    store.put({ key, lyrics, timestamp: Date.now() });
+    store.put({ key, lyrics, version, timestamp: Date.now() });
 }
 
-async function deleteLyricsFromDB(key) {
-    const db = await openDB();
-    const transaction = db.transaction([LYRICS_OBJECT_STORE], "readwrite");
-    const store = transaction.objectStore(LYRICS_OBJECT_STORE);
+async function getTranslationFromDB(key) {
+    const db = await openTranslationsDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([TRANSLATIONS_OBJECT_STORE], "readonly");
+        const store = transaction.objectStore(TRANSLATIONS_OBJECT_STORE);
+        const request = store.get(key);
+        request.onsuccess = event => resolve(event.target.result);
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
+async function saveTranslationToDB(key, translatedLyrics, originalVersion) {
+    const db = await openTranslationsDB();
+    const transaction = db.transaction([TRANSLATIONS_OBJECT_STORE], "readwrite");
+    const store = transaction.objectStore(TRANSLATIONS_OBJECT_STORE);
+    store.put({ key, translatedLyrics, originalVersion });
+}
+
+async function deleteTranslationFromDB(key) {
+    const db = await openTranslationsDB();
+    const transaction = db.transaction([TRANSLATIONS_OBJECT_STORE], "readwrite");
+    const store = transaction.objectStore(TRANSLATIONS_OBJECT_STORE);
     store.delete(key);
 }
 
@@ -519,19 +566,61 @@ async function clearCacheDB() {
     store.clear();
 }
 
-async function estimateIndexedDBSizeInKB() {
-    const db = await openDB();
+async function clearTranslationsDB() {
+    const db = await openTranslationsDB();
+    const transaction = db.transaction([TRANSLATIONS_OBJECT_STORE], "readwrite");
+    const store = transaction.objectStore(TRANSLATIONS_OBJECT_STORE);
+    store.clear();
+}
+
+async function estimateDBSizeInKB(dbName, storeName) {
     return new Promise((resolve, reject) => {
-        const transaction = db.transaction([LYRICS_OBJECT_STORE], "readonly");
-        const store = transaction.objectStore(LYRICS_OBJECT_STORE);
-        const request = store.getAll();
+        const request = indexedDB.open(dbName);
         request.onsuccess = event => {
-            const totalSizeBytes = event.target.result.reduce((acc, record) => {
-                return acc + new TextEncoder().encode(JSON.stringify(record)).length;
-            }, 0);
-            resolve(totalSizeBytes / 1024);
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(storeName)) {
+                db.close();
+                resolve({ sizeKB: 0, count: 0 });
+                return;
+            }
+            const transaction = db.transaction([storeName], "readonly");
+            const store = transaction.objectStore(storeName);
+            const getAllRequest = store.getAll();
+            const countRequest = store.count();
+
+            let sizeKB = 0;
+            let count = 0;
+            let completed = 0;
+
+            const checkCompletion = () => {
+                if (++completed === 2) {
+                    db.close();
+                    resolve({ sizeKB, count });
+                }
+            };
+
+            getAllRequest.onsuccess = event => {
+                const totalSizeBytes = event.target.result.reduce((acc, record) => {
+                    return acc + new TextEncoder().encode(JSON.stringify(record)).length;
+                }, 0);
+                sizeKB = totalSizeBytes / 1024;
+                checkCompletion();
+            };
+            getAllRequest.onerror = event => reject(event.target.error);
+
+            countRequest.onsuccess = () => {
+                count = countRequest.result;
+                checkCompletion();
+            };
+            countRequest.onerror = () => reject(countRequest.error);
         };
-        request.onerror = event => reject(event.target.error);
+        request.onerror = event => {
+            if (event.target.error.name === 'InvalidStateError' || event.target.error.name === 'NotFoundError') {
+                resolve({ sizeKB: 0, count: 0 });
+            } else {
+                reject(event.target.error);
+            }
+        };
     });
 }
 
