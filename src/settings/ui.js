@@ -99,7 +99,7 @@ function updateUI(settings) {
 
     populateDraggableSources();
     updateCacheSize();
-    populateLocalLyricsList(); // Populate local lyrics list on UI update
+    populateLocalLyricsList();
 }
 
 document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
@@ -118,7 +118,6 @@ document.getElementById('save-general').addEventListener('click', () => {
     const orderedSources = Array.from(document.getElementById('lyrics-source-order-draggable').children)
         .map(item => item.dataset.source);
 
-    // Switches and dropdowns are auto-saved. This button only saves manually ordered or entered fields.
     updateSettings({
         lyricsSourceOrder: orderedSources.join(','),
         customKpoeUrl: document.getElementById('custom-kpoe-url').value,
@@ -128,14 +127,12 @@ document.getElementById('save-general').addEventListener('click', () => {
 });
 
 document.getElementById('save-appearance').addEventListener('click', () => {
-    // This button only saves the Custom CSS.
     updateSettings({ customCSS: document.getElementById('custom-css').value });
     saveSettings();
     showStatusMessage('appearance-save-status', 'Custom CSS saved!', false);
 });
 
 document.getElementById('save-translation').addEventListener('click', () => {
-    // This button saves text inputs related to translation.
     updateSettings({
         geminiApiKey: document.getElementById('gemini-api-key').value,
         customTranslateTarget: document.getElementById('custom-translate-target').value,
@@ -154,11 +151,11 @@ let draggedItem = null;
 
 function getSourceDisplayName(sourceName) {
     switch (sourceName) {
-        case 'lyricsplus': return 'Lyrics+ (User Gen.)'; // Shorter for UI
+        case 'lyricsplus': return 'Lyrics+ (User Gen.)';
         case 'apple': return 'Apple Music';
-        case 'spotify': return 'Musixmatch (Spotify)'; // Clarified provider
+        case 'spotify': return 'Musixmatch (Spotify)';
         case 'musixmatch': return 'Musixmatch (Direct)';
-        case 'musixmatch-word': return 'Musixmatch (Word)'; // Shorter
+        case 'musixmatch-word': return 'Musixmatch (Word)';
         default: return sourceName.charAt(0).toUpperCase() + sourceName.slice(1).replace('-', ' ');
     }
 }
@@ -217,7 +214,7 @@ function populateDraggableSources() {
     addDragDropListeners();
 }
 
-let statusMessageTimeout = {}; // Use an object to store timeouts for different elements
+let statusMessageTimeout = {};
 
 function showStatusMessage(elementId, message, isError = false) {
     const targetStatusElement = document.getElementById(elementId);
@@ -297,7 +294,6 @@ function addDragDropListeners() {
 
     draggableContainer.addEventListener('dragend', onDragEnd);
 
-    // Touch Events for Mobile/Tablet
     draggableContainer.addEventListener('touchstart', (e) => {
         if (e.target.closest('.drag-handle')) {
             draggedItem = e.target.closest('.draggable-source-item');
@@ -307,7 +303,7 @@ function addDragDropListeners() {
 
     draggableContainer.addEventListener('touchmove', (e) => {
         if (!draggedItem) return;
-        e.preventDefault(); // Prevent page scroll while dragging
+        e.preventDefault();
         const touchY = e.touches[0].clientY;
         const afterElement = getDragAfterElement(draggableContainer, touchY);
         if (afterElement) {

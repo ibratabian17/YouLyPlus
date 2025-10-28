@@ -1,40 +1,7 @@
 // Browser compatibility
 const pBrowser = window.chrome || window.browser;
+let currentSettings = {};
 
-let currentSettings = {
-    lyricsProvider: 'kpoe',
-    lyricsSourceOrder: 'apple,lyricsplus,musixmatch,spotify,musixmatch-word',
-    wordByWord: true,
-    lightweight: false,
-    isEnabled: true,
-    useSponsorBlock: false,
-    autoHideLyrics: false,
-    cacheStrategy: 'aggressive',
-    fontSize: 16,
-    hideOffscreen: false,
-    compabilityWipe: false,
-    blurInactive: false,
-    dynamicPlayer: false,
-    customCSS: '',
-    translationProvider: 'google',
-    geminiApiKey: '',
-    geminiModel: 'gemini-2.5-flash-lite',
-    overrideTranslateTarget: false,
-    customTranslateTarget: '',
-    overrideGeminiPrompt: false,
-    customGeminiPrompt: '',
-    overrideGeminiRomanizePrompt: false,
-    customGeminiRomanizePrompt: '',
-    romanizationProvider: 'google',
-    geminiRomanizationModel: 'gemini-2.0-flash',
-    useSongPaletteFullscreen: false,
-    useSongPaletteAllModes: false,
-    overridePaletteColor: '',
-    largerTextMode: 'lyrics', // 'lyrics' or 'romanization'
-    customKpoeUrl: '',
-};
-
-// Storage helper function (using pBrowser.storage.local directly)
 function storageLocalGet(keys) {
     return new Promise(resolve => pBrowser.storage.local.get(keys, resolve));
 }
@@ -51,23 +18,15 @@ function storageLocalSet(items) {
     });
 }
 
-// Load settings from storage
 export function loadSettings(callback) {
-    storageLocalGet(Object.keys(currentSettings)).then((items) => {
+    storageLocalGet(defaultSettings).then((items) => {
         console.log("Items retrieved from storage:", items);
-        if (items && Object.keys(items).length > 0) {
-            const validItems = Object.entries(items).reduce((acc, [key, value]) => {
-                if (value !== undefined) {
-                    acc[key] = value;
-                }
-                return acc;
-            }, {});
-            currentSettings = { ...currentSettings, ...validItems };
-        }
+        currentSettings = { ...defaultSettings, ...items };
         console.log("Loaded settings:", currentSettings);
         if (callback) callback(currentSettings);
     }).catch(error => {
         console.error("Error loading settings:", error);
+        currentSettings = { ...defaultSettings };
         if (callback) callback(currentSettings);
     });
 }
@@ -91,12 +50,10 @@ export function updateSettings(newSettings) {
     console.log("Updated settings object:", currentSettings);
 }
 
-// Get current settings
 export function getSettings() {
     return { ...currentSettings };
 }
 
-// Function to update the cache size display.
 export function updateCacheSize() {
     if (pBrowser && pBrowser.runtime && typeof pBrowser.runtime.sendMessage === 'function') {
         pBrowser.runtime.sendMessage({ type: 'GET_CACHED_SIZE' }, (response) => {

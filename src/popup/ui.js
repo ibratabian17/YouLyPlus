@@ -1,5 +1,3 @@
-const pBrowser = (typeof browser !== "undefined") ? browser : chrome;
-
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const lyricsProviderSelect = document.getElementById('lyricsProvider');
@@ -31,20 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- M3 Switch Click Handling ---
     document.querySelectorAll('.m3-switch').forEach(switchContainer => {
         switchContainer.addEventListener('click', function() {
             const checkbox = this.querySelector('.m3-switch-input');
             if (checkbox) {
                 checkbox.checked = !checkbox.checked;
-                // Manually dispatch a 'change' event to trigger settings save
                 checkbox.dispatchEvent(new Event('change', { bubbles: true }));
             }
         });
-        // Add keyboard support for switches
         switchContainer.addEventListener('keydown', function(event) {
             if (event.key === ' ' || event.key === 'Enter') {
-                event.preventDefault(); // Prevent page scroll on space
+                event.preventDefault();
                 const checkbox = this.querySelector('.m3-switch-input');
                 if (checkbox) {
                     checkbox.checked = !checkbox.checked;
@@ -52,26 +47,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-        // Set tabindex to make the div focusable for keyboard interaction
         switchContainer.setAttribute('tabindex', '0');
-
-        // Prevent double toggle if label is also clicked (since label also toggles the input)
-        // This is only needed if clicks on children of m3-switch are not desired to bubble up
-        // to THIS specific listener (they should bubble to the document).
-        // This setup should be fine, as the label is a sibling, not a child of .m3-switch
     });
 
 
     // --- Settings Object ---
-    let currentSettings = {
-        lyricsProvider: 'kpoe',
-        wordByWord: true,
-        lightweight: false,
-        isEnabled: true,
-        useSponsorBlock: false,
-    };
+    let currentSettings = {};
 
-    // --- Storage Functions (ensure polyfill.js or similar provides these) ---
+    // --- Storage Functions ---
     const storageLocalGet = (keys) => {
         return new Promise((resolve, reject) => {
             if (typeof pBrowser === 'undefined' || !pBrowser.storage) {
@@ -81,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = {};
                 Object.keys(keys).forEach(key => {
                     if (mockStorage.hasOwnProperty(key)) result[key] = mockStorage[key];
-                    else result[key] = keys[key]; // Return default if not found
+                    else result[key] = keys[key];
                 });
                 resolve(result);
                 return;
@@ -126,14 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchAndLoadSettings() {
         try {
-            // Provide defaults to storage.local.get if items might not exist
-            const defaults = { ...currentSettings };
-            const items = await storageLocalGet(defaults);
-            currentSettings = items; // items will contain fetched values or defaults if not found
+            const items = await storageLocalGet(defaultSettings);
+            currentSettings = items;
             loadSettingsUI();
         } catch (error) {
             console.error("YouLy+: Error loading settings:", error);
-            loadSettingsUI(); // Load UI with defaults if error
+            currentSettings = { ...defaultSettings };
+            loadSettingsUI();
         }
     }
 
@@ -158,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Event Listeners for Settings (now on inputs) ---
+    // --- Event Listeners for Settings ---
     lyricsProviderSelect.addEventListener('change', saveAndApplySettings);
     // For switches, the 'change' event is dispatched manually by the .m3-switch click handler
     [wordByWordSwitchInput, lightweightSwitchInput, lyEnabledSwitchInput, sponsorBlockSwitchInput].forEach(input => {
@@ -170,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function showSnackbar(message, isError = false) {
         if (snackbarTimeout) clearTimeout(snackbarTimeout);
         snackbarText.textContent = message;
-        // Basic error indication - you might add a specific class for styling
         snackbar.style.backgroundColor = isError ? 'var(--md-sys-color-error-container)' : 'var(--md-sys-color-inverse-surface)';
         snackbar.style.color = isError ? 'var(--md-sys-color-on-error-container)' : 'var(--md-sys-color-inverse-on-surface)';
 
