@@ -7,7 +7,7 @@ let webglCanvas = null;
 let needsAnimation = false;
 
 // Uniform locations
-let u_paletteTextureLocation, u_cellStateTextureLocation, u_songPaletteTransitionProgressLocation;
+let u_paletteTextureLocation, u_cellStateTextureLocation, u_songPaletteTransitionProgressLocation, u_scrollOffsetLocation;
 let u_update_currentStateTextureLocation, u_update_deltaTimeLocation, u_update_randomLocation;
 let u_blur_imageLocation, u_blur_resolutionLocation, u_blur_directionLocation;
 let a_positionLocation, a_update_positionLocation, a_blur_positionLocation;
@@ -57,8 +57,9 @@ function handleContextRestored() {
 let blurDimensions = { width: 0, height: 0 };
 let canvasDimensions = { width: 0, height: 0 };
 
-// The factor by which to reduce the canvas resolution for the blur pass. Higher is more blurry and performant.
-const BLUR_DOWNSAMPLE_FACTOR = 22;
+// The factor by which to reduce the canvas resolution for the blur pass.
+// Higher is more blurry and performant.
+const BLUR_DOWNSAMPLE_FACTOR = 26;
 
 // Palette and Cell State Constants
 const MASTER_PALETTE_TEX_WIDTH = 8;
@@ -78,10 +79,12 @@ const STRETCHED_GRID_HEIGHT = 18;
 let currentTargetMasterArtworkPalette = [];
 
 // Animation speed & progress
-const SONG_PALETTE_TRANSITION_SPEED = 0.015; // Normalized progress per frame.
-let songPaletteTransitionProgress = 1.0; // Normalized progress (0.0 to 1.0).
+const SONG_PALETTE_TRANSITION_SPEED = 0.015;
+let songPaletteTransitionProgress = 1.0;
 let globalAnimationId = null;
 let lastFrameTime = 0;
+let scrollOffset = 0.0;
+const SCROLL_SPEED = 0.008;
 
 // Artwork processing state
 let isProcessingArtwork = false;
@@ -156,10 +159,13 @@ const fragmentShaderSource = `
     const int MASTER_PALETTE_TEX_HEIGHT_CONST = ${MASTER_PALETTE_TEX_HEIGHT * 2};
     const int SINGLE_PALETTE_HEIGHT_CONST = ${MASTER_PALETTE_TEX_HEIGHT};
     const int TOTAL_MASTER_COLORS_CONST = ${MASTER_PALETTE_SIZE};
+    const float GRID_WIDTH = ${DISPLAY_GRID_WIDTH}.0;
     uniform sampler2D u_paletteTexture;
     uniform sampler2D u_cellStateTexture;
     uniform float u_songPaletteTransitionProgress;
+    uniform float u_scrollOffset;
     varying vec2 v_uv;
+    
     vec4 getColorFromMasterPalette(int index, float y_offset) {
         index = int(clamp(float(index), 0.0, float(TOTAL_MASTER_COLORS_CONST - 1)));
         float texY_row = floor(float(index) / float(MASTER_PALETTE_TEX_WIDTH_CONST));
@@ -168,20 +174,38 @@ const fragmentShaderSource = `
         float v = (texY_row + y_offset + 0.5) / float(MASTER_PALETTE_TEX_HEIGHT_CONST);
         return texture2D(u_paletteTexture, vec2(u, v));
     }
-    void main() {
-        vec4 cellStateEncoded = texture2D(u_cellStateTexture, v_uv);
+    
+    vec4 getCellColor(vec2 uv) {
+        vec4 cellStateEncoded = texture2D(u_cellStateTexture, uv);
         float normalizer = float(TOTAL_MASTER_COLORS_CONST - 1);
         if (normalizer < 1.0) normalizer = 1.0;
         int sourceColorIndex = int(cellStateEncoded.r * normalizer + 0.5);
         int targetColorIndex = int(cellStateEncoded.g * normalizer + 0.5);
         float fadeProgress = cellStateEncoded.b;
+        
         vec4 prevPalette_source = getColorFromMasterPalette(sourceColorIndex, 0.0);
         vec4 targetPalette_source = getColorFromMasterPalette(sourceColorIndex, float(SINGLE_PALETTE_HEIGHT_CONST));
         vec4 colorA = mix(prevPalette_source, targetPalette_source, u_songPaletteTransitionProgress);
+        
         vec4 prevPalette_target = getColorFromMasterPalette(targetColorIndex, 0.0);
         vec4 targetPalette_target = getColorFromMasterPalette(targetColorIndex, float(SINGLE_PALETTE_HEIGHT_CONST));
         vec4 colorB = mix(prevPalette_target, targetPalette_target, u_songPaletteTransitionProgress);
-        gl_FragColor = mix(colorA, colorB, fadeProgress);
+        
+        return mix(colorA, colorB, fadeProgress);
+    }
+    
+    void main() {
+        float scrolledX = v_uv.x - u_scrollOffset;
+        
+        float cellX = scrolledX * GRID_WIDTH;
+        float cellXFrac = fract(cellX);
+        
+        vec2 uv1 = vec2(fract(scrolledX), v_uv.y);
+        vec2 uv2 = vec2(fract(scrolledX + 1.0/GRID_WIDTH), v_uv.y);
+        
+        vec4 color1 = getCellColor(uv1);
+        vec4 color2 = getCellColor(uv2);
+        gl_FragColor = mix(color1, color2, cellXFrac);
     }
 `;
 
@@ -280,6 +304,7 @@ function LYPLUS_setupBlurEffect() {
     u_paletteTextureLocation = gl.getUniformLocation(glProgram, 'u_paletteTexture');
     u_cellStateTextureLocation = gl.getUniformLocation(glProgram, 'u_cellStateTexture');
     u_songPaletteTransitionProgressLocation = gl.getUniformLocation(glProgram, 'u_songPaletteTransitionProgress');
+    u_scrollOffsetLocation = gl.getUniformLocation(glProgram, 'u_scrollOffset');
 
     a_update_positionLocation = gl.getAttribLocation(updateStateProgram, 'a_position');
     u_update_currentStateTextureLocation = gl.getUniformLocation(updateStateProgram, 'u_currentStateTexture');
@@ -391,7 +416,7 @@ function handleResize() {
 function createCellStateTexture() {
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -608,6 +633,10 @@ function animateWebGLBackground() {
     const deltaTime = (now - lastFrameTime) / 1000.0;
     lastFrameTime = now;
 
+    // Update scroll offset
+    scrollOffset += SCROLL_SPEED * deltaTime;
+    if (scrollOffset >= 1.0) scrollOffset -= 1.0;
+
     if (songPaletteTransitionProgress < 1.0) {
         songPaletteTransitionProgress = Math.min(1.0, songPaletteTransitionProgress + SONG_PALETTE_TRANSITION_SPEED);
         if (songPaletteTransitionProgress >= 1.0) {
@@ -649,10 +678,12 @@ function animateWebGLBackground() {
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTexture, 0);
     gl.viewport(0, 0, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT);
     gl.useProgram(glProgram);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.enableVertexAttribArray(a_positionLocation);
     gl.vertexAttribPointer(a_positionLocation, 2, gl.FLOAT, false, 0, 0);
 
     gl.uniform1f(u_songPaletteTransitionProgressLocation, songPaletteTransitionProgress);
+    gl.uniform1f(u_scrollOffsetLocation, scrollOffset);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, paletteTexture);
     gl.uniform1i(u_paletteTextureLocation, 0);
@@ -663,6 +694,7 @@ function animateWebGLBackground() {
 
     // Pass 3 & 4: Two-Pass Gaussian Blur
     gl.useProgram(blurProgram);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.enableVertexAttribArray(a_blur_positionLocation);
     gl.vertexAttribPointer(a_blur_positionLocation, 2, gl.FLOAT, false, 0, 0);
 
