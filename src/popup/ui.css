@@ -55,21 +55,20 @@
     --md-ref-typeface-plain: 'Roboto', 'Segoe UI', system-ui, sans-serif;
 
     --md-sys-elevation-level-0: none;
-    --md-sys-elevation-level-1: 0px 1px 3px 1px rgba(0,0,0,0.15), 0px 1px 2px 0px rgba(0,0,0,0.30);
-    --md-sys-elevation-level-2: 0px 2px 6px 2px rgba(0,0,0,0.15), 0px 1px 2px 0px rgba(0,0,0,0.30);
-    --md-sys-elevation-level-3: 0px 1px 3px 0px rgba(0,0,0,0.30), 0px 4px 8px 3px rgba(0,0,0,0.15);
+    --md-sys-elevation-level-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
+    --md-sys-elevation-level-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
+    --md-sys-elevation-level-3: 0px 1px 3px 0px rgba(0, 0, 0, 0.30), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
 
     --border-radius-small: 4px;
-    --border-radius-medium: 8px;
+    --border-radius-medium: 6px;
     --border-radius-large: 12px;
     --border-radius-extra-large: 16px;
-    --border-radius-full: 28px; 
+    --border-radius-full: 28px;
 
     --animation-duration-short: 150ms;
     --animation-duration-medium: 250ms;
     --animation-easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
     --animation-easing-emphasized: cubic-bezier(0.2, 0.0, 0.0, 1.0);
-
 
     /* State layer opacities */
     --state-layer-hover: 0.08;
@@ -78,203 +77,222 @@
 }
 
 /* --- Base Styles --- */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
 html {
-    font-size: 16px; 
+    font-size: 16px;
 }
 
 body {
     width: 360px;
-    min-height: 500px; 
-    background-color: var(--md-sys-color-background);
-    color: var(--md-sys-color-on-background);
+    min-height: 450px;
+    margin: 0 auto;
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
     font-family: var(--md-ref-typeface-plain);
     line-height: 1.5;
-    overflow-x: hidden; 
+    overflow-x: hidden;
 }
 
 .container {
-    padding: 16px;
+    padding: 0 16px 16px 16px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    height: 100vh; 
+    gap: 20px;
+    height: 100vh;
+    max-height: inherit;
 }
 
 /* --- Custom Scrollbar --- */
 * {
     scrollbar-width: thin;
-    scrollbar-color: var(--md-sys-color-primary) var(--md-sys-color-surface-container-highest);
+    scrollbar-color: var(--md-sys-color-primary) var(--md-sys-color-surface-container);
 }
 
-/* For WebKit browsers */
 *::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
 *::-webkit-scrollbar-track {
-    background: var(--md-sys-color-surface-container-highest);
-    border-radius: var(--border-radius-small);
+    background: var(--md-sys-color-surface-container);
 }
 
 *::-webkit-scrollbar-thumb {
-    background-color: var(--md-sys-color-primary);
-    border-radius: var(--border-radius-small);
-    border: 2px solid transparent;
-    background-clip: content-box;
+    background-color: var(--md-sys-color-outline);
+    border-radius: var(--border-radius-full);
 }
 
 *::-webkit-scrollbar-thumb:hover {
-    background-color: var(--md-sys-color-primary-container);
+    background-color: var(--md-sys-color-primary);
 }
-
-*::-webkit-scrollbar-corner {
-    background: transparent;
-}
-
 
 /* --- Typography & Icons --- */
 h1 {
-    font-size: 1.375rem; 
+    font-size: 1.375rem;
     font-weight: 500;
     color: var(--md-sys-color-on-surface);
     line-height: 1.2;
 }
 
 .section-title {
-    font-size: 1rem; 
+    font-size: 1rem;
     font-weight: 500;
     color: var(--md-sys-color-primary);
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0, /* 0 for outlined, 1 for filled */
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 20; /* optical size, can be 20, 24, 40, 48 */
-  vertical-align: middle; /* Better alignment */
-  line-height: 1; /* Prevent extra space */
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    vertical-align: middle;
+    line-height: 1;
 }
 
-.section-icon, .tab-icon, .button-icon, .header-icon, .select-arrow {
-    font-size: 1.25em; /* default 20px if base is 16px */
+.section-icon,
+.tab-icon,
+.button-icon,
+.header-icon,
+.select-arrow {
+    font-size: 1.25rem;
 }
+
 .header-icon {
-    font-size: 1.75rem; /* 28px */
+    font-size: 1.75rem;
     color: var(--md-sys-color-primary);
 }
-
 
 /* --- Header --- */
 .app-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding-bottom: 8px; 
+    padding: 16px 0;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
 
 /* --- Tabs (Segmented Buttons) --- */
 .tabs {
     display: flex;
-    background-color: var(--md-sys-color-surface-container);
-    border-radius: var(--border-radius-full);
-    padding: 4px;
-    gap: 4px; 
+    gap: 4px;
 }
 
 .tab {
-    flex: 1;
-    padding: 8px 12px;
-    font-size: 0.875rem; 
+    flex: 0 1 auto;
+    padding: 8px 16px;
+    font-size: 0.875rem;
     font-weight: 500;
     color: var(--md-sys-color-on-surface-variant);
-    background-color: transparent;
+    background-color: var(--md-sys-color-surface-container);
     border: none;
-    border-radius: var(--border-radius-full);
+    border-radius: var(--border-radius-medium);
     cursor: pointer;
     text-align: center;
-    transition: background-color var(--animation-duration-short) var(--animation-easing-standard),
-                color var(--animation-duration-short) var(--animation-easing-standard);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     position: relative;
     overflow: hidden;
+    transition: color 250ms var(--animation-easing-standard),
+        border-radius 250ms var(--animation-easing-standard),
+        background-color 250ms var(--animation-easing-standard),
+        padding 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.tab::before { 
+.tab:first-child:not(.active) {
+    border-radius: var(--border-radius-full) var(--border-radius-medium) var(--border-radius-medium) var(--border-radius-full);
+}
+
+.tab:last-child:not(.active) {
+    border-radius: var(--border-radius-medium) var(--border-radius-full) var(--border-radius-full) var(--border-radius-medium);
+}
+
+.tab:not(.active)::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: var(--md-sys-color-on-surface);
+    inset: 0;
+    background-color: var(--md-sys-color-primary);
     opacity: 0;
     transition: opacity var(--animation-duration-short) var(--animation-easing-standard);
     pointer-events: none;
-    border-radius: inherit; /* Ensure state layer follows tab's border radius */
+    border-radius: inherit;
 }
-.tab:hover::before { opacity: var(--state-layer-hover); }
-.tab:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: -2px;}
 
+.tab:not(.active):hover::before {
+    opacity: var(--state-layer-hover);
+}
+
+.tab:not(.active):hover {
+    color: var(--md-sys-color-primary);
+}
+
+.tab:focus-visible {
+    outline: 2px solid var(--md-sys-color-primary);
+    outline-offset: 2px;
+}
 
 .tab.active {
-    background-color: var(--md-sys-color-secondary-container);
-    color: var(--md-sys-color-on-secondary-container);
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    padding: 8px 24px;
+    border-radius: var(--border-radius-medium);
 }
-.tab.active::before { background-color: var(--md-sys-color-on-secondary-container); }
-.tab.active:hover::before { opacity: var(--state-layer-hover); }
-
 
 /* --- Tab Content --- */
 main {
-    flex-grow: 1; 
-    overflow-y: auto; 
-    padding-right: 4px; 
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 8px;
 }
+
 .tab-content {
     display: none;
     flex-direction: column;
-    gap: 16px;
+    gap: 24px;
 }
+
 .tab-content.active {
     display: flex;
 }
 
 /* --- Settings Section & Items --- */
 .settings-section {
-    background-color: var(--md-sys-color-surface-container-low);
-    padding: 16px;
-    border-radius: var(--border-radius-large);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    padding-bottom: 24px;
+}
+
+.settings-section:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
 .setting-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
-    min-height: 48px; 
+    padding: 12px 4px;
+    min-height: 56px;
 }
-.setting-item + .setting-item {
-    border-top: 1px solid var(--md-sys-color-outline-variant);
+
+.setting-item+.setting-item {
+    border-top: none;
 }
 
 .setting-label {
-    font-size: 0.875rem; 
-    color: var(--md-sys-color-on-surface-variant);
+    font-size: 1rem;
+    color: var(--md-sys-color-on-surface);
     flex-grow: 1;
     padding-right: 16px;
-    cursor: pointer; /* Make label text also act as a click target */
+    cursor: pointer;
 }
 
 /* --- M3 Switch --- */
@@ -282,18 +300,18 @@ main {
     position: relative;
     display: inline-flex;
     align-items: center;
-    justify-content: center; /* Center thumb within switch dimensions */
+    justify-content: center;
     width: 52px;
     height: 32px;
     cursor: pointer;
     flex-shrink: 0;
-    border-radius: var(--border-radius-full); /* For focus indicator */
+    border-radius: var(--border-radius-full);
     outline-offset: 2px;
 }
-.m3-switch:focus-visible { /* Focus on the div itself */
+
+.m3-switch:focus-visible {
     outline: 2px solid var(--md-sys-color-primary);
 }
-
 
 .m3-switch-input {
     opacity: 0;
@@ -309,7 +327,7 @@ main {
     border: 2px solid var(--md-sys-color-outline);
     border-radius: var(--border-radius-full);
     transition: background-color var(--animation-duration-short) var(--animation-easing-standard),
-                border-color var(--animation-duration-short) var(--animation-easing-standard);
+        border-color var(--animation-duration-short) var(--animation-easing-standard);
 }
 
 .m3-switch-thumb-container {
@@ -317,9 +335,9 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px; /* Default size including potential icon space if thumb has icon */
+    width: 24px;
     height: 24px;
-    left: 4px; /* (Track height 32 - Thumb height 24)/2 for centering, then adjust for border */
+    left: 4px;
     transform: translateX(0);
     transition: transform var(--animation-duration-medium) var(--animation-easing-emphasized);
 }
@@ -331,49 +349,46 @@ main {
     border-radius: 50%;
     box-shadow: var(--md-sys-elevation-level-1);
     transition: background-color var(--animation-duration-short) var(--animation-easing-standard),
-                width var(--animation-duration-medium) var(--animation-easing-emphasized),
-                height var(--animation-duration-medium) var(--animation-easing-emphasized);
+        width var(--animation-duration-medium) var(--animation-easing-emphasized),
+        height var(--animation-duration-medium) var(--animation-easing-emphasized);
 }
 
-/* Hover State */
 .m3-switch:hover .m3-switch-thumb {
     width: 20px;
     height: 20px;
 }
-.m3-switch:hover .m3-switch-input:checked + .m3-switch-track + .m3-switch-thumb-container .m3-switch-thumb {
-    width: 28px; /* Slightly larger when checked and hovered */
+
+.m3-switch:hover .m3-switch-input:checked+.m3-switch-track+.m3-switch-thumb-container .m3-switch-thumb {
+    width: 28px;
     height: 28px;
 }
 
-
-/* Checked State */
-.m3-switch-input:checked + .m3-switch-track {
+.m3-switch-input:checked+.m3-switch-track {
     background-color: var(--md-sys-color-primary);
     border-color: var(--md-sys-color-primary);
 }
 
-.m3-switch-input:checked + .m3-switch-track + .m3-switch-thumb-container {
-    transform: translateX(20px); /* (Track width 52 - Thumb container width 24 - (borders+padding)) */
+.m3-switch-input:checked+.m3-switch-track+.m3-switch-thumb-container {
+    transform: translateX(20px);
 }
 
-.m3-switch-input:checked + .m3-switch-track + .m3-switch-thumb-container .m3-switch-thumb {
+.m3-switch-input:checked+.m3-switch-track+.m3-switch-thumb-container .m3-switch-thumb {
     background-color: var(--md-sys-color-on-primary);
     width: 24px;
     height: 24px;
 }
 
-
 /* --- M3 Select --- */
 .m3-select-wrapper {
     position: relative;
     display: inline-block;
-    min-width: 150px; 
+    min-width: 150px;
 }
 
 .m3-select {
     width: 100%;
-    padding: 12px 36px 12px 16px; 
-    font-size: 0.875rem; 
+    padding: 12px 36px 12px 16px;
+    font-size: 0.875rem;
     color: var(--md-sys-color-on-surface);
     background-color: var(--md-sys-color-surface-container-high);
     border: 1px solid var(--md-sys-color-outline);
@@ -384,16 +399,19 @@ main {
     cursor: pointer;
     transition: border-color var(--animation-duration-short) var(--animation-easing-standard);
 }
+
 .m3-select:hover {
     border-color: var(--md-sys-color-on-surface);
 }
+
 .m3-select:focus {
     outline: 2px solid var(--md-sys-color-primary);
     outline-offset: 0px;
-    border-color: var(--md-sys-color-primary); 
+    border-color: var(--md-sys-color-primary);
 }
+
 .m3-select option {
-    background-color: var(--md-sys-color-surface-container-highest); /* Dropdown options bg */
+    background-color: var(--md-sys-color-surface-container-highest);
     color: var(--md-sys-color-on-surface);
 }
 
@@ -403,8 +421,8 @@ main {
     right: 12px;
     transform: translateY(-50%);
     color: var(--md-sys-color-on-surface-variant);
-    pointer-events: none; 
-    font-size: 1.25rem; /* Match other icons */
+    pointer-events: none;
+    font-size: 1.5rem;
 }
 
 /* --- Buttons --- */
@@ -413,8 +431,8 @@ main {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px 24px; 
-    font-size: 0.875rem; 
+    padding: 10px 24px;
+    font-size: 0.875rem;
     font-weight: 500;
     border-radius: var(--border-radius-full);
     border: none;
@@ -422,36 +440,47 @@ main {
     text-decoration: none;
     text-align: center;
     transition: background-color var(--animation-duration-short) var(--animation-easing-standard),
-                box-shadow var(--animation-duration-short) var(--animation-easing-standard),
-                border-color var(--animation-duration-short) var(--animation-easing-standard),
-                color var(--animation-duration-short) var(--animation-easing-standard);
+        box-shadow var(--animation-duration-short) var(--animation-easing-standard),
+        border-color var(--animation-duration-short) var(--animation-easing-standard),
+        color var(--animation-duration-short) var(--animation-easing-standard);
     position: relative;
-    overflow: hidden; 
+    overflow: hidden;
     min-height: 40px;
 }
-.m3-button::before { 
+
+.m3-button::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: currentColor; 
+    inset: 0;
+    background-color: currentColor;
     opacity: 0;
     transition: opacity var(--animation-duration-short) var(--animation-easing-standard);
     pointer-events: none;
     border-radius: inherit;
 }
-.m3-button:hover::before { opacity: var(--state-layer-hover); }
-.m3-button:focus-visible { 
-    outline: 2px solid var(--md-sys-color-primary); 
+
+.m3-button:hover::before {
+    opacity: var(--state-layer-hover);
+}
+
+.m3-button:focus-visible {
+    outline: 2px solid var(--md-sys-color-primary);
     outline-offset: 2px;
 }
-.m3-button:active::before { opacity: var(--state-layer-pressed); }
+
+.m3-button:active::before {
+    opacity: var(--state-layer-pressed);
+}
+
 .m3-button:disabled {
-    opacity: 0.38; 
+    opacity: 0.38;
     cursor: default;
     box-shadow: none;
 }
-.m3-button:disabled::before { display: none; }
 
+.m3-button:disabled::before {
+    display: none;
+}
 
 /* Filled Button */
 .m3-button-filled {
@@ -459,85 +488,108 @@ main {
     color: var(--md-sys-color-on-primary);
     box-shadow: var(--md-sys-elevation-level-0);
 }
-.m3-button-filled:hover { box-shadow: var(--md-sys-elevation-level-1); }
-.m3-button-filled:active { box-shadow: var(--md-sys-elevation-level-0); }
-.m3-button-filled::before { background-color: var(--md-sys-color-on-primary); }
+
+.m3-button-filled:hover {
+    box-shadow: var(--md-sys-elevation-level-1);
+}
+
+.m3-button-filled:active {
+    box-shadow: var(--md-sys-elevation-level-0);
+}
+
+.m3-button-filled::before {
+    background-color: var(--md-sys-color-on-primary);
+}
 
 /* Error Filled Button */
 .m3-button-error {
     background-color: var(--md-sys-color-error);
     color: var(--md-sys-color-on-error);
 }
-.m3-button-error:hover { box-shadow: var(--md-sys-elevation-level-1); }
-.m3-button-error:active { box-shadow: var(--md-sys-elevation-level-0); }
-.m3-button-error::before { background-color: var(--md-sys-color-on-error); }
-.m3-button-error:focus-visible { outline-color: var(--md-sys-color-error); }
 
+.m3-button-error:hover {
+    box-shadow: var(--md-sys-elevation-level-1);
+}
+
+.m3-button-error:active {
+    box-shadow: var(--md-sys-elevation-level-0);
+}
+
+.m3-button-error::before {
+    background-color: var(--md-sys-color-on-error);
+}
+
+.m3-button-error:focus-visible {
+    outline-color: var(--md-sys-color-error);
+}
 
 /* Tonal Button */
 .m3-button-tonal {
     background-color: var(--md-sys-color-secondary-container);
     color: var(--md-sys-color-on-secondary-container);
 }
-.m3-button-tonal::before { background-color: var(--md-sys-color-on-secondary-container); }
-.m3-button-tonal:focus-visible { outline-color: var(--md-sys-color-secondary); }
 
-
-/* Outlined Button */
-.m3-button-outlined {
-    background-color: transparent;
-    color: var(--md-sys-color-primary);
-    border: 1px solid var(--md-sys-color-outline);
-    padding: 10px 23px; 
+.m3-button-tonal::before {
+    background-color: var(--md-sys-color-on-secondary-container);
 }
-.m3-button-outlined:hover {
-    background-color: rgba(var(--md-sys-color-primary-rgb), var(--state-layer-hover));
-}
-.m3-button-outlined::before { background-color: var(--md-sys-color-primary); }
 
+.m3-button-tonal:focus-visible {
+    outline-color: var(--md-sys-color-secondary);
+}
 
 /* Text Button */
 .m3-button-text {
     background-color: transparent;
     color: var(--md-sys-color-primary);
-    padding: 10px 12px; 
+    padding: 10px 12px;
 }
+
 .m3-button-text:hover {
     background-color: rgba(var(--md-sys-color-primary-rgb), var(--state-layer-hover));
 }
-.m3-button-text::before { background-color: var(--md-sys-color-primary); }
 
+.m3-button-text::before {
+    background-color: var(--md-sys-color-primary);
+}
 
 /* --- Cache Info & Controls --- */
 .cache-info {
-    padding: 12px 0;
-    margin-bottom: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
     font-size: 0.875rem;
     color: var(--md-sys-color-on-surface-variant);
+    background-color: var(--md-sys-color-surface-container-low);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--border-radius-large);
 }
-.cache-info p { margin-bottom: 4px; }
-.cache-size-value, .cache-count-value {
+
+.cache-info p {
+    margin-bottom: 8px;
+}
+
+.cache-info p:last-child {
+    margin-bottom: 0;
+}
+
+.cache-size-value,
+.cache-count-value {
     color: var(--md-sys-color-on-surface);
     font-weight: 500;
 }
+
 .cache-controls {
     display: flex;
-    gap: 8px;
-    justify-content: flex-start; 
+    gap: 12px;
+    justify-content: flex-start;
 }
 
 /* --- Footer --- */
 .app-footer {
-    margin-top: auto; 
+    margin-top: auto;
     padding-top: 16px;
     border-top: 1px solid var(--md-sys-color-outline-variant);
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch; 
-}
-.app-footer .m3-button {
-    width: 100%; 
+    justify-content: flex-end;
 }
 
 /* --- Snackbar --- */
@@ -545,27 +597,29 @@ main {
     position: fixed;
     bottom: 16px;
     left: 50%;
-    transform: translate(-50%, calc(100% + 16px)); /* Start off-screen */
+    transform: translate(-50%, calc(100% + 16px));
     min-width: 288px;
-    max-width: 344px; 
+    max-width: 344px;
     padding: 14px 16px;
     background-color: var(--md-sys-color-inverse-surface);
     color: var(--md-sys-color-inverse-on-surface);
     border-radius: var(--border-radius-small);
     box-shadow: var(--md-sys-elevation-level-3);
-    font-size: 0.875rem; 
+    font-size: 0.875rem;
     transition: transform var(--animation-duration-medium) var(--animation-easing-standard),
-                opacity var(--animation-duration-medium) var(--animation-easing-standard);
+        opacity var(--animation-duration-medium) var(--animation-easing-standard);
     opacity: 0;
     z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
+
 .m3-snackbar.show {
     transform: translate(-50%, 0);
     opacity: 1;
 }
+
 .snackbar-text {
     flex-grow: 1;
 }

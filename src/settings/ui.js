@@ -339,7 +339,7 @@ document.getElementById('default-provider').addEventListener('change', (e) => {
 });
 
 document.getElementById('add-lyrics-fab').addEventListener('click', () => {
-    document.getElementById('upload-lyrics-modal').style.display = 'block';
+    document.getElementById('upload-lyrics-modal').style.display = 'flex';
 });
 
 document.querySelector('#upload-lyrics-modal .close-button').addEventListener('click', () => {
