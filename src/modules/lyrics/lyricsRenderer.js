@@ -697,12 +697,14 @@ class LyricsPlusRenderer {
           combinedText.trim().length <= 7 &&
           totalDuration >= 1000;
 
-        let maxScale = 1.07;
-
+        let easedProgress = 0;
+        let actualDecayRate = 0;
+        let penaltyFactor = 1.0;
         if (shouldEmphasize) {
           const minDuration = 1000;
-          const maxDuration = 3000;
+          const maxDuration = 2000;
           const easingPower = 3.0;
+
           const progress = Math.min(
             1,
             Math.max(
@@ -710,23 +712,28 @@ class LyricsPlusRenderer {
               (totalDuration - minDuration) / (maxDuration - minDuration)
             )
           );
-          const easedProgress = Math.pow(progress, easingPower);
+          easedProgress = Math.pow(progress, easingPower);
 
-          maxScale = 1.0 + 0.05 + easedProgress * 0.1;
-          const shadowIntensity = 0.4 + easedProgress * 0.4;
-          const normalizedGrowth = (maxScale - 1.0) / 0.13;
-          const translateYPeak = -normalizedGrowth * 2.5;
+          const durationProgressForDecay = Math.min(1, Math.max(0, (totalDuration - minDuration) / (maxDuration - minDuration)));
+          const decayStrength = 1 - durationProgressForDecay;
+          const maxDecayRate = 0.75;
+          actualDecayRate = maxDecayRate * decayStrength;
 
-          wordSpan.style.setProperty("--max-scale", maxScale.toFixed(3));
-          wordSpan.style.setProperty(
-            "--shadow-intensity",
-            shadowIntensity.toFixed(3)
-          );
-          wordSpan.style.setProperty(
-            "--translate-y-peak",
-            translateYPeak.toFixed(3)
-          );
+          if (wordBuffer.length > 1) {
+            const firstSyllableDuration = wordBuffer[0].duration;
+            const imbalanceRatio = firstSyllableDuration / totalDuration;
+
+            const penaltyThreshold = 0.25;
+
+            if (imbalanceRatio < penaltyThreshold) {
+              const minPenaltyFactor = 0.4;
+
+              const penaltyProgress = imbalanceRatio / penaltyThreshold;
+              penaltyFactor = minPenaltyFactor + (1.0 - minPenaltyFactor) * penaltyProgress;
+            }
+          }
         }
+
         wordSpan.style.setProperty(
           "--min-scale",
           Math.max(1.0, Math.min(1.06, 1.02))
@@ -860,14 +867,25 @@ class LyricsPlusRenderer {
             referenceFont
           );
           let cumulativeWidth = 0;
-          wordSpan._cachedChars.forEach((span) => {
-            const charWidth = this._getTextWidth(
-              span.textContent,
-              referenceFont
-            );
+
+          const numChars = wordSpan._cachedChars.length;
+          wordSpan._cachedChars.forEach((span, index) => {
+            const powerDecayFactor = 1.0 - (index / (numChars > 1 ? numChars - 1 : 1)) * actualDecayRate;
+
+            const charProgress = easedProgress * powerDecayFactor * penaltyFactor;
+
+            const charMaxScale = 1.0 + 0.05 + charProgress * 0.1;
+            const charShadowIntensity = 0.4 + charProgress * 0.4;
+            const normalizedGrowth = (charMaxScale - 1.0) / 0.13;
+            const charTranslateYPeak = -normalizedGrowth * 2.5;
+
+            span.style.setProperty("--max-scale", charMaxScale.toFixed(3));
+            span.style.setProperty("--shadow-intensity", charShadowIntensity.toFixed(3));
+            span.style.setProperty("--translate-y-peak", charTranslateYPeak.toFixed(3));
+
+            const charWidth = this._getTextWidth(span.textContent, referenceFont);
             const position = (cumulativeWidth + charWidth / 2) / wordWidth;
-            const horizontalOffset =
-              (position - 0.5) * 2 * ((maxScale - 1.0) * 25);
+            const horizontalOffset = (position - 0.5) * 2 * ((charMaxScale - 1.0) * 25);
 
             span.dataset.horizontalOffset = horizontalOffset;
             span.dataset.position = position;
