@@ -767,28 +767,44 @@ class LyricsPlusRenderer {
           } else {
             if (shouldEmphasize) {
               wordSpan.classList.add("growable");
+              const syllableText = this._getDataText(s);
+              const totalSyllableWidth = this._getTextWidth(
+                syllableText,
+                referenceFont
+              );
+              let cumulativeCharWidth = 0;
               let charIndex = 0;
-              this._getDataText(s)
-                .split("")
-                .forEach((char) => {
-                  if (char === " ") {
-                    sylSpan.appendChild(document.createTextNode(" "));
-                  } else {
-                    const charSpan =
-                      elementPool.chars.pop() || document.createElement("span");
-                    charSpan.textContent = char;
-                    charSpan.className = "char";
-                    charSpan.dataset.charIndex = charIndex++;
-                    charSpan.dataset.syllableCharIndex = characterData.length;
-                    characterData.push({
-                      charSpan,
-                      syllableSpan: sylSpan,
-                      isBackground: s.isBackground,
-                    });
-                    charSpansForSyllable.push(charSpan);
-                    sylSpan.appendChild(charSpan);
+
+              syllableText.split("").forEach((char) => {
+                if (char === " ") {
+                  sylSpan.appendChild(document.createTextNode(" "));
+                } else {
+                  const charSpan =
+                    elementPool.chars.pop() || document.createElement("span");
+                  charSpan.textContent = char;
+                  charSpan.className = "char";
+
+                  const charWidth = this._getTextWidth(char, referenceFont);
+                  if (totalSyllableWidth > 0) {
+                    const startPercent =
+                      cumulativeCharWidth / totalSyllableWidth;
+                    const durationPercent = charWidth / totalSyllableWidth;
+                    charSpan.dataset.wipeStart = startPercent.toFixed(4);
+                    charSpan.dataset.wipeDuration = durationPercent.toFixed(4);
                   }
-                });
+                  cumulativeCharWidth += charWidth;
+
+                  charSpan.dataset.charIndex = charIndex++;
+                  charSpan.dataset.syllableCharIndex = characterData.length;
+                  characterData.push({
+                    charSpan,
+                    syllableSpan: sylSpan,
+                    isBackground: s.isBackground,
+                  });
+                  charSpansForSyllable.push(charSpan);
+                  sylSpan.appendChild(charSpan);
+                }
+              });
             } else {
               sylSpan.textContent = this._getDataText(s);
             }
@@ -907,7 +923,7 @@ class LyricsPlusRenderer {
       }
       if (this._isRTL(mainContainer.textContent))
         mainContainer.classList.add("rtl-text");
-       if (this._isRTL(mainContainer.textContent))
+      if (this._isRTL(mainContainer.textContent))
         currentLine.classList.add("rtl-text");
       fragment.appendChild(currentLine);
     });
@@ -1964,28 +1980,40 @@ class LyricsPlusRenderer {
     // Step 2: Wipe Pass.
     if (charSpans && charSpans.length > 0) {
       const syllableDuration = syllable._durationMs;
-      const wipeDurationPerChar = syllableDuration / charSpans.length;
 
       charSpans.forEach((span, charIndex) => {
-        const wipeDelay = wipeDurationPerChar * charIndex;
-        const preWipeDelay = wipeDurationPerChar * (charIndex - 1);
+        const wipeDelay =
+          syllableDuration * (parseFloat(span.dataset.wipeStart) || 0);
+        const wipeDuration =
+          syllableDuration * (parseFloat(span.dataset.wipeDuration) || 0);
 
-        const wipeAnims = `pre-wipe-char ${wipeDurationPerChar}ms linear ${preWipeDelay}ms, ${wipeAnimation} ${wipeDurationPerChar}ms linear ${wipeDelay}ms forwards`;
-
+        const existingAnimation =
+          charAnimationsMap.get(span) || span.style.animation;
         const animationParts = [];
-        const fromGrowPass = charAnimationsMap.get(span);
-        const fromPreviousFrame = span.style.animation;
 
-        if (fromGrowPass) {
-          animationParts.push(fromGrowPass);
+        if (existingAnimation && existingAnimation.includes("grow-dynamic")) {
+          animationParts.push(existingAnimation.split(",")[0].trim());
         }
-        if (
-          fromPreviousFrame &&
-          !animationParts.some((p) => p.includes(fromPreviousFrame))
-        ) {
-          animationParts.push(fromPreviousFrame);
+
+        if (charIndex > 0) {
+          const prevChar = charSpans[charIndex - 1];
+          const prevWipeDelay =
+            syllableDuration * (parseFloat(prevChar.dataset.wipeStart) || 0);
+          const prevWipeDuration =
+            syllableDuration * (parseFloat(prevChar.dataset.wipeDuration) || 0);
+
+          if (prevWipeDuration > 0) {
+            animationParts.push(
+              `pre-wipe-char ${prevWipeDuration}ms linear ${prevWipeDelay}ms`
+            );
+          }
         }
-        animationParts.push(wipeAnims);
+
+        if (wipeDuration > 0) {
+          animationParts.push(
+            `${wipeAnimation} ${wipeDuration}ms linear ${wipeDelay}ms forwards`
+          );
+        }
 
         charAnimationsMap.set(span, animationParts.join(", "));
       });
