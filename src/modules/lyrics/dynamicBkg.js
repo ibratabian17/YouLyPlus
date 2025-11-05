@@ -1,29 +1,27 @@
 // --- WebGL & Animation State Variables ---
 let gl = null;
 let glProgram = null;
-let updateStateProgram = null;
 let blurProgram = null;
 let webglCanvas = null;
 let needsAnimation = false;
 
 // Uniform locations
-let u_paletteTextureLocation, u_cellStateTextureLocation, u_songPaletteTransitionProgressLocation, u_scrollOffsetLocation;
-let u_update_currentStateTextureLocation, u_update_deltaTimeLocation, u_update_randomLocation;
-let u_blur_imageLocation, u_blur_resolutionLocation, u_blur_directionLocation;
-let a_positionLocation, a_update_positionLocation, a_blur_positionLocation;
+let u_artworkTextureLocation, u_rotationLocation, u_scaleLocation, u_positionLocation, u_transitionProgressLocation;
+let u_blur_imageLocation, u_blur_resolutionLocation, u_blur_directionLocation, u_blur_radiusLocation;
+let a_positionLocation, a_texCoordLocation, a_blur_positionLocation;
 
 // WebGL objects
 let positionBuffer;
-let paletteTexture = null;
-let stateTextureA = null;
-let stateTextureB = null;
+let texCoordBuffer;
+let currentArtworkTexture = null;
+let previousArtworkTexture = null;
 
 // Framebuffers and textures for multi-pass rendering
-let cellStateFramebuffer = null;
 let renderFramebuffer = null;
 let blurFramebuffer = null;
 let renderTexture = null;
 let blurTextureA = null;
+
 
 function handleContextLost(event) {
     event.preventDefault();
@@ -35,17 +33,15 @@ function handleContextLost(event) {
     // Clean up WebGL resources
     gl = null;
     glProgram = null;
-    updateStateProgram = null;
     blurProgram = null;
-    paletteTexture = null;
-    stateTextureA = null;
-    stateTextureB = null;
-    cellStateFramebuffer = null;
+    currentArtworkTexture = null;
+    previousArtworkTexture = null;
     renderFramebuffer = null;
     blurFramebuffer = null;
     renderTexture = null;
     blurTextureA = null;
     positionBuffer = null;
+    texCoordBuffer = null;
 }
 
 function handleContextRestored() {
@@ -53,15 +49,14 @@ function handleContextRestored() {
     LYPLUS_setupBlurEffect();
 }
 
-//
 let blurDimensions = { width: 0, height: 0 };
 let canvasDimensions = { width: 0, height: 0 };
 
-// The factor by which to reduce the canvas resolution for the blur pass.
-// Higher is more blurry and performant.
-const BLUR_DOWNSAMPLE_FACTOR = 26;
 
-// Palette and Cell State Constants
+const BLUR_DOWNSAMPLE = 4; // The factor by which to reduce the canvas resolution for the blur pass.
+const BLUR_RADIUS = 12; // Controls the radius/intensity of the blur.
+
+// Palette Constants
 const MASTER_PALETTE_TEX_WIDTH = 8;
 const MASTER_PALETTE_TEX_HEIGHT = 5;
 const MASTER_PALETTE_SIZE = MASTER_PALETTE_TEX_WIDTH * MASTER_PALETTE_TEX_HEIGHT;
@@ -70,21 +65,28 @@ const DISPLAY_GRID_WIDTH = 8;
 const DISPLAY_GRID_HEIGHT = 5;
 const TOTAL_DISPLAY_CELLS = DISPLAY_GRID_WIDTH * DISPLAY_GRID_HEIGHT;
 
-// this will stretch the DISPLAY_GRID to STRETCHED_GRID (plz use 16x9 if possible)
-const STRETCHED_GRID_WIDTH = 32;
-const STRETCHED_GRID_HEIGHT = 18;
+const STRETCHED_GRID_WIDTH = 256;
+const STRETCHED_GRID_HEIGHT = 256;
 
-
-// Master artwork palettes for transition
 let currentTargetMasterArtworkPalette = [];
 
-// Animation speed & progress
-const SONG_PALETTE_TRANSITION_SPEED = 0.015;
-let songPaletteTransitionProgress = 1.0;
+// Animation & rotation
+const ROTATION_SPEEDS = [0.05, 0.08, 0.12]; // radians per second for each layer
+const ROTATION_POWER = 0.8
+let rotations = [0, 0, 0];
+let previousRotations = [0, 0, 0];
+const LAYER_SCALES = [2.5, 1, 1];
+const LAYER_POSITIONS = [
+    { x: 0, y: 0 },
+    { x: 0.35, y: -0.5 },
+    { x: -0.35, y: 0.5 },
+];
+
+// Transition
+const ARTWORK_TRANSITION_SPEED = 0.02;
+let artworkTransitionProgress = 1.0;
 let globalAnimationId = null;
 let lastFrameTime = 0;
-let scrollOffset = 0.0;
-const SCROLL_SPEED = 0.008;
 
 // Artwork processing state
 let isProcessingArtwork = false;
@@ -92,9 +94,8 @@ let pendingArtworkUrl = null;
 let currentProcessingArtworkIdentifier = null;
 let lastAppliedArtworkIdentifier = null;
 let artworkCheckTimeoutId = null;
-const ARTWORK_RECHECK_DELAY = 300; // this are on ms
+const ARTWORK_RECHECK_DELAY = 300;
 const NO_ARTWORK_IDENTIFIER = 'LYPLUS_NO_ARTWORK';
-// To get the sampled color
 const OVERSAMPLE_GRID_WIDTH = 24;
 const OVERSAMPLE_GRID_HEIGHT = 16;
 
@@ -102,52 +103,13 @@ const OVERSAMPLE_GRID_HEIGHT = 16;
 
 const vertexShaderSource = `
     attribute vec2 a_position;
+    attribute vec2 a_texCoord;
+    varying vec2 v_texCoord;
     varying vec2 v_uv;
     void main() {
         gl_Position = vec4(a_position, 0.0, 1.0);
+        v_texCoord = a_texCoord;
         v_uv = a_position * 0.5 + 0.5;
-    }
-`;
-
-const updateStateShaderSource = `
-    #ifdef GL_ES
-    precision mediump float;
-    #endif
-    varying vec2 v_uv;
-    uniform sampler2D u_currentStateTexture;
-    uniform float u_deltaTime;
-    uniform vec2 u_random;
-    const int TOTAL_MASTER_COLORS_CONST = ${MASTER_PALETTE_SIZE};
-    const float NORMALIZER = float(TOTAL_MASTER_COLORS_CONST - 1);
-    const float SPEED_MULTIPLIER = 10.0;
-    float random(vec2 st) {
-        return fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453123);
-    }
-    void main() {
-        vec4 currentState = texture2D(u_currentStateTexture, v_uv);
-        float sourceIdx_norm = currentState.r;
-        float targetIdx_norm = currentState.g;
-        float progress = currentState.b;
-        float speed_packed = currentState.a;
-        float speed = speed_packed * SPEED_MULTIPLIER;
-        if (speed == 0.0) {
-            speed = (random(v_uv) * 0.5 + 0.5) * 0.012;
-        }
-        progress += speed * u_deltaTime;
-        if (progress >= 1.0) {
-            progress = fract(progress);
-            sourceIdx_norm = targetIdx_norm;
-            vec2 seed = vec2(targetIdx_norm * 255.0, progress * 100.0) + u_random;
-            float newTargetIdx_float = floor(random(seed) * float(TOTAL_MASTER_COLORS_CONST));
-            if (TOTAL_MASTER_COLORS_CONST > 1) {
-                 if(newTargetIdx_float/NORMALIZER == sourceIdx_norm) {
-                    newTargetIdx_float = mod(newTargetIdx_float + 1.0, float(TOTAL_MASTER_COLORS_CONST));
-                 }
-                 targetIdx_norm = newTargetIdx_float / NORMALIZER;
-            }
-            speed = (random(seed + v_uv) * 0.5 + 0.5) * 0.48;
-        }
-        gl_FragColor = vec4(sourceIdx_norm, targetIdx_norm, progress, speed / SPEED_MULTIPLIER);
     }
 `;
 
@@ -155,57 +117,33 @@ const fragmentShaderSource = `
     #ifdef GL_ES
     precision mediump float;
     #endif
-    const int MASTER_PALETTE_TEX_WIDTH_CONST = ${MASTER_PALETTE_TEX_WIDTH};
-    const int MASTER_PALETTE_TEX_HEIGHT_CONST = ${MASTER_PALETTE_TEX_HEIGHT * 2};
-    const int SINGLE_PALETTE_HEIGHT_CONST = ${MASTER_PALETTE_TEX_HEIGHT};
-    const int TOTAL_MASTER_COLORS_CONST = ${MASTER_PALETTE_SIZE};
-    const float GRID_WIDTH = ${DISPLAY_GRID_WIDTH}.0;
-    uniform sampler2D u_paletteTexture;
-    uniform sampler2D u_cellStateTexture;
-    uniform float u_songPaletteTransitionProgress;
-    uniform float u_scrollOffset;
+    varying vec2 v_texCoord;
     varying vec2 v_uv;
+    uniform sampler2D u_artworkTexture;
+    uniform float u_rotation;
+    uniform float u_scale;
+    uniform vec2 u_position;
+    uniform float u_transitionProgress;
     
-    vec4 getColorFromMasterPalette(int index, float y_offset) {
-        index = int(clamp(float(index), 0.0, float(TOTAL_MASTER_COLORS_CONST - 1)));
-        float texY_row = floor(float(index) / float(MASTER_PALETTE_TEX_WIDTH_CONST));
-        float texX_col = mod(float(index), float(MASTER_PALETTE_TEX_WIDTH_CONST));
-        float u = (texX_col + 0.5) / float(MASTER_PALETTE_TEX_WIDTH_CONST);
-        float v = (texY_row + y_offset + 0.5) / float(MASTER_PALETTE_TEX_HEIGHT_CONST);
-        return texture2D(u_paletteTexture, vec2(u, v));
-    }
-    
-    vec4 getCellColor(vec2 uv) {
-        vec4 cellStateEncoded = texture2D(u_cellStateTexture, uv);
-        float normalizer = float(TOTAL_MASTER_COLORS_CONST - 1);
-        if (normalizer < 1.0) normalizer = 1.0;
-        int sourceColorIndex = int(cellStateEncoded.r * normalizer + 0.5);
-        int targetColorIndex = int(cellStateEncoded.g * normalizer + 0.5);
-        float fadeProgress = cellStateEncoded.b;
-        
-        vec4 prevPalette_source = getColorFromMasterPalette(sourceColorIndex, 0.0);
-        vec4 targetPalette_source = getColorFromMasterPalette(sourceColorIndex, float(SINGLE_PALETTE_HEIGHT_CONST));
-        vec4 colorA = mix(prevPalette_source, targetPalette_source, u_songPaletteTransitionProgress);
-        
-        vec4 prevPalette_target = getColorFromMasterPalette(targetColorIndex, 0.0);
-        vec4 targetPalette_target = getColorFromMasterPalette(targetColorIndex, float(SINGLE_PALETTE_HEIGHT_CONST));
-        vec4 colorB = mix(prevPalette_target, targetPalette_target, u_songPaletteTransitionProgress);
-        
-        return mix(colorA, colorB, fadeProgress);
+    vec2 rotate(vec2 v, float angle) {
+        float s = sin(angle);
+        float c = cos(angle);
+        return vec2(v.x * c - v.y * s, v.x * s + v.y * c);
     }
     
     void main() {
-        float scrolledX = v_uv.x - u_scrollOffset;
+        vec2 centered = v_uv - 0.5;
+        centered -= u_position;
+        centered = rotate(centered, u_rotation);
+        centered /= u_scale;
+        centered += 0.5;
         
-        float cellX = scrolledX * GRID_WIDTH;
-        float cellXFrac = fract(cellX);
-        
-        vec2 uv1 = vec2(fract(scrolledX), v_uv.y);
-        vec2 uv2 = vec2(fract(scrolledX + 1.0/GRID_WIDTH), v_uv.y);
-        
-        vec4 color1 = getCellColor(uv1);
-        vec4 color2 = getCellColor(uv2);
-        gl_FragColor = mix(color1, color2, cellXFrac);
+        if (centered.x < 0.0 || centered.x > 1.0 || centered.y < 0.0 || centered.y > 1.0) {
+            discard;
+        } else {
+            vec4 color = texture2D(u_artworkTexture, centered);
+            gl_FragColor = vec4(color.rgb, color.a * u_transitionProgress);
+        }
     }
 `;
 
@@ -217,17 +155,36 @@ const blurFragmentShaderSource = `
     uniform sampler2D u_image;
     uniform vec2 u_resolution;
     uniform vec2 u_direction;
+    uniform float u_blurRadius;
+
+    const int SAMPLES = 40;
+    const int HALF = (SAMPLES - 1) / 2;
+
+    // gaussian function
+    float gaussian(float x, float sigma) {
+        return exp(-0.5 * (x * x) / (sigma * sigma));
+    }
+
     void main() {
         vec2 texelSize = 1.0 / u_resolution;
-        vec3 result = texture2D(u_image, v_uv).rgb * 0.227027;
-        result += texture2D(u_image, v_uv + texelSize * u_direction * 1.0).rgb * 0.1945946;
-        result += texture2D(u_image, v_uv - texelSize * u_direction * 1.0).rgb * 0.1945946;
-        result += texture2D(u_image, v_uv + texelSize * u_direction * 2.0).rgb * 0.1216216;
-        result += texture2D(u_image, v_uv - texelSize * u_direction * 2.0).rgb * 0.1216216;
-        result += texture2D(u_image, v_uv + texelSize * u_direction * 3.0).rgb * 0.05405405;
-        result += texture2D(u_image, v_uv - texelSize * u_direction * 3.0).rgb * 0.05405405;
-        result += texture2D(u_image, v_uv + texelSize * u_direction * 4.0).rgb * 0.01621621;
-        result += texture2D(u_image, v_uv - texelSize * u_direction * 4.0).rgb * 0.01621621;
+
+        // avoid sigma 0
+        float sigma = max(0.0001, u_blurRadius);
+        vec2 step = u_direction * texelSize * (u_blurRadius * 0.25);
+
+        vec3 result = vec3(0.0);
+        float wsum = 0.0;
+
+        for (int i = -HALF; i <= HALF; ++i) {
+            float fi = float(i);
+            vec2 off = step * fi;
+            float w = gaussian(fi, sigma);
+            result += texture2D(u_image, v_uv + off).rgb * w;
+            wsum += w;
+        }
+
+        result /= wsum;
+
         gl_FragColor = vec4(result, 1.0);
     }
 `;
@@ -291,48 +248,40 @@ function LYPLUS_setupBlurEffect() {
 
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const displayFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-    const updateStateFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, updateStateShaderSource);
     const blurFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, blurFragmentShaderSource);
-    if (!vertexShader || !displayFragmentShader || !updateStateFragmentShader || !blurFragmentShader) return null;
+    if (!vertexShader || !displayFragmentShader || !blurFragmentShader) return null;
 
     glProgram = createProgram(gl, vertexShader, displayFragmentShader);
-    updateStateProgram = createProgram(gl, vertexShader, updateStateFragmentShader);
     blurProgram = createProgram(gl, vertexShader, blurFragmentShader);
-    if (!glProgram || !updateStateProgram || !blurProgram) return null;
+    if (!glProgram || !blurProgram) return null;
 
     a_positionLocation = gl.getAttribLocation(glProgram, 'a_position');
-    u_paletteTextureLocation = gl.getUniformLocation(glProgram, 'u_paletteTexture');
-    u_cellStateTextureLocation = gl.getUniformLocation(glProgram, 'u_cellStateTexture');
-    u_songPaletteTransitionProgressLocation = gl.getUniformLocation(glProgram, 'u_songPaletteTransitionProgress');
-    u_scrollOffsetLocation = gl.getUniformLocation(glProgram, 'u_scrollOffset');
-
-    a_update_positionLocation = gl.getAttribLocation(updateStateProgram, 'a_position');
-    u_update_currentStateTextureLocation = gl.getUniformLocation(updateStateProgram, 'u_currentStateTexture');
-    u_update_deltaTimeLocation = gl.getUniformLocation(updateStateProgram, 'u_deltaTime');
-    u_update_randomLocation = gl.getUniformLocation(updateStateProgram, 'u_random');
+    a_texCoordLocation = gl.getAttribLocation(glProgram, 'a_texCoord');
+    u_artworkTextureLocation = gl.getUniformLocation(glProgram, 'u_artworkTexture');
+    u_rotationLocation = gl.getUniformLocation(glProgram, 'u_rotation');
+    u_scaleLocation = gl.getUniformLocation(glProgram, 'u_scale');
+    u_positionLocation = gl.getUniformLocation(glProgram, 'u_position');
+    u_transitionProgressLocation = gl.getUniformLocation(glProgram, 'u_transitionProgress');
 
     a_blur_positionLocation = gl.getAttribLocation(blurProgram, 'a_position');
     u_blur_imageLocation = gl.getUniformLocation(blurProgram, 'u_image');
     u_blur_resolutionLocation = gl.getUniformLocation(blurProgram, 'u_resolution');
     u_blur_directionLocation = gl.getUniformLocation(blurProgram, 'u_direction');
+    u_blur_radiusLocation = gl.getUniformLocation(blurProgram, 'u_blurRadius');
 
     positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     const positions = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    paletteTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, paletteTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    texCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+    const texCoords = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
 
-    stateTextureA = createCellStateTexture();
-    stateTextureB = createCellStateTexture();
-    uploadInitialCellStates(stateTextureA);
+    currentArtworkTexture = createDefaultTexture();
+    previousArtworkTexture = createDefaultTexture();
 
-    cellStateFramebuffer = gl.createFramebuffer();
     renderFramebuffer = gl.createFramebuffer();
     blurFramebuffer = gl.createFramebuffer();
 
@@ -342,8 +291,6 @@ function LYPLUS_setupBlurEffect() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    // Initialize the render texture with the 16:9 stretched dimensions.
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
     blurTextureA = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
@@ -354,18 +301,19 @@ function LYPLUS_setupBlurEffect() {
 
     const initialPalette = getDefaultMasterPalette();
     currentTargetMasterArtworkPalette = initialPalette.map(c => ({ ...c }));
-    updateMasterPaletteTexture(initialPalette, initialPalette);
 
-    handleResize(); // Initial size calculation
+    handleResize();
     window.addEventListener('resize', handleResize, { passive: true });
 
-    // Use IntersectionObserver to start/stop animation when canvas is on/off screen
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MIN_SRC_ALPHA);
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 if (!globalAnimationId) {
                     console.log("LYPLUS: Canvas is visible, starting animation.");
-                    lastFrameTime = performance.now(); // Reset time to avoid large deltaTime jump
+                    lastFrameTime = performance.now();
                     globalAnimationId = requestAnimationFrame(animateWebGLBackground);
                 }
             } else {
@@ -380,18 +328,16 @@ function LYPLUS_setupBlurEffect() {
 
     observer.observe(webglCanvas);
 
-    console.log("LYPLUS: WebGL setup complete with GPU blur pipeline. Animation will start when visible.");
+    console.log("LYPLUS: WebGL setup complete with Apple Music style rotation.");
     return blurContainer;
 }
 
 function handleResize() {
     if (!gl || !webglCanvas) return;
 
-    // The fixed resolution for the canvas in pixels.
     const displayWidth = 512;
     const displayHeight = 512;
 
-    // Only perform resize operations if the size has actually changed to avoid unnecessary texture re-allocations
     if (displayWidth === canvasDimensions.width && displayHeight === canvasDimensions.height) {
         return false;
     }
@@ -402,8 +348,11 @@ function handleResize() {
     webglCanvas.width = canvasDimensions.width;
     webglCanvas.height = canvasDimensions.height;
 
-    blurDimensions.width = Math.round(canvasDimensions.width / BLUR_DOWNSAMPLE_FACTOR);
-    blurDimensions.height = Math.round(canvasDimensions.height / BLUR_DOWNSAMPLE_FACTOR);
+    blurDimensions.width = Math.round(canvasDimensions.width);
+    blurDimensions.height = Math.round(canvasDimensions.height);
+
+    gl.bindTexture(gl.TEXTURE_2D, renderTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvasDimensions.width, canvasDimensions.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
     gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, blurDimensions.width, blurDimensions.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
@@ -413,60 +362,24 @@ function handleResize() {
     return true;
 }
 
-function createCellStateTexture() {
+function createDefaultTexture() {
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, DISPLAY_GRID_WIDTH, DISPLAY_GRID_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    return texture;
-}
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-function uploadInitialCellStates(texture) {
-    if (!gl) return;
-    const textureData = new Uint8Array(TOTAL_DISPLAY_CELLS * 4);
-    const normalizer = Math.max(1, MASTER_PALETTE_SIZE - 1);
-    const CELL_FADE_SPEED_BASE = 0.006;
-    const CELL_FADE_SPEED_VARIATION = 0.005;
-    for (let i = 0; i < TOTAL_DISPLAY_CELLS; i++) {
-        const sourceIdx = Math.floor(Math.random() * MASTER_PALETTE_SIZE);
-        let targetIdx = Math.floor(Math.random() * MASTER_PALETTE_SIZE);
-        if (MASTER_PALETTE_SIZE > 1) {
-            while (targetIdx === sourceIdx) targetIdx = Math.floor(Math.random() * MASTER_PALETTE_SIZE);
-        }
-        const speed = CELL_FADE_SPEED_BASE + (Math.random() * CELL_FADE_SPEED_VARIATION * 2) - CELL_FADE_SPEED_VARIATION;
-        textureData[i * 4 + 0] = Math.round((sourceIdx / normalizer) * 255);
-        textureData[i * 4 + 1] = Math.round((targetIdx / normalizer) * 255);
-        textureData[i * 4 + 2] = Math.round(Math.random() * 255);
-        textureData[i * 4 + 3] = Math.round(Math.max(0, Math.min(1, speed)) * 255);
+    const size = 2;
+    const data = new Uint8Array(size * size * 4);
+    for (let i = 0; i < data.length; i += 4) {
+        data[i] = 30;
+        data[i + 1] = 30;
+        data[i + 2] = 40;
+        data[i + 3] = 255;
     }
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, DISPLAY_GRID_WIDTH, DISPLAY_GRID_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, textureData);
-}
-
-function updateMasterPaletteTexture(previousPalette, targetPalette) {
-    if (!gl || !paletteTexture) return;
-    const textureWidth = MASTER_PALETTE_TEX_WIDTH;
-    const textureHeight = MASTER_PALETTE_TEX_HEIGHT * 2;
-    const textureData = new Uint8Array(textureWidth * textureHeight * 4);
-    const writePalette = (palette, y_offset) => {
-        for (let i = 0; i < MASTER_PALETTE_SIZE; i++) {
-            const color = palette[i] || { r: 0, g: 0, b: 0, a: 255 };
-            const y = y_offset + Math.floor(i / MASTER_PALETTE_TEX_WIDTH);
-            const x = i % MASTER_PALETTE_TEX_WIDTH;
-            const idx = (y * textureWidth + x) * 4;
-            textureData[idx + 0] = Math.round(color.r);
-            textureData[idx + 1] = Math.round(color.g);
-            textureData[idx + 2] = Math.round(color.b);
-            textureData[idx + 3] = Math.round(color.a);
-        }
-    };
-    writePalette(previousPalette, 0);
-    writePalette(targetPalette, MASTER_PALETTE_TEX_HEIGHT);
-    gl.bindTexture(gl.TEXTURE_2D, paletteTexture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, textureWidth, textureHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, textureData);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    return texture;
 }
 
 function LYPLUS_requestProcessNewArtwork(artworkUrlFromEvent) {
@@ -517,7 +430,7 @@ function LYPLUS_requestProcessNewArtwork(artworkUrlFromEvent) {
     if (artworkIdentifierToProcess === null) {
         artworkIdentifierToProcess = NO_ARTWORK_IDENTIFIER;
     }
-    if (artworkIdentifierToProcess === lastAppliedArtworkIdentifier && songPaletteTransitionProgress >= 1.0) return;
+    if (artworkIdentifierToProcess === lastAppliedArtworkIdentifier && artworkTransitionProgress >= 1.0) return;
     if (artworkIdentifierToProcess === currentProcessingArtworkIdentifier || artworkIdentifierToProcess === pendingArtworkUrl) return;
     pendingArtworkUrl = artworkIdentifierToProcess;
     if (!isProcessingArtwork) {
@@ -530,19 +443,23 @@ function processNextArtworkFromQueue() {
     isProcessingArtwork = true;
     currentProcessingArtworkIdentifier = pendingArtworkUrl;
     pendingArtworkUrl = null;
-    console.log("LYPLUS: Processing artwork/state:", currentProcessingArtworkIdentifier);
-    const previousPaletteForTransition = currentTargetMasterArtworkPalette.length === MASTER_PALETTE_SIZE ?
-        currentTargetMasterArtworkPalette.map(c => ({ ...c })) :
-        getDefaultMasterPalette();
-    const finishProcessing = (newTargetPalette) => {
-        currentTargetMasterArtworkPalette = newTargetPalette;
-        updateMasterPaletteTexture(previousPaletteForTransition, currentTargetMasterArtworkPalette);
+    console.log("LYPLUS: Processing artwork:", currentProcessingArtworkIdentifier);
 
-        songPaletteTransitionProgress = 0.0;
+    const finishProcessing = (newTexture, newPalette) => {
+        if (previousArtworkTexture && previousArtworkTexture !== currentArtworkTexture) {
+            gl.deleteTexture(previousArtworkTexture);
+        }
+        previousArtworkTexture = currentArtworkTexture;
+        currentArtworkTexture = newTexture;
+        currentTargetMasterArtworkPalette = newPalette;
+
+        previousRotations = [...rotations];
+
+        artworkTransitionProgress = 0.0;
         needsAnimation = true;
 
         if (!globalAnimationId) {
-            console.log("LYPLUS: Starting animation for palette transition.");
+            console.log("LYPLUS: Starting animation for artwork transition.");
             lastFrameTime = performance.now();
             globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         }
@@ -554,54 +471,26 @@ function processNextArtworkFromQueue() {
             processNextArtworkFromQueue();
         }
     };
+
     if (currentProcessingArtworkIdentifier === NO_ARTWORK_IDENTIFIER) {
-        console.log("LYPLUS: No artwork detected. Transitioning to default palette.");
-        finishProcessing(getDefaultMasterPalette());
+        console.log("LYPLUS: No artwork detected. Using default.");
+        const defaultTexture = createDefaultTexture();
+        finishProcessing(defaultTexture, getDefaultMasterPalette());
         return;
     }
+
     const onImageLoadSuccess = (img) => {
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-
-        tempCanvas.width = STRETCHED_GRID_WIDTH;
-        tempCanvas.height = STRETCHED_GRID_HEIGHT;
-
-        try {
-            tempCtx.drawImage(img, 0, 0, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT);
-        } catch (e) {
-            console.error("LYPLUS: Error drawing image to temp canvas.", e);
-            onImageLoadError(e);
-            return;
-        }
-
-        const palette = [];
-        const cellW = STRETCHED_GRID_WIDTH / MASTER_PALETTE_TEX_WIDTH;
-        const cellH = STRETCHED_GRID_HEIGHT / MASTER_PALETTE_TEX_HEIGHT;
-
-        for (let j = 0; j < MASTER_PALETTE_TEX_HEIGHT; j++) {
-            for (let i = 0; i < MASTER_PALETTE_TEX_WIDTH; i++) {
-                const x = Math.floor(i * cellW);
-                const y = Math.floor(j * cellH);
-                const w = Math.ceil(cellW);
-                const h = Math.ceil(cellH);
-
-                const c = getAverageColor(tempCtx, x, y, w, h);
-                palette.push({
-                    r: c.r,
-                    g: c.g,
-                    b: c.b,
-                    a: c.a !== undefined ? c.a : 255
-                });
-            }
-        }
-
-        finishProcessing(palette.slice(0, MASTER_PALETTE_SIZE));
+        const palette = extractPaletteFromImage(img);
+        const texture = createTextureFromImage(img);
+        finishProcessing(texture, palette);
     };
 
     const onImageLoadError = (error) => {
-        console.error(`LYPLUS: Error loading/processing image. Using default palette.`, error);
-        finishProcessing(getDefaultMasterPalette());
+        console.error(`LYPLUS: Error loading image. Using default.`, error);
+        const defaultTexture = createDefaultTexture();
+        finishProcessing(defaultTexture, getDefaultMasterPalette());
     };
+
     const imageUrl = currentProcessingArtworkIdentifier;
     if (imageUrl.startsWith('http')) {
         fetch(imageUrl, { mode: 'cors' })
@@ -623,8 +512,57 @@ function processNextArtworkFromQueue() {
     }
 }
 
+function createTextureFromImage(img) {
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+    return texture;
+}
+
+function extractPaletteFromImage(img) {
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+
+    tempCanvas.width = STRETCHED_GRID_WIDTH;
+    tempCanvas.height = STRETCHED_GRID_HEIGHT;
+
+    try {
+        tempCtx.drawImage(img, 0, 0, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT);
+    } catch (e) {
+        console.error("LYPLUS: Error drawing image for palette extraction.", e);
+        return getDefaultMasterPalette();
+    }
+
+    const palette = [];
+    const cellW = STRETCHED_GRID_WIDTH / MASTER_PALETTE_TEX_WIDTH;
+    const cellH = STRETCHED_GRID_HEIGHT / MASTER_PALETTE_TEX_HEIGHT;
+
+    for (let j = 0; j < MASTER_PALETTE_TEX_HEIGHT; j++) {
+        for (let i = 0; i < MASTER_PALETTE_TEX_WIDTH; i++) {
+            const x = Math.floor(i * cellW);
+            const y = Math.floor(j * cellH);
+            const w = Math.ceil(cellW);
+            const h = Math.ceil(cellH);
+
+            const c = getAverageColor(tempCtx, x, y, w, h);
+            palette.push({
+                r: c.r,
+                g: c.g,
+                b: c.b,
+                a: c.a !== undefined ? c.a : 255
+            });
+        }
+    }
+
+    return palette.slice(0, MASTER_PALETTE_SIZE);
+}
+
 function animateWebGLBackground() {
-    if (!gl || !glProgram) {
+    if (!gl || !glProgram || !blurProgram) {
         globalAnimationId = null;
         return;
     }
@@ -633,83 +571,86 @@ function animateWebGLBackground() {
     const deltaTime = (now - lastFrameTime) / 1000.0;
     lastFrameTime = now;
 
-    // Update scroll offset
-    scrollOffset += SCROLL_SPEED * deltaTime;
-    if (scrollOffset >= 1.0) scrollOffset -= 1.0;
+    for (let i = 0; i < 3; i++) {
+        rotations[i] += (ROTATION_SPEEDS[i] * deltaTime) * ROTATION_POWER;
+    }
 
-    if (songPaletteTransitionProgress < 1.0) {
-        songPaletteTransitionProgress = Math.min(1.0, songPaletteTransitionProgress + SONG_PALETTE_TRANSITION_SPEED);
-        if (songPaletteTransitionProgress >= 1.0) {
-            console.log("LYPLUS: Palette transition completed.");
+    if (artworkTransitionProgress < 1.0) {
+        artworkTransitionProgress = Math.min(1.0, artworkTransitionProgress + ARTWORK_TRANSITION_SPEED);
+        if (artworkTransitionProgress >= 1.0) {
+            console.log("LYPLUS: Artwork transition completed.");
             needsAnimation = false;
         }
     }
 
     let shouldContinueAnimation;
-    if (currentSettings.lightweight === true) {
-        // In lightweight mode, only continue if a palette transition is active.
+    if (typeof currentSettings !== 'undefined' && currentSettings.lightweight === true) {
         shouldContinueAnimation = needsAnimation;
     } else {
         shouldContinueAnimation = true;
     }
 
-    if (currentSettings.lightweight !== true) {
-        // Pass 1: Update the 8x5 cell state texture using GPGPU (A -> B).
-        gl.bindFramebuffer(gl.FRAMEBUFFER, cellStateFramebuffer);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, stateTextureB, 0);
-        gl.viewport(0, 0, DISPLAY_GRID_WIDTH, DISPLAY_GRID_HEIGHT);
-        gl.useProgram(updateStateProgram);
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        gl.enableVertexAttribArray(a_update_positionLocation);
-        gl.vertexAttribPointer(a_update_positionLocation, 2, gl.FLOAT, false, 0, 0);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, stateTextureA);
-        gl.uniform1i(u_update_currentStateTextureLocation, 0);
-        gl.uniform1f(u_update_deltaTimeLocation, deltaTime);
-        gl.uniform2f(u_update_randomLocation, Math.random(), Math.random());
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-        // Swap textures for the next frame. B now holds the new state.
-        [stateTextureA, stateTextureB] = [stateTextureB, stateTextureA];
-    }
-
-    // Pass 2: Render the 8x5 grid, stretching it to the off-screen 16:9 texture.
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTexture, 0);
-    gl.viewport(0, 0, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT);
+    gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
     gl.useProgram(glProgram);
+
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.enableVertexAttribArray(a_positionLocation);
     gl.vertexAttribPointer(a_positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    gl.uniform1f(u_songPaletteTransitionProgressLocation, songPaletteTransitionProgress);
-    gl.uniform1f(u_scrollOffsetLocation, scrollOffset);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, paletteTexture);
-    gl.uniform1i(u_paletteTextureLocation, 0);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, stateTextureA);
-    gl.uniform1i(u_cellStateTextureLocation, 1);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+    gl.enableVertexAttribArray(a_texCoordLocation);
+    gl.vertexAttribPointer(a_texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
-    // Pass 3 & 4: Two-Pass Gaussian Blur
+    gl.activeTexture(gl.TEXTURE0);
+    gl.uniform1i(u_artworkTextureLocation, 0);
+
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    for (let i = 0; i < 3; i++) {
+        // Render previous artwork (fading out) with its old rotation
+        if (artworkTransitionProgress < 1.0) {
+            gl.bindTexture(gl.TEXTURE_2D, previousArtworkTexture);
+            gl.uniform1f(u_rotationLocation, previousRotations[i]);
+            gl.uniform1f(u_scaleLocation, LAYER_SCALES[i]);
+            gl.uniform2f(u_positionLocation, LAYER_POSITIONS[i].x, LAYER_POSITIONS[i].y);
+            gl.uniform1f(u_transitionProgressLocation, 1.0 - artworkTransitionProgress);
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+        }
+
+        // Render current artwork (fading in) with current rotation
+        gl.bindTexture(gl.TEXTURE_2D, currentArtworkTexture);
+        gl.uniform1f(u_rotationLocation, rotations[i]);
+        gl.uniform1f(u_scaleLocation, LAYER_SCALES[i]);
+        gl.uniform2f(u_positionLocation, LAYER_POSITIONS[i].x, LAYER_POSITIONS[i].y);
+        gl.uniform1f(u_transitionProgressLocation, artworkTransitionProgress);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    // Restore normal blending for blur passes
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
     gl.useProgram(blurProgram);
+    gl.uniform1f(u_blur_radiusLocation, BLUR_RADIUS);
+
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.enableVertexAttribArray(a_blur_positionLocation);
     gl.vertexAttribPointer(a_blur_positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    // Pass 3: Horizontal Blur (stretched texture -> blurTextureA)
     gl.bindFramebuffer(gl.FRAMEBUFFER, blurFramebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, blurTextureA, 0);
     gl.viewport(0, 0, blurDimensions.width, blurDimensions.height);
     gl.uniform2f(u_blur_directionLocation, 1.0, 0.0);
-    gl.uniform2f(u_blur_resolutionLocation, STRETCHED_GRID_WIDTH, STRETCHED_GRID_HEIGHT);
+    gl.uniform2f(u_blur_resolutionLocation, canvasDimensions.width, canvasDimensions.height);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, renderTexture);
     gl.uniform1i(u_blur_imageLocation, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    // Pass 4: Vertical Blur & Render to Screen (blurTextureA -> Canvas)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
     gl.uniform2f(u_blur_directionLocation, 0.0, 1.0);
@@ -727,13 +668,12 @@ function animateWebGLBackground() {
     }
 }
 
-// --- Color Math Helper Functions ---
 function calculateLuminance(color) {
     const a = [color.r, color.g, color.b].map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
     return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
 }
+
 function boostSaturation(r, g, b, factor = 1.2) {
-    // convert rgb ke hsl
     r /= 255; g /= 255; b /= 255;
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
     let h, s, l = (max + min) / 2;
@@ -756,9 +696,9 @@ function boostSaturation(r, g, b, factor = 1.2) {
     function hue2rgb(p, q, t) {
         if (t < 0) t += 1;
         if (t > 1) t -= 1;
-        if (t < 1/6) return p + (q - p) * 6 * t;
-        if (t < 1/2) return q;
-        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
         return p;
     }
 
@@ -768,9 +708,9 @@ function boostSaturation(r, g, b, factor = 1.2) {
     } else {
         const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
         const p = 2 * l - q;
-        r2 = hue2rgb(p, q, h + 1/3);
+        r2 = hue2rgb(p, q, h + 1 / 3);
         g2 = hue2rgb(p, q, h);
-        b2 = hue2rgb(p, q, h - 1/3);
+        b2 = hue2rgb(p, q, h - 1 / 3);
     }
 
     return [Math.round(r2 * 255), Math.round(g2 * 255), Math.round(b2 * 255)];
@@ -835,23 +775,13 @@ function calculateSaturation(color) {
     return delta / max;
 }
 
-/**
- * Converts an RGB color value to HSL.
- * Assumes r, g, and b are contained in the set [0, 255] and
- * returns h, s, and l in the set [0, 1].
- *
- * @param   Number  r       The red color value
- * @param   Number  g       The green color value
- * @param   Number  b       The blue color value
- * @return  Array           The HSL representation
- */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
     let h, s, l = (max + min) / 2;
 
     if (max === min) {
-        h = s = 0; // achromatic
+        h = s = 0;
     } else {
         const d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
@@ -865,21 +795,11 @@ function rgbToHsl(r, g, b) {
     return [h, s, l];
 }
 
-/**
- * Converts an HSL color value to RGB.
- * Assumes h, s, and l are contained in the set [0, 1] and
- * returns r, g, and b in the set [0, 255].
- *
- * @param   Number  h       The hue
- * @param   Number  s       The saturation
- * @param   Number  l       The lightness
- * @return  Array           The RGB representation
- */
 function hslToRgb(h, s, l) {
     let r, g, b;
 
     if (s === 0) {
-        r = g = b = l; // achromatic
+        r = g = b = l;
     } else {
         const hue2rgb = (p, q, t) => {
             if (t < 0) t += 1;
@@ -913,7 +833,6 @@ function LYPLUS_getSongPalette() {
 
     let selectedColor;
     if (filteredPalette.length > 0) {
-        // Sort by the calculated vibrancy and get the most vibrant color from the filtered list.
         selectedColor = filteredPalette.sort((a, b) => b.vibrancy - a.vibrancy)[0];
     } else {
         console.warn("LYPLUS: All colors in palette are too dark. Using original most vibrant color.");
