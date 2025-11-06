@@ -53,8 +53,8 @@ let blurDimensions = { width: 0, height: 0 };
 let canvasDimensions = { width: 0, height: 0 };
 
 
-const BLUR_DOWNSAMPLE = 4; // The factor by which to reduce the canvas resolution for the blur pass.
-const BLUR_RADIUS = 12; // Controls the radius/intensity of the blur.
+const BLUR_DOWNSAMPLE = 2; // The factor by which to reduce the canvas resolution for the blur pass.
+const BLUR_RADIUS = 13; // Controls the radius/intensity of the blur.
 
 // Palette Constants
 const MASTER_PALETTE_TEX_WIDTH = 8;
@@ -71,11 +71,11 @@ const STRETCHED_GRID_HEIGHT = 256;
 let currentTargetMasterArtworkPalette = [];
 
 // Animation & rotation
-const ROTATION_SPEEDS = [0.05, 0.08, 0.12]; // radians per second for each layer
+const ROTATION_SPEEDS = [0.05, 0.06, 0.07]; // radians per second for each layer
 const ROTATION_POWER = 0.8
-let rotations = [0, 0, 0];
+let rotations = [0.3, -2.1, 2.4];
 let previousRotations = [0, 0, 0];
-const LAYER_SCALES = [2.5, 1, 1];
+const LAYER_SCALES = [2.5, 1.2, 1.2];
 const LAYER_POSITIONS = [
     { x: 0, y: 0 },
     { x: 0.35, y: -0.5 },
@@ -133,18 +133,19 @@ const fragmentShaderSource = `
     
     void main() {
         vec2 centered = v_uv - 0.5;
+        centered.y = -centered.y; // betulin flip
         centered -= u_position;
-        centered = rotate(centered, u_rotation);
+        centered = rotate(centered, -u_rotation); // betulin arah rotasi
         centered /= u_scale;
         centered += 0.5;
-        
+
         if (centered.x < 0.0 || centered.x > 1.0 || centered.y < 0.0 || centered.y > 1.0) {
             discard;
         } else {
             vec4 color = texture2D(u_artworkTexture, centered);
             gl_FragColor = vec4(color.rgb, color.a * u_transitionProgress);
         }
-    }
+}
 `;
 
 const blurFragmentShaderSource = `
