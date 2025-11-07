@@ -703,7 +703,7 @@ class LyricsPlusRenderer {
         if (shouldEmphasize) {
           const minDuration = 1000;
           const maxDuration = 2000;
-          const easingPower = 3.0;
+          const easingPower = 2.5;
 
           const progress = Math.min(
             1,
@@ -716,7 +716,7 @@ class LyricsPlusRenderer {
 
           const durationProgressForDecay = Math.min(1, Math.max(0, (totalDuration - minDuration) / (maxDuration - minDuration)));
           const decayStrength = 1 - durationProgressForDecay;
-          const maxDecayRate = 0.75;
+          const maxDecayRate = 0.7;
           actualDecayRate = maxDecayRate * decayStrength;
 
           if (wordBuffer.length > 1) {
