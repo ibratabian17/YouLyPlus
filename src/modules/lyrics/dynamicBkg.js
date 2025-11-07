@@ -651,10 +651,6 @@ function animateWebGLBackground() {
     const deltaTime = (now - lastFrameTime) / 1000.0;
     lastFrameTime = now;
 
-    for (let i = 0; i < 3; i++) {
-        rotations[i] += (ROTATION_SPEEDS[i] * deltaTime) * ROTATION_POWER;
-    }
-
     if (artworkTransitionProgress < 1.0) {
         artworkTransitionProgress = Math.min(1.0, artworkTransitionProgress + ARTWORK_TRANSITION_SPEED);
         if (artworkTransitionProgress >= 1.0) {
@@ -668,6 +664,10 @@ function animateWebGLBackground() {
         shouldContinueAnimation = needsAnimation;
     } else {
         shouldContinueAnimation = true;
+    }
+
+    for (let i = 0; i < 3; i++) {
+        rotations[i] += (ROTATION_SPEEDS[i] * deltaTime) * ROTATION_POWER;
     }
 
     updateLayerPerimeterPositions(deltaTime);
