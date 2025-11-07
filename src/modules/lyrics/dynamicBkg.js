@@ -75,12 +75,17 @@ const ROTATION_SPEEDS = [0.05, 0.06, 0.07]; // radians per second for each layer
 const ROTATION_POWER = 0.8
 let rotations = [0.3, -2.1, 2.4];
 let previousRotations = [0, 0, 0];
-const LAYER_SCALES = [2.5, 1.2, 1.2];
+const LAYER_SCALES = [1.4, 1.2, 1.2];
 const LAYER_POSITIONS = [
     { x: 0, y: 0 },
     { x: 0.35, y: -0.5 },
     { x: -0.35, y: 0.5 },
 ];
+const BASE_LAYER_POSITIONS = LAYER_POSITIONS.map(p => ({ x: p.x, y: p.y }));
+let currentLayerPositions = BASE_LAYER_POSITIONS.map(p => ({ x: p.x, y: p.y }));
+let perimeterOffsets = null;
+const PERIMETER_SPEEDS = [0.001, 0.003, 0.005];
+const PERIMETER_DIRECTION = [1, 1, 1];
 
 // Transition
 const ARTWORK_TRANSITION_SPEED = 0.02;
@@ -562,6 +567,80 @@ function extractPaletteFromImage(img) {
     return palette.slice(0, MASTER_PALETTE_SIZE);
 }
 
+function basePosToPerimeterOffset(xBase, yBase, margin = 0.5) {
+    const m = Math.max(0.0001, margin);
+    const nx = xBase / m;
+    const ny = yBase / m;
+    const cx = Math.max(-1, Math.min(1, nx));
+    const cy = Math.max(-1, Math.min(1, ny));
+
+    if (Math.abs(cy) === 1 && Math.abs(cx) <= 1) {
+        if (cy < 0) {
+            return ((cx + 1) / 2) * 0.25;
+        } else {
+            return 0.5 + ((1 - cx) / 2) * 0.25;
+        }
+    } else {
+        if (cx > 0) {
+            return 0.25 + ((cy + 1) / 2) * 0.25;
+        } else {
+            return 0.75 + ((1 - cy) / 2) * 0.25;
+        }
+    }
+}
+
+function perimeterTtoUnitXY(t) {
+    t = ((t % 1) + 1) % 1;
+    const p = t * 4.0;
+    const seg = Math.floor(p);
+    const local = p - seg;
+    const R = 1.0;
+    switch (seg) {
+        case 0: // top: left -> right
+            return { x: -R + local * 2 * R, y: -R };
+        case 1: // right: top -> bottom
+            return { x: R, y: -R + local * 2 * R };
+        case 2: // bottom: right -> left
+            return { x: R - local * 2 * R, y: R };
+        case 3: // left: bottom -> top
+        default:
+            return { x: -R, y: R - local * 2 * R };
+    }
+}
+
+function updateLayerPerimeterPositions(deltaTime) {
+    if (!perimeterOffsets) {
+        perimeterOffsets = new Array(BASE_LAYER_POSITIONS.length).fill(0.0);
+        for (let i = 0; i < BASE_LAYER_POSITIONS.length; i++) {
+            const base = BASE_LAYER_POSITIONS[i] || { x: 0, y: 0 };
+            const margin = Math.max(Math.abs(base.x || 0), Math.abs(base.y || 0), 0.0001);
+            perimeterOffsets[i] = basePosToPerimeterOffset(base.x || 0, base.y || 0, margin);
+            if (!currentLayerPositions[i]) currentLayerPositions[i] = { x: base.x, y: base.y };
+            else { currentLayerPositions[i].x = base.x; currentLayerPositions[i].y = base.y; }
+        }
+    }
+
+    for (let i = 0; i < BASE_LAYER_POSITIONS.length; i++) {
+        const base = BASE_LAYER_POSITIONS[i];
+        const baseAbsX = Math.abs(base.x);
+        const baseAbsY = Math.abs(base.y);
+
+        const speed = PERIMETER_SPEEDS[i] !== undefined ? PERIMETER_SPEEDS[i] : 0.05;
+        const dir = PERIMETER_DIRECTION[i] !== undefined ? PERIMETER_DIRECTION[i] : 1;
+
+        perimeterOffsets[i] = (perimeterOffsets[i] + dir * speed * deltaTime) % 1.0;
+
+        const unit = perimeterTtoUnitXY(perimeterOffsets[i]);
+
+        const newX = unit.x * baseAbsX;
+        const newY = unit.y * baseAbsY;
+
+        currentLayerPositions[i].x = newX;
+        currentLayerPositions[i].y = newY;
+    }
+}
+
+
 function animateWebGLBackground() {
     if (!gl || !glProgram || !blurProgram) {
         globalAnimationId = null;
@@ -591,6 +670,8 @@ function animateWebGLBackground() {
         shouldContinueAnimation = true;
     }
 
+    updateLayerPerimeterPositions(deltaTime);
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTexture, 0);
     gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
@@ -618,7 +699,7 @@ function animateWebGLBackground() {
             gl.bindTexture(gl.TEXTURE_2D, previousArtworkTexture);
             gl.uniform1f(u_rotationLocation, previousRotations[i]);
             gl.uniform1f(u_scaleLocation, LAYER_SCALES[i]);
-            gl.uniform2f(u_positionLocation, LAYER_POSITIONS[i].x, LAYER_POSITIONS[i].y);
+            gl.uniform2f(u_positionLocation, currentLayerPositions[i].x, currentLayerPositions[i].y);
             gl.uniform1f(u_transitionProgressLocation, 1.0 - artworkTransitionProgress);
             gl.drawArrays(gl.TRIANGLES, 0, 6);
         }
@@ -627,7 +708,7 @@ function animateWebGLBackground() {
         gl.bindTexture(gl.TEXTURE_2D, currentArtworkTexture);
         gl.uniform1f(u_rotationLocation, rotations[i]);
         gl.uniform1f(u_scaleLocation, LAYER_SCALES[i]);
-        gl.uniform2f(u_positionLocation, LAYER_POSITIONS[i].x, LAYER_POSITIONS[i].y);
+        gl.uniform2f(u_positionLocation, currentLayerPositions[i].x, currentLayerPositions[i].y);
         gl.uniform1f(u_transitionProgressLocation, artworkTransitionProgress);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
