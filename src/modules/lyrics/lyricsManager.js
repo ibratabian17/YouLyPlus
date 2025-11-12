@@ -174,7 +174,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     const hasRomanization = romanizationResponse?.success && romanizationResponse.translatedLyrics;
 
     // --- 5. Combine Data & Determine Final Display Mode ---
-    const lyricsObjectToDisplay = combineLyricsData(
+    var lyricsObjectToDisplay = combineLyricsData(
       baseLyrics,
       hasTranslation ? translationResponse.translatedLyrics : null,
       hasRomanization ? romanizationResponse.translatedLyrics : null
