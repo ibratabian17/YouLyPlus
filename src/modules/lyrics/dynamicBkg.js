@@ -71,20 +71,20 @@ const STRETCHED_GRID_HEIGHT = 256;
 let currentTargetMasterArtworkPalette = [];
 
 // Animation & rotation
-const ROTATION_SPEEDS = [0.05, 0.06, 0.07]; // radians per second for each layer
+const ROTATION_SPEEDS = [0.10, 0.18, 0.32]; // radians per second for each layer
 const ROTATION_POWER = 0.8
 let rotations = [0.3, -2.1, 2.4];
 let previousRotations = [0, 0, 0];
-const LAYER_SCALES = [1.4, 1.2, 1.2];
+const LAYER_SCALES = [1.4, 1.26, 1.26];
 const LAYER_POSITIONS = [
     { x: 0, y: 0 },
-    { x: 0.35, y: -0.5 },
-    { x: -0.35, y: 0.5 },
+    { x: 0.75, y: -0.75 },
+    { x: -0.75, y: 0.75 },
 ];
 const BASE_LAYER_POSITIONS = LAYER_POSITIONS.map(p => ({ x: p.x, y: p.y }));
 let currentLayerPositions = BASE_LAYER_POSITIONS.map(p => ({ x: p.x, y: p.y }));
 let perimeterOffsets = null;
-const PERIMETER_SPEEDS = [0.001, 0.003, 0.005];
+const PERIMETER_SPEEDS = [0.09, 0.012, 0.02];
 const PERIMETER_DIRECTION = [1, 1, 1];
 
 // Transition
@@ -163,7 +163,7 @@ const blurFragmentShaderSource = `
     uniform vec2 u_direction;
     uniform float u_blurRadius;
 
-    const int SAMPLES = 40;
+    const int SAMPLES = 44;
     const int HALF = (SAMPLES - 1) / 2;
 
     // gaussian function
@@ -333,8 +333,6 @@ function LYPLUS_setupBlurEffect() {
     }, { threshold: 0.01 });
 
     observer.observe(webglCanvas);
-
-    console.log("LYPLUS: WebGL setup complete with Apple Music style rotation.");
     return blurContainer;
 }
 
@@ -449,7 +447,6 @@ function processNextArtworkFromQueue() {
     isProcessingArtwork = true;
     currentProcessingArtworkIdentifier = pendingArtworkUrl;
     pendingArtworkUrl = null;
-    console.log("LYPLUS: Processing artwork:", currentProcessingArtworkIdentifier);
 
     const finishProcessing = (newTexture, newPalette) => {
         if (previousArtworkTexture && previousArtworkTexture !== currentArtworkTexture) {
@@ -465,7 +462,6 @@ function processNextArtworkFromQueue() {
         needsAnimation = true;
 
         if (!globalAnimationId) {
-            console.log("LYPLUS: Starting animation for artwork transition.");
             lastFrameTime = performance.now();
             globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         }
@@ -614,7 +610,7 @@ function updateLayerPerimeterPositions(deltaTime) {
         for (let i = 0; i < BASE_LAYER_POSITIONS.length; i++) {
             const base = BASE_LAYER_POSITIONS[i] || { x: 0, y: 0 };
             const margin = Math.max(Math.abs(base.x || 0), Math.abs(base.y || 0), 0.0001);
-            perimeterOffsets[i] = basePosToPerimeterOffset(base.x || 0, base.y || 0, margin);
+            perimeterOffsets[i] = Math.random(); 
             if (!currentLayerPositions[i]) currentLayerPositions[i] = { x: base.x, y: base.y };
             else { currentLayerPositions[i].x = base.x; currentLayerPositions[i].y = base.y; }
         }
@@ -622,18 +618,19 @@ function updateLayerPerimeterPositions(deltaTime) {
 
     for (let i = 0; i < BASE_LAYER_POSITIONS.length; i++) {
         const base = BASE_LAYER_POSITIONS[i];
-        const baseAbsX = Math.abs(base.x);
-        const baseAbsY = Math.abs(base.y);
+        const radiusX = Math.abs(base.x);
+        const radiusY = Math.abs(base.y);
 
         const speed = PERIMETER_SPEEDS[i] !== undefined ? PERIMETER_SPEEDS[i] : 0.05;
         const dir = PERIMETER_DIRECTION[i] !== undefined ? PERIMETER_DIRECTION[i] : 1;
 
-        perimeterOffsets[i] = (perimeterOffsets[i] + dir * speed * deltaTime) % 1.0;
+        perimeterOffsets[i] = (perimeterOffsets[i] + dir * speed * deltaTime);
+        if (perimeterOffsets[i] > 1.0) perimeterOffsets[i] -= 1.0; 
 
-        const unit = perimeterTtoUnitXY(perimeterOffsets[i]);
+        const angle = perimeterOffsets[i] * 2.0 * Math.PI;
 
-        const newX = unit.x * baseAbsX;
-        const newY = unit.y * baseAbsY;
+        const newX = radiusX * Math.cos(angle);
+        const newY = radiusY * Math.sin(angle);
 
         currentLayerPositions[i].x = newX;
         currentLayerPositions[i].y = newY;
@@ -654,7 +651,6 @@ function animateWebGLBackground() {
     if (artworkTransitionProgress < 1.0) {
         artworkTransitionProgress = Math.min(1.0, artworkTransitionProgress + ARTWORK_TRANSITION_SPEED);
         if (artworkTransitionProgress >= 1.0) {
-            console.log("LYPLUS: Artwork transition completed.");
             needsAnimation = false;
         }
     }
@@ -745,7 +741,6 @@ function animateWebGLBackground() {
     if (shouldContinueAnimation) {
         globalAnimationId = requestAnimationFrame(animateWebGLBackground);
     } else {
-        console.log("LYPLUS: Animation stopped - no changes needed.");
         globalAnimationId = null;
     }
 }
@@ -917,7 +912,6 @@ function LYPLUS_getSongPalette() {
     if (filteredPalette.length > 0) {
         selectedColor = filteredPalette.sort((a, b) => b.vibrancy - a.vibrancy)[0];
     } else {
-        console.warn("LYPLUS: All colors in palette are too dark. Using original most vibrant color.");
         selectedColor = currentTargetMasterArtworkPalette.sort((a, b) => b.vibrancy - a.vibrancy)[0];
     }
 
