@@ -1,40 +1,42 @@
+/* --- M3 Dark Theme Color & Typography Tokens --- */
 :root {
-    --md-sys-color-primary-rgb: 255, 180, 168;
-    --md-sys-color-primary: rgb(var(--md-sys-color-primary-rgb));
-    --md-sys-color-on-primary: rgb(86 30 22);
-    --md-sys-color-primary-container: rgb(115 52 42);
-    --md-sys-color-on-primary-container: rgb(255 218 212);
-    --md-sys-color-secondary: rgb(231 189 182);
-    --md-sys-color-on-secondary: rgb(68 41 37);
-    --md-sys-color-secondary-container: rgb(93 63 59);
-    --md-sys-color-on-secondary-container: rgb(255 218 212);
-    --md-sys-color-tertiary-container: rgb(86 68 25);
-    --md-sys-color-on-tertiary-container: rgb(251 223 166);
-    --md-sys-color-error: rgb(255 180 171);
-    --md-sys-color-on-error: rgb(105 0 5);
-    --md-sys-color-background: rgb(26 17 16);
-    --md-sys-color-on-background: rgb(241 223 220);
-    --md-sys-color-surface: rgb(26 17 16);
-    --md-sys-color-on-surface: rgb(241 223 220);
-    --md-sys-color-surface-variant: rgb(83 67 65);
-    --md-sys-color-on-surface-variant: rgb(216 194 190);
-    --md-sys-color-outline: rgb(160 140 137);
-    --md-sys-color-outline-variant: rgb(83 67 65);
-    --md-sys-color-surface-container-lowest: rgb(20 12 11);
-    --md-sys-color-surface-container-low: rgb(35 25 24);
-    --md-sys-color-surface-container: rgb(39 29 28);
-    --md-sys-color-surface-container-high: rgb(50 40 38);
-    --md-sys-color-surface-container-highest: rgb(61 50 48);
+    --md-sys-color-primary: #ffb4a8;
+    --md-sys-color-on-primary: #561e16;
+    --md-sys-color-primary-container: #72332a;
+    --md-sys-color-on-primary-container: #ffdad4;
+    --md-sys-color-secondary: #e7bdb8;
+    --md-sys-color-on-secondary: #442926;
+    --md-sys-color-secondary-container: #5d3f3c;
+    --md-sys-color-on-secondary-container: #ffdad4;
+    --md-sys-color-tertiary: #e0c38c;
+    --md-sys-color-on-tertiary: #3f2e04;
+    --md-sys-color-tertiary-container: #584419;
+    --md-sys-color-on-tertiary-container: #fddfa6;
+    --md-sys-color-error: #ffb4ab;
+    --md-sys-color-on-error: #690005;
+    --md-sys-color-background: #1a1110;
+    --md-sys-color-on-background: #f1dedc;
+    --md-sys-color-surface: #1a1110;
+    --md-sys-color-on-surface: #f1dedc;
+    --md-sys-color-surface-variant: #534341;
+    --md-sys-color-on-surface-variant: #d8c2bf;
+    --md-sys-color-outline: #a08c8a;
+    --md-sys-color-outline-variant: #534341;
+    --md-sys-color-scrim: #000000;
+    --md-sys-color-surface-container-lowest: #140c0b;
+    --md-sys-color-surface-container-low: #231918;
+    --md-sys-color-surface-container: #271d1c;
+    --md-sys-color-surface-container-high: #322826;
+    --md-sys-color-surface-container-highest: #3d3231;
 
-    /* M3 Shape & Motion Tokens */
-    --md-sys-elevation-level-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
-    --md-sys-elevation-level-3: 0px 1px 3px 0px rgba(0, 0, 0, 0.30), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+    /* M3 Shape & Motion */
     --border-radius-small: 8px;
     --border-radius-medium: 12px;
     --border-radius-large: 16px;
+    --border-radius-extra-large: 28px;
     --border-radius-full: 999px;
-    --animation-duration: 200ms;
-    --animation-easing: ease-in-out;
+    --animation-easing: cubic-bezier(0.4, 0.0, 0.2, 1);
+    --animation-duration: 250ms;
 
     /* State Layers */
     --state-layer-hover: 0.08;
@@ -57,8 +59,8 @@ html {
 
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: var(--md-sys-color-surface);
-    color: var(--md-sys-color-on-surface);
+    background-color: var(--md-sys-color-surface-container-low);
+    color: var(--md-sys-color-on-background);
     display: flex;
     min-height: 100vh;
     overflow-x: hidden;
@@ -68,7 +70,7 @@ body {
 /* --- Scrollbar --- */
 * {
     scrollbar-width: thin;
-    scrollbar-color: var(--md-sys-color-outline) var(--md-sys-color-surface-container);
+    scrollbar-color: var(--md-sys-color-outline) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -76,7 +78,7 @@ body {
 }
 
 *::-webkit-scrollbar-track {
-    background: var(--md-sys-color-surface-container);
+    background: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
@@ -91,9 +93,9 @@ body {
 
 /* --- Navigation Drawer --- */
 .navigation-drawer {
-    width: 280px;
-    background-color: var(--md-sys-color-surface);
-    padding: 12px 0;
+    width: 260px;
+    background-color: var(--md-sys-color-surface-container-low);
+    padding: 12px;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -101,16 +103,15 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    overflow-y: auto;
-    border-right: 1px solid var(--md-sys-color-outline-variant);
-    z-index: 100;
+    transition: width var(--animation-duration) var(--animation-easing);
 }
 
 .drawer-header {
-    padding: 16px 24px 24px 24px;
+    padding: 16px;
     display: flex;
     align-items: center;
     gap: 16px;
+    height: 64px;
 }
 
 .drawer-header .logo-icon {
@@ -118,16 +119,17 @@ body {
     color: var(--md-sys-color-primary);
 }
 
-.drawer-header h1 {
+.drawer-title {
     font-size: 1.375rem;
     font-weight: 500;
     color: var(--md-sys-color-on-surface);
+    white-space: nowrap;
 }
 
 .drawer-nav {
     display: flex;
     flex-direction: column;
-    padding: 0 12px;
+    gap: 4px;
 }
 
 .nav-item {
@@ -139,17 +141,32 @@ body {
     border-radius: var(--border-radius-full);
     text-decoration: none;
     color: var(--md-sys-color-on-surface-variant);
-    transition: background-color var(--animation-duration) var(--animation-easing), color var(--animation-duration) var(--animation-easing);
+    transition: background-color var(--animation-duration), color var(--animation-duration);
     font-weight: 500;
     font-size: 0.875rem;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .nav-item .material-symbols-outlined {
     font-size: 24px;
+    transition: font-variation-settings 300ms var(--animation-easing);
 }
 
-.nav-item:hover {
-    background-color: var(--md-sys-color-surface-container-high);
+.nav-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--md-sys-color-on-surface);
+    opacity: 0;
+    transition: opacity var(--animation-duration);
+    pointer-events: none;
+    border-radius: var(--border-radius-full);
+}
+
+.nav-item:hover::before {
+    opacity: var(--state-layer-hover);
 }
 
 .nav-item.active {
@@ -165,27 +182,27 @@ body {
 /* --- Main Content Area --- */
 .content-area {
     flex-grow: 1;
-    padding: 24px 48px;
-    margin-left: 280px;
-    overflow-y: auto;
-    display: flex;
+    margin: 10px 10px 10px 270px;
+    display: block;
     flex-direction: column;
     gap: 32px;
+    border-radius: var(--border-radius-extra-large);
+    transition: margin-left var(--animation-duration) var(--animation-easing);
+    max-height: calc(100vh - 20px);
+    overflow: hidden;
+    border-collapse: separate;
+    background: var(--md-sys-color-background);
+}
+
+.scroll-area {
+    max-height: 100%;
+    overflow: auto;
+    padding: 2.2em;
 }
 
 .settings-card {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    padding-bottom: 32px;
-    border-bottom: 1px solid var(--md-sys-color-outline-variant);
     display: none;
-    animation: fadeIn 0.3s var(--animation-easing);
-}
-
-.settings-card:last-of-type {
-    border-bottom: none;
+    animation: fadeIn 400ms var(--animation-easing);
 }
 
 .settings-card.active {
@@ -195,7 +212,7 @@ body {
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(20px);
     }
 
     to {
@@ -206,37 +223,32 @@ body {
 
 /* --- Typography & Sectioning --- */
 .card-title {
-    font-size: 1.75rem;
+    font-size: 2.5rem;
     font-weight: 400;
-    color: var(--md-sys-color-on-surface);
-    margin-bottom: 32px;
-    padding-bottom: 0;
-    border-bottom: none;
+    line-height: 1.2;
+    color: var(--md-sys-color-primary);
+    margin-bottom: 48px;
+}
+
+h2.card-title.no-border {
+    margin-bottom: 0;
 }
 
 .settings-category {
-    margin-bottom: 32px;
-    padding-top: 0;
-    border-top: none;
+    margin-bottom: 48px;
 }
 
 .category-title {
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 500;
     color: var(--md-sys-color-primary);
     margin-bottom: 24px;
-    padding-bottom: 8px;
+    padding-bottom: 16px;
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
 
-.about-header-text .category-title {
-    margin-bottom: 0px;
-}
-
-/* --- Setting Item Layout --- */
 .setting-item {
-    padding: 12px 0;
-    margin-bottom: 16px;
+    padding: 8px 0;
 }
 
 .setting-description,
@@ -244,94 +256,213 @@ body {
     font-size: 0.875rem;
     color: var(--md-sys-color-on-surface-variant);
     line-height: 1.4;
-    margin-top: 8px;
+    margin-top: 4px;
+    padding: 0 4px;
 }
 
-/* --- Form Elements  --- */
+/* --- M3 Outlined Text Field & Select --- */
 .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    position: relative;
+    margin-top: 8px;
+    margin-bottom: 16px;
 }
 
-.form-group-label,
-label:not(.switch) {
-    font-size: 1rem;
-    font-weight: 400;
-    color: var(--md-sys-color-on-surface);
-    margin-bottom: 4px;
-}
-
-input[type="text"],
-input[type="password"],
-textarea,
-select,
-input[type="file"] {
+.form-group input,
+.form-group textarea,
+.m3-select {
     width: 100%;
-    background-color: var(--md-sys-color-surface-container-lowest);
+    background-color: transparent;
     color: var(--md-sys-color-on-surface);
     border: 1px solid var(--md-sys-color-outline);
-    border-radius: var(--border-radius-small);
+    border-radius: 4px;
     padding: 16px;
     font-size: 1rem;
-    transition: border-color var(--animation-duration), box-shadow var(--animation-duration);
+    transition: border-color var(--animation-duration);
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus,
-textarea:focus,
-select:focus {
-    outline: none;
-    border-color: var(--md-sys-color-primary);
-    box-shadow: 0 0 0 1px var(--md-sys-color-primary);
-}
-
-textarea {
-    min-height: 140px;
+.form-group textarea {
     resize: vertical;
 }
 
-.select-wrapper {
-    position: relative;
-    width: 100%;
+.form-group label {
+    position: absolute;
+    left: 12px;
+    top: 16px;
+    font-size: 1rem;
+    color: var(--md-sys-color-on-surface-variant);
+    pointer-events: none;
+    transition: all var(--animation-duration) var(--animation-easing);
+    background-color: var(--md-sys-color-background);
+    padding: 0 4px;
 }
 
-select {
-    appearance: none;
-    -webkit-appearance: none;
-    padding-right: 48px;
+.modal .form-group label{
+    background-color: var(--md-sys-color-surface-container-low);
+}
+
+.form-group input:focus~label,
+.form-group input:not(:placeholder-shown)~label,
+.form-group textarea:focus~label,
+.form-group textarea:not(:placeholder-shown)~label,
+.form-group .m3-select.has-value~label,
+.form-group .m3-select.open~label {
+    top: -8px;
+    font-size: 0.75rem;
+    color: var(--md-sys-color-primary);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.m3-select.open {
+    outline: none;
+    border-color: var(--md-sys-color-primary);
+    border-width: 2px;
+    padding: 15px;
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: 4px;
+    background-color: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: border-color var(--animation-duration);
+}
+
+input[type="file"]:hover {
+    border-color: var(--md-sys-color-primary);
+}
+
+input[type="file"]:focus {
+    outline: none;
+    border-color: var(--md-sys-color-primary);
+    border-width: 2px;
+}
+
+input[type="file"]::file-selector-button {
+    padding: 8px 16px;
+    margin-right: 12px;
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border: none;
+    border-radius: var(--border-radius-full);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color var(--animation-duration);
+}
+
+input[type="file"]::file-selector-button:hover {
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+/* --- M3 Custom Select --- */
+.m3-select-hidden {
+    display: none !important;
+}
+
+.m3-select {
+    position: relative;
+    height: 56px;
+    display: flex;
+    align-items: center;
     cursor: pointer;
 }
 
-.select-wrapper .select-arrow {
+.m3-select-value {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.m3-select-arrow {
     position: absolute;
-    top: 50%;
     right: 16px;
+    top: 50%;
     transform: translateY(-50%);
-    pointer-events: none;
     color: var(--md-sys-color-on-surface-variant);
+    transition: transform var(--animation-duration) var(--animation-easing);
+}
+
+.m3-select.open .m3-select-arrow {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.m3-select-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background-color: var(--md-sys-color-surface-container-high);
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    padding: 8px 0;
+    z-index: 100;
+    max-height: 240px;
+    overflow-y: auto;
+    opacity: 0;
+    transform: scaleY(0.9);
+    transform-origin: top;
+    pointer-events: none;
+    transition: opacity var(--animation-duration), transform var(--animation-duration);
+}
+
+.m3-select.open .m3-select-menu {
+    opacity: 1;
+    transform: scaleY(1);
+    pointer-events: auto;
+}
+
+.m3-select-option {
+    padding: 12px 16px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    font-size: 1rem;
+}
+
+.m3-select-option::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--md-sys-color-primary);
+    opacity: 0;
+    transition: opacity 150ms;
+}
+
+.m3-select-option:hover::before {
+    opacity: var(--state-layer-hover);
+}
+
+.m3-select-option.selected {
+    font-weight: 500;
+    color: var(--md-sys-color-primary);
 }
 
 /* --- M3 Switch --- */
-.switch {
+.m3-switch {
     display: flex;
     align-items: center;
-    width: 100%;
+    gap: 16px;
+    padding: 8px;
     cursor: pointer;
-    gap: 1em;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.switch .switch-label {
-    font-size: 1rem;
-    color: var(--md-sys-color-on-surface);
-    padding-right: 16px;
-}
-
-.switch input {
+.m3-switch input {
     display: none;
 }
 
-.switch .slider {
+.m3-switch .label {
+    font-size: 1rem;
+    color: var(--md-sys-color-on-surface);
+}
+
+.m3-switch .track {
     position: relative;
     width: 52px;
     height: 32px;
@@ -342,8 +473,7 @@ select {
     transition: background-color var(--animation-duration), border-color var(--animation-duration);
 }
 
-.switch .slider::before {
-    content: "";
+.m3-switch .handle {
     position: absolute;
     width: 16px;
     height: 16px;
@@ -351,23 +481,25 @@ select {
     top: 6px;
     background-color: var(--md-sys-color-outline);
     border-radius: 50%;
-    box-shadow: var(--md-sys-elevation-level-1);
-    transition: transform 250ms cubic-bezier(0.2, 0, 0, 1), background-color var(--animation-duration), width 250ms cubic-bezier(0.2, 0, 0, 1), height 250ms cubic-bezier(0.2, 0, 0, 1);
+    transition: transform var(--animation-duration) var(--animation-easing), background-color var(--animation-duration), width var(--animation-duration), height var(--animation-duration);
+    display: grid;
+    place-items: center;
 }
 
-.switch:hover .slider::before {
-    width: 20px;
-    height: 20px;
-    left: 4px;
-    top: 4px;
+.m3-switch .handle::before {
+    content: 'check';
+    font-family: 'Material Symbols Outlined';
+    font-size: 16px;
+    color: transparent;
+    transition: color var(--animation-duration);
 }
 
-.switch input:checked+.slider {
+.m3-switch input:checked+.track {
     background-color: var(--md-sys-color-primary);
     border-color: var(--md-sys-color-primary);
 }
 
-.switch input:checked+.slider::before {
+.m3-switch input:checked+.track .handle {
     background-color: var(--md-sys-color-on-primary);
     width: 24px;
     height: 24px;
@@ -376,30 +508,35 @@ select {
     transform: translateX(20px);
 }
 
-.switch input:focus-visible+.slider {
+.m3-switch input:checked+.track .handle::before {
+    color: var(--md-sys-color-primary);
+}
+
+.m3-switch input:focus-visible+.track {
     box-shadow: 0 0 0 2px var(--md-sys-color-surface), 0 0 0 4px var(--md-sys-color-primary);
 }
 
-/* --- M3 Buttons & Actions --- */
-.btn {
+/* --- M3 Buttons --- */
+.m3-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     padding: 10px 24px;
+    height: 40px;
     border-radius: var(--border-radius-full);
     font-size: 0.875rem;
     font-weight: 500;
     border: none;
     cursor: pointer;
     text-decoration: none;
-    transition: box-shadow var(--animation-duration);
+    transition: box-shadow var(--animation-duration), background-color var(--animation-duration);
     position: relative;
     overflow: hidden;
-    min-height: 40px;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.btn::before {
+.m3-button::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -409,75 +546,47 @@ select {
     pointer-events: none;
 }
 
-.btn:hover::before {
+.m3-button:hover::before {
     opacity: var(--state-layer-hover);
 }
 
-.btn:focus-visible {
+.m3-button:focus-visible {
     outline: 2px solid var(--md-sys-color-primary);
     outline-offset: 2px;
 }
 
-.btn:active::before {
-    opacity: var(--state-layer-pressed);
-}
-
-.btn.btn-filled {
+.m3-button.filled {
     background-color: var(--md-sys-color-primary);
     color: var(--md-sys-color-on-primary);
 }
 
-.btn.btn-filled:hover {
-    box-shadow: var(--md-sys-elevation-level-1);
-}
-
-.btn.btn-filled::before {
-    background-color: var(--md-sys-color-on-primary);
-}
-
-.btn.btn-tonal {
+.m3-button.tonal {
     background-color: var(--md-sys-color-secondary-container);
     color: var(--md-sys-color-on-secondary-container);
 }
 
-.btn.btn-tonal::before {
-    background-color: var(--md-sys-color-on-secondary-container);
-}
-
-.btn.btn-outlined {
+.m3-button.outlined {
     background-color: transparent;
     color: var(--md-sys-color-primary);
     border: 1px solid var(--md-sys-color-outline);
 }
 
-.btn.btn-outlined.btn-error {
+.m3-button.outlined.error {
     color: var(--md-sys-color-error);
     border-color: var(--md-sys-color-error);
 }
 
-.btn.btn-outlined.btn-error::before {
-    background-color: var(--md-sys-color-error);
-}
-
-.btn.btn-icon {
+.m3-button.icon {
     width: 40px;
     height: 40px;
     padding: 8px;
     border-radius: 50%;
-}
-
-.input-with-button {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.input-with-button input {
-    flex-grow: 1;
+    background-color: transparent;
+    color: var(--md-sys-color-on-surface-variant);
 }
 
 .card-actions {
-    margin-top: 24px;
+    margin-top: 32px;
     display: flex;
     justify-content: flex-end;
     gap: 12px;
@@ -485,28 +594,15 @@ select {
     border-top: 1px solid var(--md-sys-color-outline-variant);
 }
 
-/* --- File Input --- */
-input[type="file"] {
-    color: var(--md-sys-color-on-surface-variant);
+.form-group-label {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: 8px;
+    display: block;
 }
 
-input[type="file"]::file-selector-button {
-    background-color: var(--md-sys-color-secondary-container);
-    color: var(--md-sys-color-on-secondary-container);
-    border: none;
-    padding: 10px 24px;
-    border-radius: var(--border-radius-full);
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color var(--animation-duration);
-    margin-right: 16px;
-}
-
-input[type="file"]::file-selector-button:hover {
-    background-color: color-mix(in srgb, var(--md-sys-color-secondary-container) 92%, var(--md-sys-color-on-secondary-container) 8%);
-}
-
-/* --- Specific Sections --- */
+/* --- Specific Sections & Components --- */
 .reload-notification {
     display: none;
     align-items: center;
@@ -514,17 +610,17 @@ input[type="file"]::file-selector-button:hover {
     background-color: var(--md-sys-color-tertiary-container);
     color: var(--md-sys-color-on-tertiary-container);
     padding: 12px 16px;
-    border-radius: var(--border-radius-medium);
+    border-radius: var(--border-radius-large);
     font-weight: 500;
-    animation: fadeIn 0.3s;
+    animation: fadeIn 400ms;
+    margin-bottom: 2em;
 }
 
 .draggable-list {
-    background-color: var(--md-sys-color-surface-container-lowest);
-    border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: var(--border-radius-medium);
+    background-color: var(--md-sys-color-surface-container);
+    border-radius: var(--border-radius-large);
     padding: 8px;
-    min-height: 80px;
+    min-height: 120px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -533,26 +629,27 @@ input[type="file"]::file-selector-button:hover {
 .draggable-source-item {
     display: flex;
     align-items: center;
-    background-color: var(--md-sys-color-surface-container);
-    border-radius: var(--border-radius-small);
-    padding: 10px 12px;
+    background-color: var(--md-sys-color-surface-container-high);
+    border-radius: var(--border-radius-medium);
+    padding: 12px 16px;
     cursor: grab;
-    transition: background-color var(--animation-duration), box-shadow var(--animation-duration);
+    transition: background-color var(--animation-duration), box-shadow var(--animation-duration), transform var(--animation-duration);
     color: var(--md-sys-color-on-surface);
 }
 
 .draggable-source-item:hover {
-    background-color: var(--md-sys-color-surface-container-high);
-    box-shadow: var(--md-sys-elevation-level-1);
+    background-color: var(--md-sys-color-surface-container-highest);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .draggable-source-item.dragging {
-    opacity: 0.7;
+    opacity: 0.8;
     background-color: var(--md-sys-color-secondary-container);
+    transform: scale(1.02);
 }
 
 .draggable-source-item .drag-handle {
-    margin-right: 12px;
+    margin-right: 16px;
     color: var(--md-sys-color-on-surface-variant);
     cursor: grab;
 }
@@ -566,6 +663,11 @@ input[type="file"]::file-selector-button:hover {
     gap: 12px;
     margin-top: 16px;
     align-items: center;
+}
+
+.add-source-container .form-group {
+    flex-grow: 1;
+    margin: 0;
 }
 
 .about-header {
@@ -587,7 +689,6 @@ input[type="file"]::file-selector-button:hover {
 }
 
 .about-description {
-    margin-bottom: 24px;
     font-size: 1.4em;
 }
 
@@ -598,7 +699,7 @@ input[type="file"]::file-selector-button:hover {
     margin-top: 8px;
 }
 
-/* FAB & Modal */
+/* --- FAB & Modal --- */
 .fab {
     position: fixed;
     bottom: 32px;
@@ -613,7 +714,7 @@ input[type="file"]::file-selector-button:hover {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: var(--md-sys-elevation-level-3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     transition: all var(--animation-duration);
     z-index: 1000;
 }
@@ -627,31 +728,52 @@ input[type="file"]::file-selector-button:hover {
     position: fixed;
     z-index: 1001;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     animation: fadeInModal 0.3s ease-out;
 }
 
+.modal.active {
+    display: flex;
+}
+
+.modal-scrim {
+    position: absolute;
+    inset: 0;
+    background-color: var(--md-sys-color-scrim);
+    opacity: 0.4;
+}
+
 .modal-content {
     background-color: var(--md-sys-color-surface-container-low);
     padding: 24px;
-    border-radius: var(--border-radius-large);
-    box-shadow: var(--md-sys-elevation-level-3);
+    border-radius: var(--border-radius-extra-large);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     width: 90%;
     max-width: 500px;
     position: relative;
-    animation: slideInModal 0.3s ease-out;
+    animation: slideInModal 0.4s var(--animation-easing);
     max-height: 90vh;
-    overflow: auto;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
-.close-button {
-    position: absolute;
-    top: 16px;
-    right: 16px;
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
 }
 
 @keyframes fadeInModal {
@@ -666,12 +788,12 @@ input[type="file"]::file-selector-button:hover {
 
 @keyframes slideInModal {
     from {
-        transform: translateY(-20px);
+        transform: translateY(50px) scale(0.95);
         opacity: 0;
     }
 
     to {
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
         opacity: 1;
     }
 }
@@ -680,14 +802,20 @@ input[type="file"]::file-selector-button:hover {
 @media (max-width: 960px) {
     .content-area {
         padding: 24px;
+        margin-left: 80px;
     }
 
     .navigation-drawer {
-        width: 240px;
+        width: 80px;
     }
 
-    .content-area {
-        margin-left: 240px;
+    .drawer-title,
+    .nav-item-label {
+        display: none;
+    }
+
+    .nav-item {
+        justify-content: center;
     }
 }
 
@@ -712,17 +840,21 @@ input[type="file"]::file-selector-button:hover {
         padding: 0 12px 0 8px;
     }
 
-    .drawer-header h1 {
+    .drawer-title {
+        display: block;
         font-size: 1.125rem;
     }
 
     .drawer-nav {
         flex-direction: row;
-        gap: 4px;
     }
 
     .nav-item {
         height: 48px;
+    }
+
+    .nav-item-label {
+        display: block;
     }
 
     .content-area {
@@ -732,22 +864,6 @@ input[type="file"]::file-selector-button:hover {
     }
 
     .card-title {
-        font-size: 1.5rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .drawer-header h1 {
-        display: none;
-    }
-
-    .nav-item {
-        padding: 0;
-        width: 48px;
-        justify-content: center;
-    }
-
-    .nav-item>span:not(.material-symbols-outlined) {
-        display: none;
+        font-size: 2rem;
     }
 }

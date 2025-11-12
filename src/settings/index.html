@@ -16,41 +16,42 @@
     <aside class="navigation-drawer">
         <header class="drawer-header">
             <span class="material-symbols-outlined logo-icon">lyrics</span>
-            <h1>YouLy+ Settings</h1>
+            <h1 class="drawer-title">YouLy+ Settings</h1>
         </header>
         <nav class="drawer-nav">
             <a href="#" class="nav-item active" data-section="general">
                 <span class="material-symbols-outlined">tune</span>
-                General
+                <span class="nav-item-label">General</span>
             </a>
             <a href="#" class="nav-item" data-section="appearance">
                 <span class="material-symbols-outlined">palette</span>
-                Appearance
+                <span class="nav-item-label">Appearance</span>
             </a>
             <a href="#" class="nav-item" data-section="translation">
                 <span class="material-symbols-outlined">translate</span>
-                Translation
+                <span class="nav-item-label">Translation</span>
             </a>
             <a href="#" class="nav-item" data-section="cache">
                 <span class="material-symbols-outlined">cached</span>
-                Cache
+                <span class="nav-item-label">Cache</span>
             </a>
             <a href="#" class="nav-item" data-section="local-lyrics">
                 <span class="material-symbols-outlined">folder_open</span>
-                Local Lyrics
+                <span class="nav-item-label">Local Lyrics</span>
             </a>
             <a href="#" class="nav-item" data-section="about">
                 <span class="material-symbols-outlined">info</span>
-                About
+                <span class="nav-item-label">About</span>
             </a>
         </nav>
     </aside>
 
     <main class="content-area">
+        <div class="scroll-area">
         <!-- Notification bar for reloading -->
         <div id="reload-notification" class="reload-notification">
             <span>Settings saved. Reload your YouTube Music tab for changes to take effect.</span>
-            <button id="reload-button" class="btn btn-tonal">
+            <button id="reload-button" class="m3-button tonal">
                 <span class="material-symbols-outlined">refresh</span>
                 Reload
             </button>
@@ -58,32 +59,37 @@
 
         <!-- General Settings Section -->
         <section class="settings-card active" id="general">
-            <h2 class="card-title">General Settings</h2>
+            <h2 class="card-title">General</h2>
 
             <div class="settings-category">
-                <h3 class="category-title">Core Functionallity</h3>
-                 <div class="setting-item">
-                    <label class="switch">
+                <h3 class="category-title">Core Functionality</h3>
+                <div class="setting-item">
+                    <label class="m3-switch">
                         <input type="checkbox" id="enabled" checked>
-                        <span class="slider"></span>
-                        <span class="switch-label">Enable YouLy+</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Enable YouLy+</span>
                     </label>
                     <p class="setting-description">Globally enable or disable the extension.</p>
                 </div>
                 <div class="setting-item">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="wordByWord">
-                        <span class="slider"></span>
-                        <span class="switch-label">Word-by-Word Highlighting</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Word-by-Word Highlighting</span>
                     </label>
                     <p class="setting-description">Enable karaoke-style word highlighting if available.</p>
                 </div>
-
                 <div class="setting-item">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="sponsor-block">
-                        <span class="slider"></span>
-                        <span class="switch-label">Use SponsorBlock API</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Use SponsorBlock API</span>
                     </label>
                     <p class="setting-description">Skip non-music sections like intros, outros, or sponsor segments.</p>
                 </div>
@@ -93,22 +99,22 @@
                 <h3 class="category-title">Sources</h3>
                 <div class="setting-item">
                     <div class="form-group">
+                        <select id="default-provider" placeholder=" ">
+                            <option value="" disabled selected></option>
+                            <option value="kpoe">Lyrics+ (KPoe)</option>
+                            <option value="customKpoe">Custom KPoe Server</option>
+                            <option value="lrclib">LRCLIB</option>
+                            <option value="local">Local Lyrics</option>
+                        </select>
                         <label for="default-provider">Default Lyrics Provider</label>
-                        <div class="select-wrapper">
-                            <select id="default-provider">
-                                <option value="kpoe" selected>Lyrics+ (KPoe)</option>
-                                <option value="customKpoe">Custom KPoe Server</option>
-                                <option value="lrclib">LRCLIB</option>
-                                <option value="local">Local Lyrics</option>
-                            </select>
-                            <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
-                        </div>
                     </div>
                     <p class="setting-description">Choose your preferred source for lyrics.</p>
                 </div>
-                <div class="setting-item form-group" id="custom-kpoe-url-group" style="display: none;">
-                    <label for="custom-kpoe-url">Custom KPoe Server URL</label>
-                    <input type="text" id="custom-kpoe-url" placeholder="e.g., https://your-kpoe-server.com">
+                <div class="setting-item" id="custom-kpoe-url-group" style="display: none;">
+                    <div class="form-group">
+                        <input type="text" id="custom-kpoe-url" placeholder=" ">
+                        <label for="custom-kpoe-url">Custom KPoe Server URL</label>
+                    </div>
                     <p class="helper-text">Enter the base URL for your self-hosted KPoe server.</p>
                 </div>
                 <div class="setting-item" id="kpoe-sources-group">
@@ -116,16 +122,16 @@
                     <div id="lyrics-source-order-draggable" class="draggable-list">
                         <!-- Draggable items will be populated by ui.js -->
                     </div>
-                    <p class="setting-description helper-text">Drag and drop to reorder the sources for Lyrics+ (KPoe).
-                    </p>
+                    <p class="setting-description helper-text">Drag and drop to reorder the sources for Lyrics+ (KPoe).</p>
                     <div class="add-source-container">
-                        <div class="select-wrapper">
-                            <select id="available-sources-dropdown">
+                        <div class="form-group">
+                            <select id="available-sources-dropdown" placeholder=" ">
+                                <option value="" disabled selected></option>
                                 <!-- Options will be populated by ui.js -->
                             </select>
-                            <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
+                            <label for="available-sources-dropdown">Available Sources</label>
                         </div>
-                        <button id="add-source-button" class="btn btn-tonal">
+                        <button id="add-source-button" class="m3-button tonal">
                             <span class="material-symbols-outlined">add</span>
                             Add Source
                         </button>
@@ -135,14 +141,14 @@
             </div>
 
             <div class="card-actions">
-                <button id="save-general" class="btn btn-filled">Save General</button>
+                <button id="save-general" class="m3-button filled">Save General</button>
             </div>
             <p id="general-save-status" class="status-message"></p>
         </section>
 
         <!-- Local Lyrics Section -->
         <section class="settings-card" id="local-lyrics">
-            <h2 class="card-title">Local Lyrics Management</h2>
+            <h2 class="card-title">Local Lyrics</h2>
 
             <div class="settings-category">
                 <h3 class="category-title">Manage Uploaded Lyrics</h3>
@@ -150,7 +156,7 @@
                     <p class="helper-text" id="no-local-lyrics-message">No local lyrics uploaded yet.</p>
                 </div>
                 <div class="card-actions">
-                    <button id="refresh-local-lyrics-list" class="btn btn-outlined">
+                    <button id="refresh-local-lyrics-list" class="m3-button outlined">
                         <span class="material-symbols-outlined">refresh</span>
                         Refresh List
                     </button>
@@ -163,28 +169,33 @@
             </button>
 
             <div id="upload-lyrics-modal" class="modal" style="display: none;">
+                <div class="modal-scrim"></div>
                 <div class="modal-content">
-                    <span class="close-button material-symbols-outlined">close</span>
-                    <h2 class="card-title">Upload New Local Lyrics</h2>
-                    <div class="setting-item form-group">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Upload New Local Lyrics</h2>
+                        <button class="close-button m3-button icon">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="modal-upload-song-title" placeholder=" ">
                         <label for="modal-upload-song-title">Song Title</label>
-                        <input type="text" id="modal-upload-song-title" placeholder="e.g., Hype Boy">
                     </div>
-                    <div class="setting-item form-group">
+                    <div class="form-group">
+                        <input type="text" id="modal-upload-artist-name" placeholder=" ">
                         <label for="modal-upload-artist-name">Artist Name</label>
-                        <input type="text" id="modal-upload-artist-name" placeholder="e.g., NewJeans">
                     </div>
-                    <div class="setting-item form-group">
+                    <div class="form-group">
+                        <input type="text" id="modal-upload-album-name" placeholder=" ">
                         <label for="modal-upload-album-name">Album Name (Optional)</label>
-                        <input type="text" id="modal-upload-album-name" placeholder="e.g., New Jeans 1st EP">
                     </div>
-                    <div class="setting-item form-group">
-                        <label for="modal-upload-lyrics-file">Lyrics File</label>
+                    <div class="setting-item">
+                        <label for="modal-upload-lyrics-file" class="form-group-label">Lyrics File</label>
                         <input type="file" id="modal-upload-lyrics-file" accept=".lrc,.elrc,.ttml,.json">
                         <p class="helper-text">Upload your LRC, ELRC, Apple TTML, or JSON file.</p>
                     </div>
-                    <div class="card-actions">
-                        <button id="modal-upload-lyrics-button" class="btn btn-filled">
+                    <div class="modal-actions">
+                        <button id="modal-upload-lyrics-button" class="m3-button filled">
                             <span class="material-symbols-outlined">upload_file</span>
                             Upload Lyrics
                         </button>
@@ -192,48 +203,44 @@
                     <p id="modal-upload-status" class="status-message"></p>
                 </div>
             </div>
-
         </section>
 
         <!-- Translation Settings Section -->
         <section class="settings-card" id="translation">
-            <h2 class="card-title">Translation Settings</h2>
+            <h2 class="card-title">Translation</h2>
 
             <div class="settings-category">
                 <h3 class="category-title">Translation Service</h3>
                 <div class="setting-item">
                     <div class="form-group">
+                        <select id="translation-provider" placeholder=" ">
+                            <option value="" disabled selected></option>
+                            <option value="google">Google Translate</option>
+                            <option value="gemini">Gemini AI</option>
+                        </select>
                         <label for="translation-provider">Translation Provider</label>
-                        <div class="select-wrapper">
-                            <select id="translation-provider">
-                                <option value="google" selected>Google Translate</option>
-                                <option value="gemini">Gemini AI</option>
-                            </select>
-                            <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
-                        </div>
                     </div>
                     <p class="setting-description">Select the service for translating lyrics.</p>
                 </div>
-                <div class="setting-item form-group" id="gemini-api-key-group" style="display: none;">
-                    <label for="gemini-api-key">Gemini AI API Key</label>
+                <div class="setting-item" id="gemini-api-key-group" style="display: none;">
                     <div class="input-with-button">
-                        <input type="password" id="gemini-api-key" placeholder="Enter your Gemini AI API Key"
-                            autocomplete="off">
-                        <button type="button" id="toggle-gemini-api-key-visibility" class="btn btn-icon"
-                            title="Show/Hide API Key">
+                        <div class="form-group">
+                            <input type="password" id="gemini-api-key" placeholder=" " autocomplete="off">
+                            <label for="gemini-api-key">Gemini AI API Key</label>
+                        </div>
+                        <button type="button" id="toggle-gemini-api-key-visibility" class="m3-button icon" title="Show/Hide API Key">
                             <span class="material-symbols-outlined">visibility</span>
                         </button>
                     </div>
-                    <p class="helper-text">Your API key is stored locally and never sent to external servers other than
-                        Google's Gemini API.</p>
+                    <p class="helper-text">Your API key is stored locally and never sent to external servers other than Google's Gemini API.</p>
                 </div>
-                <div class="setting-item form-group" id="gemini-model-group" style="display: none;">
-                    <label for="gemini-model">Gemini AI Model</label>
-                    <div class="select-wrapper">
-                        <select id="gemini-model">
-                            <option value="gemini-flash-latest" selected>Gemini Flash Latest</option>
+                <div class="setting-item" id="gemini-model-group" style="display: none;">
+                    <div class="form-group">
+                        <select id="gemini-model" placeholder=" ">
+                            <option value="" disabled selected></option>
+                            <option value="gemini-flash-latest">Gemini Flash Latest</option>
                             <option value="gemini-flash-lite-latest">Gemini Flash-lite Latest</option>
-                            <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash</option>
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                             <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
                             <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
                             <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
@@ -242,7 +249,7 @@
                             <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
                             <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
                         </select>
-                        <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
+                        <label for="gemini-model">Gemini AI Model</label>
                     </div>
                     <p class="setting-description">Choose the Gemini AI model for translations.</p>
                 </div>
@@ -252,22 +259,20 @@
                 <h3 class="category-title">Romanization Service (for non-Latin scripts)</h3>
                 <div class="setting-item">
                     <div class="form-group">
+                        <select id="romanization-provider" placeholder=" ">
+                            <option value="" disabled selected></option>
+                            <option value="google">Google Translate</option>
+                            <option value="gemini">Gemini AI</option>
+                        </select>
                         <label for="romanization-provider">Romanization Provider</label>
-                        <div class="select-wrapper">
-                            <select id="romanization-provider">
-                                <option value="google" selected>Google Translate</option>
-                                <option value="gemini">Gemini AI</option>
-                            </select>
-                            <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
-                        </div>
                     </div>
                     <p class="setting-description">Automatically fetches romanization from the Lyrics+ API when available. If not provided by Lyrics+, it falls back to generating romanization using the selected service.</p>
                 </div>
-                <div class="setting-item form-group" id="gemini-romanization-model-group" style="display: none;">
-                    <label for="gemini-romanization-model">Gemini AI Romanization Model</label>
-                    <div class="select-wrapper">
-                        <select id="gemini-romanization-model">
-                            <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash</option>
+                <div class="setting-item" id="gemini-romanization-model-group" style="display: none;">
+                    <div class="form-group">
+                        <select id="gemini-romanization-model" placeholder=" ">
+                            <option value="" disabled selected></option>
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                             <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
                             <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
                             <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
@@ -276,7 +281,7 @@
                             <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
                             <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
                         </select>
-                        <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
+                        <label for="gemini-romanization-model">Gemini AI Romanization Model</label>
                     </div>
                     <p class="setting-description">Choose the Gemini AI model for romanization.</p>
                 </div>
@@ -285,61 +290,64 @@
             <div class="settings-category">
                 <h3 class="category-title">Translation Behavior</h3>
                 <div class="setting-item">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="override-translate-target">
-                        <span class="slider"></span>
-                        <span class="switch-label">Override Translation Target Language</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Override Translation Target Language</span>
                     </label>
-                    <p class="setting-description">Manually specify the target language for translation (e.g., 'en',
-                        'ko',
-                        'ja').</p>
+                    <p class="setting-description">Manually specify the target language for translation (e.g., 'en', 'ko', 'ja').</p>
                 </div>
-                <div class="setting-item form-group" id="custom-translate-target-group" style="display: none;">
-                    <label for="custom-translate-target">Custom Target Language Code</label>
-                    <input type="text" id="custom-translate-target" placeholder="e.g., en, ko, ja">
-                    <p class="helper-text">Enter the 2-letter language code (e.g., 'en' for English, 'ko' for Korean).
-                    </p>
+                <div class="setting-item" id="custom-translate-target-group" style="display: none;">
+                    <div class="form-group">
+                        <input type="text" id="custom-translate-target" placeholder=" ">
+                        <label for="custom-translate-target">Custom Target Language Code</label>
+                    </div>
+                    <p class="helper-text">Enter the 2-letter language code (e.g., 'en' for English, 'ko' for Korean).</p>
                 </div>
             </div>
 
             <div class="settings-category">
                 <h3 class="category-title">Advanced Prompting (Gemini)</h3>
                 <div class="setting-item" id="override-gemini-prompt-group" style="display: none;">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="override-gemini-prompt">
-                        <span class="slider"></span>
-                        <span class="switch-label">Override Gemini AI Translation Prompt</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Override Gemini AI Translation Prompt</span>
                     </label>
-                    <p class="setting-description">Use a custom prompt for Gemini AI translations. Use
-                        <code>{targetLang}</code> and <code>{lyrics}</code> placeholders.
-                    </p>
+                    <p class="setting-description">Use a custom prompt for Gemini AI translations. Use <code>{targetLang}</code> and <code>{lyrics}</code> placeholders.</p>
                 </div>
-                <div class="setting-item form-group" id="custom-gemini-prompt-group" style="display: none;">
-                    <label for="custom-gemini-prompt">Custom Gemini AI Translation Prompt</label>
-                    <textarea id="custom-gemini-prompt"
-                        placeholder="You are an expert AI Lyrical Translator..."></textarea>
-                    <p class="helper-text">Customize the prompt sent to Gemini AI for translations. Use <code>{targetLang}</code> for the
-                        target language</p>
+                <div class="setting-item" id="custom-gemini-prompt-group" style="display: none;">
+                    <div class="form-group">
+                        <textarea id="custom-gemini-prompt" placeholder=" "></textarea>
+                        <label for="custom-gemini-prompt">Custom Gemini AI Translation Prompt</label>
+                    </div>
+                    <p class="helper-text">Customize the prompt sent to Gemini AI for translations. Use <code>{targetLang}</code> for the target language</p>
                 </div>
                 <div class="setting-item" id="override-gemini-romanize-prompt-group" style="display: none;">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="override-gemini-romanize-prompt">
-                        <span class="slider"></span>
-                        <span class="switch-label">Override Gemini AI Romanization Prompt</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Override Gemini AI Romanization Prompt</span>
                     </label>
-                    <p class="setting-description">Use a custom prompt for Gemini AI romanization.
-                    </p>
+                    <p class="setting-description">Use a custom prompt for Gemini AI romanization.</p>
                 </div>
-                <div class="setting-item form-group" id="custom-gemini-romanize-prompt-group" style="display: none;">
-                    <label for="custom-gemini-romanize-prompt">Custom Gemini AI Romanization Prompt</label>
-                    <textarea id="custom-gemini-romanize-prompt"
-                        placeholder="You are an expert AI Romanizer..."></textarea>
+                <div class="setting-item" id="custom-gemini-romanize-prompt-group" style="display: none;">
+                    <div class="form-group">
+                        <textarea id="custom-gemini-romanize-prompt" placeholder=" "></textarea>
+                        <label for="custom-gemini-romanize-prompt">Custom Gemini AI Romanization Prompt</label>
+                    </div>
                     <p class="helper-text">Customize the prompt sent to Gemini AI for romanization.</p>
                 </div>
             </div>
 
             <div class="card-actions">
-                <button id="save-translation" class="btn btn-filled">Save Translation</button>
+                <button id="save-translation" class="m3-button filled">Save Translation</button>
             </div>
             <p id="translation-save-status" class="status-message"></p>
         </section>
@@ -352,14 +360,12 @@
                 <h3 class="category-title">Text Display</h3>
                 <div class="setting-item">
                     <div class="form-group">
+                        <select id="larger-text-mode" placeholder=" ">
+                            <option value="" disabled selected></option>
+                            <option value="lyrics">Lyrics</option>
+                            <option value="romanization">Pronunciation</option>
+                        </select>
                         <label for="larger-text-mode">Larger Text: Pronunciation Or Lyrics</label>
-                        <div class="select-wrapper">
-                            <select id="larger-text-mode">
-                                <option value="lyrics">Lyrics</option>
-                                <option value="romanization">Pronunciation</option>
-                            </select>
-                            <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
-                        </div>
                     </div>
                     <p class="setting-description">Choose whether lyrics or pronunciation appears larger when both are displayed.</p>
                 </div>
@@ -368,77 +374,85 @@
             <div class="settings-category">
                 <h3 class="category-title">Performance & Compatibility</h3>
                 <div class="setting-item">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="lightweight">
-                        <span class="slider"></span>
-                        <span class="switch-label">Lightweight Mode</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Lightweight Mode</span>
                     </label>
-                    <p class="setting-description">Reduces animations and visual effects for better performance on older
-                        devices.</p>
+                    <p class="setting-description">Reduces animations and visual effects for better performance on older devices.</p>
                 </div>
                 <div class="setting-item">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="hide-offscreen">
-                        <span class="slider"></span>
-                        <span class="switch-label">Hide Off-screen Lyrics Line</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Hide Off-screen Lyrics Line</span>
                     </label>
-                    <p class="setting-description">
-                        Hides & remove all animation lyrics lines that are not currently visible on the screen.
-                    </p>
+                    <p class="setting-description">Hides & remove all animation lyrics lines that are not currently visible on the screen.</p>
                 </div>
                 <div class="setting-item">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="compability-wipe">
-                        <span class="slider"></span>
-                        <span class="switch-label">Preload Wipe Animation</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Preload Wipe Animation</span>
                     </label>
-                    <p class="setting-description">
-                        Pre-renders wipe animation on all syllables before they're active. Useful for devices where the
-                        highlight animation lags or fails to show if it's only triggered when the line becomes active.
-                    </p>
+                    <p class="setting-description">Pre-renders wipe animation on all syllables before they're active. Useful for devices where the highlight animation lags or fails to show if it's only triggered when the line becomes active.</p>
                 </div>
             </div>
 
             <div class="settings-category">
                 <h3 class="category-title">Visual Effects</h3>
                 <div class="setting-item">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="blur-inactive">
-                        <span class="slider"></span>
-                        <span class="switch-label">Blur Inactive Lyrics</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Blur Inactive Lyrics</span>
                     </label>
-                    <p class="setting-description">Applies a blur effect to lyrics not currently being sung, similar to
-                        Apple Music.</p>
+                    <p class="setting-description">Applies a blur effect to lyrics not currently being sung, similar to Apple Music.</p>
                 </div>
                 <div class="setting-item">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="dynamic-player">
-                        <span class="slider"></span>
-                        <span class="switch-label">Enable Dynamic Background (Player View)</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Enable Dynamic Background (Player View)</span>
                     </label>
-                    <p class="setting-description">Applies animated album backgrounds when the player is expanded. This
-                        setting has no effect in fullscreen mode, where dynamic background is always enabled.</p>
+                    <p class="setting-description">Applies animated album backgrounds when the player is expanded. This setting has no effect in fullscreen mode, where dynamic background is always enabled.</p>
                 </div>
                 <div class="setting-item">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="useSongPaletteFullscreen">
-                        <span class="slider"></span>
-                        <span class="switch-label">Use song palette for lyrics color in fullscreen</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Use song palette for lyrics color in fullscreen</span>
                     </label>
                     <p class="setting-description">Uses the song's color palette for the lyrics when in fullscreen mode.</p>
                 </div>
                 <div class="setting-item">
-                    <label class="switch">
+                    <label class="m3-switch">
                         <input type="checkbox" id="useSongPaletteAllModes">
-                        <span class="slider"></span>
-                        <span class="switch-label">Use song palette for lyrics color in all modes</span>
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                        <span class="label">Use song palette for lyrics color in all modes</span>
                     </label>
                     <p class="setting-description">Uses the song's color palette for the lyrics in all display modes.</p>
                 </div>
-                <div class="setting-item form-group">
-                    <label for="overridePaletteColor">Override palette color</label>
-                    <input type="text" id="overridePaletteColor" placeholder="e.g., #ff0000">
-                    <p class="helper-text">Override the song palette color with a custom one. (Only for lyrics color, not dynamic backgrounf) (keep empty if dont want to override)</p>
+                <div class="setting-item">
+                    <div class="form-group">
+                        <input type="text" id="overridePaletteColor" placeholder=" ">
+                        <label for="overridePaletteColor">Override palette color</label>
+                    </div>
+                    <p class="helper-text">Override the song palette color with a custom one. (Only for lyrics color, not dynamic background) (keep empty if don't want to override)</p>
                 </div>
             </div>
 
@@ -446,42 +460,40 @@
                 <h3 class="category-title">Custom Styling</h3>
                 <div class="setting-item">
                     <div class="form-group">
+                        <textarea id="custom-css" placeholder=" "></textarea>
                         <label for="custom-css">Custom CSS</label>
-                        <textarea id="custom-css" placeholder=".lyrics-container { ... }"></textarea>
-                        <p class="helper-text">Apply your own styles to the lyrics display. Use with caution. To create or testing, it is recommended to use UserStyles</p>
                     </div>
+                    <p class="helper-text">Apply your own styles to the lyrics display. Use with caution. To create or testing, it is recommended to use UserStyles</p>
                 </div>
+            </div>
 
             <div class="card-actions">
-                <button id="save-appearance" class="btn btn-filled">Save Appearance</button>
+                <button id="save-appearance" class="m3-button filled">Save Appearance</button>
             </div>
             <p id="appearance-save-status" class="status-message"></p>
         </section>
 
         <!-- Cache Options Section -->
         <section class="settings-card" id="cache">
-            <h2 class="card-title">Cache Options</h2>
+            <h2 class="card-title">Cache</h2>
             <div class="setting-item">
                 <div class="form-group">
+                    <select id="cache-strategy" placeholder=" ">
+                        <option value="" disabled selected></option>
+                        <option value="aggressive">Aggressive (2 hours)</option>
+                        <option value="moderate">Moderate (1 hour)</option>
+                        <option value="none">None (no caching)</option>
+                    </select>
                     <label for="cache-strategy">Cache Strategy</label>
-                    <div class="select-wrapper">
-                        <select id="cache-strategy">
-                            <option value="aggressive" selected>Aggressive (2 hours)</option>
-                            <option value="moderate">Moderate (1 hour)</option>
-                            <option value="none">None (no caching)</option>
-                        </select>
-                        <span class="material-symbols-outlined select-arrow">arrow_drop_down</span>
-                    </div>
                 </div>
-                <p class="setting-description">Determines how long lyrics are stored locally to reduce loading times.
-                </p>
+                <p class="setting-description">Determines how long lyrics are stored locally to reduce loading times.</p>
             </div>
             <div class="setting-item">
                 <label class="form-group-label">Current Cache Usage</label>
                 <p id="cache-size" class="cache-info">0.00 MB used (0 songs cached)</p>
             </div>
             <div class="card-actions">
-                <button id="clear-cache" class="btn btn-outlined btn-error">
+                <button id="clear-cache" class="m3-button outlined error">
                     <span class="material-symbols-outlined">delete_sweep</span>
                     Clear Cache
                 </button>
@@ -512,22 +524,22 @@
                     <label class="form-group-label">Links & Support</label>
                     <div class="links-container">
                         <a href="https://github.com/ibratabian17/youlyplus" target="_blank" rel="noopener noreferrer"
-                            class="btn btn-outlined">
+                            class="m3-button outlined">
                             <span class="material-symbols-outlined">code</span>
                             Source Code
                         </a>
                         <a href="https://github.com/ibratabian17/youlyplus/issues" target="_blank"
-                            rel="noopener noreferrer" class="btn btn-outlined">
+                            rel="noopener noreferrer" class="m3-button outlined">
                             <span class="material-symbols-outlined">bug_report</span>
                             Report a Bug
                         </a>
                         <a href="https://patreon.com/ibratabian17" target="_blank" rel="noopener noreferrer"
-                            class="btn btn-outlined">
+                            class="m3-button outlined">
                             <span class="material-symbols-outlined">volunteer_activism</span>
                             Support on Patreon
                         </a>
                         <a href="https://ko-fi.com/ibratabian17" target="_blank" rel="noopener noreferrer"
-                            class="btn btn-outlined">
+                            class="m3-button outlined">
                             <span class="material-symbols-outlined">local_cafe</span>
                             Support on Ko-fi
                         </a>
@@ -539,9 +551,39 @@
         <footer class="content-footer">
             <p>Made with love</p>
         </footer>
+    </div>
     </main>
     <script type="module" src="settingsManager.js"></script>
     <script type="module" src="ui.js"></script>
+    <script>
+        // Ripple effect for buttons
+        document.addEventListener('click', function (e) {
+            const target = e.target.closest('.m3-button, .nav-item');
+            if (!target) return;
+
+            const ripple = document.createElement('span');
+            const rect = target.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            ripple.classList.add('ripple');
+            
+            const existingRipple = target.querySelector('.ripple');
+            if (existingRipple) {
+                existingRipple.remove();
+            }
+            
+            target.appendChild(ripple);
+
+            ripple.addEventListener('animationend', () => {
+                ripple.remove();
+            });
+        });
+    </script>
 </body>
 
 </html>
