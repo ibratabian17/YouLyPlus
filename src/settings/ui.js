@@ -321,7 +321,6 @@ document.getElementById('default-provider').addEventListener('change', (e) => {
     currentSettings.lyricsProvider = e.target.value;
     toggleKpoeSourcesVisibility();
     toggleCustomKpoeUrlVisibility();
-    toggleLocalLyricsVisibility();
 });
 
 document.getElementById('add-lyrics-fab').addEventListener('click', () => {
@@ -408,11 +407,6 @@ function toggleGeminiRomanizePromptVisibility() {
 function toggleRomanizationModelVisibility() {
     const isVisible = document.getElementById('romanization-provider').value === 'gemini';
     toggleElementVisibility('gemini-romanization-model-group', isVisible);
-}
-
-function toggleLocalLyricsVisibility() {
-    const isVisible = document.getElementById('default-provider').value === 'local';
-    toggleElementVisibility('local-lyrics', isVisible);
 }
 
 async function handleUploadLocalLyrics() {
@@ -543,6 +537,60 @@ function setAppVersion() {
     }
 }
 
+function exportSettings() {
+    try {
+        const settings = getSettings();
+        const settingsJson = JSON.stringify(settings, null, 2);
+        const blob = new Blob([settingsJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const date = new Date().toISOString().slice(0, 10);
+        a.download = `youlyplus-settings-${date}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showStatusMessage('config-status', 'Settings exported successfully!', false);
+    } catch (error) {
+        console.error('Failed to export settings:', error);
+        showStatusMessage('config-status', `Error exporting settings: ${error.message}`, true);
+    }
+}
+
+function importSettings(event) {
+    const file = event.target.files[0];
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const importedSettings = JSON.parse(e.target.result);
+
+            if (typeof importedSettings !== 'object' || importedSettings === null || typeof importedSettings.isEnabled === 'undefined') {
+                throw new Error('Invalid or corrupted settings file.');
+            }
+
+            updateSettings(importedSettings);
+            saveSettings();
+            updateUI(getSettings());
+            showStatusMessage('config-status', 'Settings imported successfully! Reload required.', false);
+            showReloadNotification();
+        } catch (error) {
+            console.error('Failed to import settings:', error);
+            showStatusMessage('config-status', `Error importing settings: ${error.message}`, true);
+        } finally {
+            event.target.value = '';
+        }
+    };
+    reader.onerror = () => {
+        showStatusMessage('config-status', 'Error reading file.', true);
+    };
+    reader.readAsText(file);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     loadSettings((settings) => {
         initCustomSelects(); // Init custom selects first
@@ -569,6 +617,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    document.getElementById('export-settings-button').addEventListener('click', exportSettings);
+    document.getElementById('import-settings-button').addEventListener('click', () => {
+        document.getElementById('import-settings-file').click();
+    });
+    document.getElementById('import-settings-file').addEventListener('change', importSettings);
 });
 
 function updateCustomSelectDisplay(selectId) {
@@ -661,3 +715,30 @@ function initCustomSelects() {
         document.querySelectorAll('.m3-select.open').forEach(select => select.classList.remove('open'));
     });
 }
+
+document.addEventListener('click', function (e) {
+    const target = e.target.closest('.m3-button, .nav-item, .draggable-source-item');
+    if (!target) return;
+
+    const ripple = document.createElement('span');
+    const rect = target.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+
+    ripple.style.width = ripple.style.height = `${size}px`;
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    ripple.classList.add('ripple');
+
+    const existingRipple = target.querySelector('.ripple');
+    if (existingRipple) {
+        existingRipple.remove();
+    }
+
+    target.appendChild(ripple);
+
+    ripple.addEventListener('animationend', () => {
+        ripple.remove();
+    });
+});

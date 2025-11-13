@@ -48,481 +48,511 @@
 
     <main class="content-area">
         <div class="scroll-area">
-        <!-- Notification bar for reloading -->
-        <div id="reload-notification" class="reload-notification">
-            <span>Settings saved. Reload your YouTube Music tab for changes to take effect.</span>
-            <button id="reload-button" class="m3-button tonal">
-                <span class="material-symbols-outlined">refresh</span>
-                Reload
-            </button>
-        </div>
-
-        <!-- General Settings Section -->
-        <section class="settings-card active" id="general">
-            <h2 class="card-title">General</h2>
-
-            <div class="settings-category">
-                <h3 class="category-title">Core Functionality</h3>
-                <div class="setting-item">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="enabled" checked>
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Enable YouLy+</span>
-                    </label>
-                    <p class="setting-description">Globally enable or disable the extension.</p>
-                </div>
-                <div class="setting-item">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="wordByWord">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Word-by-Word Highlighting</span>
-                    </label>
-                    <p class="setting-description">Enable karaoke-style word highlighting if available.</p>
-                </div>
-                <div class="setting-item">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="sponsor-block">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Use SponsorBlock API</span>
-                    </label>
-                    <p class="setting-description">Skip non-music sections like intros, outros, or sponsor segments.</p>
-                </div>
-            </div>
-
-            <div class="settings-category">
-                <h3 class="category-title">Sources</h3>
-                <div class="setting-item">
-                    <div class="form-group">
-                        <select id="default-provider" placeholder=" ">
-                            <option value="" disabled selected></option>
-                            <option value="kpoe">Lyrics+ (KPoe)</option>
-                            <option value="customKpoe">Custom KPoe Server</option>
-                            <option value="lrclib">LRCLIB</option>
-                            <option value="local">Local Lyrics</option>
-                        </select>
-                        <label for="default-provider">Default Lyrics Provider</label>
-                    </div>
-                    <p class="setting-description">Choose your preferred source for lyrics.</p>
-                </div>
-                <div class="setting-item" id="custom-kpoe-url-group" style="display: none;">
-                    <div class="form-group">
-                        <input type="text" id="custom-kpoe-url" placeholder=" ">
-                        <label for="custom-kpoe-url">Custom KPoe Server URL</label>
-                    </div>
-                    <p class="helper-text">Enter the base URL for your self-hosted KPoe server.</p>
-                </div>
-                <div class="setting-item" id="kpoe-sources-group">
-                    <label class="form-group-label">Lyrics+ (KPoe) Source Order</label>
-                    <div id="lyrics-source-order-draggable" class="draggable-list">
-                        <!-- Draggable items will be populated by ui.js -->
-                    </div>
-                    <p class="setting-description helper-text">Drag and drop to reorder the sources for Lyrics+ (KPoe).</p>
-                    <div class="add-source-container">
-                        <div class="form-group">
-                            <select id="available-sources-dropdown" placeholder=" ">
-                                <option value="" disabled selected></option>
-                                <!-- Options will be populated by ui.js -->
-                            </select>
-                            <label for="available-sources-dropdown">Available Sources</label>
-                        </div>
-                        <button id="add-source-button" class="m3-button tonal">
-                            <span class="material-symbols-outlined">add</span>
-                            Add Source
-                        </button>
-                    </div>
-                    <p id="add-source-status" class="status-message"></p>
-                </div>
-            </div>
-
-            <div class="card-actions">
-                <button id="save-general" class="m3-button filled">Save General</button>
-            </div>
-            <p id="general-save-status" class="status-message"></p>
-        </section>
-
-        <!-- Local Lyrics Section -->
-        <section class="settings-card" id="local-lyrics">
-            <h2 class="card-title">Local Lyrics</h2>
-
-            <div class="settings-category">
-                <h3 class="category-title">Manage Uploaded Lyrics</h3>
-                <div id="local-lyrics-list" class="draggable-list">
-                    <p class="helper-text" id="no-local-lyrics-message">No local lyrics uploaded yet.</p>
-                </div>
-                <div class="card-actions">
-                    <button id="refresh-local-lyrics-list" class="m3-button outlined">
-                        <span class="material-symbols-outlined">refresh</span>
-                        Refresh List
-                    </button>
-                </div>
-                <p id="local-lyrics-status" class="status-message"></p>
-            </div>
-
-            <button class="fab" id="add-lyrics-fab" title="Add New Local Lyrics">
-                <span class="material-symbols-outlined">add</span>
-            </button>
-
-            <div id="upload-lyrics-modal" class="modal" style="display: none;">
-                <div class="modal-scrim"></div>
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title">Upload New Local Lyrics</h2>
-                        <button class="close-button m3-button icon">
-                            <span class="material-symbols-outlined">close</span>
-                        </button>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" id="modal-upload-song-title" placeholder=" ">
-                        <label for="modal-upload-song-title">Song Title</label>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" id="modal-upload-artist-name" placeholder=" ">
-                        <label for="modal-upload-artist-name">Artist Name</label>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" id="modal-upload-album-name" placeholder=" ">
-                        <label for="modal-upload-album-name">Album Name (Optional)</label>
-                    </div>
-                    <div class="setting-item">
-                        <label for="modal-upload-lyrics-file" class="form-group-label">Lyrics File</label>
-                        <input type="file" id="modal-upload-lyrics-file" accept=".lrc,.elrc,.ttml,.json">
-                        <p class="helper-text">Upload your LRC, ELRC, Apple TTML, or JSON file.</p>
-                    </div>
-                    <div class="modal-actions">
-                        <button id="modal-upload-lyrics-button" class="m3-button filled">
-                            <span class="material-symbols-outlined">upload_file</span>
-                            Upload Lyrics
-                        </button>
-                    </div>
-                    <p id="modal-upload-status" class="status-message"></p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Translation Settings Section -->
-        <section class="settings-card" id="translation">
-            <h2 class="card-title">Translation</h2>
-
-            <div class="settings-category">
-                <h3 class="category-title">Translation Service</h3>
-                <div class="setting-item">
-                    <div class="form-group">
-                        <select id="translation-provider" placeholder=" ">
-                            <option value="" disabled selected></option>
-                            <option value="google">Google Translate</option>
-                            <option value="gemini">Gemini AI</option>
-                        </select>
-                        <label for="translation-provider">Translation Provider</label>
-                    </div>
-                    <p class="setting-description">Select the service for translating lyrics.</p>
-                </div>
-                <div class="setting-item" id="gemini-api-key-group" style="display: none;">
-                    <div class="input-with-button">
-                        <div class="form-group">
-                            <input type="password" id="gemini-api-key" placeholder=" " autocomplete="off">
-                            <label for="gemini-api-key">Gemini AI API Key</label>
-                        </div>
-                        <button type="button" id="toggle-gemini-api-key-visibility" class="m3-button icon" title="Show/Hide API Key">
-                            <span class="material-symbols-outlined">visibility</span>
-                        </button>
-                    </div>
-                    <p class="helper-text">Your API key is stored locally and never sent to external servers other than Google's Gemini API.</p>
-                </div>
-                <div class="setting-item" id="gemini-model-group" style="display: none;">
-                    <div class="form-group">
-                        <select id="gemini-model" placeholder=" ">
-                            <option value="" disabled selected></option>
-                            <option value="gemini-flash-latest">Gemini Flash Latest</option>
-                            <option value="gemini-flash-lite-latest">Gemini Flash-lite Latest</option>
-                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                            <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
-                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                            <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
-                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                            <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
-                        </select>
-                        <label for="gemini-model">Gemini AI Model</label>
-                    </div>
-                    <p class="setting-description">Choose the Gemini AI model for translations.</p>
-                </div>
-            </div>
-
-            <div class="settings-category">
-                <h3 class="category-title">Romanization Service (for non-Latin scripts)</h3>
-                <div class="setting-item">
-                    <div class="form-group">
-                        <select id="romanization-provider" placeholder=" ">
-                            <option value="" disabled selected></option>
-                            <option value="google">Google Translate</option>
-                            <option value="gemini">Gemini AI</option>
-                        </select>
-                        <label for="romanization-provider">Romanization Provider</label>
-                    </div>
-                    <p class="setting-description">Automatically fetches romanization from the Lyrics+ API when available. If not provided by Lyrics+, it falls back to generating romanization using the selected service.</p>
-                </div>
-                <div class="setting-item" id="gemini-romanization-model-group" style="display: none;">
-                    <div class="form-group">
-                        <select id="gemini-romanization-model" placeholder=" ">
-                            <option value="" disabled selected></option>
-                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                            <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
-                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                            <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
-                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                            <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
-                        </select>
-                        <label for="gemini-romanization-model">Gemini AI Romanization Model</label>
-                    </div>
-                    <p class="setting-description">Choose the Gemini AI model for romanization.</p>
-                </div>
-            </div>
-
-            <div class="settings-category">
-                <h3 class="category-title">Translation Behavior</h3>
-                <div class="setting-item">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="override-translate-target">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Override Translation Target Language</span>
-                    </label>
-                    <p class="setting-description">Manually specify the target language for translation (e.g., 'en', 'ko', 'ja').</p>
-                </div>
-                <div class="setting-item" id="custom-translate-target-group" style="display: none;">
-                    <div class="form-group">
-                        <input type="text" id="custom-translate-target" placeholder=" ">
-                        <label for="custom-translate-target">Custom Target Language Code</label>
-                    </div>
-                    <p class="helper-text">Enter the 2-letter language code (e.g., 'en' for English, 'ko' for Korean).</p>
-                </div>
-            </div>
-
-            <div class="settings-category">
-                <h3 class="category-title">Advanced Prompting (Gemini)</h3>
-                <div class="setting-item" id="override-gemini-prompt-group" style="display: none;">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="override-gemini-prompt">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Override Gemini AI Translation Prompt</span>
-                    </label>
-                    <p class="setting-description">Use a custom prompt for Gemini AI translations. Use <code>{targetLang}</code> and <code>{lyrics}</code> placeholders.</p>
-                </div>
-                <div class="setting-item" id="custom-gemini-prompt-group" style="display: none;">
-                    <div class="form-group">
-                        <textarea id="custom-gemini-prompt" placeholder=" "></textarea>
-                        <label for="custom-gemini-prompt">Custom Gemini AI Translation Prompt</label>
-                    </div>
-                    <p class="helper-text">Customize the prompt sent to Gemini AI for translations. Use <code>{targetLang}</code> for the target language</p>
-                </div>
-                <div class="setting-item" id="override-gemini-romanize-prompt-group" style="display: none;">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="override-gemini-romanize-prompt">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Override Gemini AI Romanization Prompt</span>
-                    </label>
-                    <p class="setting-description">Use a custom prompt for Gemini AI romanization.</p>
-                </div>
-                <div class="setting-item" id="custom-gemini-romanize-prompt-group" style="display: none;">
-                    <div class="form-group">
-                        <textarea id="custom-gemini-romanize-prompt" placeholder=" "></textarea>
-                        <label for="custom-gemini-romanize-prompt">Custom Gemini AI Romanization Prompt</label>
-                    </div>
-                    <p class="helper-text">Customize the prompt sent to Gemini AI for romanization.</p>
-                </div>
-            </div>
-
-            <div class="card-actions">
-                <button id="save-translation" class="m3-button filled">Save Translation</button>
-            </div>
-            <p id="translation-save-status" class="status-message"></p>
-        </section>
-
-        <!-- Appearance Section -->
-        <section class="settings-card" id="appearance">
-            <h2 class="card-title">Appearance</h2>
-
-            <div class="settings-category">
-                <h3 class="category-title">Text Display</h3>
-                <div class="setting-item">
-                    <div class="form-group">
-                        <select id="larger-text-mode" placeholder=" ">
-                            <option value="" disabled selected></option>
-                            <option value="lyrics">Lyrics</option>
-                            <option value="romanization">Pronunciation</option>
-                        </select>
-                        <label for="larger-text-mode">Larger Text: Pronunciation Or Lyrics</label>
-                    </div>
-                    <p class="setting-description">Choose whether lyrics or pronunciation appears larger when both are displayed.</p>
-                </div>
-            </div>
-
-            <div class="settings-category">
-                <h3 class="category-title">Performance & Compatibility</h3>
-                <div class="setting-item">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="lightweight">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Lightweight Mode</span>
-                    </label>
-                    <p class="setting-description">Reduces animations and visual effects for better performance on older devices.</p>
-                </div>
-                <div class="setting-item">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="hide-offscreen">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Hide Off-screen Lyrics Line</span>
-                    </label>
-                    <p class="setting-description">Hides & remove all animation lyrics lines that are not currently visible on the screen.</p>
-                </div>
-                <div class="setting-item">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="compability-wipe">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Preload Wipe Animation</span>
-                    </label>
-                    <p class="setting-description">Pre-renders wipe animation on all syllables before they're active. Useful for devices where the highlight animation lags or fails to show if it's only triggered when the line becomes active.</p>
-                </div>
-            </div>
-
-            <div class="settings-category">
-                <h3 class="category-title">Visual Effects</h3>
-                <div class="setting-item">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="blur-inactive">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Blur Inactive Lyrics</span>
-                    </label>
-                    <p class="setting-description">Applies a blur effect to lyrics not currently being sung, similar to Apple Music.</p>
-                </div>
-                <div class="setting-item">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="dynamic-player">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Enable Dynamic Background (Player View)</span>
-                    </label>
-                    <p class="setting-description">Applies animated album backgrounds when the player is expanded. This setting has no effect in fullscreen mode, where dynamic background is always enabled.</p>
-                </div>
-                <div class="setting-item">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="useSongPaletteFullscreen">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Use song palette for lyrics color in fullscreen</span>
-                    </label>
-                    <p class="setting-description">Uses the song's color palette for the lyrics when in fullscreen mode.</p>
-                </div>
-                <div class="setting-item">
-                    <label class="m3-switch">
-                        <input type="checkbox" id="useSongPaletteAllModes">
-                        <div class="track">
-                            <div class="handle"></div>
-                        </div>
-                        <span class="label">Use song palette for lyrics color in all modes</span>
-                    </label>
-                    <p class="setting-description">Uses the song's color palette for the lyrics in all display modes.</p>
-                </div>
-                <div class="setting-item">
-                    <div class="form-group">
-                        <input type="text" id="overridePaletteColor" placeholder=" ">
-                        <label for="overridePaletteColor">Override palette color</label>
-                    </div>
-                    <p class="helper-text">Override the song palette color with a custom one. (Only for lyrics color, not dynamic background) (keep empty if don't want to override)</p>
-                </div>
-            </div>
-
-            <div class="settings-category">
-                <h3 class="category-title">Custom Styling</h3>
-                <div class="setting-item">
-                    <div class="form-group">
-                        <textarea id="custom-css" placeholder=" "></textarea>
-                        <label for="custom-css">Custom CSS</label>
-                    </div>
-                    <p class="helper-text">Apply your own styles to the lyrics display. Use with caution. To create or testing, it is recommended to use UserStyles</p>
-                </div>
-            </div>
-
-            <div class="card-actions">
-                <button id="save-appearance" class="m3-button filled">Save Appearance</button>
-            </div>
-            <p id="appearance-save-status" class="status-message"></p>
-        </section>
-
-        <!-- Cache Options Section -->
-        <section class="settings-card" id="cache">
-            <h2 class="card-title">Cache</h2>
-            <div class="setting-item">
-                <div class="form-group">
-                    <select id="cache-strategy" placeholder=" ">
-                        <option value="" disabled selected></option>
-                        <option value="aggressive">Aggressive (2 hours)</option>
-                        <option value="moderate">Moderate (1 hour)</option>
-                        <option value="none">None (no caching)</option>
-                    </select>
-                    <label for="cache-strategy">Cache Strategy</label>
-                </div>
-                <p class="setting-description">Determines how long lyrics are stored locally to reduce loading times.</p>
-            </div>
-            <div class="setting-item">
-                <label class="form-group-label">Current Cache Usage</label>
-                <p id="cache-size" class="cache-info">0.00 MB used (0 songs cached)</p>
-            </div>
-            <div class="card-actions">
-                <button id="clear-cache" class="m3-button outlined error">
-                    <span class="material-symbols-outlined">delete_sweep</span>
-                    Clear Cache
+            <!-- Notification bar for reloading -->
+            <div id="reload-notification" class="reload-notification">
+                <span>Settings saved. Reload your YouTube Music tab for changes to take effect.</span>
+                <button id="reload-button" class="m3-button tonal">
+                    <span class="material-symbols-outlined">refresh</span>
+                    Reload
                 </button>
             </div>
-        </section>
 
-        <!-- About Section -->
-        <section class="settings-card" id="about">
-            <div class="about-header">
-                <img src="../../icons/icon128.png" alt="YouLy+ Logo" class="about-logo">
-                <div class="about-header-text">
-                    <h2 class="card-title no-border">YouLy+</h2>
-                    <p class="version">Version unknown</p>
+            <!-- General Settings Section -->
+            <section class="settings-card active" id="general">
+                <h2 class="card-title">General</h2>
+
+                <div class="settings-category">
+                    <h3 class="category-title">Core Functionality</h3>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="enabled" checked>
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Enable YouLy+</span>
+                        </label>
+                        <p class="setting-description">Globally enable or disable the extension.</p>
+                    </div>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="wordByWord">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Word-by-Word Highlighting</span>
+                        </label>
+                        <p class="setting-description">Enable karaoke-style word highlighting if available.</p>
+                    </div>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="sponsor-block">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Use SponsorBlock API</span>
+                        </label>
+                        <p class="setting-description">Skip non-music sections like intros, outros, or sponsor segments.
+                        </p>
+                    </div>
                 </div>
-            </div>
-            <div class="about-content">
-                <p class="about-description">
-                    This extension was born from a simple idea: listening to music should be an immersive experience,
-                    not just a background activity. We were tired of YouTube's static lyrics and dated interface, so we
-                    decided to build the player we've always wanted.
-                    Our goal is to make your music sessions more beautiful, engaging, and fun. We hope you love it.
 
-                    youly+ is proudly open-source. Whether you've found a bug, have a great idea, or want to contribute,
-                    we'd love to hear from you.
-                </p>
+                <div class="settings-category">
+                    <h3 class="category-title">Sources</h3>
+                    <div class="setting-item">
+                        <div class="form-group">
+                            <select id="default-provider" placeholder=" ">
+                                <option value="" disabled selected></option>
+                                <option value="kpoe">Lyrics+ (KPoe)</option>
+                                <option value="customKpoe">Custom KPoe Server</option>
+                                <option value="lrclib">LRCLIB</option>
+                            </select>
+                            <label for="default-provider">Default Lyrics Provider</label>
+                        </div>
+                        <p class="setting-description">Choose your preferred source for lyrics.</p>
+                    </div>
+                    <div class="setting-item" id="custom-kpoe-url-group" style="display: none;">
+                        <div class="form-group">
+                            <input type="text" id="custom-kpoe-url" placeholder=" ">
+                            <label for="custom-kpoe-url">Custom KPoe Server URL</label>
+                        </div>
+                        <p class="helper-text">Enter the base URL for your self-hosted KPoe server.</p>
+                    </div>
+                    <div class="setting-item" id="kpoe-sources-group">
+                        <label class="form-group-label">Lyrics+ (KPoe) Source Order</label>
+                        <div id="lyrics-source-order-draggable" class="draggable-list">
+                            <!-- Draggable items will be populated by ui.js -->
+                        </div>
+                        <p class="setting-description helper-text">Drag and drop to reorder the sources for Lyrics+
+                            (KPoe).</p>
+                        <div class="add-source-container">
+                            <div class="form-group">
+                                <select id="available-sources-dropdown" placeholder=" ">
+                                    <option value="" disabled selected></option>
+                                    <!-- Options will be populated by ui.js -->
+                                </select>
+                                <label for="available-sources-dropdown">Available Sources</label>
+                            </div>
+                            <button id="add-source-button" class="m3-button tonal">
+                                <span class="material-symbols-outlined">add</span>
+                                Add Source
+                            </button>
+                        </div>
+                        <p id="add-source-status" class="status-message"></p>
+                    </div>
+                </div>
 
-                <div class="setting-item about-links">
-                    <label class="form-group-label">Links & Support</label>
-                    <div class="links-container">
+                <div class="card-actions">
+                    <button id="save-general" class="m3-button filled">Save General</button>
+                </div>
+                <p id="general-save-status" class="status-message"></p>
+            </section>
+
+            <!-- Local Lyrics Section -->
+            <section class="settings-card" id="local-lyrics">
+                <h2 class="card-title">Local Lyrics</h2>
+
+                <div class="settings-category">
+                    <h3 class="category-title">Manage Uploaded Lyrics</h3>
+                    <div id="local-lyrics-list" class="draggable-list">
+                        <p class="helper-text" id="no-local-lyrics-message">No local lyrics uploaded yet.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button id="refresh-local-lyrics-list" class="m3-button outlined">
+                            <span class="material-symbols-outlined">refresh</span>
+                            Refresh List
+                        </button>
+                    </div>
+                    <p id="local-lyrics-status" class="status-message"></p>
+                </div>
+
+                <button class="fab" id="add-lyrics-fab" title="Add New Local Lyrics">
+                    <span class="material-symbols-outlined">add</span>
+                </button>
+
+                <div id="upload-lyrics-modal" class="modal" style="display: none;">
+                    <div class="modal-scrim"></div>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title">Upload New Local Lyrics</h2>
+                            <button class="close-button m3-button icon">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="modal-upload-song-title" placeholder=" ">
+                            <label for="modal-upload-song-title">Song Title</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="modal-upload-artist-name" placeholder=" ">
+                            <label for="modal-upload-artist-name">Artist Name</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="modal-upload-album-name" placeholder=" ">
+                            <label for="modal-upload-album-name">Album Name (Optional)</label>
+                        </div>
+                        <div class="setting-item">
+                            <label for="modal-upload-lyrics-file" class="form-group-label">Lyrics File</label>
+                            <input type="file" id="modal-upload-lyrics-file" accept=".lrc,.elrc,.ttml,.json">
+                            <p class="helper-text">Upload your LRC, ELRC, Apple TTML, or JSON file.</p>
+                        </div>
+                        <div class="modal-actions">
+                            <button id="modal-upload-lyrics-button" class="m3-button filled">
+                                <span class="material-symbols-outlined">upload_file</span>
+                                Upload Lyrics
+                            </button>
+                        </div>
+                        <p id="modal-upload-status" class="status-message"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Translation Settings Section -->
+            <section class="settings-card" id="translation">
+                <h2 class="card-title">Translation</h2>
+
+                <div class="settings-category">
+                    <h3 class="category-title">Translation Service</h3>
+                    <div class="setting-item">
+                        <div class="form-group">
+                            <select id="translation-provider" placeholder=" ">
+                                <option value="" disabled selected></option>
+                                <option value="google">Google Translate</option>
+                                <option value="gemini">Gemini AI</option>
+                            </select>
+                            <label for="translation-provider">Translation Provider</label>
+                        </div>
+                        <p class="setting-description">Select the service for translating lyrics.</p>
+                    </div>
+                    <div class="setting-item" id="gemini-api-key-group" style="display: none;">
+                        <div class="input-with-button">
+                            <div class="form-group">
+                                <input type="password" id="gemini-api-key" placeholder=" " autocomplete="off">
+                                <label for="gemini-api-key">Gemini AI API Key</label>
+                            </div>
+                            <button type="button" id="toggle-gemini-api-key-visibility" class="m3-button icon"
+                                title="Show/Hide API Key">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </button>
+                        </div>
+                        <p class="helper-text">Your API key is stored locally and never sent to external servers other
+                            than Google's Gemini API.</p>
+                    </div>
+                    <div class="setting-item" id="gemini-model-group" style="display: none;">
+                        <div class="form-group">
+                            <select id="gemini-model" placeholder=" ">
+                                <option value="" disabled selected></option>
+                                <option value="gemini-flash-latest">Gemini Flash Latest</option>
+                                <option value="gemini-flash-lite-latest">Gemini Flash-lite Latest</option>
+                                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+                                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                                <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
+                                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                                <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                                <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
+                            </select>
+                            <label for="gemini-model">Gemini AI Model</label>
+                        </div>
+                        <p class="setting-description">Choose the Gemini AI model for translations.</p>
+                    </div>
+                </div>
+
+                <div class="settings-category">
+                    <h3 class="category-title">Romanization Service (for non-Latin scripts)</h3>
+                    <div class="setting-item">
+                        <div class="form-group">
+                            <select id="romanization-provider" placeholder=" ">
+                                <option value="" disabled selected></option>
+                                <option value="google">Google Translate</option>
+                                <option value="gemini">Gemini AI</option>
+                            </select>
+                            <label for="romanization-provider">Romanization Provider</label>
+                        </div>
+                        <p class="setting-description">Automatically fetches romanization from the Lyrics+ API when
+                            available. If not provided by Lyrics+, it falls back to generating romanization using the
+                            selected service.</p>
+                    </div>
+                    <div class="setting-item" id="gemini-romanization-model-group" style="display: none;">
+                        <div class="form-group">
+                            <select id="gemini-romanization-model" placeholder=" ">
+                                <option value="" disabled selected></option>
+                                <option value="gemini-flash-latest">Gemini Flash Latest</option>
+                                <option value="gemini-flash-lite-latest">Gemini Flash-lite Latest</option>
+                                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+                                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                                <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
+                                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                                <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                                <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
+                            </select>
+                            <label for="gemini-romanization-model">Gemini AI Romanization Model</label>
+                        </div>
+                        <p class="setting-description">Choose the Gemini AI model for romanization.</p>
+                    </div>
+                </div>
+
+                <div class="settings-category">
+                    <h3 class="category-title">Translation Behavior</h3>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="override-translate-target">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Override Translation Target Language</span>
+                        </label>
+                        <p class="setting-description">Manually specify the target language for translation (e.g., 'en',
+                            'ko', 'ja').</p>
+                    </div>
+                    <div class="setting-item" id="custom-translate-target-group" style="display: none;">
+                        <div class="form-group">
+                            <input type="text" id="custom-translate-target" placeholder=" ">
+                            <label for="custom-translate-target">Custom Target Language Code</label>
+                        </div>
+                        <p class="helper-text">Enter the 2-letter language code (e.g., 'en' for English, 'ko' for
+                            Korean).</p>
+                    </div>
+                </div>
+
+                <div class="settings-category">
+                    <h3 class="category-title">Advanced Prompting (Gemini)</h3>
+                    <div class="setting-item" id="override-gemini-prompt-group" style="display: none;">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="override-gemini-prompt">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Override Gemini AI Translation Prompt</span>
+                        </label>
+                        <p class="setting-description">Use a custom prompt for Gemini AI translations. Use
+                            <code>{targetLang}</code> and <code>{lyrics}</code> placeholders.
+                        </p>
+                    </div>
+                    <div class="setting-item" id="custom-gemini-prompt-group" style="display: none;">
+                        <div class="form-group">
+                            <textarea id="custom-gemini-prompt" placeholder=" "></textarea>
+                            <label for="custom-gemini-prompt">Custom Gemini AI Translation Prompt</label>
+                        </div>
+                        <p class="helper-text">Customize the prompt sent to Gemini AI for translations. Use
+                            <code>{targetLang}</code> for the target language
+                        </p>
+                    </div>
+                    <div class="setting-item" id="override-gemini-romanize-prompt-group" style="display: none;">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="override-gemini-romanize-prompt">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Override Gemini AI Romanization Prompt</span>
+                        </label>
+                        <p class="setting-description">Use a custom prompt for Gemini AI romanization.</p>
+                    </div>
+                    <div class="setting-item" id="custom-gemini-romanize-prompt-group" style="display: none;">
+                        <div class="form-group">
+                            <textarea id="custom-gemini-romanize-prompt" placeholder=" "></textarea>
+                            <label for="custom-gemini-romanize-prompt">Custom Gemini AI Romanization Prompt</label>
+                        </div>
+                        <p class="helper-text">Customize the prompt sent to Gemini AI for romanization.</p>
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    <button id="save-translation" class="m3-button filled">Save Translation</button>
+                </div>
+                <p id="translation-save-status" class="status-message"></p>
+            </section>
+
+            <!-- Appearance Section -->
+            <section class="settings-card" id="appearance">
+                <h2 class="card-title">Appearance</h2>
+
+                <div class="settings-category">
+                    <h3 class="category-title">Text Display</h3>
+                    <div class="setting-item">
+                        <div class="form-group">
+                            <select id="larger-text-mode" placeholder=" ">
+                                <option value="" disabled selected></option>
+                                <option value="lyrics">Lyrics</option>
+                                <option value="romanization">Pronunciation</option>
+                            </select>
+                            <label for="larger-text-mode">Larger Text: Pronunciation Or Lyrics</label>
+                        </div>
+                        <p class="setting-description">Choose whether lyrics or pronunciation appears larger when both
+                            are displayed.</p>
+                    </div>
+                </div>
+
+                <div class="settings-category">
+                    <h3 class="category-title">Performance & Compatibility</h3>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="lightweight">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Lightweight Mode</span>
+                        </label>
+                        <p class="setting-description">Reduces animations and visual effects for better performance on
+                            older devices.</p>
+                    </div>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="hide-offscreen">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Hide Off-screen Lyrics Line</span>
+                        </label>
+                        <p class="setting-description">Hides & remove all animation lyrics lines that are not currently
+                            visible on the screen.</p>
+                    </div>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="compability-wipe">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Preload Wipe Animation</span>
+                        </label>
+                        <p class="setting-description">Pre-renders wipe animation on all syllables before they're
+                            active. Useful for devices where the highlight animation lags or fails to show if it's only
+                            triggered when the line becomes active.</p>
+                    </div>
+                </div>
+
+                <div class="settings-category">
+                    <h3 class="category-title">Visual Effects</h3>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="blur-inactive">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Blur Inactive Lyrics</span>
+                        </label>
+                        <p class="setting-description">Applies a blur effect to lyrics not currently being sung, similar
+                            to Apple Music.</p>
+                    </div>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="dynamic-player">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Enable Dynamic Background (Player View)</span>
+                        </label>
+                        <p class="setting-description">Applies animated album backgrounds when the player is expanded.
+                            This setting has no effect in fullscreen mode, where dynamic background is always enabled.
+                        </p>
+                    </div>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="useSongPaletteFullscreen">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Use song palette for lyrics color in fullscreen video-mode</span>
+                        </label>
+                        <p class="setting-description">Uses the song's color palette for the lyrics when in video music fullscreen
+                            mode.</p>
+                    </div>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="useSongPaletteAllModes">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label">Use song palette for lyrics color in all modes</span>
+                        </label>
+                        <p class="setting-description">Uses the song's color palette for the lyrics in all display
+                            modes.</p>
+                    </div>
+                    <div class="setting-item">
+                        <div class="form-group">
+                            <input type="text" id="overridePaletteColor" placeholder=" ">
+                            <label for="overridePaletteColor">Override palette color</label>
+                        </div>
+                        <p class="helper-text">Override the song palette color with a custom one. (Only for lyrics
+                            color, not dynamic background) (keep empty if don't want to override)</p>
+                    </div>
+                </div>
+
+                <div class="settings-category">
+                    <h3 class="category-title">Custom Styling</h3>
+                    <div class="setting-item">
+                        <div class="form-group">
+                            <textarea id="custom-css" placeholder=" "></textarea>
+                            <label for="custom-css">Custom CSS</label>
+                        </div>
+                        <p class="helper-text">Apply your own styles to the lyrics display. Use with caution. To create
+                            or testing, it is recommended to use UserStyles</p>
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    <button id="save-appearance" class="m3-button filled">Save Appearance</button>
+                </div>
+                <p id="appearance-save-status" class="status-message"></p>
+            </section>
+
+            <!-- Cache Options Section -->
+            <section class="settings-card" id="cache">
+                <h2 class="card-title">Cache</h2>
+                <div class="setting-item">
+                    <div class="form-group">
+                        <select id="cache-strategy" placeholder=" ">
+                            <option value="" disabled selected></option>
+                            <option value="aggressive">Aggressive (2 hours)</option>
+                            <option value="moderate">Moderate (1 hour)</option>
+                            <option value="none">None (no caching)</option>
+                        </select>
+                        <label for="cache-strategy">Cache Strategy</label>
+                    </div>
+                    <p class="setting-description">Determines how long lyrics are stored locally to reduce loading
+                        times.</p>
+                </div>
+                <div class="setting-item">
+                    <label class="form-group-label">Current Cache Usage</label>
+                    <p id="cache-size" class="cache-info">0.00 MB used (0 songs cached)</p>
+                </div>
+                <div class="card-actions">
+                    <button id="clear-cache" class="m3-button outlined error">
+                        <span class="material-symbols-outlined">delete_sweep</span>
+                        Clear Cache
+                    </button>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section class="settings-card" id="about">
+                <div class="about-header">
+                    <img src="../../icons/icon128.png" alt="YouLy+ Logo" class="about-logo">
+                    <div class="about-header-text">
+                        <h2 class="card-title no-border">YouLy+</h2>
+                        <p class="version">Version unknown</p>
+                    </div>
+                </div>
+                <div class="about-content">
+                    <p class="about-description">
+                        This extension was born from a simple idea: listening to music should be an immersive
+                        experience,
+                        not just a background activity. We were tired of YouTube's static lyrics and dated interface, so
+                        we
+                        decided to build the player we've always wanted.
+                        Our goal is to make your music sessions more beautiful, engaging, and fun. We hope you love it.
+
+                        youly+ is proudly open-source. Whether you've found a bug, have a great idea, or want to
+                        contribute,
+                        we'd love to hear from you.
+                    </p>
+                </div>
+
+                <div class="settings-category">
+                    <h3 class="category-title">Links & Support</h3>
+                    <div class="setting-item">
                         <a href="https://github.com/ibratabian17/youlyplus" target="_blank" rel="noopener noreferrer"
                             class="m3-button outlined">
                             <span class="material-symbols-outlined">code</span>
@@ -545,45 +575,36 @@
                         </a>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <footer class="content-footer">
-            <p>Made with love</p>
-        </footer>
-    </div>
+                <div class="settings-category">
+                    <h3 class="category-title">Configuration Management</h3>
+                    <div class="setting-item">
+                        <p class="setting-description">Export your current settings to a JSON file, or import from a
+                            file to
+                            restore your configuration.</p>
+                        <div class="links-container" style="margin-top: 16px;">
+                            <button id="export-settings-button" class="m3-button outlined">
+                                <span class="material-symbols-outlined">file_download</span>
+                                Export
+                            </button>
+                            <button id="import-settings-button" class="m3-button outlined">
+                                <span class="material-symbols-outlined">file_upload</span>
+                                Import
+                            </button>
+                            <input type="file" id="import-settings-file" accept=".json" style="display: none;">
+                        </div>
+                        <p id="config-status" class="status-message"></p>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="content-footer">
+                <p>Made with love</p>
+            </footer>
+        </div>
     </main>
     <script type="module" src="settingsManager.js"></script>
     <script type="module" src="ui.js"></script>
-    <script>
-        // Ripple effect for buttons
-        document.addEventListener('click', function (e) {
-            const target = e.target.closest('.m3-button, .nav-item');
-            if (!target) return;
-
-            const ripple = document.createElement('span');
-            const rect = target.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
-
-            ripple.style.width = ripple.style.height = `${size}px`;
-            ripple.style.left = `${x}px`;
-            ripple.style.top = `${y}px`;
-            ripple.classList.add('ripple');
-            
-            const existingRipple = target.querySelector('.ripple');
-            if (existingRipple) {
-                existingRipple.remove();
-            }
-            
-            target.appendChild(ripple);
-
-            ripple.addEventListener('animationend', () => {
-                ripple.remove();
-            });
-        });
-    </script>
 </body>
 
 </html>

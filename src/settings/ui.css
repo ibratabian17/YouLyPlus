@@ -1,35 +1,57 @@
 /* --- M3 Dark Theme Color & Typography Tokens --- */
 :root {
-    --md-sys-color-primary: #ffb4a8;
-    --md-sys-color-on-primary: #561e16;
-    --md-sys-color-primary-container: #72332a;
-    --md-sys-color-on-primary-container: #ffdad4;
-    --md-sys-color-secondary: #e7bdb8;
-    --md-sys-color-on-secondary: #442926;
-    --md-sys-color-secondary-container: #5d3f3c;
-    --md-sys-color-on-secondary-container: #ffdad4;
-    --md-sys-color-tertiary: #e0c38c;
-    --md-sys-color-on-tertiary: #3f2e04;
-    --md-sys-color-tertiary-container: #584419;
-    --md-sys-color-on-tertiary-container: #fddfa6;
-    --md-sys-color-error: #ffb4ab;
-    --md-sys-color-on-error: #690005;
-    --md-sys-color-background: #1a1110;
-    --md-sys-color-on-background: #f1dedc;
-    --md-sys-color-surface: #1a1110;
-    --md-sys-color-on-surface: #f1dedc;
-    --md-sys-color-surface-variant: #534341;
-    --md-sys-color-on-surface-variant: #d8c2bf;
-    --md-sys-color-outline: #a08c8a;
-    --md-sys-color-outline-variant: #534341;
-    --md-sys-color-scrim: #000000;
-    --md-sys-color-surface-container-lowest: #140c0b;
-    --md-sys-color-surface-container-low: #231918;
-    --md-sys-color-surface-container: #271d1c;
-    --md-sys-color-surface-container-high: #322826;
-    --md-sys-color-surface-container-highest: #3d3231;
+    --md-sys-color-primary: rgb(255 181 160);
+    --md-sys-color-surface-tint: rgb(255 181 160);
+    --md-sys-color-on-primary: rgb(86 31 15);
+    --md-sys-color-primary-container: rgb(114 53 35);
+    --md-sys-color-on-primary-container: rgb(255 219 209);
+    --md-sys-color-secondary: rgb(231 189 178);
+    --md-sys-color-on-secondary: rgb(68 42 34);
+    --md-sys-color-secondary-container: rgb(93 64 55);
+    --md-sys-color-on-secondary-container: rgb(255 219 209);
+    --md-sys-color-tertiary: rgb(216 197 141);
+    --md-sys-color-on-tertiary: rgb(59 47 5);
+    --md-sys-color-tertiary-container: rgb(83 70 25);
+    --md-sys-color-on-tertiary-container: rgb(245 225 167);
+    --md-sys-color-error: rgb(255 180 171);
+    --md-sys-color-on-error: rgb(105 0 5);
+    --md-sys-color-error-container: rgb(147 0 10);
+    --md-sys-color-on-error-container: rgb(255 218 214);
+    --md-sys-color-background: rgb(26 17 15);
+    --md-sys-color-on-background: rgb(241 223 218);
+    --md-sys-color-surface: rgb(26 17 15);
+    --md-sys-color-on-surface: rgb(241 223 218);
+    --md-sys-color-surface-variant: rgb(83 67 63);
+    --md-sys-color-on-surface-variant: rgb(216 194 188);
+    --md-sys-color-outline: rgb(160 140 135);
+    --md-sys-color-outline-variant: rgb(83 67 63);
+    --md-sys-color-shadow: rgb(0 0 0);
+    --md-sys-color-scrim: rgb(0 0 0);
+    --md-sys-color-inverse-surface: rgb(241 223 218);
+    --md-sys-color-inverse-on-surface: rgb(57 46 43);
+    --md-sys-color-inverse-primary: rgb(143 76 56);
+    --md-sys-color-primary-fixed: rgb(255 219 209);
+    --md-sys-color-on-primary-fixed: rgb(58 11 1);
+    --md-sys-color-primary-fixed-dim: rgb(255 181 160);
+    --md-sys-color-on-primary-fixed-variant: rgb(114 53 35);
+    --md-sys-color-secondary-fixed: rgb(255 219 209);
+    --md-sys-color-on-secondary-fixed: rgb(44 21 15);
+    --md-sys-color-secondary-fixed-dim: rgb(231 189 178);
+    --md-sys-color-on-secondary-fixed-variant: rgb(93 64 55);
+    --md-sys-color-tertiary-fixed: rgb(245 225 167);
+    --md-sys-color-on-tertiary-fixed: rgb(35 27 0);
+    --md-sys-color-tertiary-fixed-dim: rgb(216 197 141);
+    --md-sys-color-on-tertiary-fixed-variant: rgb(83 70 25);
+    --md-sys-color-surface-dim: rgb(26 17 15);
+    --md-sys-color-surface-bright: rgb(66 55 52);
+    --md-sys-color-surface-container-lowest: rgb(20 12 10);
+    --md-sys-color-surface-container-low: rgb(35 25 23);
+    --md-sys-color-surface-container: rgb(39 29 27);
+    --md-sys-color-surface-container-high: rgb(50 40 37);
+    --md-sys-color-surface-container-highest: rgb(61 50 47);
 
     /* M3 Shape & Motion */
+    --border-radius-smallest: 4px;
     --border-radius-small: 8px;
     --border-radius-medium: 12px;
     --border-radius-large: 16px;
@@ -42,6 +64,65 @@
     --state-layer-hover: 0.08;
     --state-layer-focus: 0.12;
     --state-layer-pressed: 0.12;
+
+    --animation-duration-short: 150ms;
+    --animation-duration-medium: 250ms;
+    --animation-easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
+    --animation-easing-emphasized: cubic-bezier(0.2, 0.0, 0.0, 1.0);
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --md-sys-color-primary: rgb(143 76 56);
+        --md-sys-color-surface-tint: rgb(143 76 56);
+        --md-sys-color-on-primary: rgb(255 255 255);
+        --md-sys-color-primary-container: rgb(255 219 209);
+        --md-sys-color-on-primary-container: rgb(114 53 35);
+        --md-sys-color-secondary: rgb(119 87 78);
+        --md-sys-color-on-secondary: rgb(255 255 255);
+        --md-sys-color-secondary-container: rgb(255 219 209);
+        --md-sys-color-on-secondary-container: rgb(93 64 55);
+        --md-sys-color-tertiary: rgb(108 93 47);
+        --md-sys-color-on-tertiary: rgb(255 255 255);
+        --md-sys-color-tertiary-container: rgb(245 225 167);
+        --md-sys-color-on-tertiary-container: rgb(83 70 25);
+        --md-sys-color-error: rgb(186 26 26);
+        --md-sys-color-on-error: rgb(255 255 255);
+        --md-sys-color-error-container: rgb(255 218 214);
+        --md-sys-color-on-error-container: rgb(147 0 10);
+        --md-sys-color-background: rgb(255 248 246);
+        --md-sys-color-on-background: rgb(35 25 23);
+        --md-sys-color-surface: rgb(255 248 246);
+        --md-sys-color-on-surface: rgb(35 25 23);
+        --md-sys-color-surface-variant: rgb(245 222 216);
+        --md-sys-color-on-surface-variant: rgb(83 67 63);
+        --md-sys-color-outline: rgb(133 115 110);
+        --md-sys-color-outline-variant: rgb(216 194 188);
+        --md-sys-color-shadow: rgb(0 0 0);
+        --md-sys-color-scrim: rgb(0 0 0);
+        --md-sys-color-inverse-surface: rgb(57 46 43);
+        --md-sys-color-inverse-on-surface: rgb(255 237 232);
+        --md-sys-color-inverse-primary: rgb(255 181 160);
+        --md-sys-color-primary-fixed: rgb(255 219 209);
+        --md-sys-color-on-primary-fixed: rgb(58 11 1);
+        --md-sys-color-primary-fixed-dim: rgb(255 181 160);
+        --md-sys-color-on-primary-fixed-variant: rgb(114 53 35);
+        --md-sys-color-secondary-fixed: rgb(255 219 209);
+        --md-sys-color-on-secondary-fixed: rgb(44 21 15);
+        --md-sys-color-secondary-fixed-dim: rgb(231 189 178);
+        --md-sys-color-on-secondary-fixed-variant: rgb(93 64 55);
+        --md-sys-color-tertiary-fixed: rgb(245 225 167);
+        --md-sys-color-on-tertiary-fixed: rgb(35 27 0);
+        --md-sys-color-tertiary-fixed-dim: rgb(216 197 141);
+        --md-sys-color-on-tertiary-fixed-variant: rgb(83 70 25);
+        --md-sys-color-surface-dim: rgb(232 214 210);
+        --md-sys-color-surface-bright: rgb(255 248 246);
+        --md-sys-color-surface-container-lowest: rgb(255 255 255);
+        --md-sys-color-surface-container-low: rgb(255 241 237);
+        --md-sys-color-surface-container: rgb(252 234 229);
+        --md-sys-color-surface-container-high: rgb(247 228 224);
+        --md-sys-color-surface-container-highest: rgb(241 223 218);
+    }
 }
 
 /* --- Base & Layout --- */
@@ -65,6 +146,23 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     line-height: 1.5;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple-animation 600ms linear;
+    background-color: var(--md-sys-color-on-primary);
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
 }
 
 /* --- Scrollbar --- */
@@ -103,7 +201,7 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    transition: width var(--animation-duration) var(--animation-easing);
+    transition: width var(--animation-duration) var(--animation-easing-standard);
 }
 
 .drawer-header {
@@ -141,7 +239,7 @@ body {
     border-radius: var(--border-radius-full);
     text-decoration: none;
     color: var(--md-sys-color-on-surface-variant);
-    transition: background-color var(--animation-duration), color var(--animation-duration);
+    transition: background-color var(--animation-duration) var(--animation-easing-standard), color var(--animation-duration) var(--animation-easing-standard);
     font-weight: 500;
     font-size: 0.875rem;
     position: relative;
@@ -151,7 +249,7 @@ body {
 
 .nav-item .material-symbols-outlined {
     font-size: 24px;
-    transition: font-variation-settings 300ms var(--animation-easing);
+    transition: font-variation-settings 300ms var(--animation-easing) var(--animation-easing-standard);
 }
 
 .nav-item::before {
@@ -296,7 +394,7 @@ h2.card-title.no-border {
     padding: 0 4px;
 }
 
-.modal .form-group label{
+.modal .form-group label {
     background-color: var(--md-sys-color-surface-container-low);
 }
 
@@ -385,7 +483,7 @@ input[type="file"]::file-selector-button:hover {
     top: 50%;
     transform: translateY(-50%);
     color: var(--md-sys-color-on-surface-variant);
-    transition: transform var(--animation-duration) var(--animation-easing);
+    transition: transform var(--animation-duration) var(--animation-easing-standard) ;
 }
 
 .m3-select.open .m3-select-arrow {
@@ -408,7 +506,7 @@ input[type="file"]::file-selector-button:hover {
     transform: scaleY(0.9);
     transform-origin: top;
     pointer-events: none;
-    transition: opacity var(--animation-duration), transform var(--animation-duration);
+    transition: opacity var(--animation-duration) var(--animation-easing-standard), transform var(--animation-duration) var(--animation-easing-standard);
 }
 
 .m3-select.open .m3-select-menu {
@@ -635,6 +733,8 @@ input[type="file"]::file-selector-button:hover {
     cursor: grab;
     transition: background-color var(--animation-duration), box-shadow var(--animation-duration), transform var(--animation-duration);
     color: var(--md-sys-color-on-surface);
+    position: relative;
+    overflow: hidden;
 }
 
 .draggable-source-item:hover {
@@ -775,6 +875,27 @@ input[type="file"]::file-selector-button:hover {
     display: flex;
     justify-content: flex-end;
 }
+
+/* local lyrics */
+div#local-lyrics-list {
+    background: none;
+    gap: 3px;
+}
+
+div#local-lyrics-list .draggable-source-item {
+    background: var(--md-sys-color-surface-container);
+    border-radius: var(--border-radius-smallest);
+}
+
+div#local-lyrics-list .draggable-source-item:first-of-type {
+  border-radius: var(--border-radius-large) var(--border-radius-large) var(--border-radius-smallest) var(--border-radius-smallest);
+}
+
+div#local-lyrics-list .draggable-source-item:last-of-type {
+  border-radius: var(--border-radius-smallest) var(--border-radius-smallest) var(--border-radius-large) var(--border-radius-large);
+}
+
+
 
 @keyframes fadeInModal {
     from {
