@@ -55,14 +55,16 @@
       "resources": [
         "src/modules/lyrics/lyrics.css",
         "src/modules/ytmusic/style.css",
-        "src/inject/ytmusic/songTracker.js"
+        "src/inject/ytmusic/songTracker.js",
+        "src/assets/loading.gif"
       ],
       "matches": ["*://*.music.youtube.com/*"]
     },
     {
       "resources": [
         "src/modules/lyrics/lyrics.css",
-        "src/modules/tidal/style.css"
+        "src/modules/tidal/style.css",
+        "src/assets/loading.gif"
       ],
       "matches": ["*://*.tidal.com/*"]
     }
