@@ -2592,7 +2592,7 @@ class LyricsPlusRenderer {
         });
       }
 
-      container.innerHTML = `<span class="text-loading">${t("loading")}</span>`;
+      container.innerHTML = `<div class="loading-container"><span class="text-loading">${t("loading")}</span><div class="loading-loop-m3"></div></div>`;
       container.classList.add("lyrics-plus-message");
 
       const classesToRemove = [

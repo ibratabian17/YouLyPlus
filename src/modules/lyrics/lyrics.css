@@ -430,7 +430,6 @@ span.lyrics-source-provider {
     transform: none !important;
 }
 
-#lyrics-plus-container .text-loading,
 #lyrics-plus-container .text-not-found {
     display: block;
     position: absolute;
@@ -443,27 +442,37 @@ span.lyrics-source-provider {
     transition: opacity 0.3s ease;
 }
 
+#lyrics-plus-container .loading-container {
+    position: absolute;
+    top: 30%;
+    width: 100%;
+    text-align: center;
+    font-size: var(--lyplus-font-size-button);
+    letter-spacing: 1px;
+    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column-reverse;
+    opacity: 0.7;
+}
+
+
+#lyrics-plus-container .loading-loop-m3 {
+    background-image: url(../../assets/loading.gif);
+    position: relative;
+    display: block;
+    height: 80px;
+    width: 80px;
+    margin: 10px;
+    background-size: contain;
+    animation: fadeInUp 0.5s ease;
+}
+
 #lyrics-plus-container .text-not-found {
     opacity: 0.7;
     animation: fadeInUp 0.6s ease-out;
-}
-
-#lyrics-plus-container .text-loading {
-    opacity: 0.8;
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-#lyrics-plus-container .text-loading:after {
-    content: "...";
-    display: inline-block;
-    width: 0;
-    overflow: hidden;
-    vertical-align: bottom;
-    text-overflow: clip;
-    mask-image: linear-gradient(to right, #FFF 90%, transparent 100%);
-    mask-size: 200% 100%;
-    mask-repeat: no-repeat;
-    animation: ellipsis 3s ease-in-out infinite;
 }
 
 /* ==========================================================================
