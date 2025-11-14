@@ -42,19 +42,17 @@ function combineLyricsData(baseLyrics, translation, romanization) {
     }
 
     if (romanizedLine) {
-      // THE FIX: Only process syllables if the lyrics type is explicitly "Word".
-      if (baseLyrics.type === "Word" && romanizedLine.syllabus?.length > 0 && updatedLine.syllabus?.length > 0) {
+      if (baseLyrics.type === "Word" && romanizedLine.chunk?.length > 0 && updatedLine.syllabus?.length > 0) {
         updatedLine.syllabus = updatedLine.syllabus.map((syllable, sylIndex) => {
-          const romanizedSyllable = romanizedLine.syllabus[sylIndex];
+          const romanizedSyllable = romanizedLine.chunk[sylIndex];
           return {
             ...syllable,
-            romanizedText: romanizedSyllable?.romanizedText || syllable.text
+            romanizedText: romanizedSyllable?.text || syllable.text
           };
         });
       }
-      // For line-by-line lyrics, or as a fallback for word-by-word lyrics without syllabus data.
-      else if (romanizedLine.romanizedText || romanizedLine.translatedText) {
-         updatedLine.romanizedText = romanizedLine.romanizedText || romanizedLine.translatedText;
+      else if (romanizedLine.text) {
+         updatedLine.romanizedText = romanizedLine.text;
       }
     }
     return updatedLine;
