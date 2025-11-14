@@ -52,22 +52,4 @@ cp manifest.json "$TEMP_DIR/manifest.json"
 rm -rf "$TEMP_DIR"
 echo "Finished youlyplus-v${VERSION}-chrome-firefox.zip"
 
-# --- Bundle for Generic V2 (Manifest V2) ---
-echo "Creating youlyplus-v${VERSION}-generic-v2.zip..."
-TEMP_DIR="temp_generic_v2"
-mkdir -p "$TEMP_DIR"
-
-# Copy common files
-cp -r $COMMON_FILES "$TEMP_DIR/"
-
-# Use manifest-v2.json as manifest.json
-cp manifest-v2.json "$TEMP_DIR/manifest.json"
-
-# Create zip archive
-(cd "$TEMP_DIR" && zip -r "../dist/youlyplus-v${VERSION}-generic-v2.zip" .)
-
-# Clean up temporary directory
-rm -rf "$TEMP_DIR"
-echo "Finished youlyplus-v${VERSION}-generic-v2.zip"
-
 echo "Bundling complete. Output files are in the 'dist' directory."

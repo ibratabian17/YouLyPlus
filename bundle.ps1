@@ -132,29 +132,4 @@ Create-ZipArchive -SourceDir $TEMP_DIR -DestinationZip "dist/youlyplus-v${VERSIO
 Remove-Item -Path $TEMP_DIR -Recurse -Force | Out-Null
 Write-Host "Finished youlyplus-v${VERSION}-chrome-firefox.zip"
 
-# --- Bundle for Generic V2 (Manifest V2) ---
-Write-Host "Creating youlyplus-v${VERSION}-generic-v2.zip..."
-$TEMP_DIR = "temp_generic_v2"
-if (Test-Path -Path $TEMP_DIR -PathType Container) {
-    Remove-Item -Path $TEMP_DIR -Recurse -Force | Out-Null
-}
-New-Item -Path $TEMP_DIR -ItemType Directory | Out-Null
-
-# Copy common files
-foreach ($file in $COMMON_FILES) {
-    if (Test-Path -Path $file) {
-        Copy-Item -Path $file -Destination $TEMP_DIR -Recurse -Force | Out-Null
-    }
-}
-
-# Use manifest-v2.json as manifest.json
-Copy-Item -Path "manifest-v2.json" -Destination "$TEMP_DIR/manifest.json" -Force | Out-Null
-
-# Create zip archive
-Create-ZipArchive -SourceDir $TEMP_DIR -DestinationZip "dist/youlyplus-v${VERSION}-generic-v2.zip"
-
-# Clean up temporary directory
-Remove-Item -Path $TEMP_DIR -Recurse -Force | Out-Null
-Write-Host "Finished youlyplus-v${VERSION}-generic-v2.zip"
-
 Write-Host "Bundling complete. Output files are in the 'dist' directory."
