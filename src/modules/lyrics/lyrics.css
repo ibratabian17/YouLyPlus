@@ -248,7 +248,6 @@
     will-change: transform, background;
 }
 
-#lyrics-plus-container.compability-wipe .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable,
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.pre-highlight {
     background-repeat: no-repeat;

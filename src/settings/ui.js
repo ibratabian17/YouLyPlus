@@ -26,7 +26,6 @@ function setupAutoSaveListeners() {
         { id: 'wordByWord', key: 'wordByWord', type: 'checkbox' },
         { id: 'lightweight', key: 'lightweight', type: 'checkbox' },
         { id: 'hide-offscreen', key: 'hideOffscreen', type: 'checkbox' },
-        { id: 'compability-wipe', key: 'compabilityWipe', type: 'checkbox' },
         { id: 'blur-inactive', key: 'blurInactive', type: 'checkbox' },
         { id: 'dynamic-player', key: 'dynamicPlayer', type: 'checkbox' },
         { id: 'useSongPaletteFullscreen', key: 'useSongPaletteFullscreen', type: 'checkbox' },
@@ -68,7 +67,6 @@ function updateUI(settings) {
     document.getElementById('wordByWord').checked = currentSettings.wordByWord;
     document.getElementById('lightweight').checked = currentSettings.lightweight;
     document.getElementById('hide-offscreen').checked = currentSettings.hideOffscreen;
-    document.getElementById('compability-wipe').checked = currentSettings.compabilityWipe;
     document.getElementById('blur-inactive').checked = currentSettings.blurInactive;
     document.getElementById('dynamic-player').checked = currentSettings.dynamicPlayer;
     document.getElementById('useSongPaletteFullscreen').checked = currentSettings.useSongPaletteFullscreen;

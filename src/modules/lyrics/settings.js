@@ -11,7 +11,6 @@ const defaultSettings = {
     cacheStrategy: 'aggressive',
     fontSize: 16,
     hideOffscreen: false,
-    compabilityWipe: false,
     blurInactive: false,
     dynamicPlayer: false,
     customCSS: '',
