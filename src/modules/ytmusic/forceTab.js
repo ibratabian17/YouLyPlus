@@ -156,6 +156,7 @@
     lyricsElement.style.display = shouldShow ? 'block' : 'none';
 
     if (shouldShow) {
+      document.querySelector("#tab-renderer").scrollTop = 0;
       const videoElement = document.querySelector('video');
       if (videoElement && typeof scrollActiveLine === 'function') {
         try {
