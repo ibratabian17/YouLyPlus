@@ -202,7 +202,7 @@
 
 .lyrics-line.active .background-vocal-container {
     max-height: 10em;
-    opacity: 1;
+    opacity: 0.8;
     transition: max-height .6s, opacity .6s, padding .6s;
     will-change: max-height, opacity, padding;
 }
@@ -227,6 +227,8 @@
     background-clip: text;
     -webkit-background-clip: text;
     transition: color 0.7s, background-color 0.7s;
+    will-change: transform, color, background-color;
+    transform: translateY(0.00001%) translateZ(2px);
 }
 
 /* --- Syllable States (Finished, Highlight, etc.) --- */
@@ -265,8 +267,9 @@
 
 #lyrics-plus-container:not(.lightweight-mode) .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
 #lyrics-plus-container:not(.lightweight-mode) .lyrics-word.growable:has(.lyrics-syllable.highlight) .lyrics-syllable {
-    transform: translateY(-3.5%) translateZ(1px);
+    transform: translateY(-3.5%) translateZ(2px);
 }
+
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.finished {
     background-image: none;
