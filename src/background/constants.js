@@ -24,6 +24,11 @@ export const CONFIG = {
   GEMINI: {
     MAX_RETRIES: 5,
     MIN_TEXT_SIMILARITY: 0.8
+  },
+
+  GOOGLE: {
+    MAX_RETRIES: 3,
+    RETRY_DELAY_MS: 500
   }
 };
 

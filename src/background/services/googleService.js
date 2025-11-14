@@ -3,6 +3,7 @@
 // ==================================================================================================
 
 import { Utilities } from '../utils/utilities.js';
+import { CONFIG } from '../constants.js';
 
 export class GoogleService {
   static async translate(text, targetLang) {
@@ -68,7 +69,7 @@ export class GoogleService {
         sourceLang = detectData[2] || 'auto';
       }
     } catch (e) {
-      console.error("Language detection failed, using 'auto':", e);
+      console.error("GoogleService: Language detection failed, using 'auto':", e);
     }
 
     const romanizedTexts = [];
@@ -78,14 +79,30 @@ export class GoogleService {
         continue;
       }
       
-      try {
-        const romanizeUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=en&hl=en&dt=rm&q=${encodeURIComponent(text)}`;
-        const response = await fetch(romanizeUrl);
-        const data = await response.json();
-        romanizedTexts.push(data?.[0]?.[0]?.[3] || text);
-      } catch (error) {
-        console.error(`Error romanizing text "${text}":`, error);
-        romanizedTexts.push(text);
+      let attempt = 0;
+      let success = false;
+      let lastError = null;
+
+      while (attempt < CONFIG.GOOGLE.MAX_RETRIES && !success) {
+        try {
+          const romanizeUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=en&hl=en&dt=rm&q=${encodeURIComponent(text)}`;
+          const response = await fetch(romanizeUrl);
+          const data = await response.json();
+          romanizedTexts.push(data?.[0]?.[0]?.[3] || text);
+          success = true;
+        } catch (error) {
+          lastError = error;
+          console.warn(`GoogleService: Error romanizing text "${text}" (attempt ${attempt + 1}/${CONFIG.GOOGLE.MAX_RETRIES}):`, error);
+          attempt++;
+          if (attempt < CONFIG.GOOGLE.MAX_RETRIES) {
+            await Utilities.delay(CONFIG.GOOGLE.RETRY_DELAY_MS * Math.pow(2, attempt - 1)); // Exponential backoff
+          }
+        }
+      }
+
+      if (!success) {
+        console.error(`GoogleService: Failed to romanize text "${text}" after ${CONFIG.GOOGLE.MAX_RETRIES} attempts. Last error:`, lastError);
+        romanizedTexts.push(text); // Fallback to original text
       }
     }
     
