@@ -698,7 +698,6 @@ class LyricsPlusRenderer {
           totalDuration >= 1000;
 
         let easedProgress = 0;
-        let actualDecayRate = 0;
         let penaltyFactor = 1.0;
         if (shouldEmphasize) {
           const minDuration = 1000;
@@ -714,11 +713,6 @@ class LyricsPlusRenderer {
           );
           easedProgress = Math.pow(progress, easingPower);
 
-          const durationProgressForDecay = Math.min(1, Math.max(0, (totalDuration - minDuration) / (maxDuration - minDuration)));
-          const decayStrength = 1 - durationProgressForDecay;
-          const maxDecayRate = 0.5;
-          actualDecayRate = maxDecayRate * decayStrength;
-
           if (wordBuffer.length > 1) {
             const firstSyllableDuration = wordBuffer[0].duration;
             const imbalanceRatio = firstSyllableDuration / totalDuration;
@@ -726,8 +720,7 @@ class LyricsPlusRenderer {
             const penaltyThreshold = 0.25;
 
             if (imbalanceRatio < penaltyThreshold) {
-              const minPenaltyFactor = 0.4;
-
+              const minPenaltyFactor = 0.5;
               const penaltyProgress = imbalanceRatio / penaltyThreshold;
               penaltyFactor = minPenaltyFactor + (1.0 - minPenaltyFactor) * penaltyProgress;
             }
@@ -869,12 +862,46 @@ class LyricsPlusRenderer {
           let cumulativeWidth = 0;
 
           const numChars = wordSpan._cachedChars.length;
+          const wordLength = combinedText.trim().length;
+
+          let maxDecayRate = 0;
+
+          const isLongWord = wordLength > 5;
+          const isShortDuration = totalDuration < 1500;
+          const hasUnbalancedSyllables = penaltyFactor < 0.95;
+
+          if (isLongWord || isShortDuration || hasUnbalancedSyllables) {
+            let decayStrength = 0;
+
+            if (isLongWord) {
+              const lengthExcess = Math.min((wordLength - 5) / 3, 1.0);
+              decayStrength += lengthExcess * 0.4;
+            }
+
+            if (isShortDuration) {
+              const durationDeficit = 1.0 - ((totalDuration - 1000) / 500);
+              decayStrength += Math.max(0, durationDeficit) * 0.4;
+            }
+
+            if (hasUnbalancedSyllables) {
+              const imbalanceStrength = 1.0 - penaltyFactor;
+
+              const exponentialImbalance = Math.pow(imbalanceStrength, 0.7);
+
+              decayStrength += exponentialImbalance * 1.2;
+            }
+
+            maxDecayRate = Math.min(decayStrength, 0.85);
+          }
+
           wordSpan._cachedChars.forEach((span, index) => {
-            const powerDecayFactor = 1.0 - (index / (numChars > 1 ? numChars - 1 : 1)) * actualDecayRate;
+            const positionInWord = numChars > 1 ? index / (numChars - 1) : 0;
+            const decayFactor = 1.0 - (positionInWord * maxDecayRate);
 
-            const charProgress = easedProgress * powerDecayFactor * penaltyFactor;
+            const charProgress = easedProgress * penaltyFactor * decayFactor;
 
-            const charMaxScale = 1.0 + 0.05 + charProgress * 0.1;
+            const baseGrowth = numChars <= 3 ? 0.07 : 0.05;
+            const charMaxScale = 1.0 + baseGrowth + charProgress * 0.1;
             const charShadowIntensity = 0.4 + charProgress * 0.4;
             const normalizedGrowth = (charMaxScale - 1.0) / 0.13;
             const charTranslateYPeak = -normalizedGrowth * 2.5;
@@ -1165,47 +1192,117 @@ class LyricsPlusRenderer {
 
     const singerClassMap = {};
     let isDualSide = false;
+
     if (lyrics && lyrics.data && lyrics.data.length > 0) {
-      const allSingers = [
-        ...new Set(
-          lyrics.data.map((line) => line.element?.singer).filter(Boolean)
-        ),
-      ];
-      const leftCandidates = [];
-      const rightCandidates = [];
+      const hasAgentsMetadata = lyrics.metadata?.agents &&
+        Object.keys(lyrics.metadata.agents).length > 0;
 
-      allSingers.forEach((s) => {
-        if (!s.startsWith("v")) return;
+      if (hasAgentsMetadata) {
+        const agents = lyrics.metadata.agents;
+        const agentEntries = Object.entries(agents);
 
-        const numericPart = s.substring(1);
-        if (numericPart.length === 0) return;
+        agentEntries.sort((a, b) => a[0].localeCompare(b[0]));
 
-        let processedNumericPart = numericPart.replaceAll("0", "");
-        if (processedNumericPart === "" && numericPart.length > 0) {
-          processedNumericPart = "0";
+        let leftAgents = [];
+        let rightAgents = [];
+
+        const personAgents = agentEntries.filter(([_, agentData]) => agentData.type === "person");
+
+        const personIndexMap = new Map();
+        personAgents.forEach(([agentKey, agentData], personIndex) => {
+          personIndexMap.set(agentKey, personIndex);
+        });
+
+        agentEntries.forEach(([agentKey, agentData]) => {
+          if (agentData.type === "group") {
+            singerClassMap[agentKey] = "singer-left";
+            leftAgents.push(agentKey);
+          } else if (agentData.type === "other") {
+            singerClassMap[agentKey] = "singer-right";
+            rightAgents.push(agentKey);
+          } else if (agentData.type === "person") {
+            const personIndex = personIndexMap.get(agentKey);
+            if (personIndex % 2 === 0) {
+              singerClassMap[agentKey] = "singer-left";
+              leftAgents.push(agentKey);
+            } else {
+              singerClassMap[agentKey] = "singer-right";
+              rightAgents.push(agentKey);
+            }
+          }
+        });
+
+        const leftCount = lyrics.data.filter(line =>
+          line.element?.singer && leftAgents.includes(line.element.singer)
+        ).length;
+
+        const rightCount = lyrics.data.filter(line =>
+          line.element?.singer && rightAgents.includes(line.element.singer)
+        ).length;
+
+        const totalCount = leftCount + rightCount;
+
+        if (totalCount > 0) {
+          const rightPercentage = rightCount / totalCount;
+
+          if (rightPercentage >= 0.9) {
+            Object.keys(singerClassMap).forEach(key => {
+              if (singerClassMap[key] === "singer-left") {
+                singerClassMap[key] = "singer-right";
+              } else if (singerClassMap[key] === "singer-right") {
+                singerClassMap[key] = "singer-left";
+              }
+            });
+
+            [leftAgents, rightAgents] = [rightAgents, leftAgents];
+          }
         }
 
-        const num = parseInt(processedNumericPart, 10);
-        if (isNaN(num)) return;
+        isDualSide = leftAgents.length > 0 && rightAgents.length > 0;
 
-        if (num % 2 !== 0) {
-          leftCandidates.push(s);
-        } else {
-          rightCandidates.push(s);
+      } else {
+        const allSingers = [
+          ...new Set(
+            lyrics.data.map((line) => line.element?.singer).filter(Boolean)
+          ),
+        ];
+        const leftCandidates = [];
+        const rightCandidates = [];
+
+        allSingers.forEach((s) => {
+          if (!s.startsWith("v")) return;
+
+          const numericPart = s.substring(1);
+          if (numericPart.length === 0) return;
+
+          let processedNumericPart = numericPart.replaceAll("0", "");
+          if (processedNumericPart === "" && numericPart.length > 0) {
+            processedNumericPart = "0";
+          }
+
+          const num = parseInt(processedNumericPart, 10);
+          if (isNaN(num)) return;
+
+          if (num % 2 !== 0) {
+            leftCandidates.push(s);
+          } else {
+            rightCandidates.push(s);
+          }
+        });
+
+        const sortByOriginalNumber = (a, b) =>
+          parseInt(a.substring(1)) - parseInt(b.substring(1));
+        leftCandidates.sort(sortByOriginalNumber);
+        rightCandidates.sort(sortByOriginalNumber);
+
+        if (leftCandidates.length > 0 || rightCandidates.length > 0) {
+          leftCandidates.forEach((s) => (singerClassMap[s] = "singer-left"));
+          rightCandidates.forEach((s) => (singerClassMap[s] = "singer-right"));
+          isDualSide = leftCandidates.length > 0 && rightCandidates.length > 0;
         }
-      });
-
-      const sortByOriginalNumber = (a, b) =>
-        parseInt(a.substring(1)) - parseInt(b.substring(1));
-      leftCandidates.sort(sortByOriginalNumber);
-      rightCandidates.sort(sortByOriginalNumber);
-
-      if (leftCandidates.length > 0 || rightCandidates.length > 0) {
-        leftCandidates.forEach((s) => (singerClassMap[s] = "singer-left"));
-        rightCandidates.forEach((s) => (singerClassMap[s] = "singer-right"));
-        isDualSide = leftCandidates.length > 0 && rightCandidates.length > 0;
       }
     }
+
     if (isDualSide) container.classList.add("dual-side-lyrics");
 
     const elementPool = { lines: [], syllables: [], chars: [] };
