@@ -49,7 +49,7 @@ export class DataParser {
       }),
       metadata: {
         ...data.metadata,
-        source: `${data.metadata.source} (KPoe)`
+        source: `${data.metadata.source}`
       },
       ignoreSponsorblock: data.ignoreSponsorblock || data.metadata.ignoreSponsorblock
     };
