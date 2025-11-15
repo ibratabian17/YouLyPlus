@@ -14,7 +14,7 @@ import { YouTubeService } from '../services/youtubeService.js';
 
 export class LyricsService {
   static createCacheKey(songInfo) {
-    return `${songInfo.title} - ${songInfo.artist} - ${songInfo.album}`;
+    return `${songInfo.title} - ${songInfo.artist} - ${songInfo.album} - ${songInfo.duration}`;
   }
 
   static async getOrFetch(songInfo, forceReload = false) {
@@ -120,7 +120,7 @@ export class LyricsService {
       state.setCached(cacheKey, result);
       
       if (settings.cacheStrategy !== 'none') {
-        await lyricsDB.set({ key: cacheKey, lyrics, version, timestamp: Date.now() });
+        await lyricsDB.set({ key: cacheKey, lyrics, version, timestamp: Date.now(), duration: songInfo.duration });
       }
 
       return result;
