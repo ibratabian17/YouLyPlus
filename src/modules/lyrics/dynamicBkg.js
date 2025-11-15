@@ -54,7 +54,7 @@ let canvasDimensions = { width: 0, height: 0 };
 
 
 const BLUR_DOWNSAMPLE = 2; // The factor by which to reduce the canvas resolution for the blur pass.
-const BLUR_RADIUS = 13; // Controls the radius/intensity of the blur.
+const BLUR_RADIUS = 10; // Controls the radius/intensity of the blur.
 
 // Palette Constants
 const MASTER_PALETTE_TEX_WIDTH = 8;
@@ -352,8 +352,8 @@ function handleResize() {
     webglCanvas.width = canvasDimensions.width;
     webglCanvas.height = canvasDimensions.height;
 
-    blurDimensions.width = Math.round(canvasDimensions.width);
-    blurDimensions.height = Math.round(canvasDimensions.height);
+    blurDimensions.width = Math.round(canvasDimensions.width / BLUR_DOWNSAMPLE);
+    blurDimensions.height = Math.round(canvasDimensions.height / BLUR_DOWNSAMPLE);
 
     gl.bindTexture(gl.TEXTURE_2D, renderTexture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvasDimensions.width, canvasDimensions.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);

@@ -716,7 +716,7 @@ class LyricsPlusRenderer {
 
           const durationProgressForDecay = Math.min(1, Math.max(0, (totalDuration - minDuration) / (maxDuration - minDuration)));
           const decayStrength = 1 - durationProgressForDecay;
-          const maxDecayRate = 0.7;
+          const maxDecayRate = 0.5;
           actualDecayRate = maxDecayRate * decayStrength;
 
           if (wordBuffer.length > 1) {
