@@ -52,9 +52,8 @@ function handleContextRestored() {
 let blurDimensions = { width: 0, height: 0 };
 let canvasDimensions = { width: 0, height: 0 };
 
-
-const BLUR_DOWNSAMPLE = 2; // The factor by which to reduce the canvas resolution for the blur pass.
-const BLUR_RADIUS = 10; // Controls the radius/intensity of the blur.
+const BLUR_DOWNSAMPLE = 1; // The factor by which to reduce the canvas resolution for the blur pass.
+const BLUR_RADIUS = 13; // Controls the radius/intensity of the blur.
 
 // Palette Constants
 const MASTER_PALETTE_TEX_WIDTH = 8;
