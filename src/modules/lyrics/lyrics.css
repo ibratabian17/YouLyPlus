@@ -284,6 +284,20 @@
     animation-name: pre-wipe-universal-rtl;
 }
 
+.lyrics-syllable-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.lyrics-syllable.transliteration  {
+    font-size: var(--lyplus-font-size-subtext);
+    white-space: pre-wrap;
+}
+.lyrics-word:has(.transliteration) .lyrics-syllable:not(.transliteration) {
+    line-height: 1.5em;
+}
+
 /* ===== CHARACTER-LEVEL ANIMATION ===== */
 .lyrics-line .lyrics-syllable span.char {
     display: inline-block;
@@ -589,6 +603,9 @@ span.lyrics-source-provider {
 .lyrics-romanization-container.rtl-text {
     direction: rtl !important;
 }
+.lyrics-romanization-container .lyrics-syllable{
+    white-space: pre-wrap;
+}
 
 /* ==========================================================================
    ENHANCED BACKGROUND & DYNAMIC PLAYER LAYOUT
@@ -670,6 +687,23 @@ canvas#lyplus-webgl-canvas {
     }
 }
 
+@keyframes start-wipe {
+    0% {
+        background-size: 0em 100%, 0% 100%;
+        background-position: -0em 0%, left;
+    }
+
+    15% {
+        background-size: 0.75em 100%, 0% 100%;
+        background-position: -0.375em 0%, left;
+    }
+
+    100% {
+        background-size: 0.75em 100%, 100% 100%;
+        background-position: calc(100% + 0.375em) 0%, left;
+    }
+}
+
 @keyframes wipe-rtl {
     from {
         background-size: 0.75em 100%, 0% 100%;
@@ -677,6 +711,23 @@ canvas#lyplus-webgl-canvas {
     }
 
     to {
+        background-size: 0.75em 100%, 100% 100%;
+        background-position: -0.75em 0%, right;
+    }
+}
+
+@keyframes start-wipe-rtl {
+    0% {
+        background-size: 0em 100%, 0% 100%;
+        background-position: calc(100% + 0em) 0%, calc(100% + 0.36em);
+    }
+
+    15% {
+        background-size: 0.75em 100%, 0% 100%;
+        background-position: calc(100% + 0.375em) 0%, calc(100% + 0.36em);
+    }
+
+    100% {
         background-size: 0.75em 100%, 100% 100%;
         background-position: -0.75em 0%, right;
     }
