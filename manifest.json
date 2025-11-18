@@ -26,6 +26,7 @@
       "js": [
         "src/lib/sponsorblock.js",
         "src/lib/polyfill.js",
+        "src/lib/md3e-progress.js",
         "src/localization.js",
         "src/modules/lyrics/settings.js",
         "src/modules/lyrics/lyricsManager.js",
