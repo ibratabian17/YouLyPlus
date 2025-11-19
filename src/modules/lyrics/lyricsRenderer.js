@@ -10,6 +10,7 @@ class LyricsPlusRenderer {
     this.lastPrimaryActiveLine = null;
     this.currentFullscreenFocusedLine = null;
     this.lastTime = 0;
+    this.offsetLatency = 0
 
     this.uiConfig = uiConfig;
     this.lyricsContainer = null;
@@ -1512,12 +1513,14 @@ class LyricsPlusRenderer {
     currentSettings = {},
     fetchAndDisplayLyricsFn,
     setCurrentDisplayModeAndRefetchFn,
-    largerTextMode = "lyrics"
+    largerTextMode = "lyrics",
+    offsetLatency = 0
   ) {
     this.lastKnownSongInfo = songInfo;
     this.fetchAndDisplayLyricsFn = fetchAndDisplayLyricsFn;
     this.setCurrentDisplayModeAndRefetchFn = setCurrentDisplayModeAndRefetchFn;
     this.largerTextMode = largerTextMode;
+    this.offsetLatency = offsetLatency
 
     const container = this._getContainer();
     if (!container) return;
@@ -1718,7 +1721,7 @@ class LyricsPlusRenderer {
     this.lastTime = this._getCurrentPlayerTime() * 1000;
     if (!this.uiConfig.disableNativeTick) {
       const sync = () => {
-        const currentTime = this._getCurrentPlayerTime() * 1000;
+        const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000;
         const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
         this._updateLyricsHighlight(
           currentTime,
@@ -1750,7 +1753,7 @@ class LyricsPlusRenderer {
   updateCurrentTick(currentTime) {
     currentTime = currentTime * 1000;
     const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
-    this._updateLyricsHighlight(currentTime, isForceScroll, currentSettings);
+    this._updateLyricsHighlight((currentTime - this.offsetLatency), isForceScroll, currentSettings);
     this.lastTime = currentTime;
   }
 

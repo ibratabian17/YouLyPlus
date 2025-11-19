@@ -2,6 +2,8 @@
    STATE VARIABLES
    ================================================================= */
 
+const audioCtx = new AudioContext();
+
 let currentFetchMediaId = null;
 let currentDisplayMode = 'none'; // User's intended display mode ('none', 'translate', 'romanize', 'both')
 let lastProcessedDisplayMode = 'none'; // The mode that was actually rendered
@@ -212,7 +214,8 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
         currentSettings,
         fetchAndDisplayLyrics,
         setCurrentDisplayModeAndRender,
-        currentSettings.largerTextMode
+        currentSettings.largerTextMode,
+        audioCtx.outputLatency || 0
       );
     } else {
       console.error("displayLyrics is not available.");
