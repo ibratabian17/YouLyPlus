@@ -1,4 +1,6 @@
-const pBrowser = chrome || browser;
+const pBrowser = typeof browser !== 'undefined'
+  ? browser
+  : (typeof chrome !== 'undefined' ? chrome : null);
 
 const defaultSettings = {
     lyricsProvider: 'kpoe',

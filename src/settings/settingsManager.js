@@ -1,5 +1,7 @@
 // Browser compatibility
-const pBrowser = window.chrome || window.browser;
+const pBrowser = typeof browser !== 'undefined'
+    ? browser
+    : (typeof chrome !== 'undefined' ? chrome : null);
 let currentSettings = {};
 
 function storageLocalGet(keys) {

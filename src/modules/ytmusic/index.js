@@ -40,6 +40,10 @@ function injectPlatformCSS() {
     const linkElement = document.createElement('link');
     linkElement.rel = 'stylesheet';
     linkElement.type = 'text/css';
+    if (!pBrowser?.runtime?.getURL) {
+        console.warn('Tidal: runtime.getURL unavailable, skipping CSS inject');
+        return;
+    }
     linkElement.href = pBrowser.runtime.getURL('src/modules/ytmusic/style.css');
     linkElement.setAttribute('data-lyrics-plus-platform-style', 'true');
     document.head.appendChild(linkElement);
@@ -47,7 +51,10 @@ function injectPlatformCSS() {
 
 // Function to inject the DOM script
 function injectDOMScript() {
-    const pBrowser = chrome || browser;
+    if (!pBrowser?.runtime?.getURL) {
+        console.warn('YTMusic: runtime.getURL unavailable, skipping DOM script inject');
+        return;
+    }
     const script = document.createElement('script');
     script.src = pBrowser.runtime.getURL('src/inject/ytmusic/songTracker.js');
     script.onload = function () {
@@ -76,10 +83,10 @@ function injectDOMScript() {
     progressBar.play();
 
     const ytPlayer = document.querySelector('video');
-    ytPlayer.addEventListener('play', ()=>{
+    ytPlayer.addEventListener('play', () => {
         progressBar.play();
     })
-    ytPlayer.addEventListener('pause', ()=>{
+    ytPlayer.addEventListener('pause', () => {
         progressBar.pause();
     })
 }

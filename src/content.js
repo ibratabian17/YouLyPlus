@@ -10,7 +10,9 @@ window.LyricsPlusAPI = {
     t: t,
     sendMessageToBackground: (message) => {
         return new Promise((resolve) => {
-            const pBrowser = chrome || browser;
+            const pBrowser = typeof browser !== 'undefined'
+                ? browser
+                : (typeof chrome !== 'undefined' ? chrome : null);
             pBrowser.runtime.sendMessage(message, (response) => {
                 resolve(response);
             });
@@ -52,11 +54,17 @@ function initializeLyricsPlus() {
 
 
 function injectCssFile() {
-    const pBrowser = chrome || browser;
+    const pBrowser = typeof browser !== 'undefined'
+        ? browser
+        : (typeof chrome !== 'undefined' ? chrome : null);
     if (document.querySelector('link[data-lyrics-plus-style]')) return;
     const lyricsElement = document.createElement('link');
     lyricsElement.rel = 'stylesheet';
     lyricsElement.type = 'text/css';
+    if (!pBrowser?.runtime?.getURL) {
+        console.warn('LyricsPlus: runtime.getURL unavailable, skipping CSS inject');
+        return;
+    }
     lyricsElement.href = pBrowser.runtime.getURL('src/modules/lyrics/lyrics.css');
     lyricsElement.setAttribute('data-lyrics-plus-style', 'true');
     document.head.appendChild(lyricsElement);

@@ -4,7 +4,9 @@
 
 import { MessageHandler } from './core/messageHandler.js';
 
-const pBrowser = chrome || browser;
+const pBrowser = typeof browser !== 'undefined'
+  ? browser
+  : (typeof chrome !== 'undefined' ? chrome : null);
 
 // ==================================================================================================
 // INITIALIZATION
@@ -12,6 +14,10 @@ const pBrowser = chrome || browser;
 
 console.log('Service Worker initialized');
 
-pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  return MessageHandler.handle(message, sender, sendResponse);
-});
+if (pBrowser?.runtime?.onMessage) {
+  pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    return MessageHandler.handle(message, sender, sendResponse);
+  });
+} else {
+  console.error('Service Worker: runtime messaging not available');
+}
