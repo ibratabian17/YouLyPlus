@@ -2737,7 +2737,12 @@ class LyricsPlusRenderer {
       container.innerHTML = `<div class="loading-container"><span class="text-loading">${t("loading")}</span><div class="loading-loop-m3"></div></div>`;
       container.classList.add("lyrics-plus-message");
       container.className = "lyrics-plus-integrated lyrics-plus-message blur-inactive-enabled";
-      container.style = ""; 
+
+      container.style.removeProperty("--lyrics-scroll-offset");
+      container.style.removeProperty("--lyplus-override-pallete");
+      container.style.removeProperty("--lyplus-override-pallete-white");
+      container.style.removeProperty("--lyplus-song-pallete");
+      container.style.removeProperty("--lyplus-song-white-pallete");
     }
 
     // Release Graphics Memory
