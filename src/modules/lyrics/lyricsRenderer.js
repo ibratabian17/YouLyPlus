@@ -775,6 +775,7 @@ class LyricsPlusRenderer {
               let cumulativeCharWidth = 0;
 
               syllableText.split("").forEach((char) => {
+                const charWidth = this._getTextWidth(char, referenceFont);
                 if (char === " ") {
                   sylSpan.appendChild(document.createTextNode(" "));
                 } else {
@@ -782,19 +783,18 @@ class LyricsPlusRenderer {
                     elementPool.chars.pop() || document.createElement("span");
                   charSpan.textContent = char;
                   charSpan.className = "char";
-                  const charWidth = this._getTextWidth(char, referenceFont);
                   if (totalSyllableWidth > 0) {
                     const startPercent = cumulativeCharWidth / totalSyllableWidth;
                     const durationPercent = charWidth / totalSyllableWidth;
                     charSpan.dataset.wipeStart = startPercent.toFixed(4);
                     charSpan.dataset.wipeDuration = durationPercent.toFixed(4);
                   }
-                  cumulativeCharWidth += charWidth;
                   charSpan.dataset.syllableCharIndex = characterData.length;
                   characterData.push({ charSpan, syllableSpan: sylSpan, isBackground: s.isBackground });
                   charSpansForSyllable.push(charSpan);
                   sylSpan.appendChild(charSpan);
                 }
+                cumulativeCharWidth += charWidth;
               });
             } else {
               sylSpan.textContent = this._getDataText(s);
@@ -1684,6 +1684,7 @@ class LyricsPlusRenderer {
       (this.textWidthCanvas = document.createElement("canvas"));
     const context = canvas.getContext("2d");
     context.font = font;
+    context.fontKerning = "none"; 
     return context.measureText(text).width;
   }
 
