@@ -1,110 +1,193 @@
-
+/**
+ * Convert LRC to KPoe Readable Format
+ * Original Implementation:
+ * https://github.com/FoedusProgramme/Gramophone/blob/beta/app/src/main/java/org/akanework/gramophone/logic/utils/SemanticLyrics.kt
+ * 
+ * @param {*} lrcContent - LRC Text
+ * @returns 
+ */
 export function parseSyncedLyrics(lrcContent) {
-  const lineTimeRegex = /\[(\d+):(\d{2})(?:[.,](\d+))?\]/g;
-  const wordTimeRegex = /<(\d+):(\d{2})(?:[.,](\d+))?>/g;
+  const timeTagRegex = /\[(\d+):(\d{2})(?:[.:](\d+))?\]/g;
+  const wordTagRegex = /<(\d+):(\d{2})(?:[.:](\d+))?>/g;
+  const metadataRegex = /^\[([a-zA-Z#]+):([^\]]*)\]$/;
+  const offsetRegex = /^\[offset:(-?\d+)\]$/i;
+  const speakerRegex = /\[(bg|v1|v2|v3|F|M|D|duet|male|female)(?::)?\]/i;
 
-  const parseTime = (match) => {
-    if (!match) return 0;
-    const minutes = parseInt(match[1], 10);
-    const seconds = parseInt(match[2], 10);
-    let milliseconds = 0;
-    if (match[3]) {
-      // Normalizes millisecond part (e.g., "52" -> 520)
-      const msStr = match[3].padEnd(3, '0').substring(0, 3);
-      milliseconds = parseInt(msStr, 10);
+  let offset = 0;
+  const lines = lrcContent.split(/\r?\n/);
+  
+  // First pass: find offset
+  lines.forEach(line => {
+    const match = line.trim().match(offsetRegex);
+    if (match) {
+      // positive offset means lyric played earlier, so multiply by -1
+      // However, standard LRC spec says [offset:200] means timestamps are 200ms too early (shift lyrics forward).
+      offset = parseInt(match[1], 10) * -1;
     }
-    return (minutes * 60 * 1000) + (seconds * 1000) + milliseconds;
+  });
+
+  const parseTime = (minutes, seconds, msStr) => {
+    const min = parseInt(minutes, 10);
+    const sec = parseInt(seconds, 10);
+    let ms = 0;
+    if (msStr) {
+      // Handle 2 digits (.10) vs 3 digits (.100)
+      if (msStr.length === 2) ms = parseInt(msStr, 10) * 10;
+      else if (msStr.length === 1) ms = parseInt(msStr, 10) * 100;
+      else ms = parseInt(msStr.substring(0, 3), 10);
+    }
+    const total = (min * 60 * 1000) + (sec * 1000) + ms + offset;
+    return total < 0 ? 0 : total;
   };
 
-  const lines = lrcContent.split('\n');
-  const parsedLyrics = [];
-  const isEnhanced = /<(\d+):(\d{2})/.test(lrcContent);
+  const parseTimeFromMatch = (match) => parseTime(match[1], match[2], match[3]);
+
+  const rawEntries = [];
+  let isEnhanced = false;
 
   lines.forEach(line => {
-    const lineTimeMatches = [...line.matchAll(lineTimeRegex)];
-    if (lineTimeMatches.length === 0) return;
+    line = line.trim();
+    if (!line) return;
 
-    const textContent = line.replace(lineTimeRegex, '').trim();
-    if (!textContent) return; // Skip empty lines
+    // Check for metadata (non-timestamp, non-offset)
+    if (metadataRegex.test(line) && !timeTagRegex.test(line)) {
+      return;
+    }
+
+    // Check for Speaker/Walaoke tags
+    let currentSpeaker = "";
+    const speakerMatch = line.match(speakerRegex);
+    if (speakerMatch) {
+      currentSpeaker = speakerMatch[1].toLowerCase();
+      line = line.replace(speakerRegex, '');
+    }
+
+    // Find all line timestamps (Compressed LRC support: [00:01][00:10]Text)
+    const timeMatches = [...line.matchAll(timeTagRegex)];
+    if (timeMatches.length === 0) return;
+
+    // Remove line timestamps to get content
+    let content = line.replace(timeTagRegex, '').trim();
+    
+    // Check for Enhanced LRC Word Timestamps
+    const wordMatches = [...content.matchAll(wordTagRegex)];
+    const hasWordTags = wordMatches.length > 0;
+    if (hasWordTags) isEnhanced = true;
 
     let syllabus = [];
-    if (isEnhanced && textContent) {
-      wordTimeRegex.lastIndex = 0;
-      
-      const parts = textContent.split(wordTimeRegex);
-      const wordMatches = [...textContent.matchAll(wordTimeRegex)];
-      
-      let textParts = [parts[0] || ''];
-      
-      for (let i = 1; i < parts.length; i++) {
-        textParts.push(parts[i] || '');
+    if (hasWordTags) {
+      let lastIndex = 0;
+      wordMatches.forEach(wm => {
+        const wordTime = parseTimeFromMatch(wm);
+        // Text before this tag
+        const preText = content.substring(lastIndex, wm.index);
+        if (preText) {
+          // If text exists before first tag, it belongs to previous node or line start.
+          syllabus.push({ text: preText, time: 0, duration: 0, isTag: false });
+        }
+        syllabus.push({ text: "", time: wordTime, duration: 0, isTag: true });
+        lastIndex = wm.index + wm[0].length;
+      });
+      const tailText = content.substring(lastIndex);
+      if (tailText) {
+         syllabus.push({ text: tailText, time: 0, duration: 0, isTag: false });
       }
+
+      // Post-process syllabus: Bind text to the previous timestamp
+      const refinedSyllabus = [];
+      let currentWordTime = 0;
       
-      wordMatches.forEach((wordMatch, index) => {
-        const text = textParts[index + 1]; 
-        if (text) {
-          syllabus.push({
-            text: text,
-            time: parseTime(wordMatch),
-            duration: 0
+      syllabus.forEach(item => {
+        if (item.isTag) {
+          currentWordTime = item.time;
+        } else {
+          // Text segment
+          refinedSyllabus.push({
+             text: item.text,
+             time: currentWordTime,
+             duration: 0
           });
         }
       });
       
-      const initialText = textParts[0];
-      if (initialText && syllabus.length === 0) {
-        syllabus.push({ 
-          text: initialText, 
-          time: 0, 
-          duration: 0 
-        });
-      }
-
-      for (let i = 0; i < syllabus.length - 1; i++) {
-        syllabus[i].duration = syllabus[i + 1].time - syllabus[i].time;
-      }
-      
-      if (syllabus.length > 0) {
-        syllabus[syllabus.length - 1].duration = 500;
-      }
+      // Fix first word if it had no tag (uses line time later)
+      syllabus = refinedSyllabus;
+      content = content.replace(wordTagRegex, ''); // Clean content
     }
 
-    lineTimeMatches.forEach(match => {
-      parsedLyrics.push({
-        time: parseTime(match),
-        duration: 0, // Will be calculated later
-        text: textContent.replace(wordTimeRegex, ''),
-        syllabus: isEnhanced ? [...syllabus] : [],
-        element: { 
-          key: "", 
-          songPart: "", 
-          singer: "" 
+    timeMatches.forEach(tm => {
+      const lineTime = parseTimeFromMatch(tm);
+      
+      // If syllabus exists, adjust first word time if it was 0 or unmatched
+      const lineSyllabus = syllabus.map(s => ({...s})); // deep copy
+      if (lineSyllabus.length > 0 && lineSyllabus[0].time === 0) {
+          lineSyllabus[0].time = lineTime;
+      }
+
+      // Calculate syllable durations
+      for (let i = 0; i < lineSyllabus.length - 1; i++) {
+        if (lineSyllabus[i + 1].time > lineSyllabus[i].time) {
+          lineSyllabus[i].duration = lineSyllabus[i + 1].time - lineSyllabus[i].time;
         }
+      }
+
+      rawEntries.push({
+        time: lineTime,
+        text: content,
+        syllabus: lineSyllabus,
+        speaker: currentSpeaker
       });
     });
   });
 
-  parsedLyrics.sort((a, b) => a.time - b.time);
+  // Sort by time
+  rawEntries.sort((a, b) => a.time - b.time);
 
-  for (let i = 0; i < parsedLyrics.length; i++) {
-    if (i < parsedLyrics.length - 1) {
-      parsedLyrics[i].duration = parsedLyrics[i + 1].time - parsedLyrics[i].time;
+  // Calculate Line Durations and Finalize Syllables
+  const validLyrics = rawEntries.map((entry, index) => {
+    const nextEntry = rawEntries[index + 1];
+    let duration = 0;
+    
+    // Estimate duration based on next line
+    if (nextEntry) {
+      duration = nextEntry.time - entry.time;
     } else {
-      const lastSyllable = parsedLyrics[i].syllabus?.[parsedLyrics[i].syllabus.length - 1];
-      parsedLyrics[i].duration = lastSyllable 
-        ? (lastSyllable.time + lastSyllable.duration) - parsedLyrics[i].time
-        : 5000;
+      // Last line fallback
+      duration = 5000;
     }
-  }
 
-  const validLyrics = parsedLyrics.filter(line => 
-    line.text.trim() !== '' && 
-    line.time >= 0 && 
-    !isNaN(line.time)
-  );
+    // Sanitize Syllabus
+    if (entry.syllabus.length > 0) {
+      const lastSyl = entry.syllabus[entry.syllabus.length - 1];
+      if (lastSyl.duration === 0) {
+        const estimatedEnd = entry.time + duration;
+        lastSyl.duration = Math.max(0, estimatedEnd - lastSyl.time);
+      }
+    }
+
+    if (isEnhanced && entry.syllabus.length === 0 && entry.text) {
+      entry.syllabus.push({
+        text: entry.text,
+        time: entry.time,
+        duration: duration
+      });
+    }
+
+    return {
+      time: entry.time,
+      duration: duration,
+      text: entry.text,
+      syllabus: entry.syllabus,
+      element: {
+        key: "",
+        songPart: "",
+        singer: entry.speaker
+      }
+    };
+  }).filter(l => l.text.trim() !== '');
 
   return {
-    KpoeTools: '1.0-parseSyncedLyrics-LRC',
+    KpoeTools: '1.1-parseSyncedLyrics-LRC',
     type: isEnhanced ? 'Word' : 'Line',
     metadata: {
       source: "Local Files",
@@ -119,8 +202,18 @@ export function parseSyncedLyrics(lrcContent) {
   };
 }
 
+/**
+ * Convert Apple Music's TTML to KPoe Readable Format
+ * Original Implementation:
+ * https://github.com/ibratabian17/LyricsPlus/blob/cookie/src/shared/parsers/ttml.parser.js
+ * 
+ * @param {*} ttml - TTML Text
+ * @param {*} offset - Format
+ * @param {*} separate - Separate non-timed
+ * @returns 
+ */
 export function parseAppleTTML(ttml, offset = 0, separate = false) {
-  const KPOE = '1.0-ConvertTTMLtoJSON-DOMParser';
+  const KPOE = '1.6-ConvertTTMLtoJSON-DOMParser';
 
   const NS = {
     tt: 'http://www.w3.org/ns/ttml',
@@ -273,29 +366,35 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
 
           const syllabus = [];
           let fullText = '';
-          const spans = Array.from(textNode.getElementsByTagName('span'));
+
+          // Get all spans with timing information
+          const spans = Array.from(textNode.getElementsByTagName('span')).filter(
+            span => getAttr(span, null, 'begin', 'begin')
+          );
           const processedSpans = new Set();
 
           for (const span of spans) {
             if (processedSpans.has(span)) continue;
+            processedSpans.add(span);
 
             let spanText = '';
             for (const child of span.childNodes) {
-              if (child.nodeType === 3) { spanText += child.nodeValue || ''; }
-              if (child.nodeType === 1) { // Element node, e.g. nested span
-                Array.from(child.getElementsByTagName('span')).forEach(s => processedSpans.add(s));
+              if (child.nodeType === 3) { // Text node
+                spanText += child.nodeValue || '';
               }
             }
             spanText = decodeHtmlEntities(spanText);
 
             const tail = collectTailText(span);
-            if (tail && !separate) {
-              spanText += decodeHtmlEntities(tail);
+            const decodedTail = decodeHtmlEntities(tail);
+
+            if (decodedTail) {
+              if (!separate) {
+                spanText += decodedTail;
+              }
             }
 
-            if (spanText.trim() === '' && (!tail || tail.trim() === '')) continue;
-
-            processedSpans.add(span);
+            if (spanText.trim() === '') continue;
 
             const begin = getAttr(span, null, 'begin', 'begin');
             const end = getAttr(span, null, 'end', 'end');
@@ -335,6 +434,10 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
       const singerId = getAttr(p, NS.ttm, 'agent', 'ttm:agent') || '';
       const singer = singerId.replace('voice', 'v');
 
+      // Get timing from paragraph element for line-by-line timing
+      const pBegin = getAttr(p, null, 'begin', 'begin');
+      const pEnd = getAttr(p, null, 'end', 'end');
+
       const currentLine = {
         time: 0,
         duration: 0,
@@ -343,58 +446,90 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
         element: { key, songPart, singer }
       };
 
+      // Check if we have word-level spans with timing
       const allSpansInP = Array.from(p.getElementsByTagName('span')).filter(span => getAttr(span, null, 'begin', 'begin'));
-      const processedSpans = new Set();
 
-      for (const sp of allSpansInP) {
-        if (processedSpans.has(sp)) continue;
+      if (allSpansInP.length > 0 && timingMode === 'Word') {
+        // Word-by-word timing mode
+        const processedSpans = new Set();
 
-        const isBg = isInsideBackgroundWrapper(sp, p);
-        if (isBg) {
-          Array.from(sp.getElementsByTagName('span')).forEach(nested => processedSpans.add(nested));
+        for (const sp of allSpansInP) {
+          if (processedSpans.has(sp)) continue;
+
+          const isBg = isInsideBackgroundWrapper(sp, p);
+          if (isBg) {
+            Array.from(sp.getElementsByTagName('span')).forEach(nested => processedSpans.add(nested));
+          }
+          processedSpans.add(sp);
+
+          const begin = getAttr(sp, null, 'begin', 'begin') || '0';
+          const end = getAttr(sp, null, 'end', 'end') || '0';
+
+          let spanText = '';
+          for (const child of sp.childNodes) {
+            if (child.nodeType === 3) { spanText += child.nodeValue || ''; }
+          }
+          spanText = decodeHtmlEntities(spanText);
+
+          const tail = collectTailText(sp);
+          if (tail && !separate) {
+            spanText += decodeHtmlEntities(tail);
+          }
+
+          if (spanText.trim() === '' && (!tail || !tail.includes(' '))) continue;
+
+          const syllabusEntry = {
+            time: timeToMs(begin) + offset,
+            duration: timeToMs(end) - timeToMs(begin),
+            text: spanText
+          };
+          if (isBg) syllabusEntry.isBackground = true;
+
+          currentLine.syllabus.push(syllabusEntry);
+          currentLine.text += spanText;
         }
-        processedSpans.add(sp);
+      } else {
+        // Line-by-line timing mode - use paragraph timing and extract text
+        if (pBegin && pEnd) {
+          let lineText = '';
 
-        const begin = getAttr(sp, null, 'begin', 'begin') || '0';
-        const end = getAttr(sp, null, 'end', 'end') || '0';
+          function extractTextFromNode(node) {
+            let text = '';
+            for (const child of node.childNodes) {
+              if (child.nodeType === 3) {
+                text += child.nodeValue || '';
+              } else if (child.nodeType === 1) {
+                text += extractTextFromNode(child);
+              }
+            }
+            return text;
+          }
 
-        let spanText = '';
-        for (const child of sp.childNodes) {
-          if (child.nodeType === 3) { spanText += child.nodeValue || ''; }
+          lineText = extractTextFromNode(p);
+          lineText = decodeHtmlEntities(lineText.trim());
+
+          if (lineText) {
+            currentLine.text = lineText;
+            currentLine.time = timeToMs(pBegin) + offset;
+            currentLine.duration = timeToMs(pEnd) - timeToMs(pBegin);
+          }
         }
-        spanText = decodeHtmlEntities(spanText);
-
-        const tail = collectTailText(sp);
-        if (tail && !separate) {
-          spanText += decodeHtmlEntities(tail);
-        }
-
-        if (spanText.trim() === '' && (!tail || !tail.includes(' '))) continue;
-
-        const syllabusEntry = {
-          time: timeToMs(begin) + offset,
-          duration: timeToMs(end) - timeToMs(begin),
-          text: spanText
-        };
-        if (isBg) syllabusEntry.isBackground = true;
-
-        currentLine.syllabus.push(syllabusEntry);
-        currentLine.text += spanText;
       }
 
-      if (currentLine.syllabus.length > 0) {
-        let earliestTime = Infinity;
-        let latestEndTime = 0;
+      if (currentLine.syllabus.length > 0 || (currentLine.text && currentLine.time >= 0)) {
+        if (currentLine.syllabus.length > 0 && timingMode === 'Word') {
+          let earliestTime = Infinity;
+          let latestEndTime = 0;
 
-        currentLine.syllabus.forEach(syllable => {
-          if (syllable.time < earliestTime) earliestTime = syllable.time;
-          const endTime = syllable.time + syllable.duration;
-          if (endTime > latestEndTime) latestEndTime = endTime;
-        });
+          currentLine.syllabus.forEach(syllable => {
+            if (syllable.time < earliestTime) earliestTime = syllable.time;
+            const endTime = syllable.time + syllable.duration;
+            if (endTime > latestEndTime) latestEndTime = endTime;
+          });
 
-        currentLine.time = earliestTime;
-        currentLine.duration = latestEndTime - earliestTime;
-        currentLine.text = currentLine.text.trim();
+          currentLine.time = earliestTime;
+          currentLine.duration = latestEndTime - earliestTime;
+        }
 
         // Attach pre-computed translation and transliteration data
         if (key && translationMap[key]) {
@@ -417,7 +552,14 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
   };
 }
 
-// V1 to V2
+/**
+ * Update Legacy KPoe format to LyricsPlus (new KPoe) Readable Format
+ * Original Implementation:
+ * https://github.com/ibratabian17/LyricsPlus/blob/cookie/src/shared/parsers/kpoe.parser.js
+ * 
+ * @param {*} data - The JSON Files
+ * @returns 
+ */
 export function v1Tov2(data) {
   const groupedLyrics = [];
   let currentGroup = null;
@@ -517,10 +659,12 @@ export function v1Tov2(data) {
     }
   }
 
+  const metadata = data.metadata || {};
+  metadata.source = "Local Files"
   return {
     type: data.type === "syllable" ? "Word" : data.type, // Convert "syllable" to "Word" if needed
     KpoeTools: '1.31R2-LPlusBcknd,' + (data.KpoeTools || 'UnknownV1'),
-    metadata: data.metadata,
+    metadata,
     ignoreSponsorblock: data.ignoreSponsorblock || undefined,
     lyrics: groupedLyrics,
     cached: data.cached || 'None'
