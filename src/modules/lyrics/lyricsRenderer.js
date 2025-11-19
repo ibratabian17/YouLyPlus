@@ -18,6 +18,7 @@ class LyricsPlusRenderer {
     this.activeLineIds = new Set();
     this.visibleLineIds = new Set();
     this.fontCache = {};
+    
     this.textWidthCanvas = null;
     this.visibilityObserver = null;
     this.resizeObserver = null;
@@ -31,10 +32,18 @@ class LyricsPlusRenderer {
     this.translationButton = null;
     this.reloadButton = null;
     this.dropdownMenu = null;
+    this.buttonsWrapper = null; 
+    this._boundLyricClickHandler = this._onLyricClick.bind(this);
 
     this.isProgrammaticScrolling = false;
     this.endProgrammaticScrollTimer = null;
     this.scrollEventHandlerAttached = false;
+    this._boundParentScrollHandler = null;
+    this._boundWheelHandler = null;
+    this._boundTouchStartHandler = null;
+    this._boundTouchMoveHandler = null;
+    this._boundTouchEndHandler = null;
+    this._boundTouchCancelHandler = null;
     this.currentScrollOffset = 0;
     this.touchStartY = 0;
     this.isTouching = false;
@@ -245,162 +254,149 @@ class LyricsPlusRenderer {
       maxSamples: 5,
     };
 
+    // Define handlers
+    this._boundParentScrollHandler = () => {
+      if (this.isProgrammaticScrolling) {
+        clearTimeout(this.endProgrammaticScrollTimer);
+        this.endProgrammaticScrollTimer = setTimeout(() => {
+          this.isProgrammaticScrolling = false;
+          this.endProgrammaticScrollTimer = null;
+        }, 250);
+        return;
+      }
+      if (this.lyricsContainer) {
+        this.lyricsContainer.classList.add("not-focused");
+      }
+    };
+
+    this._boundWheelHandler = (event) => {
+      event.preventDefault();
+      this.isProgrammaticScrolling = false;
+      if (this.lyricsContainer) {
+        this.lyricsContainer.classList.add("not-focused", "user-scrolling", "wheel-scrolling");
+        this.lyricsContainer.classList.remove("touch-scrolling");
+      }
+      this._handleUserScroll(event.deltaY);
+      clearTimeout(this.userScrollIdleTimer);
+      this.userScrollIdleTimer = setTimeout(() => {
+        if (this.lyricsContainer) {
+          this.lyricsContainer.classList.remove("user-scrolling", "wheel-scrolling");
+        }
+      }, 200);
+    };
+
+    this._boundTouchStartHandler = (event) => {
+      const touch = event.touches[0];
+      const now = performance.now();
+      if (this.touchState.momentum) {
+        cancelAnimationFrame(this.touchState.momentum);
+        this.touchState.momentum = null;
+      }
+      this.touchState.isActive = true;
+      this.touchState.startY = touch.clientY;
+      this.touchState.lastY = touch.clientY;
+      this.touchState.lastTime = now;
+      this.touchState.velocity = 0;
+      this.touchState.samples = [{ y: touch.clientY, time: now }];
+
+      this.isProgrammaticScrolling = false;
+      if (this.lyricsContainer) {
+        this.lyricsContainer.classList.add("not-focused", "user-scrolling", "touch-scrolling");
+        this.lyricsContainer.classList.remove("wheel-scrolling");
+      }
+      clearTimeout(this.userScrollIdleTimer);
+    };
+
+    this._boundTouchMoveHandler = (event) => {
+      if (!this.touchState.isActive) return;
+      event.preventDefault();
+      const touch = event.touches[0];
+      const now = performance.now();
+      const currentY = touch.clientY;
+      const deltaY = this.touchState.lastY - currentY;
+      this.touchState.lastY = currentY;
+      this.touchState.samples.push({ y: currentY, time: now });
+      if (this.touchState.samples.length > this.touchState.maxSamples) {
+        this.touchState.samples.shift();
+      }
+      this._handleUserScroll(deltaY * 0.8);
+    };
+
+    this._boundTouchEndHandler = () => {
+      if (!this.touchState.isActive) return;
+      this.touchState.isActive = false;
+      const now = performance.now();
+      const samples = this.touchState.samples;
+      if (samples.length >= 2) {
+        const recentSamples = samples.filter((sample) => now - sample.time <= 100);
+        if (recentSamples.length >= 2) {
+          const newest = recentSamples[recentSamples.length - 1];
+          const oldest = recentSamples[0];
+          const timeDelta = newest.time - oldest.time;
+          const yDelta = oldest.y - newest.y;
+          if (timeDelta > 0) {
+            this.touchState.velocity = yDelta / timeDelta;
+          }
+        }
+      }
+      if (Math.abs(this.touchState.velocity) > 0.1) {
+        this._startMomentumScroll();
+      } else {
+        this._endTouchScrolling();
+      }
+    };
+
+    this._boundTouchCancelHandler = () => {
+      this.touchState.isActive = false;
+      if (this.touchState.momentum) {
+        cancelAnimationFrame(this.touchState.momentum);
+        this.touchState.momentum = null;
+      }
+      this._endTouchScrolling();
+    };
+
+    // Attach Listeners
     if (parentScrollElement) {
-      parentScrollElement.addEventListener(
-        "scroll",
-        () => {
-          if (this.isProgrammaticScrolling) {
-            clearTimeout(this.endProgrammaticScrollTimer);
-            this.endProgrammaticScrollTimer = setTimeout(() => {
-              this.isProgrammaticScrolling = false;
-              this.endProgrammaticScrollTimer = null;
-            }, 250);
-            return;
-          }
-          if (this.lyricsContainer) {
-            this.lyricsContainer.classList.add("not-focused");
-          }
-        },
-        { passive: true }
-      );
+      parentScrollElement.addEventListener("scroll", this._boundParentScrollHandler, { passive: true });
     }
 
-    scrollListeningElement.addEventListener(
-      "wheel",
-      (event) => {
-        event.preventDefault();
-        this.isProgrammaticScrolling = false;
-        if (this.lyricsContainer) {
-          this.lyricsContainer.classList.add(
-            "not-focused",
-            "user-scrolling",
-            "wheel-scrolling"
-          );
-          this.lyricsContainer.classList.remove("touch-scrolling");
-        }
-        const scrollAmount = event.deltaY;
-        this._handleUserScroll(scrollAmount);
-        clearTimeout(this.userScrollIdleTimer);
-        this.userScrollIdleTimer = setTimeout(() => {
-          if (this.lyricsContainer) {
-            this.lyricsContainer.classList.remove(
-              "user-scrolling",
-              "wheel-scrolling"
-            );
-          }
-        }, 200);
-      },
-      { passive: false }
-    );
-
-    scrollListeningElement.addEventListener(
-      "touchstart",
-      (event) => {
-        const touch = event.touches[0];
-        const now = performance.now();
-
-        if (this.touchState.momentum) {
-          cancelAnimationFrame(this.touchState.momentum);
-          this.touchState.momentum = null;
-        }
-
-        this.touchState.isActive = true;
-        this.touchState.startY = touch.clientY;
-        this.touchState.lastY = touch.clientY;
-        this.touchState.lastTime = now;
-        this.touchState.velocity = 0;
-        this.touchState.samples = [{ y: touch.clientY, time: now }];
-
-        this.isProgrammaticScrolling = false;
-        if (this.lyricsContainer) {
-          this.lyricsContainer.classList.add(
-            "not-focused",
-            "user-scrolling",
-            "touch-scrolling"
-          );
-          this.lyricsContainer.classList.remove("wheel-scrolling");
-        }
-        clearTimeout(this.userScrollIdleTimer);
-      },
-      { passive: true }
-    );
-
-    scrollListeningElement.addEventListener(
-      "touchmove",
-      (event) => {
-        if (!this.touchState.isActive) return;
-
-        event.preventDefault();
-        const touch = event.touches[0];
-        const now = performance.now();
-        const currentY = touch.clientY;
-        const deltaY = this.touchState.lastY - currentY;
-
-        this.touchState.lastY = currentY;
-
-        this.touchState.samples.push({ y: currentY, time: now });
-        if (this.touchState.samples.length > this.touchState.maxSamples) {
-          this.touchState.samples.shift();
-        }
-
-        // Apply immediate scroll with reduced sensitivity for smoother feel
-        this._handleUserScroll(deltaY * 0.8);
-      },
-      { passive: false }
-    );
-
-    scrollListeningElement.addEventListener(
-      "touchend",
-      (event) => {
-        if (!this.touchState.isActive) return;
-
-        this.touchState.isActive = false;
-
-        const now = performance.now();
-        const samples = this.touchState.samples;
-
-        if (samples.length >= 2) {
-          // Use samples from last 100ms for velocity calculation
-          const recentSamples = samples.filter(
-            (sample) => now - sample.time <= 100
-          );
-
-          if (recentSamples.length >= 2) {
-            const newest = recentSamples[recentSamples.length - 1];
-            const oldest = recentSamples[0];
-            const timeDelta = newest.time - oldest.time;
-            const yDelta = oldest.y - newest.y;
-
-            if (timeDelta > 0) {
-              this.touchState.velocity = yDelta / timeDelta;
-            }
-          }
-        }
-
-        const minVelocity = 0.1;
-        if (Math.abs(this.touchState.velocity) > minVelocity) {
-          this._startMomentumScroll();
-        } else {
-          this._endTouchScrolling();
-        }
-      },
-      { passive: true }
-    );
-
-    scrollListeningElement.addEventListener(
-      "touchcancel",
-      () => {
-        this.touchState.isActive = false;
-        if (this.touchState.momentum) {
-          cancelAnimationFrame(this.touchState.momentum);
-          this.touchState.momentum = null;
-        }
-        this._endTouchScrolling();
-      },
-      { passive: true }
-    );
+    scrollListeningElement.addEventListener("wheel", this._boundWheelHandler, { passive: false });
+    scrollListeningElement.addEventListener("touchstart", this._boundTouchStartHandler, { passive: true });
+    scrollListeningElement.addEventListener("touchmove", this._boundTouchMoveHandler, { passive: false });
+    scrollListeningElement.addEventListener("touchend", this._boundTouchEndHandler, { passive: true });
+    scrollListeningElement.addEventListener("touchcancel", this._boundTouchCancelHandler, { passive: true });
 
     this.scrollEventHandlerAttached = true;
+  }
+
+  /**
+   * Removes event listeners to prevent memory leaks on parent elements or container destruction.
+   */
+  _removeUserScrollListener() {
+    const container = this.lyricsContainer;
+
+    // Remove parent listener
+    if (container && container.parentElement && this._boundParentScrollHandler) {
+      container.parentElement.removeEventListener("scroll", this._boundParentScrollHandler);
+    }
+
+    // Remove container listeners
+    if (container) {
+      if (this._boundWheelHandler) container.removeEventListener("wheel", this._boundWheelHandler);
+      if (this._boundTouchStartHandler) container.removeEventListener("touchstart", this._boundTouchStartHandler);
+      if (this._boundTouchMoveHandler) container.removeEventListener("touchmove", this._boundTouchMoveHandler);
+      if (this._boundTouchEndHandler) container.removeEventListener("touchend", this._boundTouchEndHandler);
+      if (this._boundTouchCancelHandler) container.removeEventListener("touchcancel", this._boundTouchCancelHandler);
+    }
+
+    this.scrollEventHandlerAttached = false;
+    // Release references
+    this._boundParentScrollHandler = null;
+    this._boundWheelHandler = null;
+    this._boundTouchStartHandler = null;
+    this._boundTouchMoveHandler = null;
+    this._boundTouchEndHandler = null;
+    this._boundTouchCancelHandler = null;
   }
 
   /**
@@ -613,10 +609,10 @@ class LyricsPlusRenderer {
      */
     const calculatePreHighlightDelay = (syllable, font, currentDuration) => {
       const syllableWidthPx = this._getTextWidth(syllable.textContent, font);
-      
+
       const fontSizeMatch = font.match(/(\d+(?:\.\d+)?)px/);
       const fontSizePx = fontSizeMatch ? parseFloat(fontSizeMatch[1]) : 16;
-      
+
       const syllableWidthEm = syllableWidthPx / fontSizePx;
 
       const gradientWidth = 0.75;
@@ -658,9 +654,9 @@ class LyricsPlusRenderer {
         ? singerClassMap[line.element.singer] || "singer-left"
         : "singer-left";
       currentLine.classList.add(singerClass);
-      if (!currentLine.hasClickListener) {
-        currentLine.addEventListener("click", this._onLyricClick.bind(this));
-        currentLine.hasClickListener = true;
+      if (!currentLine._hasSharedListener) {
+        currentLine.addEventListener("click", this._boundLyricClickHandler);
+        currentLine._hasSharedListener = true;
       }
 
       const mainContainer = document.createElement("div");
@@ -671,7 +667,7 @@ class LyricsPlusRenderer {
 
       let isFirstSyllableInMainContainer = true;
       let isFirstSyllableInBackgroundContainer = true;
-      
+
       // Variables to hold the last syllable of the previous word to link across words
       let pendingSyllable = null;
       let pendingSyllableFont = null;
@@ -873,7 +869,7 @@ class LyricsPlusRenderer {
 
         const targetContainer = isCurrentWordBackground
           ? backgroundContainer ||
-            ((backgroundContainer = document.createElement("div")),
+          ((backgroundContainer = document.createElement("div")),
             (backgroundContainer.className = "background-vocal-container"),
             currentLine.appendChild(backgroundContainer))
           : mainContainer;
@@ -973,9 +969,9 @@ class LyricsPlusRenderer {
       lineDiv.classList.add(singerClass);
       if (this._isRTL(this._getDataText(line, true)))
         lineDiv.classList.add("rtl-text");
-      if (!lineDiv.hasClickListener) {
-        lineDiv.addEventListener("click", this._onLyricClick.bind(this));
-        lineDiv.hasClickListener = true;
+      if (!lineDiv._hasSharedListener) {
+        lineDiv.addEventListener("click", this._boundLyricClickHandler);
+        lineDiv._hasSharedListener = true;
       }
       const mainContainer = document.createElement("div");
       mainContainer.className = "main-vocal-container";
@@ -1316,9 +1312,9 @@ class LyricsPlusRenderer {
       gapLine.className = "lyrics-line lyrics-gap";
       gapLine.dataset.startTime = gapStart;
       gapLine.dataset.endTime = gapEnd;
-      if (!gapLine.hasClickListener) {
-        gapLine.addEventListener("click", this._onLyricClick.bind(this));
-        gapLine.hasClickListener = true;
+      if (!gapLine._hasSharedListener) {
+        gapLine.addEventListener("click", this._boundLyricClickHandler);
+        gapLine._hasSharedListener = true;
       }
       if (classesToInherit) {
         if (classesToInherit.includes("rtl-text"))
@@ -1684,7 +1680,7 @@ class LyricsPlusRenderer {
       (this.textWidthCanvas = document.createElement("canvas"));
     const context = canvas.getContext("2d");
     context.font = font;
-    context.fontKerning = "none"; 
+    context.fontKerning = "none";
     return context.measureText(text).width;
   }
 
@@ -2100,8 +2096,8 @@ class LyricsPlusRenderer {
             ? "start-wipe-rtl"
             : "start-wipe"
           : isRTL
-          ? "wipe-rtl"
-          : "wipe";
+            ? "wipe-rtl"
+            : "wipe";
 
         const existingAnimation =
           charAnimationsMap.get(span) || span.style.animation;
@@ -2139,8 +2135,8 @@ class LyricsPlusRenderer {
           ? "start-wipe-rtl"
           : "start-wipe"
         : isRTL
-        ? "wipe-rtl"
-        : "wipe";
+          ? "wipe-rtl"
+          : "wipe";
       const currentWipeAnimation = isGap ? "fade-gap" : wipeAnimation;
       const syllableAnimation = `${currentWipeAnimation} ${syllable._durationMs}ms linear forwards`;
       pendingStyleUpdates.push({
@@ -2466,49 +2462,59 @@ class LyricsPlusRenderer {
   }
 
   _createControlButtons() {
-    let buttonsWrapper = document.getElementById("lyrics-plus-buttons-wrapper");
-    if (!buttonsWrapper) {
-      buttonsWrapper = document.createElement("div");
-      buttonsWrapper.id = "lyrics-plus-buttons-wrapper";
+    // Wrapper Management
+    this.buttonsWrapper = document.getElementById("lyrics-plus-buttons-wrapper");
+    
+    if (!this.buttonsWrapper) {
+      this.buttonsWrapper = document.createElement("div");
+      this.buttonsWrapper.id = "lyrics-plus-buttons-wrapper";
       const originalLyricsSection = document.querySelector(
         this.uiConfig.patchParent
       );
       if (originalLyricsSection) {
-        originalLyricsSection.appendChild(buttonsWrapper);
+        originalLyricsSection.appendChild(this.buttonsWrapper);
       }
     }
 
+    // Translation Button Logic
     if (this.setCurrentDisplayModeAndRefetchFn) {
       if (!this.translationButton) {
         this.translationButton = document.createElement("button");
         this.translationButton.id = "lyrics-plus-translate-button";
-        buttonsWrapper.appendChild(this.translationButton);
+        this.buttonsWrapper.appendChild(this.translationButton);
         this._updateTranslationButtonText();
+
         this.translationButton.addEventListener("click", (event) => {
           event.stopPropagation();
-          this._createDropdownMenu(buttonsWrapper);
+          this._createDropdownMenu(this.buttonsWrapper);
           if (this.dropdownMenu) this.dropdownMenu.classList.toggle("hidden");
         });
-        document.addEventListener("click", (event) => {
-          if (
-            this.dropdownMenu &&
-            !this.dropdownMenu.classList.contains("hidden") &&
-            !this.dropdownMenu.contains(event.target) &&
-            event.target !== this.translationButton
-          ) {
-            this.dropdownMenu.classList.add("hidden");
-          }
-        });
+
+        if (!this._boundDocumentClickHandler) {
+            this._boundDocumentClickHandler = (event) => {
+                if (
+                  this.dropdownMenu &&
+                  !this.dropdownMenu.classList.contains("hidden") &&
+                  !this.dropdownMenu.contains(event.target) &&
+                  event.target !== this.translationButton
+                ) {
+                  this.dropdownMenu.classList.add("hidden");
+                }
+            };
+            document.addEventListener("click", this._boundDocumentClickHandler);
+        }
       }
     }
 
+    // Reload Button Logic
     if (!this.reloadButton) {
       this.reloadButton = document.createElement("button");
       this.reloadButton.id = "lyrics-plus-reload-button";
       this.reloadButton.innerHTML =
         '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#e3e3e3"><path d="M480-192q-120 0-204-84t-84-204q0-120 84-204t204-84q65 0 120.5 27t95.5 72v-99h72v240H528v-72h131q-29-44-76-70t-103-26q-90 0-153 63t-63 153q0 90 63 153t153 63q84 0 144-55.5T693-456h74q-9 112-91 188t-196 76Z"/></svg>';
       this.reloadButton.title = t("RefreshLyrics") || "Refresh Lyrics";
-      buttonsWrapper.appendChild(this.reloadButton);
+      this.buttonsWrapper.appendChild(this.reloadButton);
+
       this.reloadButton.addEventListener("click", () => {
         if (this.lastKnownSongInfo && this.fetchAndDisplayLyricsFn) {
           this.fetchAndDisplayLyricsFn(this.lastKnownSongInfo, true, true);
@@ -2642,96 +2648,105 @@ class LyricsPlusRenderer {
    * Cleans up the lyrics container and resets the state for the next song.
    */
   cleanupLyrics() {
-    // --- Animation Frame Cleanup ---
+    // Event Listener Cleanup
+    this._removeUserScrollListener();
+
+    // Animation Frame Cleanup
     if (this.lyricsAnimationFrameId) {
       cancelAnimationFrame(this.lyricsAnimationFrameId);
       this.lyricsAnimationFrameId = null;
     }
 
-    // --- Touch State Cleanup ---
+    // Cancel Debounced Resize Handler
+    if (this._debouncedResizeHandler && this._debouncedResizeHandler.cancel) {
+        this._debouncedResizeHandler.cancel();
+    }
+
+    // Touch State Cleanup
     if (this.touchState) {
       if (this.touchState.momentum) {
         cancelAnimationFrame(this.touchState.momentum);
-        this.touchState.momentum = null;
       }
-      this.touchState.isActive = false;
-      this.touchState.startY = 0;
-      this.touchState.lastY = 0;
-      this.touchState.velocity = 0;
-      this.touchState.lastTime = 0;
-      this.touchState.samples = [];
+      this.touchState = null;
     }
 
-    // --- Timer Cleanup ---
-    if (this.endProgrammaticScrollTimer)
-      clearTimeout(this.endProgrammaticScrollTimer);
+    // Timer Cleanup
+    if (this.endProgrammaticScrollTimer) clearTimeout(this.endProgrammaticScrollTimer);
     if (this.userScrollIdleTimer) clearTimeout(this.userScrollIdleTimer);
     if (this.userScrollRevertTimer) clearTimeout(this.userScrollRevertTimer);
+    
     this.endProgrammaticScrollTimer = null;
     this.userScrollIdleTimer = null;
     this.userScrollRevertTimer = null;
 
-    // --- Observer Cleanup ---
-    if (this.visibilityObserver) this.visibilityObserver.disconnect();
-    if (this.resizeObserver) this.resizeObserver.disconnect();
-    this.visibilityObserver = null;
-    this.resizeObserver = null;
-
-    // --- DOM Elements Cleanup ---
-    const container = this._getContainer();
-    if (container) {
-      if (this.cachedLyricsLines) {
-        this.cachedLyricsLines.forEach((line) => {
-          if (line && line._cachedSyllableElements) {
-            line._cachedSyllableElements = null;
-          }
-        });
-      }
-
-      if (this.cachedSyllables) {
-        this.cachedSyllables.forEach((syllable) => {
-          if (syllable) {
-            syllable._cachedCharSpans = null;
-            syllable.style.animation = "";
-            syllable.style.removeProperty("--pre-wipe-duration");
-            syllable.style.removeProperty("--pre-wipe-delay");
-          }
-        });
-      }
-
-      container.innerHTML = `<div class="loading-container"><span class="text-loading">${t("loading")}</span><div class="loading-loop-m3"></div></div>`;
-      container.classList.add("lyrics-plus-message");
-
-      const classesToRemove = [
-        "user-scrolling",
-        "wheel-scrolling",
-        "touch-scrolling",
-        "not-focused",
-        "lyrics-translated",
-        "lyrics-romanized",
-        "lyrics-both-modes",
-        "word-by-word-mode",
-        "line-by-line-mode",
-        "mixed-direction-lyrics",
-        "dual-side-lyrics",
-        "fullscreen",
-        "blur-inactive-enabled",
-        "use-song-palette-fullscreen",
-        "use-song-palette-all-modes",
-        "override-palette-color",
-        "hide-offscreen",
-        "romanized-big-mode",
-      ];
-      container.classList.remove(...classesToRemove);
-
-      container.style.removeProperty("--lyrics-scroll-offset");
-      container.style.removeProperty("--lyplus-override-pallete");
-      container.style.removeProperty("--lyplus-override-pallete-white");
-      container.style.removeProperty("--lyplus-song-pallete");
-      container.style.removeProperty("--lyplus-song-white-pallete");
+    // Observer Cleanup
+    if (this.visibilityObserver) {
+        this.visibilityObserver.disconnect();
+        this.visibilityObserver = null;
+    }
+    if (this.resizeObserver) {
+        this.resizeObserver.disconnect();
+        this.resizeObserver = null;
     }
 
-    // --- State Variables Reset ---
+    // Clean up Control Buttons
+    if (this.translationButton) {
+        const newBtn = this.translationButton.cloneNode(true);
+        if (this.translationButton.parentNode) this.translationButton.parentNode.replaceChild(newBtn, this.translationButton);
+        newBtn.remove();
+        this.translationButton = null;
+    }
+    if (this.reloadButton) {
+        const newBtn = this.reloadButton.cloneNode(true);
+        if (this.reloadButton.parentNode) this.reloadButton.parentNode.replaceChild(newBtn, this.reloadButton);
+        newBtn.remove();
+        this.reloadButton = null;
+    }
+    if (this.dropdownMenu) {
+        this.dropdownMenu.remove();
+        this.dropdownMenu = null;
+    }
+
+    // DOM & Cache Cleanup
+    const container = this._getContainer();
+    
+    if (this.cachedLyricsLines) {
+      for (let i = 0; i < this.cachedLyricsLines.length; i++) {
+        const line = this.cachedLyricsLines[i];
+        if (line) {
+          line.removeEventListener("click", this._boundLyricClickHandler);
+          line._cachedSyllableElements = null;
+          line._cachedCharSpans = null;
+          line._hasSharedListener = false;
+        }
+      }
+    }
+    
+    if (this.cachedSyllables) {
+        for (let i = 0; i < this.cachedSyllables.length; i++) {
+            const syl = this.cachedSyllables[i];
+            if (syl) {
+                syl._cachedCharSpans = null;
+                syl._nextSyllableInWord = null;
+                syl.style.animation = "";
+            }
+        }
+    }
+
+    if (container) {
+      container.innerHTML = `<div class="loading-container"><span class="text-loading">${t("loading")}</span><div class="loading-loop-m3"></div></div>`;
+      container.classList.add("lyrics-plus-message");
+      container.className = "lyrics-plus-integrated lyrics-plus-message blur-inactive-enabled";
+      container.style = ""; 
+    }
+
+    // Release Graphics Memory
+    if (this.textWidthCanvas) {
+        this.textWidthCanvas.width = 0;
+        this.textWidthCanvas.height = 0;
+        this.textWidthCanvas = null; 
+    }
+
     this.currentPrimaryActiveLine = null;
     this.lastPrimaryActiveLine = null;
     this.currentFullscreenFocusedLine = null;
@@ -2741,6 +2756,7 @@ class LyricsPlusRenderer {
     this.visibleLineIds.clear();
     this.cachedLyricsLines = [];
     this.cachedSyllables = [];
+    this.fontCache = {};
 
     this._cachedContainerRect = null;
     this._cachedVisibleLines = null;
@@ -2757,8 +2773,6 @@ class LyricsPlusRenderer {
     this.lastKnownSongInfo = null;
     this.fetchAndDisplayLyricsFn = null;
     this.setCurrentDisplayModeAndRefetchFn = null;
-
-    this.fontCache = {};
 
     this._playerElement = undefined;
     this._customCssStyleTag = null;
