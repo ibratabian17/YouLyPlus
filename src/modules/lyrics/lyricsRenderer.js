@@ -613,8 +613,11 @@ class LyricsPlusRenderer {
      */
     const calculatePreHighlightDelay = (syllable, font, currentDuration) => {
       const syllableWidthPx = this._getTextWidth(syllable.textContent, font);
-      const emWidthPx = this._getTextWidth("—", font);
-      const syllableWidthEm = syllableWidthPx / emWidthPx;
+      
+      const fontSizeMatch = font.match(/(\d+(?:\.\d+)?)px/);
+      const fontSizePx = fontSizeMatch ? parseFloat(fontSizeMatch[1]) : 16;
+      
+      const syllableWidthEm = syllableWidthPx / fontSizePx;
 
       const gradientWidth = 0.75;
       const gradientHalfWidth = gradientWidth / 2;
