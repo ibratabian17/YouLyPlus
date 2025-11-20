@@ -861,7 +861,7 @@ class LyricsPlusRenderer {
         });
 
         if (shouldEmphasize && wordSpan._cachedChars?.length > 0) {
-          const wordWidth = this._getTextWidth(wordSpan.textContent, referenceFont);
+          const wordWidth = this._getTextWidth(wordSpan.textContent.trim(), referenceFont);
           let cumulativeWidth = 0;
           const numChars = wordSpan._cachedChars.length;
           const wordLength = combinedText.trim().length;
@@ -888,7 +888,7 @@ class LyricsPlusRenderer {
             span.style.setProperty("--max-scale", charMaxScale.toFixed(3));
             span.style.setProperty("--shadow-intensity", charShadowIntensity.toFixed(3));
             span.style.setProperty("--translate-y-peak", charTranslateYPeak.toFixed(3));
-            const charWidth = this._getTextWidth(span.textContent, referenceFont);
+            const charWidth = this._getTextWidth(span.textContent.trim(), referenceFont);
             const position = (cumulativeWidth + charWidth / 2) / wordWidth;
             const horizontalOffset = (position - 0.5) * 2 * ((charMaxScale - 1.0) * 25);
             span.dataset.horizontalOffset = horizontalOffset;
