@@ -665,7 +665,7 @@ canvas#lyplus-webgl-canvas {
     left: 50%;
     min-width: 100vw;
     min-height: 100vh;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 1 / 1;
     transform: translate(-50%, -50%);
 }
 
