@@ -598,6 +598,8 @@ class LyricsPlusRenderer {
     elementPool,
     fragment
   ) {
+    // --- Helper Functions ---
+
     const getComputedFont = (element) => {
       if (!element) return "400 16px sans-serif";
       const cacheKey = element.tagName + (element.className || "");
@@ -608,60 +610,41 @@ class LyricsPlusRenderer {
       return font;
     };
 
-    /**
-     * Calculate pre-highlight delay based on exact wipe effect positioning.
-     * @param {HTMLElement} syllable - The current syllable element.
-     * @param {string} font - The computed font string.
-     * @param {number} currentDuration - Duration of current syllable in ms.
-     * @returns {number} Delay in milliseconds (negative for early start).
-     */
-    const calculatePreHighlightDelay = (syllable, font, currentDuration) => {
-      const syllableWidthPx = this._getTextWidth(syllable.textContent, font);
-
-      const fontSizeMatch = font.match(/(\d+(?:\.\d+)?)px/);
-      const fontSizePx = fontSizeMatch ? parseFloat(fontSizeMatch[1]) : 16;
-
-      const syllableWidthEm = syllableWidthPx / fontSizePx;
-
-      const gradientWidth = 0.75;
-      const gradientHalfWidth = gradientWidth / 2;
-      const initialGradientPosition = -gradientHalfWidth;
-      const finalGradientPosition = syllableWidthEm + gradientHalfWidth;
-      const totalAnimationDistance =
-        finalGradientPosition - initialGradientPosition;
-
-      const triggerPointFromTextEnd = gradientHalfWidth;
-
-      let triggerPosition;
-      if (syllableWidthEm <= gradientWidth) {
-        triggerPosition = -gradientHalfWidth * 0.5;
-      } else {
-        triggerPosition = syllableWidthEm - triggerPointFromTextEnd;
-      }
-
-      const distanceToTrigger = triggerPosition - initialGradientPosition;
-
-      let triggerTimingFraction = 0;
-      if (totalAnimationDistance > 0) {
-        triggerTimingFraction = distanceToTrigger / totalAnimationDistance;
-      }
-
-      const rawDelayMs = triggerTimingFraction * currentDuration;
-
-      return Math.round(rawDelayMs);
+    const getFontSizePx = (font) => {
+      const match = font.match(/(\d+(?:\.\d+)?)px/);
+      return match ? parseFloat(match[1]) : 16;
     };
 
+    const calculatePhysicsPreHighlightDelay = (syllable, font, currentDuration) => {
+      const textWidthPx = this._getTextWidth(syllable.textContent, font);
+      if (textWidthPx <= 0.1 || currentDuration <= 0) return { delay: 0, duration: 0 };
+
+      const fontSizePx = getFontSizePx(font);
+      const velocityPxPerMs = textWidthPx / currentDuration;
+      const gradientDistancePx = 0.375 * fontSizePx;
+      const gradientDurationMs = gradientDistancePx / velocityPxPerMs;
+
+      return {
+        delay: currentDuration - gradientDurationMs,
+        duration: gradientDurationMs
+      };
+    };
+
+    // --- Main Line Loop ---
+
     lyrics.data.forEach((line) => {
-      let currentLine =
-        elementPool.lines.pop() || document.createElement("div");
+      // 1. Line & Container Setup
+      let currentLine = elementPool.lines.pop() || document.createElement("div");
       currentLine.innerHTML = "";
       currentLine.className = "lyrics-line";
       currentLine.dataset.startTime = line.startTime;
       currentLine.dataset.endTime = line.endTime;
+
       const singerClass = line.element?.singer
         ? singerClassMap[line.element.singer] || "singer-left"
         : "singer-left";
       currentLine.classList.add(singerClass);
+
       if (!currentLine._hasSharedListener) {
         currentLine.addEventListener("click", this._boundLyricClickHandler);
         currentLine._hasSharedListener = true;
@@ -672,13 +655,172 @@ class LyricsPlusRenderer {
       currentLine.appendChild(mainContainer);
 
       let backgroundContainer = null;
-
-      let isFirstSyllableInMainContainer = true;
-      let isFirstSyllableInBackgroundContainer = true;
-
-      // Variables to hold the last syllable of the previous word to link across words
+      let isFirstSyllableInMain = true;
+      let isFirstSyllableInBg = true;
       let pendingSyllable = null;
       let pendingSyllableFont = null;
+
+      // --- Inner Logic Helpers ---
+
+      const linkSyllables = (prevSyllable, nextSyllable, font) => {
+        const physicsData = calculatePhysicsPreHighlightDelay(
+          prevSyllable,
+          font,
+          prevSyllable._durationMs
+        );
+        prevSyllable._nextSyllableInWord = nextSyllable;
+        prevSyllable._preHighlightDurationMs = physicsData.duration;
+        prevSyllable._preHighlightDelayMs = physicsData.delay;
+      };
+
+      const calculateEmphasisMetrics = (totalDuration, wordBufferLength, firstDuration) => {
+        const minDuration = 1000;
+        const maxDuration = 2000;
+        const easingPower = 2.5;
+
+        const progress = Math.min(1, Math.max(0, (totalDuration - minDuration) / (maxDuration - minDuration)));
+        const easedProgress = Math.pow(progress, easingPower);
+
+        let penaltyFactor = 1.0;
+        if (wordBufferLength > 1) {
+          const imbalanceRatio = firstDuration / totalDuration;
+          const penaltyThreshold = 0.25;
+          if (imbalanceRatio < penaltyThreshold) {
+            const minPenaltyFactor = 0.5;
+            const penaltyProgress = imbalanceRatio / penaltyThreshold;
+            penaltyFactor = minPenaltyFactor + (1.0 - minPenaltyFactor) * penaltyProgress;
+          }
+        }
+        return { easedProgress, penaltyFactor };
+      };
+
+      const createSyllableElement = (s, totalDuration, idx, isBg) => {
+        const sylSpan = elementPool.syllables.pop() || document.createElement("span");
+        sylSpan.innerHTML = "";
+        sylSpan.className = "lyrics-syllable";
+
+        // Dataset & Props
+        sylSpan.dataset.startTime = s.time;
+        sylSpan.dataset.duration = s.duration;
+        sylSpan.dataset.endTime = s.time + s.duration;
+        sylSpan.dataset.wordDuration = totalDuration;
+        sylSpan.dataset.syllableIndex = idx;
+        sylSpan._startTimeMs = s.time;
+        sylSpan._durationMs = s.duration;
+        sylSpan._endTimeMs = s.time + s.duration;
+        sylSpan._wordDurationMs = totalDuration;
+        sylSpan._isBackground = isBg;
+
+        // First-in-container Logic
+        if (isBg) {
+          if (isFirstSyllableInBg) {
+            sylSpan._isFirstInContainer = true;
+            isFirstSyllableInBg = false;
+          }
+        } else {
+          if (isFirstSyllableInMain) {
+            sylSpan._isFirstInContainer = true;
+            isFirstSyllableInMain = false;
+          }
+        }
+
+        if (this._isRTL(this._getDataText(s, true))) {
+          sylSpan.classList.add("rtl-text");
+        }
+
+        return sylSpan;
+      };
+
+      const renderCharWipes = (s, sylSpan, referenceFont, characterData) => {
+        const syllableText = this._getDataText(s);
+        const fontSizePx = getFontSizePx(referenceFont);
+        const chars = syllableText.split("");
+        const charWidths = chars.map(c => this._getTextWidth(c, referenceFont));
+        const totalSyllableWidth = charWidths.reduce((a, b) => a + b, 0);
+
+        const velocityPxPerMs = totalSyllableWidth / s.duration;
+        const gradientDurationMs = (0.375 * fontSizePx) / velocityPxPerMs;
+
+        let cumulativeCharWidth = 0;
+        const charSpans = [];
+
+        chars.forEach((char, i) => {
+          const charWidth = charWidths[i];
+          if (char === " ") {
+            sylSpan.appendChild(document.createTextNode(" "));
+          } else {
+            const charSpan = elementPool.chars.pop() || document.createElement("span");
+            charSpan.textContent = char;
+            charSpan.className = "char";
+
+            if (totalSyllableWidth > 0) {
+              const startPercent = cumulativeCharWidth / totalSyllableWidth;
+              const durationPercent = charWidth / totalSyllableWidth;
+
+              charSpan.dataset.wipeStart = startPercent.toFixed(4);
+              charSpan.dataset.wipeDuration = durationPercent.toFixed(4);
+              charSpan.dataset.preWipeArrival = (s.duration * startPercent).toFixed(2);
+              charSpan.dataset.preWipeDuration = gradientDurationMs.toFixed(2);
+            }
+
+            charSpan.dataset.syllableCharIndex = characterData.length;
+            characterData.push({ charSpan, syllableSpan: sylSpan, isBackground: s.isBackground });
+            charSpans.push(charSpan);
+            sylSpan.appendChild(charSpan);
+          }
+          cumulativeCharWidth += charWidth;
+        });
+
+        if (charSpans.length > 0) sylSpan._cachedCharSpans = charSpans;
+      };
+
+      const applyGrowthStyles = (wordSpan, referenceFont, combinedText, totalDuration, emphasisMetrics) => {
+        if (!wordSpan._cachedChars || wordSpan._cachedChars.length === 0) return;
+
+        const { easedProgress, penaltyFactor } = emphasisMetrics;
+        const wordWidth = this._getTextWidth(wordSpan.textContent.trim(), referenceFont);
+        const numChars = wordSpan._cachedChars.length;
+        const wordLength = combinedText.trim().length;
+
+        let maxDecayRate = 0;
+        const isLongWord = wordLength > 5;
+        const isShortDuration = totalDuration < 1500;
+        const hasUnbalancedSyllables = penaltyFactor < 0.95;
+
+        if (isLongWord || isShortDuration || hasUnbalancedSyllables) {
+          let decayStrength = 0;
+          if (isLongWord) decayStrength += Math.min((wordLength - 5) / 3, 1.0) * 0.4;
+          if (isShortDuration) decayStrength += Math.max(0, 1.0 - (totalDuration - 1000) / 500) * 0.4;
+          if (hasUnbalancedSyllables) decayStrength += Math.pow(1.0 - penaltyFactor, 0.7) * 1.2;
+          maxDecayRate = Math.min(decayStrength, 0.85);
+        }
+
+        let cumulativeWidth = 0;
+        wordSpan._cachedChars.forEach((span, index) => {
+          const positionInWord = numChars > 1 ? index / (numChars - 1) : 0;
+          const decayFactor = 1.0 - positionInWord * maxDecayRate;
+          const charProgress = easedProgress * penaltyFactor * decayFactor;
+
+          const baseGrowth = numChars <= 3 ? 0.07 : 0.05;
+          const charMaxScale = 1.0 + baseGrowth + charProgress * 0.1;
+          const charShadowIntensity = 0.4 + charProgress * 0.4;
+          const normalizedGrowth = (charMaxScale - 1.0) / 0.13;
+          const charTranslateYPeak = -normalizedGrowth * 2.5;
+
+          span.style.setProperty("--max-scale", charMaxScale.toFixed(3));
+          span.style.setProperty("--shadow-intensity", charShadowIntensity.toFixed(3));
+          span.style.setProperty("--translate-y-peak", charTranslateYPeak.toFixed(3));
+
+          const charWidth = this._getTextWidth(span.textContent.trim(), referenceFont);
+          const position = (cumulativeWidth + charWidth / 2) / wordWidth;
+          const horizontalOffset = (position - 0.5) * 2 * ((charMaxScale - 1.0) * 25);
+
+          span.dataset.horizontalOffset = horizontalOffset;
+          cumulativeWidth += charWidth;
+        });
+      };
+
+      // --- Core Render Function ---
 
       const renderWordSpan = (wordBuffer, shouldEmphasize) => {
         if (!wordBuffer.length) return;
@@ -686,238 +828,96 @@ class LyricsPlusRenderer {
         const currentWordStartTime = wordBuffer[0].time;
         const lastSyllable = wordBuffer[wordBuffer.length - 1];
         const currentWordEndTime = lastSyllable.time + lastSyllable.duration;
+        const totalDuration = currentWordEndTime - currentWordStartTime;
+        const combinedText = wordBuffer.map((s) => this._getDataText(s)).join("");
+        const isBgWord = wordBuffer[0].isBackground || false;
 
-        const wordSpan =
-          elementPool.syllables.pop() || document.createElement("span");
+        const wordSpan = elementPool.syllables.pop() || document.createElement("span");
         wordSpan.innerHTML = "";
         wordSpan.className = "lyrics-word";
-        let referenceFont = mainContainer.firstChild
-          ? getComputedFont(mainContainer.firstChild)
-          : "400 16px sans-serif";
-        const combinedText = wordBuffer.map((s) => this._getDataText(s)).join("");
-        const totalDuration = currentWordEndTime - currentWordStartTime;
-
-        let easedProgress = 0;
-        let penaltyFactor = 1.0;
-        if (shouldEmphasize) {
-          const minDuration = 1000;
-          const maxDuration = 2000;
-          const easingPower = 2.5;
-
-          const progress = Math.min(
-            1,
-            Math.max(
-              0,
-              (totalDuration - minDuration) / (maxDuration - minDuration)
-            )
-          );
-          easedProgress = Math.pow(progress, easingPower);
-
-          if (wordBuffer.length > 1) {
-            const firstSyllableDuration = wordBuffer[0].duration;
-            const imbalanceRatio = firstSyllableDuration / totalDuration;
-            const penaltyThreshold = 0.25;
-
-            if (imbalanceRatio < penaltyThreshold) {
-              const minPenaltyFactor = 0.5;
-              const penaltyProgress = imbalanceRatio / penaltyThreshold;
-              penaltyFactor =
-                minPenaltyFactor + (1.0 - minPenaltyFactor) * penaltyProgress;
-            }
-          }
-        }
-
         wordSpan.style.setProperty("--min-scale", 1.02);
 
-        let isCurrentWordBackground = wordBuffer[0].isBackground || false;
+        const referenceFont = mainContainer.firstChild
+          ? getComputedFont(mainContainer.firstChild)
+          : "400 16px sans-serif";
+
+        let emphasisMetrics = { easedProgress: 0, penaltyFactor: 1.0 };
+        if (shouldEmphasize) {
+          emphasisMetrics = calculateEmphasisMetrics(totalDuration, wordBuffer.length, wordBuffer[0].duration);
+          wordSpan.classList.add("growable");
+        }
+
         const characterData = [];
         const syllableElements = [];
 
-        wordBuffer.forEach((s, syllableIndex) => {
+        // Process Syllables
+        wordBuffer.forEach((s, idx) => {
           const wrap = document.createElement("span");
           wrap.className = "lyrics-syllable-wrap";
 
-          const sylSpan =
-            elementPool.syllables.pop() || document.createElement("span");
-          sylSpan.innerHTML = "";
-          sylSpan.className = "lyrics-syllable";
-          sylSpan.dataset.startTime = s.time;
-          sylSpan.dataset.duration = s.duration;
-          sylSpan.dataset.endTime = s.time + s.duration;
-          sylSpan.dataset.wordDuration = totalDuration;
-          sylSpan.dataset.syllableIndex = syllableIndex;
-          sylSpan._startTimeMs = s.time;
-          sylSpan._durationMs = s.duration;
-          sylSpan._endTimeMs = s.time + s.duration;
-          sylSpan._wordDurationMs = totalDuration;
-          sylSpan._isBackground = s.isBackground || false;
-
-          if (s.isBackground) {
-            if (isFirstSyllableInBackgroundContainer) {
-              sylSpan._isFirstInContainer = true;
-              isFirstSyllableInBackgroundContainer = false;
-            }
-          } else {
-            if (isFirstSyllableInMainContainer) {
-              sylSpan._isFirstInContainer = true;
-              isFirstSyllableInMainContainer = false;
-            }
-          }
-
-          if (this._isRTL(this._getDataText(s, true)))
-            sylSpan.classList.add("rtl-text");
-
-          const charSpansForSyllable = [];
+          const sylSpan = createSyllableElement(s, totalDuration, idx, s.isBackground || false);
 
           if (s.isBackground) {
             sylSpan.textContent = this._getDataText(s).replace(/[()]/g, "");
+          } else if (shouldEmphasize) {
+            renderCharWipes(s, sylSpan, referenceFont, characterData);
           } else {
-            if (shouldEmphasize) {
-              wordSpan.classList.add("growable");
-              const syllableText = this._getDataText(s);
-
-              const fontSizeMatch = referenceFont.match(/(\d+(?:\.\d+)?)px/);
-              const fontSizePx = fontSizeMatch ? parseFloat(fontSizeMatch[1]) : 16;
-
-              const chars = syllableText.split("");
-              const charWidths = chars.map(char => this._getTextWidth(char, referenceFont));
-              const totalSyllableWidth = charWidths.reduce((a, b) => a + b, 0);
-
-              const velocityPxPerMs = totalSyllableWidth / s.duration;
-
-              const gradientEdgeEm = 0.375;
-              const gradientEdgePx = gradientEdgeEm * fontSizePx;
-              const gradientDurationMs = gradientEdgePx / velocityPxPerMs;
-
-              let cumulativeCharWidth = 0;
-
-              chars.forEach((char, index) => {
-                const charWidth = charWidths[index];
-
-                if (char === " ") {
-                  sylSpan.appendChild(document.createTextNode(" "));
-                } else {
-                  const charSpan = elementPool.chars.pop() || document.createElement("span");
-                  charSpan.textContent = char;
-                  charSpan.className = "char";
-
-                  if (totalSyllableWidth > 0) {
-                    const startPercent = cumulativeCharWidth / totalSyllableWidth;
-                    const durationPercent = charWidth / totalSyllableWidth;
-
-                    charSpan.dataset.wipeStart = startPercent.toFixed(4);
-                    charSpan.dataset.wipeDuration = durationPercent.toFixed(4);
-                    const arrivalTimeMs = s.duration * startPercent;
-
-                    charSpan.dataset.preWipeArrival = arrivalTimeMs.toFixed(2);
-                    charSpan.dataset.preWipeDuration = gradientDurationMs.toFixed(2);
-                  }
-
-                  charSpan.dataset.syllableCharIndex = characterData.length;
-                  characterData.push({ charSpan, syllableSpan: sylSpan, isBackground: s.isBackground });
-                  charSpansForSyllable.push(charSpan);
-                  sylSpan.appendChild(charSpan);
-                }
-
-                cumulativeCharWidth += charWidth;
-              });
-            } else {
-              sylSpan.textContent = this._getDataText(s);
-            }
+            sylSpan.textContent = this._getDataText(s);
           }
-          if (charSpansForSyllable.length > 0) {
-            sylSpan._cachedCharSpans = charSpansForSyllable;
-          }
+
           wrap.appendChild(sylSpan);
           syllableElements.push(sylSpan);
           wordSpan.appendChild(wrap);
         });
 
-        // Handle pending syllable from previous word (cross-word linking)
-        if (pendingSyllable && syllableElements.length > 0 && pendingSyllable._isBackground === isCurrentWordBackground) {
-          const nextSyllable = syllableElements[0];
-          const currentDuration = pendingSyllable._durationMs;
-          const delayMs = calculatePreHighlightDelay(pendingSyllable, pendingSyllableFont, currentDuration) * 1.03;
-          pendingSyllable._nextSyllableInWord = nextSyllable;
-          //avoid bleeding lmao
-          pendingSyllable._preHighlightDurationMs = currentDuration - delayMs;
-          pendingSyllable._preHighlightDelayMs = delayMs;
-        }
-
         if (shouldEmphasize) {
           wordSpan._cachedChars = characterData.map((cd) => cd.charSpan);
         }
 
-        // Handle syllables within the same word (intra-word linking)
+        // Inter-word Linking (Previous Word -> Current Word)
+        if (pendingSyllable && syllableElements.length > 0 && pendingSyllable._isBackground === isBgWord) {
+          linkSyllables(pendingSyllable, syllableElements[0], pendingSyllableFont);
+        }
+
+        // Intra-word Linking (Syllable -> Syllable)
         syllableElements.forEach((syllable, index) => {
           if (index < syllableElements.length - 1) {
-            const nextSyllable = syllableElements[index + 1];
-            const currentDuration = syllable._durationMs;
-            const delayMs = calculatePreHighlightDelay(syllable, referenceFont, currentDuration);
-            syllable._nextSyllableInWord = nextSyllable;
-            syllable._preHighlightDurationMs = currentDuration - delayMs;
-            syllable._preHighlightDelayMs = delayMs;
+            linkSyllables(syllable, syllableElements[index + 1], referenceFont);
           }
         });
 
-        if (shouldEmphasize && wordSpan._cachedChars?.length > 0) {
-          const wordWidth = this._getTextWidth(wordSpan.textContent.trim(), referenceFont);
-          let cumulativeWidth = 0;
-          const numChars = wordSpan._cachedChars.length;
-          const wordLength = combinedText.trim().length;
-          let maxDecayRate = 0;
-          const isLongWord = wordLength > 5;
-          const isShortDuration = totalDuration < 1500;
-          const hasUnbalancedSyllables = penaltyFactor < 0.95;
-          if (isLongWord || isShortDuration || hasUnbalancedSyllables) {
-            let decayStrength = 0;
-            if (isLongWord) decayStrength += Math.min((wordLength - 5) / 3, 1.0) * 0.4;
-            if (isShortDuration) decayStrength += Math.max(0, 1.0 - (totalDuration - 1000) / 500) * 0.4;
-            if (hasUnbalancedSyllables) decayStrength += Math.pow(1.0 - penaltyFactor, 0.7) * 1.2;
-            maxDecayRate = Math.min(decayStrength, 0.85);
-          }
-          wordSpan._cachedChars.forEach((span, index) => {
-            const positionInWord = numChars > 1 ? index / (numChars - 1) : 0;
-            const decayFactor = 1.0 - positionInWord * maxDecayRate;
-            const charProgress = easedProgress * penaltyFactor * decayFactor;
-            const baseGrowth = numChars <= 3 ? 0.07 : 0.05;
-            const charMaxScale = 1.0 + baseGrowth + charProgress * 0.1;
-            const charShadowIntensity = 0.4 + charProgress * 0.4;
-            const normalizedGrowth = (charMaxScale - 1.0) / 0.13;
-            const charTranslateYPeak = -normalizedGrowth * 2.5;
-            span.style.setProperty("--max-scale", charMaxScale.toFixed(3));
-            span.style.setProperty("--shadow-intensity", charShadowIntensity.toFixed(3));
-            span.style.setProperty("--translate-y-peak", charTranslateYPeak.toFixed(3));
-            const charWidth = this._getTextWidth(span.textContent.trim(), referenceFont);
-            const position = (cumulativeWidth + charWidth / 2) / wordWidth;
-            const horizontalOffset = (position - 0.5) * 2 * ((charMaxScale - 1.0) * 25);
-            span.dataset.horizontalOffset = horizontalOffset;
-            cumulativeWidth += charWidth;
-          });
+        // Apply Styling
+        if (shouldEmphasize) {
+          applyGrowthStyles(wordSpan, referenceFont, combinedText, totalDuration, emphasisMetrics);
         }
 
-        const targetContainer = isCurrentWordBackground
+        // DOM Insertion
+        const targetContainer = isBgWord
           ? backgroundContainer ||
           ((backgroundContainer = document.createElement("div")),
             (backgroundContainer.className = "background-vocal-container"),
             currentLine.appendChild(backgroundContainer))
           : mainContainer;
+
         targetContainer.appendChild(wordSpan);
+
         const trailText = combinedText.match(/\s+$/);
-        if (trailText)
-          targetContainer.appendChild(document.createTextNode(trailText[0]));
+        if (trailText) targetContainer.appendChild(document.createTextNode(trailText[0]));
 
         pendingSyllable = syllableElements.length > 0 ? syllableElements[syllableElements.length - 1] : null;
         pendingSyllableFont = referenceFont;
       };
 
+      // --- Syllabus Processing ---
+
       if (line.syllabus && line.syllabus.length > 0) {
         const logicalWordGroups = [];
         let currentGroupBuffer = [];
-        line.syllabus.forEach((s, syllableIndex) => {
+
+        line.syllabus.forEach((s, idx) => {
           currentGroupBuffer.push(s);
           const syllableText = this._getDataText(s);
-          const nextSyllable = line.syllabus[syllableIndex + 1];
+          const nextSyllable = line.syllabus[idx + 1];
 
           const endsWithDelimiter =
             s.isLineEnding ||
@@ -948,10 +948,10 @@ class LyricsPlusRenderer {
             renderWordSpan(group, true);
           } else {
             let visualWordBuffer = [];
-            group.forEach((s, indexInGroup) => {
+            group.forEach((s, idxInGroup) => {
               visualWordBuffer.push(s);
               const syllableText = this._getDataText(s);
-              const isLastInGroup = indexInGroup === group.length - 1;
+              const isLastInGroup = idxInGroup === group.length - 1;
 
               if (syllableText.endsWith("-") || isLastInGroup) {
                 renderWordSpan(visualWordBuffer, false);
@@ -964,10 +964,11 @@ class LyricsPlusRenderer {
         mainContainer.textContent = line.text;
       }
 
-      if (this._isRTL(mainContainer.textContent))
+      // 3. Final Line Cleanup
+      if (this._isRTL(mainContainer.textContent)) {
         mainContainer.classList.add("rtl-text");
-      if (this._isRTL(mainContainer.textContent))
         currentLine.classList.add("rtl-text");
+      }
       fragment.appendChild(currentLine);
 
       this._renderTranslationContainer(currentLine, line, displayMode);
@@ -2115,11 +2116,10 @@ class LyricsPlusRenderer {
           const constantDuration = parseFloat(span.dataset.preWipeDuration) || 100;
 
           let animDelay = arrivalTime - constantDuration;
-          let animDuration = constantDuration;
 
-          if (animDuration > 0) {
+          if (constantDuration > 0) {
             animationParts.push(
-              `pre-wipe-char ${animDuration.toFixed(2)}ms linear ${animDelay.toFixed(2)}ms forwards`
+              `pre-wipe-char ${constantDuration}ms linear ${animDelay}ms forwards`
             );
           }
         }
@@ -2173,7 +2173,7 @@ class LyricsPlusRenderer {
 
       const nextCharSpan = nextSyllable._cachedCharSpans?.[0];
       if (nextCharSpan) {
-        const preWipeAnim = `pre-wipe-char ${preHighlightDuration}ms ${preHighlightDelay}ms forwards`;
+        const preWipeAnim = `pre-wipe-char ${preHighlightDuration}ms linear ${preHighlightDelay}ms forwards`;
         const existingAnimation =
           charAnimationsMap.get(nextCharSpan) ||
           nextCharSpan.style.animation ||
