@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouLy+",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Enhanced lyrics feature for YouTube Music with line-by-line and word-by-word sync",
   "permissions": ["activeTab", "storage", "scripting"],
   "host_permissions": ["*://*.music.youtube.com/*", "*://*.tidal.com/*"],
