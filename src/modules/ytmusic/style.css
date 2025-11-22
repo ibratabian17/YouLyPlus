@@ -194,7 +194,8 @@ div#lyrics-song-progressbar {
     }
 
     ytmusic-player-page:is(:not([video-mode]), [video-mode]:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) #player.ytmusic-player-page {
-        top: calc(45% - var(--ytmusic-nav-bar-height));
+        /*top: calc(45% - var(--ytmusic-nav-bar-height)); */
+        top: calc(50% - var(--ytmusic-nav-bar-height)); 
         left: 28%;
         width: 39rem;
         height: 39rem;
@@ -378,4 +379,5 @@ Lyrics+ without any visual bug*/
         opacity: .4;
         filter: brightness(1.8) contrast(0.6);
     }
+    
 }
