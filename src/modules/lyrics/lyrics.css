@@ -104,7 +104,7 @@
     cursor: pointer;
     transform-origin: left;
     transform: translateY(var(--lyrics-scroll-offset, 0px)) translateZ(1px);
-    transition: opacity 0.3s ease, transform 0.4s ease var(--lyrics-line-delay, 0ms), filter 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(.41,0,.12,.99) var(--lyrics-line-delay, 0ms), filter 0.3s ease;
     will-change: transform, filter, opacity;
     content-visibility: auto;
     contain-intrinsic-size: auto;
