@@ -874,17 +874,35 @@ class LyricsPlusRenderer {
           wordSpan._cachedChars = characterData.map((cd) => cd.charSpan);
         }
 
-        // Inter-word Linking (Previous Word -> Current Word)
-        if (pendingSyllable && syllableElements.length > 0 && pendingSyllable._isBackground === isBgWord) {
-          linkSyllables(pendingSyllable, syllableElements[0], pendingSyllableFont);
-        }
+        const hasText = (el) => el && el.textContent.trim().length > 0;
 
+        if (pendingSyllable && syllableElements.length > 0 && pendingSyllable._isBackground === isBgWord) {
+          const firstVisibleSyllable = syllableElements.find(hasText);
+          if (firstVisibleSyllable) {
+            linkSyllables(pendingSyllable, firstVisibleSyllable, pendingSyllableFont);
+          }
+        }
+   
         // Intra-word Linking (Syllable -> Syllable)
         syllableElements.forEach((syllable, index) => {
           if (index < syllableElements.length - 1) {
-            linkSyllables(syllable, syllableElements[index + 1], referenceFont);
+            let nextIndex = index + 1;
+            let nextSyllable = syllableElements[nextIndex];
+
+            while (nextSyllable && !hasText(nextSyllable) && nextIndex < syllableElements.length - 1) {
+              nextIndex++;
+              nextSyllable = syllableElements[nextIndex];
+            }
+
+            if (nextSyllable && hasText(nextSyllable)) {
+              linkSyllables(syllable, nextSyllable, referenceFont);
+            }
           }
         });
+
+        const lastVisible = [...syllableElements].reverse().find(hasText);
+        pendingSyllable = lastVisible || (syllableElements.length > 0 ? syllableElements[syllableElements.length - 1] : null);
+        pendingSyllableFont = referenceFont;
 
         // Apply Styling
         if (shouldEmphasize) {
