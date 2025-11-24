@@ -23,6 +23,7 @@
     --lyplus-dropdown-option-padding: 8px 12px;
 
     --lyplus-font-size-base: 25px;
+    --lyplus-font-size-base-grow: 25;
     --lyplus-font-size-subtext: 0.6em;
     --lyplus-font-size-metadata: 1.6em;
     --lyplus-font-size-provider: 1.5em;
@@ -106,7 +107,7 @@
     transition: opacity 0.3s ease, transform 0.4s ease var(--lyrics-line-delay, 0ms), filter 0.3s ease;
     will-change: transform, filter, opacity;
     content-visibility: auto;
-    contain-intrinsic-size: 100% 3em;
+    contain-intrinsic-size: auto;
     text-rendering: optimizeLegibility;
     white-space: pre-wrap;
     overflow-wrap: break-word;
@@ -842,7 +843,7 @@ canvas#lyplus-webgl-canvas {
 
     25%,
     30% {
-        transform: matrix3d(var(--max-scale), 0, 0, 0, 0, var(--max-scale), 0, 0, 0, 0, 1, 0, var(--char-offset-x, 0), var(--translate-y-peak, -2%), 0, 1);
+        transform: matrix3d(calc(var(--max-scale) * calc(var(--lyplus-font-size-base-grow) / 25)), 0, 0, 0, 0, calc(var(--max-scale) * calc(var(--lyplus-font-size-base-grow) / 25)), 0, 0, 0, 0, 1, 0, calc(var(--char-offset-x) * calc(var(--lyplus-font-size-base-grow) / 25)), var(--translate-y-peak, -2%), 0, 1);
         filter: drop-shadow(0 0 0.1em rgba(255, 255, 255, var(--shadow-intensity)));
     }
 

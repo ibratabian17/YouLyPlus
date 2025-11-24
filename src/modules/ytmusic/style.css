@@ -41,6 +41,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyri
 /* Modern mobile layout font size */
 ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyrics-line {
     font-size: 34px;
+    --lyplus-font-size-base-grow: 34;
 }
 
 
