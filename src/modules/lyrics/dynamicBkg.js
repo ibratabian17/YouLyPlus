@@ -53,21 +53,21 @@ let blurDimensions = { width: 0, height: 0 };
 let canvasDimensions = { width: 0, height: 0 };
 
 const BLUR_DOWNSAMPLE = 1; // The factor by which to reduce the canvas resolution for the blur pass.
-const BLUR_RADIUS = 13; // Controls the radius/intensity of the blur.
+const BLUR_RADIUS = 6; // Controls the radius/intensity of the blur.
 
 // Palette Constants
 const MASTER_PALETTE_TEX_WIDTH = 8;
 const MASTER_PALETTE_TEX_HEIGHT = 5;
 const MASTER_PALETTE_SIZE = MASTER_PALETTE_TEX_WIDTH * MASTER_PALETTE_TEX_HEIGHT;
 
-const DISPLAY_GRID_WIDTH = 8;
-const DISPLAY_GRID_HEIGHT = 5;
-const TOTAL_DISPLAY_CELLS = DISPLAY_GRID_WIDTH * DISPLAY_GRID_HEIGHT;
-
-const STRETCHED_GRID_WIDTH = 256;
-const STRETCHED_GRID_HEIGHT = 256;
+const STRETCHED_GRID_WIDTH = 128;
+const STRETCHED_GRID_HEIGHT = 128;
 
 let currentTargetMasterArtworkPalette = [];
+
+const TARGET_FPS = 30;
+const FRAME_INTERVAL = 1000 / TARGET_FPS;
+let lastDrawTime = 0;
 
 // Animation & rotation
 const ROTATION_SPEEDS = [0.10, 0.18, 0.32]; // radians per second for each layer
@@ -100,8 +100,6 @@ let lastAppliedArtworkIdentifier = null;
 let artworkCheckTimeoutId = null;
 const ARTWORK_RECHECK_DELAY = 300;
 const NO_ARTWORK_IDENTIFIER = 'LYPLUS_NO_ARTWORK';
-const OVERSAMPLE_GRID_WIDTH = 24;
-const OVERSAMPLE_GRID_HEIGHT = 16;
 
 // --- Shader Sources ---
 
@@ -154,43 +152,48 @@ const fragmentShaderSource = `
 
 const blurFragmentShaderSource = `
     #ifdef GL_ES
-    precision mediump float;
+    precision highp float;
     #endif
+
     varying vec2 v_uv;
     uniform sampler2D u_image;
     uniform vec2 u_resolution;
     uniform vec2 u_direction;
     uniform float u_blurRadius;
 
-    const int SAMPLES = 44;
-    const int HALF = (SAMPLES - 1) / 2;
+    const int SAMPLES = 40;
+    const int HALF = SAMPLES / 2;
 
-    // gaussian function
-    float gaussian(float x, float sigma) {
-        return exp(-0.5 * (x * x) / (sigma * sigma));
+    float interleavedGradientNoise(vec2 uv) {
+        vec3 magic = vec3(0.06711056, 0.00583715, 52.9829189);
+        return fract(magic.z * fract(dot(uv, magic.xy)));
     }
 
     void main() {
         vec2 texelSize = 1.0 / u_resolution;
+        
+        vec2 step = u_direction * texelSize * (u_blurRadius * 0.3);
 
-        // avoid sigma 0
-        float sigma = max(0.0001, u_blurRadius);
-        vec2 step = u_direction * texelSize * (u_blurRadius * 0.25);
+        vec3 color = vec3(0.0);
+        float totalWeight = 0.0;
 
-        vec3 result = vec3(0.0);
-        float wsum = 0.0;
+        float sigma = float(HALF) * 0.45; 
+        float k = 2.0 * sigma * sigma;
 
         for (int i = -HALF; i <= HALF; ++i) {
-            float fi = float(i);
-            vec2 off = step * fi;
-            float w = gaussian(fi, sigma);
-            result += texture2D(u_image, v_uv + off).rgb * w;
-            wsum += w;
+            float f = float(i);
+            float w = exp(-(f * f) / k);
+            
+            color += texture2D(u_image, v_uv + (step * f)).rgb * w;
+            totalWeight += w;
         }
 
-        result /= wsum;
+        vec3 finalColor = color / totalWeight;
 
-        gl_FragColor = vec4(result, 1.0);
+        float noise = interleavedGradientNoise(gl_FragCoord.xy);
+        finalColor += (noise - 0.5) / 255.0;
+
+        gl_FragColor = vec4(finalColor, 1.0);
     }
 `;
 
@@ -243,7 +246,7 @@ function LYPLUS_setupBlurEffect() {
     (document.querySelector('#layout') || document.body).prepend(blurContainer);
 
     try {
-        const ctxAttribs = { antialias: false, depth: false, stencil: false, preserveDrawingBuffer: false };
+        const ctxAttribs = { antialias: false, depth: false, stencil: false, preserveDrawingBuffer: false, alpha: false };
         gl = webglCanvas.getContext('webgl', ctxAttribs) || webglCanvas.getContext('experimental-webgl', ctxAttribs);
     } catch (e) { console.error("LYPLUS: WebGL context creation failed.", e); }
     if (!gl) { console.error("LYPLUS: WebGL not supported!"); return null; }
@@ -338,8 +341,8 @@ function LYPLUS_setupBlurEffect() {
 function handleResize() {
     if (!gl || !webglCanvas) return;
 
-    const displayWidth = 512;
-    const displayHeight = 512;
+    const displayWidth = 256; 
+    const displayHeight = 256;
 
     if (displayWidth === canvasDimensions.width && displayHeight === canvasDimensions.height) {
         return false;
@@ -642,8 +645,14 @@ function animateWebGLBackground() {
         globalAnimationId = null;
         return;
     }
-
     const now = performance.now();
+    const elapsed = now - lastDrawTime;
+    
+    if (elapsed < FRAME_INTERVAL) {
+        globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+        return;
+    }
+
     const deltaTime = (now - lastFrameTime) / 1000.0;
     lastFrameTime = now;
 
