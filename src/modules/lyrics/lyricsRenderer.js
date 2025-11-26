@@ -675,8 +675,8 @@ class LyricsPlusRenderer {
 
       const calculateEmphasisMetrics = (totalDuration, wordBufferLength, firstDuration) => {
         const minDuration = 1000;
-        const maxDuration = 2000;
-        const easingPower = 2.5;
+        const maxDuration = 5000;
+        const easingPower = 3;
 
         const progress = Math.min(1, Math.max(0, (totalDuration - minDuration) / (maxDuration - minDuration)));
         const easedProgress = Math.pow(progress, easingPower);
