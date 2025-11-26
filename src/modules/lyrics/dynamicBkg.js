@@ -84,7 +84,7 @@ const BASE_LAYER_POSITIONS = LAYER_POSITIONS.map(p => ({ x: p.x, y: p.y }));
 let currentLayerPositions = BASE_LAYER_POSITIONS.map(p => ({ x: p.x, y: p.y }));
 let perimeterOffsets = null;
 const PERIMETER_SPEEDS = [0.09, 0.012, 0.02];
-const PERIMETER_DIRECTION = [1, 1, 1];
+const PERIMETER_DIRECTION = [-1, 1, 1];
 
 // Transition
 const ARTWORK_TRANSITION_SPEED = 0.02;
