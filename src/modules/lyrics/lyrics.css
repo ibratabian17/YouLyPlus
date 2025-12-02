@@ -284,7 +284,7 @@
     animation-name: pre-wipe-universal-rtl;
 }
 
-.lyrics-syllable-wrap {
+.lyrics-syllable-wrap:has(.lyrics-syllable.transliteration) {
   display: inline-flex;
   flex-direction: column;
   align-items: start;
@@ -293,6 +293,11 @@
 .lyrics-syllable.transliteration  {
     font-size: var(--lyplus-font-size-subtext);
     white-space: pre-wrap;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 .lyrics-word:has(.transliteration) .lyrics-syllable:not(.transliteration) {
     line-height: 1.5em;
