@@ -221,7 +221,6 @@
     color: transparent;
     background-color: var(--lyplus-text-secondary);
     white-space: normal;
-    font-kerning: none;
     font-variant-ligatures: none;
     font-feature-settings: "liga" 0;
     background-clip: text;
@@ -312,7 +311,6 @@
     display: inline-block;
     background-color: var(--lyplus-text-secondary);
     white-space: break-spaces;
-    font-kerning: none;
     font-variant-ligatures: none;
     font-feature-settings: "liga" 0;
     background-clip: text;
