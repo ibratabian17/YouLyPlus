@@ -30,11 +30,8 @@
     --lyplus-font-size-dropdown-option: 13px;
 
     --lyplus-text-primary: var(--lyplus-lyrics-pallete);
-    --lyplus-text-secondary: #ffffff85;
-    --lyplus-text-tertiary: #ffffff7a;
-    --lyplus-text-inactive: #ffffff31;
+    --lyplus-text-secondary: #ffffff7e;
     --lyplus-text-button: rgba(255, 255, 255, 0.87);
-    --lyplus-text-translation-active: #ffffffa4;
 
     --lyplus-blur-amount: 0.07em;
     --lyplus-blur-amount-near: 0.035em;
@@ -594,10 +591,6 @@ span.lyrics-source-provider {
     -moz-user-select: none;
     -ms-user-select: none;
     transition: opacity 0.3s ease, color 0.3s;
-}
-
-.lyrics-line.active .lyrics-romanization-container {
-    color: var(--lyplus-text-tertiary);
 }
 
 .lyrics-romanization-container {
