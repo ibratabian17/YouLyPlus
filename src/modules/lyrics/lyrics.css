@@ -127,6 +127,8 @@
 @media (hover: hover) and (pointer: fine) {
     .lyrics-line:hover {
         background: #ffffff21;
+    }
+    .lyrics-line {
         border-radius: var(--lyplus-border-radius-base);
     }
 }
@@ -223,7 +225,7 @@
     font-feature-settings: "liga" 0;
     background-clip: text;
     -webkit-background-clip: text;
-    transition: color 0.7s, background-color 0.7s;
+    transition: color 0.7s, background-color 0.7s, transform 0.7s ease;
 }
 
 /* --- Syllable States (Finished, Highlight, etc.) --- */
