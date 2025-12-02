@@ -129,11 +129,11 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
 }
 
 #lyrics-song-artist {
-    font-size: 1.7rem!important;
-    font-weight: 700!important;
-    color: #ffffffa3!important;
-    margin: 0!important;
-    line-height: 1.1!important;
+    font-size: 1.7rem !important;
+    font-weight: 700 !important;
+    color: #ffffffa3 !important;
+    margin: 0 !important;
+    line-height: 1.1 !important;
 }
 
 .progress-container svg {
@@ -196,16 +196,16 @@ div#lyrics-song-progressbar {
 
     ytmusic-player-page:is(:not([video-mode]), [video-mode]:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) #player.ytmusic-player-page {
         /*top: calc(45% - var(--ytmusic-nav-bar-height)); */
-        top: calc(50% - var(--ytmusic-nav-bar-height)); 
+        top: calc(50% - var(--ytmusic-nav-bar-height));
         left: 28%;
         width: 39rem;
         height: 39rem;
         transform: translate(-60%, -50%);
         overflow: visible;
-        background: none!important;
+        background: none !important;
     }
 
-    ytmusic-player-page:is(:not([video-mode]), [video-mode]:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) #song-image img{
+    ytmusic-player-page:is(:not([video-mode]), [video-mode]:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) #song-image img {
         border: 1px solid #afafaf2c;
         overflow: hidden;
         border-radius: 2em;
@@ -246,7 +246,7 @@ div#lyrics-song-progressbar {
     ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #side-panel .lyrics-line {
         margin-bottom: .5rem;
         font-size: 4.5rem;
-    --lyplus-font-size-base-grow: 25;
+        --lyplus-font-size-base-grow: 25;
     }
 
     ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] .lyrics-line:not(.active) .main-vocal-container {
@@ -365,21 +365,42 @@ Lyrics+ without any visual bug*/
         background: transparent !important;
     }
 
-    body:has(#ThemeSong-MainContainer #DynamicLight) ytmusic-player-page:not([player-fullscreened]) #lyrics-plus-container,
-    body:has(#ThemeSong-MainContainer #StaticLight) ytmusic-player-page:not([player-fullscreened]) #lyrics-plus-container {
+    body:has(#ThemeSong-MainContainer #DynamicLight) #lyrics-plus-container,
+    body:has(#ThemeSong-MainContainer #StaticLight) #lyrics-plus-container {
         --lyplus-lyrics-pallete: var(--ts-palette-darkmuted-hex, #111) !important;
         --lyplus-text-secondary: #1116;
         --lyplus-text-tertiary: #ffffff7a;
         --lyplus-text-inactive: #ffffff31;
     }
 
-    body:has(#ThemeSong-MainContainer #DynamicLight) #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container::after {
+    body:has(#ThemeSong-MainContainer #DynamicLight) #lyrics-plus-translate-button svg,
+    body:has(#ThemeSong-MainContainer #StaticLight) #lyrics-plus-translate-button svg,
+    body:has(#ThemeSong-MainContainer #DynamicLight) #lyrics-plus-reload-button svg,
+    body:has(#ThemeSong-MainContainer #StaticLight) #lyrics-plus-reload-button svg {
+        fill: #212121;
+    }
+
+
+    body:has(#ThemeSong-MainContainer #DynamicLight) .lyplus-blur-container::after,
+    body:has(#ThemeSong-MainContainer #StaticLight) .lyplus-blur-container::after {
         backdrop-filter: saturate(1.2);
     }
 
-    body:has(#ThemeSong-MainContainer #DynamicLight) #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container canvas {
+    body:has(#ThemeSong-MainContainer #DynamicLight) .lyplus-blur-container canvas,
+    body:has(#ThemeSong-MainContainer #StaticLight) .lyplus-blur-container canvas {
         opacity: .4;
         filter: brightness(1.8) contrast(0.6);
     }
-    
+
+    #song-image #img {
+        height: 100% !important;
+        width: 100% !important;
+    }
+
+    #song-image {
+        background: none !important;
+        box-shadow: 0 0 0 black !important;
+        border: 0 solid black !important;
+    }
+
 }

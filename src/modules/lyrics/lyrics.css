@@ -29,7 +29,7 @@
     --lyplus-font-size-button: 18px;
     --lyplus-font-size-dropdown-option: 13px;
 
-    --lyplus-text-primary: #fff;
+    --lyplus-text-primary: var(--lyplus-lyrics-pallete);
     --lyplus-text-secondary: #ffffff85;
     --lyplus-text-tertiary: #ffffff7a;
     --lyplus-text-inactive: #ffffff31;
@@ -109,12 +109,13 @@
     text-rendering: optimizeLegibility;
     white-space: pre-wrap;
     overflow-wrap: break-word;
+    mix-blend-mode: lighten;
 }
 
 /* --- Line States & Modifiers --- */
 .lyrics-line.active {
     opacity: 1;
-    color: var(--lyplus-lyrics-pallete, var(--lyplus-text-primary));
+    color: var(--lyplus-text-primary, var(--lyplus-text-primary));
     will-change: transform, opacity;
 }
 
@@ -230,7 +231,7 @@
 
 /* --- Syllable States (Finished, Highlight, etc.) --- */
 .lyrics-line .lyrics-syllable.finished {
-    background-color: var(--lyplus-lyrics-pallete, var(--lyplus-text-primary));
+    background-color: var(--lyplus-text-primary, var(--lyplus-text-primary));
 }
 
 .lyrics-line.active .lyrics-syllable.finished {
@@ -250,7 +251,7 @@
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.pre-highlight {
     background-repeat: no-repeat;
-    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-lyrics-pallete, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
+    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-text-primary, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-text-primary, #fff) 100%, #0000 100%);
     background-size: 0.5em 100%, 0% 100%;
     background-position: -0.5em 0%, -0.25em 0%;
 }
@@ -258,7 +259,7 @@
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.rtl-text,
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.pre-highlight.rtl-text {
     direction: rtl;
-    background-image: linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
+    background-image: linear-gradient(-90deg, var(--lyplus-text-primary, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--lyplus-text-primary, #fff) 100%, #0000 100%);
     background-position: calc(100% + 0.5em) 0%, right;
 }
 
@@ -320,11 +321,11 @@
 
 .lyrics-line .lyrics-syllable.finished span.char {
     transition: color 0.18s, background-color 0.18s;
-    background-color: var(--lyplus-lyrics-pallete, var(--lyplus-text-primary));
+    background-color: var(--lyplus-text-primary, var(--lyplus-text-primary));
 }
 
 .lyrics-line.active .lyrics-syllable span.char {
-    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-lyrics-pallete, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
+    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-text-primary, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-text-primary, #fff) 100%, #0000 100%);
     background-clip: text;
     -webkit-background-clip: text;
     background-size: 0.5em 100%, 0% 100%;
@@ -340,12 +341,12 @@
 }
 
 .lyrics-line.active .lyrics-syllable span.char.highlight {
-    background-image: linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
+    background-image: linear-gradient(-90deg, var(--lyplus-text-primary, #fff) 0%, #0000 100%), linear-gradient(-90deg, var(--lyplus-text-primary, #fff) 100%, #0000 100%);
     background-position: calc(100% + 0.5em) 0%, calc(100% + 0.25em) 0%;
 }
 
 .lyrics-line.active .lyrics-syllable.pre-highlight span.char {
-    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-lyrics-pallete, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-lyrics-pallete, #fff) 100%, #0000 100%);
+    background-image: linear-gradient(90deg, #ffffff00 0%, var(--lyplus-text-primary, #fff) 50%, #0000 100%), linear-gradient(90deg, var(--lyplus-text-primary, #fff) 100%, #0000 100%);
     background-size: 0.5em 100%, 0% 100%;
     background-position: -0.5em 0%, -0.25em 0%;
 }
@@ -389,14 +390,14 @@
     margin: 0 var(--lyplus-gap-dot-margin);
     overflow: hidden;
     border-radius: 1em;
-    background-color: rgba(255, 255, 255, 0.36);
+    background-color: var(--lyplus-text-secondary);
     background-clip: unset;
 }
 
 .lyrics-line.lyrics-gap.active .lyrics-syllable.highlight,
 .lyrics-line.lyrics-gap.active .lyrics-syllable.finished,
 .lyrics-line.lyrics-gap:not(.active) .lyrics-syllable {
-    background-color: var(--lyplus-lyrics-pallete);
+    background-color: var(--lyplus-text-primary);
 }
 
 .lyrics-line.lyrics-gap.active .lyrics-syllable.finished {
@@ -422,16 +423,16 @@
 span.lyrics-song-writters {
     display: block;
     margin-top: var(--lyplus-padding-base);
-    color: var(--lyplus-text-tertiary);
     font-size: var(--lyplus-font-size-metadata);
+    opacity: 0.6;
 }
 
 span.lyrics-source-provider {
     display: block;
     height: 150%;
     margin-bottom: var(--lyplus-padding-base);
-    color: var(--lyplus-text-inactive);
     font-size: var(--lyplus-font-size-provider);
+    opacity: 0.5;
 }
 
 .lyrics-plus-empty {
@@ -482,13 +483,14 @@ span.lyrics-source-provider {
 
 
 #lyrics-plus-container .loading-loop-m3 {
-    background-image: url(../../assets/loading.gif);
+    mask-image: url(../../assets/loading.gif);
     position: relative;
     display: block;
     height: 80px;
     width: 80px;
     margin: 10px;
-    background-size: contain;
+    mask-size: contain;
+    background-color: var(--yt-spec-text-primary, var(--lyplus-text-primary));
     animation: fadeInUp 0.5s ease;
 }
 
@@ -522,7 +524,7 @@ span.lyrics-source-provider {
     height: 36px;
     border: none;
     border-radius: 20%;
-    color: rgba(255, 255, 255, 0.87);
+    fill: rgba(255, 255, 255, 0.87);
     background-color: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(6px);
     font-size: 18px;
@@ -586,17 +588,12 @@ span.lyrics-source-provider {
     opacity: 0.8;
     font-size: var(--lyplus-font-size-subtext);
     overflow-wrap: break-word;
-    color: var(--lyplus-text-tertiary);
     pointer-events: none;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    transition: opacity 0.3s ease;
-}
-
-.lyrics-line.active .lyrics-translation-container {
-    color: var(--lyplus-text-translation-active);
+    transition: opacity 0.3s ease, color 0.3s;
 }
 
 .lyrics-line.active .lyrics-romanization-container {
@@ -612,6 +609,10 @@ span.lyrics-source-provider {
 }
 .lyrics-romanization-container .lyrics-syllable{
     white-space: pre-wrap;
+}
+
+.lyrics-translation-container  {
+    opacity: 0.5;
 }
 
 /* ==========================================================================
@@ -875,10 +876,10 @@ canvas#lyplus-webgl-canvas {
 
 @keyframes fade-gap {
     from {
-        background-color: rgba(255, 255, 255, 0.36);
+        background-color: var(--lyplus-text-secondary);
     }
 
     to {
-        background-color: var(--lyplus-lyrics-pallete);
+        background-color: var(--lyplus-text-primary);
     }
 }
