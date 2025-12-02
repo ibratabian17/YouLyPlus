@@ -5,8 +5,6 @@
 /* --- Base Variables & Palette --- */
 #lyrics-plus-container {
     --lyplus-lyrics-pallete: #ffffff;
-    --lyplus-song-white-pallete: #ffffff85;
-    --lyplus-lyrics-pallete: #fff;
 
     --lyplus-padding-base: 1em;
     --lyplus-padding-line: 10px;
@@ -220,7 +218,8 @@
 
 .lyrics-line .lyrics-syllable {
     display: inline-block;
-    color: var(--lyplus-text-secondary);
+    color: transparent;
+    background-color: var(--lyplus-text-secondary);
     white-space: normal;
     font-kerning: none;
     font-variant-ligatures: none;
@@ -300,20 +299,24 @@
 }
 
 /* ===== CHARACTER-LEVEL ANIMATION ===== */
+.lyrics-line .lyrics-syllable:has(span.char){
+    background-color: transparent;
+    color: transparent;
+}
 .lyrics-line .lyrics-syllable span.char {
     display: inline-block;
-    color: var(--lyplus-text-secondary);
+    background-color: var(--lyplus-text-secondary);
     white-space: break-spaces;
     font-kerning: none;
     font-variant-ligatures: none;
     font-feature-settings: "liga" 0;
     background-clip: text;
     -webkit-background-clip: text;
-    transition: color 0.18s, background-color 0.18s;
+    transition: color 0.7s, background-color 0.7s;
 }
 
 .lyrics-line .lyrics-syllable.finished span.char {
-    transition: none;
+    transition: color 0.18s, background-color 0.18s;
     background-color: var(--lyplus-lyrics-pallete, var(--lyplus-text-primary));
 }
 
