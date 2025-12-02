@@ -124,6 +124,10 @@
     direction: rtl;
 }
 
+.lyrics-line::selection {
+  color: rgb(255, 255, 255);
+}
+
 @media (hover: hover) and (pointer: fine) {
     .lyrics-line:hover {
         background: #ffffff21;
