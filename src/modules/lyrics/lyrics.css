@@ -109,6 +109,16 @@
     mix-blend-mode: lighten;
 }
 
+.line-by-line-mode .lyrics-line:not(.lyrics-gap) .main-vocal-container {
+    color: transparent;
+    background-clip: text;
+    background-color: var(--lyplus-text-secondary);
+}
+.line-by-line-mode .lyrics-line:not(.lyrics-gap).active .main-vocal-container {
+    opacity: 1;
+    background-color: var(--lyplus-text-primary, var(--lyplus-text-primary));
+}
+
 /* --- Line States & Modifiers --- */
 .lyrics-line.active {
     opacity: 1;
@@ -186,13 +196,13 @@
     overflow-wrap: break-word;
     transform-origin: left;
     transform: scale3d(0.93, 0.93, 0.95);
-    transition: transform 0.7s ease, color 0.7s;
+    transition: transform 0.7s ease, background-color 0.7s, color 0.7s;
 }
 
 .lyrics-line.active .main-vocal-container {
     transform: scale3d(1.001, 1.001, 1);
     will-change: transform;
-    transition: transform 0.5s ease, color 0.18s;
+    transition: transform 0.5s ease, background-color 0.18s, color 0.18s;
 }
 
 .lyrics-line .background-vocal-container {
