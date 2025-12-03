@@ -62,7 +62,6 @@ function injectDOMScript() {
     };
     (document.head || document.documentElement).appendChild(script);
 
-    /*
     //patch uiconst player = document.querySelector('ytmusic-player');
     const songInfoContainerElem = document.createElement('div');
     songInfoContainerElem.className = 'lyrics-song-container';
@@ -90,7 +89,6 @@ function injectDOMScript() {
     ytPlayer.addEventListener('pause', () => {
         progressBar.pause();
     })
-        */
 }
 
 window.addEventListener('message', (event) => {
@@ -101,11 +99,11 @@ window.addEventListener('message', (event) => {
     if (event.data.type === 'LYPLUS_TIME_UPDATE' && typeof event.data.currentTime === 'number') {
         LyricsPlusAPI.updateCurrentTick(event.data.currentTime)
 
-        //const cur = event.data.currentTime;
-        //progressBar.update(cur / currentSongDuration);
+        const cur = event.data.currentTime;
+        progressBar.update(cur / currentSongDuration);
     }
 
-    /* if (event.data.type === 'LYPLUS_SONG_CHANGED' && event.data.songInfo.duration) {
+     if (event.data.type === 'LYPLUS_SONG_CHANGED' && event.data.songInfo.duration) {
         const songInfo = event.data.songInfo
         currentSongDuration = songInfo.duration
         const yttitleElement = document.querySelector('.title.style-scope.ytmusic-player-bar');
@@ -118,5 +116,5 @@ window.addEventListener('message', (event) => {
             titleElementElem.textContent = songInfo.title
             artistElementElem.textContent = songInfo.artist + ' • ' + songInfo.album
         }
-    } */
+    }
 });
