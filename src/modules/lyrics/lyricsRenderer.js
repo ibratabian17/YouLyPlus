@@ -2360,7 +2360,7 @@ class LyricsPlusRenderer {
 
     const positionClasses = [
       "lyrics-activest",
-      "pre-active-line",
+      "post-active-line",
       "next-active-line",
       "prev-1",
       "prev-2",
@@ -2385,7 +2385,7 @@ class LyricsPlusRenderer {
       const position = i - scrollLineIndex;
       if (position === 0) continue;
       const element = elements[i];
-      if (position === -1) element.classList.add("pre-active-line");
+      if (position === -1) element.classList.add("post-active-line");
       else if (position === 1) element.classList.add("next-active-line");
       else if (position < 0)
         element.classList.add(`prev-${Math.abs(position)}`);
