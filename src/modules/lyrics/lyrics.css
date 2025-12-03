@@ -319,7 +319,7 @@
 }
 
 /* ===== CHARACTER-LEVEL ANIMATION ===== */
-.lyrics-line .lyrics-syllable:has(span.char) {
+.lyrics-line .lyrics-syllable:has(span.char):not(.finished) {
     background-color: transparent;
     color: transparent;
 }
