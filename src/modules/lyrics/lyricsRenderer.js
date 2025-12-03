@@ -2158,7 +2158,7 @@ class LyricsPlusRenderer {
           ? "wipe-rtl"
           : "wipe";
       const currentWipeAnimation = isGap ? "fade-gap" : wipeAnimation;
-      const syllableAnimation = `${currentWipeAnimation} ${syllable._durationMs}ms linear forwards`;
+      const syllableAnimation = `${currentWipeAnimation} ${syllable._durationMs}ms ${isGap ? 'var(--lyplus-fade-gap-timing-function)':'linear'} forwards`;
       pendingStyleUpdates.push({
         element: syllable,
         property: "animation",

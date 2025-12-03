@@ -35,6 +35,8 @@
 
     --lyplus-blur-amount: 0.07em;
     --lyplus-blur-amount-near: 0.035em;
+
+    --lyplus-fade-gap-timing-function: ease-out;
 }
 
 #lyrics-plus-container.override-palette-color {
@@ -408,12 +410,15 @@
     border-radius: 1em;
     background-color: var(--lyplus-text-secondary);
     background-clip: unset;
+    opacity: 0.5;
 }
 
 .lyrics-line.lyrics-gap.active .lyrics-syllable.highlight,
 .lyrics-line.lyrics-gap.active .lyrics-syllable.finished,
-.lyrics-line.lyrics-gap:not(.active) .lyrics-syllable {
+.lyrics-line.lyrics-gap:not(.active).post-active-line .lyrics-syllable,
+.lyrics-line.lyrics-gap:not(.active).lyrics-activest .lyrics-syllable {
     background-color: var(--lyplus-text-primary);
+    opacity: 1;
 }
 
 .lyrics-line.lyrics-gap.active .lyrics-syllable.finished {
@@ -440,7 +445,7 @@ span.lyrics-song-writters {
     display: block;
     margin-top: var(--lyplus-padding-base);
     font-size: var(--lyplus-font-size-metadata);
-    opacity: 0.6;
+    opacity: 0.45;
 }
 
 span.lyrics-source-provider {
@@ -448,7 +453,7 @@ span.lyrics-source-provider {
     height: 150%;
     margin-bottom: var(--lyplus-padding-base);
     font-size: var(--lyplus-font-size-provider);
-    opacity: 0.5;
+    opacity: 0.25;
 }
 
 .lyrics-plus-empty {
@@ -888,10 +893,12 @@ canvas#lyplus-webgl-canvas {
 
 @keyframes fade-gap {
     from {
+        opacity: 0.5;
         background-color: var(--lyplus-text-secondary);
     }
 
     to {
+        opacity: 1;
         background-color: var(--lyplus-text-primary);
     }
 }
