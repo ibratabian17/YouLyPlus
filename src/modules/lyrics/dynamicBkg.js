@@ -63,7 +63,7 @@ const MASTER_PALETTE_SIZE = MASTER_PALETTE_TEX_WIDTH * MASTER_PALETTE_TEX_HEIGHT
 const STRETCHED_GRID_WIDTH = 128;
 const STRETCHED_GRID_HEIGHT = 128;
 
-let currentTargetMasterArtworkPalette = [];
+let currentTargetMasterArtworkPalette = {};
 
 const TARGET_FPS = 30;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
@@ -223,11 +223,11 @@ function createProgram(glCtx, vs, fs) {
 }
 
 function getDefaultMasterPalette() {
-    return Array(MASTER_PALETTE_SIZE).fill(null).map((_, i) => {
-        const base = 20;
-        const variation = (i % 5) * 5;
-        return { r: base + variation, g: base + variation, b: base + variation + 10, a: 255 };
-    });
+    return {
+        background: { r: 0, g: 0, b: 0 },
+        primary: { r: 255, g: 255, b: 255 },
+        secondary: { r: 200, g: 200, b: 200 }
+    };
 }
 
 function LYPLUS_setupBlurEffect() {
@@ -308,7 +308,11 @@ function LYPLUS_setupBlurEffect() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
     const initialPalette = getDefaultMasterPalette();
-    currentTargetMasterArtworkPalette = initialPalette.map(c => ({ ...c }));
+    currentTargetMasterArtworkPalette = {
+        background: { ...initialPalette.background },
+        primary: { ...initialPalette.primary },
+        secondary: { ...initialPalette.secondary }
+    };
 
     handleResize();
     window.addEventListener('resize', handleResize, { passive: true });
@@ -341,7 +345,7 @@ function LYPLUS_setupBlurEffect() {
 function handleResize() {
     if (!gl || !webglCanvas) return;
 
-    const displayWidth = 256; 
+    const displayWidth = 256;
     const displayHeight = 256;
 
     if (displayWidth === canvasDimensions.width && displayHeight === canvasDimensions.height) {
@@ -484,7 +488,19 @@ function processNextArtworkFromQueue() {
     }
 
     const onImageLoadSuccess = (img) => {
-        const palette = extractPaletteFromImage(img);
+        let palette;
+        if (typeof ColorTunes !== 'undefined') {
+            try {
+                palette = ColorTunes.getSongPalette(img);
+            } catch (e) {
+                console.error("LYPLUS: ColorTunes failed", e);
+                palette = getDefaultMasterPalette();
+            }
+        } else {
+            console.warn("LYPLUS: ColorTunes library not found, using default.");
+            palette = getDefaultMasterPalette();
+        }
+
         const texture = createTextureFromImage(img);
         finishProcessing(texture, palette);
     };
@@ -612,7 +628,7 @@ function updateLayerPerimeterPositions(deltaTime) {
         for (let i = 0; i < BASE_LAYER_POSITIONS.length; i++) {
             const base = BASE_LAYER_POSITIONS[i] || { x: 0, y: 0 };
             const margin = Math.max(Math.abs(base.x || 0), Math.abs(base.y || 0), 0.0001);
-            perimeterOffsets[i] = Math.random(); 
+            perimeterOffsets[i] = Math.random();
             if (!currentLayerPositions[i]) currentLayerPositions[i] = { x: base.x, y: base.y };
             else { currentLayerPositions[i].x = base.x; currentLayerPositions[i].y = base.y; }
         }
@@ -627,7 +643,7 @@ function updateLayerPerimeterPositions(deltaTime) {
         const dir = PERIMETER_DIRECTION[i] !== undefined ? PERIMETER_DIRECTION[i] : 1;
 
         perimeterOffsets[i] = (perimeterOffsets[i] + dir * speed * deltaTime);
-        if (perimeterOffsets[i] > 1.0) perimeterOffsets[i] -= 1.0; 
+        if (perimeterOffsets[i] > 1.0) perimeterOffsets[i] -= 1.0;
 
         const angle = perimeterOffsets[i] * 2.0 * Math.PI;
 
@@ -647,7 +663,7 @@ function animateWebGLBackground() {
     }
     const now = performance.now();
     const elapsed = now - lastDrawTime;
-    
+
     if (elapsed < FRAME_INTERVAL) {
         globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         return;
@@ -909,25 +925,18 @@ function calculateColorDifference(color1, color2) {
 }
 
 function LYPLUS_getSongPalette() {
-    if (!currentTargetMasterArtworkPalette || currentTargetMasterArtworkPalette.length === 0) {
-        return null;
+    if (!currentTargetMasterArtworkPalette || !currentTargetMasterArtworkPalette.primary) {
+        return { r: 255, g: 255, b: 255, a: 255 };
     }
 
-    const MIN_LUMINANCE_THRESHOLD = 0.15;
-    const filteredPalette = currentTargetMasterArtworkPalette.filter(color => calculateLuminance(color) > MIN_LUMINANCE_THRESHOLD);
+    const c = currentTargetMasterArtworkPalette.primary;
 
-    let selectedColor;
-    if (filteredPalette.length > 0) {
-        selectedColor = filteredPalette.sort((a, b) => b.vibrancy - a.vibrancy)[0];
-    } else {
-        selectedColor = currentTargetMasterArtworkPalette.sort((a, b) => b.vibrancy - a.vibrancy)[0];
-    }
-
-    const [h, s, l] = rgbToHsl(selectedColor.r, selectedColor.g, selectedColor.b);
-    const increasedSaturation = Math.min(1.0, s * 1.2);
-    const [r, g, b] = hslToRgb(h, increasedSaturation, l);
-
-    return { r, g, b, a: selectedColor.a };
+    return {
+        r: c.r,
+        g: c.g,
+        b: c.b,
+        a: 255
+    };
 }
 
 window.addEventListener('message', (event) => {
