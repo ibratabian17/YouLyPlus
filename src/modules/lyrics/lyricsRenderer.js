@@ -881,7 +881,7 @@ class LyricsPlusRenderer {
             linkSyllables(pendingSyllable, firstVisibleSyllable, pendingSyllableFont);
           }
         }
-   
+
         // Intra-word Linking (Syllable -> Syllable)
         syllableElements.forEach((syllable, index) => {
           if (index < syllableElements.length - 1) {
@@ -1826,9 +1826,39 @@ class LyricsPlusRenderer {
 
     let primaryIndex = this._getLineIndexAtTime(predictiveTime, hint);
 
-    if (primaryIndex === -1) {
-      if (predictiveTime < this.cachedLyricsLines[0]._startTimeMs) primaryIndex = 0;
-      else primaryIndex = this.cachedLyricsLines.length - 1;
+    if (primaryIndex !== -1) {
+      const lineToCheck = this.cachedLyricsLines[primaryIndex];
+      if (predictiveTime > (lineToCheck._endTimeMs + 10)) {
+        primaryIndex = -1;
+      }
+    }
+
+    if (primaryIndex !== -1) {
+      let scanIndex = primaryIndex;
+      while (scanIndex > 0) {
+        const prevLine = this.cachedLyricsLines[scanIndex - 1];
+        const isPrevActive =
+          predictiveTime >= prevLine._startTimeMs &&
+          predictiveTime <= (prevLine._endTimeMs + 50);
+
+        if (isPrevActive) {
+          scanIndex--;
+        } else {
+          break;
+        }
+      }
+      primaryIndex = scanIndex;
+      this._lastActiveIndex = primaryIndex;
+    } else {
+      if (this.cachedLyricsLines.length > 0 && predictiveTime < this.cachedLyricsLines[0]._startTimeMs) {
+        primaryIndex = 0;
+      } else {
+        primaryIndex = this._lastActiveIndex;
+        if (primaryIndex < 0) primaryIndex = 0;
+        if (primaryIndex >= this.cachedLyricsLines.length) {
+          primaryIndex = this.cachedLyricsLines.length - 1;
+        }
+      }
     }
 
     this._lastActiveIndex = primaryIndex;
@@ -2158,7 +2188,7 @@ class LyricsPlusRenderer {
           ? "wipe-rtl"
           : "wipe";
       const currentWipeAnimation = isGap ? "fade-gap" : wipeAnimation;
-      const syllableAnimation = `${currentWipeAnimation} ${syllable._durationMs}ms ${isGap ? 'var(--lyplus-fade-gap-timing-function)':'linear'} forwards`;
+      const syllableAnimation = `${currentWipeAnimation} ${syllable._durationMs}ms ${isGap ? 'var(--lyplus-fade-gap-timing-function)' : 'linear'} forwards`;
       pendingStyleUpdates.push({
         element: syllable,
         property: "animation",
