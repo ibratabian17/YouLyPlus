@@ -348,8 +348,8 @@
     background-position: -0.5em 0%, -0.25em 0%;
     background-repeat: no-repeat;
     transform-origin: 50% 80%;
-    transform: matrix3d(var(--min-scale), 0, 0, 0,
-            0, var(--min-scale), 0, 0,
+    transform: matrix3d(1, 0, 0, 0,
+            0, 1, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1);
     transition: transform 0.5s, color 0.18s;
@@ -692,7 +692,6 @@ canvas#lyplus-webgl-canvas {
 
 :root {
     --max-scale: 1.12;
-    --min-scale: 1.01;
     --shadow-intensity: 0.6;
 }
 
@@ -857,7 +856,7 @@ canvas#lyplus-webgl-canvas {
 
 @keyframes grow-dynamic {
     0% {
-        transform: matrix3d(var(--min-scale), 0, 0, 0, 0, var(--min-scale), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
         filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
     }
 
@@ -868,7 +867,7 @@ canvas#lyplus-webgl-canvas {
     }
 
     100% {
-        transform: matrix3d(var(--min-scale), 0, 0, 0, 0, var(--min-scale), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     }
 }
 

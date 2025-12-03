@@ -835,7 +835,6 @@ class LyricsPlusRenderer {
         const wordSpan = elementPool.syllables.pop() || document.createElement("span");
         wordSpan.innerHTML = "";
         wordSpan.className = "lyrics-word";
-        wordSpan.style.setProperty("--min-scale", 1.02);
 
         const referenceFont = mainContainer.firstChild
           ? getComputedFont(mainContainer.firstChild)
