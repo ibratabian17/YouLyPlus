@@ -99,7 +99,7 @@
     cursor: pointer;
     transform-origin: left;
     transform: translateY(var(--lyrics-scroll-offset, 0px)) translateZ(1px);
-    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(.41,0,.12,.99) var(--lyrics-line-delay, 0ms), filter 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(.41, 0, .12, .99) var(--lyrics-line-delay, 0ms), filter 0.3s ease;
     will-change: transform, filter, opacity;
     content-visibility: auto;
     contain-intrinsic-size: auto;
@@ -125,13 +125,14 @@
 }
 
 .lyrics-line::selection {
-  color: rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
 }
 
 @media (hover: hover) and (pointer: fine) {
     .lyrics-line:hover {
         background: #ffffff21;
     }
+
     .lyrics-line {
         border-radius: var(--lyplus-border-radius-base);
     }
@@ -288,12 +289,12 @@
 }
 
 .lyrics-syllable-wrap:has(.lyrics-syllable.transliteration) {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: start;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: start;
 }
 
-.lyrics-syllable.transliteration  {
+.lyrics-syllable.transliteration {
     font-size: var(--lyplus-font-size-subtext);
     white-space: pre-wrap;
     pointer-events: none;
@@ -302,15 +303,17 @@
     -moz-user-select: none;
     -ms-user-select: none;
 }
+
 .lyrics-word:has(.transliteration) .lyrics-syllable:not(.transliteration) {
     line-height: 1.5em;
 }
 
 /* ===== CHARACTER-LEVEL ANIMATION ===== */
-.lyrics-line .lyrics-syllable:has(span.char){
+.lyrics-line .lyrics-syllable:has(span.char) {
     background-color: transparent;
     color: transparent;
 }
+
 .lyrics-line .lyrics-syllable span.char {
     display: inline-block;
     background-color: var(--lyplus-text-secondary);
@@ -606,11 +609,12 @@ span.lyrics-source-provider {
 .lyrics-romanization-container.rtl-text {
     direction: rtl !important;
 }
-.lyrics-romanization-container .lyrics-syllable{
+
+.lyrics-romanization-container .lyrics-syllable {
     white-space: pre-wrap;
 }
 
-.lyrics-translation-container  {
+.lyrics-translation-container {
     opacity: 0.5;
 }
 
