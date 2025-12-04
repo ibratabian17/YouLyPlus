@@ -51,6 +51,15 @@ YouLy+ is packed with features designed to enhance your lyrics experience:
 -   **SponsorBlock Integration:** Automatically skip non-music segments like intros, outros, and sponsor messages.
 -   **Smart Saving:** YouLy+ remembers lyrics it has already found, so they load faster next time and use less internet data.
 
+## ⚡ Performance Reference
+
+The benchmark I used is my own pc that developed this project, YouLy+ with config enable blur and dynamic background is able to run smoothly on old hardware from 2012 (for example, AMD FX-6300 + GT 620). any mainstream CPU from the last 10 years (2.7GHz+) is sufficient for smooth operation.
+
+**GPU Performance (Targeting 60 FPS):**
+*   **768p (1366x768):** Stable 60 FPS on **NVIDIA GT 620** (1GB) or equivalent integrated graphics.
+*   **1080p (1920x1080):** GTX 650 / GT 1030 or above recommended for a locked 60 FPS.
+    *   *Note: Legacy cards (GT 620) can still achieve 45-60 FPS at 1080p with minor jitter.*
+
 ## ⬇️ Installation
 
 ### ⭐ Recommended: Install from Official Stores
@@ -100,6 +109,8 @@ The lyrics panel will automatically be enhanced by YouLy+ with custom lyrics —
 
 -   **Quick Settings:** Access quick toggles by clicking the YouLy+ icon in your browser's toolbar.
 -   **Full Settings:** For comprehensive customization, click **"More Settings"** from the popup.
+
+
 
 ## ☁️ Self-Hosting & Open Source
 
