@@ -1724,13 +1724,12 @@ class LyricsPlusRenderer {
   }
 
   _getTextWidth(text, font) {
-    const canvas =
-      this.textWidthCanvas ||
-      (this.textWidthCanvas = document.createElement("canvas"));
-    const context = canvas.getContext("2d");
-    context.font = font;
-    context.fontKerning = "none";
-    return context.measureText(text).width;
+    if (!this.textWidthCanvas) {
+      this.textWidthCanvas = document.createElement("canvas");
+      this.textWidthCtx = this.textWidthCanvas.getContext("2d", { willReadFrequently: true });
+    }
+    this.textWidthCtx.font = font;
+    return this.textWidthCtx.measureText(text).width;
   }
 
   _ensureElementIds() {
