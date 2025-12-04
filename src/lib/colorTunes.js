@@ -351,7 +351,7 @@ class ColorTunes {
     static getSongPalette(imageSource) {
         // Create canvas to extract pixels
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         
         let width, height;
         if(imageSource.naturalWidth) {
