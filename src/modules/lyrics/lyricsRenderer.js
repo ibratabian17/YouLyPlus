@@ -1822,13 +1822,14 @@ class LyricsPlusRenderer {
     const highlightLookAheadMs = 190;
     const predictiveTime = currentTime + scrollLookAheadMs;
 
+    // 1. Find Primary Line Index
     const hint = isForceScroll ? 0 : this._lastActiveIndex;
-
     let primaryIndex = this._getLineIndexAtTime(predictiveTime, hint);
 
     if (primaryIndex !== -1) {
       const lineToCheck = this.cachedLyricsLines[primaryIndex];
-      if (predictiveTime > (lineToCheck._endTimeMs + 10)) {
+      // Sanity check: if we jumped too far ahead/behind
+      if (predictiveTime > lineToCheck._endTimeMs + 10) {
         primaryIndex = -1;
       }
     }
@@ -1839,7 +1840,7 @@ class LyricsPlusRenderer {
         const prevLine = this.cachedLyricsLines[scanIndex - 1];
         const isPrevActive =
           predictiveTime >= prevLine._startTimeMs &&
-          predictiveTime <= (prevLine._endTimeMs + 50);
+          predictiveTime <= prevLine._endTimeMs + 50;
 
         if (isPrevActive) {
           scanIndex--;
@@ -1848,9 +1849,11 @@ class LyricsPlusRenderer {
         }
       }
       primaryIndex = scanIndex;
-      this._lastActiveIndex = primaryIndex;
     } else {
-      if (this.cachedLyricsLines.length > 0 && predictiveTime < this.cachedLyricsLines[0]._startTimeMs) {
+      if (
+        this.cachedLyricsLines.length > 0 &&
+        predictiveTime < this.cachedLyricsLines[0]._startTimeMs
+      ) {
         primaryIndex = 0;
       } else {
         primaryIndex = this._lastActiveIndex;
@@ -1864,10 +1867,14 @@ class LyricsPlusRenderer {
     this._lastActiveIndex = primaryIndex;
     const lineToScroll = this.cachedLyricsLines[primaryIndex];
 
+    // 2. Determine Active Lines
     this._tempActiveLines.length = 0;
 
     const startSearch = Math.max(0, primaryIndex - 1);
-    const endSearch = Math.min(this.cachedLyricsLines.length - 1, primaryIndex + 2);
+    const endSearch = Math.min(
+      this.cachedLyricsLines.length - 1,
+      primaryIndex + 2
+    );
 
     for (let i = startSearch; i <= endSearch; i++) {
       const line = this.cachedLyricsLines[i];
@@ -1885,10 +1892,11 @@ class LyricsPlusRenderer {
       this._tempActiveLines.sort((a, b) => a._startTimeMs - b._startTimeMs);
     }
 
+    // 3. Diffing Active Lines
     let hasChanged = this.activeLineIds.size !== this._tempActiveLines.length;
     if (!hasChanged) {
-      for (const line of this._tempActiveLines) {
-        if (!this.activeLineIds.has(line.id)) {
+      for (let i = 0; i < this._tempActiveLines.length; i++) {
+        if (!this.activeLineIds.has(this._tempActiveLines[i].id)) {
           hasChanged = true;
           break;
         }
@@ -1896,30 +1904,38 @@ class LyricsPlusRenderer {
     }
 
     if (hasChanged) {
-      const newIds = [];
-      for (let i = 0; i < this._tempActiveLines.length; i++) {
-        newIds.push(this._tempActiveLines[i].id);
-      }
+      const oldActiveIds = Array.from(this.activeLineIds);
 
-      for (const oldId of this.activeLineIds) {
-        if (!newIds.includes(oldId)) {
+      for (let i = 0; i < oldActiveIds.length; i++) {
+        const oldId = oldActiveIds[i];
+        let stillActive = false;
+        for (let j = 0; j < this._tempActiveLines.length; j++) {
+          if (this._tempActiveLines[j].id === oldId) {
+            stillActive = true;
+            break;
+          }
+        }
+
+        if (!stillActive) {
           const line = document.getElementById(oldId);
           if (line) {
             line.classList.remove("active");
             this._resetSyllables(line);
           }
+          this.activeLineIds.delete(oldId);
         }
       }
 
-      this.activeLineIds.clear();
-      for (const newId of newIds) {
-        this.activeLineIds.add(newId);
-        const line = document.getElementById(newId);
-        if (line) line.classList.add("active");
+      for (let i = 0; i < this._tempActiveLines.length; i++) {
+        const line = this._tempActiveLines[i];
+        if (!this.activeLineIds.has(line.id)) {
+          line.classList.add("active");
+          this.activeLineIds.add(line.id);
+        }
       }
     }
 
-    // --- Scrolling Logic ---
+    // 4. Scrolling Logic
     if (
       lineToScroll &&
       (lineToScroll !== this.currentPrimaryActiveLine || isForceScroll)
@@ -1931,7 +1947,7 @@ class LyricsPlusRenderer {
       }
     }
 
-    // --- Focus Logic ---
+    // 5. Focus Logic
     const mostRecentActiveLine =
       this._tempActiveLines.length > 0
         ? this._tempActiveLines[this._tempActiveLines.length - 1]
@@ -1947,7 +1963,7 @@ class LyricsPlusRenderer {
       this.currentFullscreenFocusedLine = mostRecentActiveLine;
     }
 
-    this._updateSyllables(currentTime);
+    this._updateSyllables(currentTime, this._tempActiveLines);
 
     if (
       this.lyricsContainer &&
@@ -2017,16 +2033,11 @@ class LyricsPlusRenderer {
     }
   }
 
-  _updateSyllables(currentTime) {
-    if (!this.activeLineIds.size) return;
+  _updateSyllables(currentTime, activeLines) {
+    if (!activeLines || activeLines.length === 0) return;
 
-    this._activeSyllablesBuffer.length = 0;
-    this._tempSyllableHigh.length = 0;
-    this._tempSyllableFinish.length = 0;
-    this._tempSyllableReset.length = 0;
-
-    for (const lineId of this.activeLineIds) {
-      const parentLine = document.getElementById(lineId);
+    for (let i = 0; i < activeLines.length; i++) {
+      const parentLine = activeLines[i];
       if (!parentLine) continue;
 
       let syllables = parentLine._cachedSyllableElements;
@@ -2036,53 +2047,37 @@ class LyricsPlusRenderer {
       }
 
       for (let j = 0; j < syllables.length; j++) {
-        this._activeSyllablesBuffer.push(syllables[j]);
-      }
-    }
+        const syllable = syllables[j];
+        const startTime = syllable._startTimeMs;
+        const endTime = syllable._endTimeMs;
 
-    const len = this._activeSyllablesBuffer.length;
-    for (let i = 0; i < len; i++) {
-      const syllable = this._activeSyllablesBuffer[i];
-      if (typeof syllable._startTimeMs !== "number") continue;
+        if (startTime === undefined) continue;
 
-      const startTime = syllable._startTimeMs;
-      const endTime = syllable._endTimeMs;
-      const classList = syllable.classList;
+        const classList = syllable.classList;
 
-      const hasHighlight = classList.contains("highlight");
-      const hasFinished = classList.contains("finished");
+        const hasHighlight = classList.contains("highlight");
+        const hasFinished = classList.contains("finished");
 
-      if (currentTime >= startTime && currentTime <= endTime) {
-        if (!hasHighlight) {
-          this._tempSyllableHigh.push(syllable);
-        }
-        if (hasFinished) {
-          syllable.classList.remove("finished");
-        }
-      } else if (currentTime > endTime) {
-        if (!hasFinished) {
+        if (currentTime >= startTime && currentTime <= endTime) {
           if (!hasHighlight) {
-            this._tempSyllableHigh.push(syllable);
+            this._updateSyllableAnimation(syllable);
           }
-          this._tempSyllableFinish.push(syllable);
-        }
-      } else {
-        if (hasHighlight || hasFinished) {
-          this._tempSyllableReset.push(syllable);
+          if (hasFinished) {
+            classList.remove("finished");
+          }
+        } else if (currentTime > endTime) {
+          if (!hasFinished) {
+            if (!hasHighlight) {
+              this._updateSyllableAnimation(syllable);
+            }
+            classList.add("finished");
+          }
+        } else {
+          if (hasHighlight || hasFinished) {
+            this._resetSyllable(syllable);
+          }
         }
       }
-    }
-
-    for (let i = 0; i < this._tempSyllableHigh.length; i++) {
-      this._updateSyllableAnimation(this._tempSyllableHigh[i]);
-    }
-
-    for (let i = 0; i < this._tempSyllableFinish.length; i++) {
-      this._tempSyllableFinish[i].classList.add("finished");
-    }
-
-    for (let i = 0; i < this._tempSyllableReset.length; i++) {
-      this._resetSyllable(this._tempSyllableReset[i]);
     }
   }
 
