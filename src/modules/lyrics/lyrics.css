@@ -30,7 +30,7 @@
     --lyplus-font-size-dropdown-option: 13px;
 
     --lyplus-text-primary: var(--lyplus-lyrics-pallete);
-    --lyplus-text-secondary: #ffffff7e;
+    --lyplus-text-secondary: #ffffff55;
     --lyplus-text-button: rgba(255, 255, 255, 0.87);
 
     --lyplus-blur-amount: 0.07em;
@@ -95,7 +95,7 @@
 /* --- Base Line Styles --- */
 .lyrics-line {
     padding: var(--lyplus-padding-line);
-    opacity: 0.7;
+    opacity: 0.85;
     color: var(--lyplus-text-secondary);
     font-size: var(--lyplus-font-size-base);
     cursor: pointer;
@@ -410,7 +410,6 @@
     border-radius: 1em;
     background-color: var(--lyplus-text-secondary);
     background-clip: unset;
-    opacity: 0.5;
 }
 
 .lyrics-line.lyrics-gap.active .lyrics-syllable.highlight,
@@ -893,12 +892,10 @@ canvas#lyplus-webgl-canvas {
 
 @keyframes fade-gap {
     from {
-        opacity: 0.5;
         background-color: var(--lyplus-text-secondary);
     }
 
     to {
-        opacity: 1;
         background-color: var(--lyplus-text-primary);
     }
 }
