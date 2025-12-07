@@ -95,7 +95,7 @@
 /* --- Base Line Styles --- */
 .lyrics-line {
     padding: var(--lyplus-padding-line);
-    opacity: 0.85;
+    opacity: 0.8;
     color: var(--lyplus-text-secondary);
     font-size: var(--lyplus-font-size-base);
     cursor: pointer;
@@ -681,7 +681,7 @@ span.lyrics-source-provider {
     z-index: 29;
     width: 100%;
     height: 100%;
-    backdrop-filter: brightness(0.7) saturate(1.3) contrast(1);
+    backdrop-filter: brightness(0.7) saturate(1.35) contrast(0.95);
 }
 
 canvas#lyplus-webgl-canvas {
