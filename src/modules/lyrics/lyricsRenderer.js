@@ -856,12 +856,27 @@ class LyricsPlusRenderer {
 
           const sylSpan = createSyllableElement(s, totalDuration, idx, s.isBackground || false);
 
+          let txtContent = "";
           if (s.isBackground) {
-            sylSpan.textContent = this._getDataText(s).replace(/[()]/g, "");
+            txtContent = this._getDataText(s).replace(/[()]/g, "");
+            sylSpan.textContent = txtContent;
           } else if (shouldEmphasize) {
             renderCharWipes(s, sylSpan, referenceFont, characterData);
           } else {
-            sylSpan.textContent = this._getDataText(s);
+            txtContent = this._getDataText(s);
+            sylSpan.textContent = txtContent;
+          }
+
+          if (!s.isBackground && !shouldEmphasize) {
+             const textWidth = this._getTextWidth(txtContent.trim(), referenceFont);
+             const spaceWidth = this._getTextWidth(txtContent, referenceFont); 
+             if (textWidth > 0) {
+                 sylSpan._wipeRatio = textWidth / (spaceWidth);
+             } else {
+                 sylSpan._wipeRatio = 1;
+             }
+          } else {
+             sylSpan._wipeRatio = 1;
           }
 
           wrap.appendChild(sylSpan);
@@ -2174,6 +2189,8 @@ class LyricsPlusRenderer {
         charAnimationsMap.set(span, animationParts.join(", "));
       });
     } else {
+      const ratio = syllable._wipeRatio || 1;
+      const visualDuration = syllable._durationMs * ratio;
       const wipeAnimation = isFirstInContainer
         ? isRTL
           ? "start-wipe-rtl"
@@ -2182,7 +2199,7 @@ class LyricsPlusRenderer {
           ? "wipe-rtl"
           : "wipe";
       const currentWipeAnimation = isGap ? "fade-gap" : wipeAnimation;
-      const syllableAnimation = `${currentWipeAnimation} ${syllable._durationMs}ms ${isGap ? 'var(--lyplus-fade-gap-timing-function)' : 'linear'} forwards`;
+      const syllableAnimation = `${currentWipeAnimation} ${visualDuration}ms ${isGap ? 'var(--lyplus-fade-gap-timing-function)' : 'linear'} forwards`;
       pendingStyleUpdates.push({
         element: syllable,
         property: "animation",
