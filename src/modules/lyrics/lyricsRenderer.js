@@ -822,7 +822,7 @@ class LyricsPlusRenderer {
 
       // --- Core Render Function ---
 
-      const renderWordSpan = (wordBuffer, shouldEmphasize) => {
+      const renderWordSpan = (wordBuffer, shouldEmphasize, isLastInContiner = false) => {
         if (!wordBuffer.length) return;
 
         const currentWordStartTime = wordBuffer[0].time;
@@ -934,7 +934,7 @@ class LyricsPlusRenderer {
         targetContainer.appendChild(wordSpan);
 
         const trailText = combinedText.match(/\s+$/);
-        if (trailText) targetContainer.appendChild(document.createTextNode(trailText[0]));
+        if (trailText  && !isLastInContiner) targetContainer.appendChild(document.createTextNode(trailText[0]));
 
         pendingSyllable = syllableElements.length > 0 ? syllableElements[syllableElements.length - 1] : null;
         pendingSyllableFont = referenceFont;
@@ -965,9 +965,30 @@ class LyricsPlusRenderer {
           logicalWordGroups.push(currentGroupBuffer);
         }
 
-        logicalWordGroups.forEach((group) => {
+        let lastMainGroupIdx = -1;
+        let lastBgGroupIdx = -1;
+
+        for (let i = 0; i < logicalWordGroups.length; i++) {
+           const g = logicalWordGroups[i];
+           if (g.length > 0) {
+              if (g[0].isBackground) {
+                  lastBgGroupIdx = i;
+              } else {
+                  lastMainGroupIdx = i;
+              }
+           }
+        }
+
+        logicalWordGroups.forEach((group, groupIdx) => {
+          const isBg = group.length > 0 && group[0].isBackground;
+
           const groupText = group.map((s) => this._getDataText(s)).join("");
           const groupDuration = group.reduce((acc, s) => acc + s.duration, 0);
+
+          const isLastGroupInContainer = isBg 
+             ? groupIdx === lastBgGroupIdx 
+             : groupIdx === lastMainGroupIdx;
+
 
           const isGroupGrowable =
             !currentSettings.lightweight &&
@@ -977,7 +998,7 @@ class LyricsPlusRenderer {
             groupDuration >= 1000;
 
           if (isGroupGrowable) {
-            renderWordSpan(group, true);
+            renderWordSpan(group, true, isLastGroupInContainer);
           } else {
             let visualWordBuffer = [];
             group.forEach((s, idxInGroup) => {
@@ -986,7 +1007,7 @@ class LyricsPlusRenderer {
               const isLastInGroup = idxInGroup === group.length - 1;
 
               if (syllableText.endsWith("-") || isLastInGroup) {
-                renderWordSpan(visualWordBuffer, false);
+                renderWordSpan(visualWordBuffer, false, isLastGroupInContainer);
                 visualWordBuffer = [];
               }
             });
