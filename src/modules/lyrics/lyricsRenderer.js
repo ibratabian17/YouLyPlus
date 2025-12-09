@@ -467,18 +467,13 @@ class LyricsPlusRenderer {
     const scrollSensitivity = 0.7;
     let newScrollOffset = this.currentScrollOffset - delta * scrollSensitivity;
 
-    const container = this._getContainer();
+    const container = this.lyricsContainer;
     if (!container) {
       this._animateScroll(newScrollOffset);
       return;
     }
 
-    const allScrollableElements = Array.from(
-      container.querySelectorAll(
-        ".lyrics-line, .lyrics-plus-metadata, .lyrics-plus-empty"
-      )
-    );
-    if (allScrollableElements.length === 0) {
+    if (!this.cachedLyricsLines || this.cachedLyricsLines.length === 0) {
       this._animateScroll(newScrollOffset);
       return;
     }
@@ -493,18 +488,24 @@ class LyricsPlusRenderer {
     let minAllowedScroll = 0;
     let maxAllowedScroll = 0;
 
-    const firstElement = allScrollableElements[0];
-    const lastElement = allScrollableElements[allScrollableElements.length - 1];
+    const firstElement = this.cachedLyricsLines[0];
+    const lastElement = this.cachedLyricsLines[this.cachedLyricsLines.length - 1];
 
     if (firstElement && lastElement) {
       const contentTotalHeight =
         lastElement.offsetTop +
         lastElement.offsetHeight -
         firstElement.offsetTop;
+        
       if (contentTotalHeight > containerHeight) {
         maxAllowedScroll =
           containerHeight - (lastElement.offsetTop + lastElement.offsetHeight);
       }
+    }
+
+    const metadata = container.querySelector('.lyrics-plus-metadata');
+    if (metadata) {
+         maxAllowedScroll -= metadata.offsetHeight || 100;
     }
 
     newScrollOffset = Math.max(newScrollOffset, maxAllowedScroll);
@@ -2360,15 +2361,9 @@ class LyricsPlusRenderer {
     const isUserScrolling =
       this.lyricsContainer.classList.contains("user-scrolling");
 
+
     if (forceScroll || isUserScrolling) {
-      // Batch clear delays
-      const elements = this.cachedLyricsLines;
-      for (let i = 0; i < elements.length; i++) {
-        if (elements[i]) {
-          elements[i].style.setProperty("--lyrics-line-delay", "0ms");
-        }
-      }
-      return;
+      return; 
     }
 
     const referenceLine =
@@ -2384,12 +2379,17 @@ class LyricsPlusRenderer {
     const delayIncrement = 30;
     let delayCounter = 0;
     const elements = this.cachedLyricsLines;
+    
     const visibleIds = this.visibleLineIds;
 
-    // Batch style updates
     const styleUpdates = [];
 
-    for (let i = 0; i < elements.length; i++) {
+    const lookBehind = 5;
+    const lookAhead = 20;
+    const startIndex = Math.max(0, referenceLineIndex - lookBehind);
+    const endIndex = Math.min(elements.length, referenceLineIndex + lookAhead);
+
+    for (let i = startIndex; i < endIndex; i++) {
       const element = elements[i];
       if (!element) continue;
 
@@ -2504,16 +2504,31 @@ class LyricsPlusRenderer {
     const container = this._getContainer();
     if (!container || !container.parentElement) return null;
     if (this.visibilityObserver) this.visibilityObserver.disconnect();
+    
+    const isHideOffscreenEnabled = container.classList.contains("hide-offscreen");
+
     this.visibilityObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const id = entry.target.id;
-          if (entry.isIntersecting) this.visibleLineIds.add(id);
-          else this.visibleLineIds.delete(id);
+          const target = entry.target;
+          const id = target.id;
+          
+          if (entry.isIntersecting) {
+            this.visibleLineIds.add(id);
+            if (isHideOffscreenEnabled) {
+                target.classList.remove("viewport-hidden");
+            }
+          } else {
+            this.visibleLineIds.delete(id);
+            if (isHideOffscreenEnabled) {
+                target.classList.add("viewport-hidden");
+            }
+          }
         });
       },
       { root: container.parentElement, rootMargin: "200px 0px", threshold: 0.1 }
     );
+    
     if (this.cachedLyricsLines) {
       this.cachedLyricsLines.forEach((line) => {
         if (line) this.visibilityObserver.observe(line);

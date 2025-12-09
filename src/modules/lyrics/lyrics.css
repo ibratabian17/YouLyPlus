@@ -164,7 +164,6 @@
 
 #lyrics-plus-container.hide-offscreen .lyrics-line.viewport-hidden * {
     visibility: hidden;
-    background: none;
     animation: none !important;
     transition: none !important;
     will-change: auto !important;
@@ -225,6 +224,14 @@
 
 .lyrics-line.active .background-vocal {
     opacity: 1;
+}
+
+#lyrics-plus-container.user-scrolling .lyrics-line,
+#lyrics-plus-container.user-scrolling .lyrics-plus-metadata,
+#lyrics-plus-container.touch-scrolling .lyrics-line,
+#lyrics-plus-container.touch-scrolling .lyrics-plus-metadata {
+    --lyrics-line-delay: 0ms !important;
+    transition-delay: 0ms !important;
 }
 
 /* --- Word & Syllable Base Styles --- */
