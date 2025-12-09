@@ -1506,7 +1506,7 @@ class LyricsPlusRenderer {
       metadataContainer.dataset.startTime =
         (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 0.8;
       metadataContainer.dataset.endTime =
-        (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 10;
+        (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 99999999999999; // soooolonggggg
     }
 
     // Note: songWriters and source may not be available on subsequent updates.
