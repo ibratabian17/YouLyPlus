@@ -1216,10 +1216,6 @@ class LyricsPlusRenderer {
         "--lyplus-override-pallete",
         currentSettings.overridePaletteColor
       );
-      container.style.setProperty(
-        "--lyplus-override-pallete-white",
-        `${currentSettings.overridePaletteColor}85`
-      );
       container.classList.remove(
         "use-song-palette-fullscreen",
         "use-song-palette-all-modes"
@@ -1237,14 +1233,6 @@ class LyricsPlusRenderer {
             container.style.setProperty(
               "--lyplus-song-pallete",
               `rgb(${r}, ${g}, ${b})`
-            );
-            const alpha = 133 / 255;
-            const r_blend = Math.round(alpha * 255 + (1 - alpha) * r);
-            const g_blend = Math.round(alpha * 255 + (1 - alpha) * b);
-            const b_blend = Math.round(alpha * 255 + (1 - alpha) * b);
-            container.style.setProperty(
-              "--lyplus-song-white-pallete",
-              `rgb(${r_blend}, ${g_blend}, ${b_blend})`
             );
           }
         }
@@ -1629,10 +1617,6 @@ class LyricsPlusRenderer {
         "--lyplus-override-pallete",
         currentSettings.overridePaletteColor
       );
-      container.style.setProperty(
-        "--lyplus-override-pallete-white",
-        `${currentSettings.overridePaletteColor}85`
-      );
       container.classList.remove(
         "use-song-palette-fullscreen",
         "use-song-palette-all-modes"
@@ -1650,14 +1634,6 @@ class LyricsPlusRenderer {
             container.style.setProperty(
               "--lyplus-song-pallete",
               `rgb(${r}, ${g}, ${b})`
-            );
-            const alpha = 133 / 255;
-            const r_blend = Math.round(alpha * 255 + (1 - alpha) * r);
-            const g_blend = Math.round(alpha * 255 + (1 - alpha) * b);
-            const b_blend = Math.round(alpha * 255 + (1 - alpha) * b);
-            container.style.setProperty(
-              "--lyplus-song-white-pallete",
-              `rgb(${r_blend}, ${g_blend}, ${b_blend})`
             );
           }
         }
@@ -2835,9 +2811,7 @@ class LyricsPlusRenderer {
 
       container.style.removeProperty("--lyrics-scroll-offset");
       container.style.removeProperty("--lyplus-override-pallete");
-      container.style.removeProperty("--lyplus-override-pallete-white");
       container.style.removeProperty("--lyplus-song-pallete");
-      container.style.removeProperty("--lyplus-song-white-pallete");
     }
 
     // Release Graphics Memory

@@ -23,7 +23,7 @@ ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fu
 /* Use white-variant of song-art palette for lyrics in line-by-line mode */
 ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened] #lyrics-plus-container.use-song-palette-fullscreen.line-by-line-mode,
 #lyrics-plus-container.use-song-palette-all-modes.line-by-line-mode {
-    --lyplus-lyrics-pallete: var(--lyplus-song-white-pallete);
+    --lyplus-lyrics-pallete: var(--lyplus-song-pallete);
 }
 
 
