@@ -6,13 +6,15 @@ let webglCanvas = null;
 let needsAnimation = false;
 
 // Uniform locations
-let u_artworkTextureLocation, u_rotationLocation, u_scaleLocation, u_positionLocation, u_transitionProgressLocation;
+let u_artworkTextureLocation, u_timeLocation, u_transitionProgressLocation;
 let u_blur_imageLocation, u_blur_resolutionLocation, u_blur_directionLocation, u_blur_radiusLocation;
 let a_positionLocation, a_texCoordLocation, a_blur_positionLocation;
+let a_layerIndexLocation;
 
 // WebGL objects
 let positionBuffer;
 let texCoordBuffer;
+let layerIndexBuffer;
 let currentArtworkTexture = null;
 let previousArtworkTexture = null;
 
@@ -21,7 +23,6 @@ let renderFramebuffer = null;
 let blurFramebuffer = null;
 let renderTexture = null;
 let blurTextureA = null;
-
 
 function handleContextLost(event) {
     event.preventDefault();
@@ -42,6 +43,7 @@ function handleContextLost(event) {
     blurTextureA = null;
     positionBuffer = null;
     texCoordBuffer = null;
+    layerIndexBuffer = null;
 }
 
 function handleContextRestored() {
@@ -52,10 +54,9 @@ function handleContextRestored() {
 let blurDimensions = { width: 0, height: 0 };
 let canvasDimensions = { width: 0, height: 0 };
 
-const BLUR_DOWNSAMPLE = 1; // The factor by which to reduce the canvas resolution for the blur pass.
-const BLUR_RADIUS = 6; // Controls the radius/intensity of the blur.
+const BLUR_DOWNSAMPLE = 1;
+const BLUR_RADIUS = 6;
 
-// Palette Constants
 const MASTER_PALETTE_TEX_WIDTH = 8;
 const MASTER_PALETTE_TEX_HEIGHT = 5;
 const MASTER_PALETTE_SIZE = MASTER_PALETTE_TEX_WIDTH * MASTER_PALETTE_TEX_HEIGHT;
@@ -70,9 +71,9 @@ const FRAME_INTERVAL = 1000 / TARGET_FPS;
 let lastDrawTime = 0;
 
 // Animation & rotation
-const ROTATION_SPEEDS = [0.10, 0.18, 0.32]; // radians per second for each layer
-const ROTATION_POWER = 0.8
-let rotations = [0.3, -2.1, 2.4];
+const ROTATION_SPEEDS = [-0.10, 0.18, 0.32];
+const ROTATION_POWER = 0.8;
+let rotations = [0.3, -2.1, 2.4]; 
 let previousRotations = [0, 0, 0];
 const LAYER_SCALES = [1.4, 1.26, 1.26];
 const LAYER_POSITIONS = [
@@ -90,7 +91,7 @@ const PERIMETER_DIRECTION = [-1, 1, 1];
 const ARTWORK_TRANSITION_SPEED = 0.02;
 let artworkTransitionProgress = 1.0;
 let globalAnimationId = null;
-let lastFrameTime = 0;
+let startTime = 0;
 
 // Artwork processing state
 let isProcessingArtwork = false;
@@ -106,26 +107,36 @@ const NO_ARTWORK_IDENTIFIER = 'LYPLUS_NO_ARTWORK';
 const vertexShaderSource = `
     attribute vec2 a_position;
     attribute vec2 a_texCoord;
+    attribute float a_layerIndex;
+    
     varying vec2 v_texCoord;
     varying vec2 v_uv;
+    varying float v_layerIndex;
+    
     void main() {
         gl_Position = vec4(a_position, 0.0, 1.0);
         v_texCoord = a_texCoord;
         v_uv = a_position * 0.5 + 0.5;
+        v_layerIndex = a_layerIndex;
     }
 `;
 
+// GPU-optimized fragment shader - all calculations moved here
 const fragmentShaderSource = `
     #ifdef GL_ES
     precision mediump float;
     #endif
+    
     varying vec2 v_texCoord;
     varying vec2 v_uv;
+    varying float v_layerIndex;
+    
     uniform sampler2D u_artworkTexture;
-    uniform float u_rotation;
-    uniform float u_scale;
-    uniform vec2 u_position;
+    uniform float u_time;
     uniform float u_transitionProgress;
+    
+    // Layer configuration injected from JS
+    const float ROTATION_POWER = ${ROTATION_POWER.toFixed(1)};
     
     vec2 rotate(vec2 v, float angle) {
         float s = sin(angle);
@@ -133,12 +144,74 @@ const fragmentShaderSource = `
         return vec2(v.x * c - v.y * s, v.x * s + v.y * c);
     }
     
+    vec2 getBasePosition(int idx) {
+        if (idx == 0) return vec2(${BASE_LAYER_POSITIONS[0].x.toFixed(2)}, ${BASE_LAYER_POSITIONS[0].y.toFixed(2)});
+        if (idx == 1) return vec2(${BASE_LAYER_POSITIONS[1].x.toFixed(2)}, ${BASE_LAYER_POSITIONS[1].y.toFixed(2)});
+        return vec2(${BASE_LAYER_POSITIONS[2].x.toFixed(2)}, ${BASE_LAYER_POSITIONS[2].y.toFixed(2)});
+    }
+    
+    float getRotationSpeed(int idx) {
+        if (idx == 0) return ${ROTATION_SPEEDS[0].toFixed(2)};
+        if (idx == 1) return ${ROTATION_SPEEDS[1].toFixed(2)};
+        return ${ROTATION_SPEEDS[2].toFixed(2)};
+    }
+    
+    float getInitialRotation(int idx) {
+        if (idx == 0) return ${rotations[0].toFixed(2)};
+        if (idx == 1) return ${rotations[1].toFixed(2)};
+        return ${rotations[2].toFixed(2)};
+    }
+    
+    float getLayerScale(int idx) {
+        if (idx == 0) return ${LAYER_SCALES[0].toFixed(2)};
+        if (idx == 1) return ${LAYER_SCALES[1].toFixed(2)};
+        return ${LAYER_SCALES[2].toFixed(2)};
+    }
+    
+    float getPerimeterSpeed(int idx) {
+        if (idx == 0) return ${PERIMETER_SPEEDS[0].toFixed(3)};
+        if (idx == 1) return ${PERIMETER_SPEEDS[1].toFixed(3)};
+        return ${PERIMETER_SPEEDS[2].toFixed(3)};
+    }
+    
+    float getPerimeterDirection(int idx) {
+        if (idx == 0) return ${PERIMETER_DIRECTION[0].toFixed(1)};
+        if (idx == 1) return ${PERIMETER_DIRECTION[1].toFixed(1)};
+        return ${PERIMETER_DIRECTION[2].toFixed(1)};
+    }
+    
+    vec2 calculatePerimeterPosition(int idx, float time) {
+        vec2 base = getBasePosition(idx);
+        float radiusX = abs(base.x);
+        float radiusY = abs(base.y);
+        
+        float speed = getPerimeterSpeed(idx);
+        float dir = getPerimeterDirection(idx);
+        
+        // Use layer index as initial offset for variety
+        float offset = float(idx) * 0.33;
+        float t = fract(offset + dir * speed * time);
+        float angle = t * 6.283185307; // 2*PI
+        
+        return vec2(radiusX * cos(angle), radiusY * sin(angle));
+    }
+    
     void main() {
+        int idx = int(v_layerIndex);
+        
+        // Calculate rotation based on time (GPU-side)
+        float rotation = getInitialRotation(idx) + (getRotationSpeed(idx) * u_time * ROTATION_POWER);
+        float scale = getLayerScale(idx);
+        
+        // Calculate perimeter position (GPU-side)
+        vec2 position = calculatePerimeterPosition(idx, u_time);
+        
+        // Transform UV coordinates
         vec2 centered = v_uv - 0.5;
-        centered.y = -centered.y; // betulin flip
-        centered -= u_position;
-        centered = rotate(centered, -u_rotation); // betulin arah rotasi
-        centered /= u_scale;
+        centered.y = -centered.y;
+        centered -= position;
+        centered = rotate(centered, -rotation);
+        centered /= scale;
         centered += 0.5;
 
         if (centered.x < 0.0 || centered.x > 1.0 || centered.y < 0.0 || centered.y > 1.0) {
@@ -147,7 +220,7 @@ const fragmentShaderSource = `
             vec4 color = texture2D(u_artworkTexture, centered);
             gl_FragColor = vec4(color.rgb, color.a * u_transitionProgress);
         }
-}
+    }
 `;
 
 const blurFragmentShaderSource = `
@@ -171,7 +244,6 @@ const blurFragmentShaderSource = `
 
     void main() {
         vec2 texelSize = 1.0 / u_resolution;
-        
         vec2 step = u_direction * texelSize * (u_blurRadius * 0.3);
 
         vec3 color = vec3(0.0);
@@ -189,7 +261,6 @@ const blurFragmentShaderSource = `
         }
 
         vec3 finalColor = color / totalWeight;
-
         float noise = interleavedGradientNoise(gl_FragCoord.xy);
         finalColor += (noise - 0.5) / 255.0;
 
@@ -231,7 +302,7 @@ function getDefaultMasterPalette() {
 }
 
 function LYPLUS_setupBlurEffect() {
-    console.log("LYPLUS: Setting up WebGL with GPU blur...");
+    console.log("LYPLUS: Setting up GPU-optimized WebGL...");
     if (typeof currentSettings !== 'undefined' && currentSettings.dynamicPlayer) {
         document.querySelector('#layout')?.classList.add("dynamic-player");
     }
@@ -246,7 +317,13 @@ function LYPLUS_setupBlurEffect() {
     (document.querySelector('#layout') || document.body).prepend(blurContainer);
 
     try {
-        const ctxAttribs = { antialias: false, depth: false, stencil: false, preserveDrawingBuffer: false, alpha: false };
+        const ctxAttribs = { 
+            antialias: false, 
+            depth: false, 
+            stencil: false, 
+            preserveDrawingBuffer: false, 
+            alpha: false
+        };
         gl = webglCanvas.getContext('webgl', ctxAttribs) || webglCanvas.getContext('experimental-webgl', ctxAttribs);
     } catch (e) { console.error("LYPLUS: WebGL context creation failed.", e); }
     if (!gl) { console.error("LYPLUS: WebGL not supported!"); return null; }
@@ -263,12 +340,12 @@ function LYPLUS_setupBlurEffect() {
     blurProgram = createProgram(gl, vertexShader, blurFragmentShader);
     if (!glProgram || !blurProgram) return null;
 
+    // Get attribute/uniform locations
     a_positionLocation = gl.getAttribLocation(glProgram, 'a_position');
     a_texCoordLocation = gl.getAttribLocation(glProgram, 'a_texCoord');
+    a_layerIndexLocation = gl.getAttribLocation(glProgram, 'a_layerIndex');
     u_artworkTextureLocation = gl.getUniformLocation(glProgram, 'u_artworkTexture');
-    u_rotationLocation = gl.getUniformLocation(glProgram, 'u_rotation');
-    u_scaleLocation = gl.getUniformLocation(glProgram, 'u_scale');
-    u_positionLocation = gl.getUniformLocation(glProgram, 'u_position');
+    u_timeLocation = gl.getUniformLocation(glProgram, 'u_time');
     u_transitionProgressLocation = gl.getUniformLocation(glProgram, 'u_transitionProgress');
 
     a_blur_positionLocation = gl.getAttribLocation(blurProgram, 'a_position');
@@ -279,13 +356,30 @@ function LYPLUS_setupBlurEffect() {
 
     positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    const positions = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
+    const positions = [
+        -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1,  // Layer 0
+        -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1,  // Layer 1
+        -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1   // Layer 2
+    ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
     texCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-    const texCoords = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
+    const texCoords = [
+        0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1,  // Layer 0
+        0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1,  // Layer 1
+        0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1   // Layer 2
+    ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
+
+    layerIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, layerIndexBuffer);
+    const layerIndices = [
+        0,0,0,0,0,0,
+        1,1,1,1,1,1,
+        2,2,2,2,2,2
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(layerIndices), gl.STATIC_DRAW);
 
     currentArtworkTexture = createDefaultTexture();
     previousArtworkTexture = createDefaultTexture();
@@ -318,14 +412,16 @@ function LYPLUS_setupBlurEffect() {
     window.addEventListener('resize', handleResize, { passive: true });
 
     gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MIN_SRC_ALPHA);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    // Initialize start time
+    startTime = performance.now() / 1000;
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 if (!globalAnimationId) {
                     console.log("LYPLUS: Canvas is visible, starting animation.");
-                    lastFrameTime = performance.now();
                     globalAnimationId = requestAnimationFrame(animateWebGLBackground);
                 }
             } else {
@@ -468,7 +564,6 @@ function processNextArtworkFromQueue() {
         needsAnimation = true;
 
         if (!globalAnimationId) {
-            lastFrameTime = performance.now();
             globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         }
 
@@ -543,45 +638,18 @@ function createTextureFromImage(img) {
     return texture;
 }
 
+// Kept for API compatibility - no longer does actual calculations
 function updateLayerPerimeterPositions(deltaTime) {
-    if (!perimeterOffsets) {
-        perimeterOffsets = new Array(BASE_LAYER_POSITIONS.length).fill(0.0);
-        for (let i = 0; i < BASE_LAYER_POSITIONS.length; i++) {
-            const base = BASE_LAYER_POSITIONS[i] || { x: 0, y: 0 };
-            const margin = Math.max(Math.abs(base.x || 0), Math.abs(base.y || 0), 0.0001);
-            perimeterOffsets[i] = Math.random();
-            if (!currentLayerPositions[i]) currentLayerPositions[i] = { x: base.x, y: base.y };
-            else { currentLayerPositions[i].x = base.x; currentLayerPositions[i].y = base.y; }
-        }
-    }
-
-    for (let i = 0; i < BASE_LAYER_POSITIONS.length; i++) {
-        const base = BASE_LAYER_POSITIONS[i];
-        const radiusX = Math.abs(base.x);
-        const radiusY = Math.abs(base.y);
-
-        const speed = PERIMETER_SPEEDS[i] !== undefined ? PERIMETER_SPEEDS[i] : 0.05;
-        const dir = PERIMETER_DIRECTION[i] !== undefined ? PERIMETER_DIRECTION[i] : 1;
-
-        perimeterOffsets[i] = (perimeterOffsets[i] + dir * speed * deltaTime);
-        if (perimeterOffsets[i] > 1.0) perimeterOffsets[i] -= 1.0;
-
-        const angle = perimeterOffsets[i] * 2.0 * Math.PI;
-
-        const newX = radiusX * Math.cos(angle);
-        const newY = radiusY * Math.sin(angle);
-
-        currentLayerPositions[i].x = newX;
-        currentLayerPositions[i].y = newY;
-    }
+    // All calculations moved to GPU shader
+    // This function kept for backwards compatibility
 }
-
 
 function animateWebGLBackground() {
     if (!gl || !glProgram || !blurProgram) {
         globalAnimationId = null;
         return;
     }
+    
     const now = performance.now();
     const elapsed = now - lastDrawTime;
 
@@ -589,9 +657,9 @@ function animateWebGLBackground() {
         globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         return;
     }
+    lastDrawTime = now;
 
-    const deltaTime = (now - lastFrameTime) / 1000.0;
-    lastFrameTime = now;
+    const currentTime = now / 1000 - startTime;
 
     if (artworkTransitionProgress < 1.0) {
         artworkTransitionProgress = Math.min(1.0, artworkTransitionProgress + ARTWORK_TRANSITION_SPEED);
@@ -607,12 +675,7 @@ function animateWebGLBackground() {
         shouldContinueAnimation = true;
     }
 
-    for (let i = 0; i < 3; i++) {
-        rotations[i] += (ROTATION_SPEEDS[i] * deltaTime) * ROTATION_POWER;
-    }
-
-    updateLayerPerimeterPositions(deltaTime);
-
+    // === RENDER TO FRAMEBUFFER ===
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, renderTexture, 0);
     gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
@@ -621,6 +684,7 @@ function animateWebGLBackground() {
 
     gl.useProgram(glProgram);
 
+    // Setup vertex attributes (once per frame)
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.enableVertexAttribArray(a_positionLocation);
     gl.vertexAttribPointer(a_positionLocation, 2, gl.FLOAT, false, 0, 0);
@@ -629,34 +693,35 @@ function animateWebGLBackground() {
     gl.enableVertexAttribArray(a_texCoordLocation);
     gl.vertexAttribPointer(a_texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
+    gl.bindBuffer(gl.ARRAY_BUFFER, layerIndexBuffer);
+    gl.enableVertexAttribArray(a_layerIndexLocation);
+    gl.vertexAttribPointer(a_layerIndexLocation, 1, gl.FLOAT, false, 0, 0);
+
     gl.activeTexture(gl.TEXTURE0);
     gl.uniform1i(u_artworkTextureLocation, 0);
+    gl.uniform1f(u_timeLocation, currentTime); // Single time uniform
 
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-    for (let i = 0; i < 3; i++) {
-        // Render previous artwork (fading out) with its old rotation
-        if (artworkTransitionProgress < 1.0) {
-            gl.bindTexture(gl.TEXTURE_2D, previousArtworkTexture);
-            gl.uniform1f(u_rotationLocation, previousRotations[i]);
-            gl.uniform1f(u_scaleLocation, LAYER_SCALES[i]);
-            gl.uniform2f(u_positionLocation, currentLayerPositions[i].x, currentLayerPositions[i].y);
-            gl.uniform1f(u_transitionProgressLocation, 1.0 - artworkTransitionProgress);
-            gl.drawArrays(gl.TRIANGLES, 0, 6);
+    
+    // Draw previous artwork (fading out)
+    if (artworkTransitionProgress < 1.0) {
+        gl.bindTexture(gl.TEXTURE_2D, previousArtworkTexture);
+        gl.uniform1f(u_transitionProgressLocation, 1.0 - artworkTransitionProgress);
+        
+        // Draw each layer separately for proper blending
+        for (let layer = 0; layer < 3; layer++) {
+            gl.drawArrays(gl.TRIANGLES, layer * 6, 6);
         }
-
-        // Render current artwork (fading in) with current rotation
-        gl.bindTexture(gl.TEXTURE_2D, currentArtworkTexture);
-        gl.uniform1f(u_rotationLocation, rotations[i]);
-        gl.uniform1f(u_scaleLocation, LAYER_SCALES[i]);
-        gl.uniform2f(u_positionLocation, currentLayerPositions[i].x, currentLayerPositions[i].y);
-        gl.uniform1f(u_transitionProgressLocation, artworkTransitionProgress);
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
 
-    // Restore normal blending for blur passes
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.bindTexture(gl.TEXTURE_2D, currentArtworkTexture);
+    gl.uniform1f(u_transitionProgressLocation, artworkTransitionProgress);
+    
+    for (let layer = 0; layer < 3; layer++) {
+        gl.drawArrays(gl.TRIANGLES, layer * 6, 6);
+    }
 
+    // === BLUR PASSES ===
     gl.useProgram(blurProgram);
     gl.uniform1f(u_blur_radiusLocation, BLUR_RADIUS);
 
@@ -664,6 +729,7 @@ function animateWebGLBackground() {
     gl.enableVertexAttribArray(a_blur_positionLocation);
     gl.vertexAttribPointer(a_blur_positionLocation, 2, gl.FLOAT, false, 0, 0);
 
+    // Horizontal blur pass
     gl.bindFramebuffer(gl.FRAMEBUFFER, blurFramebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, blurTextureA, 0);
     gl.viewport(0, 0, blurDimensions.width, blurDimensions.height);
@@ -674,6 +740,7 @@ function animateWebGLBackground() {
     gl.uniform1i(u_blur_imageLocation, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
+    // Vertical blur pass (to screen)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
     gl.uniform2f(u_blur_directionLocation, 0.0, 1.0);
