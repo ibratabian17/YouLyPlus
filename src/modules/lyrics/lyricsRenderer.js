@@ -1997,9 +1997,9 @@ class LyricsPlusRenderer {
       this.lyricsContainer &&
       this.lyricsContainer.classList.contains("hide-offscreen")
     ) {
-      if (this._lastVisibilityUpdateSize !== this.visibleLineIds.size) {
+      if (this._visibilityHasChanged) {
         this._batchUpdateViewportVisibility();
-        this._lastVisibilityUpdateSize = this.visibleLineIds.size;
+        this._visibilityHasChanged = false;
       }
     }
   }
@@ -2511,26 +2511,30 @@ class LyricsPlusRenderer {
     if (!container || !container.parentElement) return null;
     if (this.visibilityObserver) this.visibilityObserver.disconnect();
 
-    const isHideOffscreenEnabled = container.classList.contains("hide-offscreen");
+    this._visibilityHasChanged = true;
 
     this.visibilityObserver = new IntersectionObserver(
       (entries) => {
+        let hasChanges = false;
         entries.forEach((entry) => {
           const target = entry.target;
           const id = target.id;
 
           if (entry.isIntersecting) {
-            this.visibleLineIds.add(id);
-            if (isHideOffscreenEnabled) {
-              target.classList.remove("viewport-hidden");
+            if (!this.visibleLineIds.has(id)) {
+                this.visibleLineIds.add(id);
+                hasChanges = true;
             }
           } else {
-            this.visibleLineIds.delete(id);
-            if (isHideOffscreenEnabled) {
-              target.classList.add("viewport-hidden");
+            if (this.visibleLineIds.has(id)) {
+                this.visibleLineIds.delete(id);
+                hasChanges = true;
             }
           }
         });
+        if (hasChanges) {
+            this._visibilityHasChanged = true;
+        }
       },
       { root: container.parentElement, rootMargin: "200px 0px", threshold: 0.1 }
     );
@@ -2865,7 +2869,6 @@ class LyricsPlusRenderer {
     this._cachedContainerRect = null;
     this._cachedVisibleLines = null;
     this._lastVisibilityHash = null;
-    this._lastVisibilityUpdateSize = null;
 
     this.currentScrollOffset = 0;
     this.isProgrammaticScrolling = false;
