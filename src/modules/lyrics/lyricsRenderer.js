@@ -259,7 +259,7 @@ class LyricsPlusRenderer {
       lastTime: 0,
       momentum: null,
       samples: [],
-      maxSamples: 5,
+      maxSamples: 30,
     };
 
     // Define handlers
@@ -317,17 +317,20 @@ class LyricsPlusRenderer {
 
     this._boundTouchMoveHandler = (event) => {
       if (!this.touchState.isActive) return;
-      event.preventDefault();
+      if (event.cancelable) event.preventDefault(); 
+      
       const touch = event.touches[0];
       const now = performance.now();
       const currentY = touch.clientY;
       const deltaY = this.touchState.lastY - currentY;
+      
       this.touchState.lastY = currentY;
       this.touchState.samples.push({ y: currentY, time: now });
       if (this.touchState.samples.length > this.touchState.maxSamples) {
         this.touchState.samples.shift();
       }
-      this._handleUserScroll(deltaY * 0.8);
+
+      this._handleUserScroll(deltaY); 
     };
 
     this._boundTouchEndHandler = () => {
@@ -335,19 +338,21 @@ class LyricsPlusRenderer {
       this.touchState.isActive = false;
       const now = performance.now();
       const samples = this.touchState.samples;
+      
       if (samples.length >= 2) {
-        const recentSamples = samples.filter((sample) => now - sample.time <= 100);
+        const recentSamples = samples.filter((sample) => now - sample.time <= 150);
         if (recentSamples.length >= 2) {
           const newest = recentSamples[recentSamples.length - 1];
           const oldest = recentSamples[0];
           const timeDelta = newest.time - oldest.time;
-          const yDelta = oldest.y - newest.y;
+          const yDelta = oldest.y - newest.y; 
+          
           if (timeDelta > 0) {
             this.touchState.velocity = yDelta / timeDelta;
           }
         }
       }
-      if (Math.abs(this.touchState.velocity) > 0.1) {
+      if (Math.abs(this.touchState.velocity) > 0.05) {
         this._startMomentumScroll();
       } else {
         this._endTouchScrolling();
@@ -412,11 +417,12 @@ class LyricsPlusRenderer {
    * @private
    */
   _startMomentumScroll() {
-    const deceleration = 0.95;
-    const minVelocity = 0.01;
+    const deceleration = 0.97; 
+    const minVelocity = 0.05;
 
     const animate = () => {
       const scrollDelta = this.touchState.velocity * 16;
+      
       this._handleUserScroll(scrollDelta);
 
       this.touchState.velocity *= deceleration;
