@@ -1,305 +1,167 @@
 (async function () {
   async function waitForDOMReady() {
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      return;
-    }
-    await new Promise((resolve) =>
-      document.addEventListener('DOMContentLoaded', resolve, { once: true })
-    );
+    if (document.readyState === 'complete' || document.readyState === 'interactive') return;
+    await new Promise((resolve) => document.addEventListener('DOMContentLoaded', resolve, { once: true }));
   }
 
   await waitForDOMReady();
 
-  let middleTabObserver = null;
-  let isUpdating = false;
-  let sidePanelObserver = null;
   let tabContainerObserver = null;
-  let observedSidePanelEl = null;
-  let observedTabContainerEl = null;
-  let rafId = null;
-  let lastMiddleTab = null;
-  let currentMiddleIndex = -1;
+  let middleTabObserver = null;
+  let sidePanelObserver = null;
+  let currentMiddleTab = null;
+  let isUpdating = false;
 
-  function forceActivateMiddleTab(tabElement) {
-    if (!tabElement || isUpdating) return;
+  const SELECTORS = {
+    TAB_CONTAINER: 'ytmusic-player-page .tab-header-container, #tabs-content, tp-yt-paper-tabs',
+    TAB: 'tp-yt-paper-tab.tab-header, tp-yt-paper-tab',
+    SIDE_PANEL: '#side-panel',
+    LYRICS: '.lyrics-plus-integrated',
+    SCROLL_CONTAINER: '#tab-renderer',
+    VIDEO: 'video'
+  };
 
-    const hasDisabledAttr = tabElement.hasAttribute('disabled');
-    const ariaDisabled = tabElement.getAttribute('aria-disabled');
-    const tabindex = tabElement.getAttribute('tabindex');
-    const ariaSelected = tabElement.getAttribute('aria-selected');
-    const pointerEvents = tabElement.style.pointerEvents;
-    const hasIronSelected = tabElement.classList.contains('iron-selected');
+  function forceActivateMiddleTab(tab) {
+    if (!tab || isUpdating) return;
 
-    const isActive =
-      !hasDisabledAttr &&
-      ariaDisabled === 'false' &&
-      tabindex === '0' &&
-      ariaSelected === 'true' &&
-      pointerEvents === 'auto' &&
-      hasIronSelected;
+    const needsUpdate = 
+      tab.hasAttribute('disabled') ||
+      tab.getAttribute('aria-selected') !== 'true' ||
+      tab.getAttribute('tabindex') !== '0' ||
+      !tab.classList.contains('iron-selected') ||
+      tab.style.pointerEvents !== 'auto';
 
-    if (isActive) return;
+    if (!needsUpdate) return;
 
     isUpdating = true;
-
     requestAnimationFrame(() => {
-      tabElement.removeAttribute('disabled');
-
-      tabElement.setAttribute('aria-disabled', 'false');
-      tabElement.setAttribute('tabindex', '0');
-      tabElement.setAttribute('aria-selected', 'true');
-
-      tabElement.classList.add('iron-selected');
-
-      tabElement.style.pointerEvents = 'auto';
-
-      isUpdating = false;
+      tab.removeAttribute('disabled');
+      tab.setAttribute('aria-disabled', 'false');
+      tab.setAttribute('tabindex', '0');
+      tab.setAttribute('aria-selected', 'true');
+      tab.classList.add('iron-selected');
+      tab.style.pointerEvents = 'auto';
+      
+      setTimeout(() => { isUpdating = false; }, 50);
     });
   }
 
-  function observeMiddleTab(tabElement) {
-    if (!tabElement) return;
-
-    if (!document.contains(tabElement)) {
-      if (middleTabObserver) {
-        middleTabObserver.disconnect();
-        middleTabObserver = null;
-      }
-      lastMiddleTab = null;
-      return;
-    }
-
-    if (middleTabObserver && lastMiddleTab === tabElement) return;
-
-    if (middleTabObserver) middleTabObserver.disconnect();
-
-    middleTabObserver = new MutationObserver((mutations) => {
-      if (isUpdating) return;
-
-      if (!document.contains(tabElement)) {
-        middleTabObserver.disconnect();
-        middleTabObserver = null;
-        lastMiddleTab = null;
-        checkAndApplyTabLogic();
-        return;
-      }
-
-      const needsUpdate = mutations.some(m => {
-        if (m.type === 'attributes') {
-          const attrName = m.attributeName;
-          if (attrName === 'disabled') return tabElement.hasAttribute('disabled');
-          if (attrName === 'aria-disabled') return tabElement.getAttribute('aria-disabled') !== 'false';
-          if (attrName === 'tabindex') return tabElement.getAttribute('tabindex') !== '0';
-          if (attrName === 'aria-selected') return tabElement.getAttribute('aria-selected') !== 'true';
-          if (attrName === 'style') return tabElement.style.pointerEvents !== 'auto';
-          if (attrName === 'class') return !tabElement.classList.contains('iron-selected');
-        }
-        return false;
-      });
-
-      if (!needsUpdate) return;
-
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        forceActivateMiddleTab(tabElement);
-        rafId = null;
-      });
-    });
-
-    middleTabObserver.observe(tabElement, {
-      attributes: true,
-      attributeFilter: ['disabled', 'aria-disabled', 'tabindex', 'aria-selected', 'style', 'class']
-    });
-
-    lastMiddleTab = tabElement;
-  }
-
-  function enhanceTouchHandling(tabs, middleIndex) {
-    const MOVE_THRESHOLD = 10;
-
-    tabs.forEach((tab, index) => {
-      if (tab.dataset.touchEnhanced && document.contains(tab)) return;
-
-      let startX, startY;
-
-      tab.addEventListener('touchstart', (e) => {
-        const t = e.touches[0];
-        startX = t.clientX;
-        startY = t.clientY;
-      }, { passive: true, once: false });
-
-      tab.addEventListener('touchend', (e) => {
-        const t = e.changedTouches[0];
-        if (Math.abs(t.clientX - startX) < MOVE_THRESHOLD &&
-          Math.abs(t.clientY - startY) < MOVE_THRESHOLD) {
-          handleTabInteraction(index, middleIndex);
-        }
-      }, { passive: true });
-
-      tab.dataset.touchEnhanced = 'true';
-    });
-  }
-
-  function handleTabInteraction(tabIndex, middleIndex) {
-    const lyricsElement = document.querySelector('.lyrics-plus-integrated');
+  function handleTabInteraction(clickedIndex, middleIndex) {
+    const lyricsElement = document.querySelector(SELECTORS.LYRICS);
     if (!lyricsElement) return;
 
-    const shouldShow = tabIndex === middleIndex;
-    const currentDisplay = lyricsElement.style.display;
-
-    // Avoid unnecessary reflows
-    if ((shouldShow && currentDisplay === 'block') ||
-      (!shouldShow && currentDisplay === 'none')) {
-      return;
-    }
+    const shouldShow = clickedIndex === middleIndex;
+    
+    if (shouldShow && lyricsElement.style.display === 'block') return;
+    if (!shouldShow && lyricsElement.style.display === 'none') return;
 
     lyricsElement.style.display = shouldShow ? 'block' : 'none';
 
     if (shouldShow) {
-      document.querySelector("#tab-renderer").scrollTop = 0;
-      const videoElement = document.querySelector('video');
-      if (videoElement && typeof scrollActiveLine === 'function') {
-        try {
-          scrollActiveLine(videoElement.currentTime, true);
-        } catch (e) {
-          console.warn('scrollActiveLine failed:', e);
-        }
+      const scrollContainer = document.querySelector(SELECTORS.SCROLL_CONTAINER);
+      if (scrollContainer) scrollContainer.scrollTop = 0;
+      
+      const videoElement = document.querySelector(SELECTORS.VIDEO);
+      if (videoElement && typeof window.scrollActiveLine === 'function') {
+        try { window.scrollActiveLine(videoElement.currentTime, true); } catch (e) {}
       }
     }
   }
 
-  function checkAndApplyTabLogic() {
-    const tabs = document.querySelectorAll(
-      'tp-yt-paper-tab.tab-header.style-scope.ytmusic-player-page'
-    );
+  function attachTouchLogic(tab, index, middleIndex) {
+    if (tab.dataset.forceTabEnhanced === 'true') return;
 
-    if (tabs.length >= 3) {
-      const middleIndex = Math.floor(tabs.length / 2);
-      const middleTab = tabs[middleIndex];
+    const MOVE_THRESHOLD = 10;
+    let startX = 0, startY = 0;
 
-      const needsReinit = currentMiddleIndex !== middleIndex ||
-        !lastMiddleTab ||
-        !document.contains(lastMiddleTab) ||
-        lastMiddleTab !== middleTab;
+    tab.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+    }, { passive: true });
 
-      if (needsReinit) {
-        currentMiddleIndex = middleIndex;
-
-        forceActivateMiddleTab(middleTab);
-
-        observeMiddleTab(middleTab);
-
-        enhanceTouchHandling(tabs, middleIndex);
-
-        tabs.forEach((tab, index) => {
-          if (!tab.dataset.clickEnhanced || !document.contains(tab)) {
-            tab.addEventListener('click', () => handleTabInteraction(index, middleIndex), { passive: true });
-            tab.dataset.clickEnhanced = 'true';
-          }
-        });
-      } else {
-        forceActivateMiddleTab(middleTab);
+    tab.addEventListener('touchend', (e) => {
+      const t = e.changedTouches[0];
+      if (Math.abs(t.clientX - startX) < MOVE_THRESHOLD &&
+          Math.abs(t.clientY - startY) < MOVE_THRESHOLD) {
+        handleTabInteraction(index, middleIndex);
       }
-    } else if (tabs.length < 3) {
-      currentMiddleIndex = -1;
-      if (middleTabObserver) {
-        middleTabObserver.disconnect();
-        middleTabObserver = null;
-      }
-      lastMiddleTab = null;
-    }
+    }, { passive: true });
+
+    tab.addEventListener('click', () => {
+      handleTabInteraction(index, middleIndex);
+    }, { passive: true });
+
+    tab.dataset.forceTabEnhanced = 'true';
   }
 
-  function ensureSidePanelActive() {
-    const sidePanel = document.querySelector('#side-panel');
-    if (sidePanel?.hasAttribute('inert')) {
-      sidePanel.removeAttribute('inert');
+  function processTabs(container) {
+    const tabs = Array.from(container.querySelectorAll(SELECTORS.TAB));
+    if (tabs.length < 3) return;
+
+    const middleIndex = Math.floor(tabs.length / 2);
+    const middleTab = tabs[middleIndex];
+
+    forceActivateMiddleTab(middleTab);
+
+    if (currentMiddleTab !== middleTab) {
+      if (middleTabObserver) middleTabObserver.disconnect();
+      
+      currentMiddleTab = middleTab;
+      middleTabObserver = new MutationObserver(() => {
+         if (!isUpdating) forceActivateMiddleTab(middleTab);
+      });
+      
+      middleTabObserver.observe(middleTab, { 
+        attributes: true, 
+        attributeFilter: ['class', 'aria-selected', 'disabled'] 
+      });
     }
+
+    tabs.forEach((tab, index) => {
+      attachTouchLogic(tab, index, middleIndex);
+    });
   }
 
-  function maintainObservers() {
-    const currentSidePanel = document.querySelector('#side-panel');
+  function initSidePanelObserver() {
+    const sidePanel = document.querySelector(SELECTORS.SIDE_PANEL);
+    if (!sidePanel || sidePanelObserver) return;
 
-    if (currentSidePanel) {
-      if (currentSidePanel !== observedSidePanelEl) {
-        if (sidePanelObserver) sidePanelObserver.disconnect();
+    const ensureActive = () => {
+      if (sidePanel.hasAttribute('inert')) sidePanel.removeAttribute('inert');
+    };
+    ensureActive();
 
-        ensureSidePanelActive();
+    sidePanelObserver = new MutationObserver((mutations) => {
+      if (mutations.some(m => m.attributeName === 'inert')) ensureActive();
+    });
+    sidePanelObserver.observe(sidePanel, { attributes: true, attributeFilter: ['inert'] });
+  }
 
-        sidePanelObserver = new MutationObserver((mutations) => {
-          if (mutations.some(m => m.type === 'attributes' && m.attributeName === 'inert')) {
-            ensureSidePanelActive();
-          }
-        });
+  const mainObserver = new MutationObserver(() => {
+    const tabContainer = document.querySelector(SELECTORS.TAB_CONTAINER);
 
-        sidePanelObserver.observe(currentSidePanel, {
-          attributes: true,
-          attributeFilter: ['inert']
-        });
-        observedSidePanelEl = currentSidePanel;
-      }
-    } else if (observedSidePanelEl) {
-      if (sidePanelObserver) {
-        sidePanelObserver.disconnect();
-        sidePanelObserver = null;
-      }
-      observedSidePanelEl = null;
-    }
+    if (tabContainer) {
+      processTabs(tabContainer);
 
-    const sampleTab = document.querySelector('tp-yt-paper-tab.tab-header.style-scope.ytmusic-player-page');
-    const currentContainer = sampleTab?.parentElement;
-
-    if (currentContainer) {
-      if (currentContainer !== observedTabContainerEl) {
-        if (tabContainerObserver) tabContainerObserver.disconnect();
-
-        checkAndApplyTabLogic();
-
+      if (!tabContainerObserver) {
         tabContainerObserver = new MutationObserver(() => {
-          checkAndApplyTabLogic();
+          processTabs(tabContainer);
         });
-
-        tabContainerObserver.observe(currentContainer, {
-          childList: true,
-          subtree: false
-        });
-        observedTabContainerEl = currentContainer;
+        tabContainerObserver.observe(tabContainer, { childList: true, subtree: false });
       }
-
-      // Periodically verify middle tab state
-      if (lastMiddleTab && document.contains(lastMiddleTab)) {
-        forceActivateMiddleTab(lastMiddleTab);
-      } else if (lastMiddleTab && !document.contains(lastMiddleTab)) {
-        checkAndApplyTabLogic();
-      }
-    } else if (observedTabContainerEl) {
-      if (tabContainerObserver) {
-        tabContainerObserver.disconnect();
-        tabContainerObserver = null;
-      }
-      observedTabContainerEl = null;
-      currentMiddleIndex = -1;
-      lastMiddleTab = null;
     }
-  }
 
-  // Initial setup
-  maintainObservers();
-
-  const intervalId = setInterval(maintainObservers, 3000);
-
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-      maintainObservers();
-    }
+    initSidePanelObserver();
   });
 
+  mainObserver.observe(document.body, { childList: true, subtree: true });
+
   window.addEventListener('beforeunload', () => {
-    clearInterval(intervalId);
-    if (rafId) cancelAnimationFrame(rafId);
-    middleTabObserver?.disconnect();
-    sidePanelObserver?.disconnect();
-    tabContainerObserver?.disconnect();
+    mainObserver.disconnect();
+    if (tabContainerObserver) tabContainerObserver.disconnect();
+    if (middleTabObserver) middleTabObserver.disconnect();
+    if (sidePanelObserver) sidePanelObserver.disconnect();
   }, { once: true });
 
 })();
