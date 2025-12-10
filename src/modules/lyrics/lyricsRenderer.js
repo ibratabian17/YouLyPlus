@@ -585,6 +585,16 @@ class LyricsPlusRenderer {
   _onLyricClick(e) {
     const time = parseFloat(e.currentTarget.dataset.startTime);
     this._seekPlayerTo(time - 0.05);
+
+    if (this.activeLineIds && this.activeLineIds.size > 0) {
+      this.activeLineIds.forEach((lineId) => {
+        const line = document.getElementById(lineId);
+        if (line) {
+          this._resetSyllables(line, true);
+        }
+      });
+    }
+
     this._scrollToActiveLine(e.currentTarget, true);
   }
 
@@ -2271,10 +2281,10 @@ class LyricsPlusRenderer {
     }
   }
 
-  _resetSyllable(syllable) {
+  _resetSyllable(syllable, noFade = false) {
     if (!syllable) return;
     syllable.style.animation = "";
-    if (!syllable.classList.contains("finished")) {
+    if (!syllable.classList.contains("finished") && !noFade) {
       syllable.classList.add("finished");
       syllable.offsetHeight;
     }
@@ -2286,10 +2296,10 @@ class LyricsPlusRenderer {
     });
   }
 
-  _resetSyllables(line) {
+  _resetSyllables(line, noFade = false) {
     if (!line) return;
-    Array.from(line.getElementsByClassName("lyrics-syllable")).forEach(
-      this._resetSyllable
+    Array.from(line.getElementsByClassName("lyrics-syllable")).forEach((syllable) =>
+      this._resetSyllable(syllable, noFade)
     );
   }
 
