@@ -46,18 +46,12 @@ class LyricsPlusRenderer {
     this._boundTouchEndHandler = null;
     this._boundTouchCancelHandler = null;
     this.currentScrollOffset = 0;
-    this.touchStartY = 0;
-    this.isTouching = false;
     this.userScrollIdleTimer = null;
     this.isUserControllingScroll = false;
     this.userScrollRevertTimer = null;
 
     this._lastActiveIndex = 0;
     this._tempActiveLines = [];
-    this._tempSyllableHigh = [];
-    this._tempSyllableFinish = [];
-    this._tempSyllableReset = [];
-    this._activeSyllablesBuffer = [];
 
     this._getContainer();
   }
@@ -303,7 +297,6 @@ class LyricsPlusRenderer {
       this.touchState.isActive = true;
       this.touchState.startY = touch.clientY;
       this.touchState.lastY = touch.clientY;
-      this.touchState.lastTime = now;
       this.touchState.velocity = 0;
       this.touchState.samples = [{ y: touch.clientY, time: now }];
 
@@ -602,7 +595,6 @@ class LyricsPlusRenderer {
     lyrics,
     displayMode,
     singerClassMap,
-    elementPool,
     fragment
   ) {
     // --- Helper Functions ---
@@ -641,7 +633,7 @@ class LyricsPlusRenderer {
 
     lyrics.data.forEach((line) => {
       // 1. Line & Container Setup
-      let currentLine = elementPool.lines.pop() || document.createElement("div");
+      let currentLine = document.createElement("div");
       currentLine.innerHTML = "";
       currentLine.className = "lyrics-line";
       currentLine.dataset.startTime = line.startTime;
@@ -702,7 +694,7 @@ class LyricsPlusRenderer {
       };
 
       const createSyllableElement = (s, totalDuration, idx, isBg) => {
-        const sylSpan = elementPool.syllables.pop() || document.createElement("span");
+        const sylSpan =  document.createElement("span");
         sylSpan.innerHTML = "";
         sylSpan.className = "lyrics-syllable";
 
@@ -756,7 +748,7 @@ class LyricsPlusRenderer {
           if (char === " ") {
             sylSpan.appendChild(document.createTextNode(" "));
           } else {
-            const charSpan = elementPool.chars.pop() || document.createElement("span");
+            const charSpan = document.createElement("span");
             charSpan.textContent = char;
             charSpan.className = "char";
 
@@ -845,7 +837,7 @@ class LyricsPlusRenderer {
         const combinedText = wordBuffer.map((s) => this._getDataText(s)).join("");
         const isBgWord = wordBuffer[0].isBackground || false;
 
-        const wordSpan = elementPool.syllables.pop() || document.createElement("span");
+        const wordSpan = document.createElement("span");
         wordSpan.innerHTML = "";
         wordSpan.className = "lyrics-word";
 
@@ -1053,12 +1045,11 @@ class LyricsPlusRenderer {
     lyrics,
     displayMode,
     singerClassMap,
-    elementPool,
     fragment
   ) {
     const lineFragment = document.createDocumentFragment();
     lyrics.data.forEach((line) => {
-      const lineDiv = elementPool.lines.pop() || document.createElement("div");
+      const lineDiv = document.createElement("div");
       lineDiv.innerHTML = "";
       lineDiv.className = "lyrics-line";
       lineDiv.dataset.startTime = line.startTime;
@@ -1392,11 +1383,9 @@ class LyricsPlusRenderer {
 
     if (isDualSide) container.classList.add("dual-side-lyrics");
 
-    const elementPool = { lines: [], syllables: [], chars: [] };
-
     const createGapLine = (gapStart, gapEnd, classesToInherit = null) => {
       const gapDuration = gapEnd - gapStart;
-      const gapLine = elementPool.lines.pop() || document.createElement("div");
+      const gapLine = document.createElement("div");
       gapLine.className = "lyrics-line lyrics-gap";
       gapLine.dataset.startTime = gapStart;
       gapLine.dataset.endTime = gapEnd;
@@ -1421,8 +1410,7 @@ class LyricsPlusRenderer {
       const lyricsWord = document.createElement("div");
       lyricsWord.className = "lyrics-word";
       for (let i = 0; i < 3; i++) {
-        const syllableSpan =
-          elementPool.syllables.pop() || document.createElement("span");
+        const syllableSpan = document.createElement("span");
         syllableSpan.className = "lyrics-syllable";
         const syllableStart = (gapStart + (i * gapDuration) / 3) * 1000;
         const syllableDuration = (gapDuration / 3 / 0.9) * 1000;
@@ -1444,7 +1432,6 @@ class LyricsPlusRenderer {
         lyrics,
         displayMode,
         singerClassMap,
-        elementPool,
         fragment
       );
     } else {
@@ -1452,7 +1439,6 @@ class LyricsPlusRenderer {
         lyrics,
         displayMode,
         singerClassMap,
-        elementPool,
         fragment
       );
     }
@@ -2552,12 +2538,10 @@ class LyricsPlusRenderer {
     if (!container) return null;
     if (this.resizeObserver) this.resizeObserver.disconnect();
 
-    this._lastResizeContentRect = null;
 
     this.resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (entry.target !== container) continue;
-        this._lastResizeContentRect = entry.contentRect || null;
         this._debouncedResizeHandler(container);
       }
     });
@@ -2867,8 +2851,6 @@ class LyricsPlusRenderer {
     this.fontCache = {};
 
     this._cachedContainerRect = null;
-    this._cachedVisibleLines = null;
-    this._lastVisibilityHash = null;
 
     this.currentScrollOffset = 0;
     this.isProgrammaticScrolling = false;
@@ -2886,10 +2868,6 @@ class LyricsPlusRenderer {
 
     this._lastActiveIndex = 0;
     this._tempActiveLines = [];
-    this._tempSyllableHigh = [];
-    this._tempSyllableFinish = [];
-    this._tempSyllableReset = [];
-    this._activeSyllablesBuffer = [];
   }
 
   /**
