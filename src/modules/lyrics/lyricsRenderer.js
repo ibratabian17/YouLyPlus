@@ -317,20 +317,20 @@ class LyricsPlusRenderer {
 
     this._boundTouchMoveHandler = (event) => {
       if (!this.touchState.isActive) return;
-      if (event.cancelable) event.preventDefault(); 
-      
+      if (event.cancelable) event.preventDefault();
+
       const touch = event.touches[0];
       const now = performance.now();
       const currentY = touch.clientY;
       const deltaY = this.touchState.lastY - currentY;
-      
+
       this.touchState.lastY = currentY;
       this.touchState.samples.push({ y: currentY, time: now });
       if (this.touchState.samples.length > this.touchState.maxSamples) {
         this.touchState.samples.shift();
       }
 
-      this._handleUserScroll(deltaY); 
+      this._handleUserScroll(deltaY);
     };
 
     this._boundTouchEndHandler = () => {
@@ -338,15 +338,15 @@ class LyricsPlusRenderer {
       this.touchState.isActive = false;
       const now = performance.now();
       const samples = this.touchState.samples;
-      
+
       if (samples.length >= 2) {
         const recentSamples = samples.filter((sample) => now - sample.time <= 150);
         if (recentSamples.length >= 2) {
           const newest = recentSamples[recentSamples.length - 1];
           const oldest = recentSamples[0];
           const timeDelta = newest.time - oldest.time;
-          const yDelta = oldest.y - newest.y; 
-          
+          const yDelta = oldest.y - newest.y;
+
           if (timeDelta > 0) {
             this.touchState.velocity = yDelta / timeDelta;
           }
@@ -417,12 +417,12 @@ class LyricsPlusRenderer {
    * @private
    */
   _startMomentumScroll() {
-    const deceleration = 0.97; 
+    const deceleration = 0.97;
     const minVelocity = 0.05;
 
     const animate = () => {
       const scrollDelta = this.touchState.velocity * 16;
-      
+
       this._handleUserScroll(scrollDelta);
 
       this.touchState.velocity *= deceleration;
@@ -591,16 +591,6 @@ class LyricsPlusRenderer {
   _onLyricClick(e) {
     const time = parseFloat(e.currentTarget.dataset.startTime);
     this._seekPlayerTo(time - 0.05);
-
-    if (this.activeLineIds && this.activeLineIds.size > 0) {
-      this.activeLineIds.forEach((lineId) => {
-        const line = document.getElementById(lineId);
-        if (line) {
-          this._resetSyllables(line, true);
-        }
-      });
-    }
-
     this._scrollToActiveLine(e.currentTarget, true);
   }
 
@@ -2095,6 +2085,7 @@ class LyricsPlusRenderer {
 
         const hasHighlight = classList.contains("highlight");
         const hasFinished = classList.contains("finished");
+        const hasPreHighlight = classList.contains("pre-highlight");
 
         if (currentTime >= startTime && currentTime <= endTime) {
           if (!hasHighlight) {
@@ -2113,6 +2104,19 @@ class LyricsPlusRenderer {
         } else {
           if (hasHighlight || hasFinished) {
             this._resetSyllable(syllable);
+          } else if (hasPreHighlight) {
+            let shouldReset = true;
+
+            if (j > 0) {
+              const prevSyllable = syllables[j - 1];
+              if (prevSyllable && prevSyllable.classList.contains("highlight")) {
+                shouldReset = false;
+              }
+            }
+
+            if (shouldReset) {
+              this._resetSyllable(syllable, true);
+            }
           }
         }
       }
