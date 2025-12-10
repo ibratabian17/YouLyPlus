@@ -235,7 +235,7 @@
 }
 
 /* --- Word & Syllable Base Styles --- */
-.lyrics-word {
+.lyrics-word:not(.allow-break) {
     display: inline-block;
     vertical-align: baseline;
 }

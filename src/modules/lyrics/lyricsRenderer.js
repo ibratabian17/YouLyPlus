@@ -496,7 +496,7 @@ class LyricsPlusRenderer {
         lastElement.offsetTop +
         lastElement.offsetHeight -
         firstElement.offsetTop;
-        
+
       if (contentTotalHeight > containerHeight) {
         maxAllowedScroll =
           containerHeight - (lastElement.offsetTop + lastElement.offsetHeight);
@@ -505,7 +505,7 @@ class LyricsPlusRenderer {
 
     const metadata = container.querySelector('.lyrics-plus-metadata');
     if (metadata) {
-         maxAllowedScroll -= metadata.offsetHeight || 100;
+      maxAllowedScroll -= metadata.offsetHeight || 100;
     }
 
     newScrollOffset = Math.max(newScrollOffset, maxAllowedScroll);
@@ -821,6 +821,12 @@ class LyricsPlusRenderer {
         });
       };
 
+      const shouldAllowBreak = (text) => {
+        text = text.trim();
+        if (text.length >= 12) return true;
+        return false;
+      }
+
       // --- Core Render Function ---
 
       const renderWordSpan = (wordBuffer, shouldEmphasize, isLastInContiner = false) => {
@@ -836,6 +842,10 @@ class LyricsPlusRenderer {
         const wordSpan = elementPool.syllables.pop() || document.createElement("span");
         wordSpan.innerHTML = "";
         wordSpan.className = "lyrics-word";
+
+        if (shouldAllowBreak(combinedText)) {
+          wordSpan.classList.add("allow-break");
+        }
 
         const referenceFont = mainContainer.firstChild
           ? getComputedFont(mainContainer.firstChild)
@@ -869,15 +879,15 @@ class LyricsPlusRenderer {
           }
 
           if (!s.isBackground && !shouldEmphasize) {
-             const textWidth = this._getTextWidth(txtContent.trim(), referenceFont);
-             const spaceWidth = this._getTextWidth(txtContent, referenceFont); 
-             if (textWidth > 0) {
-                 sylSpan._wipeRatio = textWidth / (spaceWidth);
-             } else {
-                 sylSpan._wipeRatio = 1;
-             }
+            const textWidth = this._getTextWidth(txtContent.trim(), referenceFont);
+            const spaceWidth = this._getTextWidth(txtContent, referenceFont);
+            if (textWidth > 0) {
+              sylSpan._wipeRatio = textWidth / (spaceWidth);
+            } else {
+              sylSpan._wipeRatio = 1;
+            }
           } else {
-             sylSpan._wipeRatio = 1;
+            sylSpan._wipeRatio = 1;
           }
 
           wrap.appendChild(sylSpan);
@@ -935,7 +945,7 @@ class LyricsPlusRenderer {
         targetContainer.appendChild(wordSpan);
 
         const trailText = combinedText.match(/\s+$/);
-        if (trailText  && !isLastInContiner) targetContainer.appendChild(document.createTextNode(trailText[0]));
+        if (trailText && !isLastInContiner) targetContainer.appendChild(document.createTextNode(trailText[0]));
 
         pendingSyllable = syllableElements.length > 0 ? syllableElements[syllableElements.length - 1] : null;
         pendingSyllableFont = referenceFont;
@@ -970,14 +980,14 @@ class LyricsPlusRenderer {
         let lastBgGroupIdx = -1;
 
         for (let i = 0; i < logicalWordGroups.length; i++) {
-           const g = logicalWordGroups[i];
-           if (g.length > 0) {
-              if (g[0].isBackground) {
-                  lastBgGroupIdx = i;
-              } else {
-                  lastMainGroupIdx = i;
-              }
-           }
+          const g = logicalWordGroups[i];
+          if (g.length > 0) {
+            if (g[0].isBackground) {
+              lastBgGroupIdx = i;
+            } else {
+              lastMainGroupIdx = i;
+            }
+          }
         }
 
         logicalWordGroups.forEach((group, groupIdx) => {
@@ -986,9 +996,9 @@ class LyricsPlusRenderer {
           const groupText = group.map((s) => this._getDataText(s)).join("");
           const groupDuration = group.reduce((acc, s) => acc + s.duration, 0);
 
-          const isLastGroupInContainer = isBg 
-             ? groupIdx === lastBgGroupIdx 
-             : groupIdx === lastMainGroupIdx;
+          const isLastGroupInContainer = isBg
+            ? groupIdx === lastBgGroupIdx
+            : groupIdx === lastMainGroupIdx;
 
 
           const isGroupGrowable =
@@ -1007,7 +1017,7 @@ class LyricsPlusRenderer {
               const syllableText = this._getDataText(s);
               const isLastInGroup = idxInGroup === group.length - 1;
 
-              if (syllableText.endsWith("-") || isLastInGroup) {
+              if (groupText.trim().length >= 12 && syllableText.endsWith("-") || isLastInGroup) {
                 renderWordSpan(visualWordBuffer, false, isLastGroupInContainer);
                 visualWordBuffer = [];
               }
@@ -2339,7 +2349,7 @@ class LyricsPlusRenderer {
 
 
     if (forceScroll || isUserScrolling) {
-      return; 
+      return;
     }
 
     const referenceLine =
@@ -2355,7 +2365,7 @@ class LyricsPlusRenderer {
     const delayIncrement = 30;
     let delayCounter = 0;
     const elements = this.cachedLyricsLines;
-    
+
     const visibleIds = this.visibleLineIds;
 
     const styleUpdates = [];
@@ -2480,7 +2490,7 @@ class LyricsPlusRenderer {
     const container = this._getContainer();
     if (!container || !container.parentElement) return null;
     if (this.visibilityObserver) this.visibilityObserver.disconnect();
-    
+
     const isHideOffscreenEnabled = container.classList.contains("hide-offscreen");
 
     this.visibilityObserver = new IntersectionObserver(
@@ -2488,23 +2498,23 @@ class LyricsPlusRenderer {
         entries.forEach((entry) => {
           const target = entry.target;
           const id = target.id;
-          
+
           if (entry.isIntersecting) {
             this.visibleLineIds.add(id);
             if (isHideOffscreenEnabled) {
-                target.classList.remove("viewport-hidden");
+              target.classList.remove("viewport-hidden");
             }
           } else {
             this.visibleLineIds.delete(id);
             if (isHideOffscreenEnabled) {
-                target.classList.add("viewport-hidden");
+              target.classList.add("viewport-hidden");
             }
           }
         });
       },
       { root: container.parentElement, rootMargin: "200px 0px", threshold: 0.1 }
     );
-    
+
     if (this.cachedLyricsLines) {
       this.cachedLyricsLines.forEach((line) => {
         if (line) this.visibilityObserver.observe(line);
