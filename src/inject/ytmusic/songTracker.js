@@ -43,10 +43,12 @@
     }
 
     function setupSeekListener() {
-        window.addEventListener('LYPLUS_SEEK_TO', (event) => {
+        window.addEventListener('message', (event) => {
+            if (!event.data || event.data.type !== 'LYPLUS_SEEK_TO') return;
+
             const player = getPlayer();
-            if (player && event.detail && typeof event.detail.time === 'number') {
-                player.seekTo(event.detail.time, true);
+            if (player && typeof event.data.time === 'number') {
+                player.seekTo(event.data.time, true);
             }
         });
     }

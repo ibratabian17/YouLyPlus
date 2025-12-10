@@ -13,7 +13,7 @@ const uiConfig = {
     ],
     disableNativeTick: true,
     seekTo: (time) => {
-        window.dispatchEvent(new CustomEvent('LYPLUS_SEEK_TO', { detail: { time } }));
+        window.postMessage({ type: 'LYPLUS_SEEK_TO', time: time }, '*');
     }
 };
 let progressBar;
