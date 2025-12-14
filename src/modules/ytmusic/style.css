@@ -61,6 +61,13 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
     opacity: 1;
 }
 
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .ytmusic-browse-response,
+#layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="MINIPLAYER_IN_PLAYER_PAGE"] .ytmusic-browse-response,
+ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response
+{
+ display: none;
+}
+
 /* Make backgrounds transparent to reveal the blur container */
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #mini-guide-background,
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #nav-bar-background,
