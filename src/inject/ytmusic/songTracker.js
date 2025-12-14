@@ -88,6 +88,20 @@
 
     // --- Metadata Extraction ---
 
+    function getMetadataFromMediaSession() {
+        if (!navigator.mediaSession || !navigator.mediaSession.metadata) return null;
+
+        const md = navigator.mediaSession.metadata;
+        const album = md.album || "";
+
+        return {
+            title: md.title,
+            artist: md.artist,
+            album: album,
+            isVideo: album === ""
+        };
+    }
+
     function getMetadataFromDOM() {
         const titleEl = document.querySelector('.title.style-scope.ytmusic-player-bar');
         const bylineEl = document.querySelector('.subtitle.style-scope.ytmusic-player-bar');
@@ -143,9 +157,11 @@
 
     function checkForSongChange() {
         const player = getPlayer();
-        const domInfo = getMetadataFromDOM();
+        
+        // Try MediaSession first, fall back to DOM
+        let songInfo = getMetadataFromMediaSession() || getMetadataFromDOM();
 
-        if (!player || !domInfo) return;
+        if (!player || !songInfo) return;
 
         let duration = 0;
         let videoId = "";
@@ -159,19 +175,19 @@
             duration = player.getDuration();
         }
 
-        if (!domInfo.title || !domInfo.artist) return;
+        if (!songInfo.title || !songInfo.artist) return;
 
         const hasChanged = videoId !== currentSong.videoId ||
-            domInfo.title !== currentSong.title;
+            songInfo.title !== currentSong.title;
 
         if (hasChanged) {
             currentSong = {
-                title: domInfo.title,
-                artist: domInfo.artist,
-                album: domInfo.album,
+                title: songInfo.title,
+                artist: songInfo.artist,
+                album: songInfo.album,
                 duration: duration,
                 videoId: videoId,
-                isVideo: domInfo.isVideo
+                isVideo: songInfo.isVideo
             };
 
             startTimeUpdater();
