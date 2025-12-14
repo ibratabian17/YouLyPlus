@@ -1,6 +1,6 @@
 # YouLy+
 
-**Elevate Your YouTube Music & Tidal Experience with Dynamic, Karaoke-Style Lyrics.**
+**Elevate Your YouTube Music, Tidal & Apple Music Experience with Dynamic, Karaoke-Style Lyrics.**
 
 [![License](https://img.shields.io/github/license/ibratabian17/YouLyPlus?style=for-the-badge)](https://github.com/ibratabian17/YouLyPlus/blob/main/LICENSE)
 [![Latest Version](https://img.shields.io/github/v/release/ibratabian17/YouLyPlus?style=for-the-badge)](https://github.com/ibratabian17/YouLyPlus/releases)
@@ -15,8 +15,10 @@
 
 ## 🌟 Why YouLy+?
 
-YouTube Music & Tidal are great for listening, but their default lyrics are often just static, plain text.  
-YouLy+ completely transforms this by injecting a rich, interactive, and beautifully animated karaoke-style experience directly into the player interface.
+Streaming services offer great libraries, but their web interfaces often lag behind in user experience.
+
+*   **For YouTube Music & Tidal:** The default lyrics are often static, plain text, and unengaging. YouLy+ transforms this by injecting rich, synced karaoke-style lyrics.
+*   **For Apple Music Web:** The native lyrics UI can be heavy, buggy, and resource-intensive. YouLy+ replaces this broken interface with a lightweight, smooth, and highly customizable alternative.
 
 It's lightweight, fully open-source, and designed to make your music sessions more engaging and fun.
 
@@ -27,9 +29,10 @@ YouLy+ is packed with features designed to enhance your lyrics experience:
 ### 🎤 Core Lyrics Experience
 
 -   **Advanced Synchronized Lyrics:** Enjoy real-time, accurately synced lyrics with line-by-line highlighting.
--   **Word-by-Word Highlighting:** Immersive karaoke-style experience with precise word highlighting.
+-   **Word-by-Word Highlighting (YT Music/Tidal):** Immersive karaoke-style experience with precise word highlighting for supported platforms.
+-   **Apple Music Lyrics Engine Overhaul:** Replaces the heavy and often broken built-in Apple Music lyrics UI with YouLy+'s optimized, lightweight interface while maintaining synchronization. and with more source, so if the song doesnt have synced, it would automatically find it!
 -   **Official Subtitle Fallback:** Automatically uses official subtitles if synced lyrics aren't available.
--   **Multiple Providers:** Choose where your lyrics come from! Works seamlessly for both YouTube Music and Tidal.
+-   **Multiple Providers:** Choose where your lyrics come from! Works seamlessly across all three platforms.
 -   **Native Integration:** Replaces default lyrics panel with custom, interactive elements. Click-to-seek, scroll to find lines, and more!
 
 ### 🌐 Translation & Romanization
@@ -104,8 +107,12 @@ For the safest and easiest experience, install YouLy+ directly from your browser
 
 ## 🚀 Usage
 
-Once installed, simply open [YouTube Music](https://music.youtube.com/) **or [Tidal Web Player](https://listen.tidal.com/)** and play any song.  
-The lyrics panel will automatically be enhanced by YouLy+ with custom lyrics — no external API setup required (except for Gemini AI features).
+Once installed, simply open one of the supported players:
+*   **[YouTube Music](https://music.youtube.com/)**
+*   **[Tidal Web Player](https://listen.tidal.com/)**
+*   **[Apple Music Web](https://music.apple.com/)**
+
+Play any song, and the lyrics panel will automatically be enhanced by YouLy+.
 
 -   **Quick Settings:** Access quick toggles by clicking the YouLy+ icon in your browser's toolbar.
 -   **Full Settings:** For comprehensive customization, click **"More Settings"** from the popup.
@@ -146,7 +153,7 @@ These scripts will generate optimized packages for different browsers within the
 
 Contributions are highly welcome! Please feel free to fork this repository and submit a pull request. For significant changes or new features, it's recommended to open an issue first to discuss your ideas.
 
-This project is a dedicated effort covering both the client extension and the server backend. If YouLy+ enhances your YouTube Music experience, please consider supporting its continued development:
+This project is a dedicated effort covering both the client extension and the server backend. If YouLy+ enhances your music experience, please consider supporting its continued development:
 
 -   [**Support on Ko-fi**](https://ko-fi.com/ibratabian17)
 -   [**Support on Patreon**](https://patreon.com/ibratabian17)

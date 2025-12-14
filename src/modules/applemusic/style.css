@@ -1,0 +1,76 @@
+[data-testid="modal"] {
+    --lyrics-scroll-padding-top: 36%;
+}
+
+.lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v {
+    grid-template-columns: 32vw 40vw;
+    padding: 0 10vw;
+}
+
+[data-testid="modal"] #lyrics-plus-container {
+    display: block;
+    opacity: 1;
+    width: 100%;
+    height: 100vh;
+    z-index: 99;
+    grid-area: lyrics;
+    padding-top: calc(1em + 40%);
+    mix-blend-mode: lighten;
+}
+
+#lyrics-plus-container::-webkit-scrollbar {
+    display: none;
+}
+
+#lyrics-plus-container .lyrics-line {
+    font-size: var(--lyrics-line-font-size);
+    line-height: var(--lyrics-line-line-height);
+    margin-bottom: 0.5em;
+}
+
+
+/* --- Hiding ONLY Native Lyrics Text --- */
+article[data-testid="lyrics-fullscreen-modal"]:has(#lyrics-plus-container) .lyrics__lyrics {
+    display: none !important;
+}
+
+/* --- Controls --- */
+#lyrics-plus-buttons-wrapper {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    z-index: 1000;
+    display: flex;
+    gap: 12px;
+}
+
+#lyrics-plus-buttons-wrapper button {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    backdrop-filter: blur(15px);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+#lyrics-plus-buttons-wrapper button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+#lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-line.lyrics-activest) .background-vocal-container,
+#lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-plus-metadata.lyrics-activest) .background-vocal-container {
+    max-height: 10em;
+}
+
+#lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-line.lyrics-activest),
+#lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-plus-metadata.lyrics-activest) {
+    opacity: 0;
+    transition: opacity 0.3s ease 0.3s, transform 0.4s ease var(--lyrics-line-delay, 0ms), filter 0.3s ease;
+}

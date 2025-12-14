@@ -39,6 +39,19 @@
       ]
     },
     {
+      "matches": ["*://*.music.apple.com/*"],
+      "js": [
+        "src/lib/polyfill.js",
+        "src/localization.js",
+        "src/modules/lyrics/settings.js",
+        "src/modules/lyrics/lyricsManager.js",
+        "src/modules/lyrics/lyricsRenderer.js",
+        "src/modules/lyrics/dynamicBkg.js",
+        "src/modules/applemusic/index.js",
+        "src/content.js"
+      ]
+    },
+    {
       "matches": ["*://*.tidal.com/*"],
       "js": [
         "src/lib/polyfill.js",
@@ -69,6 +82,14 @@
         "src/assets/loading.gif"
       ],
       "matches": ["*://*.tidal.com/*"]
+    },
+    {
+      "resources": [
+        "src/modules/lyrics/lyrics.css",
+        "src/modules/applemusic/style.css",
+        "src/assets/loading.gif"
+      ],
+      "matches": ["*://*.music.apple.com/*"]
     }
   ],
   "background": {
