@@ -821,7 +821,7 @@ class LyricsPlusRenderer {
 
       const shouldAllowBreak = (text) => {
         text = text.trim();
-        if (text.length >= 12) return true;
+        if (text.length >= 16) return true;
         return false;
       }
 
