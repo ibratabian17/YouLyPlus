@@ -18,7 +18,18 @@ const uiConfig = {
 };
 
 // --- Globals ---
-injectDOMScript = function() { /* Empty */ };
+function injectDOMScript() {
+    if (!pBrowser?.runtime?.getURL) {
+        console.warn('APPLE MUSIC: runtime.getURL unavailable, skipping DOM script inject');
+        return;
+    }
+    const script = document.createElement('script');
+    script.src = pBrowser.runtime.getURL('src/inject/applemusic/songTracker.js');
+    script.onload = function () {
+        this.remove();
+    };
+    (document.head || document.documentElement).appendChild(script);
+}
 
 injectPlatformCSS = function() {
     if (document.querySelector('link[data-lyrics-plus-platform-style]')) return;
@@ -83,9 +94,8 @@ function tryInject() {
 
         lyricsRendererInstance._createLyricsContainer();
         
-        const info = getSongInfo();
-        if (info && info.title && typeof fetchAndDisplayLyrics === 'function') {
-            fetchAndDisplayLyrics(info, true);
+        if (currentSongInfo && currentSongInfo.title && typeof fetchAndDisplayLyrics === 'function') {
+            fetchAndDisplayLyrics(currentSongInfo, true);
         }
     }
 }
@@ -104,39 +114,10 @@ function startInjectionWatcher() {
     }, 1000);
 }
 
-function handleSongChange() {
-    if (songChangeTimeout) clearTimeout(songChangeTimeout);
-
-    const info = getSongInfo();
-    if (!info) {
-        if (navigator.mediaSession && navigator.mediaSession.metadata) {
-            songChangeTimeout = setTimeout(handleSongChange, 500);
-        }
-        return;
-    }
-
-    if (info.title !== currentSongInfo.title || info.artist !== currentSongInfo.artist) {
-        currentSongInfo = info;
-        window.postMessage({ type: 'LYPLUS_SONG_CHANGED', songInfo: currentSongInfo }, '*');
-        
-        if (document.getElementById('lyrics-plus-container')) {
-            if (typeof fetchAndDisplayLyrics === 'function') {
-                fetchAndDisplayLyrics(currentSongInfo, true);
-            }
-        }
-    }
-}
 
 // --- Setup ---
 
 function setupObservers() {
-    cachedAudioElement = document.getElementById('apple-music-player');
-    if (cachedAudioElement) {
-        cachedAudioElement.addEventListener('loadeddata', handleSongChange);
-        cachedAudioElement.addEventListener('durationchange', handleSongChange);
-        cachedAudioElement.addEventListener('play', handleSongChange);
-    }
-
     const portal = document.querySelector('.portal');
     if (portal) {
         portalObserver = new MutationObserver((mutations) => {
@@ -164,8 +145,6 @@ function setupObservers() {
 function initialize() {
     console.log('LyricsPlus: Apple Music Module Initialized (Optimized)');
     window.injectPlatformCSS();
-    
-    handleSongChange();
 
     setupObservers();
     tryInject();
@@ -176,3 +155,17 @@ if (document.readyState === 'loading') {
 } else {
     initialize();
 }
+
+window.addEventListener('message', (event) => {
+    if (event.source !== window || !event.data) {
+        return;
+    }
+
+    if (event.data.type === 'LYPLUS_TIME_UPDATE' && typeof event.data.currentTime === 'number') {
+        LyricsPlusAPI.updateCurrentTick(event.data.currentTime)
+    }
+
+    if (event.data.type === 'LYPLUS_SONG_CHANGED') {
+        currentSongInfo = event.data.songInfo;
+    }
+});

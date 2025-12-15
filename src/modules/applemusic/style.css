@@ -22,12 +22,14 @@
     display: none;
 }
 
-#lyrics-plus-container .lyrics-line {
+#lyrics-plus-container .lyrics-line{
     font-size: var(--lyrics-line-font-size);
     line-height: var(--lyrics-line-line-height);
-    margin-bottom: 0.5em;
 }
 
+#lyrics-plus-container .lyrics-line:not(.lyrics-gap){
+    margin-bottom: 0.4em;
+}
 
 /* --- Hiding ONLY Native Lyrics Text --- */
 article[data-testid="lyrics-fullscreen-modal"]:has(#lyrics-plus-container) .lyrics__lyrics {

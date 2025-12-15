@@ -1,4 +1,4 @@
-// inject/songTracker.js
+// inject/ytmusic/songTracker.js
 
 (function () {
     let currentSong = {};

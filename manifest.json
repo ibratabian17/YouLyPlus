@@ -71,9 +71,11 @@
         "src/modules/lyrics/lyrics.css",
         "src/modules/ytmusic/style.css",
         "src/inject/ytmusic/songTracker.js",
+        "src/modules/applemusic/style.css",
+        "src/inject/applemusic/songTracker.js",
         "src/assets/loading.gif"
       ],
-      "matches": ["*://*.music.youtube.com/*"]
+      "matches": ["*://*.music.youtube.com/*", "*://*.music.apple.com/*"]
     },
     {
       "resources": [
