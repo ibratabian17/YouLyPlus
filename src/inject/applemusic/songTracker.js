@@ -432,15 +432,15 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
             album: attrs.albumName,
             duration: durationSec,
             cover: artworkUrl,
-            appleId: item.id,
-            isVideo: item.type === 'music-videos',
+            appleId: attrs.playParams.catalogId,
+            isVideo: attrs.playParams.kind === 'music-videos',
             lyricsJSON: null
         };
 
         const storefront = mkInstance.storefrontId || 'us';
 
         if(attrs.hasLyrics){
-            const lyricsData = await fetchSyllableLyrics(item.id, storefront);
+            const lyricsData = await fetchSyllableLyrics(attrs.playParams.catalogId, storefront);
             try {
                 if (lyricsData?.data?.[0]) {
                     const ttmlData = lyricsData.data[0].attributes.ttmlLocalizations || lyricsData.data[0].attributes.ttml;
