@@ -40,10 +40,6 @@ export class MessageHandler {
   }
 
   static async fetchLyrics(message, sendResponse) {
-    if (message.songInfo.lyricsJSON && message.songInfo.lyricsJSON.lyrics.length > 0) {
-      const lyrics = DataParser.parseKPoeFormat(message.songInfo.lyricsJSON);
-        sendResponse({ success: true, lyrics, metadata: message.songInfo });
-    } else {
       try {
         const { lyrics } = await LyricsService.getOrFetch(message.songInfo, message.forceReload);
         sendResponse({ success: true, lyrics, metadata: message.songInfo });
@@ -51,7 +47,6 @@ export class MessageHandler {
         console.error(`Failed to fetch lyrics for "${message.songInfo?.title}":`, error);
         sendResponse({ success: false, error: error.message, metadata: message.songInfo });
       }
-    }
   }
 
   static async translateLyrics(message, sendResponse) {

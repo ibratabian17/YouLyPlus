@@ -12,6 +12,10 @@
     display: block;
 }
 
+[data-testid="modal"] #lyrics-plus-buttons-wrapper{
+    display: flex;
+}
+
 #lyplus-patch-container {
     opacity: 1;
     width: 100%;
@@ -39,7 +43,8 @@
 }
 
 /* --- Hiding ONLY Native Lyrics Text --- */
-article[data-testid="lyrics-fullscreen-modal"]:has(#lyrics-plus-container) .lyrics__lyrics {
+article[data-testid="lyrics-fullscreen-modal"]:has(#lyrics-plus-container) .lyrics__lyrics,
+.toggle-button.toggle-button--lyrics.lyrics-button  {
     display: none !important;
 }
 

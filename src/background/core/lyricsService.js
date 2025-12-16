@@ -18,45 +18,54 @@ export class LyricsService {
   }
 
   static async getOrFetch(songInfo, forceReload = false) {
-    const cacheKey = this.createCacheKey(songInfo);
+    if (songInfo.lyricsJSON && songInfo.lyricsJSON.lyrics.length > 0) {
+      const lyrics = DataParser.parseKPoeFormat(songInfo.lyricsJSON)
+      console.log('Using embedded lyrics (platform specific)')
+      return {
+        lyrics: lyrics,
+        version: Date.now()
+      };
+    } else {
+      const cacheKey = this.createCacheKey(songInfo);
 
-    if (!forceReload && state.hasCached(cacheKey)) {
-      return state.getCached(cacheKey);
-    }
-
-    if (!forceReload) {
-      const dbResult = await this.getFromDB(cacheKey);
-      if (dbResult) {
-        state.setCached(cacheKey, dbResult);
-        return dbResult;
+      if (!forceReload && state.hasCached(cacheKey)) {
+        return state.getCached(cacheKey);
       }
 
-      const localResult = await this.checkLocalLyrics(songInfo);
-      if (localResult) {
-        state.setCached(cacheKey, localResult);
-        return localResult;
+      if (!forceReload) {
+        const dbResult = await this.getFromDB(cacheKey);
+        if (dbResult) {
+          state.setCached(cacheKey, dbResult);
+          return dbResult;
+        }
+
+        const localResult = await this.checkLocalLyrics(songInfo);
+        if (localResult) {
+          state.setCached(cacheKey, localResult);
+          return localResult;
+        }
       }
-    }
 
-    if (state.hasOngoingFetch(cacheKey)) {
-      return state.getOngoingFetch(cacheKey);
-    }
+      if (state.hasOngoingFetch(cacheKey)) {
+        return state.getOngoingFetch(cacheKey);
+      }
 
-    const fetchPromise = this.fetchNewLyrics(songInfo, cacheKey, forceReload);
-    state.setOngoingFetch(cacheKey, fetchPromise);
-    
-    return fetchPromise;
+      const fetchPromise = this.fetchNewLyrics(songInfo, cacheKey, forceReload);
+      state.setOngoingFetch(cacheKey, fetchPromise);
+
+      return fetchPromise;
+    }
   }
 
   static async getFromDB(key) {
     const settings = await SettingsManager.get({ cacheStrategy: 'aggressive' });
-    
+
     if (settings.cacheStrategy === 'none') {
       return null;
     }
 
     const result = await lyricsDB.get(key);
-    
+
     if (!result) return null;
 
     const now = Date.now();
@@ -98,7 +107,7 @@ export class LyricsService {
       const fetchOptions = settings.cacheStrategy === 'none' ? { cache: 'no-store' } : {};
 
       const providers = this.getProviderOrder(settings);
-      
+
       let lyrics = null;
       for (const provider of providers) {
         lyrics = await this.fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload);
@@ -118,7 +127,7 @@ export class LyricsService {
       const result = { lyrics, version };
 
       state.setCached(cacheKey, result);
-      
+
       if (settings.cacheStrategy !== 'none') {
         await lyricsDB.set({ key: cacheKey, lyrics, version, timestamp: Date.now(), duration: songInfo.duration });
       }
@@ -134,7 +143,7 @@ export class LyricsService {
     const allProviders = Object.values(PROVIDERS).filter(
       p => p !== PROVIDERS.GOOGLE && p !== PROVIDERS.GEMINI
     );
-    
+
     return [
       settings.lyricsProvider,
       ...allProviders.filter(p => p !== settings.lyricsProvider)
@@ -145,7 +154,7 @@ export class LyricsService {
     switch (provider) {
       case PROVIDERS.KPOE:
         return KPoeService.fetch(songInfo, settings.lyricsSourceOrder, forceReload, fetchOptions);
-      
+
       case PROVIDERS.CUSTOM_KPOE:
         if (settings.customKpoeUrl) {
           return KPoeService.fetchCustom(
@@ -157,14 +166,14 @@ export class LyricsService {
           );
         }
         return null;
-      
+
       case PROVIDERS.LRCLIB:
         return LRCLibService.fetch(songInfo, fetchOptions);
-      
+
       case PROVIDERS.LOCAL:
         const localResult = await this.checkLocalLyrics(songInfo);
         return localResult?.lyrics || null;
-      
+
       default:
         return null;
     }
