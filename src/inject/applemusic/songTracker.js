@@ -355,7 +355,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
     let debounceTimer = null;
 
     console.log('LyricsPlus: Tracker Injected');
-    
+
 
     // --- 1. Fetcher Lirik Syllable ---
     async function fetchSyllableLyrics(songId, storefront) {
@@ -364,9 +364,27 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
             const developerToken = mkInstance.developerToken || mkInstance.configuration?.app?.developerToken;
             if (!developerToken) return null;
 
+            const rawLocale = document.documentElement.lang || navigator.language || 'en-US';
+            let scriptParam = 'en-Latn'; 
+            
+            try {
+                if (window.Intl && Intl.Locale) {
+                    const loc = new Intl.Locale(rawLocale);
+                    const baseLang = loc.language;
+                    const scriptCode = loc.maximize().script;
+                    
+                    if (baseLang && scriptCode) {
+                        scriptParam = `${baseLang}-${scriptCode}`;
+                    }
+                }
+            } catch (e) {
+                console.warn("LyricsPlus: Locale detection failed, using fallback.", e);
+            }
+
             const queryParams = new URLSearchParams({
-                'l[lyrics]': 'en-gb',
-                'l[script]': 'en-Latn',
+                'l': rawLocale,          
+                'l[lyrics]': rawLocale,
+                'l[script]': scriptParam,
                 'extend': 'ttmlLocalizations'
             });
 
@@ -381,22 +399,23 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
             if (mkInstance.musicUserToken) headers['Music-User-Token'] = mkInstance.musicUserToken;
 
             const res = await fetch(url, { headers });
-            if (!res.ok) return null;
+            if (!res.ok) {
+                // console.error("LyricsPlus API Error:", await res.text());
+                return null;
+            }
             return await res.json();
         } catch (e) {
+            console.error("LyricsPlus Fetch Error:", e);
             return null;
         }
     }
 
-    // --- 2. Proses Metadata ---
+    // --- 2. Process Metadata ---
     async function handleSongChange() {
         if (!mkInstance) return;
 
         const item = mkInstance.nowPlayingItem;
-
-        if (!item) return; 
-
-        if (!item.attributes || !item.id) return;
+        if (!item || !item.attributes || !item.id) return;
 
         if (lastProcessedID === item.id) return;
         
@@ -421,12 +440,19 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
         const storefront = mkInstance.storefrontId || 'us';
 
         if(attrs.hasLyrics){
-        const lyricsData = await fetchSyllableLyrics(item.id, storefront);
-        try {
-        songInfo.lyricsJSON = parseAppleTTML(lyricsData.data[0].attributes.ttmlLocalizations);
-        } catch(err) {
-
-        }}
+            const lyricsData = await fetchSyllableLyrics(item.id, storefront);
+            try {
+                if (lyricsData?.data?.[0]) {
+                    const ttmlData = lyricsData.data[0].attributes.ttmlLocalizations || lyricsData.data[0].attributes.ttml;
+                    
+                    if (typeof parseAppleTTML === 'function') {
+                        songInfo.lyricsJSON = parseAppleTTML(ttmlData);
+                    }
+                }
+            } catch(err) {
+                console.error("LyricsPlus: Parse error", err);
+            }
+        }
 
         window.postMessage({
             type: 'LYPLUS_SONG_CHANGED',
