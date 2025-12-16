@@ -8,6 +8,7 @@ import { lyricsDB, translationsDB, localLyricsDB } from '../storage/database.js'
 import { LyricsService } from './lyricsService.js';
 import { TranslationService } from './translationService.js';
 import { SponsorBlockService } from '../services/sponsorblockService.js';
+import { DataParser } from '../utils/dataParser.js';
 
 export class MessageHandler {
   static handle(message, sender, sendResponse) {
@@ -24,7 +25,7 @@ export class MessageHandler {
     };
 
     const handler = handlers[message.type];
-    
+
     if (handler) {
       handler().catch(error => {
         console.error(`Error handling ${message.type}:`, error);
@@ -39,12 +40,17 @@ export class MessageHandler {
   }
 
   static async fetchLyrics(message, sendResponse) {
-    try {
-      const { lyrics } = await LyricsService.getOrFetch(message.songInfo, message.forceReload);
-      sendResponse({ success: true, lyrics, metadata: message.songInfo });
-    } catch (error) {
-      console.error(`Failed to fetch lyrics for "${message.songInfo?.title}":`, error);
-      sendResponse({ success: false, error: error.message, metadata: message.songInfo });
+    if (message.songInfo.lyricsJSON && message.songInfo.lyricsJSON.lyrics.length > 0) {
+      const lyrics = DataParser.parseKPoeFormat(message.songInfo.lyricsJSON);
+        sendResponse({ success: true, lyrics, metadata: message.songInfo });
+    } else {
+      try {
+        const { lyrics } = await LyricsService.getOrFetch(message.songInfo, message.forceReload);
+        sendResponse({ success: true, lyrics, metadata: message.songInfo });
+      } catch (error) {
+        console.error(`Failed to fetch lyrics for "${message.songInfo?.title}":`, error);
+        sendResponse({ success: false, error: error.message, metadata: message.songInfo });
+      }
     }
   }
 
@@ -93,7 +99,7 @@ export class MessageHandler {
         lyricsDB.estimateSize(),
         translationsDB.estimateSize()
       ]);
-      
+
       sendResponse({
         success: true,
         sizeKB: lyricsStats.sizeKB + translationsStats.sizeKB,
