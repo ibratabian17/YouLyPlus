@@ -425,6 +425,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
         const attrs = item.attributes;
         const artworkUrl = attrs.artwork?.url ? attrs.artwork.url.replace('{w}', '800').replace('{h}', '800') : '';
         const durationSec = (attrs.durationInMillis || 0) / 1000;
+        const songId = attrs.playParams.catalogId || attrs.playParams.id;
 
         const songInfo = {
             title: attrs.name,
@@ -432,7 +433,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
             album: attrs.albumName,
             duration: durationSec,
             cover: artworkUrl,
-            appleId: attrs.playParams.catalogId,
+            appleId: songId,
             isVideo: attrs.playParams.kind === 'music-videos',
             lyricsJSON: null
         };
@@ -440,7 +441,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
         const storefront = mkInstance.storefrontId || 'us';
 
         if(attrs.hasLyrics){
-            const lyricsData = await fetchSyllableLyrics(attrs.playParams.catalogId, storefront);
+            const lyricsData = await fetchSyllableLyrics(songId, storefront);
             try {
                 if (lyricsData?.data?.[0]) {
                     const ttmlData = lyricsData.data[0].attributes.ttmlLocalizations || lyricsData.data[0].attributes.ttml;
