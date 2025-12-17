@@ -18,43 +18,56 @@ export class LyricsService {
   }
 
   static async getOrFetch(songInfo, forceReload = false) {
+    let embeddedFallback = null;
+
     if (songInfo.lyricsJSON && songInfo.lyricsJSON.lyrics.length > 0) {
-      const lyrics = DataParser.parseKPoeFormat(songInfo.lyricsJSON)
-      console.log('Using embedded lyrics (platform specific)')
-      return {
-        lyrics: lyrics,
+      const settings = await SettingsManager.get({ appleMusicTTMLBypass: false });
+      const lyricsJsonType = songInfo.lyricsJSON.type.toUpperCase();
+
+      const embeddedResult = {
+        lyrics: DataParser.parseKPoeFormat(songInfo.lyricsJSON),
         version: Date.now()
       };
-    } else {
-      const cacheKey = this.createCacheKey(songInfo);
 
-      if (!forceReload && state.hasCached(cacheKey)) {
-        return state.getCached(cacheKey);
+      if (!settings.appleMusicTTMLBypass || lyricsJsonType === "WORD") {
+        console.log('Using embedded lyrics (platform specific)');
+        return embeddedResult;
       }
-
-      if (!forceReload) {
-        const dbResult = await this.getFromDB(cacheKey);
-        if (dbResult) {
-          state.setCached(cacheKey, dbResult);
-          return dbResult;
-        }
-
-        const localResult = await this.checkLocalLyrics(songInfo);
-        if (localResult) {
-          state.setCached(cacheKey, localResult);
-          return localResult;
-        }
-      }
-
-      if (state.hasOngoingFetch(cacheKey)) {
-        return state.getOngoingFetch(cacheKey);
-      }
-
-      const fetchPromise = this.fetchNewLyrics(songInfo, cacheKey, forceReload);
-      state.setOngoingFetch(cacheKey, fetchPromise);
-
-      return fetchPromise;
+      
+      console.log('Apple Music TTML bypass active. Attempting to fetch external lyrics...');
+      embeddedFallback = embeddedResult;
     }
+
+    const cacheKey = this.createCacheKey(songInfo);
+    let result = null;
+
+    if (!forceReload) {
+      if (state.hasCached(cacheKey)) {
+        result = state.getCached(cacheKey);
+      } else {
+        result = await this.getFromDB(cacheKey) || await this.checkLocalLyrics(songInfo);
+        if (result) state.setCached(cacheKey, result);
+      }
+    }
+
+    if (!result) {
+      if (state.hasOngoingFetch(cacheKey)) {
+        result = await state.getOngoingFetch(cacheKey);
+      } else {
+        const fetchPromise = this.fetchNewLyrics(songInfo, cacheKey, forceReload);
+        state.setOngoingFetch(cacheKey, fetchPromise);
+        result = await fetchPromise;
+      }
+    }
+
+    if (embeddedFallback) {
+      if (!result || (result.type && result.type.toUpperCase() !== "WORD")) {
+        console.log('Fetched lyrics not WORD synced. Reverting to embedded Apple Music lyrics.');
+        return embeddedFallback;
+      }
+    }
+
+    return result;
   }
 
   static async getFromDB(key) {

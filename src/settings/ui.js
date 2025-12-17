@@ -40,6 +40,7 @@ function setupAutoSaveListeners() {
         { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' },
         { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' },
         { id: 'cache-strategy', key: 'cacheStrategy', type: 'value' },
+        { id: 'bypass-apple', key: 'appleMusicTTMLBypass', type: 'checkbox' },
     ];
 
     autoSaveControls.forEach(control => {
@@ -92,6 +93,7 @@ function updateUI(settings) {
     document.getElementById('custom-gemini-romanize-prompt').value = currentSettings.customGeminiRomanizePrompt || '';
     document.getElementById('custom-css').value = currentSettings.customCSS;
     document.getElementById('cache-strategy').value = currentSettings.cacheStrategy;
+    document.getElementById('bypass-apple').checked = currentSettings.appleMusicTTMLBypass;
     updateCustomSelectDisplay('cache-strategy');
 
     toggleKpoeSourcesVisibility();

@@ -32,6 +32,7 @@ const defaultSettings = {
     overridePaletteColor: '',
     largerTextMode: 'lyrics', // 'lyrics' or 'romanization'
     customKpoeUrl: '',
+    appleMusicTTMLBypass: false
 };
 
 let currentSettings = { ...defaultSettings };

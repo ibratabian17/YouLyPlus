@@ -24,14 +24,15 @@ body:has([data-testid="modal"]) main {
     opacity: 1;
     width: 100%;
     height: 100vh;
-    z-index: 2;
+    z-index: 1;
     display: block;
     position: relative;
     grid-area: lyrics;
-    mix-blend-mode: lighten;
+    mix-blend-mode: plus-lighter;
     mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
 }
+
 
 #lyrics-plus-container::-webkit-scrollbar {
     display: none;
