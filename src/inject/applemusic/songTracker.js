@@ -350,142 +350,177 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
 }
 
 (function () {
-    let mkInstance = null;
-    let lastProcessedID = null;
-    let debounceTimer = null;
+  let mkInstance = null;
+  let lastProcessedID = null;
+  let debounceTimer = null;
+  let timeUpdateFrame = null;
 
-    console.log('LyricsPlus: Tracker Injected');
+  let basePlaybackTime = 0;
+  let basePerfTime = 0;
+  let playing = false;
 
+  async function fetchSyllableLyrics(songId, storefront) {
+    if (!songId || !mkInstance) return null;
+    try {
+      const developerToken = mkInstance.developerToken || mkInstance.configuration?.app?.developerToken;
+      if (!developerToken) return null;
 
-    // --- 1. Fetcher Lirik Syllable ---
-    async function fetchSyllableLyrics(songId, storefront) {
-        if (!songId || !mkInstance) return null;
+      const rawLocale = document.documentElement.lang || navigator.language || 'en-US';
+      let scriptParam = 'en-Latn';
+
+      try {
+        if (window.Intl && Intl.Locale) {
+          const loc = new Intl.Locale(rawLocale);
+          const baseLang = loc.language;
+          const scriptCode = loc.maximize().script;
+          if (baseLang && scriptCode) {
+            scriptParam = `${baseLang}-${scriptCode}`;
+          }
+        }
+      } catch (e) { }
+
+      const queryParams = new URLSearchParams({
+        'l[lyrics]': rawLocale,
+        'l[script]': scriptParam,
+        'extend': 'ttmlLocalizations'
+      });
+
+      const url = `https://amp-api.music.apple.com/v1/catalog/${storefront}/songs/${songId}/syllable-lyrics?${queryParams.toString()}`;
+
+      const headers = {
+        'Authorization': `Bearer ${developerToken}`,
+        'Accept': 'application/json',
+        'Origin': window.location.origin
+      };
+
+      if (mkInstance.musicUserToken) headers['Music-User-Token'] = mkInstance.musicUserToken;
+
+      const res = await fetch(url, { headers });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function syncFromMusicKit() {
+    basePlaybackTime = mkInstance?.currentPlaybackTime || 0;
+    basePerfTime = performance.now();
+  }
+
+  function getAccurateTime() {
+    if (!playing) return basePlaybackTime;
+    return basePlaybackTime + (performance.now() - basePerfTime) / 1000;
+  }
+
+  async function handleSongChange() {
+    if (!mkInstance) return;
+
+    const item = mkInstance.nowPlayingItem;
+    if (!item || !item.attributes || !item.id) return;
+    if (lastProcessedID === item.id) return;
+
+    lastProcessedID = item.id;
+
+    const attrs = item.attributes;
+    const artworkUrl = attrs.artwork?.url ? attrs.artwork.url.replace('{w}', '800').replace('{h}', '800') : '';
+    const durationSec = (attrs.durationInMillis || 0) / 1000;
+    const songId = attrs.playParams.catalogId || attrs.playParams.id;
+
+    const songInfo = {
+      title: attrs.name,
+      artist: attrs.artistName,
+      album: attrs.albumName,
+      duration: durationSec,
+      cover: artworkUrl,
+      appleId: songId,
+      isVideo: attrs.playParams.kind === 'music-videos',
+      lyricsJSON: null
+    };
+
+    const storefront = mkInstance.storefrontId || 'us';
+
+    if (attrs.hasLyrics) {
+      const lyricsData = await fetchSyllableLyrics(songId, storefront);
+      try {
+        if (lyricsData?.data?.[0]) {
+          const ttmlData = lyricsData.data[0].attributes.ttmlLocalizations || lyricsData.data[0].attributes.ttml;
+          if (typeof parseAppleTTML === 'function') {
+            songInfo.lyricsJSON = parseAppleTTML(ttmlData);
+          }
+        }
+      } catch (e) { }
+    }
+
+    syncFromMusicKit();
+
+    window.postMessage({
+      type: 'LYPLUS_SONG_CHANGED',
+      songInfo
+    }, '*');
+  }
+
+  function setupSeekListener() {
+    window.addEventListener('message', (event) => {
+      if (!event.data || event.data.type !== 'LYPLUS_SEEK_TO') return;
+      if (mkInstance && typeof event.data.time === 'number') {
         try {
-            const developerToken = mkInstance.developerToken || mkInstance.configuration?.app?.developerToken;
-            if (!developerToken) return null;
+          mkInstance.seekToTime(event.data.time);
+          setTimeout(syncFromMusicKit, 50);
+        } catch (e) { }
+      }
+    });
+  }
 
-            const rawLocale = document.documentElement.lang || navigator.language || 'en-US';
-            let scriptParam = 'en-Latn'; 
-            
-            try {
-                if (window.Intl && Intl.Locale) {
-                    const loc = new Intl.Locale(rawLocale);
-                    const baseLang = loc.language;
-                    const scriptCode = loc.maximize().script;
-                    
-                    if (baseLang && scriptCode) {
-                        scriptParam = `${baseLang}-${scriptCode}`;
-                    }
-                }
-            } catch (e) {
-                console.warn("LyricsPlus: Locale detection failed, using fallback.", e);
-            }
+  function startTimeUpdater() {
+    stopTimeUpdater();
 
-            const queryParams = new URLSearchParams({
-                'l': rawLocale,          
-                'l[lyrics]': rawLocale,
-                'l[script]': scriptParam,
-                'extend': 'ttmlLocalizations'
-            });
-
-            const url = `https://amp-api.music.apple.com/v1/catalog/${storefront}/songs/${songId}/syllable-lyrics?${queryParams.toString()}`;
-
-            const headers = {
-                'Authorization': `Bearer ${developerToken}`,
-                'Accept': 'application/json',
-                'Origin': window.location.origin
-            };
-
-            if (mkInstance.musicUserToken) headers['Music-User-Token'] = mkInstance.musicUserToken;
-
-            const res = await fetch(url, { headers });
-            if (!res.ok) {
-                // console.error("LyricsPlus API Error:", await res.text());
-                return null;
-            }
-            return await res.json();
-        } catch (e) {
-            console.error("LyricsPlus Fetch Error:", e);
-            return null;
-        }
-    }
-
-    // --- 2. Process Metadata ---
-    async function handleSongChange() {
-        if (!mkInstance) return;
-
-        const item = mkInstance.nowPlayingItem;
-        if (!item || !item.attributes || !item.id) return;
-
-        if (lastProcessedID === item.id) return;
-        
-        lastProcessedID = item.id;
-        console.log(`LyricsPlus: Song Detected [${item.attributes.name}]`);
-
-        const attrs = item.attributes;
-        const artworkUrl = attrs.artwork?.url ? attrs.artwork.url.replace('{w}', '800').replace('{h}', '800') : '';
-        const durationSec = (attrs.durationInMillis || 0) / 1000;
-        const songId = attrs.playParams.catalogId || attrs.playParams.id;
-
-        const songInfo = {
-            title: attrs.name,
-            artist: attrs.artistName,
-            album: attrs.albumName,
-            duration: durationSec,
-            cover: artworkUrl,
-            appleId: songId,
-            isVideo: attrs.playParams.kind === 'music-videos',
-            lyricsJSON: null
-        };
-
-        const storefront = mkInstance.storefrontId || 'us';
-
-        if(attrs.hasLyrics){
-            const lyricsData = await fetchSyllableLyrics(songId, storefront);
-            try {
-                if (lyricsData?.data?.[0]) {
-                    const ttmlData = lyricsData.data[0].attributes.ttmlLocalizations || lyricsData.data[0].attributes.ttml;
-                    
-                    if (typeof parseAppleTTML === 'function') {
-                        songInfo.lyricsJSON = parseAppleTTML(ttmlData);
-                    }
-                }
-            } catch(err) {
-                console.error("LyricsPlus: Parse error", err);
-            }
-        }
-
+    function loop() {
+      if (mkInstance && playing) {
         window.postMessage({
-            type: 'LYPLUS_SONG_CHANGED',
-            songInfo: songInfo
+          type: 'LYPLUS_TIME_UPDATE',
+          currentTime: getAccurateTime()
         }, '*');
+
+        timeUpdateFrame = requestAnimationFrame(loop);
+      }
     }
 
-    // --- 3. Event Listeners ---
-    function init(instance) {
-        mkInstance = instance;
-        const Events = window.MusicKit.Events;
-        
-        instance.addEventListener(Events.mediaItemDidChange, () => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(handleSongChange, 200);
-        });
+    timeUpdateFrame = requestAnimationFrame(loop);
+  }
 
-        instance.addEventListener(Events.playbackStateDidChange, () => {
-            setTimeout(handleSongChange, 200); 
-        });
-
-        handleSongChange();
+  function stopTimeUpdater() {
+    if (timeUpdateFrame) {
+      cancelAnimationFrame(timeUpdateFrame);
+      timeUpdateFrame = null;
     }
+  }
 
-    // --- 4. Initialization Loop ---
-    function waitForMusicKit() {
-        if (window.MusicKit && window.MusicKit.getInstance()) {
-            init(window.MusicKit.getInstance());
-        } else {
-            setTimeout(waitForMusicKit, 500);
-        }
+  function init(instance) {
+    mkInstance = instance;
+
+    instance.addEventListener('nowPlayingItemDidChange', () => {
+      handleSongChange();
+    });
+
+    instance.addEventListener('playbackStateDidChange', () => {
+      playing = mkInstance.isPlaying;
+      syncFromMusicKit();
+      if (playing) startTimeUpdater();
+      else stopTimeUpdater();
+    });
+
+    if (mkInstance.nowPlayingItem) handleSongChange();
+    setupSeekListener();
+  }
+
+  function waitForMusicKit() {
+    if (window.MusicKit && window.MusicKit.getInstance()) {
+      init(window.MusicKit.getInstance());
+    } else {
+      setTimeout(waitForMusicKit, 500);
     }
+  }
 
-    waitForMusicKit();
+  waitForMusicKit();
 })();

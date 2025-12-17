@@ -7,6 +7,10 @@
     padding: 0 10vw;
 }
 
+body:has([data-testid="modal"]) main {
+        display: none; /* optimize shit, so lyrics changes not heavy*/
+    }
+
 [data-testid="modal"] #lyrics-plus-container {
     position: relative;
     display: block;
