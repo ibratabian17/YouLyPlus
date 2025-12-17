@@ -352,12 +352,29 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
 (function () {
   let mkInstance = null;
   let lastProcessedID = null;
-  let debounceTimer = null;
   let timeUpdateFrame = null;
-
-  let basePlaybackTime = 0;
-  let basePerfTime = 0;
   let playing = false;
+
+  function getPreciseTime() {
+    if (!mkInstance) return 0;
+
+    try {
+      const player = mkInstance.services?.mediaItemPlayback?._currentPlayer;
+      const mediaElement = player?._targetElement; 
+
+      if (mediaElement) {
+        const rawTime = mediaElement.currentTime;
+        const offset = player._buffer?.currentTimestampOffset || 0;
+
+        return rawTime - offset;
+      }
+    } catch (e) {
+      // did they changed? for now ighore iwodbiqwabcjwsbcijwsk
+    }
+
+    // Fallback: Use public API (updates approx every 250ms)
+    return mkInstance.currentPlaybackTime || 0;
+  }
 
   async function fetchSyllableLyrics(songId, storefront) {
     if (!songId || !mkInstance) return null;
@@ -403,16 +420,6 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
     }
   }
 
-  function syncFromMusicKit() {
-    basePlaybackTime = mkInstance?.currentPlaybackTime || 0;
-    basePerfTime = performance.now();
-  }
-
-  function getAccurateTime() {
-    if (!playing) return basePlaybackTime;
-    return basePlaybackTime + (performance.now() - basePerfTime) / 1000;
-  }
-
   async function handleSongChange() {
     if (!mkInstance) return;
 
@@ -452,8 +459,6 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
       } catch (e) { }
     }
 
-    syncFromMusicKit();
-
     window.postMessage({
       type: 'LYPLUS_SONG_CHANGED',
       songInfo
@@ -466,7 +471,6 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
       if (mkInstance && typeof event.data.time === 'number') {
         try {
           mkInstance.seekToTime(event.data.time);
-          setTimeout(syncFromMusicKit, 50);
         } catch (e) { }
       }
     });
@@ -479,7 +483,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
       if (mkInstance && playing) {
         window.postMessage({
           type: 'LYPLUS_TIME_UPDATE',
-          currentTime: getAccurateTime()
+          currentTime: getPreciseTime() 
         }, '*');
 
         timeUpdateFrame = requestAnimationFrame(loop);
@@ -505,12 +509,17 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
 
     instance.addEventListener('playbackStateDidChange', () => {
       playing = mkInstance.isPlaying;
-      syncFromMusicKit();
       if (playing) startTimeUpdater();
       else stopTimeUpdater();
     });
 
     if (mkInstance.nowPlayingItem) handleSongChange();
+    
+    if (mkInstance.isPlaying) {
+      playing = true;
+      startTimeUpdater();
+    }
+
     setupSeekListener();
   }
 
