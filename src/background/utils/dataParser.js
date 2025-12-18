@@ -44,7 +44,8 @@ export class DataParser {
           endTime: startTime + duration,
           syllabus: romanizedSyllabus || syllabus,
           element: item.element || [],
-          romanizedText: lineRomanizedText
+          romanizedText: lineRomanizedText,
+          translation: item.translation || null
         };
       }),
       metadata: {

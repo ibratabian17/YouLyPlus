@@ -98,23 +98,45 @@ export class TranslationService {
   static async translate(originalLyrics, targetLang, settings) {
     const useGemini = settings.translationProvider === PROVIDERS.GEMINI && settings.geminiApiKey;
     
-    if (useGemini) {
-      const textsToTranslate = originalLyrics.data.map(line => line.text);
-      const translatedTexts = await GeminiService.translate(textsToTranslate, targetLang, settings);
-      return originalLyrics.data.map((line, index) => ({
-        ...line,
-        translatedText: translatedTexts[index] || line.text
-      }));
-    } else {
-      const translationPromises = originalLyrics.data.map(line =>
-        GoogleService.translate(line.text, targetLang)
-      );
-      const translatedTexts = await Promise.all(translationPromises);
-      return originalLyrics.data.map((line, index) => ({
-        ...line,
-        translatedText: translatedTexts[index] || line.text
-      }));
+    const normalizeLang = (l) => l ? l.toLowerCase().split('-')[0].trim() : '';
+    const targetBase = normalizeLang(targetLang);
+
+    const linesToTranslate = [];
+    const indicesToTranslate = [];
+    const finalTranslations = new Array(originalLyrics.data.length).fill(null);
+
+    originalLyrics.data.forEach((line, index) => {
+      const embedded = line.translation;
+      if (embedded && embedded.text && normalizeLang(embedded.lang) === targetBase) {
+        finalTranslations[index] = embedded.text;
+      } else {
+        linesToTranslate.push(line.text);
+        indicesToTranslate.push(index);
+      }
+    });
+
+    if (linesToTranslate.length > 0) {
+      let fetchedTranslations;
+      
+      if (useGemini) {
+        fetchedTranslations = await GeminiService.translate(linesToTranslate, targetLang, settings);
+      } else {
+        const translationPromises = linesToTranslate.map(text =>
+          GoogleService.translate(text, targetLang)
+        );
+        fetchedTranslations = await Promise.all(translationPromises);
+      }
+
+      fetchedTranslations.forEach((trans, i) => {
+        const originalIndex = indicesToTranslate[i];
+        finalTranslations[originalIndex] = trans;
+      });
     }
+
+    return originalLyrics.data.map((line, index) => ({
+      ...line,
+      translatedText: finalTranslations[index] || line.text
+    }));
   }
 
   static async romanize(originalLyrics, settings) {
