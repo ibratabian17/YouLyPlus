@@ -15,6 +15,7 @@ const uiConfig = {
         '[data-testid="modal"]',
         '[data-testid="lyrics-fullscreen-modal"]'
     ],
+    buttonParent: '[data-testid="lyrics-fullscreen-modal"]',
     disableNativeTick: true,
     seekTo: (time) => {
         window.postMessage({ type: 'LYPLUS_SEEK_TO', time: time }, '*');

@@ -2558,7 +2558,7 @@ class LyricsPlusRenderer {
       this.buttonsWrapper = document.createElement("div");
       this.buttonsWrapper.id = "lyrics-plus-buttons-wrapper";
       const originalLyricsSection = document.querySelector(
-        this.uiConfig.patchParent
+        this.uiConfig.buttonParent || this.uiConfig.patchParent
       );
       if (originalLyricsSection) {
         originalLyricsSection.appendChild(this.buttonsWrapper);
