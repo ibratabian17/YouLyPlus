@@ -32,8 +32,9 @@ body:has([data-testid="modal"]) main {
     mix-blend-mode: plus-lighter;
     mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
+    overflow: scroll;
+    scrollbar-width: none;
 }
-
 
 #lyrics-plus-container::-webkit-scrollbar {
     display: none;
