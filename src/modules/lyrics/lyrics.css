@@ -55,6 +55,7 @@
     font-weight: bolder;
     direction: ltr;
     transform: translateZ(0);
+    padding-top: var(--lyrics-scroll-padding-top);
 }
 
 #lyrics-plus-container.lyrics-plus-message {
@@ -64,7 +65,6 @@
 /* --- Scroll Behavior & Performance --- */
 #lyrics-plus-container-parent {
     --lyrics-scroll-padding-top: 25%;
-    overflow: hidden;
     scrollbar-width: none;
     will-change: scroll-position;
 }
@@ -787,6 +787,16 @@ canvas#lyplus-webgl-canvas {
 
     to {
         transform: scale(0.9);
+    }
+}
+
+@keyframes staggered-scroll {
+    from {
+        transform: translateY(var(--lyrics-scroll-from));
+    }
+
+    to {
+        transform: translateY(0);
     }
 }
 

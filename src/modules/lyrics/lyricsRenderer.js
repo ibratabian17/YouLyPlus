@@ -50,6 +50,9 @@ class LyricsPlusRenderer {
     this.isUserControllingScroll = false;
     this.userScrollRevertTimer = null;
 
+    this._boundParentScrollHandler = this._onParentScroll.bind(this);
+    this._boundUserInteractionHandler = this._onUserInteraction.bind(this);
+
     this._lastActiveIndex = 0;
     this._tempActiveLines = [];
 
@@ -201,13 +204,7 @@ class LyricsPlusRenderer {
         this._createLyricsContainer();
       }
     }
-    if (
-      this.lyricsContainer &&
-      this.lyricsContainer.parentElement &&
-      !this.scrollEventHandlerAttached
-    ) {
-      this._setupUserScrollListener();
-    }
+    if (this.lyricsContainer) this._attachScrollListeners();
     return this.lyricsContainer;
   }
 
@@ -229,288 +226,55 @@ class LyricsPlusRenderer {
     container.classList.add("lyrics-plus-integrated", "blur-inactive-enabled");
     originalLyricsSection.appendChild(container);
     this.lyricsContainer = container;
-    this._setupUserScrollListener();
     return container;
   }
 
-  /**
-   * Sets up custom event listeners for user scrolling (wheel and touch).
-   * This allows for custom scroll behavior instead of native browser scrolling.
-   */
-  _setupUserScrollListener() {
-    if (this.scrollEventHandlerAttached || !this.lyricsContainer) {
-      return;
-    }
+  _attachScrollListeners() {
+    const scrollContainer = this.lyricsContainer?.parentElement;
+    if (!scrollContainer || this.scrollEventHandlerAttached) return;
 
-    const scrollListeningElement = this.lyricsContainer;
-    const parentScrollElement = this.lyricsContainer.parentElement;
-
-    this.touchState = {
-      isActive: false,
-      startY: 0,
-      lastY: 0,
-      velocity: 0,
-      lastTime: 0,
-      momentum: null,
-      samples: [],
-      maxSamples: 30,
-    };
-
-    // Define handlers
-    this._boundParentScrollHandler = () => {
-      if (this.isProgrammaticScrolling) {
-        clearTimeout(this.endProgrammaticScrollTimer);
-        this.endProgrammaticScrollTimer = setTimeout(() => {
-          this.isProgrammaticScrolling = false;
-          this.endProgrammaticScrollTimer = null;
-        }, 250);
-        return;
-      }
-      if (this.lyricsContainer) {
-        this.lyricsContainer.classList.add("not-focused");
-      }
-    };
-
-    this._boundWheelHandler = (event) => {
-      event.preventDefault();
-      this.isProgrammaticScrolling = false;
-      if (this.lyricsContainer) {
-        this.lyricsContainer.classList.add("not-focused", "user-scrolling", "wheel-scrolling");
-        this.lyricsContainer.classList.remove("touch-scrolling");
-      }
-      this._handleUserScroll(event.deltaY);
-      clearTimeout(this.userScrollIdleTimer);
-      this.userScrollIdleTimer = setTimeout(() => {
-        if (this.lyricsContainer) {
-          this.lyricsContainer.classList.remove("user-scrolling", "wheel-scrolling");
-        }
-      }, 200);
-    };
-
-    this._boundTouchStartHandler = (event) => {
-      const touch = event.touches[0];
-      const now = performance.now();
-      if (this.touchState.momentum) {
-        cancelAnimationFrame(this.touchState.momentum);
-        this.touchState.momentum = null;
-      }
-      this.touchState.isActive = true;
-      this.touchState.startY = touch.clientY;
-      this.touchState.lastY = touch.clientY;
-      this.touchState.velocity = 0;
-      this.touchState.samples = [{ y: touch.clientY, time: now }];
-
-      this.isProgrammaticScrolling = false;
-      if (this.lyricsContainer) {
-        this.lyricsContainer.classList.add("not-focused", "user-scrolling", "touch-scrolling");
-        this.lyricsContainer.classList.remove("wheel-scrolling");
-      }
-      clearTimeout(this.userScrollIdleTimer);
-    };
-
-    this._boundTouchMoveHandler = (event) => {
-      if (!this.touchState.isActive) return;
-      if (event.cancelable) event.preventDefault();
-
-      const touch = event.touches[0];
-      const now = performance.now();
-      const currentY = touch.clientY;
-      const deltaY = this.touchState.lastY - currentY;
-
-      this.touchState.lastY = currentY;
-      this.touchState.samples.push({ y: currentY, time: now });
-      if (this.touchState.samples.length > this.touchState.maxSamples) {
-        this.touchState.samples.shift();
-      }
-
-      this._handleUserScroll(deltaY);
-    };
-
-    this._boundTouchEndHandler = () => {
-      if (!this.touchState.isActive) return;
-      this.touchState.isActive = false;
-      const now = performance.now();
-      const samples = this.touchState.samples;
-
-      if (samples.length >= 2) {
-        const recentSamples = samples.filter((sample) => now - sample.time <= 150);
-        if (recentSamples.length >= 2) {
-          const newest = recentSamples[recentSamples.length - 1];
-          const oldest = recentSamples[0];
-          const timeDelta = newest.time - oldest.time;
-          const yDelta = oldest.y - newest.y;
-
-          if (timeDelta > 0) {
-            this.touchState.velocity = yDelta / timeDelta;
-          }
-        }
-      }
-      if (Math.abs(this.touchState.velocity) > 0.05) {
-        this._startMomentumScroll();
-      } else {
-        this._endTouchScrolling();
-      }
-    };
-
-    this._boundTouchCancelHandler = () => {
-      this.touchState.isActive = false;
-      if (this.touchState.momentum) {
-        cancelAnimationFrame(this.touchState.momentum);
-        this.touchState.momentum = null;
-      }
-      this._endTouchScrolling();
-    };
-
-    // Attach Listeners
-    if (parentScrollElement) {
-      parentScrollElement.addEventListener("scroll", this._boundParentScrollHandler, { passive: true });
-    }
-
-    scrollListeningElement.addEventListener("wheel", this._boundWheelHandler, { passive: false });
-    scrollListeningElement.addEventListener("touchstart", this._boundTouchStartHandler, { passive: true });
-    scrollListeningElement.addEventListener("touchmove", this._boundTouchMoveHandler, { passive: false });
-    scrollListeningElement.addEventListener("touchend", this._boundTouchEndHandler, { passive: true });
-    scrollListeningElement.addEventListener("touchcancel", this._boundTouchCancelHandler, { passive: true });
+    scrollContainer.addEventListener('wheel', this._boundUserInteractionHandler, { passive: true });
+    scrollContainer.addEventListener('touchstart', this._boundUserInteractionHandler, { passive: true });
+    scrollContainer.addEventListener('keydown', this._boundUserInteractionHandler, { passive: true });
 
     this.scrollEventHandlerAttached = true;
   }
 
   /**
-   * Removes event listeners to prevent memory leaks on parent elements or container destruction.
+   * Fired on wheel, touch, or keydown. 
+   * Immediately flags user control.
    */
-  _removeUserScrollListener() {
-    const container = this.lyricsContainer;
-
-    // Remove parent listener
-    if (container && container.parentElement && this._boundParentScrollHandler) {
-      container.parentElement.removeEventListener("scroll", this._boundParentScrollHandler);
-    }
-
-    // Remove container listeners
-    if (container) {
-      if (this._boundWheelHandler) container.removeEventListener("wheel", this._boundWheelHandler);
-      if (this._boundTouchStartHandler) container.removeEventListener("touchstart", this._boundTouchStartHandler);
-      if (this._boundTouchMoveHandler) container.removeEventListener("touchmove", this._boundTouchMoveHandler);
-      if (this._boundTouchEndHandler) container.removeEventListener("touchend", this._boundTouchEndHandler);
-      if (this._boundTouchCancelHandler) container.removeEventListener("touchcancel", this._boundTouchCancelHandler);
-    }
-
-    this.scrollEventHandlerAttached = false;
-    // Release references
-    this._boundParentScrollHandler = null;
-    this._boundWheelHandler = null;
-    this._boundTouchStartHandler = null;
-    this._boundTouchMoveHandler = null;
-    this._boundTouchEndHandler = null;
-    this._boundTouchCancelHandler = null;
+  _onUserInteraction() {
+    this._setUserScrolled(true);
   }
 
   /**
-   * Starts momentum scrolling after touch end.
-   * @private
+   * Fired on any scroll movement.
    */
-  _startMomentumScroll() {
-    const deceleration = 0.97;
-    const minVelocity = 0.05;
-
-    const animate = () => {
-      const scrollDelta = this.touchState.velocity * 16;
-
-      this._handleUserScroll(scrollDelta);
-
-      this.touchState.velocity *= deceleration;
-
-      if (Math.abs(this.touchState.velocity) > minVelocity) {
-        this.touchState.momentum = requestAnimationFrame(animate);
-      } else {
-        this.touchState.momentum = null;
-        this._endTouchScrolling();
-      }
-    };
-
-    this.touchState.momentum = requestAnimationFrame(animate);
+  _onParentScroll() {
+    if (!this.isProgrammaticScrolling) {
+      this._setUserScrolled(true);
+    }
   }
 
   /**
-   * Cleans up touch scrolling state.
-   * @private
+   * Updates state and manages the "revert to auto-scroll" timer
    */
-  _endTouchScrolling() {
-    if (this.lyricsContainer) {
-      this.lyricsContainer.classList.remove(
-        "user-scrolling",
-        "touch-scrolling"
-      );
+  _setUserScrolled(isUserScrolling) {
+    if (isUserScrolling) {
+      this.isUserControllingScroll = true;
+      this.lyricsContainer?.classList.add("user-scrolling", 'not-focused');
+
+      clearTimeout(this.userScrollIdleTimer);
+      this.userScrollIdleTimer = setTimeout(() => {
+        this.isUserControllingScroll = false;
+        this.lyricsContainer?.classList.remove("user-scrolling", 'not-focused');
+
+        if (this.currentPrimaryActiveLine) {
+          this._scrollToActiveLine(this.currentPrimaryActiveLine, false);
+        }
+      }, 5000);
     }
-
-    this.touchState.velocity = 0;
-    this.touchState.samples = [];
-  }
-
-  /**
-   * Handles the logic for manual user scrolling, calculating and clamping the new scroll position.
-   * Also sets a timer to automatically resume player-controlled scrolling after a period of user inactivity.
-   * @param {number} delta - The amount to scroll by.
-   */
-  _handleUserScroll(delta) {
-    this.isUserControllingScroll = true;
-    clearTimeout(this.userScrollRevertTimer);
-
-    this.userScrollRevertTimer = setTimeout(() => {
-      this.isUserControllingScroll = false;
-      if (this.currentPrimaryActiveLine) {
-        this._scrollToActiveLine(this.currentPrimaryActiveLine, true);
-      }
-    }, 4000);
-
-    const scrollSensitivity = 0.7;
-    let newScrollOffset = this.currentScrollOffset - delta * scrollSensitivity;
-
-    const container = this.lyricsContainer;
-    if (!container) {
-      this._animateScroll(newScrollOffset);
-      return;
-    }
-
-    if (!this.cachedLyricsLines || this.cachedLyricsLines.length === 0) {
-      this._animateScroll(newScrollOffset);
-      return;
-    }
-
-    const scrollContainer = container.parentElement;
-    if (!scrollContainer) {
-      this._animateScroll(newScrollOffset);
-      return;
-    }
-
-    const containerHeight = scrollContainer.clientHeight;
-    let minAllowedScroll = 0;
-    let maxAllowedScroll = 0;
-
-    const firstElement = this.cachedLyricsLines[0];
-    const lastElement = this.cachedLyricsLines[this.cachedLyricsLines.length - 1];
-
-    if (firstElement && lastElement) {
-      const contentTotalHeight =
-        lastElement.offsetTop +
-        lastElement.offsetHeight -
-        firstElement.offsetTop;
-
-      if (contentTotalHeight > containerHeight) {
-        maxAllowedScroll =
-          containerHeight - (lastElement.offsetTop + lastElement.offsetHeight);
-      }
-    }
-
-    const metadata = container.querySelector('.lyrics-plus-metadata');
-    if (metadata) {
-      maxAllowedScroll -= metadata.offsetHeight || 100;
-    }
-
-    newScrollOffset = Math.max(newScrollOffset, maxAllowedScroll);
-    newScrollOffset = Math.min(newScrollOffset, minAllowedScroll);
-
-    this._animateScroll(newScrollOffset);
   }
 
   /**
@@ -1526,7 +1290,7 @@ class LyricsPlusRenderer {
 
     this.cachedLyricsLines = Array.from(
       container.querySelectorAll(
-        ".lyrics-line, .lyrics-plus-metadata, .lyrics-plus-empty"
+        ".lyrics-line, .lyrics-plus-metadata"
       )
     )
       .map((line) => {
@@ -2337,26 +2101,20 @@ class LyricsPlusRenderer {
    */
   _animateScroll(newTranslateY, forceScroll = false) {
     if (!this.lyricsContainer) return;
+    const parent = this.lyricsContainer.parentElement;
+    if (!parent) return;
 
-    if (
-      !forceScroll &&
-      Math.abs(this.currentScrollOffset - newTranslateY) < 0.1
-    )
-      return;
+    const targetTop = Math.max(0, -newTranslateY);
+    const startTop = parent.scrollTop;
+    const delta = startTop - targetTop;
 
     this.currentScrollOffset = newTranslateY;
 
-    this.lyricsContainer.style.setProperty(
-      "--lyrics-scroll-offset",
-      `${newTranslateY}px`
-    );
-
-    const isUserScrolling =
-      this.lyricsContainer.classList.contains("user-scrolling");
-
-
-    if (forceScroll || isUserScrolling) {
+    if (forceScroll) {
+      parent.scrollTo({ top: targetTop, behavior: 'smooth' });
       return;
+    } else {
+      parent.scrollTop = targetTop;
     }
 
     const referenceLine =
@@ -2371,35 +2129,33 @@ class LyricsPlusRenderer {
 
     const delayIncrement = 30;
     let delayCounter = 0;
-    const elements = this.cachedLyricsLines;
-
-    const visibleIds = this.visibleLineIds;
-
-    const styleUpdates = [];
-
     const lookBehind = 5;
     const lookAhead = 20;
+
     const startIndex = Math.max(0, referenceLineIndex - lookBehind);
-    const endIndex = Math.min(elements.length, referenceLineIndex + lookAhead);
+    const endIndex = Math.min(this.cachedLyricsLines.length, referenceLineIndex + lookAhead);
 
     for (let i = startIndex; i < endIndex; i++) {
-      const element = elements[i];
-      if (!element) continue;
+      const line = this.cachedLyricsLines[i];
+      if (!line) continue;
 
-      if (visibleIds.has(element.id)) {
-        const delay =
-          i >= referenceLineIndex ? delayCounter * delayIncrement : 0;
-        styleUpdates.push({ element, delay: `${delay}ms` });
+      if (this.visibleLineIds.has(line.id)) {
+        const delay = i >= referenceLineIndex ? delayCounter * delayIncrement : 0;
+
         if (i >= referenceLineIndex) {
           delayCounter++;
         }
-      } else {
-        styleUpdates.push({ element, delay: "0ms" });
-      }
-    }
 
-    for (const update of styleUpdates) {
-      update.element.style.setProperty("--lyrics-line-delay", update.delay);
+        line.animate([
+          { transform: `translateY(${delta * -1}px) translateZ(1px)` },
+          { transform: `translateY(0) translateZ(1px)` }
+        ], {
+          duration: 400,
+          delay: delay,
+          easing: 'cubic-bezier(.41, 0, .12, .99)',
+          fill: 'both'
+        });
+      }
     }
   }
 
@@ -2462,10 +2218,6 @@ class LyricsPlusRenderer {
 
     const paddingTop = this._getScrollPaddingTop();
     const targetTranslateY = paddingTop - activeLine.offsetTop;
-
-    const containerTop = this._cachedContainerRect
-      ? this._cachedContainerRect.containerTop
-      : this.lyricsContainer.getBoundingClientRect().top;
     const scrollContainerTop = this._cachedContainerRect
       ? this._cachedContainerRect.scrollContainerTop
       : scrollContainer.getBoundingClientRect().top;
@@ -2490,7 +2242,7 @@ class LyricsPlusRenderer {
       this.endProgrammaticScrollTimer = null;
     }, 250);
 
-    this._animateScroll(targetTranslateY);
+    this._animateScroll(targetTranslateY, forceScroll);
   }
 
   _setupVisibilityTracking() {
@@ -2738,8 +2490,15 @@ class LyricsPlusRenderer {
    * Cleans up the lyrics container and resets the state for the next song.
    */
   cleanupLyrics() {
-    // Event Listener Cleanup
-    this._removeUserScrollListener();
+    // Event Cleanup
+    const scrollContainer = this.lyricsContainer?.parentElement;
+    if (scrollContainer) {
+      scrollContainer.removeEventListener('wheel', this._boundUserInteractionHandler);
+      scrollContainer.removeEventListener('touchstart', this._boundUserInteractionHandler);
+      scrollContainer.removeEventListener('keydown', this._boundUserInteractionHandler);
+    }
+    this.scrollEventHandlerAttached = false;
+    clearTimeout(this.userScrollIdleTimer);
 
     // Animation Frame Cleanup
     if (this.lyricsAnimationFrameId) {
@@ -2750,14 +2509,6 @@ class LyricsPlusRenderer {
     // Cancel Debounced Resize Handler
     if (this._debouncedResizeHandler && this._debouncedResizeHandler.cancel) {
       this._debouncedResizeHandler.cancel();
-    }
-
-    // Touch State Cleanup
-    if (this.touchState) {
-      if (this.touchState.momentum) {
-        cancelAnimationFrame(this.touchState.momentum);
-      }
-      this.touchState = null;
     }
 
     // Timer Cleanup

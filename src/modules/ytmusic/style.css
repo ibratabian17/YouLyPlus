@@ -29,9 +29,12 @@ ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fu
 
 ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
     --lyrics-scroll-padding-top: 25%;
-    overflow: hidden;
+    scroll-padding-top: 25%;
+    scroll-padding-block-start: 25%;
+    overflow-anchor: auto;
     scrollbar-width: none;
     will-change: scroll-position;
+    scroll-snap-type: y proximity;
 }
 
 ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) {
@@ -63,9 +66,8 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .lyplus-blur-container {
 
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .ytmusic-browse-response,
 #layout.dynamic-player[is-mweb-modernization-enabled][player-ui-state="MINIPLAYER_IN_PLAYER_PAGE"] .ytmusic-browse-response,
-ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response
-{
- display: none;
+ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response {
+    display: none;
 }
 
 /* Make backgrounds transparent to reveal the blur container */
