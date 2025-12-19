@@ -694,7 +694,7 @@ class LyricsPlusRenderer {
       };
 
       const createSyllableElement = (s, totalDuration, idx, isBg) => {
-        const sylSpan =  document.createElement("span");
+        const sylSpan = document.createElement("span");
         sylSpan.innerHTML = "";
         sylSpan.className = "lyrics-syllable";
 
@@ -2282,14 +2282,15 @@ class LyricsPlusRenderer {
     syllable.style.animation = "";
     if (!syllable.classList.contains("finished") && !noFade) {
       syllable.classList.add("finished");
-      syllable.offsetHeight;
     }
-    syllable.classList.remove("highlight", "finished", "pre-highlight");
-    syllable.style.removeProperty("--pre-wipe-duration");
-    syllable.style.removeProperty("--pre-wipe-delay");
-    syllable.querySelectorAll("span.char").forEach((span) => {
-      span.style.animation = "";
-    });
+    requestAnimationFrame(() => {
+      syllable.classList.remove("highlight", "finished", "pre-highlight");
+      syllable.style.removeProperty("--pre-wipe-duration");
+      syllable.style.removeProperty("--pre-wipe-delay");
+      syllable.querySelectorAll("span.char").forEach((span) => {
+        span.style.animation = "";
+      });
+    })
   }
 
   _resetSyllables(line, noFade = false) {
@@ -2508,18 +2509,18 @@ class LyricsPlusRenderer {
 
           if (entry.isIntersecting) {
             if (!this.visibleLineIds.has(id)) {
-                this.visibleLineIds.add(id);
-                hasChanges = true;
+              this.visibleLineIds.add(id);
+              hasChanges = true;
             }
           } else {
             if (this.visibleLineIds.has(id)) {
-                this.visibleLineIds.delete(id);
-                hasChanges = true;
+              this.visibleLineIds.delete(id);
+              hasChanges = true;
             }
           }
         });
         if (hasChanges) {
-            this._visibilityHasChanged = true;
+          this._visibilityHasChanged = true;
         }
       },
       { root: container.parentElement, rootMargin: "200px 0px", threshold: 0.1 }

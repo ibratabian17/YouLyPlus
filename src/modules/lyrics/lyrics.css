@@ -167,6 +167,7 @@
     animation: none !important;
     transition: none !important;
     will-change: auto !important;
+    filter: none!important;
 }
 
 /* --- Directionality & Text Alignment --- */
@@ -255,6 +256,7 @@
 /* --- Syllable States (Finished, Highlight, etc.) --- */
 .lyrics-line .lyrics-syllable.finished {
     background-color: var(--lyplus-text-primary, var(--lyplus-text-primary));
+    transition: transform 1s ease !important;
 }
 
 .lyrics-line.active .lyrics-syllable.finished {

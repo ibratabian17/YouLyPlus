@@ -98,3 +98,6 @@ article[data-testid="lyrics-fullscreen-modal"]:has(#lyrics-plus-container) .lyri
     opacity: 0;
     transition: opacity 0.3s ease 0.3s, transform 0.4s ease var(--lyrics-line-delay, 0ms), filter 0.3s ease;
 }
+#lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-line.prev-2) {
+    filter: none;
+}
