@@ -100,7 +100,7 @@
     font-size: var(--lyplus-font-size-base);
     cursor: pointer;
     transform-origin: left;
-    transform: translateY(var(--lyrics-scroll-offset, 0px)) translateZ(1px);
+    transform: translateZ(1px);
     transition: opacity 0.3s ease, transform 0.4s cubic-bezier(.41, 0, .12, .99) var(--lyrics-line-delay, 0ms), filter 0.3s ease;
     will-change: transform, filter, opacity;
     content-visibility: auto;
@@ -110,6 +110,16 @@
     overflow-wrap: break-word;
     mix-blend-mode: lighten;
 }
+.lyrics-line.scroll-animate {
+  animation-name: lyrics-scroll;
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(.41, 0, .12, .99);
+  animation-fill-mode: both;
+  animation-delay: var(--lyrics-line-delay, 0ms);
+}
+
+
+
 
 .line-by-line-mode .lyrics-line:not(.lyrics-gap) .main-vocal-container {
     color: transparent;
@@ -790,14 +800,13 @@ canvas#lyplus-webgl-canvas {
     }
 }
 
-@keyframes staggered-scroll {
-    from {
-        transform: translateY(var(--lyrics-scroll-from));
-    }
-
-    to {
-        transform: translateY(0);
-    }
+@keyframes lyrics-scroll {
+  from {
+    transform: translateY(var(--scroll-delta)) translateZ(1px);
+  }
+  to {
+    transform: translateY(0) translateZ(1px);
+  }
 }
 
 @keyframes gap-ended {

@@ -2105,9 +2105,9 @@ class LyricsPlusRenderer {
     if (!parent) return;
 
     const targetTop = Math.max(0, -newTranslateY);
-    const startTop = parent.scrollTop;
-    const delta = startTop - targetTop;
 
+    const prevOffset = this.currentScrollOffset || 0;
+    const delta = prevOffset - newTranslateY;
     this.currentScrollOffset = newTranslateY;
 
     if (forceScroll) {
@@ -2120,43 +2120,43 @@ class LyricsPlusRenderer {
     const referenceLine =
       this.currentPrimaryActiveLine ||
       this.lastPrimaryActiveLine ||
-      (this.cachedLyricsLines.length > 0 ? this.cachedLyricsLines[0] : null);
+      this.cachedLyricsLines[0];
 
     if (!referenceLine) return;
 
-    const referenceLineIndex = this.cachedLyricsLines.indexOf(referenceLine);
-    if (referenceLineIndex === -1) return;
+    const referenceIndex = this.cachedLyricsLines.indexOf(referenceLine);
+    if (referenceIndex === -1) return;
 
     const delayIncrement = 30;
-    let delayCounter = 0;
     const lookBehind = 5;
     const lookAhead = 20;
 
-    const startIndex = Math.max(0, referenceLineIndex - lookBehind);
-    const endIndex = Math.min(this.cachedLyricsLines.length, referenceLineIndex + lookAhead);
+    let delayCounter = 0;
 
-    for (let i = startIndex; i < endIndex; i++) {
+    const start = Math.max(0, referenceIndex - lookBehind);
+    const end = Math.min(this.cachedLyricsLines.length, referenceIndex + lookAhead);
+
+    const linesToAnimate = [];
+
+    for (let i = start; i < end; i++) {
       const line = this.cachedLyricsLines[i];
-      if (!line) continue;
+      if (!this.visibleLineIds.has(line.id)) continue;
 
-      if (this.visibleLineIds.has(line.id)) {
-        const delay = i >= referenceLineIndex ? delayCounter * delayIncrement : 0;
+      const delay = i >= referenceIndex ? delayCounter * delayIncrement : 0;
+      if (i >= referenceIndex) delayCounter++;
 
-        if (i >= referenceLineIndex) {
-          delayCounter++;
-        }
+      line.style.setProperty('--scroll-delta', `${delta}px`);
+      line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
+      line.classList.remove('scroll-animate');
 
-        line.animate([
-          { transform: `translateY(${delta * -1}px) translateZ(1px)` },
-          { transform: `translateY(0) translateZ(1px)` }
-        ], {
-          duration: 400,
-          delay: delay,
-          easing: 'cubic-bezier(.41, 0, .12, .99)',
-          fill: 'both'
-        });
-      }
+      linesToAnimate.push(line);
     }
+
+    requestAnimationFrame(() => {
+      for (const line of linesToAnimate) {
+        line.classList.add('scroll-animate');
+      }
+    });
   }
 
   _updatePositionClassesAndScroll(lineToScroll, forceScroll = false) {
