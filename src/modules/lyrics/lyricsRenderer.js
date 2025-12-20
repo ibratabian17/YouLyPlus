@@ -271,7 +271,7 @@ class LyricsPlusRenderer {
         this.lyricsContainer?.classList.remove("user-scrolling", 'not-focused');
 
         if (this.currentPrimaryActiveLine) {
-          this._scrollToActiveLine(this.currentPrimaryActiveLine, false);
+          this._scrollToActiveLine(this.currentPrimaryActiveLine, true);
         }
       }, 5000);
     }
@@ -2048,12 +2048,14 @@ class LyricsPlusRenderer {
       syllable.classList.add("finished");
     }
     requestAnimationFrame(() => {
-      syllable.classList.remove("highlight", "finished", "pre-highlight");
-      syllable.style.removeProperty("--pre-wipe-duration");
-      syllable.style.removeProperty("--pre-wipe-delay");
-      syllable.querySelectorAll("span.char").forEach((span) => {
-        span.style.animation = "";
-      });
+      setTimeout(() => {
+        syllable.classList.remove("highlight", "finished", "pre-highlight");
+        syllable.style.removeProperty("--pre-wipe-duration");
+        syllable.style.removeProperty("--pre-wipe-delay");
+        syllable.querySelectorAll("span.char").forEach((span) => {
+          span.style.animation = "";
+        });
+      }, 16)
     })
   }
 
@@ -2106,15 +2108,36 @@ class LyricsPlusRenderer {
 
     const targetTop = Math.max(0, -newTranslateY);
 
-    const prevOffset = this.currentScrollOffset || 0;
+    if (!this._scrollAnimationState) {
+      this._scrollAnimationState = {
+        isAnimating: false,
+        startTime: 0,
+        startOffset: 0,
+        targetOffset: 0,
+        duration: 400,
+        pendingUpdate: null
+      };
+    }
+
+    const state = this._scrollAnimationState;
+
+    if (state.isAnimating && !forceScroll) {
+      state.pendingUpdate = newTranslateY;
+      return;
+    }
+
+    let prevOffset = this.currentScrollOffset || 0;
+
     const delta = prevOffset - newTranslateY;
     this.currentScrollOffset = newTranslateY;
 
     if (forceScroll) {
       parent.scrollTo({ top: targetTop, behavior: 'smooth' });
+      state.isAnimating = false;
+      state.pendingUpdate = null;
       return;
     } else {
-      parent.scrollTop = targetTop;
+      parent.scrollTo({ top: targetTop, behavior: 'instant' });
     }
 
     const referenceLine =
@@ -2137,6 +2160,7 @@ class LyricsPlusRenderer {
     const end = Math.min(this.cachedLyricsLines.length, referenceIndex + lookAhead);
 
     const linesToAnimate = [];
+    let maxAnimationDuration = 0;
 
     for (let i = start; i < end; i++) {
       const line = this.cachedLyricsLines[i];
@@ -2150,7 +2174,32 @@ class LyricsPlusRenderer {
       line.classList.remove('scroll-animate');
 
       linesToAnimate.push(line);
+
+      const lineDuration = 400 + delay;
+      maxAnimationDuration = Math.max(maxAnimationDuration, lineDuration);
     }
+
+    state.isAnimating = true;
+    state.startTime = performance.now();
+    state.startOffset = prevOffset;
+    state.targetOffset = newTranslateY;
+    state.duration = 400;
+
+    if (this._scrollAnimationTimeout) {
+      clearTimeout(this._scrollAnimationTimeout);
+    }
+
+    this._scrollAnimationTimeout = setTimeout(() => {
+      state.isAnimating = false;
+
+      if (state.pendingUpdate !== null) {
+        const pendingValue = state.pendingUpdate;
+        state.pendingUpdate = null;
+        this._animateScroll(pendingValue, false);
+      } else {
+        this._scrollAnimationTimeout = null;
+      }
+    }, maxAnimationDuration + 50);
 
     requestAnimationFrame(() => {
       for (const line of linesToAnimate) {

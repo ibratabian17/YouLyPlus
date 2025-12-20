@@ -110,15 +110,14 @@
     overflow-wrap: break-word;
     mix-blend-mode: lighten;
 }
-.lyrics-line.scroll-animate {
+
+.lyrics-line.scroll-animate, .lyrics-plus-metadata.scroll-animate {
   animation-name: lyrics-scroll;
   animation-duration: 400ms;
   animation-timing-function: cubic-bezier(.41, 0, .12, .99);
   animation-fill-mode: both;
   animation-delay: var(--lyrics-line-delay, 0ms);
 }
-
-
 
 
 .line-by-line-mode .lyrics-line:not(.lyrics-gap) .main-vocal-container {
@@ -268,6 +267,9 @@
     background-color: var(--lyplus-text-primary, var(--lyplus-text-primary));
     transition: transform 1s ease !important;
 }
+.lyrics-line .lyrics-syllable.finished:has(.span.char) {
+    background-color: transparent;
+}
 
 .lyrics-line.active .lyrics-syllable.finished {
     transition: transform 1s ease !important;
@@ -357,7 +359,7 @@
 }
 
 .lyrics-line .lyrics-syllable.finished span.char {
-    transition: color 0.18s, background-color 0.18s;
+    transition: color 0.18s;
     background-color: var(--lyplus-text-primary, var(--lyplus-text-primary));
 }
 
