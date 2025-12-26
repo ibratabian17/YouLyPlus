@@ -154,7 +154,7 @@ class LyricsPlusRenderer {
     };
 
     if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
-      this._scrollToActiveLine(this.currentPrimaryActiveLine, false);
+      this._scrollToActiveLine(this.currentPrimaryActiveLine, false, true);
     }
   }
 
@@ -2265,7 +2265,7 @@ class LyricsPlusRenderer {
     this._scrollToActiveLine(lineToScroll, forceScroll);
   }
 
-  _scrollToActiveLine(activeLine, forceScroll = false) {
+  _scrollToActiveLine(activeLine, forceScroll = false, isResize = false) {
     if (
       !activeLine ||
       !this.lyricsContainer ||
@@ -2301,7 +2301,16 @@ class LyricsPlusRenderer {
       this.endProgrammaticScrollTimer = null;
     }, 250);
 
-    this._animateScroll(targetTranslateY, forceScroll);
+    if (isResize) {
+      this.currentScrollOffset = targetTranslateY;
+      scrollContainer.scrollTo({ top: -targetTranslateY, behavior: 'instant' });
+
+      if (this._scrollAnimationState) {
+        this._scrollAnimationState.targetOffset = targetTranslateY;
+      }
+    } else {
+      this._animateScroll(targetTranslateY, forceScroll);
+    }
   }
 
   _setupVisibilityTracking() {
