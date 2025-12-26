@@ -184,6 +184,16 @@
 }
 
 /* --- Directionality & Text Alignment --- */
+#lyrics-plus-container .lyrics-line.rtl-text.singer-left .lyrics-romanization-container,
+#lyrics-plus-container .lyrics-line.singer-left .lyrics-romanization-container.rtl-text {
+    text-align: end;
+}
+
+#lyrics-plus-container .lyrics-line.rtl-text.singer-right .lyrics-romanization-container,
+#lyrics-plus-container .lyrics-line.singer-right .lyrics-romanization-container.rtl-text {
+    text-align: start;
+}
+
 #lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-left {
     text-align: left;
 }
