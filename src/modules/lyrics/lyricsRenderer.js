@@ -768,6 +768,7 @@ class LyricsPlusRenderer {
 
 
           const isGroupGrowable =
+            !isBg &&
             !currentSettings.lightweight &&
             !this._isRTL(groupText) &&
             !this._isCJK(groupText) &&
@@ -896,6 +897,7 @@ class LyricsPlusRenderer {
               const span = document.createElement("span");
               span.className = "lyrics-syllable";
               span.textContent = txt;
+              if (this._isRTL(txt)) span.classList.add("rtl-text");
 
               span.dataset.startTime = s.time;
               span.dataset.duration = s.duration;
