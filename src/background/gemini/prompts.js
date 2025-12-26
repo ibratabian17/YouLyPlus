@@ -1,9 +1,9 @@
 export function createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo = {}, targetLang) {
-    const songContext = (songInfo.title && songInfo.artist) 
-      ? `\n# SONG CONTEXT\n- Title: ${songInfo.title}\n- Artist: ${songInfo.artist}\n` 
-      : '';
+  const songContext = (songInfo.title && songInfo.artist)
+    ? `\n# SONG CONTEXT\n- Title: ${songInfo.title}\n- Artist: ${songInfo.artist}\n`
+    : '';
 
-    const basePrompt = `You are a professional linguistic transcription system specialized in PHONETIC ROMANIZATION.
+  const basePrompt = `You are a professional linguistic transcription system specialized in PHONETIC ROMANIZATION.
 ${songContext}
 # ABSOLUTE MISSION
 Transform non-Latin scripts into Latin alphabet representation of **actual pronunciation in natural speech context**.
@@ -305,7 +305,7 @@ WRONG output (missing trailing space):
 
 ## Rule 4: Chunk Structure Preservation
 ${hasAnyChunks ?
-`**SOME lines have chunks (syllable timing data), SOME do not:**
+      `**SOME lines have chunks (syllable timing data), SOME do not:**
 - For lines WITH "chunk" array in input: Output MUST include "chunk" array with romanized syllables
 - For lines WITHOUT "chunk" array in input: Output MUST NOT include "chunk" array
 - Each chunk must preserve its timing and whitespace exactly
@@ -359,7 +359,7 @@ CORRECT Output (NO chunk array):
     {"word": "hello ", "time": 1000}
   ]
 }` :
-`**These lyrics are LINE-SYNCED ONLY (no syllable-level timing):**
+      `**These lyrics are LINE-SYNCED ONLY (no syllable-level timing):**
 - NEVER add "chunk" arrays to any word
 - Only provide romanized "line" and "word" fields
 - Preserve time values exactly as in input
@@ -392,7 +392,7 @@ WRONG Output (added chunks when input had none):
     }
   ]
 }`
-}
+    }
 
 # OUTPUT FORMAT
 
@@ -421,47 +421,43 @@ ${JSON.stringify(lyricsForApi, null, 2)}
 # BEGIN ROMANIZATION
 Analyze the language(s) in the input, apply appropriate phonetic rules, preserve exact structure, and return valid JSON.`;
 
-    return basePrompt;
+  return basePrompt;
 }
 
-export function createTranslationPrompt(settings = {overrideGeminiPrompt: false, customGeminiPrompt: ''}, texts, targetLang, songInfo = {}) {
-  const songContext = (songInfo.title && songInfo.artist) 
-    ? `\n# SONG CONTEXT\n- Title: ${songInfo.title}\n- Artist: ${songInfo.artist}\n` 
+export function createTranslationPrompt(settings = { overrideGeminiPrompt: false, customGeminiPrompt: '' }, texts, targetLang, songInfo = {}) {
+  const songContext = (songInfo.title && songInfo.artist)
+    ? `\n# SONG CONTEXT\n- Title: ${songInfo.title}\n- Artist: ${songInfo.artist}\n`
     : '';
 
   const translationRules = (settings.overrideGeminiPrompt && settings.customGeminiPrompt) ?
-        songContext + settings.customGeminiPrompt :
-        `You are a professional translator specializing in song lyrics. Your task is to translate lyrics into ${targetLang} with precision and consistency.
+    songContext + settings.customGeminiPrompt :
+    `You are an expert song lyric translator adhering to this guidelines. Your goal is to translate lyrics into ${targetLang} while strictly preserving the structure and formatting style of the original lines.
 ${songContext}
-CRITICAL INSTRUCTIONS:
-1. LANGUAGE DETECTION:
-   - Analyze each line to identify its source language(s)
-   - Mark mixed-language segments internally before translating
+CRITICAL GUIDELINES:
 
-2. TRANSLATION REQUIREMENTS:
-   - Translate ALL non-${targetLang} text into ${targetLang}
-   - Do NOT romanize or transliterate - always translate the meaning
-   - If a line is 100% already in ${targetLang}, output it unchanged
-   - For mixed-language lines: translate foreign parts, keep ${targetLang} parts intact
+1. PRESERVE ORIGINAL STRUCTURE & STYLE:
+   - **Mirror the Source:** If the original line uses parentheses (), uses all-caps, or is entirely lowercase (artist style), your translation MUST follow the same format.
+   - **Punctuation:** Keep internal punctuation (commas, dashes) exactly where the rhythm dictates.
+   - **Line Endings:**
+     - IF the original line has NO punctuation at the end, do NOT add a period (.).
+     - IF the original line has expressive punctuation (! or ?), KEEP it.
+     - **NEVER** add a grammatical full stop (.) at the end of a line just because it is a sentence. Lyrics are poetry, not paragraphs.
 
-3. OUTPUT QUALITY STANDARDS:
-   - Maintain natural ${targetLang} grammar and word order
-   - Preserve the original emotional tone and meaning
-   - Ensure each line flows naturally when read aloud
-   - Use contemporary, conversational ${targetLang}
-   - Avoid awkward literal translations
+2. UNTRANSLATABLE WORDS (Brand/City Names):
+   - Keep proper nouns, brand names, and specific city names in their original form unless a standard local version exists.
+   - Example: "Sippin' Diet Pepsi" -> "Minum Diet Pepsi" (Keep "Diet Pepsi").
 
-5. CONSISTENCY RULES:
-   - Use consistent terminology throughout all lines
-   - Maintain consistent pronouns and perspective
-   - Keep proper nouns consistent unless culturally adapted
+3. TONE & CREATIVITY:
+   - **Convey the Vibe:** If the line is funny, translate it to be funny in ${targetLang}. If it's slang, use equivalent local slang.
+   - **Meaning over Literal:** Do not translate word-for-word. Translate the *message*.
+   - **Mixed Language:** If a line is already in ${targetLang}, return it unchanged.
 
-INPUT DATA:
+INPUT LYRICS:
 ${JSON.stringify(texts, null, 2)}
 
 OUTPUT REQUIREMENT:
-Respond with ONLY the JSON array of ${texts.length} translated strings, no other text.`;
+Respond with ONLY the JSON array of ${texts.length} translated strings. No Markdown, no explanation.`;
 
-    const prompt = translationRules;
-    return prompt;
+  const prompt = translationRules;
+  return prompt;
 }
