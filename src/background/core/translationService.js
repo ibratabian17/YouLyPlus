@@ -90,7 +90,7 @@ export class TranslationService {
     if (action === 'translate') {
       return this.translate(originalLyrics, targetLang, settings, songInfo);
     } else if (action === 'romanize') {
-      return this.romanize(originalLyrics, settings, songInfo);
+      return this.romanize(originalLyrics, settings, songInfo, targetLang);
     }
     
     return originalLyrics.data;
@@ -140,7 +140,7 @@ export class TranslationService {
     }));
   }
 
-  static async romanize(originalLyrics, settings, songInfo = {}) {
+  static async romanize(originalLyrics, settings, songInfo = {}, targetLang) {
     // Check for prebuilt romanization
     const hasPrebuilt = originalLyrics.data.some(line =>
       line.romanizedText || (line.syllabus && line.syllabus.some(syl => syl.romanizedText))
@@ -154,7 +154,7 @@ export class TranslationService {
     const useGemini = settings.romanizationProvider === PROVIDERS.GEMINI && settings.geminiApiKey;
     
     return useGemini
-      ? GeminiService.romanize(originalLyrics, settings, songInfo)
+      ? GeminiService.romanize(originalLyrics, settings, songInfo, targetLang)
       : GoogleService.romanize(originalLyrics);
   }
 }

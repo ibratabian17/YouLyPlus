@@ -14,7 +14,7 @@ export class GeminiRomanizer {
     this.url = `https://generativelanguage.googleapis.com/v1beta/models/${settings.geminiRomanizationModel}:generateContent?key=${settings.geminiApiKey}`;
   }
 
-  async romanize(structuredInput, songInfo = {}) {
+  async romanize(structuredInput, songInfo = {}, targetLang) {
     const { lyricsForApi, reconstructionPlan } = this.prepareLyrics(structuredInput);
     const hasAnyChunks = lyricsForApi.some(line => line.chunk && line.chunk.length > 0);
 
@@ -22,7 +22,7 @@ export class GeminiRomanizer {
       return this.reconstructLyrics([], reconstructionPlan, hasAnyChunks);
     }
 
-    const initialPrompt = this.createInitialPrompt(lyricsForApi, hasAnyChunks, songInfo);
+    const initialPrompt = this.createInitialPrompt(lyricsForApi, hasAnyChunks, songInfo, targetLang);
     const schema = SchemaBuilder.buildRomanizationSchema(hasAnyChunks);
     const selectiveSchema = SchemaBuilder.buildSelectiveRomanizationSchema(hasAnyChunks);
 
@@ -209,7 +209,7 @@ export class GeminiRomanizer {
     return fullList;
   }
 
-  createInitialPrompt(lyricsForApi, hasAnyChunks, songInfo = {}) {
+  createInitialPrompt(lyricsForApi, hasAnyChunks, songInfo = {}, targetLang) {
     const { overrideGeminiRomanizePrompt, customGeminiRomanizePrompt } = this.settings;
     
     if (overrideGeminiRomanizePrompt && customGeminiRomanizePrompt) {
@@ -219,7 +219,7 @@ export class GeminiRomanizer {
       return songContext + customGeminiRomanizePrompt;
     }
 
-    return createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo);
+    return createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo, targetLang);
   }
 
   createCorrectionPrompt(problematicLines, validationResult, lyricsForApi, hasAnyChunks) {

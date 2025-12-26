@@ -1,4 +1,4 @@
-export function createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo = {}) {
+export function createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo = {}, targetLang) {
     const songContext = (songInfo.title && songInfo.artist) 
       ? `\n# SONG CONTEXT\n- Title: ${songInfo.title}\n- Artist: ${songInfo.artist}\n` 
       : '';
@@ -31,6 +31,19 @@ You are a transcription machine, not a translator:
 - Do NOT add explanations
 - Do NOT insert notes or comments
 - Output ONLY romanized text in exact structure
+
+## PRINCIPLE 4: FOLLOW ${targetLang} romanization style
+Romanization must follow the conventional spelling style used by native speakers of the TARGET LANGUAGE ${targetLang}
+Even if it differs from standard international romanization
+Example: Arabic "ش"
+- Source phonetic value: /ʃ/
+- targetLang = "en-US" → "sh"
+- targetLang = "id-ID" → "sy"
+
+Example: Japanese "し"
+- Source phonetic value: /ɕi/
+- targetLang = "en-US" → "shi"
+- targetLang = "id-ID" → "si"
 
 # LANGUAGE-SPECIFIC ROMANIZATION RULES
 

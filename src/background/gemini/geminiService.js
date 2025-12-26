@@ -72,7 +72,7 @@ export class GeminiService {
     }
   }
 
-  static async romanize(originalLyrics, settings, songInfo = {}) {
+  static async romanize(originalLyrics, settings, songInfo = {}, targetLang) {
     if (!settings.geminiApiKey) {
       throw new Error('Gemini API Key is not provided');
     }
@@ -80,7 +80,7 @@ export class GeminiService {
     const structuredInput = this.prepareStructuredInput(originalLyrics);
     const romanizer = new GeminiRomanizer(settings);
     
-    return romanizer.romanize(structuredInput, songInfo);
+    return romanizer.romanize(structuredInput, songInfo, targetLang);
   }
 
   static prepareStructuredInput(originalLyrics) {
