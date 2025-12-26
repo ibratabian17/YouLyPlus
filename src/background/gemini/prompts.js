@@ -437,6 +437,7 @@ CRITICAL GUIDELINES:
 
 1. PRESERVE ORIGINAL STRUCTURE & STYLE:
    - **Mirror the Source:** If the original line uses parentheses (), uses all-caps, or is entirely lowercase (artist style), your translation MUST follow the same format.
+   - **Arabic/Non-Latin Source:** If the source script (e.g., Arabic, Kanji) has no casing, default to standard Sentence case (First letter capitalized, rest lowercase).
    - **Punctuation:** Keep internal punctuation (commas, dashes) exactly where the rhythm dictates.
    - **Line Endings:**
      - IF the original line has NO punctuation at the end, do NOT add a period (.).
