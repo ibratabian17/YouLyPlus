@@ -125,11 +125,13 @@
     color: transparent;
     background-clip: text;
     background-color: var(--lyplus-text-secondary);
+    transition: transform 0.7s ease, background-color 0.7s, color 0.7s;
 }
 
 .line-by-line-mode .lyrics-line:not(.lyrics-gap).active .main-vocal-container {
     opacity: 1;
     background-color: var(--lyplus-text-primary, var(--lyplus-text-primary));
+    transition: transform 0.5s ease, background-color 0.18s, color 0.18s;
 }
 
 /* --- Line States & Modifiers --- */
