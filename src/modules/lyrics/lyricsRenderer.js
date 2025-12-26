@@ -841,7 +841,7 @@ class LyricsPlusRenderer {
       mainContainer.textContent = this._getDataText(line);
       if (this._isRTL(this._getDataText(line, true)))
         mainContainer.classList.add("rtl-text");
-      lineDiv.appendChild(mainContainer);
+      lineDivContainer.appendChild(mainContainer);
       this._renderTranslationContainer(lineDivContainer, line, displayMode);
       lineFragment.appendChild(lineDiv);
     });
