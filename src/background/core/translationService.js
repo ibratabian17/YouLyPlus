@@ -41,7 +41,8 @@ export class TranslationService {
       originalLyrics,
       action,
       actualTargetLang,
-      settings
+      settings,
+      songInfo
     );
 
     const finalTranslatedLyrics = { ...originalLyrics, data: translatedData };
@@ -85,17 +86,17 @@ export class TranslationService {
     return null;
   }
 
-  static async performTranslation(originalLyrics, action, targetLang, settings) {
+  static async performTranslation(originalLyrics, action, targetLang, settings, songInfo = {}) {
     if (action === 'translate') {
-      return this.translate(originalLyrics, targetLang, settings);
+      return this.translate(originalLyrics, targetLang, settings, songInfo);
     } else if (action === 'romanize') {
-      return this.romanize(originalLyrics, settings);
+      return this.romanize(originalLyrics, settings, songInfo);
     }
     
     return originalLyrics.data;
   }
 
-  static async translate(originalLyrics, targetLang, settings) {
+  static async translate(originalLyrics, targetLang, settings, songInfo = {}) {
     const useGemini = settings.translationProvider === PROVIDERS.GEMINI && settings.geminiApiKey;
     
     const normalizeLang = (l) => l ? l.toLowerCase().split('-')[0].trim() : '';
@@ -119,7 +120,7 @@ export class TranslationService {
       let fetchedTranslations;
       
       if (useGemini) {
-        fetchedTranslations = await GeminiService.translate(linesToTranslate, targetLang, settings);
+        fetchedTranslations = await GeminiService.translate(linesToTranslate, targetLang, settings, songInfo);
       } else {
         const translationPromises = linesToTranslate.map(text =>
           GoogleService.translate(text, targetLang)
@@ -139,7 +140,7 @@ export class TranslationService {
     }));
   }
 
-  static async romanize(originalLyrics, settings) {
+  static async romanize(originalLyrics, settings, songInfo = {}) {
     // Check for prebuilt romanization
     const hasPrebuilt = originalLyrics.data.some(line =>
       line.romanizedText || (line.syllabus && line.syllabus.some(syl => syl.romanizedText))
@@ -153,7 +154,7 @@ export class TranslationService {
     const useGemini = settings.romanizationProvider === PROVIDERS.GEMINI && settings.geminiApiKey;
     
     return useGemini
-      ? GeminiService.romanize(originalLyrics, settings)
+      ? GeminiService.romanize(originalLyrics, settings, songInfo)
       : GoogleService.romanize(originalLyrics);
   }
 }

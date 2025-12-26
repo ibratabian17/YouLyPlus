@@ -6,11 +6,11 @@ import { createTranslationPrompt } from './prompts.js';
 import { GeminiRomanizer } from './geminiRomanizer.js';
 
 export class GeminiService {
-  static async translate(texts, targetLang, settings) {
+  static async translate(texts, targetLang, settings, songInfo = {}) {
     const { geminiApiKey, geminiModel } = settings;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`;
 
-    const prompt = createTranslationPrompt(settings, texts, targetLang);
+    const prompt = createTranslationPrompt(settings, texts, targetLang, songInfo);
 
     const requestBody = {
       contents: [{ parts: [{ text: prompt }] }],
@@ -72,7 +72,7 @@ export class GeminiService {
     }
   }
 
-  static async romanize(originalLyrics, settings) {
+  static async romanize(originalLyrics, settings, songInfo = {}) {
     if (!settings.geminiApiKey) {
       throw new Error('Gemini API Key is not provided');
     }
@@ -80,7 +80,7 @@ export class GeminiService {
     const structuredInput = this.prepareStructuredInput(originalLyrics);
     const romanizer = new GeminiRomanizer(settings);
     
-    return romanizer.romanize(structuredInput);
+    return romanizer.romanize(structuredInput, songInfo);
   }
 
   static prepareStructuredInput(originalLyrics) {

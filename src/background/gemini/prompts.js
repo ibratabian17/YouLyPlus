@@ -1,6 +1,10 @@
-export function createRomanizationPrompt(lyricsForApi, hasAnyChunks) {
-    const basePrompt = `You are a professional linguistic transcription system specialized in PHONETIC ROMANIZATION.
+export function createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo = {}) {
+    const songContext = (songInfo.title && songInfo.artist) 
+      ? `\n# SONG CONTEXT\n- Title: ${songInfo.title}\n- Artist: ${songInfo.artist}\n` 
+      : '';
 
+    const basePrompt = `You are a professional linguistic transcription system specialized in PHONETIC ROMANIZATION.
+${songContext}
 # ABSOLUTE MISSION
 Transform non-Latin scripts into Latin alphabet representation of **actual pronunciation in natural speech context**.
 
@@ -407,11 +411,15 @@ Analyze the language(s) in the input, apply appropriate phonetic rules, preserve
     return basePrompt;
 }
 
-export function createTranslationPrompt(settings = {overrideGeminiPrompt: false, customGeminiPrompt: ''}, texts, targetLang) {
-  const translationRules = (settings.overrideGeminiPrompt && settings.customGeminiPrompt) ?
-        settings.customGeminiPrompt :
-        `You are a professional translator specializing in song lyrics. Your task is to translate lyrics into ${targetLang} with precision and consistency.
+export function createTranslationPrompt(settings = {overrideGeminiPrompt: false, customGeminiPrompt: ''}, texts, targetLang, songInfo = {}) {
+  const songContext = (songInfo.title && songInfo.artist) 
+    ? `\n# SONG CONTEXT\n- Title: ${songInfo.title}\n- Artist: ${songInfo.artist}\n` 
+    : '';
 
+  const translationRules = (settings.overrideGeminiPrompt && settings.customGeminiPrompt) ?
+        songContext + settings.customGeminiPrompt :
+        `You are a professional translator specializing in song lyrics. Your task is to translate lyrics into ${targetLang} with precision and consistency.
+${songContext}
 CRITICAL INSTRUCTIONS:
 1. LANGUAGE DETECTION:
    - Analyze each line to identify its source language(s)
