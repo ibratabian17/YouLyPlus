@@ -1,7 +1,3 @@
-[data-testid="modal"] {
-    --lyrics-scroll-padding-top: 36%;
-}
-
 .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v {
     grid-template-columns: 32vw 40vw;
     padding: 0 10vw;
@@ -34,6 +30,14 @@ body:has([data-testid="modal"]) main {
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
     overflow: scroll;
     scrollbar-width: none;
+
+    --lyrics-scroll-padding-top: 36%;
+    scroll-padding-top: 36%;
+    scroll-padding-block-start: 36%;
+    overflow-anchor: auto;
+    scrollbar-width: none;
+    will-change: scroll-position;
+    scroll-snap-type: y proximity;
 }
 
 #lyrics-plus-container::-webkit-scrollbar {

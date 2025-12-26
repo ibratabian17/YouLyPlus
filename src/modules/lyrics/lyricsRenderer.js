@@ -403,6 +403,10 @@ class LyricsPlusRenderer {
       currentLine.dataset.startTime = line.startTime;
       currentLine.dataset.endTime = line.endTime;
 
+      let currentLineContainer = document.createElement("div");
+      currentLineContainer.className = "lyrics-line-container";
+      currentLine.appendChild(currentLineContainer);
+
       const singerClass = line.element?.singer
         ? singerClassMap[line.element.singer] || "singer-left"
         : "singer-left";
@@ -415,7 +419,7 @@ class LyricsPlusRenderer {
 
       const mainContainer = document.createElement("div");
       mainContainer.classList.add("main-vocal-container");
-      currentLine.appendChild(mainContainer);
+      currentLineContainer.appendChild(mainContainer);
 
       let backgroundContainer = null;
       let isFirstSyllableInMain = true;
@@ -701,7 +705,7 @@ class LyricsPlusRenderer {
           ? backgroundContainer ||
           ((backgroundContainer = document.createElement("div")),
             (backgroundContainer.className = "background-vocal-container"),
-            currentLine.appendChild(backgroundContainer))
+            currentLineContainer.appendChild(backgroundContainer))
           : mainContainer;
 
         targetContainer.appendChild(wordSpan);
@@ -797,7 +801,7 @@ class LyricsPlusRenderer {
       }
       fragment.appendChild(currentLine);
 
-      this._renderTranslationContainer(currentLine, line, displayMode);
+      this._renderTranslationContainer(currentLineContainer, line, displayMode);
     });
   }
 
@@ -816,6 +820,10 @@ class LyricsPlusRenderer {
       const lineDiv = document.createElement("div");
       lineDiv.innerHTML = "";
       lineDiv.className = "lyrics-line";
+      const lineDivContainer = document.createElement("div");
+      lineDivContainer.innerHTML = "";
+      lineDivContainer.className = "lyrics-line-container";
+      lineDiv.append(lineDivContainer);
       lineDiv.dataset.startTime = line.startTime;
       lineDiv.dataset.endTime = line.endTime;
       const singerClass = line.element?.singer
@@ -834,7 +842,7 @@ class LyricsPlusRenderer {
       if (this._isRTL(this._getDataText(line, true)))
         mainContainer.classList.add("rtl-text");
       lineDiv.appendChild(mainContainer);
-      this._renderTranslationContainer(lineDiv, line, displayMode);
+      this._renderTranslationContainer(lineDivContainer, line, displayMode);
       lineFragment.appendChild(lineDiv);
     });
     fragment.appendChild(lineFragment);

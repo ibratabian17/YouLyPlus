@@ -111,12 +111,13 @@
     mix-blend-mode: lighten;
 }
 
-.lyrics-line.scroll-animate, .lyrics-plus-metadata.scroll-animate {
-  animation-name: lyrics-scroll;
-  animation-duration: 400ms;
-  animation-timing-function: cubic-bezier(.41, 0, .12, .99);
-  animation-fill-mode: both;
-  animation-delay: var(--lyrics-line-delay, 0ms);
+.lyrics-line.scroll-animate,
+.lyrics-plus-metadata.scroll-animate {
+    animation-name: lyrics-scroll;
+    animation-duration: 400ms;
+    animation-timing-function: cubic-bezier(.41, 0, .12, .99);
+    animation-fill-mode: both;
+    animation-delay: var(--lyrics-line-delay, 0ms);
 }
 
 
@@ -125,6 +126,7 @@
     background-clip: text;
     background-color: var(--lyplus-text-secondary);
 }
+
 .line-by-line-mode .lyrics-line:not(.lyrics-gap).active .main-vocal-container {
     opacity: 1;
     background-color: var(--lyplus-text-primary, var(--lyplus-text-primary));
@@ -176,7 +178,7 @@
     animation: none !important;
     transition: none !important;
     will-change: auto !important;
-    filter: none!important;
+    filter: none !important;
 }
 
 /* --- Directionality & Text Alignment --- */
@@ -188,14 +190,25 @@
     text-align: right;
 }
 
-.lyrics-line.singer-right:not(.rtl-text) .main-vocal-container,
-.lyrics-line.rtl-text:not(.singer-right) .main-vocal-container,
-#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-right .main-vocal-container {
+.lyrics-line.singer-right:not(.rtl-text) .lyrics-line-container,
+.lyrics-line.rtl-text:not(.singer-right) .lyrics-line-container,
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-right .lyrics-line-container {
     transform-origin: right;
 }
 
-#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-left .main-vocal-container {
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-left .lyrics-line-container {
     transform-origin: left;
+}
+
+.lyrics-line.singer-right:not(.rtl-text) .main-vocal-container,
+.lyrics-line.rtl-text:not(.singer-right) .main-vocal-container,
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-right .main-vocal-container {
+    transform-origin: 95% 50%;
+}
+
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-left .main-vocal-container,
+.lyrics-line .main-vocal-container {
+    transform-origin: 5% 50%;
 }
 
 /* ==========================================================================
@@ -203,14 +216,14 @@
    ========================================================================== */
 
 /* --- Vocal Containers --- */
-.lyrics-line .main-vocal-container {
+.lyrics-line .lyrics-line-container {
     overflow-wrap: break-word;
     transform-origin: left;
     transform: scale3d(0.93, 0.93, 0.95);
     transition: transform 0.7s ease, background-color 0.7s, color 0.7s;
 }
 
-.lyrics-line.active .main-vocal-container {
+.lyrics-line.active .lyrics-line-container {
     transform: scale3d(1.001, 1.001, 1);
     will-change: transform;
     transition: transform 0.5s ease, background-color 0.18s, color 0.18s;
@@ -267,6 +280,7 @@
     background-color: var(--lyplus-text-primary, var(--lyplus-text-primary));
     transition: transform 1s ease !important;
 }
+
 .lyrics-line .lyrics-syllable.finished:has(.span.char) {
     background-color: transparent;
 }
@@ -803,12 +817,13 @@ canvas#lyplus-webgl-canvas {
 }
 
 @keyframes lyrics-scroll {
-  from {
-    transform: translateY(var(--scroll-delta)) translateZ(1px);
-  }
-  to {
-    transform: translateY(0) translateZ(1px);
-  }
+    from {
+        transform: translateY(var(--scroll-delta)) translateZ(1px);
+    }
+
+    to {
+        transform: translateY(0) translateZ(1px);
+    }
 }
 
 @keyframes gap-ended {

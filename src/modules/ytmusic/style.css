@@ -258,7 +258,7 @@ div#lyrics-song-progressbar {
         --lyplus-font-size-base-grow: 25;
     }
 
-    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] .lyrics-line:not(.active) .main-vocal-container {
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] .lyrics-line:not(.active) .lyrics-line-container {
         transform: scale3d(0.8, 0.8, 0.95);
     }
 
