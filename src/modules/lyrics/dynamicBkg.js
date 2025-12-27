@@ -55,7 +55,7 @@ let blurDimensions = { width: 0, height: 0 };
 let canvasDimensions = { width: 0, height: 0 };
 
 const BLUR_DOWNSAMPLE = 1;
-const BLUR_RADIUS = 6;
+const BLUR_RADIUS = 7;
 
 const MASTER_PALETTE_TEX_WIDTH = 8;
 const MASTER_PALETTE_TEX_HEIGHT = 5;
@@ -657,9 +657,9 @@ function animateWebGLBackground() {
         globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         return;
     }
-    lastDrawTime = now;
+    lastDrawTime = now - (elapsed % FRAME_INTERVAL);
 
-    const currentTime = now / 1000 - startTime;
+    const currentTime = lastDrawTime / 1000 - startTime;
 
     if (artworkTransitionProgress < 1.0) {
         artworkTransitionProgress = Math.min(1.0, artworkTransitionProgress + ARTWORK_TRANSITION_SPEED);
