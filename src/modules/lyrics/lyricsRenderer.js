@@ -2147,75 +2147,87 @@ class LyricsPlusRenderer {
       state.pendingUpdate = null;
       return;
     } else {
+      const referenceLine =
+        this.currentPrimaryActiveLine ||
+        this.lastPrimaryActiveLine ||
+        this.cachedLyricsLines[0];
+
+      if (!referenceLine) return;
+
+      const referenceIndex = this.cachedLyricsLines.indexOf(referenceLine);
+      if (referenceIndex === -1) return;
+
+      const delayIncrement = 30;
+      const lookBehind = 5;
+      const lookAhead = 20;
+
+      let delayCounter = 0;
+
+      const start = Math.max(0, referenceIndex - lookBehind);
+      const end = Math.min(this.cachedLyricsLines.length, referenceIndex + lookAhead);
+
+      const linesToAnimate = [];
+      let maxAnimationDuration = 0;
+
+      for (let i = start; i < end; i++) {
+        const line = this.cachedLyricsLines[i];
+        if (!this.visibleLineIds.has(line.id)) continue;
+
+        const delay = i >= referenceIndex ? delayCounter * delayIncrement : 0;
+        if (i >= referenceIndex) delayCounter++;
+
+        line.style.setProperty('--scroll-delta', `${delta}px`);
+        line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
+
+        line.classList.remove('scroll-animate');
+
+        linesToAnimate.push(line);
+
+        const lineDuration = 400 + delay;
+        maxAnimationDuration = Math.max(maxAnimationDuration, lineDuration);
+      }
+
+      state.isAnimating = true;
+      state.startTime = performance.now();
+      state.startOffset = prevOffset;
+      state.targetOffset = newTranslateY;
+      state.duration = 400;
+
+      if (this._scrollAnimationTimeout) {
+        clearTimeout(this._scrollAnimationTimeout);
+      }
+
+      this._scrollAnimationTimeout = setTimeout(() => {
+        state.isAnimating = false;
+
+        if (state.pendingUpdate !== null) {
+          const pendingValue = state.pendingUpdate;
+          state.pendingUpdate = null;
+          this._animateScroll(pendingValue, false);
+        } else {
+          this._scrollAnimationTimeout = null;
+        }
+      }, maxAnimationDuration + 50);
+
+      for (const line of linesToAnimate) {
+        const animations = line.getAnimations();
+        let found = false;
+        for (const anim of animations) {
+          if (anim.animationName === 'lyrics-scroll') {
+            anim.cancel();
+            anim.play();
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          line.classList.remove('scroll-animate');
+          requestAnimationFrame(() => line.classList.add('scroll-animate'));
+        }
+      }
       parent.scrollTo({ top: targetTop, behavior: 'instant' });
     }
 
-    const referenceLine =
-      this.currentPrimaryActiveLine ||
-      this.lastPrimaryActiveLine ||
-      this.cachedLyricsLines[0];
-
-    if (!referenceLine) return;
-
-    const referenceIndex = this.cachedLyricsLines.indexOf(referenceLine);
-    if (referenceIndex === -1) return;
-
-    const delayIncrement = 30;
-    const lookBehind = 5;
-    const lookAhead = 20;
-
-    let delayCounter = 0;
-
-    const start = Math.max(0, referenceIndex - lookBehind);
-    const end = Math.min(this.cachedLyricsLines.length, referenceIndex + lookAhead);
-
-    const linesToAnimate = [];
-    let maxAnimationDuration = 0;
-
-    for (let i = start; i < end; i++) {
-      const line = this.cachedLyricsLines[i];
-      if (!this.visibleLineIds.has(line.id)) continue;
-
-      const delay = i >= referenceIndex ? delayCounter * delayIncrement : 0;
-      if (i >= referenceIndex) delayCounter++;
-
-      line.style.setProperty('--scroll-delta', `${delta}px`);
-      line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-      line.classList.remove('scroll-animate');
-
-      linesToAnimate.push(line);
-
-      const lineDuration = 400 + delay;
-      maxAnimationDuration = Math.max(maxAnimationDuration, lineDuration);
-    }
-
-    state.isAnimating = true;
-    state.startTime = performance.now();
-    state.startOffset = prevOffset;
-    state.targetOffset = newTranslateY;
-    state.duration = 400;
-
-    if (this._scrollAnimationTimeout) {
-      clearTimeout(this._scrollAnimationTimeout);
-    }
-
-    this._scrollAnimationTimeout = setTimeout(() => {
-      state.isAnimating = false;
-
-      if (state.pendingUpdate !== null) {
-        const pendingValue = state.pendingUpdate;
-        state.pendingUpdate = null;
-        this._animateScroll(pendingValue, false);
-      } else {
-        this._scrollAnimationTimeout = null;
-      }
-    }, maxAnimationDuration + 50);
-
-    requestAnimationFrame(() => {
-      for (const line of linesToAnimate) {
-        line.classList.add('scroll-animate');
-      }
-    });
   }
 
   _updatePositionClassesAndScroll(lineToScroll, forceScroll = false) {

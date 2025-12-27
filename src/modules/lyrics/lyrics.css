@@ -119,7 +119,10 @@
     animation-fill-mode: both;
     animation-delay: var(--lyrics-line-delay, 0ms);
 }
-
+.lyrics-line:not(.scroll-animate),
+.lyrics-plus-metadata:not(.scroll-animate) {
+    animation: none;
+}
 
 .line-by-line-mode .lyrics-line:not(.lyrics-gap) .main-vocal-container {
     color: transparent;
