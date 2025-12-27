@@ -12,6 +12,7 @@ const uiConfig = {
     player: '#apple-music-player',
     patchParent: '#lyplus-patch-container', 
     selectors: [
+        '#lyplus-patch-container',
         '[data-testid="modal"]',
         '[data-testid="lyrics-fullscreen-modal"]'
     ],
@@ -82,7 +83,6 @@ function tryInject() {
                 lyricsRendererInstance.uiConfig.patchParent = '#lyplus-patch-container';
                 lyricsRendererInstance.lyricsContainer = null;
             }
-            lyricsRendererInstance._createLyricsContainer();
             
             if (currentSongInfo && currentSongInfo.title && typeof fetchAndDisplayLyrics === 'function') {
                 fetchAndDisplayLyrics(currentSongInfo, true);

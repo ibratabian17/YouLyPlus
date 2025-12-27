@@ -1,3 +1,8 @@
+
+[data-testid="modal"] {
+    --lyrics-scroll-padding-top: 36%;
+}
+
 .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v {
     grid-template-columns: 32vw 40vw;
     padding: 0 10vw;
@@ -10,6 +15,7 @@ body:has([data-testid="modal"]) main {
 [data-testid="modal"] #lyrics-plus-container {
     position: relative;
     display: block;
+    padding-top: calc(1em + 36vh);
 }
 
 [data-testid="modal"] #lyrics-plus-buttons-wrapper {
@@ -31,7 +37,6 @@ body:has([data-testid="modal"]) main {
     overflow: scroll;
     scrollbar-width: none;
 
-    --lyrics-scroll-padding-top: 36%;
     scroll-padding-top: 36%;
     scroll-padding-block-start: 36%;
     overflow-anchor: auto;
@@ -43,6 +48,7 @@ body:has([data-testid="modal"]) main {
 #lyrics-plus-container::-webkit-scrollbar {
     display: none;
 }
+
 
 #lyrics-plus-container .lyrics-line{
     font-size: var(--lyrics-line-font-size);

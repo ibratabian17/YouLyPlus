@@ -55,7 +55,7 @@
     font-weight: bolder;
     direction: ltr;
     transform: translateZ(0);
-    padding-top: var(--lyrics-scroll-padding-top);
+    padding-top: calc(1em + var(--lyrics-scroll-padding-top));
 }
 
 #lyrics-plus-container.lyrics-plus-message {
