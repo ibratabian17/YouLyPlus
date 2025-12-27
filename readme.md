@@ -8,60 +8,68 @@
 [![GitHub Forks](https://img.shields.io/github/forks/ibratabian17/YouLyPlus?style=for-the-badge&color=blue)](https://github.com/ibratabian17/YouLyPlus/network/members)
 
 <p align="center">
-<img src="https://ibratabian17.github.io/youlyplus-page/assets/screenshot-4.png" alt="The Screenshot">
+<img src="https://ibratabian17.github.io/youlyplus-page/assets/youlyplus.png" alt="The Screenshot">
 </p>
 
 ---
 
 ## 🌟 Why YouLy+?
 
-Streaming services offer great libraries, but their web interfaces often lag behind in user experience.
+Streaming services offer great libraries, but their web interfaces so trash, with this extension, it replace streaming shitty lyrics player to Apple Music-like lyrics
 
-*   **For YouTube Music & Tidal:** The default lyrics are often static, plain text, and unengaging. YouLy+ transforms this by injecting rich, synced karaoke-style lyrics.
-*   **For Apple Music Web:** The native lyrics UI can be heavy, buggy, and resource-intensive. YouLy+ replaces this broken interface with a lightweight, smooth, and highly customizable alternative.
+* **YouTube Music:** Transforms the default static or plain text lyrics into a rich, timed, karaoke-style experience.
+* **Tidal Web (Experimental):** While Tidal Web offers synced lyrics, they are limited to **line-by-line** synchronization. YouLy+ make them to **word-by-word**.
+* **Apple Music Web (Experimental):** The native web player attempts word-by-word sync, but the implementation is flawed:
+    * **Precision Issues:** Native AM Web uses `setTimeout` and their musickit uses timeupdate which is inaccurate, causing lyrics became offsync and hard to read.
+    * **Performance Hog:** Heavy JavaScript-based animations spike CPU usage, causing lag on single-threaded or older devices.
+    * **Broken Layout:** Frequent visual bugs occur with pronunciation guides and word breaks on syllable-synced song lmao.
+    * **Inferior Animation:** The web animations feels so broken, idk how to tell it, but it's a pain.
 
-It's lightweight, fully open-source, and designed to make your music sessions more engaging and fun.
+**YouLy+ trying to replaces these broken implementations with a lightweight, precise (idts), and visually faithful rendering engine.**
 
 ## ✨ Features
 
-YouLy+ is packed with features designed to enhance your lyrics experience:
+YouLy+ is come with a features that designed to fix and enhance your lyrics experience:
 
 ### 🎤 Core Lyrics Experience
 
--   **Advanced Synchronized Lyrics:** Enjoy real-time, accurately synced lyrics with line-by-line highlighting.
--   **Word-by-Word Highlighting (YT Music/Tidal):** Immersive karaoke-style experience with precise word highlighting for supported platforms.
--   **Apple Music Lyrics Engine Overhaul:** Replaces the heavy and often broken built-in Apple Music lyrics UI with YouLy+'s optimized, lightweight interface while maintaining synchronization. and with more source, so if the song doesnt have synced, it would automatically find it!
+-   **Advanced Synchronized Lyrics:** Enjoy real-time, accurately synced lyrics with line-by-line highlighting. (cuz it uses apple ttml)
+-   **Word-by-Word Highlighting:**
+    -   *YouTube Music:* Adds syncing where none exists.
+    -   *Tidal:* Upgrades line-sync to word-sync.
+    -   *Apple Music:* Replaces the buggy native engine with a high-performance alternative.
+-   **Apple Music Engine Overhaul:** Replaces the resource-heavy native UI. YouLy+ solves the `setTimeout` drift issues and layout bugs while significantly lowering CPU usage. It also expands the lyric sources—if AM lacks synced lyrics, YouLy+ finds them elsewhere!
 -   **Official Subtitle Fallback:** Automatically uses official subtitles if synced lyrics aren't available.
 -   **Multiple Providers:** Choose where your lyrics come from! Works seamlessly across all three platforms.
--   **Native Integration:** Replaces default lyrics panel with custom, interactive elements. Click-to-seek, scroll to find lines, and more!
+-   **Native Integration:** Replaces default lyrics panels with custom, interactive elements. Click-to-seek, scroll to find lines, and more!
 
 ### 🌐 Translation & Romanization
 
--   **Instant Translation:** Translate lyrics on the fly using **Google Translate** or the powerful **Gemini AI** (need API KEY).
--   **Romanization:** See lyrics written in the familiar English alphabet, even for languages that use different writing systems (like Japanese, Korean, or Russian). (Only for some songs, if it doesn't exist, it will use lyrics-on-the-fly romanization)
--   **Full Gemini AI Control:** For advanced users, you can connect your own Gemini AI account, choose different AI settings, and even create your own instructions for how translations should work.
+-   **Instant Translation:** Translate lyrics on the fly using **Google Translate** or the powerful **Gemini AI** (API Key required).
+-   **Romanization:** See lyrics written in the familiar English alphabet, even for languages that use different writing systems (like Japanese, Korean, or Russian).
+-   **Full Gemini AI Control:** For advanced users, connect your own Gemini AI account to customize translation instructions and AI settings.
 
 ### 🎨 Appearance & Customization
 
 -   **Dynamic Theming:** Lyrics and backgrounds automatically adapt to the **song's color palette**.
 -   **Visual Effects:** Enable an Apple Music-style **blur for inactive lines** to improve focus.
--   **Custom Look:** If you know a bit about web design, you can use custom code (CSS) to make the lyrics look exactly how you want them.
+-   **Custom CSS:** Full control for web designers to inject custom CSS and style the lyrics exactly how they want.
 
 ### ⚙️ Performance & Integration
 
--   **Fast & Smooth:** YouLy+ is designed to run quickly and smoothly, even on older computers, without slowing down your system.
--   **Performance Modes:** Utilize **Lightweight Mode** or **Compatibility Mode** for smooth animations on any machine.
--   **SponsorBlock Integration:** Automatically skip non-music segments like intros, outros, and sponsor messages.
--   **Smart Saving:** YouLy+ remembers lyrics it has already found, so they load faster next time and use less internet data.
+-   **Optimized Renderer:** Unlike the native Apple Music Web player, YouLy+ is designed to run smoothly on older hardware (e.g., dual-core CPUs) without freezing the browser.
+-   **Performance Modes:** Utilize **Lightweight Mode** or **Compatibility Mode** to ensure 60 FPS animations on any machine.
+-   **SponsorBlock Integration:** Automatically skip non-music segments like intros, outros, and sponsor messages (YouTube Music).
+-   **Smart Caching:** YouLy+ remembers lyrics it has found, reducing data usage and loading times.
 
 ## ⚡ Performance Reference
 
-The benchmark I used is my own pc that developed this project, YouLy+ with config enable blur and dynamic background is able to run smoothly on old hardware from 2012 (for example, AMD FX-6300 + GT 620). any mainstream CPU from the last 10 years (2.7GHz+) is sufficient for smooth operation.
+The benchmark machine used to develop this project is older hardware (AMD FX-6300 + GT 620 from ~2012). YouLy+ is optimized to run where native web players fail.
 
 **GPU Performance (Targeting 60 FPS):**
-*   **768p (1366x768):** Stable 60 FPS on **NVIDIA GT 620** (1GB) or equivalent integrated graphics.
-*   **1080p (1920x1080):** GTX 650 / GT 1030 or above recommended for a locked 60 FPS.
-    *   *Note: Legacy cards (GT 620) can still achieve 45-60 FPS at 1080p with minor jitter.*
+* **768p (1366x768):** Stable 60 FPS on **NVIDIA GT 620** (1GB) or equivalent integrated graphics.
+* **1080p (1920x1080):** GTX 650 / GT 1030 or above recommended for a locked 60 FPS.
+    * *Note: Legacy cards (GT 620) can still achieve 45-60 FPS at 1080p with minor jitter.*
 
 ## ⬇️ Installation
 
@@ -81,9 +89,9 @@ For the safest and easiest experience, install YouLy+ directly from your browser
 
 1.  **Clone or Download the Repository:**
     ```bash
-    git clone https://github.com/ibratabian17/YouLyPlus.git
+    git clone [https://github.com/ibratabian17/YouLyPlus.git](https://github.com/ibratabian17/YouLyPlus.git)
     ```
-2.  Alternatively, you can download the latest release from [Github Releases](https://github.com/ibratabian17/YouLyPlus/releases/latest).
+2.  Alternatively, you can download the latest release from [Github Releases](https://github.com/ibratabian17/YouLyPlus/releases/latest) and extract them.
 3.  **Open Chrome Extensions Page:**
     Navigate to `chrome://extensions/`.
 4.  **Enable Developer Mode:**
@@ -95,7 +103,7 @@ For the safest and easiest experience, install YouLy+ directly from your browser
 
 1.  **Clone or Download the Repository:**
     ```bash
-    git clone https://github.com/ibratabian17/YouLyPlus.git
+    git clone [https://github.com/ibratabian17/YouLyPlus.git](https://github.com/ibratabian17/YouLyPlus.git)
     ```
 2.  Alternatively, you can download the latest release from [Github Releases](https://github.com/ibratabian17/YouLyPlus/releases/latest).
 3.  **Open Firefox Debugging Page:**
@@ -108,16 +116,14 @@ For the safest and easiest experience, install YouLy+ directly from your browser
 ## 🚀 Usage
 
 Once installed, simply open one of the supported players:
-*   **[YouTube Music](https://music.youtube.com/)**
-*   **[Tidal Web Player](https://listen.tidal.com/)**
-*   **[Apple Music Web](https://music.apple.com/)**
+* **[YouTube Music](https://music.youtube.com/)**
+* **[Tidal Web Player](https://listen.tidal.com/)** *(Experimental)*
+* **[Apple Music Web](https://music.apple.com/)** *(Experimental)*
 
 Play any song, and the lyrics panel will automatically be enhanced by YouLy+.
 
 -   **Quick Settings:** Access quick toggles by clicking the YouLy+ icon in your browser's toolbar.
 -   **Full Settings:** For comprehensive customization, click **"More Settings"** from the popup.
-
-
 
 ## ☁️ Self-Hosting & Open Source
 
@@ -133,7 +139,7 @@ If you're interested in contributing to or modifying YouLy+:
 
 1.  **Clone the Repository:**
     ```bash
-    git clone https://github.com/ibratabian17/YouLyPlus.git
+    git clone [https://github.com/ibratabian17/YouLyPlus.git](https://github.com/ibratabian17/YouLyPlus.git)
     ```
 2.  **Load the Extension:**
     Use your browser’s "Load unpacked" feature (as described in the [Installation](#installation) section) to test your changes in real-time.
