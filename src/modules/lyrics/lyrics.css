@@ -231,14 +231,14 @@
    ========================================================================== */
 
 /* --- Vocal Containers --- */
-.lyrics-line .lyrics-line-container {
+.lyrics-line:not(.lyrics-gap) .lyrics-line-container {
     overflow-wrap: break-word;
     transform-origin: left;
     transform: scale3d(0.93, 0.93, 0.95);
     transition: transform 0.7s ease, background-color 0.7s, color 0.7s;
 }
 
-.lyrics-line.active .lyrics-line-container {
+.lyrics-line.active:not(.lyrics-gap) .lyrics-line-container {
     transform: scale3d(1.001, 1.001, 1);
     will-change: transform;
     transition: transform 0.5s ease, background-color 0.18s, color 0.18s;
@@ -247,14 +247,14 @@
 .lyrics-line .background-vocal-container {
     max-height: 0;
     padding-top: 0.2em;
-    overflow: hidden;
+    overflow: visible;
     opacity: 0;
     font-size: var(--lyplus-font-size-subtext);
     transition: max-height .3s, opacity .6s, padding .6s;
 }
 
 .lyrics-line.active .background-vocal-container {
-    max-height: 10em;
+    max-height: 4em;
     opacity: 1;
     transition: max-height .6s, opacity .6s, padding .6s;
     will-change: max-height, opacity, padding;
@@ -444,6 +444,9 @@
 .lyrics-line.lyrics-gap:not(.active) .main-vocal-container {
     animation: gap-ended 0.8s ease;
     transform: translateY(-25%) scale(0) translateZ(0);
+}
+.lyrics-line.lyrics-gap:not(.active) .main-vocal-container .lyrics-word {
+    animation-play-state: paused;
 }
 
 .lyrics-line.lyrics-gap.active .main-vocal-container .lyrics-word {
