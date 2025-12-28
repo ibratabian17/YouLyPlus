@@ -240,7 +240,6 @@ div#lyrics-song-progressbar {
         min-width: 50%;
         mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
         transform: translateY(-8.8rem);
-        interactivity: auto !important;
     }
 
     ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened] .lyplus-blur-container .lyplus-gradient-overlay {
