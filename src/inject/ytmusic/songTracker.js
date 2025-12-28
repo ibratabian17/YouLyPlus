@@ -58,17 +58,14 @@
 
         function loop() {
             const player = getPlayer();
-
-            if (player && player.getCurrentTime) {
-                try {
-                    const currentTime = player.getCurrentTime();
-                    window.postMessage({
-                        type: 'LYPLUS_TIME_UPDATE',
-                        currentTime: currentTime
-                    }, '*');
-                    lastSentTime = currentTime;
-                } catch (e) {
-                }
+            try {
+                const currentTime = player.getCurrentTime() + 0.15;
+                window.postMessage({
+                    type: 'LYPLUS_TIME_UPDATE',
+                    currentTime: currentTime
+                }, '*');
+                lastSentTime = currentTime;
+            } catch (e) {
             }
 
             timeUpdateFrame = requestAnimationFrame(loop);
