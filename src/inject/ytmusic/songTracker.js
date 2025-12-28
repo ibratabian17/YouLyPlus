@@ -56,8 +56,6 @@
     function startTimeUpdater() {
         stopTimeUpdater();
 
-        let lastSentTime = 0;
-
         function loop() {
             const player = getPlayer();
 
@@ -157,6 +155,11 @@
 
         if (player.getDuration) {
             duration = player.getDuration();
+        }
+
+        if (!duration || duration === 0) {
+            setTimeout(checkForSongChange, 250);
+            return;
         }
 
         if (!domInfo.title || !domInfo.artist) return;
