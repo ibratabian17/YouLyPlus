@@ -23,6 +23,10 @@ body:has([data-testid="modal"]) main {
     justify-content: flex-end;
 }
 
+[data-testid="modal"] #lyrics-plus-reload-button {
+    display: none;
+}
+
 #lyplus-patch-container {
     opacity: 1;
     width: 100%;
@@ -60,8 +64,9 @@ body:has([data-testid="modal"]) main {
 }
 
 /* --- Hiding ONLY Native Lyrics Text --- */
-article[data-testid="lyrics-fullscreen-modal"]:has(#lyrics-plus-container) .lyrics__lyrics,
-.toggle-button.toggle-button--lyrics.lyrics-button  {
+article[data-testid="lyrics-fullscreen-modal"] .lyrics__lyrics,
+.toggle-button.toggle-button--lyrics.lyrics-button,
+[data-testid="modal"] span.lyrics-source-provider  {
     display: none !important;
 }
 
@@ -91,11 +96,46 @@ article[data-testid="lyrics-fullscreen-modal"]:has(#lyrics-plus-container) .lyri
 }
 
 [data-testid="modal"] #lyrics-plus-translation-dropdown {
-    background-color: #ffffff14;
-    border-radius: 1em;
-    backdrop-filter: blur(3px);
+    border-radius: 6px;
+    backdrop-filter: blur(60px) saturate(220%);
     top: -7em;
-    left: 71%;
+    left: 74.5%;
+    background-color: transparent;
+    border: 0px solid transparent;
+    box-shadow: 0 0 35px #00000059;
+}
+
+#lyrics-plus-translation-dropdown::before {
+    background-color: var(--systemStandardThickMaterialSover-default_IC);
+    content: "";
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), 0 8px 40px var(--dialogShadowColor);
+}
+
+@supports (backdrop-filter: blur(10px)) {
+    #lyrics-plus-translation-dropdown::before {
+        background-color: var(--systemStandardThickMaterialSover);
+        backdrop-filter: blur(60px) saturate(210%);
+    }
+}
+
+@supports (backdrop-filter: blur(10px)) {
+    @media (prefers-color-scheme: dark) {
+        #lyrics-plus-translation-dropdown::before {
+            backdrop-filter: blur(60px) saturate(220%);
+        }
+    }
+}
+
+[data-testid="modal"] .dropdown-option:not(:first-of-type) {
+    border-top: 0.5px solid var(--labelDivider);
 }
 
 
