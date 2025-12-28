@@ -1364,6 +1364,7 @@ class LyricsPlusRenderer {
     offsetLatency = 0
   ) {
     this.lastKnownSongInfo = songInfo;
+    this.currentSettings = currentSettings;
     this.fetchAndDisplayLyricsFn = fetchAndDisplayLyricsFn;
     this.setCurrentDisplayModeAndRefetchFn = setCurrentDisplayModeAndRefetchFn;
     this.largerTextMode = largerTextMode;
@@ -2383,6 +2384,22 @@ class LyricsPlusRenderer {
     return this.resizeObserver;
   }
 
+  restore() {
+    if (!this.lyricsContainer) return;
+
+    this._playerElement = undefined;
+    this._attachScrollListeners();
+
+    if (this.visibilityObserver) this.visibilityObserver.disconnect();
+    this.visibilityObserver = this._setupVisibilityTracking();
+
+    if (this.resizeObserver) this.resizeObserver.disconnect();
+    this._setupResizeObserver();
+
+    this._startLyricsSync(this.currentSettings);
+    this._createControlButtons();
+  }
+
   _createControlButtons() {
     // Wrapper Management
     this.buttonsWrapper = document.getElementById("lyrics-plus-buttons-wrapper");
@@ -2425,6 +2442,8 @@ class LyricsPlusRenderer {
           };
           document.addEventListener("click", this._boundDocumentClickHandler);
         }
+      } else if (!this.buttonsWrapper.contains(this.translationButton)) {
+        this.buttonsWrapper.appendChild(this.translationButton);
       }
     }
 
@@ -2442,6 +2461,8 @@ class LyricsPlusRenderer {
           this.fetchAndDisplayLyricsFn(this.lastKnownSongInfo, true, true);
         }
       });
+    } else if (!this.buttonsWrapper.contains(this.reloadButton)) {
+      this.buttonsWrapper.appendChild(this.reloadButton);
     }
   }
 

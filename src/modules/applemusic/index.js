@@ -75,17 +75,31 @@ function tryInject() {
         }
 
         if (!document.getElementById('lyrics-plus-container')) {
-            console.log('LyricsPlus: Lyrics container missing, injecting into wrapper...');
+            console.log('LyricsPlus: Lyrics container missing, checking for reuse...');
             
             if (!lyricsRendererInstance) {
                 lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
-            } else {
-                lyricsRendererInstance.uiConfig.patchParent = '#lyplus-patch-container';
-                lyricsRendererInstance.lyricsContainer = null;
             }
             
-            if (currentSongInfo && currentSongInfo.title && typeof fetchAndDisplayLyrics === 'function') {
-                fetchAndDisplayLyrics(currentSongInfo, true);
+            const canReuse = lyricsRendererInstance.lyricsContainer && 
+                             lyricsRendererInstance.lastKnownSongInfo && 
+                             currentSongInfo &&
+                             lyricsRendererInstance.lastKnownSongInfo.title === currentSongInfo.title &&
+                             lyricsRendererInstance.lastKnownSongInfo.artist === currentSongInfo.artist;
+
+            if (canReuse) {
+                console.log('LyricsPlus: Reusing existing container');
+                patchWrapper.appendChild(lyricsRendererInstance.lyricsContainer);
+                lyricsRendererInstance.uiConfig.patchParent = '#lyplus-patch-container';
+                lyricsRendererInstance.restore();
+            } else {
+                console.log('LyricsPlus: Injecting new lyrics...');
+                lyricsRendererInstance.uiConfig.patchParent = '#lyplus-patch-container';
+                lyricsRendererInstance.lyricsContainer = null;
+                
+                if (currentSongInfo && currentSongInfo.title && typeof fetchAndDisplayLyrics === 'function') {
+                    fetchAndDisplayLyrics(currentSongInfo, true);
+                }
             }
         }
     }

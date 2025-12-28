@@ -59,9 +59,6 @@ function ensureLyricsTab() {
     lyricsPanel.setAttribute('role', 'tabpanel');
     lyricsPanel.style.display = 'none';
     
-    lyricsPanel.innerHTML = `
-    `;
-    
     panelContainer.appendChild(lyricsPanel);
 
     if (!lyricsRendererInstance) {
@@ -73,6 +70,31 @@ function ensureLyricsTab() {
         if (typeof LyricsPlusRenderer !== 'undefined') {
             lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
         }
+    } else {
+        const canReuse = lyricsRendererInstance.lyricsContainer && 
+                         lyricsRendererInstance.lastKnownSongInfo && 
+                         LYPLUS_currentSong &&
+                         lyricsRendererInstance.lastKnownSongInfo.title === LYPLUS_currentSong.title &&
+                         lyricsRendererInstance.lastKnownSongInfo.artist === LYPLUS_currentSong.artist;
+
+        if (canReuse) {
+            console.log('LyricsPlus: Reusing existing container');
+            lyricsPanel.appendChild(lyricsRendererInstance.lyricsContainer);
+            lyricsRendererInstance.uiConfig.patchParent = '#lyrics-plus-panel';
+            lyricsRendererInstance.restore();
+        } else {
+            console.log('LyricsPlus: Injecting new lyrics instance (resetting container)...');
+            lyricsRendererInstance.uiConfig.patchParent = '#lyrics-plus-panel';
+            lyricsRendererInstance.lyricsContainer = null;
+            
+            if (LYPLUS_currentSong && LYPLUS_currentSong.title && typeof fetchAndDisplayLyrics === 'function') {
+                fetchAndDisplayLyrics(LYPLUS_currentSong, true);
+            }
+        }
+    }
+
+    if (lyricsRendererInstance && !lyricsRendererInstance.lyricsContainer && LYPLUS_currentSong && LYPLUS_currentSong.title && typeof fetchAndDisplayLyrics === 'function') {
+        fetchAndDisplayLyrics(LYPLUS_currentSong, true);
     }
 
     customLyricsTab.setAttribute('aria-controls', 'lyrics-plus-panel');
