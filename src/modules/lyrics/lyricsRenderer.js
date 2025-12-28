@@ -2388,6 +2388,8 @@ class LyricsPlusRenderer {
     if (!this.lyricsContainer) return;
 
     this._playerElement = undefined;
+
+    this.scrollEventHandlerAttached = false;
     this._attachScrollListeners();
 
     if (this.visibilityObserver) this.visibilityObserver.disconnect();
