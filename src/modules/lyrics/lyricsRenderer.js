@@ -1754,14 +1754,16 @@ class LyricsPlusRenderer {
 
     this._updateSyllables(currentTime, this._tempActiveLines);
 
-    if (
-      this.lyricsContainer &&
-      this.lyricsContainer.classList.contains("hide-offscreen")
-    ) {
-      if (this._visibilityHasChanged) {
+    if (this._visibilityHasChanged) {
+      if (
+        this.lyricsContainer &&
+        this.lyricsContainer.classList.contains("hide-offscreen")
+      ) {
         this._batchUpdateViewportVisibility();
-        this._visibilityHasChanged = false;
+      } else {
+        this._visibilityChanges = [];
       }
+      this._visibilityHasChanged = false;
     }
   }
 
@@ -1810,16 +1812,14 @@ class LyricsPlusRenderer {
    * Batch update viewport visibility
    */
   _batchUpdateViewportVisibility() {
-    const lines = this.cachedLyricsLines;
-    const visibleIds = this.visibleLineIds;
+    if (!this._visibilityChanges) return;
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (line) {
-        const isOutOfView = !visibleIds.has(line.id);
-        line.classList.toggle("viewport-hidden", isOutOfView);
-      }
+    for (let i = 0; i < this._visibilityChanges.length; i++) {
+      const change = this._visibilityChanges[i];
+      change.target.classList.toggle("viewport-hidden", !change.isIntersecting);
     }
+
+    this._visibilityChanges = [];
   }
 
   _updateSyllables(currentTime, activeLines) {
@@ -1831,7 +1831,7 @@ class LyricsPlusRenderer {
 
       let syllables = parentLine._cachedSyllableElements;
       if (!syllables) {
-        syllables = parentLine.querySelectorAll(".lyrics-syllable");
+        syllables = Array.from(parentLine.querySelectorAll(".lyrics-syllable"));
         parentLine._cachedSyllableElements = syllables;
       }
 
@@ -2167,7 +2167,6 @@ class LyricsPlusRenderer {
       const start = Math.max(0, referenceIndex - lookBehind);
       const end = Math.min(this.cachedLyricsLines.length, referenceIndex + lookAhead);
 
-      const linesToAnimate = [];
       let maxAnimationDuration = 0;
 
       for (let i = start; i < end; i++) {
@@ -2179,10 +2178,7 @@ class LyricsPlusRenderer {
 
         line.style.setProperty('--scroll-delta', `${delta}px`);
         line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-
-        line.classList.remove('scroll-animate');
-
-        linesToAnimate.push(line);
+        line.classList.add('scroll-animate');
 
         const lineDuration = 400 + delay;
         maxAnimationDuration = Math.max(maxAnimationDuration, lineDuration);
@@ -2210,25 +2206,16 @@ class LyricsPlusRenderer {
         }
       }, maxAnimationDuration + 50);
 
-      for (const line of linesToAnimate) {
-        const animations = line.getAnimations();
-        let found = false;
-        for (const anim of animations) {
-          if (anim.animationName === 'lyrics-scroll') {
-            anim.cancel();
-            anim.play();
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          line.classList.remove('scroll-animate');
-          requestAnimationFrame(() => line.classList.add('scroll-animate'));
+      parent.scrollTo({ top: targetTop, behavior: 'instant' });
+
+      const animations = this.lyricsContainer.getAnimations({ subtree: true });
+      for (const anim of animations) {
+        if (anim.animationName === 'lyrics-scroll') {
+          anim.cancel();
+          anim.play();
         }
       }
-      parent.scrollTo({ top: targetTop, behavior: 'instant' });
     }
-
   }
 
   _updatePositionClassesAndScroll(lineToScroll, forceScroll = false) {
@@ -2332,6 +2319,7 @@ class LyricsPlusRenderer {
     if (this.visibilityObserver) this.visibilityObserver.disconnect();
 
     this._visibilityHasChanged = true;
+    this._visibilityChanges = [];
 
     this.visibilityObserver = new IntersectionObserver(
       (entries) => {
@@ -2339,6 +2327,11 @@ class LyricsPlusRenderer {
         entries.forEach((entry) => {
           const target = entry.target;
           const id = target.id;
+
+          this._visibilityChanges.push({
+            target: target,
+            isIntersecting: entry.isIntersecting
+          });
 
           if (entry.isIntersecting) {
             if (!this.visibleLineIds.has(id)) {
