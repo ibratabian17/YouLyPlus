@@ -417,7 +417,7 @@ class LyricsPlusRenderer {
         currentLine._hasSharedListener = true;
       }
 
-      const mainContainer = document.createElement("div");
+      const mainContainer = document.createElement("p");
       mainContainer.classList.add("main-vocal-container");
       currentLineContainer.appendChild(mainContainer);
 
@@ -703,7 +703,7 @@ class LyricsPlusRenderer {
         // DOM Insertion
         const targetContainer = isBgWord
           ? backgroundContainer ||
-          ((backgroundContainer = document.createElement("div")),
+          ((backgroundContainer = document.createElement("p")),
             (backgroundContainer.className = "background-vocal-container"),
             currentLineContainer.appendChild(backgroundContainer))
           : mainContainer;
