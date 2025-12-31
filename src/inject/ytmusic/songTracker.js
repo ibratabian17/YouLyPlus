@@ -59,7 +59,7 @@
         function loop() {
             const player = getPlayer();
             try {
-                const currentTime = player.getCurrentTime() + 0.15;
+                const currentTime = player.getCurrentTime() + 0.11;
                 window.postMessage({
                     type: 'LYPLUS_TIME_UPDATE',
                     currentTime: currentTime
