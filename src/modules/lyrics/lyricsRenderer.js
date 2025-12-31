@@ -315,14 +315,14 @@ class LyricsPlusRenderer {
 
       const currentOriginallyLonger = currentLine.originalEndTime > nextLine.originalEndTime;
       const currentOverlapsNext = nextLine.startTime < currentLine.originalEndTime;
-      
-      const nextHasGapToAfter = lineAfterNext 
+
+      const nextHasGapToAfter = lineAfterNext
         ? lineAfterNext.startTime > nextLine.originalEndTime
         : true;
 
       if (currentOriginallyLonger && currentOverlapsNext && nextHasGapToAfter) {
         const longerEnd = currentLine.originalEndTime;
-        
+
         let targetEnd = longerEnd;
         if (lineAfterNext) {
           const gap = lineAfterNext.startTime - longerEnd;
@@ -330,14 +330,12 @@ class LyricsPlusRenderer {
             const gapExtension = Math.min(1.3, gap);
             targetEnd = longerEnd + gapExtension;
           }
-        } else {
-          targetEnd = longerEnd + 1.3;
+
+          if (targetEnd > lineAfterNext.startTime) {
+            targetEnd = lineAfterNext.startTime;
+          }
         }
-        
-        if (lineAfterNext && targetEnd > lineAfterNext.startTime) {
-          targetEnd = lineAfterNext.startTime;
-        }
-        
+
         currentLine.newEndTime = targetEnd;
         currentLine.isHandledByExtensionPass = true;
         nextLine.newEndTime = targetEnd;
