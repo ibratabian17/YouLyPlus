@@ -292,6 +292,7 @@ class LyricsPlusRenderer {
       originalEndTime: parseFloat(line.dataset.endTime),
       newEndTime: parseFloat(line.dataset.endTime),
       isHandledByPrecursorPass: false,
+      isHandledByExtensionPass: false,
     }));
 
     for (let i = 0; i <= linesData.length - 3; i++) {
@@ -307,10 +308,47 @@ class LyricsPlusRenderer {
       }
     }
 
+    for (let i = 0; i < linesData.length - 1; i++) {
+      const currentLine = linesData[i];
+      const nextLine = linesData[i + 1];
+      const lineAfterNext = i + 2 < linesData.length ? linesData[i + 2] : null;
+
+      const currentOriginallyLonger = currentLine.originalEndTime > nextLine.originalEndTime;
+      const currentOverlapsNext = nextLine.startTime < currentLine.originalEndTime;
+      
+      const nextHasGapToAfter = lineAfterNext 
+        ? lineAfterNext.startTime > nextLine.originalEndTime
+        : true;
+
+      if (currentOriginallyLonger && currentOverlapsNext && nextHasGapToAfter) {
+        const longerEnd = currentLine.originalEndTime;
+        
+        let targetEnd = longerEnd;
+        if (lineAfterNext) {
+          const gap = lineAfterNext.startTime - longerEnd;
+          if (gap > 0) {
+            const gapExtension = Math.min(1.3, gap);
+            targetEnd = longerEnd + gapExtension;
+          }
+        } else {
+          targetEnd = longerEnd + 1.3;
+        }
+        
+        if (lineAfterNext && targetEnd > lineAfterNext.startTime) {
+          targetEnd = lineAfterNext.startTime;
+        }
+        
+        currentLine.newEndTime = targetEnd;
+        currentLine.isHandledByExtensionPass = true;
+        nextLine.newEndTime = targetEnd;
+        nextLine.isHandledByExtensionPass = true;
+      }
+    }
+
     for (let i = linesData.length - 2; i >= 0; i--) {
       const currentLine = linesData[i];
       const nextLine = linesData[i + 1];
-      if (currentLine.isHandledByPrecursorPass) continue;
+      if (currentLine.isHandledByPrecursorPass || currentLine.isHandledByExtensionPass) continue;
 
       if (nextLine.startTime < currentLine.originalEndTime) {
         const overlap = currentLine.originalEndTime - nextLine.startTime;
