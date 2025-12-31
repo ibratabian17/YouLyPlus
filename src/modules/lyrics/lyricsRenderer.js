@@ -1314,9 +1314,15 @@ class LyricsPlusRenderer {
     if (lyrics.metadata.songWriters && lyrics.metadata.songWriters.length > 0) {
       const songWritersDiv = document.createElement("span");
       songWritersDiv.className = "lyrics-song-writters";
-      songWritersDiv.innerText = `${t(
-        "writtenBy"
-      )} ${lyrics.metadata.songWriters.join(", ")}`;
+      songWritersDiv.textContent = "";
+      const WrittenByTxt = document.createElement("b");
+      WrittenByTxt.textContent = t("writtenBy");
+      const writersText = document.createTextNode(
+        " " + lyrics.metadata.songWriters.join(", ")
+      );
+      songWritersDiv.appendChild(WrittenByTxt);
+      songWritersDiv.appendChild(writersText);
+
       metadataContainer.appendChild(songWritersDiv);
     }
     const sourceDiv = document.createElement("span");
