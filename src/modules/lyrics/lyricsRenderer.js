@@ -1681,16 +1681,15 @@ class LyricsPlusRenderer {
       }
       primaryIndex = scanIndex;
     } else {
-      if (
-        this.cachedLyricsLines.length > 0 &&
-        predictiveTime < this.cachedLyricsLines[0]._startTimeMs
-      ) {
+      const firstLineStartTime = this.cachedLyricsLines[0]._startTimeMs;
+      if (predictiveTime < firstLineStartTime) {
         primaryIndex = 0;
       } else {
         primaryIndex = this._lastActiveIndex;
         if (primaryIndex < 0) primaryIndex = 0;
-        if (primaryIndex >= this.cachedLyricsLines.length) {
-          primaryIndex = this.cachedLyricsLines.length - 1;
+        const linesLength = this.cachedLyricsLines.length;
+        if (primaryIndex >= linesLength) {
+          primaryIndex = linesLength - 1;
         }
       }
     }
@@ -1698,8 +1697,8 @@ class LyricsPlusRenderer {
     this._lastActiveIndex = primaryIndex;
     const lineToScroll = this.cachedLyricsLines[primaryIndex];
 
-    // 2. Determine Active Lines
-    this._tempActiveLines.length = 0;
+    // reuse array to avoid allocation
+    let tempActiveCount = 0;
 
     const startSearch = Math.max(0, primaryIndex - 1);
     const endSearch = Math.min(
@@ -1714,19 +1713,22 @@ class LyricsPlusRenderer {
           currentTime >= line._startTimeMs - highlightLookAheadMs &&
           currentTime <= line._endTimeMs - highlightLookAheadMs
         ) {
-          this._tempActiveLines.push(line);
+          this._tempActiveLines[tempActiveCount++] = line;
         }
       }
     }
 
-    if (this._tempActiveLines.length > 1) {
+    if (this._tempActiveLines.length > tempActiveCount) {
+      this._tempActiveLines.length = tempActiveCount;
+    }
+
+    if (tempActiveCount > 1) {
       this._tempActiveLines.sort((a, b) => a._startTimeMs - b._startTimeMs);
     }
 
-    // 3. Diffing Active Lines
-    let hasChanged = this.activeLineIds.size !== this._tempActiveLines.length;
-    if (!hasChanged) {
-      for (let i = 0; i < this._tempActiveLines.length; i++) {
+    let hasChanged = this.activeLineIds.size !== tempActiveCount;
+    if (!hasChanged && tempActiveCount > 0) {
+      for (let i = 0; i < tempActiveCount; i++) {
         if (!this.activeLineIds.has(this._tempActiveLines[i].id)) {
           hasChanged = true;
           break;
@@ -1735,12 +1737,9 @@ class LyricsPlusRenderer {
     }
 
     if (hasChanged) {
-      const oldActiveIds = Array.from(this.activeLineIds);
-
-      for (let i = 0; i < oldActiveIds.length; i++) {
-        const oldId = oldActiveIds[i];
+      for (const oldId of this.activeLineIds) {
         let stillActive = false;
-        for (let j = 0; j < this._tempActiveLines.length; j++) {
+        for (let j = 0; j < tempActiveCount; j++) {
           if (this._tempActiveLines[j].id === oldId) {
             stillActive = true;
             break;
@@ -1757,7 +1756,7 @@ class LyricsPlusRenderer {
         }
       }
 
-      for (let i = 0; i < this._tempActiveLines.length; i++) {
+      for (let i = 0; i < tempActiveCount; i++) {
         const line = this._tempActiveLines[i];
         if (!this.activeLineIds.has(line.id)) {
           line.classList.add("active");
@@ -1780,9 +1779,7 @@ class LyricsPlusRenderer {
 
     // 5. Focus Logic
     const mostRecentActiveLine =
-      this._tempActiveLines.length > 0
-        ? this._tempActiveLines[this._tempActiveLines.length - 1]
-        : null;
+      tempActiveCount > 0 ? this._tempActiveLines[tempActiveCount - 1] : null;
 
     if (this.currentFullscreenFocusedLine !== mostRecentActiveLine) {
       if (this.currentFullscreenFocusedLine) {
@@ -1867,7 +1864,9 @@ class LyricsPlusRenderer {
   _updateSyllables(currentTime, activeLines) {
     if (!activeLines || activeLines.length === 0) return;
 
-    for (let i = 0; i < activeLines.length; i++) {
+    const activeLinesLength = activeLines.length;
+
+    for (let i = 0; i < activeLinesLength; i++) {
       const parentLine = activeLines[i];
       if (!parentLine) continue;
 
@@ -1877,10 +1876,11 @@ class LyricsPlusRenderer {
         parentLine._cachedSyllableElements = syllables;
       }
 
-      for (let j = 0; j < syllables.length; j++) {
+      const syllablesLength = syllables.length;
+
+      for (let j = 0; j < syllablesLength; j++) {
         const syllable = syllables[j];
         const startTime = syllable._startTimeMs;
-        const endTime = syllable._endTimeMs;
 
         if (startTime === undefined) continue;
 
@@ -1889,6 +1889,12 @@ class LyricsPlusRenderer {
         const hasHighlight = classList.contains("highlight");
         const hasFinished = classList.contains("finished");
         const hasPreHighlight = classList.contains("pre-highlight");
+        const hasActiveState = hasHighlight || hasFinished || hasPreHighlight;
+
+        // Early exit only if syllable is far 
+        if (currentTime < startTime - 1000 && !hasActiveState) continue;
+
+        const endTime = syllable._endTimeMs;
 
         if (currentTime >= startTime && currentTime <= endTime) {
           if (!hasHighlight) {
@@ -1905,6 +1911,7 @@ class LyricsPlusRenderer {
             classList.add("finished");
           }
         } else {
+          // currentTime < startTime
           if (hasHighlight || hasFinished) {
             this._resetSyllable(syllable);
           } else if (hasPreHighlight) {
@@ -1912,8 +1919,8 @@ class LyricsPlusRenderer {
 
             if (j > 0) {
               const prevSyllable = syllables[j - 1];
-              if (prevSyllable && prevSyllable.classList.contains("highlight")) {
-                shouldReset = false;
+              if (prevSyllable) {
+                shouldReset = !prevSyllable.classList.contains("highlight");
               }
             }
 
@@ -1945,8 +1952,10 @@ class LyricsPlusRenderer {
     const isFirstInContainer = syllable._isFirstInContainer || false;
 
     // --- CALCULATION PHASE ---
-    const pendingStyleUpdates = [];
     const charAnimationsMap = new Map();
+    let styleUpdatesCount = 0;
+    const maxStyleUpdates = 100;
+    const styleUpdates = new Array(maxStyleUpdates);
 
     // Step 1: Grow Pass.
     if (isGrowable && isFirstSyllable && allWordCharSpans) {
@@ -1954,27 +1963,30 @@ class LyricsPlusRenderer {
       const baseDelayPerChar = finalDuration * 0.09;
       const growDurationMs = finalDuration * 1.5;
 
-      allWordCharSpans.forEach((span) => {
+      const charsLength = allWordCharSpans.length;
+      for (let i = 0; i < charsLength; i++) {
+        const span = allWordCharSpans[i];
         const horizontalOffset = parseFloat(span.dataset.horizontalOffset) || 0;
-        const growDelay =
-          baseDelayPerChar * (parseFloat(span.dataset.syllableCharIndex) || 0);
+        const growDelay = baseDelayPerChar * (parseFloat(span.dataset.syllableCharIndex) || 0);
         charAnimationsMap.set(
           span,
           `grow-dynamic ${growDurationMs}ms ease-in-out ${growDelay}ms forwards`
         );
-        pendingStyleUpdates.push({
+        styleUpdates[styleUpdatesCount++] = {
           element: span,
           property: "--char-offset-x",
           value: `${horizontalOffset}`,
-        });
-      });
+        };
+      }
     }
 
     // Step 2: Wipe Pass.
     if (charSpans && charSpans.length > 0) {
       const syllableDuration = syllable._durationMs;
+      const charSpansLength = charSpans.length;
 
-      charSpans.forEach((span, charIndex) => {
+      for (let charIndex = 0; charIndex < charSpansLength; charIndex++) {
+        const span = charSpans[charIndex];
         const startPct = parseFloat(span.dataset.wipeStart) || 0;
         const durationPct = parseFloat(span.dataset.wipeDuration) || 0;
 
@@ -1990,8 +2002,7 @@ class LyricsPlusRenderer {
             ? "wipe-rtl"
             : "wipe";
 
-        const existingAnimation =
-          charAnimationsMap.get(span) || span.style.animation;
+        const existingAnimation = charAnimationsMap.get(span) || span.style.animation;
         const animationParts = [];
 
         if (existingAnimation && existingAnimation.includes("grow-dynamic")) {
@@ -2002,7 +2013,7 @@ class LyricsPlusRenderer {
           const arrivalTime = parseFloat(span.dataset.preWipeArrival) || 0;
           const constantDuration = parseFloat(span.dataset.preWipeDuration) || 100;
 
-          let animDelay = arrivalTime - constantDuration;
+          const animDelay = arrivalTime - constantDuration;
 
           if (constantDuration > 0) {
             animationParts.push(
@@ -2018,7 +2029,7 @@ class LyricsPlusRenderer {
         }
 
         charAnimationsMap.set(span, animationParts.join(", "));
-      });
+      }
     } else {
       const ratio = syllable._wipeRatio || 1;
       const visualDuration = syllable._durationMs * ratio;
@@ -2031,11 +2042,11 @@ class LyricsPlusRenderer {
           : "wipe";
       const currentWipeAnimation = isGap ? "fade-gap" : wipeAnimation;
       const syllableAnimation = `${currentWipeAnimation} ${visualDuration}ms ${isGap ? 'var(--lyplus-fade-gap-timing-function)' : 'linear'} forwards`;
-      pendingStyleUpdates.push({
+      styleUpdates[styleUpdatesCount++] = {
         element: syllable,
         property: "animation",
         value: syllableAnimation,
-      });
+      };
     }
 
     // Step 3: Pre-Wipe Pass (Cross-Syllable).
@@ -2043,22 +2054,22 @@ class LyricsPlusRenderer {
       const preHighlightDuration = syllable._preHighlightDurationMs;
       const preHighlightDelay = syllable._preHighlightDelayMs;
 
-      pendingStyleUpdates.push({
+      styleUpdates[styleUpdatesCount++] = {
         element: nextSyllable,
         property: "class",
         action: "add",
         value: "pre-highlight",
-      });
-      pendingStyleUpdates.push({
+      };
+      styleUpdates[styleUpdatesCount++] = {
         element: nextSyllable,
         property: "--pre-wipe-duration",
         value: `${preHighlightDuration}ms`,
-      });
-      pendingStyleUpdates.push({
+      };
+      styleUpdates[styleUpdatesCount++] = {
         element: nextSyllable,
         property: "--pre-wipe-delay",
         value: `${preHighlightDelay}ms`,
-      });
+      };
 
       const nextCharSpan = nextSyllable._cachedCharSpans?.[0];
       if (nextCharSpan) {
@@ -2083,7 +2094,8 @@ class LyricsPlusRenderer {
       span.style.animation = animationString;
     }
 
-    for (const update of pendingStyleUpdates) {
+    for (let i = 0; i < styleUpdatesCount; i++) {
+      const update = styleUpdates[i];
       if (update.action === "add") {
         update.element.classList.add(update.value);
       } else if (update.property === "animation") {
