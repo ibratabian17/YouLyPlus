@@ -2171,17 +2171,12 @@ class LyricsPlusRenderer {
     const parent = this.lyricsContainer.parentElement;
     if (!parent) return;
 
-    const targetTop = Math.max(0, -newTranslateY);
-
     if (!this._scrollAnimationState) {
       this._scrollAnimationState = {
         isAnimating: false,
-        startTime: 0,
-        startOffset: 0,
-        targetOffset: 0,
-        duration: 400,
         pendingUpdate: null
       };
+      this._animatingLines = [];
     }
 
     const state = this._scrollAnimationState;
@@ -2191,8 +2186,24 @@ class LyricsPlusRenderer {
       return;
     }
 
-    let prevOffset = this.currentScrollOffset || 0;
+    if (this._scrollAnimationTimeout) {
+      clearTimeout(this._scrollAnimationTimeout);
+      this._scrollAnimationTimeout = null;
+    }
 
+    const animatingLines = this._animatingLines;
+    if (animatingLines.length > 0) {
+      for (let i = 0; i < animatingLines.length; i++) {
+        const line = animatingLines[i];
+        line.classList.remove('scroll-animate');
+        line.style.removeProperty('--scroll-delta');
+        line.style.removeProperty('--lyrics-line-delay');
+      }
+      animatingLines.length = 0;
+    }
+
+    const targetTop = Math.max(0, -newTranslateY);
+    const prevOffset = this.currentScrollOffset || 0;
     const delta = prevOffset - newTranslateY;
     this.currentScrollOffset = newTranslateY;
 
@@ -2201,75 +2212,76 @@ class LyricsPlusRenderer {
       state.isAnimating = false;
       state.pendingUpdate = null;
       return;
-    } else {
-      const referenceLine =
-        this.currentPrimaryActiveLine ||
-        this.lastPrimaryActiveLine ||
-        this.cachedLyricsLines[0];
+    }
 
-      if (!referenceLine) return;
+    const referenceLine =
+      this.currentPrimaryActiveLine ||
+      this.lastPrimaryActiveLine ||
+      this.cachedLyricsLines[0];
 
-      const referenceIndex = this.cachedLyricsLines.indexOf(referenceLine);
-      if (referenceIndex === -1) return;
+    if (!referenceLine) return;
 
-      const delayIncrement = 30;
-      const lookBehind = 5;
-      const lookAhead = 20;
+    const referenceIndex = this.cachedLyricsLines.indexOf(referenceLine);
+    if (referenceIndex === -1) return;
 
-      let delayCounter = 0;
+    const delayIncrement = 30;
+    const lookBehind = 5;
+    const lookAhead = 20;
+    const len = this.cachedLyricsLines.length;
 
-      const start = Math.max(0, referenceIndex - lookBehind);
-      const end = Math.min(this.cachedLyricsLines.length, referenceIndex + lookAhead);
+    const start = Math.max(0, referenceIndex - lookBehind);
+    const end = Math.min(len, referenceIndex + lookAhead);
 
-      let maxAnimationDuration = 0;
+    let maxAnimationDuration = 0;
+    let delayCounter = 0;
 
-      for (let i = start; i < end; i++) {
-        const line = this.cachedLyricsLines[i];
-        if (!this.visibleLineIds.has(line.id)) continue;
+    for (let i = start; i < end; i++) {
+      const line = this.cachedLyricsLines[i];
+      if (!this.visibleLineIds.has(line.id)) continue;
 
-        const delay = i >= referenceIndex ? delayCounter * delayIncrement : 0;
-        if (i >= referenceIndex) delayCounter++;
+      const delay = i >= referenceIndex ? delayCounter++ * delayIncrement : 0;
+      
+      line.style.setProperty('--scroll-delta', `${delta}px`);
+      line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
+      line.classList.add('scroll-animate');
+      
+      animatingLines.push(line);
 
-        line.style.setProperty('--scroll-delta', `${delta}px`);
-        line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-        line.classList.add('scroll-animate');
+      const lineDuration = 400 + delay;
+      if (lineDuration > maxAnimationDuration) maxAnimationDuration = lineDuration;
+    }
 
-        const lineDuration = 400 + delay;
-        maxAnimationDuration = Math.max(maxAnimationDuration, lineDuration);
-      }
+    state.isAnimating = true;
 
-      state.isAnimating = true;
-      state.startTime = performance.now();
-      state.startOffset = prevOffset;
-      state.targetOffset = newTranslateY;
-      state.duration = 400;
-
-      if (this._scrollAnimationTimeout) {
-        clearTimeout(this._scrollAnimationTimeout);
-      }
-
-      this._scrollAnimationTimeout = setTimeout(() => {
-        state.isAnimating = false;
-
-        if (state.pendingUpdate !== null) {
-          const pendingValue = state.pendingUpdate;
-          state.pendingUpdate = null;
-          this._animateScroll(pendingValue, false);
-        } else {
-          this._scrollAnimationTimeout = null;
-        }
-      }, maxAnimationDuration + 50);
-
-      parent.scrollTo({ top: targetTop, behavior: 'instant' });
-
-      const animations = this.lyricsContainer.getAnimations({ subtree: true });
-      for (const anim of animations) {
-        if (anim.animationName === 'lyrics-scroll') {
-          anim.cancel();
-          anim.play();
-        }
+    const animations = this.lyricsContainer.getAnimations({ subtree: true });
+    for (const anim of animations) {
+      if (anim.animationName === 'lyrics-scroll') {
+        anim.cancel();
+        anim.play();
       }
     }
+
+    this._scrollAnimationTimeout = setTimeout(() => {
+      state.isAnimating = false;
+      
+      for (let i = 0; i < animatingLines.length; i++) {
+        const line = animatingLines[i];
+        line.classList.remove('scroll-animate');
+        line.style.removeProperty('--scroll-delta');
+        line.style.removeProperty('--lyrics-line-delay');
+      }
+      animatingLines.length = 0;
+
+      if (state.pendingUpdate !== null) {
+        const pendingValue = state.pendingUpdate;
+        state.pendingUpdate = null;
+        this._animateScroll(pendingValue, false);
+      } else {
+        this._scrollAnimationTimeout = null;
+      }
+    }, maxAnimationDuration + 50);
+
+    parent.scrollTo({ top: targetTop, behavior: 'instant' });
   }
 
   _updatePositionClassesAndScroll(lineToScroll, forceScroll = false) {
