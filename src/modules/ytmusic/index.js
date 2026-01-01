@@ -18,6 +18,8 @@ const uiConfig = {
 };
 let progressBar;
 let currentSongDuration = 1;
+let lastUpdateTimestamp = 0;
+const THROTTLE_MS = 33.3;
 
 const titleElementElem = document.createElement('p');
 const artistElementElem = document.createElement('p');
@@ -49,6 +51,55 @@ function injectPlatformCSS() {
     document.head.appendChild(linkElement);
 }
 
+function updateTextWithMarquee(container, text) {
+    container.innerHTML = '';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'marquee-wrapper';
+
+    const content = document.createElement('span');
+    content.className = 'marquee-content';
+    content.textContent = text;
+
+    wrapper.appendChild(content);
+    container.appendChild(wrapper);
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            const containerWidth = container.clientWidth;
+            const contentWidth = content.scrollWidth;
+
+            container.classList.remove('marquee-active');
+            wrapper.classList.remove('animate');
+
+            if (contentWidth > containerWidth) {
+                const gap = 60;
+
+                const duplicate = content.cloneNode(true);
+                wrapper.appendChild(duplicate);
+
+                const scrollDistance = contentWidth + gap;
+
+                const scrollDuration = scrollDistance / 60; 
+                const pauseDuration = 2;
+                const totalDuration = scrollDuration + pauseDuration;
+
+                const pausePercent = (pauseDuration / totalDuration) * 100;
+                const scrollPercent = 100 - pausePercent;
+
+                wrapper.style.setProperty('--marquee-distance', `${scrollDistance}px`);
+                wrapper.style.setProperty('--total-duration', `${totalDuration}s`);
+                wrapper.style.setProperty('--pause-percent', pausePercent.toFixed(2));
+                wrapper.style.setProperty('--scroll-percent', scrollPercent.toFixed(2));
+                wrapper.style.setProperty('--gap', `${gap}px`);
+
+                container.classList.add('marquee-active');
+                wrapper.classList.add('animate');
+            }
+        });
+    });
+}
+
 // Function to inject the DOM script
 function injectDOMScript() {
     if (!pBrowser?.runtime?.getURL) {
@@ -62,35 +113,40 @@ function injectDOMScript() {
     };
     (document.head || document.documentElement).appendChild(script);
 
-    /*
-    //patch uiconst player = document.querySelector('ytmusic-player');
-    const songInfoContainerElem = document.createElement('div');
-    songInfoContainerElem.className = 'lyrics-song-container';
 
-    //title
-    titleElementElem.id = 'lyrics-song-title';
-    titleElementElem.textContent = "Placeholder"
+    //patch ui
+    if (currentSettings.YTSongInfo) {
+        const player = document.querySelector('ytmusic-player');
+        const songInfoContainerElem = document.createElement('div');
+        songInfoContainerElem.className = 'lyrics-song-container';
 
-    artistElementElem.id = 'lyrics-song-artist';
-    artistElementElem.textContent = "Placeholder"
-    const progressBarElem = document.createElement('div');
-    progressBarElem.id = 'lyrics-song-progressbar';
-    progressBarElem.classList.add('progress-container');
-    songInfoContainerElem.appendChild(titleElementElem);
-    songInfoContainerElem.appendChild(artistElementElem);
-    songInfoContainerElem.appendChild(progressBarElem);
-    player.appendChild(songInfoContainerElem);
-    progressBar = new WavyProgressBar(progressBarElem);
-    progressBar.play();
+        //title
+        titleElementElem.id = 'lyrics-song-title';
+        titleElementElem.className = 'marquee-container';
+        updateTextWithMarquee(titleElementElem, "Placeholder");
 
-    const ytPlayer = document.querySelector('video');
-    ytPlayer.addEventListener('play', () => {
+        artistElementElem.id = 'lyrics-song-artist';
+        artistElementElem.className = 'marquee-container';
+        updateTextWithMarquee(artistElementElem, "Placeholder");
+
+        const progressBarElem = document.createElement('div');
+        progressBarElem.id = 'lyrics-song-progressbar';
+        progressBarElem.classList.add('progress-container');
+        songInfoContainerElem.appendChild(titleElementElem);
+        songInfoContainerElem.appendChild(artistElementElem);
+        songInfoContainerElem.appendChild(progressBarElem);
+        player.appendChild(songInfoContainerElem);
+        progressBar = new WavyProgressBar(progressBarElem);
         progressBar.play();
-    })
-    ytPlayer.addEventListener('pause', () => {
-        progressBar.pause();
-    })
-        */
+
+        const ytPlayer = document.querySelector('video');
+        ytPlayer.addEventListener('play', () => {
+            progressBar.play();
+        })
+        ytPlayer.addEventListener('pause', () => {
+            progressBar.pause();
+        })
+    }
 }
 
 window.addEventListener('message', (event) => {
@@ -101,22 +157,35 @@ window.addEventListener('message', (event) => {
     if (event.data.type === 'LYPLUS_TIME_UPDATE' && typeof event.data.currentTime === 'number') {
         LyricsPlusAPI.updateCurrentTick(event.data.currentTime)
 
-        //const cur = event.data.currentTime;
-        //progressBar.update(cur / currentSongDuration);
+        if (currentSettings.YTSongInfo) {
+            const now = performance.now();
+            if (now - lastUpdateTimestamp >= THROTTLE_MS) {
+                lastUpdateTimestamp = now;
+
+                const cur = event.data.currentTime;
+                progressBar.update(cur / currentSongDuration);
+            }
+        }
     }
 
-    /* if (event.data.type === 'LYPLUS_SONG_CHANGED' && event.data.songInfo.duration) {
-        const songInfo = event.data.songInfo
-        currentSongDuration = songInfo.duration
-        const yttitleElement = document.querySelector('.title.style-scope.ytmusic-player-bar');
-        const ytbyline = document.querySelector('.byline.style-scope.ytmusic-player-bar');
-        if (yttitleElement.textContent.trim() != "") {
-            titleElementElem.textContent = yttitleElement.textContent
-            artistElementElem.textContent = ytbyline.textContent
+    if (event.data.type === 'LYPLUS_SONG_CHANGED' && event.data.songInfo.duration) {
+        if (currentSettings.YTSongInfo) {
+            const songInfo = event.data.songInfo
+            currentSongDuration = songInfo.duration
+            const yttitleElement = document.querySelector('.title.style-scope.ytmusic-player-bar');
+            const ytbyline = document.querySelector('.byline.style-scope.ytmusic-player-bar');
+
+            let titleText = songInfo.title;
+            let artistText = songInfo.artist + ' • ' + songInfo.album;
+
+            if (yttitleElement && yttitleElement.textContent.trim() != "") {
+                titleText = yttitleElement.textContent;
+                artistText = ytbyline.textContent;
+            }
+
+            updateTextWithMarquee(titleElementElem, titleText);
+            updateTextWithMarquee(artistElementElem, artistText);
+
         }
-        else {
-            titleElementElem.textContent = songInfo.title
-            artistElementElem.textContent = songInfo.artist + ' • ' + songInfo.album
-        }
-    } */
+    }
 });
