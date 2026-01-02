@@ -2237,8 +2237,6 @@ class LyricsPlusRenderer {
 
     for (let i = start; i < end; i++) {
       const line = this.cachedLyricsLines[i];
-      if (!this.visibleLineIds.has(line.id)) continue;
-
       const delay = i >= referenceIndex ? delayCounter++ * delayIncrement : 0;
       
       line.style.setProperty('--scroll-delta', `${delta}px`);
