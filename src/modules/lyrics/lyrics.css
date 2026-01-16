@@ -329,8 +329,8 @@
     background-position: calc(100% + 0.5em) 0%, right;
 }
 
-#lyrics-plus-container:not(.lightweight-mode) .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
-#lyrics-plus-container:not(.lightweight-mode) .lyrics-word.growable:has(.lyrics-syllable.highlight) .lyrics-syllable {
+#lyrics-plus-container:not(.lightweight-mode) .lyrics-line.active:not(.lyrics-gap) .lyrics-word:not(.growable) .lyrics-syllable.highlight,
+#lyrics-plus-container:not(.lightweight-mode) .lyrics-word.growable .lyrics-syllable.cleanup span.char {
     transform: translateY(-3.5%) translateZ(1px);
 }
 
@@ -384,7 +384,7 @@
     font-feature-settings: "liga" 0;
     background-clip: text;
     -webkit-background-clip: text;
-    transition: color 0.7s, background-color 0.7s;
+    transition: color 0.7s, background-color 0.7s, transform 0.7s ease;
 }
 
 .lyrics-line .lyrics-syllable.finished span.char {
@@ -404,7 +404,7 @@
             0, 1, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1);
-    transition: transform 0.5s, color 0.18s;
+    transition: transform 0.7s ease, color 0.18s;
     will-change: background, transform;
 }
 
@@ -934,7 +934,7 @@ canvas#lyplus-webgl-canvas {
     }
 
     100% {
-        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+        transform: translateY(-3.5%) translateZ(1px);
     }
 }
 

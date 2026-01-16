@@ -608,7 +608,7 @@ class LyricsPlusRenderer {
           const charMaxScale = 1.0 + baseGrowth + charProgress * 0.1;
           const charShadowIntensity = 0.4 + charProgress * 0.4;
           const normalizedGrowth = (charMaxScale - 1.0) / 0.13;
-          const charTranslateYPeak = -normalizedGrowth * 2.5;
+          const charTranslateYPeak = -normalizedGrowth * 6;
 
           span.style.setProperty("--max-scale", charMaxScale.toFixed(3));
           span.style.setProperty("--shadow-intensity", charShadowIntensity.toFixed(3));
@@ -2112,14 +2112,16 @@ class LyricsPlusRenderer {
     if (!syllable.classList.contains("finished") && !noFade) {
       syllable.classList.add("finished");
     }
+    syllable.classList.add("cleanup");
+    syllable.style.removeProperty("--pre-wipe-duration");
+    syllable.style.removeProperty("--pre-wipe-delay");
+    syllable.querySelectorAll("span.char").forEach((span) => {
+      span.style.animation = "";
+    });
+
     requestAnimationFrame(() => {
       setTimeout(() => {
-        syllable.classList.remove("highlight", "finished", "pre-highlight");
-        syllable.style.removeProperty("--pre-wipe-duration");
-        syllable.style.removeProperty("--pre-wipe-delay");
-        syllable.querySelectorAll("span.char").forEach((span) => {
-          span.style.animation = "";
-        });
+        syllable.classList.remove("highlight", "finished", "pre-highlight", "cleanup");
       }, 16)
     })
   }
@@ -2186,6 +2188,11 @@ class LyricsPlusRenderer {
       return;
     }
 
+    if (this._scrollUnlockTimeout) {
+      clearTimeout(this._scrollUnlockTimeout);
+      this._scrollUnlockTimeout = null;
+    }
+
     if (this._scrollAnimationTimeout) {
       clearTimeout(this._scrollAnimationTimeout);
       this._scrollAnimationTimeout = null;
@@ -2200,6 +2207,14 @@ class LyricsPlusRenderer {
         line.style.removeProperty('--lyrics-line-delay');
       }
       animatingLines.length = 0;
+    }
+
+    const animations = this.lyricsContainer.getAnimations({ subtree: true });
+    for (const anim of animations) {
+      if (anim.animationName === 'lyrics-scroll') {
+        anim.cancel();
+        anim.play();
+      }
     }
 
     const targetTop = Math.max(0, -newTranslateY);
@@ -2238,30 +2253,33 @@ class LyricsPlusRenderer {
     for (let i = start; i < end; i++) {
       const line = this.cachedLyricsLines[i];
       const delay = i >= referenceIndex ? delayCounter++ * delayIncrement : 0;
-      
+
       line.style.setProperty('--scroll-delta', `${delta}px`);
       line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
       line.classList.add('scroll-animate');
-      
+
       animatingLines.push(line);
 
       const lineDuration = 400 + delay;
-      if (lineDuration > maxAnimationDuration) maxAnimationDuration = lineDuration;
-    }
-
-    state.isAnimating = true;
-
-    const animations = this.lyricsContainer.getAnimations({ subtree: true });
-    for (const anim of animations) {
-      if (anim.animationName === 'lyrics-scroll') {
-        anim.cancel();
-        anim.play();
+      if (lineDuration > maxAnimationDuration) {
+        maxAnimationDuration = lineDuration;
       }
     }
 
-    this._scrollAnimationTimeout = setTimeout(() => {
+    state.isAnimating = true;
+    const BASE_DURATION = 400;
+
+    this._scrollUnlockTimeout = setTimeout(() => {
       state.isAnimating = false;
-      
+
+      if (state.pendingUpdate !== null) {
+        const pendingValue = state.pendingUpdate;
+        state.pendingUpdate = null;
+        this._animateScroll(pendingValue, false);
+      }
+    }, BASE_DURATION);
+
+    this._scrollAnimationTimeout = setTimeout(() => {
       for (let i = 0; i < animatingLines.length; i++) {
         const line = animatingLines[i];
         line.classList.remove('scroll-animate');
@@ -2269,14 +2287,7 @@ class LyricsPlusRenderer {
         line.style.removeProperty('--lyrics-line-delay');
       }
       animatingLines.length = 0;
-
-      if (state.pendingUpdate !== null) {
-        const pendingValue = state.pendingUpdate;
-        state.pendingUpdate = null;
-        this._animateScroll(pendingValue, false);
-      } else {
-        this._scrollAnimationTimeout = null;
-      }
+      this._scrollAnimationTimeout = null;
     }, maxAnimationDuration + 50);
 
     parent.scrollTo({ top: targetTop, behavior: 'instant' });
