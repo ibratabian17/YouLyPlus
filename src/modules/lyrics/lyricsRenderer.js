@@ -2218,7 +2218,7 @@ class LyricsPlusRenderer {
     }
 
     const targetTop = Math.max(0, -newTranslateY);
-    const prevOffset = this.currentScrollOffset || 0;
+    const prevOffset = -parent.scrollTop || this.currentScrollOffset || 0;
     const delta = prevOffset - newTranslateY;
     this.currentScrollOffset = newTranslateY;
 
