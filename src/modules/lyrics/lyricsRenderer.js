@@ -957,8 +957,10 @@ class LyricsPlusRenderer {
             for (let i = 0; i < lineData.syllabus.length && i < wraps.length; i++) {
               const s = lineData.syllabus[i];
               const wrap = wraps[i];
+              let isBackground = false
+              if (wrap.parentElement.parentElement.classList.contains("background-vocal-container")) isBackground = true
 
-              const transTxt = (this._getDataText(s, false) || "");
+              const transTxt = ((isBackground ? this._getDataText(s, false).replace(/[()]/g, "") : (this._getDataText(s, false))) || "");
               if (!transTxt) continue;
 
 
