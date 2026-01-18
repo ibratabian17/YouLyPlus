@@ -196,13 +196,13 @@
 #lyrics-plus-container .lyrics-line.singer-right .lyrics-romanization-container.rtl-text {
     text-align: start;
 }
-#lyrics-plus-container.dual-side-lyrics .lyrics-line.singer-left,
-#lyrics-plus-container.dual-side-lyrics .lyrics-line.rtl-text.singer-left {
+#lyrics-plus-container.dual-side-lyrics .lyrics-line:not(.rtl-text).singer-left,
+#lyrics-plus-container.dual-side-lyrics .lyrics-line.rtl-text.singer-right {
     padding-right: 20%;
 }
 
-#lyrics-plus-container.dual-side-lyrics .lyrics-line.singer-right,
-#lyrics-plus-container.dual-side-lyrics .lyrics-line.rtl-text.singer-right {
+#lyrics-plus-container.dual-side-lyrics .lyrics-line:not(.rtl-text).singer-right,
+#lyrics-plus-container.dual-side-lyrics .lyrics-line.rtl-text.singer-left {
     padding-left: 20%;
 }
 
