@@ -18,9 +18,15 @@ export class TranslationService {
   }
 
   static async getOrFetch(songInfo, action, targetLang, forceReload = false) {
-    const translatedKey = this.createCacheKey(songInfo, action, targetLang);
+    const settings = await SettingsManager.getTranslationSettings();
+    const resolvedTargetLang = targetLang || settings.customTranslateTarget || 'en';
+    const actualTargetLang = settings.overrideTranslateTarget && settings.customTranslateTarget
+      ? settings.customTranslateTarget
+      : resolvedTargetLang;
 
-    const { lyrics: originalLyrics, version: originalVersion } =
+    const translatedKey = this.createCacheKey(songInfo, action, actualTargetLang);
+
+    const { lyrics: originalLyrics, version: originalVersion } = 
       await LyricsService.getOrFetch(songInfo, forceReload);
 
     if (Utilities.isEmptyLyrics(originalLyrics)) {
@@ -31,11 +37,6 @@ export class TranslationService {
       const cached = await this.getCached(translatedKey, originalVersion);
       if (cached) return cached;
     }
-
-    const settings = await SettingsManager.getTranslationSettings();
-    const actualTargetLang = settings.overrideTranslateTarget && settings.customTranslateTarget
-      ? settings.customTranslateTarget
-      : targetLang;
 
     const translatedData = await this.performTranslation(
       originalLyrics,
@@ -120,12 +121,14 @@ export class TranslationService {
       let fetchedTranslations;
 
       if (useGemini) {
-        fetchedTranslations = await GeminiService.translate(linesToTranslate, targetLang, settings, songInfo);
+        try {
+          fetchedTranslations = await GeminiService.translate(linesToTranslate, targetLang, settings, songInfo);
+        } catch (error) {
+          console.warn('Gemini translation failed, falling back:', error);
+          fetchedTranslations = await this.translateWithGoogle(linesToTranslate, targetLang);
+        }
       } else {
-        const translationPromises = linesToTranslate.map(text =>
-          GoogleService.translate(text, targetLang)
-        );
-        fetchedTranslations = await Promise.all(translationPromises);
+        fetchedTranslations = await this.translateWithGoogle(linesToTranslate, targetLang);
       }
 
       fetchedTranslations.forEach((trans, i) => {
@@ -158,5 +161,12 @@ export class TranslationService {
     return useGemini
       ? GeminiService.romanize(originalLyrics, settings, songInfo, targetLang)
       : GoogleService.romanize(originalLyrics);
+  }
+
+  static async translateWithGoogle(linesToTranslate, targetLang) {
+    const translationPromises = linesToTranslate.map(text =>
+      GoogleService.translate(text, targetLang).catch(() => text)
+    );
+    return Promise.all(translationPromises);
   }
 }
