@@ -250,7 +250,7 @@ export class GoogleService {
         .map(segment => segment[3] || segment[0] || "")
         .join("");
 
-      return fullRomanizedString.split('|').map(t => t);
+      return fullRomanizedString.replaceAll('| ', '|').replaceAll(' |', '|').split('|').map(t => t);
 
     } catch (error) {
       if (attempt < CONFIG.GOOGLE.MAX_RETRIES) {
