@@ -37,6 +37,7 @@ function injectDOMScript() {
     (document.head || document.documentElement).appendChild(script);
     const parser = document.createElement('script');
     parser.src = pBrowser.runtime.getURL('src/lib/parser.js');
+    parser.type = 'module';
     parser.onload = function () {
         this.remove();
     };

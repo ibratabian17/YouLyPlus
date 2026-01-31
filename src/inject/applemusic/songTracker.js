@@ -103,8 +103,8 @@
       try {
         if (lyricsData?.data?.[0]) {
           const ttmlData = lyricsData.data[0].attributes.ttmlLocalizations || lyricsData.data[0].attributes.ttml;
-          if (typeof parseAppleTTML === 'function') {
-            songInfo.lyricsJSON = parseAppleTTML(ttmlData);
+          if (typeof window.lyricspluslib.parseAppleTTML === 'function') {
+            songInfo.lyricsJSON = window.lyricspluslib.parseAppleTTML(ttmlData);
           }
         }
       } catch (e) { }

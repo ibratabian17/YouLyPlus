@@ -145,6 +145,8 @@ export class TranslationService {
     const hasPrebuilt = originalLyrics.data.some(line =>
       line.romanizedText || (line.syllabus && line.syllabus.some(syl => syl.romanizedText))
     );
+    console.log("Checking for prebuilt romanization:", hasPrebuilt);
+    console.debug(originalLyrics);
 
     if (hasPrebuilt) {
       console.log("Using prebuilt romanization");
