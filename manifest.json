@@ -71,6 +71,7 @@
         "src/modules/lyrics/lyrics.css",
         "src/modules/ytmusic/style.css",
         "src/inject/ytmusic/songTracker.js",
+        "src/lib/parser.js",
         "src/modules/applemusic/style.css",
         "src/inject/applemusic/songTracker.js",
         "src/assets/loading.gif"

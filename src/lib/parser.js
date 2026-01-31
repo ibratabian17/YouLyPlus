@@ -6,7 +6,7 @@
  * @param {*} lrcContent - LRC Text
  * @returns 
  */
-export function parseSyncedLyrics(lrcContent) {
+function parseSyncedLyrics(lrcContent) {
   const timeTagRegex = /\[(\d+):(\d{2})(?:[.:](\d+))?\]/g;
   const wordTagRegex = /<(\d+):(\d{2})(?:[.:](\d+))?>/g;
   const metadataRegex = /^\[([a-zA-Z#]+):([^\]]*)\]$/;
@@ -15,7 +15,7 @@ export function parseSyncedLyrics(lrcContent) {
 
   let offset = 0;
   const lines = lrcContent.split(/\r?\n/);
-  
+
   // First pass: find offset
   lines.forEach(line => {
     const match = line.trim().match(offsetRegex);
@@ -68,7 +68,7 @@ export function parseSyncedLyrics(lrcContent) {
 
     // Remove line timestamps to get content
     let content = line.replace(timeTagRegex, '').trim();
-    
+
     // Check for Enhanced LRC Word Timestamps
     const wordMatches = [...content.matchAll(wordTagRegex)];
     const hasWordTags = wordMatches.length > 0;
@@ -90,26 +90,26 @@ export function parseSyncedLyrics(lrcContent) {
       });
       const tailText = content.substring(lastIndex);
       if (tailText) {
-         syllabus.push({ text: tailText, time: 0, duration: 0, isTag: false });
+        syllabus.push({ text: tailText, time: 0, duration: 0, isTag: false });
       }
 
       // Post-process syllabus: Bind text to the previous timestamp
       const refinedSyllabus = [];
       let currentWordTime = 0;
-      
+
       syllabus.forEach(item => {
         if (item.isTag) {
           currentWordTime = item.time;
         } else {
           // Text segment
           refinedSyllabus.push({
-             text: item.text,
-             time: currentWordTime,
-             duration: 0
+            text: item.text,
+            time: currentWordTime,
+            duration: 0
           });
         }
       });
-      
+
       // Fix first word if it had no tag (uses line time later)
       syllabus = refinedSyllabus;
       content = content.replace(wordTagRegex, ''); // Clean content
@@ -117,11 +117,11 @@ export function parseSyncedLyrics(lrcContent) {
 
     timeMatches.forEach(tm => {
       const lineTime = parseTimeFromMatch(tm);
-      
+
       // If syllabus exists, adjust first word time if it was 0 or unmatched
-      const lineSyllabus = syllabus.map(s => ({...s})); // deep copy
+      const lineSyllabus = syllabus.map(s => ({ ...s })); // deep copy
       if (lineSyllabus.length > 0 && lineSyllabus[0].time === 0) {
-          lineSyllabus[0].time = lineTime;
+        lineSyllabus[0].time = lineTime;
       }
 
       // Calculate syllable durations
@@ -147,7 +147,7 @@ export function parseSyncedLyrics(lrcContent) {
   const validLyrics = rawEntries.map((entry, index) => {
     const nextEntry = rawEntries[index + 1];
     let duration = 0;
-    
+
     // Estimate duration based on next line
     if (nextEntry) {
       duration = nextEntry.time - entry.time;
@@ -212,8 +212,8 @@ export function parseSyncedLyrics(lrcContent) {
  * @param {*} separate - Separate non-timed
  * @returns 
  */
-export function parseAppleTTML(ttml, offset = 0, separate = false) {
-  const KPOE = '1.6-ConvertTTMLtoJSON-DOMParser';
+function parseAppleTTML(ttml, offset = 0, separate = false) {
+  const KPOE = '1.7-ConvertTTMLtoJSON-DOMParser';
 
   const NS = {
     tt: 'http://www.w3.org/ns/ttml',
@@ -239,7 +239,7 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
   };
 
   const decodeHtmlEntities = (text) => {
-    if (!text) return text || '';
+    if (!text) return '';
     const map = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#x27;': "'", '&#39;': "'" };
     return text.replace(/&(amp|lt|gt|quot|#x27|#39);/g, (m) => map[m] || m);
   };
@@ -249,12 +249,12 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
     try {
       if (nsUri && el.getAttributeNS) {
         const v = el.getAttributeNS(nsUri, localName);
-        if (v !== null && v !== undefined) return v;
+        if (v !== null) return v;
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) { }
     if (prefixedName) {
       const v2 = el.getAttribute(prefixedName);
-      if (v2 !== null && v2 !== undefined) return v2;
+      if (v2 !== null) return v2;
     }
     return el.getAttribute(localName);
   }
@@ -262,7 +262,7 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
   function collectTailText(node) {
     let txt = '';
     let sib = node.nextSibling;
-    while (sib && sib.nodeType === 3) { // 3 = TEXT_NODE
+    while (sib && sib.nodeType === 3) {
       txt += sib.nodeValue || '';
       sib = sib.nextSibling;
     }
@@ -291,9 +291,12 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
   const timingMode = getAttr(root, NS.itunes, 'timing', 'itunes:timing') || 'Word';
 
   const metadata = {
-    source: 'Local Files', songWriters: [], title: '',
+    source: 'Apple Music',
+    songWriters: [],
+    title: '',
     language: getAttr(root, NS.xml, 'lang', 'xml:lang') || '',
     agents: {},
+    songParts: [],
     totalDuration: getAttr(doc.getElementsByTagName('body')[0], null, 'dur', 'dur') || '',
   };
 
@@ -301,6 +304,7 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
   const itunesMetaEl = headEl ? headEl.getElementsByTagName('iTunesMetadata')[0] : null;
 
   if (headEl) {
+    // Agents
     const agentNodes = headEl.getElementsByTagName('ttm:agent');
     for (let i = 0; i < agentNodes.length; i++) {
       const a = agentNodes[i];
@@ -309,12 +313,11 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
       const type = getAttr(a, null, 'type', 'type') || 'person';
       let name = '';
       const nameNode = a.getElementsByTagName('ttm:name')[0];
-      if (nameNode) {
-        name = decodeHtmlEntities(nameNode.textContent.trim());
-      }
+      if (nameNode) name = decodeHtmlEntities(nameNode.textContent.trim());
       metadata.agents[agentId] = { type, name, alias: agentId.replace('voice', 'v') };
     }
 
+    // Title & Songwriters
     const metaContent = itunesMetaEl || headEl.getElementsByTagName('metadata')[0];
     if (metaContent) {
       const titleEl = metaContent.getElementsByTagName('ttm:title')[0] || metaContent.getElementsByTagName('title')[0];
@@ -335,6 +338,7 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
   const transliterationMap = {};
 
   if (itunesMetaEl) {
+    // Translations
     const translationsNode = itunesMetaEl.getElementsByTagName('translations')[0];
     if (translationsNode) {
       const translationNodes = translationsNode.getElementsByTagName('translation');
@@ -353,6 +357,7 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
       }
     }
 
+    // Transliterations
     const transliterationsNode = itunesMetaEl.getElementsByTagName('transliterations')[0];
     if (transliterationsNode) {
       const transliterationNodes = transliterationsNode.getElementsByTagName('transliteration');
@@ -364,55 +369,48 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
           const lineId = getAttr(textNode, null, 'for', 'for');
           if (!lineId) continue;
 
-          const syllabus = [];
-          let fullText = '';
-
-          // Get all spans with timing information
+          // Check if it has timing spans
           const spans = Array.from(textNode.getElementsByTagName('span')).filter(
             span => getAttr(span, null, 'begin', 'begin')
           );
-          const processedSpans = new Set();
 
-          for (const span of spans) {
-            if (processedSpans.has(span)) continue;
-            processedSpans.add(span);
+          if (spans.length > 0) {
+            // Word Sync logic for transliteration
+            const syllabus = [];
+            let fullText = '';
+            const processedSpans = new Set();
 
-            let spanText = '';
-            for (const child of span.childNodes) {
-              if (child.nodeType === 3) { // Text node
-                spanText += child.nodeValue || '';
+            for (const span of spans) {
+              if (processedSpans.has(span)) continue;
+              processedSpans.add(span);
+
+              let spanText = '';
+              for (const child of span.childNodes) {
+                if (child.nodeType === 3) spanText += child.nodeValue || '';
               }
+              spanText = decodeHtmlEntities(spanText);
+
+              const tail = collectTailText(span);
+              if (tail && !separate) spanText += decodeHtmlEntities(tail);
+
+              if (spanText.trim() === '') continue;
+
+              const begin = getAttr(span, null, 'begin', 'begin');
+              const end = getAttr(span, null, 'end', 'end');
+
+              syllabus.push({
+                time: timeToMs(begin) + offset,
+                duration: timeToMs(end) - timeToMs(begin),
+                text: spanText,
+              });
+              fullText += spanText;
             }
-            spanText = decodeHtmlEntities(spanText);
-
-            const tail = collectTailText(span);
-            const decodedTail = decodeHtmlEntities(tail);
-
-            if (decodedTail) {
-              if (!separate) {
-                spanText += decodedTail;
-              }
-            }
-
-            if (spanText.trim() === '') continue;
-
-            const begin = getAttr(span, null, 'begin', 'begin');
-            const end = getAttr(span, null, 'end', 'end');
-
-            syllabus.push({
-              time: timeToMs(begin) + offset,
-              duration: timeToMs(end) - timeToMs(begin),
-              text: spanText,
-            });
-
-            fullText += spanText;
-          }
-
-          if (syllabus.length > 0) {
+            transliterationMap[lineId] = { lang, text: fullText.trim(), syllabus };
+          } else {
+            // Line Sync / Plain logic for transliteration
             transliterationMap[lineId] = {
               lang: lang,
-              text: fullText.trim(),
-              syllabus: syllabus,
+              text: decodeHtmlEntities(textNode.textContent.trim())
             };
           }
         }
@@ -428,13 +426,31 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
     const songPart = getAttr(div, NS.itunes, 'song-part', 'itunes:song-part') || getAttr(div, NS.itunes, 'songPart', 'itunes:songPart') || '';
     const ps = div.getElementsByTagName('p');
 
+    // Metadata: Song Parts
+    let divBegin = getAttr(div, null, 'begin', 'begin');
+    let divEnd = getAttr(div, null, 'end', 'end');
+
+    // Fallback if div has no timing but ps do
+    if ((!divBegin || !divEnd) && ps.length > 0) {
+      if (!divBegin) divBegin = getAttr(ps[0], null, 'begin', 'begin');
+      if (!divEnd) divEnd = getAttr(ps[ps.length - 1], null, 'end', 'end');
+    }
+
+    const partTime = timeToMs(divBegin) + (divBegin ? offset : 0);
+    const partDur = Math.max(0, timeToMs(divEnd) - timeToMs(divBegin));
+
+    metadata.songParts.push({
+      name: songPart,
+      time: partTime,
+      duration: partDur
+    });
+
     for (let j = 0; j < ps.length; j++) {
       const p = ps[j];
       const key = getAttr(p, NS.itunes, 'key', 'itunes:key') || '';
       const singerId = getAttr(p, NS.ttm, 'agent', 'ttm:agent') || '';
       const singer = singerId.replace('voice', 'v');
 
-      // Get timing from paragraph element for line-by-line timing
       const pBegin = getAttr(p, null, 'begin', 'begin');
       const pEnd = getAttr(p, null, 'end', 'end');
 
@@ -443,102 +459,82 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
         duration: 0,
         text: '',
         syllabus: [],
-        element: { key, songPart, singer }
+        element: { key, songPart, singer, songPartIndex: i }
       };
 
-      // Check if we have word-level spans with timing
-      const allSpansInP = Array.from(p.getElementsByTagName('span')).filter(span => getAttr(span, null, 'begin', 'begin'));
+      // Set line timing based on P tag first
+      if (pBegin && pEnd) {
+        currentLine.time = timeToMs(pBegin) + offset;
+        currentLine.duration = timeToMs(pEnd) - timeToMs(pBegin);
+      }
 
-      if (allSpansInP.length > 0 && timingMode === 'Word') {
-        // Word-by-word timing mode
-        const processedSpans = new Set();
+      if (timingMode === 'Word') {
+        const allSpansInP = Array.from(p.getElementsByTagName('span')).filter(span => getAttr(span, null, 'begin', 'begin'));
 
-        for (const sp of allSpansInP) {
-          if (processedSpans.has(sp)) continue;
+        if (allSpansInP.length > 0) {
+          const processedSpans = new Set();
+          for (const sp of allSpansInP) {
+            if (processedSpans.has(sp)) continue;
 
-          const isBg = isInsideBackgroundWrapper(sp, p);
-          if (isBg) {
-            Array.from(sp.getElementsByTagName('span')).forEach(nested => processedSpans.add(nested));
+            const isBg = isInsideBackgroundWrapper(sp, p);
+            if (isBg) {
+              Array.from(sp.getElementsByTagName('span')).forEach(nested => processedSpans.add(nested));
+            }
+            processedSpans.add(sp);
+
+            const begin = getAttr(sp, null, 'begin', 'begin') || '0';
+            const end = getAttr(sp, null, 'end', 'end') || '0';
+
+            let spanText = '';
+            for (const child of sp.childNodes) {
+              if (child.nodeType === 3) spanText += child.nodeValue || '';
+            }
+            spanText = decodeHtmlEntities(spanText);
+
+            const tail = collectTailText(sp);
+            if (tail && !separate) spanText += decodeHtmlEntities(tail);
+
+            if (spanText.trim() === '' && (!tail || !tail.includes(' '))) continue;
+
+            const syllabusEntry = {
+              time: timeToMs(begin) + offset,
+              duration: timeToMs(end) - timeToMs(begin),
+              text: spanText
+            };
+            if (isBg) syllabusEntry.isBackground = true;
+
+            currentLine.syllabus.push(syllabusEntry);
+            currentLine.text += spanText;
           }
-          processedSpans.add(sp);
-
-          const begin = getAttr(sp, null, 'begin', 'begin') || '0';
-          const end = getAttr(sp, null, 'end', 'end') || '0';
-
-          let spanText = '';
-          for (const child of sp.childNodes) {
-            if (child.nodeType === 3) { spanText += child.nodeValue || ''; }
-          }
-          spanText = decodeHtmlEntities(spanText);
-
-          const tail = collectTailText(sp);
-          if (tail && !separate) {
-            spanText += decodeHtmlEntities(tail);
-          }
-
-          if (spanText.trim() === '' && (!tail || !tail.includes(' '))) continue;
-
-          const syllabusEntry = {
-            time: timeToMs(begin) + offset,
-            duration: timeToMs(end) - timeToMs(begin),
-            text: spanText
-          };
-          if (isBg) syllabusEntry.isBackground = true;
-
-          currentLine.syllabus.push(syllabusEntry);
-          currentLine.text += spanText;
+        } else {
+          // Fallback for Word mode if no spans found (treat as line)
+          currentLine.text = decodeHtmlEntities(p.textContent.trim());
         }
       } else {
-        // Line-by-line timing mode - use paragraph timing and extract text
-        if (pBegin && pEnd) {
-          let lineText = '';
-
-          function extractTextFromNode(node) {
-            let text = '';
-            for (const child of node.childNodes) {
-              if (child.nodeType === 3) {
-                text += child.nodeValue || '';
-              } else if (child.nodeType === 1) {
-                text += extractTextFromNode(child);
-              }
-            }
-            return text;
+        // Line Sync or None
+        let lineText = '';
+        const extractText = (node) => {
+          let t = '';
+          for (const child of node.childNodes) {
+            if (child.nodeType === 3) t += child.nodeValue || '';
+            else if (child.nodeType === 1) t += extractText(child);
           }
+          return t;
+        };
+        lineText = extractText(p);
+        currentLine.text = decodeHtmlEntities(lineText.trim());
 
-          lineText = extractTextFromNode(p);
-          lineText = decodeHtmlEntities(lineText.trim());
-
-          if (lineText) {
-            currentLine.text = lineText;
-            currentLine.time = timeToMs(pBegin) + offset;
-            currentLine.duration = timeToMs(pEnd) - timeToMs(pBegin);
-          }
+        // If Plain text (None), ensure time is 0 if not present
+        if (timingMode === 'None' || (!pBegin && !pEnd)) {
+          currentLine.time = undefined;
+          currentLine.duration = undefined;
         }
       }
 
-      if (currentLine.syllabus.length > 0 || (currentLine.text && currentLine.time >= 0)) {
-        if (currentLine.syllabus.length > 0 && timingMode === 'Word') {
-          let earliestTime = Infinity;
-          let latestEndTime = 0;
-
-          currentLine.syllabus.forEach(syllable => {
-            if (syllable.time < earliestTime) earliestTime = syllable.time;
-            const endTime = syllable.time + syllable.duration;
-            if (endTime > latestEndTime) latestEndTime = endTime;
-          });
-
-          currentLine.time = earliestTime;
-          currentLine.duration = latestEndTime - earliestTime;
-        }
-
-        // Attach pre-computed translation and transliteration data
-        if (key && translationMap[key]) {
-          currentLine.translation = translationMap[key];
-        }
-        if (key && transliterationMap[key]) {
-          currentLine.transliteration = transliterationMap[key];
-        }
-
+      // Add if valid
+      if (currentLine.text || currentLine.syllabus.length > 0) {
+        if (key && translationMap[key]) currentLine.translation = translationMap[key];
+        if (key && transliterationMap[key]) currentLine.transliteration = transliterationMap[key];
         lyrics.push(currentLine);
       }
     }
@@ -560,7 +556,7 @@ export function parseAppleTTML(ttml, offset = 0, separate = false) {
  * @param {*} data - The JSON Files
  * @returns 
  */
-export function v1Tov2(data) {
+function v1Tov2(data) {
   const groupedLyrics = [];
   let currentGroup = null;
 
@@ -581,11 +577,11 @@ export function v1Tov2(data) {
       // If it's a Word/Syllable type without explicit line endings,
       // we might need to create a syllabus from the text if not already present.
       if ((data.type === "Word" || data.type === "Syllable") && !lineItem.syllabus.length && lineItem.text) {
-          lineItem.syllabus = [{
-              time: segment.time,
-              duration: segment.duration,
-              text: segment.text
-          }];
+        lineItem.syllabus = [{
+          time: segment.time,
+          duration: segment.duration,
+          text: segment.text
+        }];
       }
       groupedLyrics.push(lineItem);
     });
@@ -672,6 +668,20 @@ export function v1Tov2(data) {
 }
 
 // Utility to convert parsed lyrics to a standardized JSON format
-export function convertToStandardJson(parsedLyrics) {
-    return parsedLyrics;
+function convertToStandardJson(parsedLyrics) {
+  return parsedLyrics;
 }
+
+if (typeof exports !== 'undefined') {
+  module.exports = { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2 };
+} 
+
+if (typeof window !== 'undefined') {
+  if (typeof window.lyricspluslib == 'undefined') window.lyricspluslib = {};
+  window.lyricspluslib.parseSyncedLyrics = parseSyncedLyrics;
+  window.lyricspluslib.parseAppleTTML = parseAppleTTML;
+  window.lyricspluslib.v1Tov2 = v1Tov2;
+  window.lyricspluslib.convertToStandardJson = convertToStandardJson;
+}
+
+export { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2 };

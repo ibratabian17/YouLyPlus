@@ -35,6 +35,12 @@ function injectDOMScript() {
         this.remove();
     };
     (document.head || document.documentElement).appendChild(script);
+    const parser = document.createElement('script');
+    parser.src = pBrowser.runtime.getURL('src/lib/parser.js');
+    parser.onload = function () {
+        this.remove();
+    };
+    (document.head || document.documentElement).appendChild(parser);
 }
 
 injectPlatformCSS = function() {

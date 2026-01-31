@@ -1,5 +1,5 @@
 import { loadSettings, saveSettings, updateSettings, getSettings, updateCacheSize, clearCache, setupSettingsMessageListener, uploadLocalLyrics, getLocalLyricsList, deleteLocalLyrics } from './settingsManager.js';
-import { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2 } from './parser.js';
+import { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2 } from '../lib/parser.js';
 
 let currentSettings = getSettings();
 
