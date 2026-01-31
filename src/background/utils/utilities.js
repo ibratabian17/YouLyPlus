@@ -48,4 +48,8 @@ export class Utilities {
 
     return track[s2.length][s1.length];
   }
+  
+  static delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 }
