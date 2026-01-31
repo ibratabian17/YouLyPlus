@@ -8,104 +8,126 @@ import { CONFIG } from '../constants.js';
 export class GoogleService {
   static async translate(text, targetLang) {
     if (!text.trim()) return "";
-    
+
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
-    
+
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Google Translate error: ${response.statusText}`);
-    
+
     const data = await response.json();
     return data?.[0]?.map(segment => segment?.[0]).join('') || text;
   }
 
   static async romanize(originalLyrics) {
+    let processedData;
+
     if (originalLyrics.type === "Word") {
-      return this.romanizeWordSynced(originalLyrics);
+      processedData = await this.romanizeWordSynced(originalLyrics);
     } else {
-      return this.romanizeLineSynced(originalLyrics);
+      processedData = await this.romanizeLineSynced(originalLyrics);
     }
+
+    return processedData;
   }
 
   static async romanizeWordSynced(originalLyrics) {
-    return Promise.all(originalLyrics.data.map(async (line) => {
-      if (!line.syllabus?.length) return line;
-      
-      const syllableTexts = line.syllabus.map(s => s.text);
-      const romanizedTexts = await this.romanizeTexts(syllableTexts);
-      
-      const newSyllabus = line.syllabus.map((s, index) => ({
-        ...s,
-        romanizedText: `${romanizedTexts[index]} ` || s.text
-      }));
-      
-      return { ...line, syllabus: newSyllabus };
-    }));
+    const allSyllables = [];
+    originalLyrics.data.forEach(line => {
+      line.syllabus?.forEach(s => allSyllables.push(s.text));
+    });
+
+    const romanizedResults = await this.romanizeTexts(allSyllables);
+
+    let globalIndex = 0;
+    return originalLyrics.data.map((line, lineIndex) => {
+      const chunks = line.syllabus?.map(s => {
+        const rom = romanizedResults[globalIndex++] || s.text;
+        return {
+          text: rom + " "
+        };
+      }) || [];
+
+      return {
+        text: chunks.map(c => c.text).join(""),
+        chunk: chunks,
+        original_line_index: lineIndex
+      };
+    });
   }
 
   static async romanizeLineSynced(originalLyrics) {
-    const linesToRomanize = originalLyrics.data.map(line => line.text);
-    const romanizedLines = await this.romanizeTexts(linesToRomanize);
-    
+    const texts = originalLyrics.data.map(line => line.text);
+    const romanizedResults = await this.romanizeTexts(texts);
+
     return originalLyrics.data.map((line, index) => ({
       ...line,
-      romanizedText: romanizedLines[index] || line.text
+      text: romanizedResults[index] || line.text,
+      romanizedText: romanizedResults[index] || line.text
     }));
   }
 
   static async romanizeTexts(texts) {
-    const contextText = texts.join(' ');
-    
-    if (Utilities.isPurelyLatinScript(contextText)) {
-      return texts;
+    const validIndices = [];
+    const textsToFetch = [];
+
+    // Filter valid texts
+    texts.forEach((text, index) => {
+      if (text && !Utilities.isPurelyLatinScript(text)) {
+        validIndices.push(index);
+        textsToFetch.push(text);
+      }
+    });
+
+    if (textsToFetch.length === 0) return texts;
+
+    const BATCH_SIZE = 50;
+    const resultsMap = {};
+
+    for (let i = 0; i < textsToFetch.length; i += BATCH_SIZE) {
+      const batch = textsToFetch.slice(i, i + BATCH_SIZE);
+      const batchText = batch.join('\n');
+
+      try {
+        const batchResultArray = await this.fetchRomanizationWithRetry(batchText);
+
+        batch.forEach((originalText, batchIndex) => {
+          const res = batchResultArray[batchIndex] !== undefined ? batchResultArray[batchIndex] : originalText;
+          const originalGlobalIndex = validIndices[i + batchIndex];
+          resultsMap[originalGlobalIndex] = res;
+        });
+
+      } catch (e) {
+        console.error("GoogleService: Batch failed, falling back to original text", e);
+      }
     }
 
-    let sourceLang = 'auto';
+    return texts.map((text, index) => resultsMap[index] || text);
+  }
+
+  static async fetchRomanizationWithRetry(text, attempt = 0) {
     try {
-      const detectUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(contextText)}`;
-      const detectResponse = await fetch(detectUrl);
-      
-      if (detectResponse.ok) {
-        const detectData = await detectResponse.json();
-        sourceLang = detectData[2] || 'auto';
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=rm&q=${encodeURIComponent(text)}`;
+      const response = await fetch(url);
+
+      if (response.status === 429) throw new Error("Rate Limit Exceeded");
+
+      const data = await response.json();
+
+      if (!data || !data[0]) return [];
+
+      const fullRomanizedString = data[0]
+        .map(segment => segment[3] || segment[0] || "")
+        .join("");
+
+      return fullRomanizedString.split('\n').map(t => t.trim());
+
+    } catch (error) {
+      if (attempt < CONFIG.GOOGLE.MAX_RETRIES) {
+        const delay = CONFIG.GOOGLE.RETRY_DELAY_MS * Math.pow(2, attempt);
+        await Utilities.delay(delay);
+        return this.fetchRomanizationWithRetry(text, attempt + 1);
       }
-    } catch (e) {
-      console.error("GoogleService: Language detection failed, using 'auto':", e);
+      throw error;
     }
-
-    const romanizedTexts = [];
-    for (const text of texts) {
-      if (Utilities.isPurelyLatinScript(text)) {
-        romanizedTexts.push(text);
-        continue;
-      }
-      
-      let attempt = 0;
-      let success = false;
-      let lastError = null;
-
-      while (attempt < CONFIG.GOOGLE.MAX_RETRIES && !success) {
-        try {
-          const romanizeUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=en&hl=en&dt=rm&q=${encodeURIComponent(text)}`;
-          const response = await fetch(romanizeUrl);
-          const data = await response.json();
-          romanizedTexts.push(data?.[0]?.[0]?.[3] || text);
-          success = true;
-        } catch (error) {
-          lastError = error;
-          console.warn(`GoogleService: Error romanizing text "${text}" (attempt ${attempt + 1}/${CONFIG.GOOGLE.MAX_RETRIES}):`, error);
-          attempt++;
-          if (attempt < CONFIG.GOOGLE.MAX_RETRIES) {
-            await Utilities.delay(CONFIG.GOOGLE.RETRY_DELAY_MS * Math.pow(2, attempt - 1)); // Exponential backoff
-          }
-        }
-      }
-
-      if (!success) {
-        console.error(`GoogleService: Failed to romanize text "${text}" after ${CONFIG.GOOGLE.MAX_RETRIES} attempts. Last error:`, lastError);
-        romanizedTexts.push(text); // Fallback to original text
-      }
-    }
-    
-    return romanizedTexts;
   }
 }
