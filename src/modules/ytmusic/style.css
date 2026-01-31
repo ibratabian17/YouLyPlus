@@ -381,6 +381,7 @@ div#lyrics-song-progressbar {
         width: 100%;
         opacity: 0;
         text-align: center !important;
+        padding: 0 !important;
         transform: none !important;
     }
 
