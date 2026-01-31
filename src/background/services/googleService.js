@@ -85,7 +85,7 @@ export class GoogleService {
 
     for (let i = 0; i < textsToFetch.length; i += BATCH_SIZE) {
       const batch = textsToFetch.slice(i, i + BATCH_SIZE);
-      const batchText = batch.join('\n');
+      const batchText = batch.join('|');
 
       try {
         const batchResultArray = await this.fetchRomanizationWithRetry(batchText);
@@ -119,7 +119,7 @@ export class GoogleService {
         .map(segment => segment[3] || segment[0] || "")
         .join("");
 
-      return fullRomanizedString.split('\n').map(t => t.trim());
+      return fullRomanizedString.split('|').map(t => t);
 
     } catch (error) {
       if (attempt < CONFIG.GOOGLE.MAX_RETRIES) {
