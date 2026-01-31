@@ -13,7 +13,7 @@ export class DataParser {
       data: data.lyrics.map(item => {
         const startTime = Number(item.time || 0) / 1000;
         const duration = Number(item.duration || 0) / 1000;
-        
+
         const syllabus = (item.syllabus || []).map(syl => ({
           text: syl.text || '',
           time: Number(syl.time || 0),
@@ -25,8 +25,9 @@ export class DataParser {
         let romanizedSyllabus = undefined;
 
         if (item.transliteration) {
-          if (item.transliteration.syllabus && 
-              item.transliteration.syllabus.length === syllabus.length) {
+          if (Array.isArray(item.transliteration.syllabus) &&
+            item.transliteration.syllabus.length === syllabus.length &&
+            syllabus.length > 0) {
             romanizedSyllabus = syllabus.map((syl, index) => ({
               ...syl,
               romanizedText: item.transliteration.syllabus[index].text || syl.text
@@ -61,14 +62,14 @@ export class DataParser {
 
     const timeRegex = /^\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
     const lines = data.syncedLyrics.split('\n');
-    
+
     const matches = lines
       .map(line => timeRegex.exec(line))
       .filter(Boolean)
       .map(match => ({
-        startTime: parseInt(match[1], 10) * 60 + 
-                   parseInt(match[2], 10) + 
-                   parseInt(match[3], 10) / (match[3].length === 2 ? 100 : 1000),
+        startTime: parseInt(match[1], 10) * 60 +
+          parseInt(match[2], 10) +
+          parseInt(match[3], 10) / (match[3].length === 2 ? 100 : 1000),
         text: match[4].trim()
       }));
 
@@ -76,10 +77,10 @@ export class DataParser {
 
     const parsedLines = matches
       .map((current, i) => {
-        const endTime = i < matches.length - 1 
-          ? matches[i + 1].startTime 
+        const endTime = i < matches.length - 1
+          ? matches[i + 1].startTime
           : current.startTime + 5;
-        
+
         return {
           ...current,
           endTime,

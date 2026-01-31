@@ -19,10 +19,10 @@ export class TranslationService {
 
   static async getOrFetch(songInfo, action, targetLang, forceReload = false) {
     const translatedKey = this.createCacheKey(songInfo, action, targetLang);
-    
-    const { lyrics: originalLyrics, version: originalVersion } = 
+
+    const { lyrics: originalLyrics, version: originalVersion } =
       await LyricsService.getOrFetch(songInfo, forceReload);
-    
+
     if (Utilities.isEmptyLyrics(originalLyrics)) {
       throw new Error('Original lyrics not found or empty');
     }
@@ -51,7 +51,7 @@ export class TranslationService {
       translatedLyrics: finalTranslatedLyrics,
       originalVersion
     });
-    
+
     await translationsDB.set({
       key: translatedKey,
       translatedLyrics: finalTranslatedLyrics,
@@ -92,13 +92,13 @@ export class TranslationService {
     } else if (action === 'romanize') {
       return this.romanize(originalLyrics, settings, songInfo, targetLang);
     }
-    
+
     return originalLyrics.data;
   }
 
   static async translate(originalLyrics, targetLang, settings, songInfo = {}) {
     const useGemini = settings.translationProvider === PROVIDERS.GEMINI && settings.geminiApiKey;
-    
+
     const normalizeLang = (l) => l ? l.toLowerCase().split('-')[0].trim() : '';
     const targetBase = normalizeLang(targetLang);
 
@@ -118,7 +118,7 @@ export class TranslationService {
 
     if (linesToTranslate.length > 0) {
       let fetchedTranslations;
-      
+
       if (useGemini) {
         fetchedTranslations = await GeminiService.translate(linesToTranslate, targetLang, settings, songInfo);
       } else {
@@ -145,16 +145,16 @@ export class TranslationService {
     const hasPrebuilt = originalLyrics.data.some(line =>
       line.romanizedText || (line.syllabus && line.syllabus.some(syl => syl.romanizedText))
     );
-    console.log("Checking for prebuilt romanization:", hasPrebuilt);
-    console.debug(originalLyrics);
 
     if (hasPrebuilt) {
       console.log("Using prebuilt romanization");
-      return originalLyrics.data;
+      return originalLyrics.data.map(line => ({
+        text: line.romanizedText || line.text
+      }));
     }
 
     const useGemini = settings.romanizationProvider === PROVIDERS.GEMINI && settings.geminiApiKey;
-    
+
     return useGemini
       ? GeminiService.romanize(originalLyrics, settings, songInfo, targetLang)
       : GoogleService.romanize(originalLyrics);
