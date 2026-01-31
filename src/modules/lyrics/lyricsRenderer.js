@@ -886,6 +886,42 @@ class LyricsPlusRenderer {
   }
 
   /**
+ * Internal helper to render plain text lyrics as a single text block.
+ * @private
+ */
+  _renderPlainLyrics(lyrics, fragment) {
+    const container = document.createElement("div");
+    container.className = "lyrics-plain-text-container";
+
+    const contentWrapper = document.createElement("div");
+    contentWrapper.className = "lyrics-plain-text-content";
+
+    let fullText = "";
+    let currentSongPartIndex = 0;
+
+    lyrics.data.forEach((line) => {
+      const lineText = this._getDataText(line, true);
+
+      if (line.element.songPartIndex !== currentSongPartIndex && fullText !== "") {
+        fullText += "\n";
+      }
+
+      if (!line.text || !line.text.trim()) {
+        fullText += "\n";
+      } else {
+        fullText += lineText + "\n";
+      }
+
+      currentSongPartIndex = line.element.songPartIndex || currentSongPartIndex;
+    });
+
+    contentWrapper.textContent = fullText;
+
+    container.appendChild(contentWrapper);
+    fragment.appendChild(container);
+  }
+
+  /**
    * Applies the appropriate CSS classes to the container based on the display mode.
    * @param {HTMLElement} container - The lyrics container element.
    * @param {string} displayMode - The current display mode ('none', 'translate', 'romanize').
@@ -1465,16 +1501,58 @@ class LyricsPlusRenderer {
       "fullscreen",
       document.body.hasAttribute("player-fullscreened_")
     );
-    const isWordByWordMode = (lyrics.type === "Word") && currentSettings.wordByWord;
+
+    const isPlainLyrics = lyrics.type === "None";
+    const isWordByWordMode = !isPlainLyrics && (lyrics.type === "Word") && currentSettings.wordByWord;
+
+    const isLineByLineMode = !isPlainLyrics && !isWordByWordMode;
+
+    container.classList.toggle("plain-text-mode", isPlainLyrics);
     container.classList.toggle("word-by-word-mode", isWordByWordMode);
-    container.classList.toggle("line-by-line-mode", !isWordByWordMode);
+    container.classList.toggle("line-by-line-mode", isLineByLineMode);
 
     container.classList.toggle(
       "romanized-big-mode",
       largerTextMode != "lyrics"
     );
 
-    this.updateDisplayMode(lyrics, displayMode, currentSettings);
+    if (!isPlainLyrics) {
+      this.updateDisplayMode(lyrics, displayMode, currentSettings);
+    } else {
+      container.innerHTML = "";
+      const fragment = document.createDocumentFragment();
+
+      const metadataContainer = document.createElement("div");
+      metadataContainer.className = "lyrics-plus-metadata";
+
+      if (lyrics.metadata?.songWriters?.length > 0) {
+        const songWritersDiv = document.createElement("span");
+        songWritersDiv.className = "lyrics-song-writters";
+        songWritersDiv.innerHTML = `<b>${t("writtenBy")}</b> ${lyrics.metadata.songWriters.join(", ")}`;
+        metadataContainer.appendChild(songWritersDiv);
+      }
+
+      const sourceDiv = document.createElement("span");
+      sourceDiv.className = "lyrics-source-provider";
+      sourceDiv.innerText = `${t("source")} ${lyrics.metadata?.source || "Unknown"}`;
+      metadataContainer.appendChild(sourceDiv);
+
+      fragment.appendChild(metadataContainer);
+
+      this._renderPlainLyrics(lyrics, fragment);
+
+      const emptyDiv = document.createElement("div");
+      emptyDiv.className = "lyrics-plus-empty";
+      fragment.appendChild(emptyDiv);
+
+      container.appendChild(fragment);
+
+      this.cachedLyricsLines = [];
+      this.cachedSyllables = [];
+      this.activeLineIds.clear();
+      this.visibleLineIds.clear();
+    }
+
 
     // Control buttons are created once to avoid re-rendering them.
     this._createControlButtons();
@@ -1579,6 +1657,8 @@ class LyricsPlusRenderer {
    * @returns {Function} - A cleanup function to stop the sync.
    */
   _startLyricsSync(currentSettings = {}) {
+    if (this.currentLyricsType === "None") return () => { };
+
     const canGetTime =
       typeof this.uiConfig.getCurrentTime === "function" ||
       this._getPlayerElement();
@@ -2488,7 +2568,7 @@ class LyricsPlusRenderer {
     }
 
     // Translation Button Logic
-    if (this.setCurrentDisplayModeAndRefetchFn) {
+    if (this.setCurrentDisplayModeAndRefetchFn && this.currentLyricsType !== "None") {
       if (!this.translationButton) {
         this.translationButton = document.createElement("button");
         this.translationButton.id = "lyrics-plus-translate-button";

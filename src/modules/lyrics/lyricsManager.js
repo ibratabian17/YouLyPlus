@@ -204,7 +204,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     }
     
     // --- 7. Render Lyrics ---
-    lyricsObjectToDisplay.type = lyricsObjectToDisplay.type === "Line" ? "Line" : "Word";
+    lyricsObjectToDisplay.type = (lyricsObjectToDisplay.type === "None" ? "None" : (lyricsObjectToDisplay.type === "Line" ? "Line" : "Word"));
     lastFetchedLyrics = lyricsObjectToDisplay;
     if (LyricsPlusAPI.displayLyrics) {
       LyricsPlusAPI.displayLyrics(

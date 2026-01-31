@@ -283,6 +283,23 @@
     transition-delay: 0ms !important;
 }
 
+#lyrics-plus-container .lyrics-plain-text-content {
+    white-space: pre-wrap;
+    font-size: var(--lyplus-font-size-metadata);
+    font-weight: normal;
+    opacity: 0.75;
+}
+
+#lyrics-plus-container.blur-inactive-enabled:not(.not-focused).plain-text-mode .lyrics-plus-metadata:not(.lyrics-activest){
+    filter: none;
+}
+#lyrics-plus-container.plain-text-mode span.lyrics-song-writters {
+    opacity: 0.75;
+}
+#lyrics-plus-container.plain-text-mode span.lyrics-source-provider {
+    opacity: 0.65;
+}
+
 /* --- Word & Syllable Base Styles --- */
 .lyrics-word:not(.allow-break) {
     display: inline-block;
