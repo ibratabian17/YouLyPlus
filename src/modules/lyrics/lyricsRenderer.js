@@ -2334,7 +2334,11 @@ class LyricsPlusRenderer {
 
     for (let i = start; i < end; i++) {
       const line = this.cachedLyricsLines[i];
-      const delay = i >= referenceIndex ? delayCounter++ * delayIncrement : 0;
+      const delay = i >= referenceIndex ? delayCounter * delayIncrement : 0;
+
+      if (i >= referenceIndex && !line.classList.contains('lyrics-gap')) {
+        delayCounter++;
+      }
 
       line.style.setProperty('--scroll-delta', `${delta}px`);
       line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
