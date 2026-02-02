@@ -763,6 +763,7 @@ span.lyrics-source-provider {
     width: 100%;
     height: 100%;
     backdrop-filter: brightness(0.7) saturate(3) contrast(0.95);
+    background-color: #50505027;
 }
 
 canvas#lyplus-webgl-canvas {
