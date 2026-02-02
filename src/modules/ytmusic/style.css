@@ -474,7 +474,8 @@ Lyrics+ without any visual bug*/
 
     body:has(#ThemeSong-MainContainer #DynamicLight) .lyplus-blur-container::after,
     body:has(#ThemeSong-MainContainer #StaticLight) .lyplus-blur-container::after {
-        backdrop-filter: saturate(1.4);
+        backdrop-filter: saturate(2);
+        background-color: transparent;
     }
 
     body:has(#ThemeSong-MainContainer #DynamicLight) .lyplus-blur-container canvas,
