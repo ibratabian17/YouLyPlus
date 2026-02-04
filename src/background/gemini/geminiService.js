@@ -9,30 +9,48 @@ export class GeminiService {
   static async translate(texts, targetLang, settings, songInfo = {}) {
     const { geminiApiKey, geminiModel } = settings;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`;
+    const isGemma = geminiModel.toLowerCase().includes("gemma");
 
-    const prompt = createTranslationPrompt(settings, texts, targetLang, songInfo);
+    let prompt = createTranslationPrompt(settings, texts, targetLang, songInfo, geminiModel);
+
+    const generationConfig = {
+      temperature: 0.0
+    };
+
+    if (!isGemma) {
+      generationConfig.response_mime_type = "application/json";
+      generationConfig.responseSchema = {
+        type: "OBJECT",
+        properties: {
+          translated_lyrics: {
+            type: "ARRAY",
+            description: "An array of translated lyric lines, maintaining the original order and count.",
+            items: { type: "STRING" }
+          },
+          target_language: {
+            type: "STRING",
+            description: "The target language for the translation."
+          }
+        },
+        required: ["translated_lyrics", "target_language"]
+      };
+    } else {
+      prompt += `\n\nIMPORTANT OUTPUT FORMAT:
+You must return a valid JSON object exactly like this:
+{
+  "translated_lyrics": [
+    "translated line 1",
+    "translated line 2",
+    ... (one string per input line)
+  ],
+  "target_language": "${targetLang}"
+}
+Do not wrap in Markdown code blocks. Just the raw JSON string.`;
+    }
 
     const requestBody = {
-      contents: [{ parts: [{ text: prompt }] }],
-      generation_config: {
-        temperature: 0.0,
-        response_mime_type: "application/json",
-        responseSchema: {
-          type: "OBJECT",
-          properties: {
-            translated_lyrics: {
-              type: "ARRAY",
-              description: "An array of translated lyric lines, maintaining the original order and count.",
-              items: { type: "STRING" }
-            },
-            target_language: {
-              type: "STRING",
-              description: "The target language for the translation."
-            }
-          },
-          required: ["translated_lyrics", "target_language"]
-        }
-      }
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generation_config: generationConfig
     };
 
     const response = await fetch(url, {
@@ -55,16 +73,23 @@ export class GeminiService {
     }
 
     try {
-      const parsedJson = JSON.parse(data.candidates[0].content.parts[0].text);
-      
+      let rawText = data.candidates[0].content.parts[0].text;
+
+      rawText = rawText
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/\s*```$/, "");
+
+      const parsedJson = JSON.parse(rawText);
+
       if (!Array.isArray(parsedJson.translated_lyrics)) {
         throw new Error('Invalid JSON structure: translated_lyrics is not an array');
       }
-      
+
       if (parsedJson.translated_lyrics.length !== texts.length) {
         throw new Error(`Length mismatch: expected ${texts.length} lines, got ${parsedJson.translated_lyrics.length}`);
       }
-      
+
       return parsedJson.translated_lyrics;
     } catch (e) {
       console.error("Gemini response parsing failed:", e);
@@ -79,7 +104,7 @@ export class GeminiService {
 
     const structuredInput = this.prepareStructuredInput(originalLyrics);
     const romanizer = new GeminiRomanizer(settings);
-    
+
     return romanizer.romanize(structuredInput, songInfo, targetLang);
   }
 
@@ -89,14 +114,14 @@ export class GeminiService {
         original_line_index: index,
         text: line.text
       };
-      
+
       if (line.syllabus?.length) {
         lineObject.chunk = line.syllabus.map((s, sylIndex) => ({
           text: s.text,
           chunkIndex: sylIndex
         }));
       }
-      
+
       return lineObject;
     });
   }
