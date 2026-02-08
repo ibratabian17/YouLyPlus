@@ -69,7 +69,8 @@ The benchmark machine used to develop this project is older hardware (AMD FX-630
 **GPU Performance (Targeting 60 FPS):**
 * **768p (1366x768):** Stable 60 FPS on **NVIDIA GT 620** (1GB) or equivalent integrated graphics.
 * **1080p (1920x1080):** GTX 650 / GT 1030 or above recommended for a locked 60 FPS.
-    * *Note: Legacy cards (GT 620) can still achieve 45-60 FPS at 1080p with minor jitter.*
+    * *Note: For some reason, the user interface (UI) on YTMusic is experiencing a glitch, causing the UI to jitter slightly (For GT620). To fix this, simply click the line of lyrics or seek the video. I'm still working on a fix. As of February 8, 2026.*
+    * *Additional Notes: This benchmark is for Windows. Other operating systems may have different performance.*
 
 ## ⬇️ Installation
 
