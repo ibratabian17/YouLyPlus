@@ -1116,7 +1116,7 @@ class LyricsPlusRenderer {
     container.classList.remove("mixed-direction-lyrics", "dual-side-lyrics");
     if (hasRTL && hasLTR) container.classList.add("mixed-direction-lyrics");
 
-    
+
     // Singer Side Assignment Logic (i hope it similiar as apple lmfao)
     // We calculate the specific class for every line index.
     const lineSideAssignments = new Array(lyrics.data.length).fill("");
@@ -1128,6 +1128,9 @@ class LyricsPlusRenderer {
 
       let currentSideIsLeft = true; 
       let lastPersonSingerId = null;
+
+      let rightCount = 0;
+      let totalCount = 0;
 
       lyrics.data.forEach((line, index) => {
         const singerId = line.element?.singer;
@@ -1163,10 +1166,28 @@ class LyricsPlusRenderer {
             lastPersonSingerId = singerId;
           }
         }
+        
+        if (sideClass) {
+          totalCount++;
+          if (sideClass === "singer-right") rightCount++;
+        }
 
         lineSideAssignments[index] = sideClass;
         if (singerId) singerClassMap[singerId] = sideClass;
       });
+
+      // Flip everything if ≥ 85% are on the right
+      if (totalCount > 0 && Math.round((rightCount / totalCount) * 100) >= 85) {
+        const flip = (s) => s === "singer-left" ? "singer-right" : (s === "singer-right" ? "singer-left" : s);
+
+        for (let i = 0; i < lineSideAssignments.length; i++) {
+          lineSideAssignments[i] = flip(lineSideAssignments[i]);
+        }
+
+        for (const id in singerClassMap) {
+          singerClassMap[id] = flip(singerClassMap[id]);
+        }
+      }
 
       const hasLeft = lineSideAssignments.includes("singer-left");
       const hasRight = lineSideAssignments.includes("singer-right");
