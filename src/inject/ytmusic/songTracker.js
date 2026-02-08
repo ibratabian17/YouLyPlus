@@ -5,6 +5,9 @@
     let timeUpdateFrame = null;
     let debounceTimer = null;
     let playerInstance = null;
+    
+    const timeUpdateMsg = { type: 'LYPLUS_TIME_UPDATE', currentTime: 0 };
+    let lastSentTime = -1;
 
     console.log('LYPLUS: Tracker injected.');
 
@@ -14,20 +17,22 @@
     }
 
     function getPlayer() {
-        if (!playerInstance) {
-            playerInstance = document.getElementById("movie_player");
+        if (playerInstance && playerInstance.isConnected) {
+            return playerInstance;
         }
+        playerInstance = document.getElementById("movie_player");
         return playerInstance;
     }
 
     // --- Observers & Listeners ---
 
     function setupMutationObserver() {
-        const contentBar = document.querySelector('ytmusic-player-bar');
+        const metadataContainer = document.querySelector('ytmusic-player-bar .content-info-wrapper') 
+                               || document.querySelector('ytmusic-player-bar .left-controls');
 
-        if (contentBar) {
+        if (metadataContainer) {
             const observer = new MutationObserver(handleMutations);
-            observer.observe(contentBar, {
+            observer.observe(metadataContainer, {
                 childList: true,
                 subtree: true,
                 characterData: true
@@ -58,14 +63,21 @@
 
         function loop() {
             const player = getPlayer();
-            try {
-                const currentTime = player.getCurrentTime() + 0.11;
-                window.postMessage({
-                    type: 'LYPLUS_TIME_UPDATE',
-                    currentTime: currentTime
-                }, '*');
-                lastSentTime = currentTime;
-            } catch (e) {
+            
+            if (player) {
+                try {
+                    const state = player.getPlayerState();
+                    
+                    if (state === 1) { 
+                        const rawTime = player.getCurrentTime();
+                        
+                        if (Math.abs(rawTime - lastSentTime) > 0.001) {
+                            timeUpdateMsg.currentTime = rawTime + 0.11; 
+                            window.postMessage(timeUpdateMsg, '*');
+                            lastSentTime = rawTime;
+                        }
+                    }
+                } catch (e) {}
             }
 
             timeUpdateFrame = requestAnimationFrame(loop);
@@ -84,8 +96,11 @@
     // --- Metadata Extraction ---
 
     function getMetadataFromDOM() {
-        const titleEl = document.querySelector('.title.style-scope.ytmusic-player-bar');
-        const bylineEl = document.querySelector('.subtitle.style-scope.ytmusic-player-bar');
+        const bar = document.querySelector('ytmusic-player-bar');
+        if (!bar) return null;
+
+        const titleEl = bar.querySelector('.title');
+        const bylineEl = bar.querySelector('.subtitle');
 
         if (!titleEl || !bylineEl) return null;
 
@@ -114,23 +129,11 @@
             if (isArtist) {
                 artistNames.push(link.textContent.trim());
             } else {
-                // If it is a link, but NOT an artist, it is the Album/Release
-                if (!albumName) {
-                    albumName = link.textContent.trim();
-                }
+                if (!albumName) albumName = link.textContent.trim();
             }
         });
 
-        // 1. Finalize Artist
-        let artist = "";
-        if (artistNames.length > 0) {
-            artist = artistNames.join(", "); // Handle multiple artists
-        } else {
-            // Fallback: If absolutely no links exist, split text by bullet
-            artist = bylineText.split('•')[0]?.trim() || "";
-        }
-
-        // 2. Finalize Album
+        let artist = artistNames.length > 0 ? artistNames.join(", ") : (bylineText.split('•')[0]?.trim() || "");
         let album = albumName;
 
         return { title, artist, album, isVideo: album === "" };
@@ -145,14 +148,10 @@
         let duration = 0;
         let videoId = "";
 
-        if (player.getVideoData) {
-            const data = player.getVideoData();
-            videoId = data.video_id;
-        }
-
-        if (player.getDuration) {
-            duration = player.getDuration();
-        }
+        try {
+            if (player.getVideoData) videoId = player.getVideoData().video_id;
+            if (player.getDuration) duration = player.getDuration();
+        } catch (e) { return; }
 
         if (!duration || duration === 0) {
             setTimeout(checkForSongChange, 250);
@@ -161,8 +160,7 @@
 
         if (!domInfo.title || !domInfo.artist) return;
 
-        const hasChanged = videoId !== currentSong.videoId ||
-            domInfo.title !== currentSong.title;
+        const hasChanged = videoId !== currentSong.videoId || domInfo.title !== currentSong.title;
 
         if (hasChanged) {
             currentSong = {
