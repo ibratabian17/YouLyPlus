@@ -104,7 +104,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
   }, DEBOUNCE_TIME_MS);
   lastRequestedSongKey = songKey;
 
-  const localCurrentFetchMediaId = currentSong.videoId || currentSong.songId;
+  const localCurrentFetchMediaId = currentSong.videoId || currentSong.appleId || currentSong.songId || songKey;
   currentFetchMediaId = localCurrentFetchMediaId;
 
   LyricsPlusAPI.cleanupLyrics();
