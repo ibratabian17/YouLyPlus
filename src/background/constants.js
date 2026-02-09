@@ -8,18 +8,18 @@ export const CONFIG = {
     TRANSLATIONS: { name: "TranslationsDB", version: 2, store: "translations" },
     LOCAL: { name: "LocalLyricsDB", version: 2, store: "localLyrics" }
   },
-  
+
   CACHE_EXPIRY: {
-    aggressive: 24 * 60 * 60 * 1000, 
-    moderate: 12 * 60 * 60 * 1000 
+    aggressive: 24 * 60 * 60 * 1000,
+    moderate: 12 * 60 * 60 * 1000
   },
-  
+
   KPOE_SERVERS: [
     "https://lyricsplus-seven.vercel.app",
     "https://lyricsplus.prjktla.workers.dev",
     "https://lyrics-plus-backend.vercel.app"
   ],
-  
+
   GEMINI: {
     MAX_RETRIES: 5,
     MIN_TEXT_SIMILARITY: 0.8
@@ -37,7 +37,8 @@ export const PROVIDERS = {
   LRCLIB: 'lrclib',
   LOCAL: 'local',
   GEMINI: 'gemini',
-  GOOGLE: 'google'
+  GOOGLE: 'google',
+  OPENROUTER: 'openrouter'
 };
 
 export const MESSAGE_TYPES = {

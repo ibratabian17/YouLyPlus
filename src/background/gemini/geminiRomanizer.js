@@ -4,7 +4,7 @@
 
 import { CONFIG } from '../constants.js';
 import { Utilities } from '../utils/utilities.js';
-import { createRomanizationPrompt } from './prompts.js';
+import { createRomanizationPrompt } from '../services/translation/prompts.js';
 import { SchemaBuilder } from './schemaBuilder.js';
 import { ResponseValidator } from './responseValidator.js';
 

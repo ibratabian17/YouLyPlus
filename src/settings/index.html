@@ -249,6 +249,7 @@
                                 <option value="" disabled selected></option>
                                 <option value="google">Google Translate</option>
                                 <option value="gemini">Gemini AI</option>
+                                <option value="openrouter">OpenRouter (LLM)</option>
                             </select>
                             <label for="translation-provider">Translation Provider</label>
                         </div>
@@ -294,6 +295,30 @@
                     </div>
                 </div>
 
+                <div class="settings-category" id="openrouter-settings-category" style="display: none;">
+                    <h3 class="category-title">OpenRouter Settings</h3>
+                    <div class="setting-item">
+                        <div class="input-with-button">
+                            <div class="form-group">
+                                <input type="password" id="openrouter-api-key" placeholder=" " autocomplete="off">
+                                <label for="openrouter-api-key">OpenRouter API Key</label>
+                            </div>
+                            <button type="button" id="toggle-openrouter-api-key-visibility" class="m3-button icon"
+                                title="Show/Hide API Key">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </button>
+                        </div>
+                        <p class="helper-text">Your API key is stored locally.</p>
+                    </div>
+                    <div class="setting-item">
+                        <div class="form-group">
+                            <input type="text" id="openrouter-model" placeholder=" ">
+                            <label for="openrouter-model">OpenRouter Model (e.g., google/gemini-2.0-flash-001)</label>
+                        </div>
+                        <p class="helper-text">Specify the model ID from OpenRouter.</p>
+                    </div>
+                </div>
+
                 <div class="settings-category">
                     <h3 class="category-title">Romanization Service (for non-Latin scripts)</h3>
                     <div class="setting-item">
@@ -302,6 +327,7 @@
                                 <option value="" disabled selected></option>
                                 <option value="google">Google Translate</option>
                                 <option value="gemini">Gemini AI</option>
+                                <option value="openrouter">OpenRouter (LLM)</option>
                             </select>
                             <label for="romanization-provider">Romanization Provider</label>
                         </div>
@@ -359,25 +385,25 @@
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Advanced Prompting (Gemini)</h3>
+                    <h3 class="category-title">Advanced Prompting (Gemini / OpenRouter)</h3>
                     <div class="setting-item" id="override-gemini-prompt-group" style="display: none;">
                         <label class="m3-switch">
                             <input type="checkbox" id="override-gemini-prompt">
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Override Gemini AI Translation Prompt</span>
+                            <span class="label">Override AI Translation Prompt</span>
                         </label>
-                        <p class="setting-description">Use a custom prompt for Gemini AI translations. Use
+                        <p class="setting-description">Use a custom prompt for Gemini/OpenRouter translations. Use
                             <code>{targetLang}</code> and <code>{lyrics}</code> placeholders.
                         </p>
                     </div>
                     <div class="setting-item" id="custom-gemini-prompt-group" style="display: none;">
                         <div class="form-group">
                             <textarea id="custom-gemini-prompt" placeholder=" "></textarea>
-                            <label for="custom-gemini-prompt">Custom Gemini AI Translation Prompt</label>
+                            <label for="custom-gemini-prompt">Custom AI Translation Prompt</label>
                         </div>
-                        <p class="helper-text">Customize the prompt sent to Gemini AI for translations. Use
+                        <p class="helper-text">Customize the prompt sent to the AI for translations. Use
                             <code>{targetLang}</code> for the target language
                         </p>
                     </div>
@@ -387,16 +413,16 @@
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Override Gemini AI Romanization Prompt</span>
+                            <span class="label">Override AI Romanization Prompt</span>
                         </label>
-                        <p class="setting-description">Use a custom prompt for Gemini AI romanization.</p>
+                        <p class="setting-description">Use a custom prompt for Gemini/OpenRouter romanization.</p>
                     </div>
                     <div class="setting-item" id="custom-gemini-romanize-prompt-group" style="display: none;">
                         <div class="form-group">
                             <textarea id="custom-gemini-romanize-prompt" placeholder=" "></textarea>
-                            <label for="custom-gemini-romanize-prompt">Custom Gemini AI Romanization Prompt</label>
+                            <label for="custom-gemini-romanize-prompt">Custom AI Romanization Prompt</label>
                         </div>
-                        <p class="helper-text">Customize the prompt sent to Gemini AI for romanization.</p>
+                        <p class="helper-text">Customize the prompt sent to the AI for romanization.</p>
                     </div>
                 </div>
 

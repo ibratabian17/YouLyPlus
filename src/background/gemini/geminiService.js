@@ -2,7 +2,7 @@
 // EXTERNAL SERVICE - GEMINI
 // ==================================================================================================
 
-import { createTranslationPrompt } from './prompts.js';
+import { createTranslationPrompt } from '../services/translation/prompts.js';
 import { GeminiRomanizer } from './geminiRomanizer.js';
 
 export class GeminiService {

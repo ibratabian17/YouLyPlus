@@ -42,6 +42,8 @@ function setupAutoSaveListeners() {
         { id: 'cache-strategy', key: 'cacheStrategy', type: 'value' },
         { id: 'bypass-apple', key: 'appleMusicTTMLBypass', type: 'checkbox' },
         { id: 'ytsonginfo', key: 'YTSongInfo', type: 'checkbox' },
+        { id: 'openrouter-api-key', key: 'openRouterApiKey', type: 'value' },
+        { id: 'openrouter-model', key: 'openRouterModel', type: 'value' },
     ];
 
     autoSaveControls.forEach(control => {
@@ -96,11 +98,17 @@ function updateUI(settings) {
     document.getElementById('cache-strategy').value = currentSettings.cacheStrategy;
     document.getElementById('bypass-apple').checked = currentSettings.appleMusicTTMLBypass;
     document.getElementById('ytsonginfo').checked = currentSettings.YTSongInfo;
+    document.getElementById('cache-strategy').value = currentSettings.cacheStrategy;
+    document.getElementById('bypass-apple').checked = currentSettings.appleMusicTTMLBypass;
+    document.getElementById('ytsonginfo').checked = currentSettings.YTSongInfo;
+    document.getElementById('openrouter-api-key').value = currentSettings.openRouterApiKey || '';
+    document.getElementById('openrouter-model').value = currentSettings.openRouterModel || '';
     updateCustomSelectDisplay('cache-strategy');
 
     toggleKpoeSourcesVisibility();
     toggleCustomKpoeUrlVisibility();
     toggleGeminiSettingsVisibility();
+    toggleOpenRouterSettingsVisibility();
     toggleTranslateTargetVisibility();
     toggleGeminiPromptVisibility();
     toggleGeminiRomanizePromptVisibility();
@@ -146,7 +154,11 @@ document.getElementById('save-translation').addEventListener('click', () => {
         geminiApiKey: document.getElementById('gemini-api-key').value,
         customTranslateTarget: document.getElementById('custom-translate-target').value,
         customGeminiPrompt: document.getElementById('custom-gemini-prompt').value,
-        customGeminiRomanizePrompt: document.getElementById('custom-gemini-romanize-prompt').value
+        customTranslateTarget: document.getElementById('custom-translate-target').value,
+        customGeminiPrompt: document.getElementById('custom-gemini-prompt').value,
+        customGeminiRomanizePrompt: document.getElementById('custom-gemini-romanize-prompt').value,
+        openRouterApiKey: document.getElementById('openrouter-api-key').value,
+        openRouterModel: document.getElementById('openrouter-model').value
     });
     saveSettings();
     showStatusMessage('translation-save-status', 'Translation input fields saved!', false);
@@ -357,11 +369,13 @@ document.getElementById('override-gemini-romanize-prompt').addEventListener('cha
 
 document.getElementById('romanization-provider').addEventListener('change', () => {
     toggleRomanizationModelVisibility();
+    toggleOpenRouterSettingsVisibility();
 });
 
 document.getElementById('translation-provider').addEventListener('change', (e) => {
     currentSettings.translationProvider = e.target.value;
     toggleGeminiSettingsVisibility();
+    toggleOpenRouterSettingsVisibility();
 });
 
 function toggleElementVisibility(elementId, isVisible) {
@@ -385,10 +399,22 @@ function toggleGeminiSettingsVisibility() {
     const isGemini = document.getElementById('translation-provider').value === 'gemini';
     toggleElementVisibility('gemini-api-key-group', isGemini);
     toggleElementVisibility('gemini-model-group', isGemini);
-    toggleElementVisibility('override-gemini-prompt-group', isGemini);
-    toggleElementVisibility('override-gemini-romanize-prompt-group', isGemini);
+
+    // Prompt overrides are shared with OpenRouter
+    const isGeminiOrOpenRouter = isGemini || document.getElementById('translation-provider').value === 'openrouter';
+    toggleElementVisibility('override-gemini-prompt-group', isGeminiOrOpenRouter);
+
+    // Romanization prompt override is shared
+    const isRomanizationGeminiOrOpenRouter = isGeminiOrOpenRouter || ['gemini', 'openrouter'].includes(document.getElementById('romanization-provider').value);
+    toggleElementVisibility('override-gemini-romanize-prompt-group', isRomanizationGeminiOrOpenRouter);
     toggleGeminiPromptVisibility();
     toggleGeminiRomanizePromptVisibility();
+}
+
+function toggleOpenRouterSettingsVisibility() {
+    const isTranslationOpenRouter = document.getElementById('translation-provider').value === 'openrouter';
+    const isRomanizationOpenRouter = document.getElementById('romanization-provider').value === 'openrouter';
+    toggleElementVisibility('openrouter-settings-category', isTranslationOpenRouter || isRomanizationOpenRouter);
 }
 
 function toggleTranslateTargetVisibility() {
@@ -397,12 +423,15 @@ function toggleTranslateTargetVisibility() {
 }
 
 function toggleGeminiPromptVisibility() {
-    const isVisible = document.getElementById('translation-provider').value === 'gemini' && document.getElementById('override-gemini-prompt').checked;
+    const isGeminiOrOpenRouter = ['gemini', 'openrouter'].includes(document.getElementById('translation-provider').value);
+    const isVisible = isGeminiOrOpenRouter && document.getElementById('override-gemini-prompt').checked;
     toggleElementVisibility('custom-gemini-prompt-group', isVisible);
 }
 
 function toggleGeminiRomanizePromptVisibility() {
-    const isVisible = document.getElementById('translation-provider').value === 'gemini' && document.getElementById('override-gemini-romanize-prompt').checked;
+    const isGeminiOrOpenRouter = ['gemini', 'openrouter'].includes(document.getElementById('translation-provider').value) ||
+        ['gemini', 'openrouter'].includes(document.getElementById('romanization-provider').value);
+    const isVisible = isGeminiOrOpenRouter && document.getElementById('override-gemini-romanize-prompt').checked;
     toggleElementVisibility('custom-gemini-romanize-prompt-group', isVisible);
 }
 
@@ -521,6 +550,18 @@ async function populateLocalLyricsList() {
 document.getElementById('toggle-gemini-api-key-visibility').addEventListener('click', () => {
     const apiKeyInput = document.getElementById('gemini-api-key');
     const icon = document.querySelector('#toggle-gemini-api-key-visibility .material-symbols-outlined');
+    if (apiKeyInput.type === 'password') {
+        apiKeyInput.type = 'text';
+        icon.textContent = 'visibility_off';
+    } else {
+        apiKeyInput.type = 'password';
+        icon.textContent = 'visibility';
+    }
+});
+
+document.getElementById('toggle-openrouter-api-key-visibility').addEventListener('click', () => {
+    const apiKeyInput = document.getElementById('openrouter-api-key');
+    const icon = document.querySelector('#toggle-openrouter-api-key-visibility .material-symbols-outlined');
     if (apiKeyInput.type === 'password') {
         apiKeyInput.type = 'text';
         icon.textContent = 'visibility_off';

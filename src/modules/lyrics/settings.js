@@ -1,6 +1,6 @@
 const pBrowser = typeof browser !== 'undefined'
-  ? browser
-  : (typeof chrome !== 'undefined' ? chrome : null);
+    ? browser
+    : (typeof chrome !== 'undefined' ? chrome : null);
 
 const defaultSettings = {
     lyricsProvider: 'kpoe',
@@ -33,7 +33,9 @@ const defaultSettings = {
     largerTextMode: 'lyrics', // 'lyrics' or 'romanization'
     customKpoeUrl: '',
     appleMusicTTMLBypass: false,
-    YTSongInfo: false
+    YTSongInfo: false,
+    openRouterApiKey: '',
+    openRouterModel: 'google/gemma-3n-e2b-it:free'
 };
 
 let currentSettings = { ...defaultSettings };

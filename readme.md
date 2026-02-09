@@ -45,7 +45,7 @@ YouLy+ is come with a features that designed to fix and enhance your lyrics expe
 
 ### 🌐 Translation & Romanization
 
--   **Instant Translation:** Translate lyrics on the fly using **Google Translate** or the powerful **Gemini AI** (API Key required).
+-   **Instant Translation:** Translate lyrics on the fly using **Google Translate** or the powerful **Gemini AI/OpenRouter** (API Key are required for LLM/AI Translation).
 -   **Romanization:** See lyrics written in the familiar English alphabet, even for languages that use different writing systems (like Japanese, Korean, or Russian).
 -   **Full Gemini AI Control:** For advanced users, connect your own Gemini AI account to customize translation instructions and AI settings.
 
