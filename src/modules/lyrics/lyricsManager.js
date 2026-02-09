@@ -10,6 +10,7 @@ let lastProcessedDisplayMode = 'none'; // The mode that was actually rendered
 
 let lastKnownSongInfo = null;
 let lastFetchedLyrics = null;
+let lastBaseLyrics = null;
 
 // Debouncing to prevent rapid-fire requests
 let lyricsFetchDebounceTimer = null;
@@ -54,7 +55,7 @@ function combineLyricsData(baseLyrics, translation, romanization) {
         });
       }
       else if (romanizedLine.text) {
-         updatedLine.romanizedText = romanizedLine.text;
+        updatedLine.romanizedText = romanizedLine.text;
       }
     }
     return updatedLine;
@@ -92,7 +93,7 @@ function determineFinalDisplayMode(intendedMode, hasTranslation, hasRomanization
 
 async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload = false) {
   const songKey = `${currentSong.title}-${currentSong.artist}-${currentSong.album}`;
-  
+
   // --- 1. Debouncing and Race Condition Setup ---
   if (lyricsFetchDebounceTimer && lastRequestedSongKey === songKey && !forceReload && currentDisplayMode === lastProcessedDisplayMode) {
     return;
@@ -107,7 +108,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
   const localCurrentFetchMediaId = currentSong.videoId || currentSong.appleId || currentSong.songId || songKey;
   currentFetchMediaId = localCurrentFetchMediaId;
 
-  LyricsPlusAPI.cleanupLyrics();
+
 
   try {
     // --- 2. Determine Effective Mode (User's Intent) ---
@@ -122,28 +123,40 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     }
 
     // --- 3. Fetch Base Lyrics ---
-    const originalLyricsResponse = await pBrowser.runtime.sendMessage({
-      type: 'FETCH_LYRICS',
-      songInfo: currentSong,
-      forceReload: forceReload
-    });
+    let baseLyrics = null;
 
-    if (currentFetchMediaId !== localCurrentFetchMediaId) {
-      console.warn("Song changed during initial lyrics fetch. Aborting.", currentSong);
-      return;
-    }
+    if (!isNewSong && !forceReload && lastBaseLyrics && lastKnownSongInfo && lastKnownSongInfo.title === currentSong.title && lastKnownSongInfo.artist === currentSong.artist) {
+      // Reuse cached base lyrics
+      baseLyrics = lastBaseLyrics;
+      if (LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
+    } else {
+      // Full fetch
+      LyricsPlusAPI.cleanupLyrics();
 
-    if (!originalLyricsResponse.success) {
-      console.warn('Failed to fetch original lyrics:', originalLyricsResponse.error);
-      if (LyricsPlusAPI.displaySongNotFound) LyricsPlusAPI.displaySongNotFound();
-      return;
+      const originalLyricsResponse = await pBrowser.runtime.sendMessage({
+        type: 'FETCH_LYRICS',
+        songInfo: currentSong,
+        forceReload: forceReload
+      });
+
+      if (currentFetchMediaId !== localCurrentFetchMediaId) {
+        console.warn("Song changed during initial lyrics fetch. Aborting.", currentSong);
+        return;
+      }
+
+      if (!originalLyricsResponse.success) {
+        console.warn('Failed to fetch original lyrics:', originalLyricsResponse.error);
+        if (LyricsPlusAPI.displaySongNotFound) LyricsPlusAPI.displaySongNotFound();
+        return;
+      }
+      baseLyrics = originalLyricsResponse.lyrics;
+      lastBaseLyrics = baseLyrics;
     }
-    let baseLyrics = originalLyricsResponse.lyrics;
 
     // --- 4. Fetch Additional Data (Translation/Romanization) in Parallel ---
     const htmlLang = document.documentElement.getAttribute('lang');
     const promises = [];
-    
+
     const needsTranslation = effectiveMode === 'translate' || effectiveMode === 'both';
     const needsRomanization = effectiveMode === 'romanize' || effectiveMode === 'both' || currentSettings.largerTextMode === "romanization";
 
@@ -162,12 +175,38 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     } else {
       promises.push(Promise.resolve(null));
     }
-    
+
+    // RENDER BASE LYRICS IMMEDIATELY if we are waiting for translation/romanization
+    // This makes the UI feel responsive (like the "toggle" behavior) even for new songs.
+    if ((needsTranslation || needsRomanization) && LyricsPlusAPI.displayLyrics) {
+      let tempLyricsObject = JSON.parse(JSON.stringify(baseLyrics));
+
+      if (tempLyricsObject.type === "Word" && !currentSettings.wordByWord) {
+        tempLyricsObject = convertWordLyricsToLine(tempLyricsObject);
+      }
+
+      tempLyricsObject.type = (tempLyricsObject.type === "None" ? "None" : (tempLyricsObject.type === "Line" ? "Line" : "Word"));
+
+      // Render with 'none' mode (just base lyrics) but set loading indicator
+      LyricsPlusAPI.displayLyrics(
+        tempLyricsObject,
+        currentSong,
+        'none', // Correctly display base lyrics
+        currentSettings,
+        fetchAndDisplayLyrics,
+        setCurrentDisplayModeAndRender,
+        currentSettings.largerTextMode,
+        audioCtx.outputLatency || 0
+      );
+
+      if (LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
+    }
+
     const [translationResponse, romanizationResponse] = await Promise.all(promises);
 
     if (currentFetchMediaId !== localCurrentFetchMediaId) {
-        console.warn("Song changed during additional data fetch. Aborting.", currentSong);
-        return;
+      console.warn("Song changed during additional data fetch. Aborting.", currentSong);
+      return;
     }
 
     const hasTranslation = translationResponse?.success && translationResponse.translatedLyrics;
@@ -179,14 +218,14 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
       hasTranslation ? translationResponse.translatedLyrics : null,
       hasRomanization ? romanizationResponse.translatedLyrics : null
     );
-    
+
     const finalDisplayModeForRenderer = determineFinalDisplayMode(effectiveMode, hasTranslation, hasRomanization);
 
     // --- 6. Post-Processing ---
     if (lyricsObjectToDisplay.type === "Word" && !currentSettings.wordByWord) {
       lyricsObjectToDisplay = convertWordLyricsToLine(lyricsObjectToDisplay);
     }
-    
+
     if (currentSong.isVideo && currentSong.videoId && currentSettings.useSponsorBlock && !lyricsObjectToDisplay.ignoreSponsorblock && !lyricsObjectToDisplay.metadata.ignoreSponsorblock) {
       const sponsorBlockResponse = await pBrowser.runtime.sendMessage({
         type: 'FETCH_SPONSOR_SEGMENTS',
@@ -197,12 +236,12 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
         console.warn("Song changed during SponsorBlock fetch. Aborting.", currentSong);
         return;
       }
-      
+
       if (sponsorBlockResponse.success) {
         lyricsObjectToDisplay.data = adjustLyricTiming(lyricsObjectToDisplay.data, sponsorBlockResponse.segments, lyricsObjectToDisplay.type === "Line" ? "s" : "s");
       }
     }
-    
+
     // --- 7. Render Lyrics ---
     lyricsObjectToDisplay.type = (lyricsObjectToDisplay.type === "None" ? "None" : (lyricsObjectToDisplay.type === "Line" ? "Line" : "Word"));
     lastFetchedLyrics = lyricsObjectToDisplay;
@@ -220,7 +259,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     } else {
       console.error("displayLyrics is not available.");
     }
-    
+
     lastKnownSongInfo = currentSong;
     lastProcessedDisplayMode = finalDisplayModeForRenderer;
 

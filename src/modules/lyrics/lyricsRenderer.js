@@ -1126,7 +1126,7 @@ class LyricsPlusRenderer {
     if (lyrics && lyrics.data && lyrics.data.length > 0) {
       const agents = lyrics.metadata?.agents || {};
 
-      let currentSideIsLeft = true; 
+      let currentSideIsLeft = true;
       let lastPersonSingerId = null;
 
       let rightCount = 0;
@@ -1139,8 +1139,8 @@ class LyricsPlusRenderer {
         if (singerId) {
           const agentData = agents[singerId];
           // ig we guess default types for v1000/v2000?? idk
-          const type = agentData 
-            ? agentData.type 
+          const type = agentData
+            ? agentData.type
             : (singerId === "v1000" ? "group" : (singerId === "v2000" ? "other" : "person"));
 
           if (type === "group") {
@@ -1166,7 +1166,7 @@ class LyricsPlusRenderer {
             lastPersonSingerId = singerId;
           }
         }
-        
+
         if (sideClass) {
           totalCount++;
           if (sideClass === "singer-right") rightCount++;
@@ -1387,8 +1387,17 @@ class LyricsPlusRenderer {
     this.visibleLineIds.clear();
     this.currentPrimaryActiveLine = null;
 
-    if (this.cachedLyricsLines.length > 0)
-      this._scrollToActiveLine(this.cachedLyricsLines[0], true);
+    if (this.cachedLyricsLines.length > 0) {
+      const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000;
+      let activeIndex = this._getLineIndexAtTime(currentTime);
+      if (activeIndex === -1) activeIndex = 0;
+
+      const activeLine = this.cachedLyricsLines[activeIndex];
+      this.currentPrimaryActiveLine = activeLine;
+      this.lastPrimaryActiveLine = activeLine;
+      this._lastActiveIndex = activeIndex;
+      this._scrollToActiveLine(activeLine, false, true);
+    }
 
     this._startLyricsSync(currentSettings);
     container.classList.toggle(
@@ -1424,6 +1433,9 @@ class LyricsPlusRenderer {
     this.setCurrentDisplayModeAndRefetchFn = setCurrentDisplayModeAndRefetchFn;
     this.largerTextMode = largerTextMode;
     this.offsetLatency = offsetLatency
+
+    // Reset translation loading state if it was active
+    this.setTranslationLoading(false);
 
     const container = this._getContainer();
     if (!container) return;
@@ -1540,6 +1552,24 @@ class LyricsPlusRenderer {
       !!currentSettings.hideOffscreen
     );
     this._injectCustomCSS(currentSettings.customCSS);
+  }
+
+  /**
+   * Sets the loading state of the translation button.
+   * @param {boolean} active - Whether the loading state is active.
+   */
+  setTranslationLoading(active) {
+    if (!this.translationButton) return;
+
+    if (active) {
+      this.translationButton.classList.add("loading");
+      this.translationButton.innerHTML = '<div class="loading-loop-m3 small"></div>';
+      this.translationButton.disabled = true;
+    } else {
+      this.translationButton.classList.remove("loading");
+      this.translationButton.disabled = false;
+      this._updateTranslationButtonText();
+    }
   }
 
   /**

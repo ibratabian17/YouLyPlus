@@ -34,7 +34,8 @@ const LyricsPlusAPI = {
     displaySongError: () => lyricsRendererInstance.displaySongError(),
     cleanupLyrics: () => lyricsRendererInstance.cleanupLyrics(),
     updateDisplayMode: (...args) => lyricsRendererInstance.updateDisplayMode(...args),
-    updateCurrentTick: (...args) => lyricsRendererInstance.updateCurrentTick(...args)
+    updateCurrentTick: (...args) => lyricsRendererInstance.updateCurrentTick(...args),
+    setTranslationLoading: (...args) => lyricsRendererInstance.setTranslationLoading(...args)
 };
 
 function injectPlatformCSS() {
@@ -80,7 +81,7 @@ function updateTextWithMarquee(container, text) {
 
                 const scrollDistance = contentWidth + gap;
 
-                const scrollDuration = scrollDistance / 60; 
+                const scrollDuration = scrollDistance / 60;
                 const pauseDuration = 2;
                 const totalDuration = scrollDuration + pauseDuration;
 

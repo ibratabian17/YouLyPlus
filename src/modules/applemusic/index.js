@@ -63,7 +63,8 @@ const LyricsPlusAPI = {
     displaySongError: () => lyricsRendererInstance?.displaySongError(),
     cleanupLyrics: () => lyricsRendererInstance?.cleanupLyrics(),
     updateDisplayMode: (...args) => lyricsRendererInstance?.updateDisplayMode(...args),
-    updateCurrentTick: (...args) => lyricsRendererInstance?.updateCurrentTick(...args)
+    updateCurrentTick: (...args) => lyricsRendererInstance?.updateCurrentTick(...args),
+    setTranslationLoading: (...args) => lyricsRendererInstance?.setTranslationLoading(...args)
 };
 
 // --- Injection ---
@@ -147,7 +148,7 @@ function injectShowHideButton(retryCount = 0) {
             console.log('LyricsPlus: Button wrapper never appeared.');
             return;
         }
-        
+
         setTimeout(() => injectShowHideButton(retryCount + 1), 500);
         return;
     }
