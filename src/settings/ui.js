@@ -76,7 +76,7 @@ function setupAutoSaveListeners() {
     autoSaveControls.forEach(control => {
         const element = document.getElementById(control.id);
         if (element) {
-            const eventType = control.type === 'checkbox' ? 'change' : 'input';
+            const eventType = (control.type === 'checkbox' || element.tagName === 'SELECT') ? 'change' : 'input';
             const saveHandler = (e) => {
                 const value = control.type === 'checkbox' ? e.target.checked : e.target.value;
                 updateSettings({ [control.key]: value });
