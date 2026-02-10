@@ -36,7 +36,6 @@ function initializeLyricsPlus() {
             // Handle song info updates
             if (event.data.type === 'LYPLUS_SONG_CHANGED') {
                 const songInfo = event.data.songInfo;
-                const isNewSong = event.data.isNewSong; // Get the new song flag
                 console.log('Song changed (received in extension):', songInfo);
 
                 // Don't fetch lyrics if title or artist is empty
@@ -46,7 +45,7 @@ function initializeLyricsPlus() {
                 }
 
                 // Call the lyrics fetching function with the new song info and new song flag
-                fetchAndDisplayLyrics(songInfo, isNewSong);
+                fetchAndDisplayLyrics(songInfo, true);
             }
         }
     });
