@@ -42,6 +42,11 @@ export class GoogleService {
       syllables.forEach(s => allSyllables.push(s));
     });
 
+    /**
+     * Parallel fetch: 
+     * Syllable guides help determine cut points.
+     * Full lines ensure correct phonetic context and spacing from the engine.
+     */
     const [fullLineResults, isolatedResults] = await Promise.all([
       this.romanizeTexts(allLines),
       this.romanizeTexts(allSyllables)
@@ -52,14 +57,19 @@ export class GoogleService {
     return originalLyrics.data.map((line, index) => {
       const fullLineRom = fullLineResults[index] || "";
       const count = lineStructure[index];
-      const guideChunks = isolatedResults.slice(globalSyllableIndex, globalSyllableIndex + count);
+
+      const romanizedGuides = isolatedResults.slice(globalSyllableIndex, globalSyllableIndex + count);
+      const originalSyllables = line.syllabus || [];
+
       globalSyllableIndex += count;
 
-      const alignedChunks = this.alignRomanizationAnchors(fullLineRom, guideChunks);
+      const alignedChunks = this.alignRomanizationAnchors(fullLineRom, romanizedGuides, originalSyllables);
 
-      const formattedChunks = (line.syllabus || []).map((s, i) => ({
-        text: alignedChunks[i] + " "
-      }));
+      const formattedChunks = originalSyllables.map((s, i) => {
+        return {
+          text: alignedChunks[i]
+        };
+      });
 
       return {
         text: formattedChunks.map(c => c.text).join(""),
@@ -69,122 +79,111 @@ export class GoogleService {
     });
   }
 
-  static alignRomanizationAnchors(fullText, guideChunks) {
-    let remainingText = fullText.trim().replace(/\s+/g, '').toLowerCase();
-    const results = new Array(guideChunks.length).fill("");
-    let bufferIndices = [];
+  static alignRomanizationAnchors(fullText, romanizedGuides, originalSyllables) {
+    // Partition fullText into M segments that phonetically match the guides while preserving spaces.
+    const target = fullText;
+    const N = target.length;
+    const M = romanizedGuides.length;
 
-    for (let i = 0; i < guideChunks.length; i++) {
-      const rawGuide = guideChunks[i].trim().replace(/\s+/g, '').toLowerCase();
+    if (M === 0) return [];
+    if (N === 0) return romanizedGuides.map(() => "");
 
-      if (!rawGuide) {
-        bufferIndices.push(i);
-        continue;
-      }
+    const dp = Array.from({ length: M + 1 }, () => new Float64Array(N + 1).fill(Number.MAX_VALUE));
+    const path = Array.from({ length: M + 1 }, () => new Int32Array(N + 1).fill(-1));
 
-      const scanLimit = Math.max(10, bufferIndices.length * 8 + rawGuide.length + 5);
-      const searchSpace = remainingText.substring(0, scanLimit);
+    dp[0][0] = 0;
 
-      const match = this.findBestMatch(rawGuide, searchSpace);
+    for (let i = 1; i <= M; i++) {
+      const guideRom = romanizedGuides[i - 1];
+      const isLatin = Utilities.isPurelyLatinScript(originalSyllables[i - 1].text);
+      const guideLen = guideRom.length;
 
-      if (match.found) {
-        const preamble = remainingText.substring(0, match.index);
+      // Latin uses strict length; Japanese uses flexible length for contracted sounds/particles.
+      const minLen = isLatin ? Math.max(1, guideLen - 1) : 1;
+      const maxLen = isLatin ? guideLen + 3 : Math.max(guideLen * 3 + 3, 15);
 
-        if (bufferIndices.length > 0) {
-          this.distributeTextToBuffer(preamble, bufferIndices, guideChunks, results);
-        } else if (preamble.length > 0) {
-          if (i > 0) results[i - 1] += preamble;
+      for (let j = 1; j <= N; j++) {
+        let bestLocalCost = Number.MAX_VALUE;
+        let bestPrevJ = -1;
+
+        for (let len = minLen; len <= maxLen; len++) {
+          const k = j - len;
+          if (k < 0) break;
+
+          if (dp[i - 1][k] === Number.MAX_VALUE) continue;
+
+          const candidate = target.substring(k, j);
+          const segmentCost = this.calculateMatchCost(candidate, guideRom, isLatin);
+
+          const totalCost = dp[i - 1][k] + segmentCost;
+
+          if (totalCost < bestLocalCost) {
+            bestLocalCost = totalCost;
+            bestPrevJ = k;
+          }
         }
 
-        results[i] = remainingText.substring(match.index, match.index + match.length);
-        remainingText = remainingText.substring(match.index + match.length);
-        bufferIndices = [];
-      } else {
-        bufferIndices.push(i);
+        dp[i][j] = bestLocalCost;
+        path[i][j] = bestPrevJ;
       }
     }
 
-    if (remainingText.length > 0 && bufferIndices.length > 0) {
-      this.distributeTextToBuffer(remainingText, bufferIndices, guideChunks, results);
-    } else if (remainingText.length > 0 && results.length > 0) {
-      results[results.length - 1] += remainingText;
+    const results = new Array(M);
+    let currJ = N;
+
+    // Fallback: if exact end unreachable, find best possible endpoint
+    if (dp[M][N] === Number.MAX_VALUE) {
+      let minEndCost = Number.MAX_VALUE;
+      for (let k = N; k >= 0; k--) {
+        if (dp[M][k] < minEndCost) {
+          minEndCost = dp[M][k];
+          currJ = k;
+        }
+      }
+    }
+
+    for (let i = M; i > 0; i--) {
+      const prevJ = path[i][currJ];
+      if (prevJ === -1) {
+        results[i - 1] = "";
+      } else {
+        results[i - 1] = target.substring(prevJ, currJ);
+        currJ = prevJ;
+      }
+    }
+
+    // Distribute remaining characters to first/last chunks
+    if (currJ > 0 && results.length > 0) {
+      results[0] = target.substring(0, currJ) + results[0];
+    }
+    const totalLen = results.join("").length;
+    if (totalLen < N && results.length > 0) {
+      results[results.length - 1] += target.substring(totalLen);
     }
 
     return results;
   }
 
-  static findBestMatch(guide, text) {
-    if (!text) return { found: false };
+  static calculateMatchCost(candidate, guide, isLatin) {
+    const cTrim = candidate.trim();
+    const gTrim = guide.trim();
 
-    const maxErrors = guide.length <= 2 ? 0 : Math.floor(guide.length * 0.35);
-    let bestDist = Infinity;
-    let bestIndex = -1;
-    let bestLen = -1;
+    if (!cTrim && gTrim) return 50;
 
-    for (let idx = 0; idx < text.length; idx++) {
-      if (bestDist === 0 && bestIndex === 0) break;
+    const cLower = cTrim.toLowerCase();
+    const gLower = gTrim.toLowerCase();
+    const dist = Utilities.levenshteinDistance(cLower, gLower);
 
-      for (let lenOffset = -1; lenOffset <= 2; lenOffset++) {
-        const len = guide.length + lenOffset;
-        if (len <= 0) continue;
-        if (idx + len > text.length) continue;
-
-        const candidate = text.substring(idx, idx + len);
-        const dist = this.levenshteinDistance(guide, candidate);
-
-        if (dist <= maxErrors) {
-          if (dist < bestDist || (dist === bestDist && idx < bestIndex)) {
-            bestDist = dist;
-            bestIndex = idx;
-            bestLen = len;
-          }
-        }
-      }
+    if (isLatin) {
+      // High penalty for Latin mismatches to keep strict alignment
+      return dist * 50 + (Math.abs(candidate.length - guide.length) * 0.5);
     }
 
-    return bestIndex !== -1 ? { found: true, index: bestIndex, length: bestLen } : { found: false };
-  }
+    const lenDiff = Math.abs(cTrim.length - gTrim.length);
+    const hasTrailingSpace = candidate.endsWith(" ");
+    const bonus = hasTrailingSpace ? -0.5 : 0;
 
-  static distributeTextToBuffer(text, bufferIndices, guideChunks, results) {
-    if (bufferIndices.length === 0) return;
-
-    const totalGuideLen = bufferIndices.reduce((sum, idx) => sum + guideChunks[idx].length, 0);
-    let currentIndex = 0;
-
-    bufferIndices.forEach((bIdx, i) => {
-      if (i === bufferIndices.length - 1) {
-        results[bIdx] = text.substring(currentIndex);
-        return;
-      }
-
-      const weight = guideChunks[bIdx].length / totalGuideLen;
-      let charCount = Math.round(text.length * weight);
-
-      if (charCount === 0 && text.length > bufferIndices.length) charCount = 1;
-
-      results[bIdx] = text.substring(currentIndex, currentIndex + charCount);
-      currentIndex += charCount;
-    });
-  }
-
-  static levenshteinDistance(a, b) {
-    if (a.length === 0) return b.length;
-    if (b.length === 0) return a.length;
-    const matrix = [];
-    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-
-    for (let i = 1; i <= b.length; i++) {
-      for (let j = 1; j <= a.length; j++) {
-        const cost = b.charAt(i - 1) === a.charAt(j - 1) ? 0 : 1;
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j - 1] + cost
-        );
-      }
-    }
-    return matrix[b.length][a.length];
+    return dist + (lenDiff * 0.8) + bonus;
   }
 
   static async romanizeLineSynced(originalLyrics) {
@@ -222,13 +221,15 @@ export class GoogleService {
         const batchResultArray = await this.fetchRomanizationWithRetry(batchText);
 
         batch.forEach((originalText, batchIndex) => {
-          const res = batchResultArray[batchIndex] !== undefined ? batchResultArray[batchIndex] : originalText;
-          const originalGlobalIndex = validIndices[i + batchIndex];
-          resultsMap[originalGlobalIndex] = res;
+          if (batchResultArray[batchIndex] !== undefined) {
+            resultsMap[validIndices[i + batchIndex]] = batchResultArray[batchIndex];
+          } else {
+            resultsMap[validIndices[i + batchIndex]] = originalText;
+          }
         });
 
       } catch (e) {
-        console.error("GoogleService: Batch failed, falling back to original text", e);
+        console.error("GoogleService: Batch failed", e);
       }
     }
 
@@ -244,13 +245,15 @@ export class GoogleService {
 
       const data = await response.json();
 
-      if (!data || !data[0]) return [];
+      const fullRomanizedString = data?.[0]
+        ?.map(segment => segment?.[3] || segment?.[0] || "")
+        .join("") || "";
 
-      const fullRomanizedString = data[0]
-        .map(segment => segment[3] || segment[0] || "")
-        .join("");
+      if (!fullRomanizedString) return text.split('|');
 
-      return fullRomanizedString.replaceAll('| ', '|').replaceAll(' |', '|').split('|').map(t => t);
+      return fullRomanizedString
+        .replace(/\s*\|\s*/g, '|')
+        .split('|');
 
     } catch (error) {
       if (attempt < CONFIG.GOOGLE.MAX_RETRIES) {
