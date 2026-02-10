@@ -597,13 +597,13 @@ span.lyrics-source-provider {
     width: 80px;
     margin: 10px;
     mask-size: contain;
-    background-color: var(--yt-spec-text-primary, var(--lyplus-text-primary));
+    background-color: var(--yt-spec-text-primary, var(--lyplus-text-primary, #fff));
     animation: fadeInUp 0.5s ease;
 }
 
 #lyrics-plus-buttons-wrapper .loading-loop-m3 {
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
     margin: 0;
 }
 
