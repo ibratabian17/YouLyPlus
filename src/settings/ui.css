@@ -1032,6 +1032,14 @@ div#local-lyrics-list .draggable-source-item:last-of-type {
     .card-title {
         font-size: 2rem;
     }
+
+    .scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 2.2em;
+        padding-bottom: 100px;
+        padding-top: 100px;
+    }
 }
 
 /* --- Drag and Drop Touch Fix --- */
