@@ -9,12 +9,54 @@ const RESTART_REQUIRED_KEYS = [
     'dynamicPlayer'
 ];
 
-function showReloadNotification(changedKey) {
+const SUPPORTED_PLATFORMS = [
+    { name: 'YouTube Music', url: "*://music.youtube.com/*" },
+    { name: 'Apple Music', url: "*://music.apple.com/*" },
+    { name: 'Tidal', url: "*://listen.tidal.com/*" }
+];
+
+async function getAvailableTabs() {
+    return new Promise((resolve) => {
+        let results = [];
+        let checkedCount = 0;
+
+        SUPPORTED_PLATFORMS.forEach(platform => {
+            chrome.tabs.query({ url: platform.url }, (tabs) => {
+                if (tabs && tabs.length > 0) {
+                    results.push({ ...platform, tabs });
+                }
+                checkedCount++;
+                if (checkedCount === SUPPORTED_PLATFORMS.length) {
+                    resolve(results);
+                }
+            });
+        });
+    });
+}
+
+async function showReloadNotification(changedKey) {
     if (changedKey && !RESTART_REQUIRED_KEYS.includes(changedKey)) {
         return;
     }
+
+    const availablePlatforms = await getAvailableTabs();
     const notification = document.getElementById('reload-notification');
-    if (notification) {
+    const notificationText = document.getElementById('notification-text');
+    const reloadBtnText = document.getElementById('reload-button-text');
+
+    if (notification && notificationText) {
+        if (availablePlatforms.length > 0) {
+            const names = availablePlatforms.map(p => p.name);
+            let platformString = names.length > 1
+                ? names.slice(0, -1).join(', ') + ' & ' + names.slice(-1)
+                : names[0];
+
+            notificationText.innerHTML = `Settings saved. Restart <strong>${platformString}</strong> for changes to take effect.`;
+            if (reloadBtnText) reloadBtnText.textContent = `Restart ${availablePlatforms.length > 1 ? 'Tabs' : names[0]}`;
+        } else {
+            notificationText.textContent = 'Settings saved. Restart your music tab for changes to take effect.';
+            if (reloadBtnText) reloadBtnText.textContent = 'Restart';
+        }
         notification.style.display = 'flex';
     }
 }
@@ -755,17 +797,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setAppVersion();
 
-    document.getElementById('reload-button')?.addEventListener('click', () => {
-        chrome.tabs.query({ url: "*://music.youtube.com/*" }, (tabs) => {
-            if (tabs.length > 0) {
-                chrome.tabs.reload(tabs[0].id, () => {
-                    hideReloadNotification();
-                    // showStatusMessage('general-save-status', 'YouTube Music tab reloaded!', false);
+    document.getElementById('reload-button')?.addEventListener('click', async () => {
+        const availablePlatforms = await getAvailableTabs();
+        if (availablePlatforms.length > 0) {
+            let reloadPromises = [];
+            availablePlatforms.forEach(p => {
+                p.tabs.forEach(tab => {
+                    reloadPromises.push(new Promise(r => chrome.tabs.reload(tab.id, r)));
                 });
-            } else {
-                alert("No YouTube Music tab found.");
-            }
-        });
+            });
+            await Promise.all(reloadPromises);
+            hideReloadNotification();
+        } else {
+            alert("No active music tabs found. Please reload them manually.");
+        }
     });
 
     document.getElementById('export-settings-button').addEventListener('click', exportSettings);
