@@ -215,6 +215,7 @@ async function applySponsorBlock(lyricsObject, currentSong, localCurrentFetchMed
     }
 
     if (sponsorBlockResponse.success) {
+      console.log(lyricsObject.data)
       return adjustLyricTiming(lyricsObject.data, sponsorBlockResponse.segments, lyricsObject.type === "Line" ? "s" : "s");
     }
   }

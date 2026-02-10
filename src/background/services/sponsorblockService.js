@@ -8,24 +8,39 @@ export class SponsorBlockService {
       "sponsor", "selfpromo", "interaction", "intro",
       "outro", "preview", "filler", "music_offtopic"
     ];
-    
-    const url = `https://sponsor.ajay.app/api/skipSegments?videoID=${videoId}&categories=[${categories.map(c => `"${c}"`).join(',')}]`;
 
     try {
+      if (!videoId) return [];
+
+      const prefix = await this.computeHashPrefix(videoId);
+      const url = `https://sponsor.ajay.app/api/skipSegments/${prefix}?categories=${JSON.stringify(categories)}&actionTypes=${JSON.stringify(["skip", "mute", "full"])}`;
+
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         if (response.status === 404) {
-          console.log(`No SponsorBlock segments for videoId: ${videoId}`);
           return [];
         }
         throw new Error(`SponsorBlock API error: ${response.statusText}`);
       }
-      
-      return await response.json();
+
+      const data = await response.json();
+
+      const videoData = data.find(item => item.videoID === videoId);
+      return videoData ? videoData.segments : [];
+
     } catch (error) {
       console.error("SponsorBlock error:", error);
       return [];
     }
+  }
+
+  static async computeHashPrefix(videoId) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(videoId);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex.substring(0, 4);
   }
 }

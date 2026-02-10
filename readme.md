@@ -59,7 +59,7 @@ YouLy+ is come with a features that designed to fix and enhance your lyrics expe
 
 -   **Optimized Renderer:** Unlike the native Apple Music Web player, YouLy+ is designed to run smoothly on older hardware (e.g., dual-core CPUs) without freezing the browser.
 -   **Performance Modes:** Utilize **Lightweight Mode** or **Compatibility Mode** to ensure 60 FPS animations on any machine.
--   **SponsorBlock Integration:** Automatically skip non-music segments like intros, outros, and sponsor messages (YouTube Music).
+-   **SponsorBlock Integration:** Automatically adapts lyrics timeline to be following non-music segments like intros, outros, and sponsor messages on music videos (YouTube Music).
 -   **Smart Caching:** YouLy+ remembers lyrics it has found, reducing data usage and loading times.
 
 ## ⚡ Performance Reference
