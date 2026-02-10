@@ -23,6 +23,10 @@
                 <span class="material-symbols-outlined">tune</span>
                 <span class="nav-item-label">General</span>
             </a>
+            <a href="#" class="nav-item" data-section="sources">
+                <span class="material-symbols-outlined">library_music</span>
+                <span class="nav-item-label">Sources</span>
+            </a>
             <a href="#" class="nav-item" data-section="appearance">
                 <span class="material-symbols-outlined">palette</span>
                 <span class="nav-item-label">Appearance</span>
@@ -45,8 +49,15 @@
             </a>
         </nav>
     </aside>
+    <div id="drawer-overlay" class="drawer-overlay"></div>
 
     <main class="content-area">
+        <header class="mobile-header">
+            <button id="mobile-menu-button" class="m3-button icon">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <h1 class="mobile-title">YouLy+ Settings</h1>
+        </header>
         <div class="scroll-area">
             <!-- Notification bar for reloading -->
             <div id="reload-notification" class="reload-notification">
@@ -128,8 +139,14 @@
                     </div>
                 </div>
 
+            </section>
+
+            <!-- Sources Settings Section -->
+            <section class="settings-card" id="sources">
+                <h2 class="card-title">Sources</h2>
+
                 <div class="settings-category">
-                    <h3 class="category-title">Sources</h3>
+                    <h3 class="category-title">Lyrics Provider</h3>
                     <div class="setting-item">
                         <div class="form-group">
                             <select id="default-provider" placeholder=" ">
@@ -171,11 +188,6 @@
                         <p id="add-source-status" class="status-message"></p>
                     </div>
                 </div>
-
-                <div class="card-actions">
-                    <button id="save-general" class="m3-button filled">Save General</button>
-                </div>
-                <p id="general-save-status" class="status-message"></p>
             </section>
 
             <!-- Local Lyrics Section -->
@@ -426,9 +438,6 @@
                     </div>
                 </div>
 
-                <div class="card-actions">
-                    <button id="save-translation" class="m3-button filled">Save Translation</button>
-                </div>
                 <p id="translation-save-status" class="status-message"></p>
             </section>
 
@@ -548,9 +557,6 @@
                     </div>
                 </div>
 
-                <div class="card-actions">
-                    <button id="save-appearance" class="m3-button filled">Save Appearance</button>
-                </div>
                 <p id="appearance-save-status" class="status-message"></p>
             </section>
 

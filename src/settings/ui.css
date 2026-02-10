@@ -165,6 +165,90 @@ body {
     }
 }
 
+/* --- Mobile Responsiveness --- */
+.mobile-header {
+    display: none;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: var(--md-sys-color-surface-container-low);
+    color: var(--md-sys-color-on-surface);
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+.mobile-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--md-sys-color-scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--animation-duration);
+    z-index: 90;
+}
+
+.drawer-overlay.visible {
+    opacity: 0.5;
+    pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+
+    .content-area {
+        margin: 0 !important;
+        padding: 0 !important;
+        gap: 24px;
+        border-radius: 0;
+        width: 100% !important;
+        max-height: 100vh !important;
+        overflow-y: scroll;
+        border-radius: 0 !important;
+    }
+
+    .mobile-header {
+        display: flex;
+        position: fixed;
+        z-index: 1;
+        position: absolute;
+        width: 100%;
+    }
+
+    .navigation-drawer {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        height: 100vh;
+        width: 280px;
+        max-width: 80%;
+        transform: translateX(-100%);
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+        z-index: 200;
+    }
+
+    .scroll-area {
+        padding: 16px;
+        padding-bottom: 80px;
+    }
+
+    .settings-card {
+        padding-bottom: 80px;
+    }
+
+    .card-title {
+        font-size: 2rem;
+        margin-bottom: 32px;
+    }
+
+    .settings-category {
+        margin-bottom: 32px;
+    }
+}
+
 /* --- Scrollbar --- */
 * {
     scrollbar-width: thin;
@@ -194,14 +278,16 @@ body {
     width: 260px;
     background-color: var(--md-sys-color-surface-container-low);
     padding: 12px;
-    display: flex;
     flex-direction: column;
     flex-shrink: 0;
     height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    transition: width var(--animation-duration) var(--animation-easing-standard);
+    position: relative;
+    transition: transform var(--animation-duration) var(--animation-easing-standard);
+    z-index: 100;
+}
+
+.navigation-drawer.open {
+    transform: translateX(0);
 }
 
 .drawer-header {
@@ -280,22 +366,23 @@ body {
 /* --- Main Content Area --- */
 .content-area {
     flex-grow: 1;
-    margin: 10px 10px 10px 270px;
+    margin: 10px 10px 10px 10px;
     display: block;
     flex-direction: column;
     gap: 32px;
     border-radius: var(--border-radius-extra-large);
     transition: margin-left var(--animation-duration) var(--animation-easing);
     max-height: calc(100vh - 20px);
-    overflow: hidden;
+    overflow: scroll;
     border-collapse: separate;
     background: var(--md-sys-color-background);
 }
 
 .scroll-area {
-    max-height: 100%;
-    overflow: auto;
+    flex: 1;
+    overflow-y: auto;
     padding: 2.2em;
+    padding-bottom: 100px;
 }
 
 .settings-card {
@@ -483,7 +570,7 @@ input[type="file"]::file-selector-button:hover {
     top: 50%;
     transform: translateY(-50%);
     color: var(--md-sys-color-on-surface-variant);
-    transition: transform var(--animation-duration) var(--animation-easing-standard) ;
+    transition: transform var(--animation-duration) var(--animation-easing-standard);
 }
 
 .m3-select.open .m3-select-arrow {
@@ -888,11 +975,11 @@ div#local-lyrics-list .draggable-source-item {
 }
 
 div#local-lyrics-list .draggable-source-item:first-of-type {
-  border-radius: var(--border-radius-large) var(--border-radius-large) var(--border-radius-smallest) var(--border-radius-smallest);
+    border-radius: var(--border-radius-large) var(--border-radius-large) var(--border-radius-smallest) var(--border-radius-smallest);
 }
 
 div#local-lyrics-list .draggable-source-item:last-of-type {
-  border-radius: var(--border-radius-smallest) var(--border-radius-smallest) var(--border-radius-large) var(--border-radius-large);
+    border-radius: var(--border-radius-smallest) var(--border-radius-smallest) var(--border-radius-large) var(--border-radius-large);
 }
 
 
@@ -920,25 +1007,6 @@ div#local-lyrics-list .draggable-source-item:last-of-type {
 }
 
 /* --- Responsive Design --- */
-@media (max-width: 960px) {
-    .content-area {
-        padding: 24px;
-        margin-left: 80px;
-    }
-
-    .navigation-drawer {
-        width: 80px;
-    }
-
-    .drawer-title,
-    .nav-item-label {
-        display: none;
-    }
-
-    .nav-item {
-        justify-content: center;
-    }
-}
 
 @media (max-width: 768px) {
     body {
@@ -961,30 +1029,12 @@ div#local-lyrics-list .draggable-source-item:last-of-type {
         padding: 0 12px 0 8px;
     }
 
-    .drawer-title {
-        display: block;
-        font-size: 1.125rem;
-    }
-
-    .drawer-nav {
-        flex-direction: row;
-    }
-
-    .nav-item {
-        height: 48px;
-    }
-
-    .nav-item-label {
-        display: block;
-    }
-
-    .content-area {
-        margin-left: 0;
-        padding: 16px;
-        gap: 24px;
-    }
-
     .card-title {
         font-size: 2rem;
     }
+}
+
+/* --- Drag and Drop Touch Fix --- */
+.drag-handle {
+    touch-action: none;
 }

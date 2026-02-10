@@ -17,44 +17,83 @@ function hideReloadNotification() {
     }
 }
 
+// Debounce function to limit the frequency of function execution
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 function setupAutoSaveListeners() {
     const autoSaveControls = [
+        // General
         { id: 'enabled', key: 'isEnabled', type: 'checkbox' },
-        { id: 'default-provider', key: 'lyricsProvider', type: 'value' },
-        { id: 'custom-kpoe-url', key: 'customKpoeUrl', type: 'value' },
-        { id: 'sponsor-block', key: 'useSponsorBlock', type: 'checkbox' },
         { id: 'wordByWord', key: 'wordByWord', type: 'checkbox' },
+        { id: 'ytsonginfo', key: 'YTSongInfo', type: 'checkbox' },
+        { id: 'sponsor-block', key: 'useSponsorBlock', type: 'checkbox' },
+        { id: 'bypass-apple', key: 'appleMusicTTMLBypass', type: 'checkbox' },
+
+        // Sources
+        { id: 'default-provider', key: 'lyricsProvider', type: 'value' },
+        { id: 'custom-kpoe-url', key: 'customKpoeUrl', type: 'value', debounce: 500 },
+
+        // Translation
+        { id: 'translation-provider', key: 'translationProvider', type: 'value' },
+        { id: 'gemini-api-key', key: 'geminiApiKey', type: 'value', debounce: 500 },
+        { id: 'gemini-model', key: 'geminiModel', type: 'value' },
+        { id: 'openrouter-api-key', key: 'openRouterApiKey', type: 'value', debounce: 500 },
+        { id: 'openrouter-model', key: 'openRouterModel', type: 'value', debounce: 500 },
+        { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' },
+        { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' },
+        { id: 'override-translate-target', key: 'overrideTranslateTarget', type: 'checkbox' },
+        { id: 'custom-translate-target', key: 'customTranslateTarget', type: 'value', debounce: 500 },
+        { id: 'override-gemini-prompt', key: 'overrideGeminiPrompt', type: 'checkbox' },
+        { id: 'custom-gemini-prompt', key: 'customGeminiPrompt', type: 'value', debounce: 500 },
+        { id: 'override-gemini-romanize-prompt', key: 'overrideGeminiRomanizePrompt', type: 'checkbox' },
+        { id: 'custom-gemini-romanize-prompt', key: 'customGeminiRomanizePrompt', type: 'value', debounce: 500 },
+
+        // Appearance
+        { id: 'larger-text-mode', key: 'largerTextMode', type: 'value' },
         { id: 'lightweight', key: 'lightweight', type: 'checkbox' },
         { id: 'hide-offscreen', key: 'hideOffscreen', type: 'checkbox' },
         { id: 'blur-inactive', key: 'blurInactive', type: 'checkbox' },
         { id: 'dynamic-player', key: 'dynamicPlayer', type: 'checkbox' },
         { id: 'useSongPaletteFullscreen', key: 'useSongPaletteFullscreen', type: 'checkbox' },
         { id: 'useSongPaletteAllModes', key: 'useSongPaletteAllModes', type: 'checkbox' },
-        { id: 'overridePaletteColor', key: 'overridePaletteColor', type: 'value' },
-        { id: 'larger-text-mode', key: 'largerTextMode', type: 'value' },
-        { id: 'translation-provider', key: 'translationProvider', type: 'value' },
-        { id: 'gemini-model', key: 'geminiModel', type: 'value' },
-        { id: 'override-translate-target', key: 'overrideTranslateTarget', type: 'checkbox' },
-        { id: 'override-gemini-prompt', key: 'overrideGeminiPrompt', type: 'checkbox' },
-        { id: 'override-gemini-romanize-prompt', key: 'overrideGeminiRomanizePrompt', type: 'checkbox' },
-        { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' },
-        { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' },
+        { id: 'overridePaletteColor', key: 'overridePaletteColor', type: 'value', debounce: 500 },
+        { id: 'custom-css', key: 'customCSS', type: 'value', debounce: 800 },
+
+        // Cache
         { id: 'cache-strategy', key: 'cacheStrategy', type: 'value' },
-        { id: 'bypass-apple', key: 'appleMusicTTMLBypass', type: 'checkbox' },
-        { id: 'ytsonginfo', key: 'YTSongInfo', type: 'checkbox' },
-        { id: 'openrouter-api-key', key: 'openRouterApiKey', type: 'value' },
-        { id: 'openrouter-model', key: 'openRouterModel', type: 'value' },
     ];
 
     autoSaveControls.forEach(control => {
         const element = document.getElementById(control.id);
         if (element) {
-            element.addEventListener('change', (e) => {
+            const eventType = control.type === 'checkbox' ? 'change' : 'input';
+            const saveHandler = (e) => {
                 const value = control.type === 'checkbox' ? e.target.checked : e.target.value;
                 updateSettings({ [control.key]: value });
                 saveSettings();
                 showReloadNotification();
-            });
+
+                // Show a small "Saved" indicator near the element if possible, 
+                // or just rely on the reload notification which is prominent properly.
+                // For now, we'll just log it.
+                console.log(`Auto-saved ${control.key}: ${value}`);
+            };
+
+            if (control.debounce) {
+                element.addEventListener(eventType, debounce(saveHandler, control.debounce));
+            } else {
+                element.addEventListener(eventType, saveHandler);
+            }
         }
     });
 }
@@ -63,48 +102,67 @@ function updateUI(settings) {
     currentSettings = settings;
     console.log("Updating UI with settings:", currentSettings);
 
-    document.getElementById('enabled').checked = currentSettings.isEnabled;
-    document.getElementById('default-provider').value = currentSettings.lyricsProvider;
+    // Helper to safely set element value
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val !== undefined ? val : '';
+    };
+    const setCheck = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = !!val;
+    };
+
+    // General
+    setCheck('enabled', currentSettings.isEnabled);
+    setCheck('wordByWord', currentSettings.wordByWord);
+    setCheck('ytsonginfo', currentSettings.YTSongInfo);
+    setCheck('sponsor-block', currentSettings.useSponsorBlock);
+    setCheck('bypass-apple', currentSettings.appleMusicTTMLBypass);
+
+    // Sources
+    setVal('default-provider', currentSettings.lyricsProvider);
     updateCustomSelectDisplay('default-provider');
-    document.getElementById('custom-kpoe-url').value = currentSettings.customKpoeUrl || '';
-    document.getElementById('sponsor-block').checked = currentSettings.useSponsorBlock;
-    document.getElementById('wordByWord').checked = currentSettings.wordByWord;
-    document.getElementById('lightweight').checked = currentSettings.lightweight;
-    document.getElementById('hide-offscreen').checked = currentSettings.hideOffscreen;
-    document.getElementById('blur-inactive').checked = currentSettings.blurInactive;
-    document.getElementById('dynamic-player').checked = currentSettings.dynamicPlayer;
-    document.getElementById('useSongPaletteFullscreen').checked = currentSettings.useSongPaletteFullscreen;
-    document.getElementById('useSongPaletteAllModes').checked = currentSettings.useSongPaletteAllModes;
-    document.getElementById('overridePaletteColor').value = currentSettings.overridePaletteColor;
-    document.getElementById('larger-text-mode').value = currentSettings.largerTextMode;
-    updateCustomSelectDisplay('larger-text-mode');
-    document.getElementById('romanization-provider').value = currentSettings.romanizationProvider;
-    updateCustomSelectDisplay('romanization-provider');
-    document.getElementById('gemini-romanization-model').value = currentSettings.geminiRomanizationModel || 'gemini-1.5-pro-latest';
-    updateCustomSelectDisplay('gemini-romanization-model');
-    document.getElementById('translation-provider').value = currentSettings.translationProvider;
+    setVal('custom-kpoe-url', currentSettings.customKpoeUrl);
+
+    // Translation
+    setVal('translation-provider', currentSettings.translationProvider);
     updateCustomSelectDisplay('translation-provider');
-    document.getElementById('gemini-api-key').value = currentSettings.geminiApiKey || '';
+    setVal('gemini-api-key', currentSettings.geminiApiKey);
     document.getElementById('gemini-api-key').type = 'password';
-    document.getElementById('gemini-model').value = currentSettings.geminiModel || 'gemini-1.5-flash';
+    setVal('gemini-model', currentSettings.geminiModel || 'gemini-1.5-flash');
     updateCustomSelectDisplay('gemini-model');
-    document.getElementById('override-translate-target').checked = currentSettings.overrideTranslateTarget;
-    document.getElementById('custom-translate-target').value = currentSettings.customTranslateTarget || '';
-    document.getElementById('override-gemini-prompt').checked = currentSettings.overrideGeminiPrompt;
-    document.getElementById('custom-gemini-prompt').value = currentSettings.customGeminiPrompt || '';
-    document.getElementById('override-gemini-romanize-prompt').checked = currentSettings.overrideGeminiRomanizePrompt;
-    document.getElementById('custom-gemini-romanize-prompt').value = currentSettings.customGeminiRomanizePrompt || '';
-    document.getElementById('custom-css').value = currentSettings.customCSS;
-    document.getElementById('cache-strategy').value = currentSettings.cacheStrategy;
-    document.getElementById('bypass-apple').checked = currentSettings.appleMusicTTMLBypass;
-    document.getElementById('ytsonginfo').checked = currentSettings.YTSongInfo;
-    document.getElementById('cache-strategy').value = currentSettings.cacheStrategy;
-    document.getElementById('bypass-apple').checked = currentSettings.appleMusicTTMLBypass;
-    document.getElementById('ytsonginfo').checked = currentSettings.YTSongInfo;
-    document.getElementById('openrouter-api-key').value = currentSettings.openRouterApiKey || '';
-    document.getElementById('openrouter-model').value = currentSettings.openRouterModel || '';
+    setVal('openrouter-api-key', currentSettings.openRouterApiKey);
+    setVal('openrouter-model', currentSettings.openRouterModel);
+
+    setVal('romanization-provider', currentSettings.romanizationProvider);
+    updateCustomSelectDisplay('romanization-provider');
+    setVal('gemini-romanization-model', currentSettings.geminiRomanizationModel || 'gemini-1.5-pro-latest');
+    updateCustomSelectDisplay('gemini-romanization-model');
+
+    setCheck('override-translate-target', currentSettings.overrideTranslateTarget);
+    setVal('custom-translate-target', currentSettings.customTranslateTarget);
+    setCheck('override-gemini-prompt', currentSettings.overrideGeminiPrompt);
+    setVal('custom-gemini-prompt', currentSettings.customGeminiPrompt);
+    setCheck('override-gemini-romanize-prompt', currentSettings.overrideGeminiRomanizePrompt);
+    setVal('custom-gemini-romanize-prompt', currentSettings.customGeminiRomanizePrompt);
+
+    // Appearance
+    setVal('larger-text-mode', currentSettings.largerTextMode);
+    updateCustomSelectDisplay('larger-text-mode');
+    setCheck('lightweight', currentSettings.lightweight);
+    setCheck('hide-offscreen', currentSettings.hideOffscreen);
+    setCheck('blur-inactive', currentSettings.blurInactive);
+    setCheck('dynamic-player', currentSettings.dynamicPlayer);
+    setCheck('useSongPaletteFullscreen', currentSettings.useSongPaletteFullscreen);
+    setCheck('useSongPaletteAllModes', currentSettings.useSongPaletteAllModes);
+    setVal('overridePaletteColor', currentSettings.overridePaletteColor);
+    setVal('custom-css', currentSettings.customCSS);
+
+    // Cache
+    setVal('cache-strategy', currentSettings.cacheStrategy);
     updateCustomSelectDisplay('cache-strategy');
 
+    // Visibility Toggles
     toggleKpoeSourcesVisibility();
     toggleCustomKpoeUrlVisibility();
     toggleGeminiSettingsVisibility();
@@ -129,39 +187,6 @@ document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
         document.querySelectorAll('.settings-card').forEach(section => section.classList.remove('active'));
         document.getElementById(sectionId)?.classList.add('active');
     });
-});
-
-document.getElementById('save-general').addEventListener('click', () => {
-    const orderedSources = Array.from(document.getElementById('lyrics-source-order-draggable').children)
-        .map(item => item.dataset.source);
-
-    updateSettings({
-        lyricsSourceOrder: orderedSources.join(','),
-        customKpoeUrl: document.getElementById('custom-kpoe-url').value,
-    });
-    saveSettings();
-    showStatusMessage('general-save-status', 'General settings saved!', false);
-});
-
-document.getElementById('save-appearance').addEventListener('click', () => {
-    updateSettings({ customCSS: document.getElementById('custom-css').value });
-    saveSettings();
-    showStatusMessage('appearance-save-status', 'Custom CSS saved!', false);
-});
-
-document.getElementById('save-translation').addEventListener('click', () => {
-    updateSettings({
-        geminiApiKey: document.getElementById('gemini-api-key').value,
-        customTranslateTarget: document.getElementById('custom-translate-target').value,
-        customGeminiPrompt: document.getElementById('custom-gemini-prompt').value,
-        customTranslateTarget: document.getElementById('custom-translate-target').value,
-        customGeminiPrompt: document.getElementById('custom-gemini-prompt').value,
-        customGeminiRomanizePrompt: document.getElementById('custom-gemini-romanize-prompt').value,
-        openRouterApiKey: document.getElementById('openrouter-api-key').value,
-        openRouterModel: document.getElementById('openrouter-model').value
-    });
-    saveSettings();
-    showStatusMessage('translation-save-status', 'Translation input fields saved!', false);
 });
 
 document.getElementById('clear-cache').addEventListener('click', clearCache);
@@ -234,6 +259,7 @@ function populateDraggableSources() {
     }
     updateCustomSelectDisplay('available-sources-dropdown');
     addDragDropListeners();
+    addTouchListeners();
 }
 
 let statusMessageTimeout = {};
@@ -253,6 +279,20 @@ function showStatusMessage(elementId, message, isError = false) {
     }, 3000);
 }
 
+function saveSourceOrder() {
+    const draggableContainer = document.getElementById('lyrics-source-order-draggable');
+    if (!draggableContainer) return;
+
+    const orderedSources = Array.from(draggableContainer.children)
+        .map(item => item.dataset.source);
+
+    updateSettings({
+        lyricsSourceOrder: orderedSources.join(',')
+    });
+    saveSettings();
+    showReloadNotification();
+}
+
 function addSource() {
     const sourceName = document.getElementById('available-sources-dropdown').value;
     if (!sourceName) {
@@ -268,29 +308,37 @@ function addSource() {
 
     sources.push(sourceName);
     currentSettings.lyricsSourceOrder = sources.join(',');
+    updateSettings({ lyricsSourceOrder: currentSettings.lyricsSourceOrder });
+    saveSettings();
+    showReloadNotification();
+
     populateDraggableSources();
-    showStatusMessage('add-source-status', `"${getSourceDisplayName(sourceName)}" added. Save to apply.`, false);
+    showStatusMessage('add-source-status', `"${getSourceDisplayName(sourceName)}" added.`, false);
 }
 
 function removeSource(sourceName) {
     const sources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s?.trim());
     currentSettings.lyricsSourceOrder = sources.filter(s => s !== sourceName).join(',');
+
+    // Auto-save immediately
+    updateSettings({ lyricsSourceOrder: currentSettings.lyricsSourceOrder });
+    saveSettings();
+    showReloadNotification();
+
     populateDraggableSources();
-    showStatusMessage('add-source-status', `"${getSourceDisplayName(sourceName)}" removed. Save to apply.`, false);
+    showStatusMessage('add-source-status', `"${getSourceDisplayName(sourceName)}" removed.`, false);
 }
 
 function addDragDropListeners() {
     const draggableContainer = document.getElementById('lyrics-source-order-draggable');
-    if (!draggableContainer) return;
+    if (!draggableContainer || draggableContainer.dataset.dragListenersAttached) return;
 
     const onDragEnd = () => {
         if (draggedItem) {
             draggedItem.classList.remove('dragging');
         }
         draggedItem = null;
-        const orderedSources = Array.from(draggableContainer.children).map(item => item.dataset.source);
-        currentSettings.lyricsSourceOrder = orderedSources.join(',');
-        showStatusMessage('add-source-status', 'Source order updated. Save to apply.', false);
+        saveSourceOrder();
     };
 
     draggableContainer.addEventListener('dragstart', (e) => {
@@ -314,6 +362,7 @@ function addDragDropListeners() {
     });
 
     draggableContainer.addEventListener('dragend', onDragEnd);
+    draggableContainer.dataset.dragListenersAttached = 'true';
 }
 
 function getDragAfterElement(container, y) {
@@ -327,6 +376,55 @@ function getDragAfterElement(container, y) {
             return closest;
         }
     }, { offset: -Infinity }).element;
+}
+
+function addTouchListeners() {
+    const draggableContainer = document.getElementById('lyrics-source-order-draggable');
+    if (!draggableContainer || draggableContainer.dataset.touchListenersAttached) return;
+
+    let touchDraggedItem = null;
+    let initialY = 0;
+    let currentY = 0;
+    let yOffset = 0;
+
+    draggableContainer.addEventListener('touchstart', (e) => {
+        const handle = e.target.closest('.drag-handle');
+        if (!handle) return;
+
+        const item = handle.closest('.draggable-source-item');
+        if (!item) return;
+
+        e.preventDefault();
+
+        touchDraggedItem = item;
+        touchDraggedItem.classList.add('dragging');
+
+        touchDraggedItem.style.opacity = '0.5';
+    }, { passive: false });
+
+    draggableContainer.addEventListener('touchmove', (e) => {
+        if (!touchDraggedItem) return;
+        e.preventDefault();
+
+        const touchLocation = e.targetTouches[0];
+        const afterElement = getDragAfterElement(draggableContainer, touchLocation.clientY);
+
+        if (afterElement) {
+            draggableContainer.insertBefore(touchDraggedItem, afterElement);
+        } else {
+            draggableContainer.appendChild(touchDraggedItem);
+        }
+    }, { passive: false });
+
+    draggableContainer.addEventListener('touchend', (e) => {
+        if (touchDraggedItem) {
+            touchDraggedItem.classList.remove('dragging');
+            touchDraggedItem.style.opacity = '1';
+            touchDraggedItem = null;
+            saveSourceOrder();
+        }
+    });
+    draggableContainer.dataset.touchListenersAttached = 'true';
 }
 
 document.getElementById('add-source-button').addEventListener('click', addSource);
@@ -653,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tabs.length > 0) {
                 chrome.tabs.reload(tabs[0].id, () => {
                     hideReloadNotification();
-                    showStatusMessage('general-save-status', 'YouTube Music tab reloaded!', false);
+                    // showStatusMessage('general-save-status', 'YouTube Music tab reloaded!', false);
                 });
             } else {
                 alert("No YouTube Music tab found.");
@@ -757,6 +855,39 @@ function initCustomSelects() {
     document.addEventListener('click', () => {
         document.querySelectorAll('.m3-select.open').forEach(select => select.classList.remove('open'));
     });
+
+    // Mobile Drawer Logic
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const drawerOverlay = document.getElementById('drawer-overlay');
+    const navDrawer = document.querySelector('.navigation-drawer');
+
+    if (mobileMenuButton && drawerOverlay && navDrawer) {
+        function toggleDrawer() {
+            navDrawer.classList.toggle('open');
+            drawerOverlay.classList.toggle('visible');
+        }
+
+        function closeDrawer() {
+            navDrawer.classList.remove('open');
+            drawerOverlay.classList.remove('visible');
+        }
+
+        mobileMenuButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDrawer();
+        });
+
+        drawerOverlay.addEventListener('click', closeDrawer);
+
+        // Close drawer when a nav item is clicked (on mobile)
+        document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    closeDrawer();
+                }
+            });
+        });
+    }
 }
 
 document.addEventListener('click', function (e) {
