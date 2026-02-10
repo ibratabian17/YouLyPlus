@@ -171,7 +171,7 @@ function injectShowHideButton(retryCount = 0) {
         }
     });
 
-    buttonsWrapper.append(btn);
+    buttonsWrapper.prepend(btn);
 }
 
 function disableNativeLyrics() {
