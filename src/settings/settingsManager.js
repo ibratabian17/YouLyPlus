@@ -182,3 +182,17 @@ export function setupSettingsMessageListener(callback) {
         });
     }
 }
+
+// Listen for storage changes to keep settings in sync across contexts (e.g. background script)
+if (pBrowser && pBrowser.storage) {
+    pBrowser.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local') {
+            const newSettings = {};
+            for (let key in changes) {
+                newSettings[key] = changes[key].newValue;
+            }
+            console.log("Settings updated via storage (background/shared):", newSettings);
+            updateSettings(newSettings);
+        }
+    });
+}

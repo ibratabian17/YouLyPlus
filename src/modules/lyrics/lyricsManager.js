@@ -248,7 +248,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     currentDisplayMode = effectiveMode;
 
     const baseLyrics = await fetchBaseLyrics(currentSong, isNewSong, forceReload, localCurrentFetchMediaId);
-    if (!baseLyrics) return; 
+    if (!baseLyrics) return;
 
     const needsTranslation = effectiveMode === 'translate' || effectiveMode === 'both';
     const needsRomanization = effectiveMode === 'romanize' || effectiveMode === 'both' || currentSettings.largerTextMode === "romanization";
@@ -365,3 +365,36 @@ function setCurrentDisplayModeAndRender(mode, songInfoForRefetch) {
     if (LyricsPlusAPI.displaySongError) LyricsPlusAPI.displaySongError();
   }
 };
+
+/* =================================================================
+   LIVE SETTINGS UPDATE LISTENER
+   ================================================================= */
+window.addEventListener('YOUPLUS_SETTINGS_UPDATED', ({ detail }) => {
+  const { settings, changedKeys } = detail;
+  if (!changedKeys) return;
+
+  if (changedKeys.some(k => ['translationProvider', 'geminiApiKey', 'geminiModel', 'openRouterApiKey', 'openRouterModel', 'targetLang'].includes(k))) {
+    lastTranslationResponse = null;
+  }
+
+  if (changedKeys.some(k => ['romanizationProvider', 'geminiRomanizationModel'].includes(k))) {
+    lastRomanizationResponse = null;
+  }
+
+  lastProcessedDisplayMode = 'none';
+
+  if (lastKnownSongInfo) {
+    const translationKeys = ['translationProvider', 'geminiApiKey', 'geminiModel', 'openRouterApiKey', 'openRouterModel', 'targetLang', 'romanizationProvider', 'geminiRomanizationModel'];
+    const restartRequiredKeys = ['isEnabled', 'YTSongInfo', 'dynamicPlayer'];
+
+    const shouldRender = changedKeys.some(k => !translationKeys.includes(k) && !restartRequiredKeys.includes(k));
+
+    if (shouldRender) {
+      console.log("Live settings update received, re-rendering lyrics...", changedKeys);
+
+      const shouldForceReload = changedKeys.some(k => ['lyricsProvider', 'lyricsSourceOrder', 'customKpoeUrl', 'appleMusicTTMLBypass'].includes(k));
+
+      fetchAndDisplayLyrics(lastKnownSongInfo, false, shouldForceReload);
+    }
+  }
+});

@@ -56,11 +56,28 @@ function loadSettings(callback) {
 }
 
 function updateSettings(newSettings) {
-    currentSettings = newSettings;
+    currentSettings = { ...currentSettings, ...newSettings };
+
     applyDynamicPlayerClass();
-    pBrowser.runtime.sendMessage({
-        type: 'SETTINGS_CHANGED',
-        settings: currentSettings
+
+    window.dispatchEvent(new CustomEvent('YOUPLUS_SETTINGS_UPDATED', {
+        detail: {
+            settings: currentSettings,
+            changedKeys: Object.keys(newSettings)
+        }
+    }));
+}
+
+if (pBrowser && pBrowser.storage) {
+    pBrowser.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local') {
+            const changedSettings = {};
+            for (let key in changes) {
+                changedSettings[key] = changes[key].newValue;
+            }
+            console.log("Settings updated via storage:", changedSettings);
+            updateSettings(changedSettings);
+        }
     });
 }
 

@@ -3,7 +3,16 @@ import { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2 } from
 
 let currentSettings = getSettings();
 
-function showReloadNotification() {
+const RESTART_REQUIRED_KEYS = [
+    'isEnabled',
+    'YTSongInfo',
+    'dynamicPlayer'
+];
+
+function showReloadNotification(changedKey) {
+    if (changedKey && !RESTART_REQUIRED_KEYS.includes(changedKey)) {
+        return;
+    }
     const notification = document.getElementById('reload-notification');
     if (notification) {
         notification.style.display = 'flex';
@@ -81,7 +90,7 @@ function setupAutoSaveListeners() {
                 const value = control.type === 'checkbox' ? e.target.checked : e.target.value;
                 updateSettings({ [control.key]: value });
                 saveSettings();
-                showReloadNotification();
+                showReloadNotification(control.key);
 
                 // Show a small "Saved" indicator near the element if possible, 
                 // or just rely on the reload notification which is prominent properly.
@@ -290,7 +299,7 @@ function saveSourceOrder() {
         lyricsSourceOrder: orderedSources.join(',')
     });
     saveSettings();
-    showReloadNotification();
+    showReloadNotification('lyricsSourceOrder');
 }
 
 function addSource() {
@@ -310,7 +319,7 @@ function addSource() {
     currentSettings.lyricsSourceOrder = sources.join(',');
     updateSettings({ lyricsSourceOrder: currentSettings.lyricsSourceOrder });
     saveSettings();
-    showReloadNotification();
+    showReloadNotification('lyricsSourceOrder');
 
     populateDraggableSources();
     showStatusMessage('add-source-status', `"${getSourceDisplayName(sourceName)}" added.`, false);
@@ -323,7 +332,7 @@ function removeSource(sourceName) {
     // Auto-save immediately
     updateSettings({ lyricsSourceOrder: currentSettings.lyricsSourceOrder });
     saveSettings();
-    showReloadNotification();
+    showReloadNotification('lyricsSourceOrder');
 
     populateDraggableSources();
     showStatusMessage('add-source-status', `"${getSourceDisplayName(sourceName)}" removed.`, false);
