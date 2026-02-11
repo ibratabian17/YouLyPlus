@@ -258,6 +258,15 @@ div#lyrics-song-progressbar {
     width: 100%;
 }
 
+#lyrics-plus-container {
+    filter: url(#youly-plus-lighter-filter);
+    will-change: filter;
+}
+
+#lyrics-plus-container.override-palette-color, #lyrics-plus-container.use-song-palette-all-modes, ytmusic-player-page[video-mode][player-fullscreened] #lyrics-plus-container.use-song-palette-fullscreen {
+    filter: none;
+}
+
 /* ==========================================================================
    DESKTOP & FULLSCREEN STYLES (@media)
    ========================================================================== */
@@ -322,6 +331,7 @@ div#lyrics-song-progressbar {
     ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #side-panel {
         min-width: 45%;
         mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
         transform: translateY(-8.8rem);
         padding-right: 8em !important;
     }
