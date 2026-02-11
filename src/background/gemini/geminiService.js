@@ -30,6 +30,10 @@ export class GeminiService {
           target_language: {
             type: "STRING",
             description: "The target language for the translation."
+          },
+          source_language: {
+            type: "ARRAY",
+            description: "The source language(s) of the original lyrics."
           }
         },
         required: ["translated_lyrics", "target_language"]
@@ -43,8 +47,9 @@ You must return a valid JSON object exactly like this:
     "translated line 2",
     ... (one string per input line)
   ],
-  "target_language": "${targetLang}"
-}
+  "target_language": "${targetLang}",
+  "source_language": ["detected source language(s)"]
+} ensure the JSON is properly formatted with correct syntax.
 Do not wrap in Markdown code blocks. Just the raw JSON string.`;
     }
 

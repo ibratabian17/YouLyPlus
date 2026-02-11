@@ -425,40 +425,59 @@ Analyze the language(s) in the input, apply appropriate phonetic rules, preserve
 }
 
 export function createTranslationPrompt(settings = { overrideGeminiPrompt: false, customGeminiPrompt: '' }, texts, targetLang, songInfo = {}) {
+  // 1. Build Context & Metadata
   const songContext = (songInfo.title && songInfo.artist)
-    ? `\n# SONG CONTEXT\n- Title: ${songInfo.title}\n- Artist: ${songInfo.artist}\n`
-    : '';
+    ? `Song Metadata: Title="${songInfo.title}", Artist="${songInfo.artist}"`
+    : 'Song Metadata: None';
 
-  const translationRules = (settings.overrideGeminiPrompt && settings.customGeminiPrompt) ?
-    songContext + settings.customGeminiPrompt :
-    `You are an expert song lyric translator adhering to this guidelines. Your goal is to translate lyrics into ${targetLang} while strictly preserving the structure and formatting style of the original lines.
+  const sourceLangHint = songInfo.source_languages
+    ? `Source Languages Present: ${songInfo.source_languages.join(', ')}`
+    : 'Source Languages: Mixed/Unknown';
+
+  if (settings.overrideGeminiPrompt && settings.customGeminiPrompt) {
+    return songContext + '\n' + settings.customGeminiPrompt;
+  }
+
+  return `### ROLE
+You are a song lyrics translator. Your task is to translate the provided JSON array of lines into ${targetLang}.
+
+### CONTEXT
 ${songContext}
-CRITICAL GUIDELINES:
+${sourceLangHint}
 
-1. PRESERVE ORIGINAL STRUCTURE & STYLE:
-   - **Mirror the Source:** If the original line uses parentheses (), uses all-caps, or is entirely lowercase (artist style), your translation MUST follow the same format.
-   - **Arabic/Non-Latin Source:** If the source script (e.g., Arabic, Kanji) has no casing, default to standard Sentence case (First letter capitalized, rest lowercase).
-   - **Punctuation:** Keep internal punctuation (commas, dashes) exactly where the rhythm dictates.
-   - **Line Endings:**
-     - IF the original line has NO punctuation at the end, do NOT add a period (.).
-     - IF the original line has expressive punctuation (! or ?), KEEP it.
-     - **NEVER** add a grammatical full stop (.) at the end of a line just because it is a sentence. Lyrics are poetry, not paragraphs.
+### STRICT RULES (Read Carefully)
+1. **Target Language Enforcement:**
+   - The FINAL output must be 100% intelligible in ${targetLang}.
+   - **CRITICAL:** If a line is in a foreign script (Cyrillic, Kanji, Hangul, Arabic, etc.), you **MUST** translate it. Do NOT leave it in the original script.
+   - Example: "Я сошла с ума" -> MUST become "Aku kehilangan akal" (in Indonesian).
 
-2. UNTRANSLATABLE WORDS (Brand/City Names):
-   - Keep proper nouns, brand names, and specific city names in their original form unless a standard local version exists.
-   - Example: "Sippin' Diet Pepsi" -> "Minum Diet Pepsi" (Keep "Diet Pepsi").
+2. **The "Identity" Logic:**
+   - IF the line is *already* in ${targetLang} -> KEEP IT EXACTLY AS IS (Copy/Paste).
+   - IF the line is in *any other language* -> TRANSLATE it to ${targetLang}.
 
-3. TONE & CREATIVITY:
-   - **Convey the Vibe:** If the line is funny, translate it to be funny in ${targetLang}. If it's slang, use equivalent local slang.
-   - **Meaning over Literal:** Do not translate word-for-word. Translate the *message*.
-   - **Mixed Language:** If a line is already in ${targetLang}, return it unchanged.
+3. **Formatting:**
+   - Preserve repetition ("ma-ma", "la-la-la").
+   - Preserve punctuation and casing from the source.
 
-INPUT LYRICS:
+### FEW-SHOT EXAMPLES
+
+Input: ["Hello", "Konnichiwa", "Selamat pagi"]
+Target: Indonesian
+Output: ["Halo", "Halo", "Selamat pagi"]
+(Explanation: English translated, Japanese translated, Indonesian kept as-is.)
+
+Input: ["(Screaming)", "Я сошла с ума"]
+Target: English
+Output: ["(Screaming)", "I've lost my mind"]
+(Explanation: Parentheses kept. Cyrillic translated to English.)
+
+Input: ["Love you", "Te amo"]
+Target: Indonesian
+Output: ["Cinta kamu", "Aku mencintaimu"]
+
+### TASK
+Input Lyrics:
 ${JSON.stringify(texts, null, 2)}
 
-OUTPUT REQUIREMENT:
-Respond with ONLY the JSON array of ${texts.length} translated strings. No Markdown, no explanation.`;
-
-  const prompt = translationRules;
-  return prompt;
+Respond with ONLY the valid JSON string array of translations. No markdown.`;
 }
