@@ -3,8 +3,15 @@
   "name": "YouLy+",
   "version": "4.2.0",
   "description": "Enhanced lyrics feature for YouTube Music, Apple Music & Tidal with line-by-line and word-by-word sync",
-  "permissions": ["activeTab", "storage", "scripting"],
-  "host_permissions": ["*://*.music.youtube.com/*", "*://*.tidal.com/*"],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*.music.youtube.com/*",
+    "*://*.tidal.com/*"
+  ],
   "action": {
     "default_popup": "src/popup/ui.html",
     "default_icon": {
@@ -14,6 +21,12 @@
       "128": "icons/icon128.png"
     }
   },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "browser_specific_settings": {
     "gecko": {
       "id": "{00a6e1f0-4808-45e7-b66d-3a5aa6527a0e}",
@@ -22,7 +35,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.music.youtube.com/*"],
+      "matches": [
+        "*://*.music.youtube.com/*"
+      ],
       "js": [
         "src/lib/sponsorblock.js",
         "src/lib/polyfill.js",
@@ -39,7 +54,9 @@
       ]
     },
     {
-      "matches": ["*://*.music.apple.com/*"],
+      "matches": [
+        "*://*.music.apple.com/*"
+      ],
       "js": [
         "src/lib/polyfill.js",
         "src/localization.js",
@@ -52,7 +69,9 @@
       ]
     },
     {
-      "matches": ["*://*.tidal.com/*"],
+      "matches": [
+        "*://*.tidal.com/*"
+      ],
       "js": [
         "src/lib/polyfill.js",
         "src/localization.js",
@@ -76,7 +95,10 @@
         "src/inject/applemusic/songTracker.js",
         "src/assets/loading.gif"
       ],
-      "matches": ["*://*.music.youtube.com/*", "*://*.music.apple.com/*"]
+      "matches": [
+        "*://*.music.youtube.com/*",
+        "*://*.music.apple.com/*"
+      ]
     },
     {
       "resources": [
@@ -84,7 +106,9 @@
         "src/modules/tidal/style.css",
         "src/assets/loading.gif"
       ],
-      "matches": ["*://*.tidal.com/*"]
+      "matches": [
+        "*://*.tidal.com/*"
+      ]
     },
     {
       "resources": [
@@ -92,12 +116,16 @@
         "src/modules/applemusic/style.css",
         "src/assets/loading.gif"
       ],
-      "matches": ["*://*.music.apple.com/*"]
+      "matches": [
+        "*://*.music.apple.com/*"
+      ]
     }
   ],
   "background": {
     "service_worker": "src/background/lyricsHandler.js",
     "type": "module",
-    "scripts": ["src/background/lyricsHandler.js"]
+    "scripts": [
+      "src/background/lyricsHandler.js"
+    ]
   }
 }
