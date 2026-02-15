@@ -2337,6 +2337,8 @@ class LyricsPlusRenderer {
       this._scrollAnimationTimeout = null;
     }
 
+    duration = Math.max(400, duration);
+
     const animatingLines = this._animatingLines;
     if (animatingLines.length > 0) {
       for (let i = 0; i < animatingLines.length; i++) {
