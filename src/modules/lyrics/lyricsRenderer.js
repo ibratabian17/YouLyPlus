@@ -52,6 +52,11 @@ class LyricsPlusRenderer {
 
     this._boundParentScrollHandler = this._onParentScroll.bind(this);
     this._boundUserInteractionHandler = this._onUserInteraction.bind(this);
+    this._boundTouchStartHandler = this._onTouchStart.bind(this);
+    this._boundTouchMoveHandler = this._onTouchMove.bind(this);
+
+    this._touchStartY = 0;
+    this._touchStartX = 0;
 
     this._lastActiveIndex = 0;
     this._tempActiveLines = [];
@@ -234,8 +239,10 @@ class LyricsPlusRenderer {
     if (!scrollContainer || this.scrollEventHandlerAttached) return;
 
     scrollContainer.addEventListener('wheel', this._boundUserInteractionHandler, { passive: true });
-    scrollContainer.addEventListener('touchstart', this._boundUserInteractionHandler, { passive: true });
     scrollContainer.addEventListener('keydown', this._boundUserInteractionHandler, { passive: true });
+
+    scrollContainer.addEventListener('touchstart', this._boundTouchStartHandler, { passive: true });
+    scrollContainer.addEventListener('touchmove', this._boundTouchMoveHandler, { passive: true });
 
     this.scrollEventHandlerAttached = true;
   }
@@ -254,6 +261,34 @@ class LyricsPlusRenderer {
   _onParentScroll() {
     if (!this.isProgrammaticScrolling) {
       this._setUserScrolled(true);
+    }
+  }
+
+  /**
+   * Records the starting position of a touch.
+   */
+  _onTouchStart(e) {
+    if (e.touches.length > 0) {
+      this._touchStartX = e.touches[0].clientX;
+      this._touchStartY = e.touches[0].clientY;
+    }
+  }
+
+  /**
+   * checks if the user moved their finger enough to be considered a scroll.
+   */
+  _onTouchMove(e) {
+    if (e.touches.length > 0) {
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+
+      const diffX = Math.abs(currentX - this._touchStartX);
+      const diffY = Math.abs(currentY - this._touchStartY);
+
+      // Threshold of 10px prevents micro-jitters or taps from locking auto-scroll
+      if (diffY > 10 || diffX > 10) {
+        this._setUserScrolled(true);
+      }
     }
   }
 
@@ -1152,7 +1187,7 @@ class LyricsPlusRenderer {
           }
           else {
             // Type is "person" or "other" (v2000)
-            
+
             if (lastPersonSingerId === null) {
               // If the first active singer is "other" (v2000), start on Right.
               if (type === "other") {
@@ -1160,7 +1195,7 @@ class LyricsPlusRenderer {
               } else {
                 currentSideIsLeft = true;
               }
-            } 
+            }
             else if (singerId !== lastPersonSingerId) {
               // If the singer is different from the LAST PERSON, we toggle the side.
               currentSideIsLeft = !currentSideIsLeft;
@@ -2760,8 +2795,10 @@ class LyricsPlusRenderer {
     const scrollContainer = this.lyricsContainer?.parentElement;
     if (scrollContainer) {
       scrollContainer.removeEventListener('wheel', this._boundUserInteractionHandler);
-      scrollContainer.removeEventListener('touchstart', this._boundUserInteractionHandler);
       scrollContainer.removeEventListener('keydown', this._boundUserInteractionHandler);
+
+      scrollContainer.removeEventListener('touchstart', this._boundTouchStartHandler);
+      scrollContainer.removeEventListener('touchmove', this._boundTouchMoveHandler);
     }
     this.scrollEventHandlerAttached = false;
     clearTimeout(this.userScrollIdleTimer);
