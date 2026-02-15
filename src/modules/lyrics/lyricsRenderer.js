@@ -1150,15 +1150,19 @@ class LyricsPlusRenderer {
             // This ensures the A/B conversation flow persists across the chorus.
             sideClass = "singer-left";
           }
-          else if (type === "other") {
-            // 'Other' agents (ad-libs) usually go Right
-            // They also usually don't interrupt the main flow.
-            sideClass = "singer-right";
-          }
           else {
-            // Type is "person"
-            // If the singer is different from the LAST PERSON, we toggle the side.
-            if (lastPersonSingerId !== null && singerId !== lastPersonSingerId) {
+            // Type is "person" or "other" (v2000)
+            
+            if (lastPersonSingerId === null) {
+              // If the first active singer is "other" (v2000), start on Right.
+              if (type === "other") {
+                currentSideIsLeft = false;
+              } else {
+                currentSideIsLeft = true;
+              }
+            } 
+            else if (singerId !== lastPersonSingerId) {
+              // If the singer is different from the LAST PERSON, we toggle the side.
               currentSideIsLeft = !currentSideIsLeft;
             }
 
