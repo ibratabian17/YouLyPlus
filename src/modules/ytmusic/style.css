@@ -102,7 +102,7 @@ ytmusic-app-layout:has(#lyrics-plus-container[style*="display: block"]) #lyrics-
 
 ytmusic-app-layout:has(#lyrics-plus-container[style*="display: block"])[is-mweb-modernization-enabled] #lyrics-plus-buttons-wrapper {
     bottom: 12px;
-    right: 12px!important;
+    right: 12px !important;
 }
 
 ytmusic-app-layout[is-mweb-modernization-enabled] #lyrics-plus-buttons-wrapper {
@@ -402,7 +402,7 @@ div#lyrics-song-progressbar {
 
     ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) #lyrics-plus-buttons-wrapper {
         top: 25px;
-        right: 25px!important;
+        right: 25px !important;
         width: min-content;
     }
 
@@ -424,6 +424,10 @@ div#lyrics-song-progressbar {
 
     ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #lyrics-plus-container .lyrics-source-provider {
         font-size: 80%;
+    }
+
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #lyrics-plus-container .lyrics-plain-text-container {
+        font-size: 70%;
     }
 
     ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #side-panel .lyrics-line:not(.lyrics-gap) {
