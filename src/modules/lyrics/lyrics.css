@@ -108,6 +108,7 @@
     text-rendering: optimizeLegibility;
     white-space: pre-wrap;
     overflow-wrap: break-word;
+    mix-blend-mode: lighten;
 }
 
 .lyrics-line.scroll-animate,

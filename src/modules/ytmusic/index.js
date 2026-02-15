@@ -101,24 +101,6 @@ function updateTextWithMarquee(container, text) {
     });
 }
 
-function injectPlusLighterFilter() {
-    if (!document.getElementById('youly-plus-lighter-filter')) {
-        const svgNamespace = "http://www.w3.org/2000/svg";
-        const svgElem = document.createElementNS(svgNamespace, "svg");
-        
-        svgElem.setAttribute("style", "display:none; position:absolute; width:0; height:0;");
-        svgElem.setAttribute("aria-hidden", "true");
-
-        svgElem.innerHTML = `
-            <filter id="youly-plus-lighter-filter" color-interpolation-filters="auto" >
-                <feBlend mode="plus-lighter" in="SourceGraphic" in2="BackgroundImage" />
-            </filter>
-        `;
-
-        document.body.appendChild(svgElem);
-    }
-}
-
 // Function to inject the DOM script
 function injectDOMScript() {
     if (!pBrowser?.runtime?.getURL) {
@@ -131,7 +113,6 @@ function injectDOMScript() {
         this.remove();
     };
     (document.head || document.documentElement).appendChild(script);
-    injectPlusLighterFilter();
 
 
     //patch ui
