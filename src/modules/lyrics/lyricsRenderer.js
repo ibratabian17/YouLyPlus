@@ -1775,7 +1775,19 @@ class LyricsPlusRenderer {
       return;
     }
 
-    const scrollLookAheadMs = 300;
+    let scrollLookAheadMs = 350;
+    const currentAudioIndex = this._getLineIndexAtTime(currentTime, this._lastActiveIndex);
+
+    if (currentAudioIndex !== -1 && currentAudioIndex + 1 < this.cachedLyricsLines.length) {
+      const currentLine = this.cachedLyricsLines[currentAudioIndex];
+      const nextLine = this.cachedLyricsLines[currentAudioIndex + 1];
+      const rawEndTime = currentLine.dataset.actualEndTime
+        ? parseFloat(currentLine.dataset.actualEndTime) * 1000
+        : currentLine._endTimeMs;
+      const gap = nextLine._startTimeMs - rawEndTime;
+      scrollLookAheadMs = Math.min(500, Math.max(350, gap));
+    }
+
     const highlightLookAheadMs = 190;
     const predictiveTime = currentTime + scrollLookAheadMs;
 
@@ -1897,7 +1909,7 @@ class LyricsPlusRenderer {
       (lineToScroll !== this.currentPrimaryActiveLine || isForceScroll)
     ) {
       if (!this.isUserControllingScroll || isForceScroll) {
-        this._updatePositionClassesAndScroll(lineToScroll, isForceScroll);
+        this._updatePositionClassesAndScroll(lineToScroll, isForceScroll, scrollLookAheadMs);
         this.lastPrimaryActiveLine = this.currentPrimaryActiveLine;
         this.currentPrimaryActiveLine = lineToScroll;
       }
@@ -2293,8 +2305,9 @@ class LyricsPlusRenderer {
    *
    * @param {number} newTranslateY - The target Y-axis translation value in pixels.
    * @param {boolean} forceScroll - If true, all animation delays are ignored for instant movement.
+   * @param {number} duration - The duration of the scroll animation in milliseconds.
    */
-  _animateScroll(newTranslateY, forceScroll = false) {
+  _animateScroll(newTranslateY, forceScroll = false, duration = 300) {
     if (!this.lyricsContainer) return;
     const parent = this.lyricsContainer.parentElement;
     if (!parent) return;
@@ -2331,6 +2344,7 @@ class LyricsPlusRenderer {
         line.classList.remove('scroll-animate');
         line.style.removeProperty('--scroll-delta');
         line.style.removeProperty('--lyrics-line-delay');
+        line.style.removeProperty('--scroll-duration');
       }
       animatingLines.length = 0;
     }
@@ -2365,7 +2379,7 @@ class LyricsPlusRenderer {
     const referenceIndex = this.cachedLyricsLines.indexOf(referenceLine);
     if (referenceIndex === -1) return;
 
-    const delayIncrement = 30;
+    const delayIncrement = duration * 0.1;
     const lookBehind = 5;
     const lookAhead = 20;
     const len = this.cachedLyricsLines.length;
@@ -2386,11 +2400,12 @@ class LyricsPlusRenderer {
 
       line.style.setProperty('--scroll-delta', `${delta}px`);
       line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
+      line.style.setProperty('--scroll-duration', `${duration + 100}ms`);
       line.classList.add('scroll-animate');
 
       animatingLines.push(line);
 
-      const lineDuration = 400 + delay;
+      const lineDuration = duration + delay;
       if (lineDuration > maxAnimationDuration) {
         maxAnimationDuration = lineDuration;
       }
@@ -2423,7 +2438,7 @@ class LyricsPlusRenderer {
     parent.scrollTo({ top: targetTop, behavior: 'instant' });
   }
 
-  _updatePositionClassesAndScroll(lineToScroll, forceScroll = false) {
+  _updatePositionClassesAndScroll(lineToScroll, forceScroll = false, durationScroll = 300) {
     if (
       !this.lyricsContainer ||
       !this.cachedLyricsLines ||
@@ -2467,10 +2482,10 @@ class LyricsPlusRenderer {
       else element.classList.add(`next-${position}`);
     }
 
-    this._scrollToActiveLine(lineToScroll, forceScroll);
+    this._scrollToActiveLine(lineToScroll, forceScroll, false, durationScroll);
   }
 
-  _scrollToActiveLine(activeLine, forceScroll = false, isResize = false) {
+  _scrollToActiveLine(activeLine, forceScroll = false, isResize = false, durationScroll = 300) {
     if (
       !activeLine ||
       !this.lyricsContainer ||
@@ -2514,7 +2529,7 @@ class LyricsPlusRenderer {
         this._scrollAnimationState.targetOffset = targetTranslateY;
       }
     } else {
-      this._animateScroll(targetTranslateY, forceScroll);
+      this._animateScroll(targetTranslateY, forceScroll, durationScroll);
     }
   }
 

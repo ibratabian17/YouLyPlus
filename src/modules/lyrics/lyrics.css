@@ -114,7 +114,7 @@
 .lyrics-line.scroll-animate,
 .lyrics-plus-metadata.scroll-animate {
     animation-name: lyrics-scroll;
-    animation-duration: 400ms;
+    animation-duration: var(--scroll-duration, 400ms); 
     animation-timing-function: cubic-bezier(.41, 0, .12, .99);
     animation-fill-mode: both;
     animation-delay: var(--lyrics-line-delay, 0ms);
