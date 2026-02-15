@@ -5,17 +5,21 @@
 // 1. Platform-specific implementations
 const uiConfig = {
     player: 'video',
-    patchParent: '#tab-renderer',
+    patchParent: '#lyplus-patch-container',
     selectors: [
+        '#lyplus-patch-container',
+        'ytmusic-tab-renderer:has(#lyplus-patch-container)',
         'ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
         'ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
         'ytmusic-player-page:not([is-video-truncation-fix-enabled])[player-fullscreened] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])'
     ],
+    buttonParent: 'ytmusic-app-layout',
     disableNativeTick: true,
     seekTo: (time) => {
         window.postMessage({ type: 'LYPLUS_SEEK_TO', time: time }, '*');
     }
 };
+let lyricsRendererInstance = null;
 let progressBar;
 let currentSongDuration = 1;
 let lastUpdateTimestamp = 0;
@@ -24,10 +28,30 @@ const THROTTLE_MS = 33.3;
 const titleElementElem = document.createElement('p');
 const artistElementElem = document.createElement('p');
 
-// 2. Create the renderer instance
-const lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
+function patchTabRenderer() {
+    const tabRenderer = document.querySelector('#tab-renderer');
 
-// 3. Create the global API for other modules to use
+    if (tabRenderer) {
+        let patchWrapper = document.getElementById('lyplus-patch-container');
+
+        if (!patchWrapper) {
+            console.log('LyricsPlus: Creating wrapper container...');
+            patchWrapper = document.createElement('div');
+            patchWrapper.id = 'lyplus-patch-container';
+            tabRenderer.appendChild(patchWrapper);
+        }
+
+        if (!document.getElementById('lyrics-plus-container')) {
+            console.log('LyricsPlus: Lyrics container missing, checking for reuse...');
+
+            if (!lyricsRendererInstance) {
+                lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
+            }
+        }
+    }
+}
+
+//Create the global API for other modules to use
 const LyricsPlusAPI = {
     displayLyrics: (...args) => lyricsRendererInstance.displayLyrics(...args),
     displaySongNotFound: () => lyricsRendererInstance.displaySongNotFound(),
@@ -113,6 +137,8 @@ function injectDOMScript() {
         this.remove();
     };
     (document.head || document.documentElement).appendChild(script);
+
+    patchTabRenderer();
 
 
     //patch ui

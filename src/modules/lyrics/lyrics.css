@@ -607,6 +607,7 @@ span.lyrics-source-provider {
     width: 30px;
     height: 30px;
     margin: 0;
+    animation: none;
 }
 
 #lyrics-plus-container .text-not-found {
