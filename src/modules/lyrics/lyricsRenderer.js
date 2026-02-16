@@ -2041,26 +2041,20 @@ class LyricsPlusRenderer {
           if (hasFinished) {
             classList.remove("finished");
           }
-        } else if (currentTime > endTime) {
+        }
+        else if (currentTime > endTime) {
           if (!hasFinished) {
             if (!hasHighlight) {
               this._updateSyllableAnimation(syllable);
             }
             classList.add("finished");
           }
-        } else {
-          // currentTime < startTime
+        }
+        else {
           if (hasHighlight || hasFinished) {
             this._resetSyllable(syllable);
           } else if (hasPreHighlight) {
-            let shouldReset = true;
-
-            if (j > 0) {
-              const prevSyllable = syllables[j - 1];
-              if (prevSyllable) {
-                shouldReset = !prevSyllable.classList.contains("highlight");
-              }
-            }
+            const shouldReset = j === 0 || !syllables[j - 1]?.classList.contains("highlight");
 
             if (shouldReset) {
               this._resetSyllable(syllable, true);
@@ -2253,22 +2247,31 @@ class LyricsPlusRenderer {
     syllable.classList.add("cleanup");
     syllable.style.removeProperty("--pre-wipe-duration");
     syllable.style.removeProperty("--pre-wipe-delay");
-    syllable.querySelectorAll("span.char").forEach((span) => {
-      span.style.animation = "";
-    });
+
+    const charSpans = syllable.querySelectorAll("span.char");
+    const charSpansLength = charSpans.length;
+    for (let i = 0; i < charSpansLength; i++) {
+      charSpans[i].style.animation = "";
+    }
 
     requestAnimationFrame(() => {
       setTimeout(() => {
         syllable.classList.remove("highlight", "finished", "pre-highlight", "cleanup");
-      }, 16)
-    })
+      }, 16);
+    });
   }
 
   _resetSyllables(line, noFade = false) {
     if (!line) return;
-    Array.from(line.getElementsByClassName("lyrics-syllable")).forEach((syllable) =>
-      this._resetSyllable(syllable, noFade)
-    );
+    let syllables = line._cachedSyllableElements;
+    if (!syllables) {
+      syllables = Array.from(line.getElementsByClassName("lyrics-syllable"));
+    }
+    
+    const syllablesLength = syllables.length;
+    for (let i = 0; i < syllablesLength; i++) {
+      this._resetSyllable(syllables[i], noFade);
+    }
   }
 
   _getScrollPaddingTop() {
