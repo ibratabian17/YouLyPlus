@@ -660,7 +660,7 @@ class LyricsPlusRenderer {
 
       const shouldAllowBreak = (text) => {
         text = text.trim();
-        if (text.length >= 16) return true;
+        if (text.length >= 16 || this._isCJK(text)) return true;
         return false;
       }
 
@@ -2267,7 +2267,7 @@ class LyricsPlusRenderer {
     if (!syllables) {
       syllables = Array.from(line.getElementsByClassName("lyrics-syllable"));
     }
-    
+
     const syllablesLength = syllables.length;
     for (let i = 0; i < syllablesLength; i++) {
       this._resetSyllable(syllables[i], noFade);
