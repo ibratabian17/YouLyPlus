@@ -1798,20 +1798,20 @@ class LyricsPlusRenderer {
       }
     }
 
-    if (primaryIndex !== -1) {
-      const linesLen = this.cachedLyricsLines.length;
-
-      // Collect all active DOM indices.
-      const activeIndices = [];
-      for (let i = 0; i < linesLen; i++) {
-        const line = this.cachedLyricsLines[i];
-        if (
-          predictiveTime >= line._startTimeMs &&
-          predictiveTime <= line._endTimeMs + 50
-        ) {
-          activeIndices.push(i);
-        }
+    // Collect all active DOM indices (used by guard later).
+    const linesLen = this.cachedLyricsLines.length;
+    const activeIndices = [];
+    for (let i = 0; i < linesLen; i++) {
+      const line = this.cachedLyricsLines[i];
+      if (
+        predictiveTime >= line._startTimeMs &&
+        predictiveTime <= line._endTimeMs + 50
+      ) {
+        activeIndices.push(i);
       }
+    }
+
+    if (primaryIndex !== -1) {
 
       if (activeIndices.length > 0) {
         let groupEnd = activeIndices.length - 1;
@@ -1846,9 +1846,11 @@ class LyricsPlusRenderer {
 
     const currentPrimaryLine = this.cachedLyricsLines[this._lastActiveIndex];
     const candidateLine = this.cachedLyricsLines[primaryIndex];
+    const activeCount = activeIndices.length;
     if (
       primaryIndex > this._lastActiveIndex &&
-      candidateLine._endTimeMs === currentPrimaryLine._endTimeMs
+      candidateLine._endTimeMs === currentPrimaryLine._endTimeMs &&
+      activeCount <= 3
     ) {
       primaryIndex = this._lastActiveIndex;
     } else {
