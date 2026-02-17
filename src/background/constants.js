@@ -15,9 +15,12 @@ export const CONFIG = {
   },
 
   KPOE_SERVERS: [
-    "https://lyricsplus-seven.vercel.app",
-    "https://lyricsplus.prjktla.workers.dev",
-    "https://lyrics-plus-backend.vercel.app"
+    "rl-api.atomix.one", //meow's server (basically proxy to vercel, but cached 7 days)
+    "https://lyricsplus-seven.vercel.app", //jigen's mirror
+    "https://lyricsplus.prjktla.workers.dev", //ibra's cf worker
+    "http://ly.mxtiy.xyz/", //painfueg0's server (http only)
+    "https://lyrics-plus-backend.vercel.app", //ibra's vercel
+    "https://youlyplus.binimum.org" //binimum's server (spotify fetch didnt work)
   ],
 
   GEMINI: {
