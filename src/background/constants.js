@@ -15,7 +15,7 @@ export const CONFIG = {
   },
 
   KPOE_SERVERS: [
-    "rl-api.atomix.one", //meow's server (basically proxy to vercel, but cached 7 days)
+    "https://lyricsplus.atomix.one/", //meow's mirror
     "https://lyricsplus-seven.vercel.app", //jigen's mirror
     "https://lyricsplus.prjktla.workers.dev", //ibra's cf worker
     "http://ly.mxtiy.xyz/", //painfueg0's server (http only)
