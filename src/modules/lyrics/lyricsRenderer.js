@@ -1807,7 +1807,7 @@ class LyricsPlusRenderer {
         const line = this.cachedLyricsLines[i];
         if (
           predictiveTime >= line._startTimeMs &&
-          predictiveTime <= line._endTimeMs - 190
+          predictiveTime <= line._endTimeMs + 50
         ) {
           activeIndices.push(i);
         }
@@ -1820,7 +1820,15 @@ class LyricsPlusRenderer {
           groupStart--;
         }
 
-        primaryIndex = Math.max(activeIndices[groupStart], activeIndices[groupEnd] - 2);
+        const candidateIndex = Math.max(activeIndices[groupStart], activeIndices[groupEnd] - 2);
+
+        const lastPrimary = this._lastActiveIndex;
+        const lastPrimaryStillActive = lastPrimary >= 0 &&
+          lastPrimary < this.cachedLyricsLines.length &&
+          activeIndices.includes(lastPrimary);
+        primaryIndex = (candidateIndex < lastPrimary && lastPrimaryStillActive)
+          ? lastPrimary
+          : candidateIndex;
       }
     } else {
       const firstLineStartTime = this.cachedLyricsLines[0]._startTimeMs;
@@ -1836,7 +1844,16 @@ class LyricsPlusRenderer {
       }
     }
 
-    this._lastActiveIndex = primaryIndex;
+    const currentPrimaryLine = this.cachedLyricsLines[this._lastActiveIndex];
+    const candidateLine = this.cachedLyricsLines[primaryIndex];
+    if (
+      primaryIndex > this._lastActiveIndex &&
+      candidateLine._endTimeMs === currentPrimaryLine._endTimeMs
+    ) {
+      primaryIndex = this._lastActiveIndex;
+    } else {
+      this._lastActiveIndex = primaryIndex;
+    }
     const lineToScroll = this.cachedLyricsLines[primaryIndex];
 
     // reuse array to avoid allocation
