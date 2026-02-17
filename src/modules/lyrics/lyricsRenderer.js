@@ -1804,20 +1804,29 @@ class LyricsPlusRenderer {
     }
 
     if (primaryIndex !== -1) {
-      let scanIndex = primaryIndex;
-      while (scanIndex > 0) {
-        const prevLine = this.cachedLyricsLines[scanIndex - 1];
-        const isPrevActive =
-          predictiveTime >= prevLine._startTimeMs &&
-          predictiveTime <= prevLine._endTimeMs + 50;
+      const linesLen = this.cachedLyricsLines.length;
 
-        if (isPrevActive) {
-          scanIndex--;
-        } else {
-          break;
+      // Collect all active DOM indices.
+      const activeIndices = [];
+      for (let i = 0; i < linesLen; i++) {
+        const line = this.cachedLyricsLines[i];
+        if (
+          predictiveTime >= line._startTimeMs &&
+          predictiveTime <= line._endTimeMs - 190
+        ) {
+          activeIndices.push(i);
         }
       }
-      primaryIndex = scanIndex;
+
+      if (activeIndices.length > 0) {
+        let groupEnd = activeIndices.length - 1;
+        let groupStart = groupEnd;
+        while (groupStart > 0 && activeIndices[groupStart] - activeIndices[groupStart - 1] === 1) {
+          groupStart--;
+        }
+        
+        primaryIndex = Math.max(activeIndices[groupStart], activeIndices[groupEnd] - 2);
+      }
     } else {
       const firstLineStartTime = this.cachedLyricsLines[0]._startTimeMs;
       if (predictiveTime < firstLineStartTime) {
