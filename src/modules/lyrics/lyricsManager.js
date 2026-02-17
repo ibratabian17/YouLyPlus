@@ -163,7 +163,7 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, localCurrent
   return baseLyrics;
 }
 
-async function fetchAdditionalData(currentSong, effectiveMode, htmlLang) {
+async function fetchAdditionalData(currentSong, effectiveMode, htmlLang, localFetchId) {
   const promises = [];
 
   const needsTranslation = effectiveMode === 'translate' || effectiveMode === 'both';
@@ -176,7 +176,7 @@ async function fetchAdditionalData(currentSong, effectiveMode, htmlLang) {
       promises.push(pBrowser.runtime.sendMessage({
         type: 'TRANSLATE_LYRICS', action: 'translate', songInfo: currentSong, targetLang: htmlLang
       }).then(response => {
-        if (response && response.success) lastTranslationResponse = response;
+        if (currentFetchMediaId === localFetchId && response && response.success) lastTranslationResponse = response;
         return response;
       }));
     }
@@ -191,7 +191,7 @@ async function fetchAdditionalData(currentSong, effectiveMode, htmlLang) {
       promises.push(pBrowser.runtime.sendMessage({
         type: 'TRANSLATE_LYRICS', action: 'romanize', songInfo: currentSong, targetLang: htmlLang
       }).then(response => {
-        if (response && response.success) lastRomanizationResponse = response;
+        if (currentFetchMediaId === localFetchId && response && response.success) lastRomanizationResponse = response;
         return response;
       }));
     }
@@ -263,7 +263,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     }
 
     const htmlLang = document.documentElement.getAttribute('lang');
-    const [translationResponse, romanizationResponse] = await fetchAdditionalData(currentSong, effectiveMode, htmlLang);
+    const [translationResponse, romanizationResponse] = await fetchAdditionalData(currentSong, effectiveMode, htmlLang, localCurrentFetchMediaId);
 
     if (currentFetchMediaId !== localCurrentFetchMediaId) {
       console.warn("Song changed during additional data fetch. Aborting.", currentSong);
