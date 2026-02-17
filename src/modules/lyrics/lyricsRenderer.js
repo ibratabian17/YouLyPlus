@@ -1930,18 +1930,6 @@ class LyricsPlusRenderer {
     }
 
     this._updateSyllables(currentTime, this._tempActiveLines);
-
-    if (this._visibilityHasChanged) {
-      if (
-        this.lyricsContainer &&
-        this.lyricsContainer.classList.contains("hide-offscreen")
-      ) {
-        this._batchUpdateViewportVisibility();
-      } else {
-        this._visibilityChanges = [];
-      }
-      this._visibilityHasChanged = false;
-    }
   }
 
   _getLineIndexAtTime(timeMs, startHintIndex = 0) {
@@ -2543,7 +2531,6 @@ class LyricsPlusRenderer {
     if (!container || !container.parentElement) return null;
     if (this.visibilityObserver) this.visibilityObserver.disconnect();
 
-    this._visibilityHasChanged = true;
     this._visibilityChanges = [];
 
     this.visibilityObserver = new IntersectionObserver(
@@ -2571,7 +2558,12 @@ class LyricsPlusRenderer {
           }
         });
         if (hasChanges) {
-          this._visibilityHasChanged = true;
+          if (
+            this.lyricsContainer &&
+            this.lyricsContainer.classList.contains("hide-offscreen")
+          ) {
+            this._batchUpdateViewportVisibility();
+          }
         }
       },
       { root: container.parentElement, rootMargin: "200px 0px", threshold: 0.1 }
