@@ -109,6 +109,7 @@ ytmusic-app-layout:has(#lyrics-plus-container[style*="display: block"]) #lyrics-
     right: 0em;
     width: min-content;
     right: 72px;
+    position: fixed;
 }
 
 ytmusic-app-layout:has(#lyrics-plus-container[style*="display: block"])[is-mweb-modernization-enabled] #lyrics-plus-buttons-wrapper {
