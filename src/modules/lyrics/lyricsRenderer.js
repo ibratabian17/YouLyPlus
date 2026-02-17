@@ -384,12 +384,7 @@ class LyricsPlusRenderer {
       if (currentLine.isHandledByPrecursorPass || currentLine.isHandledByExtensionPass) continue;
 
       if (nextLine.startTime < currentLine.originalEndTime) {
-        const overlap = currentLine.originalEndTime - nextLine.startTime;
-        if (overlap >= 0.1) {
-          currentLine.newEndTime = nextLine.newEndTime;
-        } else {
-          currentLine.newEndTime = currentLine.originalEndTime;
-        }
+        currentLine.newEndTime = nextLine.newEndTime;
       } else {
         const gap = nextLine.startTime - currentLine.originalEndTime;
         const nextElement = currentLine.element.nextElementSibling;
@@ -1824,7 +1819,7 @@ class LyricsPlusRenderer {
         while (groupStart > 0 && activeIndices[groupStart] - activeIndices[groupStart - 1] === 1) {
           groupStart--;
         }
-        
+
         primaryIndex = Math.max(activeIndices[groupStart], activeIndices[groupEnd] - 2);
       }
     } else {
