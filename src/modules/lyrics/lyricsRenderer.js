@@ -383,14 +383,20 @@ class LyricsPlusRenderer {
       const nextLine = linesData[i + 1];
       if (currentLine.isHandledByPrecursorPass || currentLine.isHandledByExtensionPass) continue;
 
-      if (nextLine.startTime < currentLine.originalEndTime) {
-        currentLine.newEndTime = nextLine.newEndTime;
-      } else {
-        const gap = nextLine.startTime - currentLine.originalEndTime;
+      const overlap = currentLine.originalEndTime - nextLine.startTime;
+
+      if (overlap > 0.001) {
+        const nextLineWasExtended = nextLine.newEndTime > nextLine.originalEndTime + 0.001;
+
+        if (overlap > 0.05 || nextLineWasExtended) {
+          currentLine.newEndTime = nextLine.newEndTime;
+        }
+      } else if (overlap < -0.001) {
+        const gap = -overlap;
         const nextElement = currentLine.element.nextElementSibling;
         const isFollowedByManualGap =
           nextElement && nextElement.classList.contains("lyrics-gap");
-        if (gap > 0 && !isFollowedByManualGap) {
+        if (gap > 0.05 && !isFollowedByManualGap) {
           const extension = Math.min(1.3, gap);
           currentLine.newEndTime = currentLine.originalEndTime + extension;
         }
