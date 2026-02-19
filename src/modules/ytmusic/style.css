@@ -471,6 +471,7 @@ div#lyrics-song-progressbar {
         pointer-events: none;
         overflow: visible;
         mask-image: none;
+        padding: none!important;
     }
 
     ytmusic-player-page[video-mode]:not(:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) #lyplus-patch-container {

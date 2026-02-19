@@ -388,7 +388,7 @@ class LyricsPlusRenderer {
       if (overlap > 0.001) {
         const nextLineWasExtended = nextLine.newEndTime > nextLine.originalEndTime + 0.001;
 
-        if (overlap > 0.05 || nextLineWasExtended) {
+        if (nextLineWasExtended) {
           currentLine.newEndTime = nextLine.newEndTime;
         }
       } else if (overlap < -0.001) {
