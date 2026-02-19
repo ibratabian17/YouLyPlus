@@ -386,7 +386,7 @@ class LyricsPlusRenderer {
         const nextElement = currentLine.element.nextElementSibling;
         const isFollowedByManualGap =
           nextElement && nextElement.classList.contains("lyrics-gap");
-        if (gap > 0.05 && !isFollowedByManualGap) {
+        if (!isFollowedByManualGap) {
           const extension = Math.min(1.3, gap);
           currentLine.newEndTime = currentLine.originalEndTime + extension;
         }
