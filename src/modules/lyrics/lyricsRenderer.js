@@ -39,12 +39,6 @@ class LyricsPlusRenderer {
     this.isProgrammaticScrolling = false;
     this.endProgrammaticScrollTimer = null;
     this.scrollEventHandlerAttached = false;
-    this._boundParentScrollHandler = null;
-    this._boundWheelHandler = null;
-    this._boundTouchStartHandler = null;
-    this._boundTouchMoveHandler = null;
-    this._boundTouchEndHandler = null;
-    this._boundTouchCancelHandler = null;
     this.currentScrollOffset = 0;
     this.userScrollIdleTimer = null;
     this.isUserControllingScroll = false;
@@ -121,22 +115,18 @@ class LyricsPlusRenderer {
   _getDataText(normal, isOriginal = true) {
     if (!normal) return "";
 
-    if (this.largerTextMode === "romanization") {
-      if (isOriginal) {
-        // Main/background container in romanization mode: show romanized
-        return normal.romanizedText || normal.text || "";
-      } else {
-        // Romanization container in romanization mode: show original
-        return normal.text || "";
-      }
+    const isRomanizationMode = this.largerTextMode === "romanization";
+
+    // In romanization mode the main/background container shows romanized text
+    // and the secondary container shows original text — the roles are swapped.
+    if (isOriginal) {
+      return isRomanizationMode
+        ? normal.romanizedText || normal.text || ""  // Main: prefer romanized
+        : normal.text || "";                          // Main: prefer original
     } else {
-      if (isOriginal) {
-        // Main/background container in normal mode: show original
-        return normal.text || "";
-      } else {
-        // Romanization container in normal mode: show romanized (if available)
-        return normal.romanizedText || normal.text || "";
-      }
+      return isRomanizationMode
+        ? normal.text || ""                           // Secondary: show original
+        : normal.romanizedText || normal.text || "";  // Secondary: prefer romanized
     }
   }
 
@@ -659,11 +649,8 @@ class LyricsPlusRenderer {
         });
       };
 
-      const shouldAllowBreak = (text) => {
-        text = text.trim();
-        if (text.length >= 16 || this._isCJK(text)) return true;
-        return false;
-      }
+      const shouldAllowBreak = (text) =>
+        text.trim().length >= 16 || this._isCJK(text.trim());
 
       // --- Core Render Function ---
 
@@ -890,33 +877,33 @@ class LyricsPlusRenderer {
   ) {
     const lineFragment = document.createDocumentFragment();
     lyrics.data.forEach((line) => {
-      const lineDiv = document.createElement("div");
-      lineDiv.innerHTML = "";
-      lineDiv.className = "lyrics-line";
-      const lineDivContainer = document.createElement("div");
-      lineDivContainer.innerHTML = "";
-      lineDivContainer.className = "lyrics-line-container";
-      lineDiv.append(lineDivContainer);
-      lineDiv.dataset.startTime = line.startTime;
-      lineDiv.dataset.endTime = line.endTime;
+      const lineEl = document.createElement("div");
+      lineEl.innerHTML = "";
+      lineEl.className = "lyrics-line";
+      const lineContainer = document.createElement("div");
+      lineContainer.innerHTML = "";
+      lineContainer.className = "lyrics-line-container";
+      lineEl.append(lineContainer);
+      lineEl.dataset.startTime = line.startTime;
+      lineEl.dataset.endTime = line.endTime;
       const singerClass = line.element?.singer
         ? singerClassMap[line.element.singer] || "singer-left"
         : "singer-left";
-      lineDiv.classList.add(singerClass);
+      lineEl.classList.add(singerClass);
       if (this._isRTL(this._getDataText(line, true)))
-        lineDiv.classList.add("rtl-text");
-      if (!lineDiv._hasSharedListener) {
-        lineDiv.addEventListener("click", this._boundLyricClickHandler);
-        lineDiv._hasSharedListener = true;
+        lineEl.classList.add("rtl-text");
+      if (!lineEl._hasSharedListener) {
+        lineEl.addEventListener("click", this._boundLyricClickHandler);
+        lineEl._hasSharedListener = true;
       }
       const mainContainer = document.createElement("div");
       mainContainer.className = "main-vocal-container";
       mainContainer.textContent = this._getDataText(line);
       if (this._isRTL(this._getDataText(line, true)))
         mainContainer.classList.add("rtl-text");
-      lineDivContainer.appendChild(mainContainer);
-      this._renderTranslationContainer(lineDivContainer, line, displayMode);
-      lineFragment.appendChild(lineDiv);
+      lineContainer.appendChild(mainContainer);
+      this._renderTranslationContainer(lineContainer, line, displayMode);
+      lineFragment.appendChild(lineEl);
     });
     fragment.appendChild(lineFragment);
   }
@@ -1077,21 +1064,13 @@ class LyricsPlusRenderer {
   }
 
   /**
-   * Updates the display of lyrics based on a new display mode (translation/romanization).
-   * This method re-renders the lyric lines without re-fetching the entire lyrics data.
-   * @param {object} lyrics - The lyrics data object.
-   * @param {string} displayMode - The new display mode ('none', 'translate', 'romanize').
+   * Applies palette-related CSS classes and custom properties to the container
+   * based on the current settings. Called from both displayLyrics and updateDisplayMode.
+   * @param {HTMLElement} container - The lyrics container element.
    * @param {object} currentSettings - The current user settings.
+   * @private
    */
-  updateDisplayMode(lyrics, displayMode, currentSettings) {
-    this.currentDisplayMode = displayMode;
-    const container = this._getContainer();
-    if (!container) return;
-
-    container.innerHTML = "";
-
-    this._applyDisplayModeClasses(container, displayMode);
-
+  _applyPaletteSettings(container, currentSettings) {
     container.classList.toggle(
       "use-song-palette-fullscreen",
       !!currentSettings.useSongPaletteFullscreen
@@ -1129,13 +1108,32 @@ class LyricsPlusRenderer {
         }
       }
     }
+  }
+
+  /**
+   * Updates the display of lyrics based on a new display mode (translation/romanization).
+   * This method re-renders the lyric lines without re-fetching the entire lyrics data.
+   * @param {object} lyrics - The lyrics data object.
+   * @param {string} displayMode - The new display mode ('none', 'translate', 'romanize').
+   * @param {object} currentSettings - The current user settings.
+   */
+  updateDisplayMode(lyrics, displayMode, currentSettings) {
+    this.currentDisplayMode = displayMode;
+    const container = this._getContainer();
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    this._applyDisplayModeClasses(container, displayMode);
+
+    this._applyPaletteSettings(container, currentSettings);
 
     container.classList.toggle(
       "fullscreen",
       document.body.hasAttribute("player-fullscreened_")
     );
-    const isWordByWordMode =
-      lyrics.type === "Word" && currentSettings.wordByWord;
+
+    const isWordByWordMode = lyrics.type === "Word" && currentSettings.wordByWord;
     container.classList.toggle("word-by-word-mode", isWordByWordMode);
     container.classList.toggle("line-by-line-mode", !isWordByWordMode);
 
@@ -1368,12 +1366,12 @@ class LyricsPlusRenderer {
       const songWritersDiv = document.createElement("span");
       songWritersDiv.className = "lyrics-song-writters";
       songWritersDiv.textContent = "";
-      const WrittenByTxt = document.createElement("b");
-      WrittenByTxt.textContent = t("writtenBy");
+      const writtenByLabel = document.createElement("b");
+      writtenByLabel.textContent = t("writtenBy");
       const writersText = document.createTextNode(
         " " + lyrics.metadata.songWriters.join(", ")
       );
-      songWritersDiv.appendChild(WrittenByTxt);
+      songWritersDiv.appendChild(writtenByLabel);
       songWritersDiv.appendChild(writersText);
 
       metadataContainer.appendChild(songWritersDiv);
@@ -1483,46 +1481,11 @@ class LyricsPlusRenderer {
     container.classList.remove("lyrics-plus-message");
 
     container.classList.toggle(
-      "use-song-palette-fullscreen",
-      !!currentSettings.useSongPaletteFullscreen
-    );
-    container.classList.toggle(
-      "use-song-palette-all-modes",
-      !!currentSettings.useSongPaletteAllModes
-    );
-    container.classList.toggle(
       "lightweight-mode",
       currentSettings.lightweight
     );
 
-    if (currentSettings.overridePaletteColor) {
-      container.classList.add("override-palette-color");
-      container.style.setProperty(
-        "--lyplus-override-pallete",
-        currentSettings.overridePaletteColor
-      );
-      container.classList.remove(
-        "use-song-palette-fullscreen",
-        "use-song-palette-all-modes"
-      );
-    } else {
-      container.classList.remove("override-palette-color");
-      if (
-        currentSettings.useSongPaletteFullscreen ||
-        currentSettings.useSongPaletteAllModes
-      ) {
-        if (typeof LYPLUS_getSongPalette === "function") {
-          const songPalette = LYPLUS_getSongPalette();
-          if (songPalette) {
-            const { r, g, b } = songPalette;
-            container.style.setProperty(
-              "--lyplus-song-pallete",
-              `rgb(${r}, ${g}, ${b})`
-            );
-          }
-        }
-      }
-    }
+    this._applyPaletteSettings(container, currentSettings);
 
     container.classList.toggle(
       "fullscreen",
@@ -1613,29 +1576,30 @@ class LyricsPlusRenderer {
   }
 
   /**
+   * Renders a plain status message (e.g. "not found", error) inside the container.
+   * @param {string} i18nKey - The translation key for the message text.
+   * @private
+   */
+  _displayMessage(i18nKey) {
+    const container = this._getContainer();
+    if (container) {
+      container.innerHTML = `<span class="text-not-found">${t(i18nKey)}</span>`;
+      container.classList.add("lyrics-plus-message");
+    }
+  }
+
+  /**
    * Displays a "not found" message in the lyrics container.
    */
   displaySongNotFound() {
-    const container = this._getContainer();
-    if (container) {
-      container.innerHTML = `<span class="text-not-found">${t(
-        "notFound"
-      )}</span>`;
-      container.classList.add("lyrics-plus-message");
-    }
+    this._displayMessage("notFound");
   }
 
   /**
    * Displays an error message in the lyrics container.
    */
   displaySongError() {
-    const container = this._getContainer();
-    if (container) {
-      container.innerHTML = `<span class="text-not-found">${t(
-        "notFoundError"
-      )}</span>`;
-      container.classList.add("lyrics-plus-message");
-    }
+    this._displayMessage("notFoundError");
   }
 
   /**
@@ -2707,6 +2671,24 @@ class LyricsPlusRenderer {
     }
   }
 
+  /**
+   * Creates a single clickable dropdown option element.
+   * @param {string} labelKey - The i18n key for the option label.
+   * @param {Function} onClick - Click handler; the menu is hidden automatically before it fires.
+   * @returns {HTMLDivElement}
+   * @private
+   */
+  _createDropdownOption(labelKey, onClick) {
+    const optionDiv = document.createElement("div");
+    optionDiv.className = "dropdown-option";
+    optionDiv.textContent = t(labelKey);
+    optionDiv.addEventListener("click", () => {
+      this.dropdownMenu.classList.add("hidden");
+      onClick();
+    });
+    return optionDiv;
+  }
+
   _createDropdownMenu(parentWrapper) {
     if (this.dropdownMenu) {
       this.dropdownMenu.innerHTML = "";
@@ -2726,47 +2708,27 @@ class LyricsPlusRenderer {
       this.currentDisplayMode === "romanize" ||
       this.currentDisplayMode === "both";
 
+    const dispatchModeChange = (newMode) => {
+      if (this.setCurrentDisplayModeAndRefetchFn && this.lastKnownSongInfo) {
+        this.setCurrentDisplayModeAndRefetchFn(newMode, this.lastKnownSongInfo);
+      }
+    };
+
     if (!hasTranslation) {
-      const optionDiv = document.createElement("div");
-      optionDiv.className = "dropdown-option";
-      optionDiv.textContent = t("showTranslation");
-      optionDiv.addEventListener("click", () => {
-        this.dropdownMenu.classList.add("hidden");
-        let newMode = "translate";
-        if (this.currentDisplayMode === "romanize") {
-          newMode = "both";
-        }
-        if (this.setCurrentDisplayModeAndRefetchFn && this.lastKnownSongInfo) {
-          this.setCurrentDisplayModeAndRefetchFn(
-            newMode,
-            this.lastKnownSongInfo
-          );
-        }
-      });
-      this.dropdownMenu.appendChild(optionDiv);
+      this.dropdownMenu.appendChild(
+        this._createDropdownOption("showTranslation", () => {
+          dispatchModeChange(this.currentDisplayMode === "romanize" ? "both" : "translate");
+        })
+      );
     }
 
     if (!hasRomanization) {
-      const optionDiv = document.createElement("div");
-      optionDiv.className = "dropdown-option";
-      optionDiv.textContent =
-        this.largerTextMode == "romanization"
-          ? t("showOriginal")
-          : t("showPronunciation");
-      optionDiv.addEventListener("click", () => {
-        this.dropdownMenu.classList.add("hidden");
-        let newMode = "romanize";
-        if (this.currentDisplayMode === "translate") {
-          newMode = "both";
-        }
-        if (this.setCurrentDisplayModeAndRefetchFn && this.lastKnownSongInfo) {
-          this.setCurrentDisplayModeAndRefetchFn(
-            newMode,
-            this.lastKnownSongInfo
-          );
-        }
-      });
-      this.dropdownMenu.appendChild(optionDiv);
+      const romanizeLabel = this.largerTextMode == "romanization" ? "showOriginal" : "showPronunciation";
+      this.dropdownMenu.appendChild(
+        this._createDropdownOption(romanizeLabel, () => {
+          dispatchModeChange(this.currentDisplayMode === "translate" ? "both" : "romanize");
+        })
+      );
     }
 
     const hasShowOptions = !hasTranslation || !hasRomanization;
@@ -2778,46 +2740,20 @@ class LyricsPlusRenderer {
     }
 
     if (hasTranslation) {
-      const optionDiv = document.createElement("div");
-      optionDiv.className = "dropdown-option";
-      optionDiv.textContent = t("hideTranslation");
-      optionDiv.addEventListener("click", () => {
-        this.dropdownMenu.classList.add("hidden");
-        let newMode = "none";
-        if (this.currentDisplayMode === "both") {
-          newMode = "romanize";
-        }
-        if (this.setCurrentDisplayModeAndRefetchFn && this.lastKnownSongInfo) {
-          this.setCurrentDisplayModeAndRefetchFn(
-            newMode,
-            this.lastKnownSongInfo
-          );
-        }
-      });
-      this.dropdownMenu.appendChild(optionDiv);
+      this.dropdownMenu.appendChild(
+        this._createDropdownOption("hideTranslation", () => {
+          dispatchModeChange(this.currentDisplayMode === "both" ? "romanize" : "none");
+        })
+      );
     }
 
     if (hasRomanization) {
-      const optionDiv = document.createElement("div");
-      optionDiv.className = "dropdown-option";
-      optionDiv.textContent =
-        this.largerTextMode == "romanization"
-          ? t("hideOriginal")
-          : t("hidePronunciation");
-      optionDiv.addEventListener("click", () => {
-        this.dropdownMenu.classList.add("hidden");
-        let newMode = "none";
-        if (this.currentDisplayMode === "both") {
-          newMode = "translate";
-        }
-        if (this.setCurrentDisplayModeAndRefetchFn && this.lastKnownSongInfo) {
-          this.setCurrentDisplayModeAndRefetchFn(
-            newMode,
-            this.lastKnownSongInfo
-          );
-        }
-      });
-      this.dropdownMenu.appendChild(optionDiv);
+      const hideLabel = this.largerTextMode == "romanization" ? "hideOriginal" : "hidePronunciation";
+      this.dropdownMenu.appendChild(
+        this._createDropdownOption(hideLabel, () => {
+          dispatchModeChange(this.currentDisplayMode === "both" ? "translate" : "none");
+        })
+      );
     }
   }
 
@@ -2826,6 +2762,21 @@ class LyricsPlusRenderer {
     this.translationButton.innerHTML =
       '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="m488-96 171-456h82L912-96h-79l-41-117H608L567-96h-79ZM169-216l-50-51 192-190q-36-38-67-79t-54-89h82q18 32 36 54.5t52 60.5q38-42 70-87.5t52-98.5H48v-72h276v-96h72v96h276v72H558q-21 69-61 127.5T409-457l91 90-28 74-112-112-191 189Zm463-63h136l-66-189-70 189Z"/></svg>';
     this.translationButton.title = t("showTranslationOptions") || "Translation";
+  }
+
+  /**
+   * Removes a button element from the DOM by cloning it (to strip all event
+   * listeners) and then removing it. Nulls the provided ref after removal.
+   * @param {'translationButton'|'reloadButton'} buttonProp - The instance property name.
+   * @private
+   */
+  _removeButton(buttonProp) {
+    const btn = this[buttonProp];
+    if (!btn) return;
+    const clone = btn.cloneNode(true);
+    if (btn.parentNode) btn.parentNode.replaceChild(clone, btn);
+    clone.remove();
+    this[buttonProp] = null;
   }
 
   /**
@@ -2875,18 +2826,8 @@ class LyricsPlusRenderer {
     }
 
     // Clean up Control Buttons
-    if (this.translationButton) {
-      const newBtn = this.translationButton.cloneNode(true);
-      if (this.translationButton.parentNode) this.translationButton.parentNode.replaceChild(newBtn, this.translationButton);
-      newBtn.remove();
-      this.translationButton = null;
-    }
-    if (this.reloadButton) {
-      const newBtn = this.reloadButton.cloneNode(true);
-      if (this.reloadButton.parentNode) this.reloadButton.parentNode.replaceChild(newBtn, this.reloadButton);
-      newBtn.remove();
-      this.reloadButton = null;
-    }
+    this._removeButton("translationButton");
+    this._removeButton("reloadButton");
     if (this.dropdownMenu) {
       this.dropdownMenu.remove();
       this.dropdownMenu = null;
