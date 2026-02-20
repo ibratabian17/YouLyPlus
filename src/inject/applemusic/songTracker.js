@@ -90,7 +90,7 @@
       artist: attrs.artistName,
       album: attrs.albumName,
       duration: durationSec,
-      cover: artworkUrl,
+      artwork: artworkUrl,
       appleId: songId,
       isVideo: attrs.playParams.kind === 'music-videos',
       lyricsJSON: null

@@ -213,7 +213,7 @@
                 artist: songInfo.artist,
                 album: albumName,
                 duration: songInfo.duration,
-                cover: coverUrl,
+                artwork: coverUrl,
                 isVideo: songInfo.isVideo
             };
 
