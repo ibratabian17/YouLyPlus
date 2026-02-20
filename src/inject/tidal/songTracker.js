@@ -94,10 +94,12 @@
             let finalArtist = 'Unknown Artist';
             let duration = 0;
             let albumId = null;
+            let isrc = null;
 
             if (data.data && data.data.attributes) {
                 const attrs = data.data.attributes;
                 title = attrs.title || '';
+                isrc = attrs.isrc || null;
                 if (attrs.duration && attrs.duration.startsWith('PT')) {
                     const match = attrs.duration.match(/PT(?:(\d+)M)?(?:(\d+)S)?/);
                     if (match) {
@@ -111,6 +113,7 @@
             } else {
                 title = data.title || '';
                 duration = data.duration || 0;
+                isrc = data.isrc || null;
                 if (data.album && data.album.id) albumId = data.album.id;
                 if (data.artist && data.artist.name) finalArtist = data.artist.name;
                 if (data.artists && data.artists.length > 0) {
@@ -121,6 +124,7 @@
             return {
                 title: title,
                 artist: finalArtist,
+                isrc: isrc,
                 duration: duration,
                 albumId: albumId,
                 isVideo: false
@@ -211,6 +215,7 @@
             const finalSongInfo = {
                 title: songInfo.title,
                 artist: songInfo.artist,
+                isrc: songInfo.isrc,
                 album: albumName,
                 duration: songInfo.duration,
                 artwork: coverUrl,

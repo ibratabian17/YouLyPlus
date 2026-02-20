@@ -49,11 +49,12 @@ export class KPoeService {
   }
 
   static async fetchFromAPI(baseUrl, songInfo, sourceOrder, forceReload, fetchOptions) {
-    const { title, artist, album, duration } = songInfo;
+    const { title, artist, album, duration, isrc } = songInfo;
     const params = new URLSearchParams({ title, artist });
 
     if (duration > 0) params.append('duration', duration);
     if (album) params.append('album', album);
+    if (isrc) params.append('isrc', isrc);
     if (sourceOrder) params.append('source', sourceOrder);
     if (forceReload) params.append('forceReload', 'true');
 
@@ -74,6 +75,11 @@ export class KPoeService {
       }
 
       if (response.status === 404 || response.status === 403) {
+        if (response.status === 404 && isrc) {
+          const fallbackSongInfo = { ...songInfo };
+          delete fallbackSongInfo.isrc;
+          return await this.fetchFromAPI(baseUrl, fallbackSongInfo, sourceOrder, forceReload, fetchOptions);
+        }
         return null;
       }
 
