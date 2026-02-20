@@ -26,70 +26,153 @@ function injectPlatformCSS() {
 }
 
 function injectDOMScript() {
-    // Empty for now
+    const pBrowser = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
+    if (!pBrowser?.runtime?.getURL) {
+        console.warn('TIDAL: runtime.getURL unavailable, skipping DOM script inject');
+        return;
+    }
+    const script = document.createElement('script');
+    script.src = pBrowser.runtime.getURL('src/inject/tidal/songTracker.js');
+    script.onload = function () {
+        this.remove();
+    };
+    (document.head || document.documentElement).appendChild(script);
+
+    const parser = document.createElement('script');
+    parser.src = pBrowser.runtime.getURL('src/lib/parser.js');
+    parser.type = 'module';
+    parser.onload = function () {
+        this.remove();
+    };
+    (document.head || document.documentElement).appendChild(parser);
 }
 
 // --- UI LOGIC ---
 function ensureLyricsTab() {
     const tablist = document.querySelector('[role="tablist"]');
-    const firstPanel = document.querySelector('div[role="tabpanel"]');
-    const panelContainer = firstPanel ? firstPanel.parentNode : null;
+    if (!tablist) return;
 
-    if (!tablist || !panelContainer) return;
+    const panelContainer = tablist.parentNode;
+    if (!panelContainer) return;
 
     const originalLyricsTab = tablist.querySelector('[data-test="tabs-lyrics"]');
     if (originalLyricsTab) {
         originalLyricsTab.style.display = 'none';
     }
 
-    if (document.getElementById('lyrics-plus-tab')) return;
+    let customLyricsTab = document.getElementById('lyrics-plus-tab');
+    if (!customLyricsTab) {
+        customLyricsTab = document.createElement('li');
+        customLyricsTab.className = '_tabItem_8436610';
+        customLyricsTab.dataset.test = 'tabs-lyrics-plus';
+        customLyricsTab.id = 'lyrics-plus-tab';
+        customLyricsTab.setAttribute('role', 'tab');
+        customLyricsTab.setAttribute('aria-selected', 'false');
+        customLyricsTab.setAttribute('aria-disabled', 'false');
+        customLyricsTab.setAttribute('data-rttab', 'true');
+        customLyricsTab.innerHTML = `<svg class="_icon_77f3f89" viewBox="0 0 20 20"><use href="#general__lyrics"></use></svg><span data-wave-color="textDefault" class="wave-text-description-demi">Lyrics</span>`;
 
-    const customLyricsTab = document.createElement('li');
-    customLyricsTab.className = '_tabItem_8436610';
-    customLyricsTab.dataset.test = 'tabs-lyrics-plus';
-    customLyricsTab.id = 'lyrics-plus-tab';
-    customLyricsTab.setAttribute('role', 'tab');
-    customLyricsTab.setAttribute('aria-selected', 'false');
-    customLyricsTab.setAttribute('aria-disabled', 'false');
-    customLyricsTab.setAttribute('data-rttab', 'true');
-    customLyricsTab.innerHTML = `<svg class="_icon_77f3f89" viewBox="0 0 20 20"><use href="#general__lyrics"></use></svg><span data-wave-color="textDefault" class="wave-text-description-demi">Lyrics</span>`;
+        customLyricsTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
 
-    const lyricsPanel = document.createElement('div');
-    lyricsPanel.id = 'lyrics-plus-panel';
-    lyricsPanel.className = firstPanel.className;
-    lyricsPanel.setAttribute('role', 'tabpanel');
-    lyricsPanel.style.display = 'none';
+            if (customLyricsTab.getAttribute('aria-selected') === 'true') {
+                return;
+            }
 
-    panelContainer.appendChild(lyricsPanel);
+            const currentTablist = document.querySelector('[role="tablist"]');
+            if (currentTablist) {
+                currentTablist.querySelectorAll('[role="tab"]').forEach(tab => {
+                    tab.setAttribute('aria-selected', 'false');
+                    tab.classList.remove('_activeTab_f47dafa');
+                });
+            }
 
-    if (!lyricsRendererInstance) {
-        const uiConfig = {
-            player: 'video',
-            patchParent: '#lyrics-plus-panel',
-            selectors: ['#lyrics-plus-panel']
-        };
-        if (typeof LyricsPlusRenderer !== 'undefined') {
-            lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
-        }
-    } else {
-        const canReuse = lyricsRendererInstance.lyricsContainer &&
-            lyricsRendererInstance.lastKnownSongInfo &&
-            LYPLUS_currentSong &&
-            lyricsRendererInstance.lastKnownSongInfo.title === LYPLUS_currentSong.title &&
-            lyricsRendererInstance.lastKnownSongInfo.artist === LYPLUS_currentSong.artist;
+            const currentPanelContainer = currentTablist ? currentTablist.parentNode : null;
+            if (currentPanelContainer) {
+                currentPanelContainer.querySelectorAll('[role="tabpanel"]:not(#lyrics-plus-panel)').forEach(panel => {
+                    panel.style.display = 'none';
+                    panel.classList.remove('react-tabs__tab-panel--selected');
+                });
+            }
 
-        if (canReuse) {
-            console.log('LyricsPlus: Reusing existing container');
-            lyricsPanel.appendChild(lyricsRendererInstance.lyricsContainer);
-            lyricsRendererInstance.uiConfig.patchParent = '#lyrics-plus-panel';
-            lyricsRendererInstance.restore();
+            customLyricsTab.setAttribute('aria-selected', 'true');
+            customLyricsTab.classList.add('_activeTab_f47dafa');
+
+            const currentLyricsPanel = document.getElementById('lyrics-plus-panel');
+            if (currentLyricsPanel) {
+                currentLyricsPanel.style.display = 'block';
+                currentLyricsPanel.classList.add('react-tabs__tab-panel--selected');
+            }
+
+            console.log('LYPLUS: Lyrics tab activated');
+        });
+    }
+
+    if (!tablist.contains(customLyricsTab)) {
+        tablist.appendChild(customLyricsTab);
+    }
+
+    let lyricsPanel = document.getElementById('lyrics-plus-panel');
+    if (!lyricsPanel) {
+        const firstPanel = panelContainer.querySelector('div[role="tabpanel"]:not(#lyrics-plus-panel)');
+        lyricsPanel = document.createElement('div');
+        lyricsPanel.id = 'lyrics-plus-panel';
+        lyricsPanel.className = firstPanel ? firstPanel.className : '_tabPanelStyles_d7b9f59';
+        lyricsPanel.setAttribute('role', 'tabpanel');
+        lyricsPanel.style.display = 'none';
+        lyricsPanel.setAttribute('aria-labelledby', 'lyrics-plus-tab');
+    }
+
+    if (!panelContainer.contains(lyricsPanel)) {
+        panelContainer.appendChild(lyricsPanel);
+    }
+
+    customLyricsTab.setAttribute('aria-controls', 'lyrics-plus-panel');
+
+    let patchWrapper = document.getElementById('lyplus-patch-container');
+    if (!patchWrapper) {
+        console.log('LyricsPlus: Creating wrapper container...');
+        patchWrapper = document.createElement('div');
+        patchWrapper.id = 'lyplus-patch-container';
+    }
+
+    if (!lyricsPanel.contains(patchWrapper)) {
+        lyricsPanel.appendChild(patchWrapper);
+    }
+
+    if (!document.getElementById('lyrics-plus-container')) {
+        console.log('LyricsPlus: Lyrics container missing, checking for reuse...');
+        if (!lyricsRendererInstance) {
+            const uiConfig = {
+                player: 'video#video-one',
+                patchParent: '#lyplus-patch-container',
+                selectors: ['#lyplus-patch-container', '#lyrics-plus-panel'],
+                buttonParent: '#lyrics-plus-panel',
+            };
+            if (typeof LyricsPlusRenderer !== 'undefined') {
+                lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
+            }
         } else {
-            console.log('LyricsPlus: Injecting new lyrics instance (resetting container)...');
-            lyricsRendererInstance.uiConfig.patchParent = '#lyrics-plus-panel';
-            lyricsRendererInstance.lyricsContainer = null;
+            const canReuse = lyricsRendererInstance.lyricsContainer &&
+                lyricsRendererInstance.lastKnownSongInfo &&
+                LYPLUS_currentSong &&
+                lyricsRendererInstance.lastKnownSongInfo.title === LYPLUS_currentSong.title &&
+                lyricsRendererInstance.lastKnownSongInfo.artist === LYPLUS_currentSong.artist;
 
-            if (LYPLUS_currentSong && LYPLUS_currentSong.title && typeof fetchAndDisplayLyrics === 'function') {
-                fetchAndDisplayLyrics(LYPLUS_currentSong, true);
+            if (canReuse) {
+                console.log('LyricsPlus: Reusing existing container');
+                patchWrapper.appendChild(lyricsRendererInstance.lyricsContainer);
+                lyricsRendererInstance.uiConfig.patchParent = '#lyplus-patch-container';
+                lyricsRendererInstance.restore();
+            } else {
+                console.log('LyricsPlus: Injecting new lyrics instance (resetting container)...');
+                lyricsRendererInstance.uiConfig.patchParent = '#lyplus-patch-container';
+                lyricsRendererInstance.lyricsContainer = null;
+
+                if (LYPLUS_currentSong && LYPLUS_currentSong.title && typeof fetchAndDisplayLyrics === 'function') {
+                    fetchAndDisplayLyrics(LYPLUS_currentSong, true);
+                }
             }
         }
     }
@@ -98,72 +181,62 @@ function ensureLyricsTab() {
         fetchAndDisplayLyrics(LYPLUS_currentSong, true);
     }
 
-    customLyricsTab.setAttribute('aria-controls', 'lyrics-plus-panel');
-    lyricsPanel.setAttribute('aria-labelledby', 'lyrics-plus-tab');
-
-    tablist.appendChild(customLyricsTab);
-
-    customLyricsTab.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (customLyricsTab.getAttribute('aria-selected') === 'true') {
-            return;
-        }
-
-        tablist.querySelectorAll('[role="tab"]').forEach(tab => {
-            tab.setAttribute('aria-selected', 'false');
-            tab.classList.remove('_activeTab_f47dafa');
-        });
-
-        // Hide all original panels (but keep their original display logic intact)
-        panelContainer.querySelectorAll('[role="tabpanel"]:not(#lyrics-plus-panel)').forEach(panel => {
-            panel.style.display = 'none';
-            panel.classList.remove('react-tabs__tab-panel--selected');
-        });
-
-        customLyricsTab.setAttribute('aria-selected', 'true');
-        customLyricsTab.classList.add('_activeTab_f47dafa');
-
-        lyricsPanel.style.display = 'block';
-        lyricsPanel.classList.add('react-tabs__tab-panel--selected');
-
-        console.log('LYPLUS: Lyrics tab activated');
-    });
-
     tablist.querySelectorAll('[role="tab"]:not(#lyrics-plus-tab)').forEach(tab => {
         if (!tab.hasAttribute('data-lyrics-plus-listener')) {
             tab.setAttribute('data-lyrics-plus-listener', 'true');
 
             tab.addEventListener('click', (e) => {
-                setTimeout(() => {
-                    // Deactivate our lyrics tab
-                    customLyricsTab.setAttribute('aria-selected', 'false');
-                    customLyricsTab.classList.remove('_activeTab_f47dafa');
-                    lyricsPanel.style.display = 'none';
-                    lyricsPanel.classList.remove('react-tabs__tab-panel--selected');
+                const lTab = document.getElementById('lyrics-plus-tab');
+                const lPanel = document.getElementById('lyrics-plus-panel');
 
-                    const selectedTab = tablist.querySelector('[role="tab"][aria-selected="true"]:not(#lyrics-plus-tab)');
-                    if (selectedTab) {
-                        const panelId = selectedTab.getAttribute('aria-controls');
-                        const targetPanel = document.getElementById(panelId);
-                        if (targetPanel) {
-                            // Remove our forced display:none and let React's logic take over
-                            targetPanel.style.display = '';
-                            setTimeout(() => {
-                                if (targetPanel.style.display === 'none' ||
-                                    getComputedStyle(targetPanel).display === 'none') {
-                                    targetPanel.style.display = 'block';
-                                }
-                            }, 50);
-                        }
+                if (lTab) {
+                    lTab.setAttribute('aria-selected', 'false');
+                    lTab.classList.remove('_activeTab_f47dafa');
+                }
+                if (lPanel) {
+                    lPanel.style.display = 'none';
+                    lPanel.classList.remove('react-tabs__tab-panel--selected');
+                }
+
+                // Deselect all tabs to prevent multiple actives
+                const currentTablist = document.querySelector('[role="tablist"]');
+                if (currentTablist) {
+                    currentTablist.querySelectorAll('[role="tab"]').forEach(t => {
+                        t.setAttribute('aria-selected', 'false');
+                        t.classList.remove('_activeTab_f47dafa');
+                    });
+                }
+
+                // Hide all panels
+                if (currentTablist && currentTablist.parentNode) {
+                    currentTablist.parentNode.querySelectorAll('[role="tabpanel"]').forEach(panel => {
+                        panel.style.display = 'none';
+                        panel.classList.remove('react-tabs__tab-panel--selected');
+                    });
+                }
+
+                // Manually select clicked tab and panel to work around React optimisations
+                tab.setAttribute('aria-selected', 'true');
+                tab.classList.add('_activeTab_f47dafa');
+
+                const panelId = tab.getAttribute('aria-controls');
+                if (panelId) {
+                    const targetPanel = document.getElementById(panelId);
+                    if (targetPanel) {
+                        targetPanel.style.display = '';
+                        targetPanel.classList.add('react-tabs__tab-panel--selected');
                     }
-                }, 10);
+                }
             });
         }
     });
 
-    console.log('LYPLUS: Custom lyrics tab created and attached');
+    // Make sure our tabpanel is correctly selected if the tab is active
+    if (customLyricsTab.getAttribute('aria-selected') === 'true') {
+        lyricsPanel.style.display = 'block';
+    }
+
+    console.log('LYPLUS: Custom lyrics tab verified and attached');
 }
 
 const uiObserver = new MutationObserver((mutations) => {
@@ -209,289 +282,6 @@ function startUiObserver() {
     }
 }
 
-// --- SONG TRACKING LOGIC ---
-let LYPLUS_currentSong = {};
-
-function setupSongTracker() {
-    // Try multiple possible selectors for the player with better coverage
-    const possibleSelectors = [
-        'div[data-test="left-column-footer-player"]',
-        '#nowPlaying',
-        '[data-test="footer-track-title"]',
-        '[data-test="now-playing-title"]',
-        '.player-controls',
-        'main', // Fallback to main content area
-        'body' // Ultimate fallback
-    ];
-
-    let targetNode = null;
-    for (const selector of possibleSelectors) {
-        targetNode = document.querySelector(selector);
-        if (targetNode) {
-            console.log(`LYPLUS: Song tracker targeting: ${selector}`);
-            break;
-        }
-    }
-
-    if (targetNode) {
-        const songTrackerObserver = new MutationObserver(debounceCheckForSongChange);
-        const observerOptions = {
-            characterData: true,
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['title', 'aria-label', 'src', 'data-test']
-        };
-        songTrackerObserver.observe(targetNode, observerOptions);
-        console.log('LYPLUS: Song tracker observer attached to:', targetNode);
-
-        // Also observe for URL changes (for SPA navigation)
-        let lastUrl = location.href;
-        const urlObserver = new MutationObserver(() => {
-            const currentUrl = location.href;
-            if (currentUrl !== lastUrl) {
-                lastUrl = currentUrl;
-                console.log('LYPLUS: URL changed, checking for song change');
-                setTimeout(checkForSongChange, 500); // Delay to let page load
-            }
-        });
-        urlObserver.observe(document, { subtree: true, childList: true });
-
-    } else {
-        console.log('LYPLUS: No suitable target found for song tracking, retrying...');
-        setTimeout(setupSongTracker, 2000);
-        return;
-    }
-
-    // More frequent periodic checks for better detection
-    setInterval(checkForSongChange, 3000);
-
-    // Multiple initial checks with delays
-    setTimeout(checkForSongChange, 500);
-    setTimeout(checkForSongChange, 1500);
-    setTimeout(checkForSongChange, 3000);
-}
-
-let debounceTimer = null;
-function debounceCheckForSongChange() {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(checkForSongChange, 300);
-}
-
-function checkForSongChange() {
-    const newSongInfo = getSongInfo();
-
-    if (!newSongInfo || !newSongInfo.title.trim() || !newSongInfo.artist.trim()) {
-        return;
-    }
-
-    // Check if current src has changed (for video/audio elements)
-    const videoElement = document.querySelector('video');
-    const audioElement = document.querySelector('audio');
-    const currentSrc = videoElement?.currentSrc || audioElement?.currentSrc || '';
-
-    const hasChanged = (
-        newSongInfo.title !== LYPLUS_currentSong.title ||
-        newSongInfo.artist !== LYPLUS_currentSong.artist ||
-        currentSrc !== LYPLUS_currentSong.currentSrc
-    );
-
-    if (hasChanged) {
-        if (!pendingSongInfo) {
-            pendingSongInfo = { ...newSongInfo, currentSrc };
-            pendingCheckCount = 0;
-            return;
-        }
-
-        if (
-            pendingSongInfo.title === newSongInfo.title &&
-            pendingSongInfo.artist === newSongInfo.artist &&
-            pendingSongInfo.currentSrc === currentSrc
-        ) {
-            pendingCheckCount++;
-
-            const validDuration = newSongInfo.duration && !isNaN(newSongInfo.duration) && newSongInfo.duration > 0;
-            const differentFromOld = newSongInfo.duration !== LYPLUS_currentSong.duration;
-
-            if (validDuration && differentFromOld) {
-                LYPLUS_currentSong = { ...newSongInfo, currentSrc };
-                pendingSongInfo = null;
-                pendingCheckCount = 0;
-
-                window.postMessage({ type: 'LYPLUS_SONG_CHANGED', songInfo: LYPLUS_currentSong }, '*');
-                window.postMessage({ type: 'LYPLUS_updateFullScreenAnimatedBg' }, '*');
-            }
-            else if (pendingCheckCount >= 3) {
-                LYPLUS_currentSong = { ...newSongInfo, currentSrc };
-                pendingSongInfo = null;
-                pendingCheckCount = 0;
-
-                window.postMessage({ type: 'LYPLUS_SONG_CHANGED', songInfo: LYPLUS_currentSong }, '*');
-                window.postMessage({ type: 'LYPLUS_updateFullScreenAnimatedBg' }, '*');
-            }
-        } else {
-            pendingSongInfo = { ...newSongInfo, currentSrc };
-            pendingCheckCount = 0;
-            console.log('LYPLUS: New pending song', pendingSongInfo);
-        }
-    }
-}
-
-
-function getSongInfo() {
-    // Try to get song info from multiple sources with improved reliability
-    let title = '';
-    let artist = '';
-    let album = '';
-
-    // Method 1: Try footer player area (most common)
-    const footerPlayer = document.querySelector('div[data-test="left-column-footer-player"]');
-    if (footerPlayer) {
-        // Get title - try multiple selectors
-        const titleSelectors = [
-            'div[data-test="footer-track-title"] a span',
-            'div[data-test="footer-track-title"] span',
-            '[data-test="footer-track-title"] *:last-child'
-        ];
-
-        for (const selector of titleSelectors) {
-            const titleEl = footerPlayer.querySelector(selector);
-            if (titleEl && titleEl.textContent.trim()) {
-                title = titleEl.textContent.trim();
-                break;
-            }
-        }
-
-        // Get artist - try multiple selectors
-        const artistSelectors = [
-            'a[data-test="grid-item-detail-text-title-artist"]',
-            '[data-test="grid-item-detail-text-title-artist"]',
-            'a[href*="/artist/"]'
-        ];
-
-        for (const selector of artistSelectors) {
-            const artistEl = footerPlayer.querySelector(selector);
-            if (artistEl && artistEl.textContent.trim()) {
-                artist = artistEl.textContent.trim();
-                break;
-            }
-        }
-    }
-
-    // Method 2: Try current page if footer didn't work
-    if (!title || !artist) {
-        const pageSelectors = [
-            {
-                title: 'h1[data-test="entity-title"]',
-                artist: '[data-test="grid-item-detail-text-title-artist"]:first-of-type'
-            },
-            {
-                title: '[data-test="now-playing-title"]',
-                artist: '[data-test="now-playing-artist"]'
-            },
-            {
-                title: '.track-title, .song-title',
-                artist: '.track-artist, .song-artist'
-            }
-        ];
-
-        for (const selectors of pageSelectors) {
-            const titleEl = document.querySelector(selectors.title);
-            const artistEl = document.querySelector(selectors.artist);
-
-            if (titleEl && artistEl && titleEl.textContent.trim() && artistEl.textContent.trim()) {
-                title = title || titleEl.textContent.trim();
-                artist = artist || artistEl.textContent.trim();
-                break;
-            }
-        }
-    }
-
-    // Method 3: Try to get from document title as last resort
-    if (!title && !artist && document.title) {
-        const titleParts = document.title.split(' - ');
-        if (titleParts.length >= 2) {
-            title = titleParts[0].trim();
-            artist = titleParts[1].split(' | ')[0].trim(); // Remove " | TIDAL" part
-        }
-    }
-
-    // Clean up extracted data
-    title = title.replace(/^["']|["']$/g, ''); // Remove quotes
-    artist = artist.replace(/^["']|["']$/g, '');
-
-    // Don't return if we don't have both title and artist
-    if (!title || !artist || title.length < 2 || artist.length < 2) {
-        return null;
-    }
-
-    // Try to get album info
-    const albumSelectors = [
-        '.react-tabs div[role="tabpanel"] a[href*="/album/"]',
-    ];
-
-    for (const selector of albumSelectors) {
-        const albumEl = document.querySelector(selector);
-        if (albumEl && albumEl.textContent.trim() && albumEl.textContent.trim() !== title) {
-            album = albumEl.textContent.trim();
-            break;
-        }
-    }
-
-    // Try to get duration from media element
-    let duration = 0;
-    const mediaElements = [
-        document.querySelector('video'),
-        document.querySelector('audio'),
-        document.querySelector('[data-test="duration"]')
-    ];
-
-    for (const element of mediaElements) {
-        if (element) {
-            if (element.duration && !isNaN(element.duration) && element.duration > 0) {
-                duration = Math.round(element.duration);
-                break;
-            }
-            // Try to parse duration from text content
-            if (element.textContent && /\d+:\d+/.test(element.textContent)) {
-                const timeMatch = element.textContent.match(/(\d+):(\d+)/);
-                if (timeMatch) {
-                    duration = parseInt(timeMatch[1]) * 60 + parseInt(timeMatch[2]);
-                    break;
-                }
-            }
-        }
-    }
-
-    // Try to get cover art
-    let cover = '';
-    const coverSelectors = [
-        'img[data-test="current-media-imagery"]',
-        'img[data-test="entity-image"]',
-        '.player-image img',
-        '.album-cover img'
-    ];
-
-    for (const selector of coverSelectors) {
-        const coverEl = document.querySelector(selector);
-        if (coverEl && coverEl.src) {
-            cover = coverEl.src;
-            break;
-        }
-    }
-
-    const songInfo = {
-        title,
-        artist,
-        album,
-        duration,
-        cover,
-        isVideo: !!document.querySelector('video')
-    };
-
-    return songInfo;
-}
-
 // --- INITIALIZATION ---
 function initialize() {
     console.log('LYPLUS: Initializing Tidal injector...');
@@ -505,12 +295,27 @@ function initialize() {
     // Inject CSS
     // injectPlatformCSS();
 
-    // Start observers
-    startUiObserver();
-    setupSongTracker();
+    setupObservers();
 
     console.log('LYPLUS: Tidal injector initialized');
 }
+
+// --- Setup ---
+let LYPLUS_currentSong = null;
+
+function setupObservers() {
+    startUiObserver();
+}
+
+window.addEventListener('message', (event) => {
+    if (event.source !== window || !event.data) {
+        return;
+    }
+
+    if (event.data.type === 'LYPLUS_SONG_CHANGED') {
+        LYPLUS_currentSong = event.data.songInfo;
+    }
+});
 
 // Start initialization
 initialize();
