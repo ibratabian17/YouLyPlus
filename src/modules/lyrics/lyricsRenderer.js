@@ -1411,7 +1411,7 @@ class LyricsPlusRenderer {
       this.currentPrimaryActiveLine = activeLine;
       this.lastPrimaryActiveLine = activeLine;
       this._lastActiveIndex = activeIndex;
-      this._scrollToActiveLine(activeLine, false, true);
+      this._updatePositionClassesAndScroll(activeLine, true, 0);
     }
 
     this._startLyricsSync(currentSettings);

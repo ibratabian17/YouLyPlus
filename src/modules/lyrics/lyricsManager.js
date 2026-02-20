@@ -40,12 +40,12 @@ const LYRICS_SOURCE_KEYS = ['lyricsProvider', 'lyricsSourceOrder', 'customKpoeUr
 function combineLyricsData(baseLyrics, translation, romanization) {
   const combined = JSON.parse(JSON.stringify(baseLyrics)); // Deep copy
 
-  const translationData = translation?.data;
+  const translationData  = translation?.data;
   const romanizationData = romanization?.data;
 
   combined.data = combined.data.map((line, index) => {
-    const translatedLine = translationData?.[index];
-    const romanizedLine = romanizationData?.[index];
+    const translatedLine  = translationData?.[index];
+    const romanizedLine   = romanizationData?.[index];
     let mergedLine = { ...line };
 
     if (translatedLine?.translatedText) {
@@ -56,10 +56,10 @@ function combineLyricsData(baseLyrics, translation, romanization) {
       const hasWordSyncedRomanization =
         baseLyrics.type === "Word" &&
         romanizedLine.chunk?.length > 0 &&
-        mergedLine.syllables?.length > 0;
+        mergedLine.syllabus?.length > 0;
 
       if (hasWordSyncedRomanization) {
-        mergedLine.syllables = mergedLine.syllables.map((syllable, sylIndex) => {
+        mergedLine.syllabus = mergedLine.syllabus.map((syllable, sylIndex) => {
           const romanizedSyllable = romanizedLine.chunk[sylIndex];
           return {
             ...syllable,
