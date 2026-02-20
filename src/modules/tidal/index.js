@@ -186,47 +186,51 @@ function ensureLyricsTab() {
             tab.setAttribute('data-lyrics-plus-listener', 'true');
 
             tab.addEventListener('click', (e) => {
-                const lTab = document.getElementById('lyrics-plus-tab');
-                const lPanel = document.getElementById('lyrics-plus-panel');
+                setTimeout(() => {
+                    const lTab = document.getElementById('lyrics-plus-tab');
+                    const lPanel = document.getElementById('lyrics-plus-panel');
 
-                if (lTab) {
-                    lTab.setAttribute('aria-selected', 'false');
-                    lTab.classList.remove('_activeTab_f47dafa');
-                }
-                if (lPanel) {
-                    lPanel.style.display = 'none';
-                    lPanel.classList.remove('react-tabs__tab-panel--selected');
-                }
-
-                // Deselect all tabs to prevent multiple actives
-                const currentTablist = document.querySelector('[role="tablist"]');
-                if (currentTablist) {
-                    currentTablist.querySelectorAll('[role="tab"]').forEach(t => {
-                        t.setAttribute('aria-selected', 'false');
-                        t.classList.remove('_activeTab_f47dafa');
-                    });
-                }
-
-                // Hide all panels
-                if (currentTablist && currentTablist.parentNode) {
-                    currentTablist.parentNode.querySelectorAll('[role="tabpanel"]').forEach(panel => {
-                        panel.style.display = 'none';
-                        panel.classList.remove('react-tabs__tab-panel--selected');
-                    });
-                }
-
-                // Manually select clicked tab and panel to work around React optimisations
-                tab.setAttribute('aria-selected', 'true');
-                tab.classList.add('_activeTab_f47dafa');
-
-                const panelId = tab.getAttribute('aria-controls');
-                if (panelId) {
-                    const targetPanel = document.getElementById(panelId);
-                    if (targetPanel) {
-                        targetPanel.style.display = '';
-                        targetPanel.classList.add('react-tabs__tab-panel--selected');
+                    // 1. Hide our custom tab stuff
+                    if (lTab) {
+                        lTab.setAttribute('aria-selected', 'false');
+                        lTab.classList.remove('_activeTab_f47dafa');
                     }
-                }
+                    if (lPanel) {
+                        lPanel.style.display = 'none';
+                        lPanel.classList.remove('react-tabs__tab-panel--selected');
+                    }
+
+                    // 2. Clear all native tabs to ensure no duplicates
+                    const currentTablist = document.querySelector('[role="tablist"]');
+                    if (currentTablist) {
+                        currentTablist.querySelectorAll('[role="tab"]:not(#lyrics-plus-tab)').forEach(t => {
+                            t.setAttribute('aria-selected', 'false');
+                            t.classList.remove('_activeTab_f47dafa');
+                        });
+                    }
+
+                    // 3. Clear our inline overrides from all native panels
+                    if (currentTablist && currentTablist.parentNode) {
+                        currentTablist.parentNode.querySelectorAll('[role="tabpanel"]:not(#lyrics-plus-panel)').forEach(panel => {
+                            panel.style.display = '';
+                            panel.classList.remove('react-tabs__tab-panel--selected');
+                        });
+                    }
+
+                    // 4. Forcefully select the clicked tab incase React desynced
+                    tab.setAttribute('aria-selected', 'true');
+                    tab.classList.add('_activeTab_f47dafa');
+
+                    // 5. Forcefully display the clicked tab's panel
+                    const panelId = tab.getAttribute('aria-controls');
+                    if (panelId) {
+                        const targetPanel = document.getElementById(panelId);
+                        if (targetPanel) {
+                            targetPanel.style.display = '';
+                            targetPanel.classList.add('react-tabs__tab-panel--selected');
+                        }
+                    }
+                }, 10);
             });
         }
     });
@@ -294,6 +298,7 @@ function initialize() {
 
     // Inject CSS
     // injectPlatformCSS();
+    injectDOMScript();
 
     setupObservers();
 

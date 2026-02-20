@@ -104,6 +104,7 @@
       "resources": [
         "src/modules/lyrics/lyrics.css",
         "src/modules/tidal/style.css",
+        "src/lib/parser.js",
         "src/inject/tidal/songTracker.js",
         "src/assets/loading.gif"
       ],
