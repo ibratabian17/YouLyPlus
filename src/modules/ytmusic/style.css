@@ -392,7 +392,7 @@ div#lyrics-song-progressbar {
         display: none !important;
     }
 
-    ytmusic-app-layout[video-mode]:not(:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-mweb-modernization-enabled]):not([is-video-truncation-fix-enabled])[player-fullscreened]>[slot="player-page"] #side-panel {
+    ytmusic-app-layout:not([video-mode]):not([is-mweb-modernization-enabled]):not([is-video-truncation-fix-enabled]):has(ytmusic-player[playback-mode="ATV_PREFERRED"])[player-fullscreened]>[slot="player-page"]:has(#lyrics-plus-container[style*="display: block"]) #side-panel {
         min-width: 45%;
         padding-right: 8em !important;
     }
