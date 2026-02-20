@@ -118,7 +118,7 @@ function convertWordLyricsToLine(lyrics) {
 
   return {
     type: "Line",
-    data: lyrics.data.map(line => ({ ...line, syllables: [] })),
+    data: lyrics.data.map(line => ({ ...line, syllabus: [] })),
     metadata: lyrics.metadata,
     ignoreSponsorblock: lyrics.ignoreSponsorblock
   };
