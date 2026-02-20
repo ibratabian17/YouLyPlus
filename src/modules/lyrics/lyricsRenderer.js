@@ -307,7 +307,7 @@ class LyricsPlusRenderer {
    * @param {NodeListOf<HTMLElement> | Array<HTMLElement>} originalLines - A list of lyric elements.
    */
   _retimingActiveTimings(originalLines) {
-    if (!originalLines || originalLines.length < 2) {
+    if (!originalLines || originalLines.length < 1) {
       return;
     }
 
@@ -316,86 +316,63 @@ class LyricsPlusRenderer {
       startTime: parseFloat(line.dataset.startTime),
       originalEndTime: parseFloat(line.dataset.endTime),
       newEndTime: parseFloat(line.dataset.endTime),
-      isHandledByPrecursorPass: false,
-      isHandledByExtensionPass: false,
     }));
 
-    for (let i = 0; i <= linesData.length - 3; i++) {
-      const lineA = linesData[i];
-      const lineB = linesData[i + 1];
-      const lineC = linesData[i + 2];
-      const aOverlapsB = lineB.startTime < lineA.originalEndTime;
-      const bOverlapsC = lineC.startTime < lineB.originalEndTime;
-      const aDoesNotOverlapC = lineC.startTime >= lineA.originalEndTime;
-      if (aOverlapsB && bOverlapsC && aDoesNotOverlapC) {
-        lineA.newEndTime = lineC.startTime;
-        lineA.isHandledByPrecursorPass = true;
+    let i = 0;
+    while (i < linesData.length) {
+      let endIdx = i;
+      let currentMaxEnd = linesData[i].originalEndTime;
+
+      while (endIdx < linesData.length - 1) {
+        const nextLine = linesData[endIdx + 1];
+        if (currentMaxEnd - nextLine.startTime > 0.001) {
+          endIdx++;
+          currentMaxEnd = Math.max(currentMaxEnd, nextLine.originalEndTime);
+        } else {
+          break;
+        }
       }
-    }
 
-    for (let i = 0; i < linesData.length - 1; i++) {
-      const currentLine = linesData[i];
-      const nextLine = linesData[i + 1];
-      const lineAfterNext = i + 2 < linesData.length ? linesData[i + 2] : null;
+      const cluster = linesData.slice(i, endIdx + 1);
+      const clusterBaseEndTime = Math.max(...cluster.map(line => line.originalEndTime));
+      let clusterFinalEndTime = clusterBaseEndTime;
+      const lineAfterCluster = linesData[endIdx + 1];
 
-      const currentOriginallyLonger = currentLine.originalEndTime > nextLine.originalEndTime;
-      const currentOverlapsNext = nextLine.startTime < currentLine.originalEndTime;
+      if (lineAfterCluster) {
+        const gap = lineAfterCluster.startTime - clusterBaseEndTime;
+        if (gap > 0.001) {
+          const nextElement = linesData[endIdx].element.nextElementSibling;
+          const isFollowedByManualGap = nextElement && nextElement.classList.contains("lyrics-gap");
 
-      const nextHasGapToAfter = lineAfterNext
-        ? lineAfterNext.startTime > nextLine.originalEndTime
-        : true;
-
-      if (currentOriginallyLonger && currentOverlapsNext && nextHasGapToAfter) {
-        const longerEnd = currentLine.originalEndTime;
-
-        let targetEnd = longerEnd;
-        if (lineAfterNext) {
-          const gap = lineAfterNext.startTime - longerEnd;
-          if (gap > 0) {
-            const gapExtension = Math.min(1.3, gap);
-            targetEnd = longerEnd + gapExtension;
-          }
-
-          if (targetEnd > lineAfterNext.startTime) {
-            targetEnd = lineAfterNext.startTime;
+          if (!isFollowedByManualGap) {
+            const extension = Math.min(1.3, gap);
+            clusterFinalEndTime += extension;
           }
         }
-
-        currentLine.newEndTime = targetEnd;
-        currentLine.isHandledByExtensionPass = true;
-        nextLine.newEndTime = targetEnd;
-        nextLine.isHandledByExtensionPass = true;
       }
-    }
 
-    for (let i = linesData.length - 2; i >= 0; i--) {
-      const currentLine = linesData[i];
-      const nextLine = linesData[i + 1];
-      if (currentLine.isHandledByPrecursorPass || currentLine.isHandledByExtensionPass) continue;
+      for (let j = i; j <= endIdx; j++) {
+        let cutoffTime = null;
 
-      const overlap = currentLine.originalEndTime - nextLine.startTime;
-
-      if (overlap > 0.001) {
-        const nextLineWasExtended = nextLine.newEndTime > nextLine.originalEndTime + 0.001;
-
-        if (nextLineWasExtended) {
-          currentLine.newEndTime = nextLine.newEndTime;
+        for (let k = j + 1; k <= endIdx; k++) {
+          if (linesData[j].originalEndTime - linesData[k].startTime <= 0.001) {
+            cutoffTime = linesData[k].startTime;
+            break;
+          }
         }
-      } else if (overlap < -0.001) {
-        const gap = -overlap;
-        const nextElement = currentLine.element.nextElementSibling;
-        const isFollowedByManualGap =
-          nextElement && nextElement.classList.contains("lyrics-gap");
-        if (!isFollowedByManualGap) {
-          const extension = Math.min(1.3, gap);
-          currentLine.newEndTime = currentLine.originalEndTime + extension;
+
+        if (cutoffTime !== null) {
+          linesData[j].newEndTime = cutoffTime;
+        } else {
+          linesData[j].newEndTime = clusterFinalEndTime;
         }
       }
+
+      i = endIdx + 1;
     }
 
     linesData.forEach((lineData) => {
-      lineData.element.dataset.actualEndTime =
-        lineData.originalEndTime.toFixed(3);
+      lineData.element.dataset.actualEndTime = lineData.originalEndTime.toFixed(3);
       if (Math.abs(lineData.newEndTime - lineData.originalEndTime) > 0.001) {
         lineData.element.dataset.endTime = lineData.newEndTime.toFixed(3);
       }
