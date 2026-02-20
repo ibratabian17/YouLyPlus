@@ -55,6 +55,7 @@
     left: 20px;
     width: min-content;
     z-index: 3;
+    height: min-content;
 }
 
 #lyrics-plus-buttons-wrapper button {
