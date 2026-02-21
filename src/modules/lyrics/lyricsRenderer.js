@@ -1031,7 +1031,7 @@ class LyricsPlusRenderer {
 
     if (displayMode === "translate" || displayMode === "both") {
       if (lineData.translatedText &&
-        lineData.text.trim() !== lineData.translatedText.trim()) {
+        lineData.text.toLowerCase().replaceAll(' ', '').trim() !== lineData.translatedText.toLowerCase().replaceAll(' ', '').trim()) {
         const cont = document.createElement("div");
         cont.classList.add("lyrics-translation-container");
         cont.textContent = lineData.translatedText;
