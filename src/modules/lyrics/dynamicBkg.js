@@ -648,7 +648,7 @@ function checkBg() {
         if (isTidal) {
             parent = document.querySelector('#wimp [data-test="now-playing"]');
         } else {
-            parent = document.querySelector('ytmusic-player') || document.querySelector('#layout');
+            parent = document.querySelector('#layout');
         }
 
         if (parent) {
