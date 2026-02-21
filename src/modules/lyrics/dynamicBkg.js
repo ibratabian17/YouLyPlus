@@ -639,7 +639,6 @@ function checkBg() {
 
     if (bgCheckRetryTimeout) clearTimeout(bgCheckRetryTimeout);
 
-    console.log('LYPLUS: trying to attach blur container');
     if (!document.querySelector('.lyplus-blur-container')) {
         console.log('LYPLUS: Reattaching blur container');
         const isTidal = document.querySelector('#wimp');
@@ -658,10 +657,6 @@ function checkBg() {
             console.log('LYPLUS: Target parent not found yet, retrying in 100ms...');
             bgCheckRetryTimeout = setTimeout(checkBg, 100);
         }
-    } else {
-        console.log('LYPLUS: blur container already attached');
-        const container = document.querySelector('.lyplus-blur-container');
-        if (container) console.debug(container.parentElement);
     }
 }
 
