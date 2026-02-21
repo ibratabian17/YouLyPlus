@@ -355,7 +355,10 @@ class LyricsPlusRenderer {
         let cutoffTime = null;
 
         for (let k = j + 1; k <= endIdx; k++) {
-          if (linesData[j].originalEndTime - linesData[k].startTime <= 0.001) {
+          const jNotOverlapK = linesData[j].originalEndTime - linesData[k].startTime <= 0.001;
+          const chainBrokenAtK = linesData[k - 1].originalEndTime - linesData[k].startTime <= 0.001;
+
+          if (jNotOverlapK || chainBrokenAtK) {
             cutoffTime = linesData[k].startTime;
             break;
           }
