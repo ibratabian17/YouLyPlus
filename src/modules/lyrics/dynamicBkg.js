@@ -507,8 +507,12 @@ function processNextArtworkFromQueue() {
     if (pBrowser && pBrowser.runtime) {
         pBrowser.runtime.sendMessage({ type: 'FETCH_IMAGE', url: currentProcessingArtworkIdentifier }, (response) => {
             if (pBrowser.runtime.lastError || !response || !response.success || !response.dataUrl) {
-                console.error("LYPLUS: Failed to fetch image via background script", pBrowser.runtime.lastError || (response && response.error));
-                finalize(createDefaultTexture(), currentTargetMasterArtworkPalette);
+                console.warn("LYPLUS: Failed to fetch image via background script", pBrowser.runtime.lastError || (response && response.error));
+                try {
+                    img.src = currentProcessingArtworkIdentifier;
+                } catch (e) {
+                    finalize(createDefaultTexture(), currentTargetMasterArtworkPalette);
+                }
                 return;
             }
             img.src = response.dataUrl;
