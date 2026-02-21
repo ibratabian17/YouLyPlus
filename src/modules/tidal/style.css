@@ -78,8 +78,19 @@
     left: 80%;
 }
 
-[data-test="now-playing"] .lyplus-blur-container {
+#wimp.dynamic-player [data-test="now-playing"] .lyplus-blur-container {
     display: block;
     position: fixed;
     opacity: 1;
+}
+
+#wimp.dynamic-player:has(#nowPlaying:not([class*="_nowPlayingVisibleAndNotFullscreen"])) ._player_1d16b04._notFullscreen_a82939e {
+    background-color: #0000004d;
+    backdrop-filter: blur(23px);
+    box-shadow: 0 -6px 24px #0000003d;
+}
+
+#wimp.dynamic-player:has(#nowPlaying:not([class*="_nowPlayingVisibleAndNotFullscreen"])) ._mainContainer_6519c30 {
+    display: none !important;
+
 }
