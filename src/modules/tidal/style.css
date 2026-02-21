@@ -77,3 +77,9 @@
     top: 4em;
     left: 80%;
 }
+
+[data-test="now-playing"] .lyplus-blur-container {
+    display: block;
+    position: fixed;
+    opacity: 1;
+}

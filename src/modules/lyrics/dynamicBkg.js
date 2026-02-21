@@ -216,6 +216,7 @@ function LYPLUS_setupBlurEffect() {
 
     if (typeof currentSettings !== 'undefined' && currentSettings.dynamicPlayer) {
         document.querySelector('#layout')?.classList.add("dynamic-player");
+        document.querySelector('#wimp')?.classList.add("dynamic-player");
     }
     const existingContainer = document.querySelector('.lyplus-blur-container');
     if (existingContainer) existingContainer.remove();
@@ -225,7 +226,7 @@ function LYPLUS_setupBlurEffect() {
     webglCanvas = document.createElement('canvas');
     webglCanvas.id = 'lyplus-webgl-canvas';
     blurContainer.appendChild(webglCanvas);
-    (document.querySelector('#layout') || document.body).prepend(blurContainer);
+    (document.querySelector('#wimp [data-test="now-playing"]') || document.querySelector('#layout') || document.body).prepend(blurContainer);
 
     const ctxAttribs = { alpha: false, depth: false, stencil: false, antialias: false, preserveDrawingBuffer: false };
     try {
@@ -460,7 +461,20 @@ function processNextArtworkFromQueue() {
         finalize(tex, pal);
     };
     img.onerror = () => finalize(createDefaultTexture(), currentTargetMasterArtworkPalette);
-    img.src = currentProcessingArtworkIdentifier;
+
+    const pBrowser = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
+    if (pBrowser && pBrowser.runtime) {
+        pBrowser.runtime.sendMessage({ type: 'FETCH_IMAGE', url: currentProcessingArtworkIdentifier }, (response) => {
+            if (pBrowser.runtime.lastError || !response || !response.success || !response.dataUrl) {
+                console.error("LYPLUS: Failed to fetch image via background script", pBrowser.runtime.lastError || (response && response.error));
+                finalize(createDefaultTexture(), currentTargetMasterArtworkPalette);
+                return;
+            }
+            img.src = response.dataUrl;
+        });
+    } else {
+        img.src = currentProcessingArtworkIdentifier;
+    }
 }
 
 // Pre-allocate reusable transform arrays
@@ -586,7 +600,7 @@ function LYPLUS_getSongPalette() {
 
 window.addEventListener('message', (event) => {
     if (event.source === window && event.data?.type === 'LYPLUS_updateFullScreenAnimatedBg') {
-        const el = document.querySelector('.image.ytmusic-player-bar');
+        const el = document.querySelector('.image.ytmusic-player-bar') || document.querySelector('[data-test="current-media-imagery"] img');
         LYPLUS_requestProcessNewArtwork(el ? el.src : null);
     }
 });

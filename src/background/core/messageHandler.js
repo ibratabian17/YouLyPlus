@@ -21,7 +21,8 @@ export class MessageHandler {
       [MESSAGE_TYPES.UPLOAD_LOCAL_LYRICS]: () => this.uploadLocalLyrics(message, sendResponse),
       [MESSAGE_TYPES.GET_LOCAL_LYRICS_LIST]: () => this.getLocalLyricsList(sendResponse),
       [MESSAGE_TYPES.DELETE_LOCAL_LYRICS]: () => this.deleteLocalLyrics(message, sendResponse),
-      [MESSAGE_TYPES.FETCH_LOCAL_LYRICS]: () => this.fetchLocalLyrics(message, sendResponse)
+      [MESSAGE_TYPES.FETCH_LOCAL_LYRICS]: () => this.fetchLocalLyrics(message, sendResponse),
+      [MESSAGE_TYPES.FETCH_IMAGE]: () => this.fetchImage(message, sendResponse)
     };
 
     const handler = handlers[message.type];
@@ -40,13 +41,13 @@ export class MessageHandler {
   }
 
   static async fetchLyrics(message, sendResponse) {
-      try {
-        const { lyrics } = await LyricsService.getOrFetch(message.songInfo, message.forceReload);
-        sendResponse({ success: true, lyrics, metadata: message.songInfo });
-      } catch (error) {
-        console.error(`Failed to fetch lyrics for "${message.songInfo?.title}":`, error);
-        sendResponse({ success: false, error: error.message, metadata: message.songInfo });
-      }
+    try {
+      const { lyrics } = await LyricsService.getOrFetch(message.songInfo, message.forceReload);
+      sendResponse({ success: true, lyrics, metadata: message.songInfo });
+    } catch (error) {
+      console.error(`Failed to fetch lyrics for "${message.songInfo?.title}":`, error);
+      sendResponse({ success: false, error: error.message, metadata: message.songInfo });
+    }
   }
 
   static async translateLyrics(message, sendResponse) {
@@ -161,6 +162,25 @@ export class MessageHandler {
       }
     } catch (error) {
       console.error("Error fetching local lyrics:", error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  static async fetchImage(message, sendResponse) {
+    try {
+      const response = await fetch(message.url);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        sendResponse({ success: true, dataUrl: reader.result });
+      };
+      reader.onerror = () => {
+        sendResponse({ success: false, error: "Failed to read blob" });
+      };
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      console.error("Error fetching image:", error);
       sendResponse({ success: false, error: error.message });
     }
   }
