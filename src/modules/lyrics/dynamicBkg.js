@@ -3,6 +3,7 @@ let gl = null;
 let glProgram = null;
 let blurProgram = null;
 let webglCanvas = null;
+let blurContainerElem = null;
 let needsAnimation = false;
 
 // Extension for VAO
@@ -62,6 +63,8 @@ let artworkTransitionProgress = 1.0;
 let globalAnimationId = null;
 let startTime = 0;
 let lastDrawTime = 0;
+let bgCheckInterval = null;
+let bgObserver = null;
 
 // Artwork Processing
 let isProcessingArtwork = false;
@@ -179,11 +182,26 @@ function handleContextLost(event) {
     vaoExt = null;
     mainVAO = null;
     blurVAO = null;
+    glProgram = null;
+    blurProgram = null;
 }
 
 function handleContextRestored() {
     console.log("LYPLUS: WebGL context restored.");
     LYPLUS_setupBlurEffect();
+
+    let targetUrl = pendingArtworkUrl || lastAppliedArtworkIdentifier;
+    lastAppliedArtworkIdentifier = null;
+    currentProcessingArtworkIdentifier = null;
+    pendingArtworkUrl = null;
+    isProcessingArtwork = false;
+
+    if (targetUrl && targetUrl !== NO_ARTWORK_IDENTIFIER) {
+        LYPLUS_requestProcessNewArtwork(targetUrl);
+    } else {
+        const el = document.querySelector('.image.ytmusic-player-bar') || document.querySelector('[data-test="current-media-imagery"] img');
+        if (el) LYPLUS_requestProcessNewArtwork(el.src);
+    }
 }
 
 function createShader(glCtx, type, source) {
@@ -214,6 +232,9 @@ function createProgram(glCtx, vs, fs) {
 function LYPLUS_setupBlurEffect() {
     console.log("LYPLUS: Setting up Optimized WebGL...");
 
+    canvasDimensions = { width: 0, height: 0 };
+    blurDimensions = { width: 0, height: 0 };
+
     if (typeof currentSettings !== 'undefined' && currentSettings.dynamicPlayer) {
         document.querySelector('#layout')?.classList.add("dynamic-player");
         document.querySelector('#wimp')?.classList.add("dynamic-player");
@@ -221,12 +242,12 @@ function LYPLUS_setupBlurEffect() {
     const existingContainer = document.querySelector('.lyplus-blur-container');
     if (existingContainer) existingContainer.remove();
 
-    const blurContainer = document.createElement('div');
-    blurContainer.classList.add('lyplus-blur-container');
+    blurContainerElem = document.createElement('div');
+    blurContainerElem.classList.add('lyplus-blur-container');
     webglCanvas = document.createElement('canvas');
     webglCanvas.id = 'lyplus-webgl-canvas';
-    blurContainer.appendChild(webglCanvas);
-    (document.querySelector('#wimp [data-test="now-playing"]') || document.querySelector('#layout') || document.body).prepend(blurContainer);
+    blurContainerElem.appendChild(webglCanvas);
+    (document.querySelector('#wimp [data-test="now-playing"]') || document.querySelector('#layout') || document.body).prepend(blurContainerElem);
 
     const ctxAttribs = { alpha: false, depth: false, stencil: false, antialias: false, preserveDrawingBuffer: false };
     try {
@@ -234,6 +255,25 @@ function LYPLUS_setupBlurEffect() {
     } catch (e) { }
 
     if (!gl) return null;
+
+    if (bgObserver) bgObserver.disconnect();
+    bgObserver = new MutationObserver((mutations) => {
+        let isDetached = false;
+        mutations.forEach(m => {
+            Array.from(m.removedNodes).forEach(node => {
+                if (node === blurContainerElem || node.contains?.(blurContainerElem)) {
+                    isDetached = true;
+                }
+            });
+        });
+
+        if (isDetached) {
+            checkBg();
+        }
+    });
+
+    const parent = document.querySelector('#wimp') || document.querySelector('#layout') || document.body;
+    bgObserver.observe(parent, { childList: true, subtree: true });
 
     // Enable VAO extension
     vaoExt = gl.getExtension('OES_vertex_array_object');
@@ -343,6 +383,7 @@ function LYPLUS_setupBlurEffect() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     handleResize();
+    window.removeEventListener('resize', handleResize);
     window.addEventListener('resize', handleResize, { passive: true });
 
     startTime = performance.now() / 1000;
@@ -359,7 +400,7 @@ function LYPLUS_setupBlurEffect() {
         }
     }, { threshold: 0.01 }).observe(webglCanvas);
 
-    return blurContainer;
+    return blurContainerElem;
 }
 
 function handleResize() {
@@ -591,6 +632,40 @@ function animateWebGLBackground(timestamp) {
     }
 }
 
+let bgCheckRetryTimeout = null;
+
+function checkBg() {
+    if (!blurContainerElem) return;
+
+    if (bgCheckRetryTimeout) clearTimeout(bgCheckRetryTimeout);
+
+    console.log('LYPLUS: trying to attach blur container');
+    if (!document.querySelector('.lyplus-blur-container')) {
+        console.log('LYPLUS: Reattaching blur container');
+        const isTidal = document.querySelector('#wimp');
+        let parent = null;
+
+        if (isTidal) {
+            parent = document.querySelector('#wimp [data-test="now-playing"]');
+        } else {
+            parent = document.querySelector('ytmusic-player') || document.querySelector('#layout');
+        }
+
+        if (parent) {
+            parent.prepend(blurContainerElem);
+            if (!globalAnimationId) globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+        } else {
+            console.log('LYPLUS: Target parent not found yet, retrying in 100ms...');
+            bgCheckRetryTimeout = setTimeout(checkBg, 100);
+        }
+    } else {
+        console.log('LYPLUS: blur container already attached');
+        const container = document.querySelector('.lyplus-blur-container');
+        if (container) console.debug(container.parentElement);
+    }
+}
+
+
 const ARTWORK_TRANSITION_SPEED = 0.02;
 
 function LYPLUS_getSongPalette() {
@@ -601,6 +676,11 @@ function LYPLUS_getSongPalette() {
 window.addEventListener('message', (event) => {
     if (event.source === window && event.data?.type === 'LYPLUS_updateFullScreenAnimatedBg') {
         const el = document.querySelector('.image.ytmusic-player-bar') || document.querySelector('[data-test="current-media-imagery"] img');
+        checkBg();
         LYPLUS_requestProcessNewArtwork(el ? el.src : null);
+    }
+
+    if (event.source === window && event.data?.type === 'LYPLUS_reattachBg') {
+        checkBg();
     }
 });
