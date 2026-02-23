@@ -1517,6 +1517,11 @@ class LyricsPlusRenderer {
 
       container.appendChild(fragment);
 
+      //those stuff randomly fix the mix-blend-mode lmao, not sure why but it works
+      const emptyFixedDiv = document.createElement("div");
+      emptyFixedDiv.className = "lyrics-plus-empty-fixed";
+      container.appendChild(emptyFixedDiv);
+
       this.cachedLyricsLines = [];
       this.cachedSyllables = [];
       this.activeLineIds.clear();
