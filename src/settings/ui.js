@@ -250,6 +250,7 @@ function getSourceDisplayName(sourceName) {
     switch (sourceName) {
         case 'lyricsplus': return 'Lyrics+ (User Gen.)';
         case 'apple': return 'Apple Music';
+        case 'qq': return 'QQ Music';
         case 'spotify': return 'Musixmatch (Spotify)';
         case 'musixmatch': return 'Musixmatch (Direct)';
         case 'musixmatch-word': return 'Musixmatch (Word)';
@@ -279,7 +280,7 @@ function createDraggableSourceItem(sourceName) {
 function populateDraggableSources() {
     const draggableContainer = document.getElementById('lyrics-source-order-draggable');
     const availableSourcesDropdown = document.getElementById('available-sources-dropdown');
-    const allowedSources = ['lyricsplus', 'apple', 'spotify', 'musixmatch', 'musixmatch-word'];
+    const allowedSources = ['lyricsplus', 'apple', 'qq', 'spotify', 'musixmatch', 'musixmatch-word'];
 
     if (!draggableContainer || !availableSourcesDropdown) return;
 

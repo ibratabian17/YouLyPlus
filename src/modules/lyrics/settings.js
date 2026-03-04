@@ -4,7 +4,7 @@ const pBrowser = typeof browser !== 'undefined'
 
 const defaultSettings = {
     lyricsProvider: 'kpoe',
-    lyricsSourceOrder: 'apple,lyricsplus,musixmatch,spotify,musixmatch-word',
+    lyricsSourceOrder: 'apple,lyricsplus,qq,musixmatch,spotify,musixmatch-word',
     wordByWord: true,
     lightweight: false,
     isEnabled: true,
