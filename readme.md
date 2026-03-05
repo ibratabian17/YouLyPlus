@@ -1,6 +1,6 @@
 # YouLy+
 
-**Elevate Your YouTube Music, Tidal & Apple Music Experience with Dynamic, Karaoke-Style Lyrics.**
+A web extension to elevate your **YouTube Music, Tidal & Apple Music** Experience with **ultra-performant, word-by-word lyrics**.
 
 [![License](https://img.shields.io/github/license/ibratabian17/YouLyPlus?style=for-the-badge)](https://github.com/ibratabian17/YouLyPlus/blob/main/LICENSE)
 [![Latest Version](https://img.shields.io/github/v/release/ibratabian17/YouLyPlus?style=for-the-badge)](https://github.com/ibratabian17/YouLyPlus/releases)
@@ -8,71 +8,24 @@
 [![GitHub Forks](https://img.shields.io/github/forks/ibratabian17/YouLyPlus?style=for-the-badge&color=blue)](https://github.com/ibratabian17/YouLyPlus/network/members)
 
 <p align="center">
-<img src="https://ibratabian17.github.io/youlyplus-page/assets/youlyplus.png" alt="The Screenshot">
+<img src="youlyplus.png" alt="The Screenshot">
 </p>
 
 ---
 
-## 🌟 Why YouLy+?
+## ➡️ Why YouLy+?
 
-Streaming services offer great libraries, but their web interfaces so trash, with this extension, it replace streaming shitty lyrics player to Apple Music-like lyrics
+Streaming services offer great music libraries, but their web interfaces are buggy, outdated and often only have line-by-line lyrics. **YouLy+ replaces these broken implementations with a word-by-word, lightweight, precise (idts), and visually faithful rendering engine.**
+
+Other open-source projects that provide Apple Music-like lyrics often require dedicated GPUs for full performance. **YouLy+ smartly utilises CSS animations to hit 60FPS on almost any machine with graphics acceleration. See [Performance Reference](#performance-reference).**
+
+## Supported streaming platforms
 
 * **YouTube Music:** Transforms the default static or plain text lyrics into a rich, timed, karaoke-style experience.
-* **Tidal Web (Experimental):** While Tidal Web offers synced lyrics, they are limited to **line-by-line** synchronization. YouLy+ make them to **word-by-word**.
-* **Apple Music Web (Experimental):** The native web player attempts word-by-word sync, but the implementation is flawed:
-    * **Precision Issues:** Native AM Web uses `setTimeout` and their musickit uses timeupdate which is inaccurate, causing lyrics became offsync and hard to read.
-    * **Performance Hog:** Heavy JavaScript-based animations spike CPU usage, causing lag on single-threaded or older devices.
-    * **Broken Layout:** Frequent visual bugs occur with pronunciation guides and word breaks on syllable-synced song lmao.
-    * **Inferior Animation:** The web animations feels so broken, idk how to tell it, but it's a pain.
+* **Tidal Web (Experimental):** While Tidal Web offers synced lyrics, they are limited to **line-by-line** synchronization. YouLy+ makes them **word-by-word**.
+* **Apple Music Web (Experimental):** The native web player attempts word-by-word sync, but the implementation is flawed and inaccurate. YouLy+ replaces their laggy implementation with a CSS-animation driven smooth experience.
 
-**YouLy+ trying to replaces these broken implementations with a lightweight, precise (idts), and visually faithful rendering engine.**
-
-## ✨ Features
-
-YouLy+ is come with a features that designed to fix and enhance your lyrics experience:
-
-### 🎤 Core Lyrics Experience
-
--   **Advanced Synchronized Lyrics:** Enjoy real-time, accurately synced lyrics with line-by-line highlighting. (cuz it uses apple ttml)
--   **Word-by-Word Highlighting:**
-    -   *YouTube Music:* Adds syncing where none exists.
-    -   *Tidal:* Upgrades line-sync to word-sync.
-    -   *Apple Music:* Replaces the buggy native engine with a high-performance alternative.
--   **Apple Music Engine Overhaul:** Replaces the resource-heavy native UI. YouLy+ solves the `setTimeout` drift issues and layout bugs while significantly lowering CPU usage. It also expands the lyric sources—if AM lacks synced lyrics, YouLy+ finds them elsewhere!
--   **Official Subtitle Fallback:** Automatically uses official subtitles if synced lyrics aren't available.
--   **Multiple Providers:** Choose where your lyrics come from! Works seamlessly across all three platforms.
--   **Native Integration:** Replaces default lyrics panels with custom, interactive elements. Click-to-seek, scroll to find lines, and more!
-
-### 🌐 Translation & Romanization
-
--   **Instant Translation:** Translate lyrics on the fly using **Google Translate** or the powerful **Gemini AI/OpenRouter** (API Key are required for LLM/AI Translation).
--   **Romanization:** See lyrics written in the familiar English alphabet, even for languages that use different writing systems (like Japanese, Korean, or Russian).
--   **Full Gemini AI Control:** For advanced users, connect your own Gemini AI account to customize translation instructions and AI settings.
-
-### 🎨 Appearance & Customization
-
--   **Dynamic Theming:** Lyrics and backgrounds automatically adapt to the **song's color palette**.
--   **Visual Effects:** Enable an Apple Music-style **blur for inactive lines** to improve focus.
--   **Custom CSS:** Full control for web designers to inject custom CSS and style the lyrics exactly how they want.
-
-### ⚙️ Performance & Integration
-
--   **Optimized Renderer:** Unlike the native Apple Music Web player, YouLy+ is designed to run smoothly on older hardware (e.g., dual-core CPUs) without freezing the browser.
--   **Performance Modes:** Utilize **Lightweight Mode** or **Compatibility Mode** to ensure 60 FPS animations on any machine.
--   **SponsorBlock Integration:** Automatically adapts lyrics timeline to be following non-music segments like intros, outros, and sponsor messages on music videos (YouTube Music).
--   **Smart Caching:** YouLy+ remembers lyrics it has found, reducing data usage and loading times.
-
-## ⚡ Performance Reference
-
-The benchmark machine used to develop this project is older hardware (AMD FX-6300 + GT 620 from ~2012). YouLy+ is optimized to run where native web players fail.
-
-**GPU Performance (Targeting 60 FPS):**
-* **768p (1366x768):** Stable 60 FPS on **NVIDIA GT 620** (1GB) or equivalent integrated graphics.
-* **1080p (1920x1080):** GTX 650 / GT 1030 or above recommended for a locked 60 FPS.
-    * *Note: For some reason, Chromium Base 144.0.7559.133 has a random bug that causes web became laggy due keep the browser keep relayerizing for no reason. To fix this, simply click anywhere on the site. We can't do anything about it as it's an engine bug. As of February 8, 2026.*
-    * *Additional Notes: This benchmark is for Windows. Other operating systems may have different performance.*
-
-## ⬇️ Installation
+## Installation
 
 ### ⭐ Recommended: Install from Official Stores
 
@@ -114,7 +67,7 @@ For the safest and easiest experience, install YouLy+ directly from your browser
 
 </details>
 
-## 🚀 Usage
+## Usage
 
 Once installed, simply open one of the supported players:
 * **[YouTube Music](https://music.youtube.com/)**
@@ -126,15 +79,51 @@ Play any song, and the lyrics panel will automatically be enhanced by YouLy+.
 -   **Quick Settings:** Access quick toggles by clicking the YouLy+ icon in your browser's toolbar.
 -   **Full Settings:** For comprehensive customization, click **"More Settings"** from the popup.
 
-## ☁️ Self-Hosting & Open Source
+## Features
 
-YouLy+ is proudly open-source, offering full transparency and control to its users.
+### Core Features
 
--   **Client (The Extension):** The code for the YouLy+ extension itself is completely open for anyone to look at and change.
--   **Server (Lyrics+ Provider):** The main source for lyrics (Lyrics+) is also open for anyone to see its code. You can even set up your own version of it if you want! Find the server code here:
-    -   [**ibratabian17/lyricsplus**](https://github.com/ibratabian17/lyricsplus)
+-   **Word-by-word, syllable-synced lyrics**: YouLy+ features real-time, accurately synced lyrics with word-by-word highlighting.
+-   **Apple Music engine overhaul**: Replaces the resource-heavy native UI. YouLy+ solves the `setTimeout` drift issues and layout bugs while significantly lowering CPU usage. It also expands the lyric sources—if AM lacks synced lyrics, YouLy+ finds them elsewhere!
+-   **Multi-platform fallback**: Automatically searches multiple platforms to find lyrics for almost every song.
+-   **Fits seamlessly**: Replaces default lyrics panels out of the box with designs that fit in to whichever platform you use.
 
-## 🧑‍💻 Development
+### Translation & Romanization
+
+-   **Instant Translation**: YouLy+ utilises label-provided translations but also supports **Google Translate** and **Gemini/OpenRouter** (BYO API key) translations.
+-   **Romanization**: For different writing systems, YouLy+ can provide romanisations from the label or via Google Translate.
+-   **Full Gemini AI Control**: For advanced users, connect your own Gemini AI account to customize translation instructions and AI settings.
+
+### Appearance & Customization
+
+-   **Dynamic Theming**: Lyrics and backgrounds automatically adapt to the **song's color palette**.
+-   **Custom CSS**: Full control for advanced users to inject custom CSS and style the lyrics exactly how you want.
+
+### Performance
+
+-   **Optimized Renderer**: YouLy+ is designed and tested to run smoothly on older hardware without noticeable lag.
+-   **Lightweight Mode**: The renderer hits 60FPS out of the box on a M1 MBA. **Lightweight Mode** can be used to hit 60FPS even worse machines without much change in the experience - beating all competitors.
+-   **SponsorBlock Integration:** Automatically adapts lyrics timeline to follow non-music segments like intros, outros, and sponsors on music videos (YouTube Music).
+
+## Performance Reference
+
+The benchmark machine used to develop this project is older hardware (AMD FX-6300 + GT 620 from ~2012). YouLy+ is optimized to run where native web players fail.
+
+### GPU Performance (Targeting 60 FPS)
+
+- **768p (1366x768):** Stable 60 FPS on **NVIDIA GT 620** (1GB) or equivalent integrated graphics.
+- **1080p (1920x1080):** GTX 650 / GT 1030 or above recommended for a locked 60 FPS.
+    * *Note: For some reason, Chromium 144.0.7559.133 has a random bug that causes lag because of a browser issue. To fix this, simply click anywhere on the site. We can't do anything about it because it's an engine bug. (February 8, 2026)*
+
+- Tested on a M1 MacBook Air (base specs, 1680x1050 Retina display), YouLy+ stays stable at 60FPS with little decrease in battery life.
+
+## Self-Hosting & Open Source
+
+YouLy+ is proudly open-source.
+
+**Backend API (Lyrics+):** YouLy+ mainly utilises Lyrics+ for lyrics. This API is also fully open-source. If you could host your instance, YouLy+ would benefit lots from it! See instructions at the repo: [**ibratabian17/lyricsplus**](https://github.com/ibratabian17/lyricsplus)
+
+## Development
 
 If you're interested in contributing to or modifying YouLy+:
 
@@ -145,7 +134,7 @@ If you're interested in contributing to or modifying YouLy+:
 2.  **Load the Extension:**
     Use your browser’s "Load unpacked" feature (as described in the [Installation](#installation) section) to test your changes in real-time.
 
-## 📦 Packaging
+## Packaging
 
 To create distributable `.zip` files for various browsers:
 
@@ -156,9 +145,9 @@ To create distributable `.zip` files for various browsers:
 
 These scripts will generate optimized packages for different browsers within the `dist/` folder.
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are highly welcome! Please feel free to fork this repository and submit a pull request. For significant changes or new features, it's recommended to open an issue first to discuss your ideas.
+Contributions are very appreciated! Please feel free to fork this repository and submit a pull request. For significant changes or new features, it's recommended to open an issue first to discuss your ideas.
 
 This project is a dedicated effort covering both the client extension and the server backend. If YouLy+ enhances your music experience, please consider supporting its continued development:
 
