@@ -1038,6 +1038,9 @@ class LyricsPlusRenderer {
         const cont = document.createElement("div");
         cont.classList.add("lyrics-translation-container");
         cont.textContent = lineData.translatedText;
+        if (this._isRTL(lineData.translatedText)) {
+          cont.classList.add("rtl-text");
+        }
         lineElement.appendChild(cont);
       }
     }

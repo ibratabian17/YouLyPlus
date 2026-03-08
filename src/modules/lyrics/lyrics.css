@@ -720,6 +720,79 @@ span.lyrics-source-provider {
     direction: rtl !important;
 }
 
+/* --- Translation container: break out of parent RTL direction ---
+   Four cases based on parent line direction and translation text direction:
+   A) LTR line  + LTR translation  → left-align,  direction: ltr  (default)
+   B) RTL line  + LTR translation  → right-align, direction: ltr
+   C) LTR line  + RTL translation  → right-align, direction: rtl  (.rtl-text on container)
+   D) RTL line  + RTL translation  → right-align, direction: rtl
+   JS adds .rtl-text to the container when translatedText contains RTL chars. */
+
+/* Case A: LTR translation under LTR line (default) */
+.lyrics-translation-container {
+    direction: ltr;
+    unicode-bidi: plaintext;
+    text-align: start;
+}
+
+/* Case B: LTR translation under RTL line */
+.lyrics-line.rtl-text .lyrics-translation-container:not(.rtl-text) {
+    direction: ltr;
+    unicode-bidi: plaintext;
+    text-align: end;
+}
+
+/* Case C: RTL translation under LTR line ("flipped" — e.g. Arabic is the translation) */
+.lyrics-line:not(.rtl-text) .lyrics-translation-container.rtl-text {
+    direction: rtl;
+    unicode-bidi: embed;
+    text-align: start;
+}
+
+/* Case D: RTL translation under RTL line */
+.lyrics-line.rtl-text .lyrics-translation-container.rtl-text {
+    direction: rtl;
+    unicode-bidi: embed;
+    text-align: start;
+}
+
+/* LTR singer-right: line is right-aligned, LTR translation follows */
+.lyrics-line.singer-right:not(.rtl-text) .lyrics-translation-container:not(.rtl-text) {
+    text-align: end;
+}
+
+/* --- Romanization alignment for dual-direction / dual-side mode ---  */
+
+/* mixed-direction + dual-side: RTL singer-right text is explicitly
+   right-aligned, so romanization (always LTR) must mirror that. */
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics
+    .lyrics-line.rtl-text.singer-right
+    .lyrics-romanization-container {
+    text-align: end;
+}
+
+/* mixed-direction + dual-side: RTL singer-left text is left-aligned */
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics
+    .lyrics-line.rtl-text.singer-left
+    .lyrics-romanization-container {
+    text-align: start;
+}
+
+/* Non-mixed dual-side: RTL singer-right is pushed right via padding-left;
+   romanization stays left-aligned so it tracks under the Arabic glyphs. */
+#lyrics-plus-container.dual-side-lyrics:not(.mixed-direction-lyrics)
+    .lyrics-line.rtl-text.singer-right
+    .lyrics-romanization-container {
+    text-align: start;
+}
+
+/* Non-mixed dual-side: RTL singer-left is pushed left via padding-right */
+#lyrics-plus-container.dual-side-lyrics:not(.mixed-direction-lyrics)
+    .lyrics-line.rtl-text.singer-left
+    .lyrics-romanization-container {
+    text-align: end;
+}
+
 .lyrics-romanization-container .lyrics-syllable {
     white-space: pre-wrap;
 }
