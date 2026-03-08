@@ -3,6 +3,7 @@
 // ==================================================================================================
 
 import { MessageHandler } from './core/messageHandler.js';
+import { LyricsService } from './core/lyricsService.js';
 
 const pBrowser = typeof browser !== 'undefined'
   ? browser
@@ -13,6 +14,7 @@ const pBrowser = typeof browser !== 'undefined'
 // ==================================================================================================
 
 console.log('Service Worker initialized');
+LyricsService.clearExpiredCache();
 
 if (pBrowser?.runtime?.onMessage) {
   pBrowser.runtime.onMessage.addListener((message, sender, sendResponse) => {

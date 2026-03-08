@@ -3,7 +3,7 @@
 // ==================================================================================================
 
 import { state } from '../storage/state.js';
-import { lyricsDB, localLyricsDB } from '../storage/database.js';
+import { lyricsDB, localLyricsDB, translationsDB } from '../storage/database.js';
 import { SettingsManager } from '../storage/settings.js';
 import { CONFIG, PROVIDERS } from '../constants.js';
 import { DataParser } from '../utils/dataParser.js';
@@ -15,6 +15,35 @@ import { YouTubeService } from '../services/youtubeService.js';
 export class LyricsService {
   static createCacheKey(songInfo) {
     return `${songInfo.title} - ${songInfo.artist} - ${songInfo.album} - ${songInfo.duration}`;
+  }
+
+  static async clearExpiredCache() {
+    try {
+      const settings = await SettingsManager.get({ cacheStrategy: 'aggressive' });
+
+      if (settings.cacheStrategy === 'none') {
+        const stats = await lyricsDB.estimateSize();
+        if (stats.count > 0) {
+          await Promise.all([lyricsDB.clear(), translationsDB.clear()]);
+          console.log('Cleared all cache as strategy is none.');
+        }
+        return;
+      }
+
+      const expirationTime = CONFIG.CACHE_EXPIRY[settings.cacheStrategy];
+      if (!expirationTime) return;
+
+      const [deletedLyrics, deletedTrans] = await Promise.all([
+        lyricsDB.deleteExpired(expirationTime),
+        translationsDB.deleteExpired(expirationTime)
+      ]);
+
+      if (deletedLyrics > 0 || deletedTrans > 0) {
+        console.log(`Cleared expired cache: ${deletedLyrics} lyrics, ${deletedTrans} translations.`);
+      }
+    } catch (error) {
+      console.error('Error clearing expired cache:', error);
+    }
   }
 
   static async getOrFetch(songInfo, forceReload = false) {
@@ -33,7 +62,7 @@ export class LyricsService {
         console.log('Using embedded lyrics (platform specific)');
         return embeddedResult;
       }
-      
+
       console.log('Apple Music TTML bypass active. Attempting to fetch external lyrics...');
       embeddedFallback = embeddedResult;
     }

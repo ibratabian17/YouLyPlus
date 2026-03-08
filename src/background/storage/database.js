@@ -12,7 +12,7 @@ class DatabaseManager {
   open() {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.config.name, this.config.version);
-      
+
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
         if (!db.objectStoreNames.contains(this.config.store)) {
@@ -20,7 +20,7 @@ class DatabaseManager {
           db.createObjectStore(this.config.store, { keyPath });
         }
       };
-      
+
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
@@ -32,7 +32,7 @@ class DatabaseManager {
       const transaction = db.transaction([this.config.store], "readonly");
       const store = transaction.objectStore(this.config.store);
       const request = store.get(key);
-      
+
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
@@ -52,13 +52,41 @@ class DatabaseManager {
     store.delete(key);
   }
 
+  async deleteExpired(expirationTimeMs) {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.config.store], "readwrite");
+      const store = transaction.objectStore(this.config.store);
+      const request = store.openCursor();
+
+      const now = Date.now();
+      let deletedCount = 0;
+
+      request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          const record = cursor.value;
+          if (record.timestamp && (now - record.timestamp > expirationTimeMs)) {
+            cursor.delete();
+            deletedCount++;
+          }
+          cursor.continue();
+        } else {
+          resolve(deletedCount);
+        }
+      };
+
+      request.onerror = () => reject(request.error);
+    });
+  }
+
   async getAll() {
     const db = await this.open();
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.config.store], "readonly");
       const store = transaction.objectStore(this.config.store);
       const request = store.getAll();
-      
+
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
@@ -81,7 +109,7 @@ class DatabaseManager {
 
       const transaction = db.transaction([this.config.store], "readonly");
       const store = transaction.objectStore(this.config.store);
-      
+
       const getAllRequest = store.getAll();
       const countRequest = store.count();
 
