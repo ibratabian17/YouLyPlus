@@ -5,8 +5,7 @@
   "description": "Enhanced lyrics feature for YouTube Music, Apple Music & Tidal with line-by-line and word-by-word sync",
   "permissions": [
     "activeTab",
-    "storage",
-    "scripting"
+    "storage"
   ],
   "host_permissions": [
     "*://*.music.youtube.com/*",
