@@ -37,7 +37,7 @@ let blurTextureA = null;
 // Constants
 const BLUR_DOWNSAMPLE = 1;
 const BLUR_RADIUS = 7;
-const TARGET_FPS = 30;
+const TARGET_FPS = 40;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
 
 // Animation State
@@ -48,6 +48,17 @@ let currentTargetMasterArtworkPalette = {
     primary: { r: 255, g: 255, b: 255 },
     secondary: { r: 200, g: 200, b: 200 }
 };
+
+let LYPLUS_bgConfig = {
+    dynamicPlayerSelectors: [],
+    blurContainerParentSelector: 'body',
+    mutationObserverRootSelector: 'body',
+    artworkSelector: ''
+};
+
+function LYPLUS_setBgConfig(config) {
+    Object.assign(LYPLUS_bgConfig, config);
+}
 
 // Layer Config 
 const ROTATION_POWER = 0.8;
@@ -199,7 +210,7 @@ function handleContextRestored() {
     if (targetUrl && targetUrl !== NO_ARTWORK_IDENTIFIER) {
         LYPLUS_requestProcessNewArtwork(targetUrl);
     } else {
-        const el = document.querySelector('.image.ytmusic-player-bar') || document.querySelector('[data-test="current-media-imagery"] img');
+        const el = LYPLUS_bgConfig.artworkSelector ? document.querySelector(LYPLUS_bgConfig.artworkSelector) : null;
         if (el) LYPLUS_requestProcessNewArtwork(el.src);
     }
 }
@@ -236,8 +247,9 @@ function LYPLUS_setupBlurEffect() {
     blurDimensions = { width: 0, height: 0 };
 
     if (typeof currentSettings !== 'undefined' && currentSettings.dynamicPlayer) {
-        document.querySelector('#layout')?.classList.add("dynamic-player");
-        document.querySelector('#wimp')?.classList.add("dynamic-player");
+        LYPLUS_bgConfig.dynamicPlayerSelectors.forEach(sel => {
+            document.querySelector(sel)?.classList.add("dynamic-player");
+        });
     }
     const existingContainer = document.querySelector('.lyplus-blur-container');
     if (existingContainer) existingContainer.remove();
@@ -247,7 +259,7 @@ function LYPLUS_setupBlurEffect() {
     webglCanvas = document.createElement('canvas');
     webglCanvas.id = 'lyplus-webgl-canvas';
     blurContainerElem.appendChild(webglCanvas);
-    (document.querySelector('#wimp [data-test="now-playing"]') || document.querySelector('#layout') || document.body).prepend(blurContainerElem);
+    (document.querySelector(LYPLUS_bgConfig.blurContainerParentSelector) || document.body).prepend(blurContainerElem);
 
     const ctxAttribs = { alpha: false, depth: false, stencil: false, antialias: false, preserveDrawingBuffer: false };
     try {
@@ -272,7 +284,7 @@ function LYPLUS_setupBlurEffect() {
         }
     });
 
-    const parent = document.querySelector('#wimp') || document.querySelector('#layout') || document.body;
+    const parent = document.querySelector(LYPLUS_bgConfig.mutationObserverRootSelector) || document.body;
     bgObserver.observe(parent, { childList: true, subtree: true });
 
     // Enable VAO extension
@@ -446,7 +458,7 @@ function LYPLUS_requestProcessNewArtwork(url) {
         } else {
             // Temporary, recheck later
             artworkCheckTimeoutId = setTimeout(() => {
-                const el = document.querySelector('.image.ytmusic-player-bar');
+                const el = LYPLUS_bgConfig.artworkSelector ? document.querySelector(LYPLUS_bgConfig.artworkSelector) : null;
                 LYPLUS_requestProcessNewArtwork(el ? el.src : null);
             }, ARTWORK_RECHECK_DELAY);
             return;
@@ -645,14 +657,7 @@ function checkBg() {
 
     if (!document.querySelector('.lyplus-blur-container')) {
         console.log('LYPLUS: Reattaching blur container');
-        const isTidal = document.querySelector('#wimp');
-        let parent = null;
-
-        if (isTidal) {
-            parent = document.querySelector('#wimp [data-test="now-playing"]');
-        } else {
-            parent = document.querySelector('#layout');
-        }
+        const parent = document.querySelector(LYPLUS_bgConfig.blurContainerParentSelector);
 
         if (parent) {
             parent.prepend(blurContainerElem);
@@ -674,7 +679,7 @@ function LYPLUS_getSongPalette() {
 
 window.addEventListener('message', (event) => {
     if (event.source === window && event.data?.type === 'LYPLUS_updateFullScreenAnimatedBg') {
-        const el = document.querySelector('.image.ytmusic-player-bar') || document.querySelector('[data-test="current-media-imagery"] img');
+        const el = LYPLUS_bgConfig.artworkSelector ? document.querySelector(LYPLUS_bgConfig.artworkSelector) : null;
         checkBg();
         LYPLUS_requestProcessNewArtwork(el ? el.src : null);
     }

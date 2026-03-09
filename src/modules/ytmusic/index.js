@@ -1,5 +1,14 @@
 // ytmusic/index.js
 
+if (typeof LYPLUS_setBgConfig === 'function') {
+    LYPLUS_setBgConfig({
+        dynamicPlayerSelectors: ['#layout'],
+        blurContainerParentSelector: '#layout',
+        mutationObserverRootSelector: '#layout',
+        artworkSelector: '.image.ytmusic-player-bar'
+    });
+}
+
 // This script is the bridge between the generic renderer and the YouTube Music UI
 
 // 1. Platform-specific implementations

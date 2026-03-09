@@ -1,3 +1,12 @@
+if (typeof LYPLUS_setBgConfig === 'function') {
+    LYPLUS_setBgConfig({
+        dynamicPlayerSelectors: ['#wimp'],
+        blurContainerParentSelector: '#wimp [data-test="now-playing"]',
+        mutationObserverRootSelector: '#wimp',
+        artworkSelector: '[data-test="current-media-imagery"] img'
+    });
+}
+
 let lyricsRendererInstance = null;
 let pendingSongInfo = null;
 let pendingCheckCount = 0;
