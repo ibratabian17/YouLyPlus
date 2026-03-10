@@ -612,3 +612,9 @@ Lyrics+ without any visual bug*/
     }
 
 }
+
+:root:has(#better-lyrics-kawarp-player) {
+    .lyplus-blur-container {
+        display: none !important;
+    }
+}
