@@ -115,6 +115,7 @@ function setupAutoSaveListeners() {
         { id: 'hide-offscreen', key: 'hideOffscreen', type: 'checkbox' },
         { id: 'blur-inactive', key: 'blurInactive', type: 'checkbox' },
         { id: 'dynamic-player', key: 'dynamicPlayer', type: 'checkbox' },
+        { id: 'audio-beat-sync', key: 'audioBeatSync', type: 'checkbox' },
         { id: 'useSongPaletteFullscreen', key: 'useSongPaletteFullscreen', type: 'checkbox' },
         { id: 'useSongPaletteAllModes', key: 'useSongPaletteAllModes', type: 'checkbox' },
         { id: 'overridePaletteColor', key: 'overridePaletteColor', type: 'value', debounce: 500 },
@@ -204,6 +205,7 @@ function updateUI(settings) {
     setCheck('hide-offscreen', currentSettings.hideOffscreen);
     setCheck('blur-inactive', currentSettings.blurInactive);
     setCheck('dynamic-player', currentSettings.dynamicPlayer);
+    setCheck('audio-beat-sync', currentSettings.audioBeatSync);
     setCheck('useSongPaletteFullscreen', currentSettings.useSongPaletteFullscreen);
     setCheck('useSongPaletteAllModes', currentSettings.useSongPaletteAllModes);
     setVal('overridePaletteColor', currentSettings.overridePaletteColor);

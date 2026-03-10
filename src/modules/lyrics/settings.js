@@ -15,6 +15,7 @@ const defaultSettings = {
     hideOffscreen: true,
     blurInactive: false,
     dynamicPlayer: false,
+    audioBeatSync: false,
     customCSS: '',
     translationProvider: 'google',
     geminiApiKey: '',

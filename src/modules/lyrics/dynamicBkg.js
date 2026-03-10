@@ -76,6 +76,111 @@ let startTime = 0;
 let lastDrawTime = 0;
 let bgCheckInterval = null;
 let bgObserver = null;
+let lyplusAccumulatedPerimeterTime = 0;
+const BEAT_ROT_BOOST = [0.28, -0.18, 0.02];
+const BEAT_SPD_BOOST = [0.8, 0.2, 0.5];
+const BEAT_SCALE_BOOST = [0.2, 0.34, 0.39];
+const BEAT_SCALE_DECAY = 2;                 // decays to zero over 1 second
+const layerRotOffset = [0, 0, 0];
+const layerPerimTime = [0, 0, 0];
+const layerBeatScale = [0, 0, 0];
+let beatEnergyBaseline = 0;
+
+const LYPLUS_FFT_SIZE      = 2048;
+
+const LYPLUS_connectedElements = new WeakSet();
+
+let LYPLUS_audioState = {
+    ctx:                  null,
+    analyser:             null,
+    element:              null,
+    resumeContextHandler: null,
+
+    beatPulse:    0,
+};
+
+
+function processAudioPulse() {
+    if (typeof currentSettings === 'undefined' || !currentSettings.audioBeatSync) {
+        LYPLUS_audioState.beatPulse *= 0.9;
+        return;
+    }
+
+    const currentElement = document.querySelector('audio, video');
+
+    if (!LYPLUS_audioState.ctx && currentElement) {
+        try {
+            const ac = new (window.AudioContext || window.webkitAudioContext)();
+
+            if (ac.state === 'suspended') {
+                LYPLUS_audioState.resumeContextHandler = () => {
+                    LYPLUS_audioState.ctx?.resume();
+                    document.removeEventListener('click',   LYPLUS_audioState.resumeContextHandler);
+                    document.removeEventListener('keydown', LYPLUS_audioState.resumeContextHandler);
+                    LYPLUS_audioState.resumeContextHandler = null;
+                };
+                document.addEventListener('click',   LYPLUS_audioState.resumeContextHandler);
+                document.addEventListener('keydown', LYPLUS_audioState.resumeContextHandler);
+            }
+
+            const an = ac.createAnalyser();
+            an.fftSize               = LYPLUS_FFT_SIZE;
+            an.smoothingTimeConstant = 0.8;
+
+            LYPLUS_audioState.ctx      = ac;
+            LYPLUS_audioState.analyser = an;
+
+            if (!LYPLUS_connectedElements.has(currentElement)) {
+                const src = ac.createMediaElementSource(currentElement);
+                src.connect(an);
+                src.connect(ac.destination);
+                LYPLUS_connectedElements.add(currentElement);
+            }
+            LYPLUS_audioState.element = currentElement;
+
+        } catch (e) {
+            console.warn('LYPLUS: init failed', e);
+            LYPLUS_audioState.ctx = { failed: true };
+        }
+
+    } else if (
+        LYPLUS_audioState.ctx && !LYPLUS_audioState.ctx.failed &&
+        currentElement && currentElement !== LYPLUS_audioState.element
+    ) {
+        try {
+            if (!LYPLUS_connectedElements.has(currentElement)) {
+                const src = LYPLUS_audioState.ctx.createMediaElementSource(currentElement);
+                src.connect(LYPLUS_audioState.analyser);
+                src.connect(LYPLUS_audioState.ctx.destination);
+                LYPLUS_connectedElements.add(currentElement);
+            }
+            LYPLUS_audioState.element = currentElement;
+        } catch (e) {
+            console.warn('LYPLUS: reconnect failed', e);
+        }
+    }
+
+    const s = LYPLUS_audioState;
+    if (s.ctx && !s.ctx.failed && s.analyser && s.element && !s.element.paused) {
+
+        const bufferLength = s.analyser.frequencyBinCount;
+        const dataArray    = new Uint8Array(bufferLength);
+        s.analyser.getByteTimeDomainData(dataArray);
+
+        const vol = s.element.volume;
+        const volumeMultiplier = vol > 0.005 ? 1 / vol : 1;
+
+        let peak = 0;
+        for (let i = 0; i < bufferLength; i++) {
+            const amplitude = Math.abs(dataArray[i] - 128) / 128 * volumeMultiplier;
+            if (amplitude > peak) peak = amplitude;
+        }
+
+        s.beatPulse = peak;
+    } else {
+        s.beatPulse *= 0.9;
+    }
+}
 
 // Artwork Processing
 let isProcessingArtwork = false;
@@ -545,25 +650,39 @@ function animateWebGLBackground(timestamp) {
         globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         return;
     }
+    const elapsedSec = Math.min(elapsed / 1000.0, 0.1);
     lastDrawTime = timestamp - (elapsed % FRAME_INTERVAL);
 
     const currentTime = lastDrawTime / 1000 - startTime;
     if (artworkTransitionProgress < 1.0) {
-        artworkTransitionProgress = Math.min(1.0, artworkTransitionProgress + ARTWORK_TRANSITION_SPEED * 1.5); // Slightly faster transition
+        artworkTransitionProgress = Math.min(1.0, artworkTransitionProgress + ARTWORK_TRANSITION_SPEED * 1.5);
         if (artworkTransitionProgress >= 1.0) needsAnimation = false;
     }
 
-    const shouldRender = (typeof currentSettings === 'undefined' || !currentSettings.lightweight || needsAnimation);
+    const shouldRender = (typeof currentSettings === 'undefined' || !currentSettings.lightweight || needsAnimation || currentSettings.audioBeatSync);
 
-    // --- RENDER PASS ---
+    processAudioPulse();
+    const pulse = typeof LYPLUS_audioState !== 'undefined' ? LYPLUS_audioState.beatPulse : 0;
+
+    beatEnergyBaseline += (pulse - beatEnergyBaseline) * Math.min(1.0, 0.8 * elapsedSec);
+    const relativePulse = Math.max(0, pulse - beatEnergyBaseline);
+
+    for (let i = 0; i < 3; i++) {
+        layerRotOffset[i] += elapsedSec * pulse * BEAT_ROT_BOOST[i];
+        layerPerimTime[i]  += elapsedSec * (1.0 + pulse * BEAT_SPD_BOOST[i]);
+
+        const attackSpeed = 12.0;
+        const decaySpeed  = BEAT_SCALE_DECAY;
+        const speed = relativePulse > layerBeatScale[i] ? attackSpeed : decaySpeed;
+        layerBeatScale[i] += (relativePulse - layerBeatScale[i]) * Math.min(1.0, speed * elapsedSec);
+    }
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
     gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    // it's Optional if drawing full screen quads over everything, but i think it's more safer to keep. <3
 
     gl.useProgram(glProgram);
 
-    // Use VAO if available
     if (vaoExt) {
         vaoExt.bindVertexArrayOES(mainVAO);
     } else {
@@ -578,26 +697,29 @@ function animateWebGLBackground(timestamp) {
     gl.activeTexture(gl.TEXTURE0);
     gl.uniform1i(u_main_artworkTexture, 0);
 
-    // Draw logic for Cross-fading
     const drawLayers = (tex, progress) => {
         if (progress <= 0.001) return;
         gl.bindTexture(gl.TEXTURE_2D, tex);
         gl.uniform1f(u_main_transitionProgress, progress);
 
         for (let i = 0; i < 3; i++) {
-            const rot = INITIAL_ROTATIONS[i] + (ROTATION_SPEEDS[i] * currentTime * ROTATION_POWER);
+            const rot = INITIAL_ROTATIONS[i] + (ROTATION_SPEEDS[i] * currentTime * ROTATION_POWER) + layerRotOffset[i];
 
             const bx = LAYER_BASE_POSITIONS[i * 2];
             const by = LAYER_BASE_POSITIONS[i * 2 + 1];
 
             const offset = i * 0.33;
-            const t = ((offset + PERIMETER_DIRECTION[i] * PERIMETER_SPEEDS[i] * currentTime) % 1.0);
+            const t = ((offset + PERIMETER_DIRECTION[i] * PERIMETER_SPEEDS[i] * layerPerimTime[i]) % 1.0);
             const angle = t * 6.283185307;
             const px = Math.abs(bx) * Math.cos(angle);
             const py = Math.abs(by) * Math.sin(angle);
 
+            const bs = layerBeatScale[i];
+            const smoothBS = bs * bs * (3.0 - 2.0 * bs);
+            const scale = LAYER_SCALES[i] + smoothBS * BEAT_SCALE_BOOST[i];
+
             _layerParams[0] = rot;
-            _layerParams[1] = LAYER_SCALES[i];
+            _layerParams[1] = scale;
             _layerParams[2] = px;
             _layerParams[3] = py;
 
@@ -611,7 +733,6 @@ function animateWebGLBackground(timestamp) {
 
     if (vaoExt) vaoExt.bindVertexArrayOES(null);
 
-    // --- BLUR PASS 1  ---
     gl.useProgram(blurProgram);
     gl.uniform1f(u_blur_radius, BLUR_RADIUS);
 
@@ -631,7 +752,6 @@ function animateWebGLBackground(timestamp) {
     gl.bindTexture(gl.TEXTURE_2D, renderTexture);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    // --- BLUR PASS 2 (Vertical to Screen) ---
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
     gl.uniform2f(u_blur_direction, 0.0, 1.0);
@@ -656,14 +776,12 @@ function checkBg() {
     if (bgCheckRetryTimeout) clearTimeout(bgCheckRetryTimeout);
 
     if (!document.querySelector('.lyplus-blur-container')) {
-        console.log('LYPLUS: Reattaching blur container');
         const parent = document.querySelector(LYPLUS_bgConfig.blurContainerParentSelector);
 
         if (parent) {
             parent.prepend(blurContainerElem);
             if (!globalAnimationId) globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         } else {
-            console.log('LYPLUS: Target parent not found yet, retrying in 100ms...');
             bgCheckRetryTimeout = setTimeout(checkBg, 100);
         }
     }
