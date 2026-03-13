@@ -1021,6 +1021,10 @@ class LyricsPlusRenderer {
               tr.className = "lyrics-syllable transliteration";
               wrap.appendChild(tr);
 
+              if (currentSettings.hidePhoneticDup && this._getDataText(s, false).trim() === this._getDataText(s, true).trim()) {
+                tr.classList.add("hidden");
+              }
+
               tr.textContent = transTxt;
               tr.dataset.startTime = s.time;
               tr.dataset.duration = s.duration;

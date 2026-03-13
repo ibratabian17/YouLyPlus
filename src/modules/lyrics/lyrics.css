@@ -398,6 +398,10 @@
     -ms-user-select: none;
 }
 
+.lyrics-syllable.transliteration.hidden {
+    display: none;
+}
+
 .lyrics-word:has(.transliteration) .lyrics-syllable:not(.transliteration) {
     line-height: 1.5em;
 }

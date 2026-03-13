@@ -32,6 +32,7 @@ const defaultSettings = {
     useSongPaletteAllModes: false,
     overridePaletteColor: '',
     largerTextMode: 'lyrics', // 'lyrics' or 'romanization'
+    hidePhoneticDup: false,
     customKpoeUrl: '',
     appleMusicTTMLBypass: false,
     YTSongInfo: false,
