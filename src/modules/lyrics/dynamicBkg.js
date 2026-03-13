@@ -84,11 +84,32 @@ const BEAT_SCALE_DECAY = 2;                 // decays to zero over 1 second
 const layerRotOffset = [0, 0, 0];
 const layerPerimTime = [0, 0, 0];
 const layerBeatScale = [0, 0, 0];
+const layerBeatRot   = [0, 0, 0];
 let beatEnergyBaseline = 0;
 
 const LYPLUS_FFT_SIZE      = 2048;
 
 const LYPLUS_connectedElements = new WeakSet();
+
+let _audioDataArray = null;
+
+const LYPLUS_MEDIA_SELECTORS = [
+    'video.video-stream.html5-main-video',
+    'video#video-one',
+    'audio',
+    'video',
+];
+let _cachedMediaElement = null;
+
+function _resolveMediaElement() {
+    if (_cachedMediaElement && _cachedMediaElement.isConnected) return _cachedMediaElement;
+    for (const sel of LYPLUS_MEDIA_SELECTORS) {
+        const el = document.querySelector(sel);
+        if (el) { _cachedMediaElement = el; return el; }
+    }
+    _cachedMediaElement = null;
+    return null;
+}
 
 let LYPLUS_audioState = {
     ctx:                  null,
@@ -106,7 +127,7 @@ function processAudioPulse() {
         return;
     }
 
-    const currentElement = document.querySelector('audio, video');
+    const currentElement = _resolveMediaElement();
 
     if (!LYPLUS_audioState.ctx && currentElement) {
         try {
@@ -164,7 +185,11 @@ function processAudioPulse() {
     if (s.ctx && !s.ctx.failed && s.analyser && s.element && !s.element.paused) {
 
         const bufferLength = s.analyser.frequencyBinCount;
-        const dataArray    = new Uint8Array(bufferLength);
+
+        if (!_audioDataArray || _audioDataArray.length !== bufferLength) {
+            _audioDataArray = new Uint8Array(bufferLength);
+        }
+        const dataArray = _audioDataArray;
         s.analyser.getByteTimeDomainData(dataArray);
 
         const vol = s.element.volume;
@@ -668,13 +693,17 @@ function animateWebGLBackground(timestamp) {
     const relativePulse = Math.max(0, pulse - beatEnergyBaseline);
 
     for (let i = 0; i < 3; i++) {
-        layerRotOffset[i] += elapsedSec * pulse * BEAT_ROT_BOOST[i];
         layerPerimTime[i]  += elapsedSec * (1.0 + pulse * BEAT_SPD_BOOST[i]);
 
         const attackSpeed = 12.0;
         const decaySpeed  = BEAT_SCALE_DECAY;
         const speed = relativePulse > layerBeatScale[i] ? attackSpeed : decaySpeed;
+
+        // Scale — smooth attack/decay + smoothstep
         layerBeatScale[i] += (relativePulse - layerBeatScale[i]) * Math.min(1.0, speed * elapsedSec);
+
+        // Rotation — same smooth system as scale
+        layerBeatRot[i] += (relativePulse - layerBeatRot[i]) * Math.min(1.0, speed * elapsedSec);
     }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
@@ -703,7 +732,13 @@ function animateWebGLBackground(timestamp) {
         gl.uniform1f(u_main_transitionProgress, progress);
 
         for (let i = 0; i < 3; i++) {
-            const rot = INITIAL_ROTATIONS[i] + (ROTATION_SPEEDS[i] * currentTime * ROTATION_POWER) + layerRotOffset[i];
+            const bs = layerBeatScale[i];
+            const smoothBS = bs * bs * (3.0 - 2.0 * bs);
+
+            const br = layerBeatRot[i];
+            const smoothBR = br * br * (3.0 - 2.0 * br);
+
+            const rot = INITIAL_ROTATIONS[i] + (ROTATION_SPEEDS[i] * currentTime * ROTATION_POWER) + smoothBR * BEAT_ROT_BOOST[i];
 
             const bx = LAYER_BASE_POSITIONS[i * 2];
             const by = LAYER_BASE_POSITIONS[i * 2 + 1];
@@ -714,8 +749,6 @@ function animateWebGLBackground(timestamp) {
             const px = Math.abs(bx) * Math.cos(angle);
             const py = Math.abs(by) * Math.sin(angle);
 
-            const bs = layerBeatScale[i];
-            const smoothBS = bs * bs * (3.0 - 2.0 * bs);
             const scale = LAYER_SCALES[i] + smoothBS * BEAT_SCALE_BOOST[i];
 
             _layerParams[0] = rot;
