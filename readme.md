@@ -113,7 +113,6 @@ The benchmark machine used to develop this project is older hardware (AMD FX-630
 
 - **768p (1366x768):** Stable 60 FPS on **NVIDIA GT 620** (1GB) or equivalent integrated graphics.
 - **1080p (1920x1080):** GTX 650 / GT 1030 or above recommended for a locked 60 FPS.
-    * *Note: For some reason, Chromium 144.0.7559.133 has a random bug that causes lag because of a browser issue. To fix this, simply click anywhere on the site. We can't do anything about it because it's an engine bug. (February 8, 2026)*
 
 - Tested on a M1 MacBook Air (base specs, 1680x1050 Retina display), YouLy+ stays stable at 60FPS with little decrease in battery life.
 
