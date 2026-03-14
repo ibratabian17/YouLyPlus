@@ -33,6 +33,7 @@ const defaultSettings = {
     overridePaletteColor: '',
     largerTextMode: 'lyrics', // 'lyrics' or 'romanization'
     hidePhoneticDup: false,
+    bkgOverlap: true,
     customKpoeUrl: '',
     appleMusicTTMLBypass: false,
     YTSongInfo: false,

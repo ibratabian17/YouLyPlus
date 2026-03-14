@@ -112,6 +112,7 @@ function setupAutoSaveListeners() {
         // Appearance
         { id: 'larger-text-mode', key: 'largerTextMode', type: 'value' },
         { id: 'hide-phoneticdup', key: 'hidePhoneticDup', type: 'checkbox' },
+        { id: 'bkg-overlap', key: 'bkgOverlap', type: 'checkbox' },
         { id: 'lightweight', key: 'lightweight', type: 'checkbox' },
         { id: 'hide-offscreen', key: 'hideOffscreen', type: 'checkbox' },
         { id: 'blur-inactive', key: 'blurInactive', type: 'checkbox' },
@@ -203,6 +204,7 @@ function updateUI(settings) {
     setVal('larger-text-mode', currentSettings.largerTextMode);
     updateCustomSelectDisplay('larger-text-mode');
     setCheck('hide-phoneticdup', currentSettings.hidePhoneticDup);
+    setCheck('bkg-overlap', currentSettings.bkgOverlap);
     setCheck('lightweight', currentSettings.lightweight);
     setCheck('hide-offscreen', currentSettings.hideOffscreen);
     setCheck('blur-inactive', currentSettings.blurInactive);

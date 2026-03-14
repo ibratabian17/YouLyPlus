@@ -259,11 +259,21 @@
 
 .lyrics-line .background-vocal-container {
     max-height: 0;
-    padding-top: 0.2em;
     overflow: visible;
     opacity: 0;
     font-size: var(--lyplus-font-size-subtext);
     transition: max-height .3s, opacity .6s, padding .6s;
+}
+
+.lyrics-line .background-vocal-wrap.onTop {
+    padding-top: 0.0em;
+    padding-bottom: 0.26em;
+}
+
+.lyrics-line .background-vocal-wrap {
+    display: block;
+    padding-top: 0.26em;
+    padding-bottom: 0.0em;
 }
 
 .lyrics-line.active .background-vocal-container {

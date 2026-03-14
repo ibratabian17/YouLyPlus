@@ -756,11 +756,33 @@ class LyricsPlusRenderer {
         }
 
         // DOM Insertion
+        const MoveEarlier = currentSettings.bkgOverlap;
+        let backgroundInnerWrap = backgroundContainer?.querySelector(".background-vocal-wrap");
         const targetContainer = isBgWord
-          ? backgroundContainer ||
-          ((backgroundContainer = document.createElement("p")),
-            (backgroundContainer.className = "background-vocal-container"),
-            currentLineContainer.appendChild(backgroundContainer))
+          ? backgroundInnerWrap ||
+          (() => {
+            backgroundContainer = document.createElement("p");
+            backgroundContainer.className = "background-vocal-container";
+
+            backgroundInnerWrap = document.createElement("span");
+            backgroundInnerWrap.className = "background-vocal-wrap";
+            backgroundContainer.appendChild(backgroundInnerWrap);
+
+            if (MoveEarlier) {
+              const firstMainSyllable = mainContainer.querySelector(".lyrics-syllable");
+              const mainStartTime = firstMainSyllable ? firstMainSyllable._startTimeMs : Infinity;
+
+              if (currentWordStartTime < mainStartTime) {
+                currentLineContainer.prepend(backgroundContainer);
+              } else {
+                currentLineContainer.appendChild(backgroundContainer);
+              }
+            } else {
+              currentLineContainer.appendChild(backgroundContainer);
+            }
+
+            return backgroundInnerWrap;
+          })()
           : mainContainer;
 
         targetContainer.appendChild(wordSpan);
