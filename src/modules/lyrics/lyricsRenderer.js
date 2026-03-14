@@ -2490,10 +2490,20 @@ class LyricsPlusRenderer {
     ];
 
     if (!this._positionClassedLines) this._positionClassedLines = [];
-    for (let _pi = 0; _pi < this._positionClassedLines.length; _pi++) {
-      this._positionClassedLines[_pi].classList.remove(...positionClasses);
+
+    // On a force-scroll (seek/click) the previous active line may be far outside
+    // the tracked window, so fall back to a full sweep to guarantee cleanup.
+    if (forceScroll) {
+      this.lyricsContainer
+        .querySelectorAll("." + positionClasses.join(", ."))
+        .forEach((el) => el.classList.remove(...positionClasses));
+      this._positionClassedLines.length = 0;
+    } else {
+      for (let _pi = 0; _pi < this._positionClassedLines.length; _pi++) {
+        this._positionClassedLines[_pi].classList.remove(...positionClasses);
+      }
+      this._positionClassedLines.length = 0;
     }
-    this._positionClassedLines.length = 0;
 
     lineToScroll.classList.add("lyrics-activest");
     this._positionClassedLines.push(lineToScroll);
