@@ -773,6 +773,7 @@ class LyricsPlusRenderer {
               const mainStartTime = firstMainSyllable ? firstMainSyllable._startTimeMs : Infinity;
 
               if (currentWordStartTime < mainStartTime) {
+                backgroundContainer.classList.add("onTop");
                 currentLineContainer.prepend(backgroundContainer);
               } else {
                 currentLineContainer.appendChild(backgroundContainer);
