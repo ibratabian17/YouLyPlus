@@ -15,12 +15,13 @@ export const CONFIG = {
   },
 
   KPOE_SERVERS: [
+    //plz dont stole lmao
+    "https://lyricsplus.prjktla.my.id", //youly's server
     "https://lyricsplus.atomix.one/", //meow's mirror
-    "https://lyricsplus-seven.vercel.app", //jigen's mirror
+    "https://lyricsplus.binimum.org", //binimum's server
     "https://lyricsplus.prjktla.workers.dev", //ibra's cf worker
-    "http://ly.mxtiy.xyz/", //painfueg0's server (http only)
+    "https://lyricsplus-seven.vercel.app", //jigen's mirror
     "https://lyrics-plus-backend.vercel.app", //ibra's vercel
-    "https://youlyplus.binimum.org" //binimum's server (spotify fetch didnt work)
   ],
 
   GEMINI: {
