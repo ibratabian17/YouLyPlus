@@ -2395,16 +2395,6 @@ class LyricsPlusRenderer {
       animatingLines.length = 0;
     }
 
-    for (let _ai = 0; _ai < animatingLines.length; _ai++) {
-      const _lineAnims = animatingLines[_ai].getAnimations();
-      for (let _li = 0; _li < _lineAnims.length; _li++) {
-        if (_lineAnims[_li].animationName === 'lyrics-scroll') {
-          _lineAnims[_li].cancel();
-          _lineAnims[_li].play();
-        }
-      }
-    }
-
     const targetTop = Math.max(0, -newTranslateY);
     const prevOffset = -parent.scrollTop || this.currentScrollOffset || 0;
     const delta = prevOffset - newTranslateY;
@@ -2430,12 +2420,29 @@ class LyricsPlusRenderer {
     if (referenceIndex === -1) return;
 
     const delayIncrement = duration * 0.1;
-    const lookBehind = 5;
     const lookAhead = 20;
     const len = this.cachedLyricsLines.length;
 
-    const start = Math.max(0, referenceIndex - lookBehind);
-    const end = Math.min(len, referenceIndex + lookAhead);
+
+    let visMin = referenceIndex;
+    let visMax = referenceIndex;
+    if (this.visibleLineIds.size > 0) {
+      const visIds = this.visibleLineIds;
+      for (let vi = 0; vi < len; vi++) {
+        if (visIds.has(this.cachedLyricsLines[vi].id)) {
+          if (vi < visMin) visMin = vi;
+          if (vi > visMax) visMax = vi;
+        }
+      }
+    }
+
+    // start = earliest edge of the current visible viewport (or referenceIndex
+    //         if the active line is already above visible content).
+    // end   = target visible viewport: from referenceIndex out by lookAhead,
+    //         but never less than the current visible bottom so departing lines
+    //         also animate out smoothly.
+    const start = Math.min(visMin, referenceIndex);
+    const end = Math.min(len, Math.max(visMax, referenceIndex) + lookAhead);
 
     let maxAnimationDuration = 0;
     let delayCounter = 0;
