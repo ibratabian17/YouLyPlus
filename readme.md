@@ -32,14 +32,15 @@ Other open-source projects that provide Apple Music-like lyrics often require de
 For the safest and easiest experience, install YouLy+ directly from your browser's web store. This ensures you get automatic updates and a verified version of the extension.
 
 <p float="left">
+<a href="https://chromewebstore.google.com/detail/youly+/pboadpgpgabkmepmgchhlnlfnimlnmoe" target="_blank"><img src="https://developer.chrome.com/static/docs/webstore/branding/image/iNEddTyWiMfLSwFD6qGq.png" alt="Google Chrome Webstore Extensions" height="60"/></a>
 <a href="https://addons.mozilla.org/en-US/firefox/addon/youly/" target="_blank"><img src="https://blog.mozilla.org/addons/files/2020/04/get-the-addon-fx-apr-2020.svg" alt="Firefox Add-ons" height="60"/></a>
 <a href="https://microsoftedge.microsoft.com/addons/detail/youly/gichhhcjpkhbidkecadfejcjgcmdlnpb" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Get_it_from_Microsoft_Badge.svg" alt="Microsoft Edge Extensions" height="60"/></a>
 </p>
 
 <details>
-<summary><b>For Chrome Users, Developers & Advanced Users: Install from Source</b></summary>
+<summary><b>For Developers & Advanced Users: Install from Source</b></summary>
 
-### For Chrome (Manifest V3)
+### For Chromium Based Browsers (Manifest V3)
 
 1.  **Clone or Download the Repository:**
     ```bash
