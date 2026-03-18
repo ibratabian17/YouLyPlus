@@ -286,7 +286,7 @@ function createDraggableSourceItem(sourceName) {
 function populateDraggableSources() {
     const draggableContainer = document.getElementById('lyrics-source-order-draggable');
     const availableSourcesDropdown = document.getElementById('available-sources-dropdown');
-    const allowedSources = ['lyricsplus', 'apple', 'qq', 'spotify', 'musixmatch', 'musixmatch-word'];
+    const allowedSources = ['lyricsplus', 'apple', 'qq', 'musixmatch', 'musixmatch-word'];
 
     if (!draggableContainer || !availableSourcesDropdown) return;
 
