@@ -24,8 +24,6 @@
         return playerInstance;
     }
 
-    // --- Observers & Listeners ---
-
     function setupMutationObserver() {
         const metadataContainer = document.querySelector('ytmusic-player-bar .content-info-wrapper')
             || document.querySelector('ytmusic-player-bar .left-controls');
@@ -93,8 +91,6 @@
         }
     }
 
-    // --- DOM Metadata Extraction (Fallback) ---
-
     function getMetadataFromDOM() {
         const bar = document.querySelector('ytmusic-player-bar');
         if (!bar) return null;
@@ -106,7 +102,6 @@
 
         const title = titleEl.textContent.trim();
         const bylineText = bylineEl.textContent.trim();
-
         const allLinks = Array.from(bylineEl.querySelectorAll('a'));
 
         let artistNames = [];
@@ -127,13 +122,32 @@
             }
         });
 
-        let artist = artistNames.length > 0 ? artistNames.join(", ") : (bylineText.split('•')[0]?.trim() || "");
-        let album = albumName;
+        const artist = artistNames.length > 0
+            ? artistNames.join(", ")
+            : (bylineText.split('•')[0]?.trim() || "");
 
-        return { title, artist, album, isVideo: album === "" };
+        return { title, artist, album: albumName, isVideo: albumName === "" };
     }
 
-    // --- API Metadata Extraction ---
+    function getMediaSessionArtist() {
+        return navigator.mediaSession?.metadata?.artist || "";
+    }
+
+    // Splits "Artist - Title" / "Artist — Title" patterns common in user uploads.
+    // Returns { artist, title } or null if the pattern doesn't match.
+    function parseArtistTitle(rawTitle) {
+        if (!rawTitle) return null;
+
+        const match = rawTitle.match(/^(.+?)\s*[–—-]\s*(.+)$/);
+        if (!match) return null;
+
+        const left = match[1].trim();
+        const right = match[2].trim();
+
+        if (!left || !right || /^\d+(:\d+)+$/.test(left) || /^\d+$/.test(left)) return null;
+
+        return { artist: left, title: right };
+    }
 
     function extractAlbumFromDescription(description, title) {
         if (!description) return null;
@@ -141,28 +155,22 @@
         const lines = description.split('\n')
                                  .map(l => l.trim())
                                  .filter(l => l.length > 0);
-        
+
         const providedIndex = lines.findIndex(line => line.startsWith('Provided to YouTube'));
-        
+
         if (providedIndex !== -1 && lines.length > providedIndex + 2) {
             const potentialAlbum = lines[providedIndex + 2];
-            
-            if (!isMetadataLine(potentialAlbum)) {
-                return potentialAlbum;
-            }
+            if (!isMetadataLine(potentialAlbum)) return potentialAlbum;
         }
 
         if (title) {
-            const separator = ' · ';
-            const titleIndex = lines.findIndex(line => 
-                line.includes(separator) && (line.startsWith(title) || line.includes(title))
+            const titleIndex = lines.findIndex(line =>
+                line.includes(' · ') && (line.startsWith(title) || line.includes(title))
             );
 
             if (titleIndex !== -1 && lines.length > titleIndex + 1) {
                 const potentialAlbum = lines[titleIndex + 1];
-                if (!isMetadataLine(potentialAlbum)) {
-                    return potentialAlbum;
-                }
+                if (!isMetadataLine(potentialAlbum)) return potentialAlbum;
             }
         }
 
@@ -170,13 +178,11 @@
     }
 
     function isMetadataLine(line) {
-        return line.startsWith('℗') || 
-               line.startsWith('Released on') || 
+        return line.startsWith('℗') ||
+               line.startsWith('Released on') ||
                line.startsWith('Auto-generated') ||
                line.match(/^Composer:/);
     }
-    
-    // --- API Helpers ---
 
     async function fetchFromYouTube(videoId, clientName, clientVersion) {
         try {
@@ -187,13 +193,8 @@
                     "accept-language": "en-US,en;q=0.9"
                 },
                 body: JSON.stringify({
-                    context: {
-                        client: {
-                            clientName: clientName,
-                            clientVersion: clientVersion
-                        }
-                    },
-                    videoId: videoId
+                    context: { client: { clientName, clientVersion } },
+                    videoId
                 })
             });
             if (!response.ok) return null;
@@ -206,47 +207,31 @@
 
     async function fetchMetadataDual(videoId) {
         const [remixData, legacyData] = await Promise.all([
-            // Artist list & Titles
             fetchFromYouTube(videoId, "WEB_REMIX", "1.20260204.03.00"),
-        
-            // Description -> Album
             fetchFromYouTube(videoId, "WEB", "2.20230327.07.00")
         ]);
 
         if (!remixData && !legacyData) return null;
+
         const rDetails = remixData?.videoDetails || {};
         const rMicro = remixData?.microformat?.microformatDataRenderer || {};
-        
-        const title = rDetails.title || rMicro.title || "";
-        
-        const artist = rDetails.author || "";
-
-        const thumbnails = rDetails.thumbnail?.thumbnails || rMicro.thumbnail?.thumbnails || [];
-        const artwork = thumbnails.length > 0 ? thumbnails[thumbnails.length - 1].url : "";
-
-        const duration = parseInt(rDetails.lengthSeconds || 0);
-
         const lDetails = legacyData?.videoDetails || {};
         const lMicro = legacyData?.microformat?.playerMicroformatRenderer || {};
-        
+
+        const title = rDetails.title || rMicro.title || "";
+        const artist = rDetails.author || "";
+        const thumbnails = rDetails.thumbnail?.thumbnails || rMicro.thumbnail?.thumbnails || [];
+        const artwork = thumbnails.length > 0 ? thumbnails[thumbnails.length - 1].url : "";
+        const duration = parseInt(rDetails.lengthSeconds || 0);
         const fullDescription = lDetails.shortDescription || lMicro.description?.simpleText || "";
-        const extractedAlbum = extractAlbumFromDescription(fullDescription, title);
+        const album = extractAlbumFromDescription(fullDescription, title);
 
-        return {
-            title: title,
-            artist: artist,
-            album: extractedAlbum,
-            artwork: artwork,
-            duration: duration,
-            videoId: videoId
-        };
+        return { title, artist, album, artwork, duration, videoId };
     }
-
-    // --- Main Logic ---
 
     async function checkForSongChange() {
         const player = getPlayer();
-        const domInfo = getMetadataFromDOM(); 
+        const domInfo = getMetadataFromDOM();
 
         if (!player) return;
 
@@ -264,26 +249,32 @@
         }
 
         if (videoId !== currentSong.videoId || (domInfo && domInfo.title !== currentSong.title)) {
-            
+
             const apiData = await fetchMetadataDual(videoId);
 
-            let finalTitle = apiData?.title || domInfo?.title || "Unknown Title";
-            let finalArtist = apiData?.artist || domInfo?.artist || "Unknown Artist";
-            let finalArtwork = apiData?.artwork || "";
-            let finalDuration = apiData?.duration || duration;
-            
-            let finalAlbum = apiData?.album || domInfo?.album || "";
+            const rawTitle = apiData?.title || domInfo?.title || "";
+            const parsed = parseArtistTitle(rawTitle);
 
-            const isVideo = !finalAlbum;
+            const finalTitle = parsed?.title || rawTitle || "Unknown Title";
+            const finalArtist =
+                apiData?.artist         ||
+                parsed?.artist          ||
+                domInfo?.artist         ||
+                getMediaSessionArtist() ||
+                "Unknown Artist";
+
+            const finalArtwork = apiData?.artwork || "";
+            const finalDuration = apiData?.duration || duration;
+            const finalAlbum = apiData?.album || domInfo?.album || "";
 
             currentSong = {
                 title: finalTitle,
                 artist: finalArtist,
                 album: finalAlbum,
                 duration: finalDuration,
-                videoId: videoId,
+                videoId,
                 artwork: finalArtwork,
-                isVideo: isVideo
+                isVideo: !finalAlbum
             };
 
             startTimeUpdater();
@@ -293,7 +284,6 @@
         }
     }
 
-    // Start
     init();
 
 })();
