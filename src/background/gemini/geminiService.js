@@ -33,7 +33,8 @@ export class GeminiService {
           },
           source_language: {
             type: "ARRAY",
-            description: "The source language(s) of the original lyrics."
+            description: "The source language(s) of the original lyrics.",
+            items: { type: "STRING" }
           }
         },
         required: ["translated_lyrics", "target_language"]
