@@ -646,22 +646,26 @@ function processNextArtworkFromQueue() {
     img.onerror = () => finalize(createDefaultTexture(), currentTargetMasterArtworkPalette);
 
     const pBrowser = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
-    if (pBrowser && pBrowser.runtime) {
-        pBrowser.runtime.sendMessage({ type: 'FETCH_IMAGE', url: currentProcessingArtworkIdentifier }, (response) => {
-            if (pBrowser.runtime.lastError || !response || !response.success || !response.dataUrl) {
-                console.warn("LYPLUS: Failed to fetch image via background script", pBrowser.runtime.lastError || (response && response.error));
-                try {
-                    img.src = currentProcessingArtworkIdentifier;
-                } catch (e) {
+
+    img.onerror = () => {
+        if (pBrowser && pBrowser.runtime) {
+            console.warn("LYPLUS: Direct img.src failed, retrying via background fetch...");
+            pBrowser.runtime.sendMessage({ type: 'FETCH_IMAGE', url: currentProcessingArtworkIdentifier }, (response) => {
+                if (pBrowser.runtime.lastError || !response || !response.success || !response.dataUrl) {
+                    console.warn("LYPLUS: Background fetch also failed", pBrowser.runtime.lastError || (response && response.error));
                     finalize(createDefaultTexture(), currentTargetMasterArtworkPalette);
+                    return;
                 }
-                return;
-            }
-            img.src = response.dataUrl;
-        });
-    } else {
-        img.src = currentProcessingArtworkIdentifier;
-    }
+                // Re-wire handlers for the retry load
+                img.onerror = () => finalize(createDefaultTexture(), currentTargetMasterArtworkPalette);
+                img.src = response.dataUrl;
+            });
+        } else {
+            finalize(createDefaultTexture(), currentTargetMasterArtworkPalette);
+        }
+    };
+
+    img.src = currentProcessingArtworkIdentifier;
 }
 
 // Pre-allocate reusable transform arrays
