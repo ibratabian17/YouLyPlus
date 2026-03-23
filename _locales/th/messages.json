@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "คุณสมบัติเนื้อเพลงขั้นสูงสำหรับ YouTube Music, Apple Music & Tidal พร้อมการซิงค์แบบบรรทัดต่อบรรทัดและคำต่อคำ",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "การตั้งค่า YouLy+",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "ทั่วไป",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "รูปลักษณ์",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "ขั้นสูง",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "คุณสมบัติหลัก",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "เปิดใช้งาน YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "แหล่งข้อมูล",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "ผู้ให้บริการเนื้อเพลงหลัก",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "รวมกับ SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "การตั้งค่าการแสดงผล",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "โหมดประหยัดทรัพยากร",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "ไฮไลต์แบบคำต่อคำ",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "การจัดการข้อมูล",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "พื้นที่ที่ใช้:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "จำนวนรายการที่แคช:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "ล้างแคช",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "รีเฟรช",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "การตั้งค่าเพิ่มเติม",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "บันทึกการตั้งค่าแล้ว! โปรดรีเฟรชหน้า YouTube เพื่อใช้การเปลี่ยนแปลง",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "เกิดข้อผิดพลาดในการบันทึกการตั้งค่า",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "ล้างแคชสำเร็จแล้ว!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearFailed": {
+    "message": "ล้างแคชไม่สำเร็จ",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "เกิดข้อผิดพลาดในการสื่อสารเพื่อล้างแคช",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "รีเฟรชข้อมูลแคชแล้ว",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "ไม่สามารถล้างแคชได้: API ส่วนขยายไม่พร้อมใช้งาน",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "การตั้งค่า YouLy+",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "ทั่วไป",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "แหล่งที่มา",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "รูปลักษณ์",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "การแปล",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "แคช",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "เนื้อเพลงในเครื่อง",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "เกี่ยวกับ",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "บันทึกการตั้งค่าแล้ว โปรดรีสตาร์ทแท็บเพลงของคุณเพื่อให้การเปลี่ยนแปลงมีผล",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "บันทึกการตั้งค่าแล้ว โปรดรีสตาร์ท $PLATFORMS$ เพื่อให้การเปลี่ยนแปลงมีผล",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "รีสตาร์ท",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "รีสตาร์ทแท็บ",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "ฟังก์ชันหลัก",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "เปิดหรือปิดการทำงานของส่วนขยายทั้งหมด",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "เปิดใช้งานการไฮไลต์แบบคำต่อคำสไตล์คาราโอเกะเมื่อมีข้อมูล",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "การตั้งค่า YouTube Music",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "เปิดใช้งานข้อมูลเพลงแบบเต็มหน้าจอ",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "แสดงรายละเอียดเพลงในโหมดเต็มหน้าจอ รวมถึงแถบความคืบหน้า วันที่วางจำหน่าย ชื่อเพลง และศิลปิน",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "ใช้ SponsorBlock API",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "ข้ามส่วนที่ไม่ใช่เพลง เช่น ช่วงแนะนำ ช่วงจบ หรือช่วงโฆษณาสปอนเซอร์",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "การตั้งค่า Apple Music",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "เลือกใช้เนื้อเพลงภายนอกสำหรับเพลงที่มีการซิงค์แบบบรรทัด",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "หากเปิดใช้งาน แอปจะใช้แหล่งเนื้อเพลงภายนอกหาก Apple Music ให้บริการเฉพาะการซิงค์แบบบรรทัดแทนที่จะเป็นแบบคำต่อคำ",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "แหล่งที่มา",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "ผู้ให้บริการเนื้อเพลง",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "ผู้ให้บริการเนื้อเพลงเริ่มต้น",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "เลือกแหล่งเนื้อเพลงที่คุณต้องการ",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "URL เซิร์ฟเวอร์ KPoe แบบกำหนดเอง",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "ป้อน URL พื้นฐานสำหรับเซิร์ฟเวอร์ KPoe ที่คุณโฮสต์เอง",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "ลำดับแหล่งข้อมูล Lyrics+",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "ลากและวางเพื่อจัดลำดับแหล่งที่มาสำหรับ Lyrics+",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "แหล่งข้อมูลที่มีอยู่",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "เพิ่มแหล่งข้อมูล",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "เพิ่มแหล่งข้อมูลทั้งหมดแล้ว",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "โปรดเลือกแหล่งข้อมูลที่ต้องการเพิ่ม",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "มีแหล่งข้อมูล \"$NAME$\" อยู่แล้ว",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "เพิ่ม \"$NAME$\" แล้ว",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "ลบ \"$NAME$\" แล้ว",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "เนื้อเพลงในเครื่อง",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "จัดการเนื้อเพลงที่อัปโหลด",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "ยังไม่มีเนื้อเพลงในเครื่องที่อัปโหลด",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "รีเฟรชรายการ",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "เพิ่มเนื้อเพลงในเครื่องใหม่",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "อัปโหลดเนื้อเพลงในเครื่องใหม่",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "ชื่อเพลง",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "ชื่อศิลปิน",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "ชื่ออัลบั้ม (ไม่บังคับ)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "ไฟล์เนื้อเพลง",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "โปรดอัปโหลดไฟล์ LRC, ELRC, Apple TTML หรือ JSON ของคุณ",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "อัปโหลดเนื้อเพลง",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "ต้องระบุชื่อเพลง ชื่อศิลปิน และไฟล์เนื้อเพลง",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "กำลังอัปโหลดเนื้อเพลง...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "อัปโหลดเนื้อเพลงสำเร็จแล้ว!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "เกิดข้อผิดพลาดในการอัปโหลดเนื้อเพลง: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "เกิดข้อผิดพลาดในการอ่านไฟล์",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "ลบเนื้อเพลงในเครื่องแล้ว",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "เกิดข้อผิดพลาดในการลบเนื้อเพลง: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "ยืนยันการลบ \"$TITLE$\"?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "เกิดข้อผิดพลาดในการโหลดเนื้อเพลงในเครื่อง: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "การแปล",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "บริการแปลภาษา",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "ผู้ให้บริการแปลภาษา",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "เลือกบริการที่จะใช้แปลเนื้อเพลง",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "คีย์ Gemini AI API",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "คีย์ API ของคุณจะถูกเก็บไว้ในเครื่องและจะไม่ถูกส่งไปยังเซิร์ฟเวอร์ภายนอกใดๆ นอกเหนือจาก Gemini API ของ Google",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "รุ่น Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "เลือกรุ่น Gemini AI ที่จะใช้แปลภาษา",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "การตั้งค่า OpenRouter",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "คีย์ OpenRouter API",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "คีย์ API ของคุณจะถูกเก็บไว้ในเครื่อง",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "รุ่น OpenRouter (เช่น: google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "ระบุ ID รุ่นจาก OpenRouter",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "บริการเขียนคำอ่าน (สำหรับตัวอักษรที่ไม่ใช่ภาษาละติน)",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "ผู้ให้บริการเขียนคำอ่าน",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "ดึงคำอ่านจาก Lyrics+ API โดยอัตโนมัติหากมี หากไม่มีบริการที่เลือกจะสร้างคำอ่านให้",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "รุ่นเขียนคำอ่าน Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "เลือกรุ่น Gemini AI ที่จะใช้เขียนคำอ่าน",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "ลักษณะการแปล",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "กำหนดภาษาเป้าหมายการแปลเอง",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "ระบุภาษาที่จะแปลเป็น (เช่น 'th', 'en', 'ja') ด้วยตนเอง",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "รหัสภาษาเป้าหมายที่กำหนดเอง",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "โปรดป้อนรหัสภาษา 2 ตัวอักษร (เช่น 'th' สำหรับภาษาไทย, 'en' สำหรับภาษาอังกฤษ)",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "การตั้งค่า Prompt ขั้นสูง (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "กำหนด Prompt การแปลของ AI เอง",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "ใช้ prompt ที่กำหนดเองสำหรับการแปล Gemini/OpenRouter ใช้ {targetLang} และ {lyrics} เป็นตัวแทน",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Prompt การแปล AI ที่กำหนดเอง",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "กำหนด prompt ที่ส่งไปยัง AI เพื่อการแปลภาษา ใช้ {targetLang} สำหรับภาษาเป้าหมาย",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "กำหนด Prompt การเขียนคำอ่านของ AI เอง",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "ใช้ prompt ที่กำหนดเองสำหรับการเขียนคำอ่าน Gemini/OpenRouter",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Prompt การเขียนคำอ่าน AI ที่กำหนดเอง",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "กำหนด prompt ที่ส่งไปยัง AI เพื่อการเขียนคำอ่าน",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "รูปลักษณ์",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "การแสดงข้อความ",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "แสดงข้อความขนาดใหญ่: คำอ่าน หรือ เนื้อเพลง",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "เลือกว่าจะให้เนื้อเพลงหรือคำอ่านมีขนาดใหญ่กว่าเมื่อแสดงผลทั้งคู่",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "ซ่อนคำอ่านภาษาละติน",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "ซ่อนคำแนะนำการออกเสียงโดยอัตโนมัติหากเนื้อเพลงเขียนด้วยอักษรละตินอยู่แล้ว",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "การจัดวางเสียงร้องประสานแบบไดนามิก",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "เนื้อเพลงประสานที่เริ่มก่อนเนื้อเพลงหลักจะแสดงไว้ด้านบน",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "ประสิทธิภาพและความเข้ากันได้",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "ลดแอนิเมชั่นและเอฟเฟกต์ภาพเพื่อประสิทธิภาพที่ดีขึ้นบนอุปกรณ์รุ่นเก่า",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "ซ่อนบรรทัดเนื้อเพลงที่อยู่นอกจอ",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "ซ่อนและลบบรรทัดเนื้อเพลงที่มีแอนิเมชั่นทั้งหมดที่มองไม่เห็นบนหน้าจอในขณะนั้น แนะนำสำหรับอุปกรณ์สเปกต่ำ",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "เอฟเฟกต์ภาพ",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "เบลอเนื้อเพลงที่ไม่ใช้งาน",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "ใช้เอฟเฟกต์เบลอกับเนื้อเพลงที่ไม่ได้ร้องอยู่ในขณะนั้น คล้ายกับ Apple Music",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "เปิดใช้งานพื้นหลังไดนามิก (มุมมองผู้เล่น)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "ใช้พื้นหลังอัลบั้มแบบเคลื่อนไหวเมื่อขยายหน้าจอผู้เล่น การตั้งค่านี้จะไม่มีผลในโหมดเต็มหน้าจอ",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "การเต้นตามจังหวะเสียง (พื้นหลังไดนามิก)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "ทำให้ชั้นพื้นหลังไดนามิกเต้นตามจังหวะเสียง หากคุณใช้ Better Lyrics Shaders หรือ Visualizer อื่นๆ คุณควรปิดการตั้งค่านี้",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "ใช้จานสีเพลงสำหรับสีเนื้อเพลงในโหมดวิดีโอเต็มหน้าจอ",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "ใช้จานสีของเพลงสำหรับเนื้อเพลงเมื่ออยู่ในโหมดเต็มหน้าจอวิดีโอเพลง",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "ใช้จานสีเพลงสำหรับสีเนื้อเพลงในทุกโหมด",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "ใช้จานสีของเพลงสำหรับเนื้อเพลงในทุกโหมดการแสดงผล",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "กำหนดสีจานสีเอง",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "ทับสีจานสีของเพลงด้วยสีที่กำหนดเอง (สำหรับสีเนื้อเพลงเท่านั้น ไม่รวมพื้นหลังไดนามิก) (ปล่อยว่างไว้หากไม่ต้องการทับ)",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "การปรับแต่งสไตล์ด้วยตนเอง",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "CSS ที่กำหนดเอง",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "ใช้สไตล์ของคุณเองกับการแสดงเนื้อเพลง โปรดใช้ด้วยความระมัดระวัง แนะนำให้ใช้ UserStyles ในการสร้างหรือทดสอบ",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "แคช",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "กลยุทธ์แคช",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "กำหนดระยะเวลาที่จะเก็บเนื้อเพลงไว้ในเครื่องเพื่อลดเวลาในการโหลด",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "เชิงรุก (2 ชั่วโมง)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "ปานกลาง (1 ชั่วโมง)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "ไม่มี (ไม่ใช้แคช)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "การใช้แคชในปัจจุบัน",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "เกี่ยวกับ",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "ส่วนขยายนี้เกิดจากแนวคิดง่ายๆ ว่า การฟังเพลงควรเป็นประสบการณ์ที่ดื่มด่ำ ไม่ใช่แค่กิจกรรมพื้นหลัง เราเบื่อกับเนื้อเพลงที่หยุดนิ่งและอินเทอร์เฟซที่ล้าสมัยของ YouTube เราจึงตัดสินใจสร้างเครื่องเล่นที่เราต้องการมาตลอด เป้าหมายของเราคือทำให้เซสชั่นดนตรีของคุณสวยงาม มีเสน่ห์ และสนุกสนานยิ่งขึ้น เราหวังว่าคุณจะชอบมัน youly+ ภูมิใจที่ได้เป็นโอเพนซอร์ส ไม่ว่าคุณจะพบจุดบกพร่อง มีไอเดียเจ๋งๆ หรือต้องการร่วมสนับสนุน เราอยากรับฟังจากคุณ",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "ลิงก์และการสนับสนุน",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "รหัสต้นฉบับ",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "รายงานจุดบกพร่อง",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "สนับสนุนใน Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "สนับสนุนใน Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "การจัดการการตั้งค่า",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "ส่งออกการตั้งค่าปัจจุบันของคุณเป็นไฟล์ JSON หรือนำเข้าจากไฟล์เพื่อกู้คืนการกำหนดค่าของคุณ",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "ส่งออก",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "นำเข้า",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "สร้างขึ้นด้วยความรัก",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "ส่งออกการตั้งค่าสำเร็จแล้ว!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "เกิดข้อผิดพลาดในการส่งออกการตั้งค่า: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "นำเข้าการตั้งค่าสำเร็จแล้ว! ต้องรีเฟรชเพื่อให้การเปลี่ยนแปลงมีผล",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "เกิดข้อผิดพลาดในการนำเข้าการตั้งค่า: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "ไม่พบแท็บเพลงที่ใช้งานอยู่ โปรดรีเฟรชด้วยตนเอง",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "แสดง/ซ่อน คีย์ API",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "ลบแหล่งข้อมูล",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "ลบเนื้อเพลงในเครื่อง",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "เวอร์ชัน $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "เนื้อเพลง",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "การออกเสียง",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google แปลภาษา",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (ผลงานผู้ใช้)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (โดยตรง)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (คำต่อคำ)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

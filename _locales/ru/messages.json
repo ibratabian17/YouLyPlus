@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Расширенные функции текстов песен для YouTube Music, Apple Music и Tidal с синхронизацией по строкам и по словам.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "Настройки YouLy+",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "Общие",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "Внешний вид",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "Дополнительно",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "Основные функции",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "Включить YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "Источники данных",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "Основной провайдер текстов",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "Интеграция SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "Настройки отображения",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "Легкий режим",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "Пословная подсветка",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "Управление данными",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "Использовано памяти:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "Элементов в кэше:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "Очистить кэш",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "Обновить",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "Больше настроек",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "Настройки сохранены! Пожалуйста, обновите страницу YouTube для применения изменений.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "Ошибка при сохранении настроек.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "Кэш успешно очищен!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearFailed": {
+    "message": "Не удалось очистить кэш.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "Ошибка связи при очистке кэша.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "Информация о кэше обновлена.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "Невозможно очистить кэш: API расширения недоступен.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "Настройки YouLy+",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "Общие",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "Источники",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "Внешний вид",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "Перевод",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "Кэш",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "Локальные тексты",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "О программе",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "Настройки сохранены. Перезапустите вкладку с музыкой для применения изменений.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "Настройки сохранены. Перезапустите $PLATFORMS$ для применения изменений.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "Перезапустить",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "Перезапустить вкладки",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "Основные функции",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "Включить или выключить расширение глобально.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "Включить пословную подсветку в стиле караоке (если доступно).",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "Настройки YouTube Music",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "Инфо о песне в полноэкранном режиме",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "Показывает детали песни в полноэкранном режиме, включая прогресс-бар, дату релиза, название и исполнителя.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "Использовать SponsorBlock API",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "Пропускать немузыкальные части: вступления, концовки или спонсорские сегменты.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Настройки Apple Music",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "Предпочитать внешние тексты для построчной синхронизации",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "Если включено, приложение будет использовать внешние источники, если Apple Music предоставляет только построчную синхронизацию.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "Источники",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "Провайдер текстов",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "Провайдер по умолчанию",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Выберите предпочтительный источник текстов.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "Свой URL сервера KPoe",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "Введите базовый URL для вашего собственного сервера KPoe.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Порядок источников Lyrics+",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Перетащите, чтобы изменить порядок источников для Lyrics+.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "Доступные источники",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "Добавить источник",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "Все источники уже добавлены",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "Пожалуйста, выберите источник для добавления.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "Источник \"$NAME$\" уже существует.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "Добавлено: \"$NAME$\".",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "Удалено: \"$NAME$\".",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "Локальные тексты",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "Управление загруженными текстами",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "Локальные тексты еще не загружены.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "Обновить список",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "Добавить новый текст",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "Загрузить новый текст",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "Название песни",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "Имя исполнителя",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "Название альбома (необязательно)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "Файл с текстом",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "Загрузите файл LRC, ELRC, Apple TTML или JSON.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "Загрузить",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "Название, исполнитель и файл обязательны для заполнения.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "Загрузка текста...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "Текст успешно загружен!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "Ошибка при загрузке: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "Ошибка при чтении файла.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "Текст удален.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "Ошибка при удалении: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "Подтверждаете удаление \"$TITLE$\"?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "Ошибка при загрузке списка: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "Перевод",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "Сервис перевода",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "Провайдер перевода",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "Выберите сервис для перевода текстов песен.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Gemini AI API Ключ",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "Ваш API-ключ хранится локально и никогда не передается на сторонние серверы, кроме Google Gemini API.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Модель Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "Выберите модель Gemini AI для перевода.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "Настройки OpenRouter",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "Ключ OpenRouter API",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "Ваш API-ключ хранится локально.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "Модель OpenRouter (напр: google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "Укажите ID модели из OpenRouter.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "Сервис романизации (для нелатинских алфавитов)",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "Провайдер романизации",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "Автоматически получает транскрипцию из Lyrics+ API, если она доступна. Иначе она будет создана выбранным сервисом.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Модель романизации Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "Выберите модель Gemini AI для транскрипции.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "Поведение перевода",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "Переопределить целевой язык перевода",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "Вручную укажите язык для перевода (напр: 'ru', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "Свой код целевого языка",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "Введите 2-буквенный код языка (напр: 'ru' для русского, 'en' для английского).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "Расширенные настройки промптов (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "Переопределить AI промпт для перевода",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Использовать свои промпты для Gemini/OpenRouter. Используйте теги {targetLang} и {lyrics}.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Свой AI промпт для перевода",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "Настройте промпт для перевода. Используйте {targetLang} для целевого языка",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "Переопределить AI промпт для романизации",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Использовать свои промпты для романизации через Gemini/OpenRouter.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Свой AI промпт для романизации",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "Настройте промпт для создания транскрипции.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "Внешний вид",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "Отображение текста",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "Увеличить: Транскрипцию или Текст песни",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "Выберите, какая часть текста должна быть крупнее при одновременном отображении.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "Скрывать латинскую транскрипцию",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "Автоматически скрывать фонетический гайд, если текст уже написан латиницей.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "Динамическое размещение бэк-вокала",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "Текст бэк-вокала, начинающийся раньше основного, будет отображаться сверху.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "Производительность и совместимость",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "Отключает часть анимаций и эффектов для повышения скорости на старых устройствах.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "Скрывать строки за пределами экрана",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "Скрывает и удаляет все анимированные строки, невидимые в данный момент. Рекомендуется для слабых устройств.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "Визуальные эффекты",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "Размывать неактивный текст",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Применяет эффект размытия к строкам, которые не поются в данный момент (как в Apple Music).",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "Включить динамический фон (Вид плеера)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "Анимированный фон на основе обложки альбома. Не влияет на полноэкранный режим.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "Пульсация в такт музыке (Динамический фон)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "Заставляет слои фона пульсировать в такт. Отключите, если используете Better Lyrics Shaders.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "Цвета обложки для текста в полноэкранном режиме",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "Применяет цвета обложки альбома к тексту песен в полноэкранном видео-режиме.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "Цвета обложки для текста во всех режимах",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "Применяет цвета обложки альбома к тексту песен во всех режимах отображения.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "Переопределить цвет палитры",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "Заменить цвет текста своим (только для букв, не для фона) (оставьте пустым для авто-цвета).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "Свой стиль",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "Свой CSS",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "Примените свои стили к отображению песен. Используйте с осторожностью.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "Кэш",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "Стратегия кэширования",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "Определяет, как долго тексты песен хранятся в памяти.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "Агрессивно (2 часа)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "Умеренно (1 час)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "Нет (не кэшировать)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "Текущее использование кэша",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "О подписке",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "Это расширение родилось из простой идеи: прослушивание музыки должно быть погружением, а не просто фоновым действием. Нам надоели статичные тексты YouTube и устаревшие интерфейсы, поэтому мы решили создать плеер, который всегда хотели. Наша цель — сделать ваше прослушивание более красивым, увлекательным и веселым. youly+ с гордостью работает как открытый исходный код. Если вы нашли баг или у вас есть идея — мы будем рады обратной связи.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "Ссылки и поддержка",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "Исходный код",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "Сообщить об ошибке",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Поддержать на Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Поддержать на Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "Управление конфигурацией",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "Экспортируйте свои настройки в JSON или импортируйте их из файла.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "Экспорт",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "Импорт",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Сделано с любовью",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "Настройки успешно экспортированы!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "Ошибка при экспорте: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "Настройки успешно импортированы! Нужно обновить страницу.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "Ошибка при импорте: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "Активные вкладки с музыкой не найдены. Обновите вручную.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "Показать/скрыть API ключ",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "Удалить источник",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "Удалить локальный текст",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "Версия $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "Текст песни",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "Транскрипция",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google Переводчик",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (от пользователей)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (напрямую)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (по словам)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

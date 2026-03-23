@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "YouTube Music, Apple Music, Tidal을 위한 향상된 가사 기능. 줄 단위 및 단어 단위 동기화 지원.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "YouLy+ 설정",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "일반",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "디자인",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "고급",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "주요 기능",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "YouLy+ 활성화",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "데이터 소스",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "기본 가사 제공자",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "SponsorBlock 통합",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "표시 설정",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "저사양 모드",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "단어 단위 하이라이트",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "데이터 관리",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "사용된 저장공간:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "캐시된 항목 수:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "캐시 삭제",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "새로고침",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "추가 설정",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "설정이 저장되었습니다! 변경 사항을 적용하려면 YouTube 페이지를 새로고침하세요.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "설정 저장 중 오류가 발생했습니다.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "캐시가 성공적으로 삭제되었습니다!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearFailed": {
+    "message": "캐시 삭제에 실패했습니다.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "캐시 삭제 통신 중 오류가 발생했습니다.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "캐시 정보가 새로고침되었습니다.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "캐시를 삭제할 수 없습니다: 확장 프로그램 API를 사용할 수 없습니다.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "YouLy+ 설정",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "일반",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "소스",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "디자인",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "번역",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "캐시",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "로컬 가사",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "정보",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "설정이 저장되었습니다. 변경 사항을 적용하려면 음악 탭을 다시 시작하세요.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "설정이 저장되었습니다. 변경 사항을 적용하려면 $PLATFORMS$ 탭을 다시 시작하세요.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "다시 시작",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "탭 다시 시작",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "핵심 기능",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "확장 프로그램을 전체적으로 켜거나 끕니다.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "가능한 경우 가라오케 스타일의 단어 하이라이트를 활성화합니다.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "YouTube Music 설정",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "전체 화면 곡 정보 활성화",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "전체 화면 모드에서 진행 상태 표시줄, 출시일, 제목, 아티스트를 포함한 곡 세부 정보를 표시합니다.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "SponsorBlock API 사용",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "인트로, 아웃로 또는 스폰서 세그먼트와 같은 음악이 아닌 섹션을 건너뜁니다.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Apple Music 설정",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "줄 단위 동기화 곡에서 외부 가사 우선 사용",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "이 설정을 활성화하면 Apple Music이 단어 단위 동기화 대신 줄 단위 동기화만 제공하는 경우 외부 가사 소스를 사용합니다.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "소스",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "가사 제공자",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "기본 가사 제공자",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "선호하는 가사 소스를 선택하세요.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "사용자 지정 KPoe 서버 URL",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "자체 호스팅된 KPoe 서버의 기본 URL을 입력하세요.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Lyrics+ 소스 순서",
+    "description": "Label for source order configuration"
+  },
+  "helperSourceOrder": {
+    "message": "드래그 앤 드롭으로 Lyrics+ 소스 순서를 변경할 수 있습니다.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "추가 가능한 소스",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "소스 추가",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "모든 소스가 이미 추가되었습니다",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "추가할 소스를 선택하세요.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "\"$NAME$\" 소스가 이미 존재합니다.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "\"$NAME$\" 소스가 추가되었습니다.",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "\"$NAME$\" 소스가 삭제되었습니다.",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "로컬 가사",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "업로드된 가사 관리",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "아직 업로드된 로컬 가사가 없습니다.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "목록 새로고침",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "새 로컬 가사 추가",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "새 로컬 가사 업로드",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "곡 제목",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "아티스트 이름",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "앨범 이름 (선택사항)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "가사 파일",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "LRC, ELRC, Apple TTML 또는 JSON 파일을 업로드하세요.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "가사 업로드",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "곡 제목, 아티스트 이름 및 가사 파일은 필수 항목입니다.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "가사 업로드 중...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "가사가 성공적으로 업로드되었습니다!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "가사 업로드 중 오류가 발생했습니다: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "파일 읽기 오류가 발생했습니다.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "로컬 가사가 삭제되었습니다.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "가사 삭제 중 오류가 발생했습니다: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "\"$TITLE$\" 가사를 삭제하시겠습니까?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "로컬 가사 불러오기 중 오류가 발생했습니다: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "번역",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "번역 서비스",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "번역 서비스 제공자",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "가사 번역에 사용할 서비스를 선택하세요.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Gemini AI API 키",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "API 키는 로컬에 안전하게 저장되며 Google Gemini API 이외의 외부 서버로 전송되지 않습니다.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Gemini AI 모델",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "번역에 사용할 Gemini AI 모델을 선택하세요.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "OpenRouter 설정",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "OpenRouter API 키",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "API 키는 로컬에 저장됩니다.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "OpenRouter 모델 (예: google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "OpenRouter에서 제공하는 모델 ID를 입력하세요.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "발음 가이드 (로마자 표기) 서비스",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "발음 가이드 제공자",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "가능한 경우 Lyrics+ API에서 발음 가이드를 자동으로 가져옵니다. Lyrics+에서 제공하지 않는 경우 선택한 서비스를 사용하여 발음 가이드를 생성합니다.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Gemini AI 발음 가이드 모델",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "발음 가이드 생성에 사용할 Gemini AI 모델을 선택하세요.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "번역 동작",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "대상 언어 직접 지정",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "번역 대상 언어를 수동으로 지정합니다 (예: 'ko', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "사용자 정의 대상 언어 코드",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "2자리 언어 코드를 입력하세요 (예: 한국어는 'ko', 영어는 'en').",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "고급 프롬프트 설정 (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "AI 번역 프롬프트 직접 지정",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Gemini/OpenRouter 번역에 사용자 정의 프롬프트를 사용합니다. {targetLang} 및 {lyrics} 플레이스홀더를 사용하세요.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "사용자 정의 AI 번역 프롬프트",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "AI에 전송되는 번역 프롬프트를 사용자 정의합니다. 대상 언어에는 {targetLang}을 사용하세요.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "AI 발음 가이드 프롬프트 직접 지정",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Gemini/OpenRouter 발음 가이드 생성에 사용자 정의 프롬프트를 사용합니다.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "사용자 정의 AI 발음 가이드 프롬프트",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "AI에 전송되는 발음 가이드 프롬프트를 사용자 정의합니다.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "디자인",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "텍스트 표시",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "더 크게 표시할 텍스트: 발음 또는 가사",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "가사와 발음이 모두 표시될 때 어떤 텍스트를 더 크게 표시할지 선택합니다.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "라틴 문자 발음 가이드 숨기기",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "가사가 이미 라틴 문자로 작성된 경우 음성 가이드를 자동으로 숨깁니다.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "다이내믹 백그라운드 보컬 배치",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "메인 가사보다 먼저 시작되는 백그라운드 가사를 상단에 표시합니다.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "성능 및 호환성",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "성능 향상을 위해 애니메이션과 시각 효과를 줄입니다 (구형 기기에 권장).",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "화면 밖 가사 숨기기",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "화면에 표시되지 않는 가사 애니메이션을 숨기고 제거합니다. 저사양 기기에서 유용합니다.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "시각 효과",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "비활성 가사 흐리게 표시",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Apple Music 처럼 현재 노래 중이지 않은 가사에 흐림 효과를 적용합니다.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "다이내믹 배경 활성화 (플레이어 뷰)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "플레이어가 확장된 상태일 때 애니메이션 앨범 아트 배경을 적용합니다. 전체 화면 모드에는 영향을 주지 않습니다.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "오디오 기반 비트 심박수 효과",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "오디오 비트에 맞춰 다이내믹 배경 레이어가 박동하도록 합니다. 다른 비주얼라이저를 사용 중이라면 비활성화를 권장합니다.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "비디오 전체 화면에서 곡 색상 팔레트 사용",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "비디오 뮤직 전체 화면 모드에서 가사 색상에 곡의 컬러 팔레트를 사용합니다.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "모든 모드에서 곡 색상 팔레트 사용",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "모든 표시 모드에서 가사 색상에 곡의 컬러 팔레트를 사용합니다.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "팔레트 색상 직접 지정",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "곡 색상 팔레트를 사용자 정의 색상으로 덮어씁니다 (가사 색상에만 해당, 다이내믹 배경 제외).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "사용자 스타일 지정",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "사용자 정의 CSS",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "가사 표시에 나만의 스타일을 적용합니다. 주의해서 사용하세요.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "캐시",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "캐시 전략",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "로딩 단축을 위해 가사를 로컬에 저장하는 기간을 설정합니다.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "공격적 (2시간)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "중간 (1시간)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "안 함 (사용 안 함)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "현재 캐시 사용량",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "정보",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "이 확장 프로그램은 단순한 생각에서 시작되었습니다. 음악 감상은 단순한 배경 활동이 아니라 높은 몰입감을 주는 경험이어야 한다는 것입니다. YouTube의 정적인 가사와 구식 인터페이스에 지쳐 우리가 항상 원했던 플레이어를 직접 만들기로 했습니다. 우리의 목표는 여러분의 음악 감상을 더 아름답고 매력적이며 재미있게 만드는 것입니다. 여러분이 좋아해 주시길 바랍니다. youly+는 오픈 소스로 운영됩니다. 버그를 발견하거나 좋은 아이디어가 있다면 언제든지 의견을 보내주세요.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "링크 및 지원",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "소스 코드",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "버그 보고",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Patreon에서 후원하기",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Ko-fi에서 후원하기",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "설정 관리",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "현재 설정을 JSON 파일로 내보내거나 파일을 불러와서 설정을 복구할 수 있습니다.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "내보내기",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "가져오기",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Made with love",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "설정이 성공적으로 내보내졌습니다!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "설정 내보내기 중 오류 발생: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "설정이 성공적으로 가져와졌습니다! 변경 사항 적용을 위해 탭을 새로고침하세요.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "설정 가져오기 중 오류 발생: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "활성 음악 탭을 찾을 수 없습니다. 수동으로 새로고침해 주세요.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "API 키 표시/숨기기",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "소스 삭제",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "로컬 가사 삭제",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "버전 $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "가사",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "발음",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google 번역",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (사용자 제공)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (직접)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (단어)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

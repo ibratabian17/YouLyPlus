@@ -1,0 +1,801 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "YouTube Music, Apple Music மற்றும் Tidal ஆகியவற்றுக்கான மேம்பட்ட பாடல் வரிகள் அம்சங்கள், வரிக்கு வரி மற்றும் வார்த்தைக்கு வார்த்தை ஒத்திசைவுடன்.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "YouLy+ அமைப்புகள்",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "பொதுவானவை",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "தோற்றம்",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "மேம்பட்டவை",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "முக்கிய அம்சங்கள்",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "YouLy+ ஐ இயக்கு",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "தரவு ஆதாரங்கள்",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "முதன்மை பாடல் வரிகள் வழங்குநர்",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "SponsorBlock ஐ ஒருங்கிணைக்கவும்",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "காட்சி அமைப்புகள்",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "இலகுரக முறை",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "வார்த்தைக்கு வார்த்தை சிறப்பம்சமாக்கல்",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "தரவு மேலாண்மை",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "பயன்படுத்தப்பட்ட சேமிப்பு:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "தேக்ககப்படுத்தப்பட்ட உருப்படிகள்:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "தேக்ககத்தை அழி",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "புதுப்பி",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "கூடுதல் அமைப்புகள்",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "அமைப்புகள் சேமிக்கப்பட்டன! மாற்றங்களைப் பயன்படுத்த YouTube பக்கத்தை மீண்டும் ஏற்றவும்.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "அமைப்புகளைச் சேமிப்பதில் பிழை.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "தேக்ககம் வெற்றிகரமாக அழிக்கப்பட்டது!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearedFailed": {
+    "message": "தேக்ககத்தை அழிப்பதில் தோல்வி.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "தேக்ககத்தை அழிக்கும்போது தொடர்பு பிழை.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "தேக்ககத் தகவல் புதுப்பிக்கப்பட்டது.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "தேக்ககத்தை அழிக்க முடியவில்லை: நீட்டிப்பு API கிடைக்கவில்லை.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "YouLy+ அமைப்புகள்",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "பொதுவானவை",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "ஆதாரங்கள்",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "தோற்றம்",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "மொழிபெயர்ப்பு",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "தேக்ககம்",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "உள்ளூர் வரிகள்",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "பற்றி",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "அமைப்புகள் சேமிக்கப்பட்டன. மாற்றங்களைப் பயன்படுத்த உங்கள் இசை தாவலை மீண்டும் தொடங்கவும்.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "அமைப்புகள் சேமிக்கப்பட்டன. மாற்றங்களைப் பயன்படுத்த $PLATFORMS$ ஐ மீண்டும் தொடங்கவும்.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "மீண்டும் தொடங்கு",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "தாவல்களை மீண்டும் தொடங்கு",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "முக்கிய செயல்பாடு",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "நீட்டிப்பை உலகளவில் இயக்கி அல்லது முடக்கவும்.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "கிடைக்கும்போது வார்த்தைக்கு வார்த்தை கரோக்கி சிறப்பம்சத்தை இயக்கவும்.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "YouTube Music அமைப்புகள்",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "முழுத் திரையில் பாடல் தகவலை இயக்கு",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "முன்னேற்றப் பட்டி, வெளியீட்டுத் தேதி, தலைப்பு மற்றும் கலைஞர் உள்ளிட்ட பாடல் விவரங்களை முழுத் திரை முறையில் காட்டுகிறது.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "SponsorBlock API ஐப் பயன்படுத்தவும்",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "முன்னுரை, முடிவுரை அல்லது விளம்பரப் பகுதிகள் போன்ற இசை அல்லாத பகுதைகளைத் தவிர்க்கவும்.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Apple Music அமைப்புகள்",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "வரிக்கு வரி ஒத்திசைவுக்கு வெளிப்புற வரிகளை விரும்பவும்",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "செயல்படுத்தப்பட்டால், Apple Music வரிக்கு வரி ஒத்திசைவை மட்டுமே வழங்கினால், ஆப்ஸ் வெளிப்புற வரிகள் ஆதாரங்களைப் பயன்படுத்தும்.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "ஆதாரங்கள்",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "பாடல் வரிகள் வழங்குநர்",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "இயல்புநிலை பாடல் வரிகள் வழங்குநர்",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "உங்களுக்கு பிடித்த பாடல் வரிகள் ஆதாரத்தைத் தேர்ந்தெடுக்கவும்.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "தனிப்பயன் KPoe சேவையக URL",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "சுய-ஹோஸ்ட் செய்யப்பட்ட KPoe சேவையகத்தின் அடிப்படை URL ஐ உள்ளிடவும்.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Lyrics+ ஆதார வரிசை",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Lyrics+ க்கான ஆதாரங்களை வரிசைப்படுத்த இழுத்து விடவும்.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "கிடைக்கக்கூடிய ஆதாரங்கள்",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "ஆதாரத்தைச் சேர்",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "அனைத்து ஆதாரங்களும் ஏற்கனவே சேர்க்கப்பட்டுள்ளன",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "சேர்ப்பதற்கு ஒரு ஆதாரத்தைத் தேர்ந்தெடுக்கவும்.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "\"$NAME$\" ஆதாரம் ஏற்கனவே உள்ளது.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "\"$NAME$\" சேர்க்கப்பட்டது.",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "\"$NAME$\" அகற்றப்பட்டது.",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "உள்ளூர் வரிகள்",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "பதிவேற்றப்பட்ட வரிகளை நிர்வகிக்கவும்",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "உள்ளூர் பாடல் வரிகள் இன்னும் பதிவேற்றப்படவில்லை.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "பட்டியலைப் புதுப்பி",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "புதிய உள்ளூர் வரிகளைச் சேர்",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "புதிய உள்ளூர் வரிகளைப் பதிவேற்றவும்",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "பாடல் தலைப்பு",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "கலைஞர் பெயர்",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "ஆல்பம் பெயர் (விருப்பத்திற்குரியது)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "பாடல் வரிகள் கோப்பு",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "LRC, ELRC, Apple TTML அல்லது JSON கோப்பைப் பதிவேற்றவும்.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "பாடல் வரிகளைப் பதிவேற்றவும்",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "தலைப்பு, கலைஞர் மற்றும் கோப்பு தேவை.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "பாடல் வரிகள் பதிவேற்றப்படுகின்றன...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "பாடல் வரிகள் வெற்றிகரமாக பதிவேற்றப்பட்டன!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "பதிவேற்றத்தின் போது பிழை: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "கோப்பை வாசிப்பதில் பிழை.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "உள்ளூர் வரிகள் நீக்கப்பட்டன.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "நீக்கும் போது பிழை: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "\"$TITLE$\" ஐ நீக்க விரும்புகிறீர்களா?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "confirmClearLocalLyrics": {
+    "message": "அனைத்து உள்ளூர் வரிகளையும் நீக்க விரும்புகிறீர்களா?",
+    "description": "Confirm dialog for clearing all local lyrics"
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "உள்ளூர் வரிகளை ஏற்றும் போது பிழை: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "மொழிபெயர்ப்பு",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "மொழிபெயர்ப்பு சேவை",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "மொழிபெயர்ப்பு வழங்குநர்",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "பாடல் வரிகளை மொழிபெயர்க்கப் பயன்படுத்த வேண்டிய சேவையைத் தேர்ந்தெடுக்கவும்.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Gemini AI API விசை",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "உங்கள் விசை உள்ளூர் சேமிப்பகத்தில் சேமிக்கப்படும், மேலும் Google Gemini API ஐத் தவிர வேறு எந்த வெளிப்புற சேவையகங்களுக்கும் ஒருபோதும் அனுப்பப்படாது.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Gemini AI மாதிரி",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "மொழிபெயர்ப்பிற்கான Gemini AI மாதிரியைத் தேர்ந்தெடுக்கவும்.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "OpenRouter அமைப்புகள்",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "OpenRouter API விசை",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "உங்கள் விசை உள்ளூர் சேமிப்பகத்தில் சேமிக்கப்படும்.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "OpenRouter மாதிரி (உதாரணமாக google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "OpenRouter இலிருந்து மாதிரி ஐடியை குறிப்பிடவும்.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "ரோமானைசேஷன் (லத்தீன் அல்லாத எழுத்துக்களுக்கு) சேவை",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "ரோமானைசேஷன் வழங்குநர்",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "முடிந்தால் Lyrics+ API இலிருந்து ரோமானைசேஷனை தானாகவே பெறுகிறது. இல்லையெனில், தேர்ந்தெடுக்கப்பட்ட சேவை அதை உருவாக்கும்.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Gemini AI ரோமானைசேஷன் மாதிரி",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "ரோமானைசேஷனுக்கான Gemini AI மாதிரியைத் தேர்ந்தெடுக்கவும்.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "மொழிபெயர்ப்பு நடத்தை",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "மொழிபெயர்ப்பு இலக்கு மொழியை மேலெழுதவும்",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "மொழிபெயர்ப்பு செய்ய வேண்டிய மொழியை கைமுறையாக அமைக்கவும் (உதாரணமாக: 'ta', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "தனிப்பயன் இலக்கு மொழி குறியீடு",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "2-எழுத்து மொழி குறியீட்டை உள்ளிடவும் (உதாரணமாக: தமிழிற்கு 'ta').",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "மேம்பட்ட ப்ராம்ட் அமைப்புகள் (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "AI மொழிபெயர்ப்பு ப்ராம்ட்டை மேலெழுதவும்",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Gemini/OpenRouter மொழிபெயர்ப்பிற்கு தனிப்பயன் ப்ராம்ட்களைப் பயன்படுத்தவும். {targetLang} மற்றும் {lyrics} ஐப் பயன்படுத்தவும்.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "தனிப்பயன் AI மொழிபெயர்ப்பு ப்ராம்ட்",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "மொழிபெயர்ப்பிற்காக AI க்கு அனுப்பப்படும் ப்ராம்ட்டைத் தனிப்பயனாக்கவும். இலக்கு மொழிக்கு {targetLang} ஐப் பயன்படுத்தவும்.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "AI ரோமானைசேஷன் ப்ராம்ட்டை மேலெழுதவும்",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Gemini/OpenRouter ரோமானைசேஷனுக்கு தனிப்பயன் ப்ராம்ட்களைப் பயன்படுத்தவும்.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "தனிப்பயன் AI ரோமானைசேஷன் ப்ராம்ட்",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "ரோமானைசேஷனுக்காக AI க்கு அனுப்பப்படும் ப்ராம்ட்டைத் தனிப்பயனாக்கவும்.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "தோற்றம்",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "உரை காட்சி",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "இதற்கான பெரிய உரை காட்சி: ரோமானைசேஷன் அல்லது பாடல் வரிகள்",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "உரையின் எந்தப் பகுதி பெரியதாகத் தோன்ற வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும்.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "லத்தீன் உச்சரிப்பை மறைக்கவும்",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "பாடல் வரிகள் ஏற்கனவே லத்தீன் எழுத்துக்களில் இருந்தால் ஒலிப்பு வழிகாட்டியை தானாகவே மறைக்கவும்.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "டைனமிக் பின்னணி குரல் முறை",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "முக்கிய வரிகளுக்கு முன் தொடங்கும் பின்னணி குரல்கள் மேலே காட்டப்படும்.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "செயல்திறன் மற்றும் இணக்கத்தன்மை",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "பழைய சாதனங்களில் சிறந்த செயல்திறனுக்காக அனிமேஷன்கள் மற்றும் காட்சி விளைவுகளைக் குறைக்கிறது.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "திரைக்கு வெளியே உள்ள வரிகளை மறைக்கவும்",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "தற்போது பார்வையில் இல்லாத அனைத்து அனிமேஷன் வரிகளையும் மறைத்து நீக்குகிறது. குறைந்த விலையுள்ள சாதனங்களுக்குப் பரிந்துரைக்கப்படுகிறது.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "காட்சி விளைவுகள்",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "செயலில் இல்லாத வரிகளை மங்கலாக்கு",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Apple Music ஐப் போலவே, தற்போது பாடப்படாத வரிகளுக்கு மங்கலான விளைவைப் பயன்படுத்துகிறது.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "டைனமிக் பின்னணியை இயக்கு (பிளேயர் காட்சி)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "பிளேயர் பெரிதாக்கப்படும்போது அனிமேஷன் செய்யப்பட்ட ஆல்பம் பின்னணியைப் பயன்படுத்துகிறது. முழுத் திரை முறையில் இந்த அமைப்பு செயல்படாது.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "ஆடியோ பீட் ஒத்திசைவு (டைனமிக் பின்னணி)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "டைனமிக் பின்னணி அடுக்குகளை ஆடியோவின் தாளத்திற்கு ஏற்ப துடிக்க வைக்கிறது. Better Lyrics Shaders ஐப் பயன்படுத்தினால் முடக்கப்பட வேண்டும்.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "முழுத் திரை உரைகளுக்கு பாடல் தட்டுகளைப் பயன்படுத்தவும்",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "வீடியோ முழுத் திரை முறையில் பாடல் வரிகளுக்கு ஆல்பம் வண்ணங்களைப் பயன்படுத்துகிறது.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "அனைத்து முறைகளிலும் உரைகளுக்கு பாடல் தட்டுகளைப் பயன்படுத்தவும்",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "அனைத்து காட்சி முறைகளிலும் பாடல் வரிகளுக்கு ஆல்பம் வண்ணங்களைப் பயன்படுத்துகிறது.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "பேலட் நிறத்தை மேலெழுதவும்",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "பாடல் வரிகளின் நிறத்தை தனிப்பயன் நிறமாக மாற்றவும் (உரை மட்டும், பின்னணி அல்ல) (இயல்புநிலைக்கு காலியாக விடவும்).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "தனிப்பயன் ஸ்டைலிங்",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "தனிப்பயன் CSS",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "பாடல் வரிகளின் காட்சியில் உங்கள் சொந்த ஸ்டைல்களைப் பயன்படுத்துங்கள். எச்சரிக்கையுடன் பயன்படுத்தவும்.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "தேக்ககம்",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "தேக்கக உத்தி",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "பாடல் வரிகள் எவ்வளவு காலம் உள்ளூரில் சேமிக்கப்படும் என்பதைத் தீர்மானிக்கிறது.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "தீவிரமானது (2 மணிநேரம்)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "மிதமானது (1 மணிநேரம்)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "எதுவுமில்லை (தேக்ககம் இல்லை)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "தற்போதைய தேக்ககப் பயன்பாடு",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "பற்றி",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "இந்த நீட்டிப்பு ஒரு எளிய யோசனையிலிருந்து பிறந்தது: இசை கேட்பது என்பது ஒரு ஆழ்ந்த அனுபவமாக இருக்க வேண்டும், வெறும் பின்னணி செயல்பாடு மட்டுமல்ல. YouTube இன் நிலையான வரிகள் மற்றும் காலாவதியான இடைமுகங்களால் நாங்கள் சோர்வடைந்தோம், எனவே நாங்கள் எப்போதும் விரும்பிய பிளேயரை உருவாக்க முடிவு செய்தோம். உங்கள் இசை அமர்வை மிகவும் அழகாகவும், ஊடாடும் விதமாகவும், வேடிக்கையாகவும் மாற்றுவதே எங்கள் குறிக்கோள். youly+ பெருமையுடன் திறந்த மூலமாகும். ஒரு பிழையைக் கண்டால் அல்லது உங்களுக்கு ஏதேனும் யோசனை இருந்தால், நாங்கள் உங்களிடமிருந்து கேட்க விரும்புகிறோம்.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "இணைப்புகள் மற்றும் ஆதரவு",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "மூலக் குறியீடு",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "பிழையைப் புகாரளி",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Patreon இல் ஆதரவு",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Ko-fi இல் ஆதரவு",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "உள்ளமைவு மேலாண்மை",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "உங்கள் அமைப்புகளை JSON கோப்பிற்கு ஏற்றுமதி செய்யவும் அல்லது கோப்பிலிருந்து இறக்குமதி செய்யவும்.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "ஏற்றுமதி",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "இறக்குமதி",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "அன்புடன் உருவாக்கப்பட்டது",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "அமைப்புகள் வெற்றிகரமாக ஏற்றுமதி செய்யப்பட்டன!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "ஏற்றுமதியின் போது பிழை: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "அமைப்புகள் வெற்றிகரமாக இறக்குமதி செய்யப்பட்டன! மீண்டும் ஏற்றுவது அவசியம்.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "இறக்குமதியின் போது பிழை: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "செயலில் உள்ள இசைத் தாவல்கள் எதுவும் இல்லை. தயவுசெய்து கைமுறையாகப் புதுப்பிக்கவும்.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "API விசையைக் காட்டு/மறை",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "ஆதாரத்தை அகற்று",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "உள்ளூர் வரிகளை நீக்கு",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "பதிப்பு $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "பாடல் வரிகள்",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "ரோமானைசேஷன்",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "கூகுள் மொழிபெயர்ப்பு",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (பயனர் பங்களிப்புகள்)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (நேரடி)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (வார்த்தை)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

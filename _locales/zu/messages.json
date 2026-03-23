@@ -1,0 +1,801 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Izici zomculo ezithuthukisiwe ze-YouTube Music, i-Apple Music ne-Tidal, ezinokuvumelanisa komugqa nomugqa kanye nezwi nezwi.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "Izilungiselelo ze-YouLy+",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "Okujwayelekile",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "Ukubukeka",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "Okuthuthukile",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "Izici Ezibalulekile",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "Vula i-YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "Imithombo Yedatha",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "Umhlinzeki Wamagama Omculo Oyinhloko",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "Hlanganisa i-SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "Izilungiselelo Zokubonisa",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "Imodi Elula",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "Ukugqanyiswa kwezwi nezwi",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "Ukuphathwa Yedatha",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "Isitoreji esisetshenzisiwe:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "Izinto ezigciniwe (cache):",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "Sula i-Cache",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "Vuselela",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "Izilungiselelo Ezengeziwe",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "Izilungiselelo zigciniwe! Vuselela ikhasi le-YouTube ukuze usebenzise ushintsho.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "Iphutha ngenkathi uzama ukugcina izilungiselelo.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "I-Cache isulwe ngempumelelo!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Kuhluleke ukusula i-cache.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "Iphutha lokuxhumana lapho kusulwa i-cache.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "Ulwazi lwe-cache luvuselelwe.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "Ayikwazi ukusula i-cache: I-API yesandiso ayitholakali.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "Izilungiselelo ze-YouLy+",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "Okujwayelekile",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "Imithombo",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "Ukubukeka",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "Ukuhumusha",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "I-Cache",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "Amagama Omculo Wendawo",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "Mayelana",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "Izilungiselelo zigciniwe. Qala kabusha ithebhu yakho yomculo ukuze usebenzise ushintsho.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "Izilungiselelo zigciniwe. Qala kabusha i-$PLATFORMS$ ukuze usebenzise ushintsho.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "Qala kabusha",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "Qala kabusha Amathebhu",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "Ukusebenza Okubalulekile",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "Vula noma uvale isandiso kuwo wonke umhlaba.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "Vula ukugqanyiswa kwe-karaoke kwezwi nezwi uma kutholakala.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "Izilungiselelo ze-YouTube Music",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "Bonisa ulwazi lwenkondlo kusikrini esigcwele",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "Ibonisa imininingwane yenkondlo kuhlanganise nebha yokuthuthuka, usuku lokukhishwa, isihloko nomculi kwimodi yesikrini esigcwele.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "Sebenzisa i-SponsorBlock API",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "Yeqa izingxenye ezingezona zomculo njengezingeniso, iziphetho noma izingxenye zezikhangiso.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Izilungiselelo ze-Apple Music",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "Khetha amagama omculo angaphandle ukuze uvumelanise umugqa nomugqa",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "Uma kuvunyelwe, uhlelo lokusebenza luzosebenzisa imithombo yamagama omculo yangaphandle uma i-Apple Music ihlinzeka kuphela ngokuvumelanisa komugqa nomugqa.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "Imithombo",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "Umhlinzeki Wamagama Omculo",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "Umhlinzeki wamagama omculo ozenzakalelayo",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Khetha umthombo wamagama omculo owuthandayo.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "I-URL Yeseva ye-KPoe Ngokwezifiso",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "Faka i-URL eyisisekelo yeseva ye-KPoe ozibambele yona ngokwakho.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Ukulandelana Kwemithombo ye-Lyrics+",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Hudula bese uphonsa ukuze uhlele imithombo ye-Lyrics+.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "Imithombo Etholakalayo",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "Faka Umthombo",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "Yonke imithombo isivele ifakiwe",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "Sicela ukhethe umthombo ozowufaka.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "Umthombo we-\"$NAME$\" usukhona kakade.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "Umthombo owedlulisiwe we-\"$NAME$\".",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "Kukhishwe umthombo we-\"$NAME$\".",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "Amagama Omculo Wendawo",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "Phatha Amagama Omculo Alayishiwe",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "Awekho amagama omculo wendawo alayishiwe okwamanje.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "Vuselela Uhlu",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "Faka Amagama Omculo Wendawo Amasha",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "Layisha Amagama Omculo Wendawo Amasha",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "Isihloko Sengoma",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "Igama Lomculi",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "Igama Le-albhamu (uyazikhethela)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "Ifayela Lamagama Omculo",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "Layisha ifayela le-LRC, ELRC, Apple TTML noma i-JSON.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "Layisha Amagama Omculo",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "Isihloko, umculi nefayela kuyadingeka.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "Ilayisha amagama omculo...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "Amagama omculo alayishwe ngempumelelo!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "Iphutha ngenkathi ulayisha: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "Iphutha lokufunda ifayela.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "Amagama omculo wendawo asusiwe.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "Iphutha ngenkathi ususa: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "Ingabe uyafuna ukususa i-\"$TITLE$\"?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "confirmClearLocalLyrics": {
+    "message": "Ingabe uyafuna ukusula wonke amagama omculo wendawo?",
+    "description": "Confirm dialog for clearing all local lyrics"
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "Iphutha ngenkathi kulayishwa amagama omculo wendawo: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "Ukuhumusha",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "Insizakalo Yokuhumusha",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "Umhlinzeki Wokuhumusha",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "Khetha isevisi ozoyisebenzisela ukuhumusha amagama omculo.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Ukhiye we-API we-Gemini AI",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "Ukhiye wakho ugcinwe endaweni yangakini futhi awuthunyelwa kunoma yimaphi amaseva angaphandle ngaphandle kwe-Google Gemini API.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Imodeli ye-Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "Khetha imodeli ye-Gemini AI yokuhumusha.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "Izilungiselelo ze-OpenRouter",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "Ukhiye we-API we-OpenRouter",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "Ukhiye wakho ugcinwe endaweni yangakini.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "Imodeli ye-OpenRouter (isib. google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "Cacisa i-ID yemodeli evela ku-OpenRouter.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "Insizakalo Yezinhlamvu Zesi-Latin",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "Umhlinzeki Wezinhlamvu Zesi-Latin",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "Ithola ngokuzenzakalelayo izinhlamvu zesi-Latin e-Lyrics+ API uma kungenzeka. Ngaphandle kwalokho, isevisi ekhethiwe izoyikhiqiza.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Imodeli ye-Gemini AI Yezinhlamvu Zesi-Latin",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "Khetha imodeli ye-Gemini AI yezinhlamvu zesi-Latin.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "Ukuziphatha Kokuhumusha",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "Shintsha Ulimi Oluhlosiwe Lokuhumusha",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "Setha mathupha ulimi amagama omculo okufanele ahunyushelwe kulo (isib. 'zu', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "Ikhodi yolimi oluqondiswe kuyo ngokwezifiso",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "Faka ikhodi yolimi enezinhlamvu ezi-2 (isib. 'zu' kwisi-Zulu).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "Izilungiselelo Zemiyalo Ethuthukisiwe (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "Shintsha umyalo wokuhumusha we-AI",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Sebenzisa imiyalo ngokwezifiso ngokuhumusha kwe-Gemini/OpenRouter. Sebenzisa i-{targetLang} ne-{lyrics}.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Umyalo Wokuhumusha we-AI Ngokwezifiso",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "Kwenze kube ngokwakho umyalo othunyelwa ku-AI ukuze ahumushe. Sebenzisa i-{targetLang} olimini oluqondiswe kulo.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "Shintsha umyalo wezinhlamvu zesi-Latin we-AI",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Sebenzisa imiyalo ngokwezifiso ngezinhlamvu zesi-Latin ze-Gemini/OpenRouter.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Umyalo Wezinhlamvu Zesi-Latin we-AI Ngokwezifiso",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "Kwenze kube ngokwakho umyalo othunyelwa ku-AI ngezinhlamvu zesi-Latin.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "Ukubukeka",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "Umbukiso Wombhalo",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "Umbukiso wombhalo omkhulu we: Zinhlamvu Zesi-Latin noma Amagama Omculo",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "Khetha ukuthi iyiphi ingxenye yombhalo okufanele ibonakale inkulu.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "Fihla ukuphinyiselwa kwe-Latin",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "Fihla ngokuzenzakalelayo umhlahlandlela wokuphinyiselwa uma amagama omculo esevele ekuhlamvu lwe-Latin.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "Imodi Yamazwi Angemuva we-Dynamic",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "Amazwi angemuva aqala ngaphambi kwemigqa eyinhloko azoboniswa phezulu.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "Ukusebenza Nokuhumelana",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "Ikhulisa ukugqwayiza (animations) nemiphumela yokubukwayo ukuze isebenze kangcono kumadivayisi amala.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "Fihla amagama omculo angaphandle kwesikrini",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "Ifihla futhi isuse yonke imigqa egqwayizayo engabonakali manje. Kunconywa kumadivayisi anezincazelo eziphansi.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "Imiphumela Yokubuka",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "Fiphaza imigqa engasebenzi",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Ibenzisa umphumela wokufiphala (blur) emigqeni engaculwa okwamanje, efana ne-Apple Music.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "Vula ingemuva le-dynamic (Ukubuka Komdlali)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "Ibenzisa ingemuva le-albhamu egqwayizayo lapho umdlali enwetshiwe. Lesi silungiselelo asisebenzi kwimodi yesikrini esigcwele.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "Ukuvumelanisa isigqi somsindo (Ingemuva le-Dynamic)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "Kwenza izingqimba zengemuva le-dynamic zishaye ngokuvumelana nesigqi somsindo. Kufanele icishwe uma usebenzisa i-Better Lyrics Shaders.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "Sebenzisa iphalethi yengoma kumagama omculo wesikrini esigcwele",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "Isebenzisa imibala ye-albhamu kumagama omculo kwimodi yesikrini esigcwele yevidiyo.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "Sebenzisa iphalethi yengoma yombhalo kuzo zonke izindlela",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "Isebenzisa imibala ye-albhamu kumagama omculo kuzo zonke izindlela zokubonisa.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "Shintsha umbala wephalethi",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "Shintsha umbala wamagama omculo ube umbala owufunayo (umbhalo kuphela, hhayi ingemuva) (shiya kungenalutho ngokuzenzakalelayo).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "Isitayela Ngokwezifiso",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "I-CSS Ngokwezifiso",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "Sebenzisa izitayela zakho ekubonisweni kwamagama omculo. Sebenzisa ngokuqaphela.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "I-Cache",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "Isu le-cache",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "Iquma ukuthi amagama omculo azogcinwa isikhathi esingakanani endaweni yangakini.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "Inamandla (amahora ama-2)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "Ilingene (ihora eli-1)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "None (akukho cache)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "Ukusetshenziswa kwe-cache kwamanje",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "Mayelana",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "Lesi sandiso sizalwe ngombono olula: ukulalela umculo kufanele kube into ejulile, hhayi nje umsebenzi wasengemuva. Sikhathele amagama omculo ajwayelekile e-YouTube nezindawo ezindala, ngakho sinqume ukuzakhela umdlali esihlale isimfuna. Inhloso yethu ukwenza izikhathi zakho zomculo zibe zinhle kakhulu, zibe nokuxhumana, futhi zibe mnandi. i-youly+ ingumthombo ovulekile ngokuziqhenya. Uma uthola iphutha noma unombono, singathanda ukuzwa kuwe.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "Izixhumanisi Nokusekelwa",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "Ikhodi Yomthombo",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "Bika Iphutha (Bug)",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Sisekele ku-Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Sisekele ku-Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "Ukuphathwa Kwezakhiwo",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "Khipha izilungiselelo zakho kufayela le-JSON noma ungenise usuka efayeleni.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "Khipha (Export)",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "Ngenisa (Import)",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Yenziwe ngothando",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "Izilungiselelo zikhishwe ngempumelelo!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "Iphutha ngenkathi kukhiswa: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "Izilungiselelo zingeniswe ngempumelelo! Kuyadingeka ukuvuselela.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "Iphutha ngenkathi kungeniswa: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "Awekho amathebhu omculo asebenzayo atholakele. Sicela uvuselele mathupha.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "Bonisa/Fihla ukhiye we-API",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "Susa Umthombo",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "Susa amagama omculo wendawo",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "Inguqulo $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "Amagama Omculo",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "Izinhlamvu Zesi-Latin",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google Translate",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (Iminikelo Yabasebenzisi)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (Okuqondile)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (Zwi)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

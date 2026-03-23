@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Avancerade sångtextfunktioner för YouTube Music, Apple Music och Tidal med rad-för-rad- och ord-för-ord-synkronisering.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "YouLy+ Inställningar",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "Allmänt",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "Utseende",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "Avancerat",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "Kärnfunktioner",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "Aktivera YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "Datakällor",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "Primär sångtextleverantör",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "Integrera SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "Skärminställningar",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "Lättviktsläge",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "Ord-för-ord-markering",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "Datahantering",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "Lagring som används:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "Cachade objekt:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "Rensa cache",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "Uppdatera",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "Fler inställningar",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "Inställningarna sparades! Uppdatera YouTube-sidan för att tillämpa ändringarna.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "Fel vid sparning av inställningar.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "Cachen har rensats!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Det gick inte att rensa cachen.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "Kommunikationsfel vid rensning av cache.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "Cacheinformationen har uppdaterats.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "Kunde inte rensa cache: Extension API är inte tillgängligt.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "YouLy+ Inställningar",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "Allmänt",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "Källor",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "Utseende",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "Översättning",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "Cache",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "Lokala sångtexter",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "Om",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "Inställningarna sparades. Starta om din musikflik för att tillämpa ändringarna.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "Inställningarna sparades. Starta om $PLATFORMS$ för att tillämpa ändringarna.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "Starta om",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "Starta om flikar",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "Kärnfunktionalitet",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "Aktivera eller inaktivera tillägget globalt.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "Aktivera ord-för-ord karaokemarkering när det är tillgängligt.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "YouTube Music Inställningar",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "Aktivera låtinfo i helskärm",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "Visar låtdetaljer i helskärmsläge, inklusive förloppsindikator, lanseringsdatum, titel och artist.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "Använd SponsorBlock API",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "Hoppa över icke-musikaliska delar som intron, outron eller reklaminslag.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Apple Music Inställningar",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "Föredra externa låttexter för rad-för-rad-synkronisering",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "Om aktiverat kommer appen att använda externa låttextkällor om Apple Music endast erbjuder rad-för-rad-synkronisering.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "Källor",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "Sångtextleverantör",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "Standard sångtextleverantör",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Välj din föredragna låttextkälla.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "Anpassad KPoe-server URL",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "Ange bas-URL för din egenhostade KPoe-server.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Lyrics+ Källordning",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Dra och släpp för att ordna om källor för Lyrics+.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "Tillgängliga källor",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "Lägg till källa",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "Alla källor har redan lagts till",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "Välj en källa att lägga till.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "Källan \"$NAME$\" finns redan.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "\"$NAME$\" har lagts till.",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "\"$NAME$\" har tagits bort.",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "Lokala sångtexter",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "Hantera uppladdade texter",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "Inga lokala sångtexter har laddats upp än.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "Uppdatera lista",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "Lägg till nya lokala texter",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "Ladda upp nya lokala texter",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "Låttitel",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "Artistnamn",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "Albumnamn (valfritt)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "Sångstextfil",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "Ladda upp en LRC-, ELRC-, Apple TTML- eller JSON-fil.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "Ladda upp texter",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "Titel, artist och fil krävs.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "Laddar upp texter...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "Texterna laddades upp framgångsrikt!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "Fel vid uppladdning: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "Fel vid läsning av fil.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "Lokala texter har raderats.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "Fel vid radering: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "Vill du radera \"$TITLE$\"?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "Fel vid laddning av lokala texter: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "Översättning",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "Översättningstjänst",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "Översättningsleverantör",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "Välj vilken tjänst som ska användas för att översätta sångtexter.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Gemini AI API-nyckel",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "Din nyckel lagras lokalt och skickas aldrig till några externa servrar förutom Google Gemini API.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Gemini AI-modell",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "Välj Gemini AI-modell för översättning.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "OpenRouter Inställningar",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "OpenRouter API-nyckel",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "Din nyckel lagras lokalt.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "OpenRouter-modell (t.ex. google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "Ange modell-ID från OpenRouter.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "Romaniseringstjänst (för icke-latinska skrifter)",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "Romaniseringsleverantör",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "Hämtar automatiskt romanisering från Lyrics+ API om det är tillgängligt. Annars genererar den valda tjänsten den.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Gemini AI Romaniseringsmodell",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "Välj Gemini AI-modell för romanisering.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "Översättningsbeteende",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "Åsidosätt målspråk för översättning",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "Ställ manuellt in det språk som översättning ska ske till (t.ex: 'sv', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "Anpassad målspråkskod",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "Ange den 2-bokstaviga språkkoden (t.ex: 'sv' för svenska).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "Avancerade promptinställningar (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "Åsidosätt AI-översättningsprompt",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Använd anpassade prompter för Gemini/OpenRouter-översättning. Använd {targetLang} och {lyrics}.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Anpassad AI-översättningsprompt",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "Anpassa den prompt som skickas till AI:n för översättning. Använd {targetLang} för målspråket.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "Åsidosätt AI-romaniseringsprompt",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Använd anpassade prompter för Gemini/OpenRouter-romanisering.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Anpassad AI-romaniseringsprompt",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "Anpassa den prompt som skickas till AI:n för romanisering.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "Utseende",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "Textvisning",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "Större textvisning för: Romanisering eller Sångtext",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "Välj vilken del av texten som ska visas med större stil.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "Dölj latinskt uttal",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "Dölj automatiskt den fonetiska guiden ifall sångtexten redan är på latin.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "Dynamiskt bakgrundssångläge",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "Bakgrundssång som börjar före huvudsången kommer att visas högst upp.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "Prestanda och kompatibilitet",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "Minskar animationer och visuella effekter för bättre prestanda på äldre enheter.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "Dölj textrader utanför skärmen",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "Döljer och tar bort alla animerade textrader som för närvarande inte syns. Rekommenderas för budgetenheter.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "Visuella effekter",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "Sudda ut inaktiv text",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Applicerar en oskärpeeffekt på rader som för närvarande inte sjungs, likt Apple Music.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "Aktivera dynamisk bakgrund (spelarvy)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "Applicerar en animerad albumbakgrund när spelaren är maximerad. Denna inställning fungerar inte i helskärmsläge.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "Audio Beat Sync (Dynamisk bakgrund)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "Gör att dynamiska bakgrundslager pulserar i takt med ljudet. Bör inaktiveras om du använder Better Lyrics Shaders.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "Använd låtpalett för texter i helskärm",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "Applicerar albumfärger på texten i video-helskärmsläge.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "Använd låtpalett för texter i alla lägen",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "Applicerar albumfärger på texten i alla visningslägen.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "Åsidosätt palettfärg",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "Ändra färgen på texterna till en anpassad färg (endast text, inte bakgrund) (lämna tomt för standard).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "Anpassad stil",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "Anpassad CSS",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "Applicera dina egna stilar på låttextvisningen. Använd med försiktighet.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "Cache",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "Cachestrategi",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "Bestämmer hur länge sångtexter förblir lagrade lokalt.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "Aggressiv (2 timmar)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "Moderat (1 timme)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "Ingen (Ingen cachning)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "Nuvarande cacheanvändning",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "Om",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "Detta tillägg föddes ur en enkel idé: att lyssna på musik ska vara en uppslukande upplevelse, inte bara en bakgrundsaktivitet. Vi var trötta på YouTubes statiska texter och föråldrade gränssnitt, så vi bestämde oss för att bygga den spelare vi alltid velat ha. Vårt mål är att göra dina musiksessioner vackrare, mer interaktiva och roligare. youly+ är stolt open source. Om du hittar en bugg eller har en idé så vill vi gärna höra från dig.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "Länkar och support",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "Källkod",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "Rapportera en bugg",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Stöd på Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Stöd på Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "Konfigurationshantering",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "Exportera dina inställningar till en JSON-fil eller importera från en fil.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "Exportera",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "Importera",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Skapad med kärlek",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "Inställningarna exporterades framgångsrikt!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "Fel vid export: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "Inställningarna importerades framgångsrikt! Omstart krävs.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "Fel vid import: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "Inga aktiva musikflikar hittades. Uppdatera manuellt.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "Visa/dölj API-nyckel",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "Ta bort källa",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "Radera lokala texter",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "Version $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "Sångtexter",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "Romanisering",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google Översätt",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (Användarbidrag)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (Direkt)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (Ord)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

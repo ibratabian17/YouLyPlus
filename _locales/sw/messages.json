@@ -1,0 +1,801 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Vipengele vya hali ya juu vya mashairi ya YouTube Music, Apple Music na Tidal, vikiwa na usawazishaji wa mstari kwa mstari na neno kwa neno.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "Mipangilio ya YouLy+",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "Jumla",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "Muonekano",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "Iliyoboreshwa",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "Vipengele vya Msingi",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "Washa YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "Vyanzo vya Data",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "Mtoa Huduma Mkuu wa Mashairi",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "Unganisha SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "Mipangilio ya Kuonyesha",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "Hali Nyepesi",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "Uangaziaji wa Neno kwa Neno",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "Usimamizi wa Data",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "Hifadhi inayotumika:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "Vitu vilivyohifadhiwa (cache):",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "Futa Cache",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "Rejesha upya",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "Mipangilio Zaidi",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "Mipangilio imehifadhiwa! Pakia upya ukurasa wa YouTube ili kutumia mabadiliko.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "Hitilafu wakati wa kuhifadhi mipangilio.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "Cache imefutwa kwa mafanikio!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Imeshindwa kufuta cache.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "Hitilafu ya mawasiliano wakati wa kufuta cache.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "Taarifa ya cache imerejeshwa.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "Haiwezi kufuta cache: API ya kiendelezi haipatikani.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "Mipangilio ya YouLy+",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "Jumla",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "Vyanzo",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "Muonekano",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "Tafsiri",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "Cache",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "Mashairi ya Ndani",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "Kuhusu",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "Mipangilio imehifadhiwa. Anzisha upya kichupo chako cha muziki ili kutumia mabadiliko.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "Mipangilio imehifadhiwa. Anzisha upya $PLATFORMS$ ili kutumia mabadiliko.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "Anzisha upya",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "Anzisha upya Vikichupo",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "Utendaji wa Msingi",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "Washa au zima kiendelezi ulimwenguni kote.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "Washa uangaziaji wa karaoke wa neno kwa neno inapopatikana.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "Mipangilio ya YouTube Music",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "Onyesha maelezo ya wimbo kwenye skrini nzima",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "Huonyesha maelezo ya wimbo ikiwa ni pamoja na bar ya maendeleo, tarehe ya kutolewa, kichwa na msanii katika hali ya skrini nzima.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "Tumia API ya SponsorBlock",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "Ruka sehemu zisizo za muziki kama vile utangulizi (intro), sehemu za mwisho (outro) au sehemu za matangazo.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Mipangilio ya Apple Music",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "Pendelea mashairi ya nje kwa usawazishaji wa mstari kwa mstari",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "Ikiwashwa, programu itatumia vyanzo vya nje vya mashairi ikiwa Apple Music inatoa usawazishaji wa mstari kwa mstari pekee.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "Vyanzo",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "Mtoa Huduma wa Mashairi",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "Mtoa huduma chaguo-msingi wa mashairi",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Chagua chanzo chako cha mashairi unachokipenda.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "URL ya Seva ya KPoe Maalum",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "Weka bado URL ya mwanzo ya seva ya KPoe unayojimiliki mwenyewe.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Mpangilio wa Vyanzo vya Lyrics+",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Buruta na uachie ili kupanga vyanzo kwa ajili ya Lyrics+.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "Vyanzo Vinavyopatikana",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "Ongeza Chanzo",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "Vyanzo vyote tayari vimeongezwa",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "Tafadhali chagua chanzo cha kuongeza.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "Chanzo cha \"$NAME$\" tayari kipo.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "Imeongeza chanzo \"$NAME$\".",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "Imeondoa chanzo \"$NAME$\".",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "Mashairi ya Ndani",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "Dhibiti Mashairi Yaliyopakiwa",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "Hakuna mashairi ya ndani yaliyopakiwa bado.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "Rejesha upya Orodha",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "Ongeza Mashairi Mapya ya Ndani",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "Pakia Mashairi Mapya ya Ndani",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "Kichwa cha Wimbo",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "Jina la Msanii",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "Jina la Albamu (hiari)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "Faili la Mashairi",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "Pakia faili la LRC, ELRC, Apple TTML au JSON.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "Pakia Mashairi",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "Kichwa, msanii na faili vinahitajika.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "Inapakia mashairi...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "Mashairi yamepakiwa kwa mafanikio!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "Hitilafu wakati wa kupakia: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "Hitilafu ya kusoma faili.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "Mashairi ya ndani yamefutwa.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "Hitilafu wakati wa kufuta: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "Je, unataka kufuta \"$TITLE$\"?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "confirmClearLocalLyrics": {
+    "message": "Je, unataka kufuta mashairi yote ya ndani?",
+    "description": "Confirm dialog for clearing all local lyrics"
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "Hitilafu wakati wa kupakia mashairi ya ndani: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "Tafsiri",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "Huduma ya Tafsiri",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "Mtoa huduma wa Tafsiri",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "Chagua huduma ya kutumia kutafsiri mashairi.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Ufunguo wa API ya Gemini AI",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "Ufunguo wako umehifadhiwa ndani ya kifaa chako na haulimwi kwa seva yoyote ya nje isipokuwa Google Gemini API.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Mfano wa Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "Chagua mfano wa Gemini AI kwa ajili ya tafsiri.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "Mipangilio ya OpenRouter",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "Ufunguo wa API ya OpenRouter",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "Ufunguo wako umehifadhiwa ndani ya kifaa chako.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "Mfano wa OpenRouter (k.m. google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "Bainisha ID ya mfano kutoka OpenRouter.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "Huduma ya Uandishi wa Kilatini",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "Mtoa huduma wa Uandishi wa Kilatini",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "Hupata uandishi wa Kilatini moja kwa moja kutoka kwa API ya Lyrics+ inapowezekana. Vinginevyo, huduma iliyochaguliwa itaizalisha.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Mfano wa Uandishi wa Kilatini wa Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "Chagua mfano wa Gemini AI kwa ajili ya uandishi wa Kilatini.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "Tabia ya Tafsiri",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "Badilisha Lugha Unayotaka Kutafsiriwa",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "Weka kwa mkono lugha ambayo mashairi yanapaswa kutafsiriwa (k.m. 'sw', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "Nambari maalum ya lugha unayolenga",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "Weka nambari ya lugha yenye herufi 2 (k.m. 'sw' kwa Kiswahili).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "Mipangilio ya Maagizo ya Hali ya Juu (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "Badilisha agizo la tafsiri la AI",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Tumia maagizo maalum kwa tafsiri ya Gemini/OpenRouter. Tumia {targetLang} na {lyrics}.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Agizo Maalum la Tafsiri la AI",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "Binafsisha agizo linalotumwa kwa AI kwa ajili ya tafsiri. Tumia {targetLang} kwa lugha unayolenga.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "Badilisha agizo la uandishi wa Kilatini la AI",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Tumia maagizo maalum kwa uandishi wa Kilatini wa Gemini/OpenRouter.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Agizo Maalum la Uandishi wa Kilatini la AI",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "Binafsisha agizo linalotumwa kwa AI kwa ajili ya uandishi wa Kilatini.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "Muonekano",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "Maonyesho ya Maandishi",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "Maonyesho ya maandishi makubwa kwa: Uandishi wa Kilatini au Mashairi",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "Chagua ni sehemu gani ya maandishi inapaswa kuonekana kubwa zaidi.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "Ficha matamshi ya Kilatini",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "Ficha kiotomatiki mwongozo wa matamshi ikiwa mashairi tayari yako katika herufi za Kilatini.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "Njia ya Sauti ya Chinichini ya Dynamic",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "Sauti za chinichini zinazoanza kabla ya mistari mikuu zitaonyeshwa juu.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "Utendaji na Utangamano",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "Inapunguza uhuishaji (animations) na athari za kuona kwa utendaji bora kwenye vifaa vya zamani.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "Ficha mashairi yaliyo nje ya skrini",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "Huficha na kuondoa mistari yote yenye uhuishaji ambayo haionekani kwa sasa. Inapendekezwa kwa vifaa vyenye uwezo mdogo.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "Athari za Kuona",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "Fanya mistari isiyo na shughuli iwe na ukungu (blur)",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Hutumia athari ya ukungu kwenye mistari ambayo haiimbwi kwa sasa, sawa na Apple Music.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "Washa mandhari ya dynamic (Muonekano wa Kicbezeo)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "Hutumia mandhari ya albamu yenye uhuishaji wakati kichezeo kimepanuliwa. Mpangilio huu haufanyi kazi katika hali ya skrini nzima.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "Usawazishaji wa midundo ya sauti (Mandhari ya Dynamic)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "Hufanya tabaka za mandhari ya dynamic kuitikia midundo ya sauti. Inapaswa kuzimwa ikiwa unatumia Better Lyrics Shaders.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "Tumia palette ya wimbo kwa mashairi ya skrini nzima",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "Hutumia rangi za albamu kwenye mashairi katika hali ya skrini nzima ya video.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "Tumia palette ya wimbo kwa maandishi katika njia zote",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "Hutumia rangi za albamu kwenye mashairi katika hali zote za kuonyesha.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "Badilisha rangi ya palette",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "Badilisha rangi ya mashairi kuwa rangi maalum (maandishi pekee, si mandhari) (acha wazi kwa chaguo-msingi).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "Mtindo Maalum",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "CSS Maalum",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "Tumia mitindo yako mwenyewe kwa onyesho la mashairi. Tumia kwa tahadhari.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "Cache",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "Mkakati wa Cache",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "Huamua ni muda gani mashairi yatawekwa kwenye hifadhi ya ndani.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "Imara (Masaa 2)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "Wastani (Saa 1)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "Hakuna (hakuna cache)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "Matumizi ya sasa ya cache",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "Kuhusu",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "Kiendelezi hiki kilizaliwa kutokana na wazo rahisi: kusikiliza muziki kunapaswa kuwa uzoefu wa kuvutia, si tu shughuli ya chinichini. Tulichoshwa na mashairi ya kawaida ya YouTube na violesura vilivyopitwa na wakati, kwa hiyo tuliamua kujenga kichezeo tulichokuwa tunakitaka kila wakati. Lengo letu ni kufanya vipindi vyako vya muziki kuwa vyema zaidi, vyenye mwingiliano, na vya kufurahisha. youly+ ni chanzo wazi (open source) kwa fahari. Ukipata hitilafu au una wazo, tungependa kusikia kutoka kwako.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "Viungo na Msaada",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "Nambari ya Chanzo (Source Code)",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "Ripoti Hitilafu (Bug)",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Tuunge mkono kwenye Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Tuunge mkono kwenye Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "Usimamizi wa Maingizo",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "Hamisha mipangilio yako kwenye faili la JSON au ingiza kutoka faili.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "Hamisha",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "Ingiza",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Imetengenezwa kwa upendo",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "Mipangilio imehamishwa kwa mafanikio!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "Hitilafu wakati wa kuhamisha: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "Mipangilio imeingizwa kwa mafanikio! Pakia upya inahitajika.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "Hitilafu wakati wa kuingiza: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "Hakuna vichupo vya muziki vilivyotumika viliyoonekana. Tafadhali rejesha upya kwa mkono.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "Onyesha/Ficha ufunguo wa API",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "Ondoa Chanzo",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "Futa mashairi ya ndani",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "Toleo $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "Mashairi",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "Uandishi wa Kilatini",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google Translate",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (Michango ya Watumiaji)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (Moja kwa moja)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (Neno)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

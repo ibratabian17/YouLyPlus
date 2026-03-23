@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Fonctions avancées de paroles pour YouTube Music, Apple Music & Tidal avec synchronisation ligne par ligne et mot par mot.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "Paramètres YouLy+",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "Général",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "Apparence",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "Avancé",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "Fonctions de base",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "Activer YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "Sources de données",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "Fournisseur de paroles principal",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "Intégrer SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "Paramètres d'affichage",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "Mode léger",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "Surlignage mot par mot",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "Gestion des données",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "Stockage utilisé :",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "Éléments en cache :",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "Effacer le cache",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "Actualiser",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "Plus de paramètres",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "Paramètres enregistrés ! Veuillez recharger YouTube pour appliquer les changements.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "Erreur lors de l'enregistrement des paramètres.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "Cache effacé avec succès !",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearFailed": {
+    "message": "Échec de l'effacement du cache.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "Erreur de communication lors de l'effacement du cache.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "Informations du cache actualisées.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "Impossible d'effacer le cache : API de l'extension non disponible.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "Paramètres YouLy+",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "Général",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "Sources",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "Apparence",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "Traduction",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "Cache",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "Paroles locales",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "À propos",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "Paramètres enregistrés. Redémarrez votre onglet de musique pour appliquer les changements.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "Paramètres enregistrés. Redémarrez $PLATFORMS$ pour appliquer les changements.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "Redémarrer",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "Redémarrer les onglets",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "Fonctions principales",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "Activer ou désactiver l'extension globalement.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "Activer le surlignage mot par mot de style karaoké si disponible.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "Paramètres YouTube Music",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "Activer les infos de chanson en plein écran",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "Affiche les détails de la chanson en mode plein écran, y compris la barre de progression, la date de sortie, le titre et l'artiste.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "Utiliser l'API SponsorBlock",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "Passer les sections non musicales comme les intros, outros ou segments sponsorisés.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Paramètres Apple Music",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "Préférer les paroles externes pour les titres synchronisés par ligne",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "Si activé, l'application utilisera des sources externes si Apple Music propose uniquement une synchronisation ligne par ligne.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "Sources",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "Fournisseur de paroles",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "Fournisseur de paroles par défaut",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Sélectionnez votre source de paroles préférée.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "URL personnalisée du serveur KPoe",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "Saisissez l'URL de base de votre serveur KPoe auto-hébergé.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Ordre des sources Lyrics+",
+    "description": "Label for source ordering configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Glissez-déposez pour réorganiser l'ordre des sources pour Lyrics+.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "Sources disponibles",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "Ajouter une source",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "Toutes les sources ont déjà été ajoutées",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "Veuillez sélectionner une source à ajouter.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "La source \"$NAME$\" existe déjà.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "Source \"$NAME$\" ajoutée.",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "Source \"$NAME$\" supprimée.",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "Paroles locales",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "Gérer les paroles téléchargées",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "Aucune parole locale n'a encore été téléchargée.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "Actualiser la liste",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "Ajouter de nouvelles paroles locales",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "Télécharger de nouvelles paroles locales",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "Titre du morceau",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "Nom de l'artiste",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "Nom de l'album (Optionnel)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "Fichier de paroles",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "Veuillez télécharger votre fichier LRC, ELRC, Apple TTML ou JSON.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "Télécharger les paroles",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "Le titre, le nom de l'artiste et le fichier sont obligatoires.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "Téléchargement des paroles...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "Paroles téléchargées avec succès !",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "Erreur lors du téléchargement : $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "Erreur lors de la lecture du fichier.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "Paroles locales supprimées.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "Erreur lors de la suppression : $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "Supprimer \"$TITLE$\" ?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "Erreur lors du chargement : $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "Traduction",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "Service de traduction",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "Fournisseur de traduction",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "Sélectionnez le service utilisé pour traduire les paroles.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Clé API Gemini AI",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "Votre clé API est stockée localement et n'est jamais envoyée à un serveur externe autre que l'API Gemini de Google.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Modèle Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "Sélectionnez le modèle Gemini AI pour la traduction.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "Paramètres OpenRouter",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "Clé API OpenRouter",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "Votre clé API est stockée localement.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "Modèle OpenRouter (ex : google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "Spécifiez l'ID du modèle OpenRouter.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "Service de romanisation (pour les écritures non latines)",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "Fournisseur de romanisation",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "Récupère automatiquement la romanisation depuis Lyrics+ API si disponible. Sinon, le service sélectionné la générera.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Modèle de romanisation Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "Sélectionnez le modèle Gemini AI pour la romanisation.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "Comportement de traduction",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "Forcer la langue cible",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "Spécifiez manuellement la langue cible (ex : 'fr', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "Code de langue cible personnalisé",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "Entrez le code langue à 2 lettres (ex : 'fr' pour français).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "Paramètres de prompt avancés (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "Forcer le prompt de traduction AI",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Utiliser des prompts personnalisés pour Gemini/OpenRouter. Utilisez {targetLang} et {lyrics}.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Prompt de traduction AI personnalisé",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "Personnalisez le prompt envoyé à l'IA pour la traduction. Utilisez {targetLang} pour la langue cible.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "Forcer le prompt de romanisation AI",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Utiliser des prompts personnalisés pour la romanisation Gemini/OpenRouter.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Prompt de romanisation AI personnalisé",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "Personnalisez le prompt envoyé à l'IA pour la romanisation.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "Apparence",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "Affichage du texte",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "Texte plus grand : Romanisation ou Paroles",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "Choisissez quelle partie du texte doit apparaître plus grande.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "Cacher la romanisation latine",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "Cache automatiquement le guide phonétique si les paroles sont déjà en alphabet latin.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "Placement dynamique des chœurs",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "Les paroles des chœurs qui commencent avant les paroles principales seront affichées en haut.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "Performance & Compatibilité",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "Réduit les animations et effets visuels pour de meilleures performances sur les anciens appareils.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "Cacher les paroles hors écran",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "Cache et supprime les paroles animées hors de vue. Recommandé pour les appareils lents.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "Effets visuels",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "Flouter les paroles inactives",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Applique un flou sur les paroles qui ne sont pas en train d'être chantées, comme sur Apple Music.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "Activer le fond dynamique (Vue Lecteur)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "Applique un fond d'album animé lorsque le lecteur est étendu. Ce paramètre n'a aucun effet en mode plein écran.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "Pulsations synchronisées sur l'audio (Fond dynamique)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "Fait battre le fond dynamique au rythme de la musique. À désactiver si vous utilisez d'autres visualiseurs.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "Utiliser la palette du morceau en mode vidéo plein écran",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "Utilise les couleurs de l'album pour les paroles en mode vidéo plein écran.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "Utiliser la palette du morceau dans tous les modes",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "Utilise les couleurs de l'album pour les paroles dans tous les modes d'affichage.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "Forcer la couleur de la palette",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "Forcez la couleur des paroles avec une couleur personnalisée (laisser vide sinon).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "Style personnalisé",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "CSS personnalisé",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "Appliquez vos propres styles à l'affichage des paroles. À utiliser avec précaution.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "Cache",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "Stratégie de cache",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "Détermine combien de temps les paroles restent stockées localement.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "Agressif (2 heures)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "Modéré (1 heure)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "Aucune (Pas de cache)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "Utilisation actuelle du cache",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "À propos",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "Cette extension est née d'une idée simple : écouter de la musique doit être une expérience immersive, pas seulement une activité de fond. Nous étions fatigués des paroles statiques de YouTube et des interfaces obsolètes, nous avons donc décidé de construire le lecteur que nous avons toujours voulu. Notre objectif est de rendre vos sessions musicales plus belles, engageantes et amusantes. youly+ est fièrement open-source. N'hésitez pas à nous contacter si vous avez des idées ou des corrections.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "Liens & Support",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "Code source",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "Signaler un bug",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Supporter sur Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Supporter sur Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "Gestion de la configuration",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "Exportez vos paramètres ou importez-les depuis un fichier JSON.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "Exporter",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "Importer",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Fait avec amour",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "Paramètres exportés avec succès !",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "Erreur lors de l'exportation : $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "Paramètres importés avec succès ! Rechargement nécessaire.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "Erreur lors de l'importation : $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "Aucun onglet de musique actif trouvé. Veuillez recharger manuellement.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "Afficher/Masquer la clé API",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "Supprimer la source",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "Supprimer les paroles locales",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "Version $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "Paroles",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "Romanisation",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google Traduction",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (Contenu utilisateur)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (Direct)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (Mot)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

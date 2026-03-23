@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Fitur lirik yang ditingkatkan untuk YouTube Music, Apple Music & Tidal dengan sinkronisasi baris demi baris dan kata demi kata",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "Pengaturan YouLy+",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "Umum",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "Tampilan",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "Lanjutan",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "Fitur Utama",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "Aktifkan YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "Sumber Data",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "Penyedia Lirik Utama",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "Integrasikan SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "Pengaturan Tampilan",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "Mode Ringan",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "Penyorotan Kata demi Kata",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "Manajemen Data",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "Penyimpanan Digunakan:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "Item Tersimpan:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "Hapus Cache",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "Muat Ulang",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "Pengaturan Lainnya",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "Pengaturan disimpan! Muat ulang halaman YouTube untuk perubahan.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "Gagal menyimpan pengaturan.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "Cache berhasil dihapus!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearFailed": {
+    "message": "Gagal menghapus cache.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "Error saat berkomunikasi untuk menghapus cache.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "Info cache diperbarui.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "Tidak dapat menghapus cache: API Peramban tidak tersedia.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "Pengaturan YouLy+",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "Umum",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "Sumber",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "Tampilan",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "Terjemahan",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "Cache",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "Lirik Lokal",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "Tentang",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "Pengaturan disimpan. Mulai ulang tab musik Anda agar perubahan diterapkan.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "Pengaturan disimpan. Mulai ulang $PLATFORMS$ agar perubahan diterapkan.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "Mulai Ulang",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "Mulai Ulang Tab",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "Fungsi Inti",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "Aktifkan atau nonaktifkan ekstensi secara global.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "Aktifkan penyorotan kata gaya karaoke jika tersedia.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "Pengaturan YouTube Music",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "Aktifkan Info Lagu Layar Penuh",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "Tampilkan detail lagu dalam mode layar penuh, termasuk bilah progres, tanggal rilis, judul, dan artis.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "Gunakan API SponsorBlock",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "Lewati bagian non-musik seperti intro, outro, atau segmen sponsor.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Pengaturan Apple Music",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "Utamakan Lirik Eksternal untuk Lagu dengan Sinkronisasi Baris",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "Jika diaktifkan, aplikasi akan menggunakan sumber lirik eksternal jika Apple Music hanya menyediakan sinkronisasi baris demi baris, bukan kata demi kata.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "Sumber",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "Penyedia Lirik",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "Penyedia Lirik Default",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Pilih sumber lirik pilihan Anda.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "URL Server KPoe Kustom",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "Masukkan URL dasar untuk server KPoe yang Anda host sendiri.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Urutan Sumber Lyrics+",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Seret dan lepas untuk mengatur ulang urutan sumber untuk Lyrics+.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "Sumber yang Tersedia",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "Tambah Sumber",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "Semua sumber telah ditambahkan",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "Harap pilih sumber untuk ditambahkan.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "Sumber \"$NAME$\" sudah ada.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "\"$NAME$\" ditambahkan.",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "\"$NAME$\" dihapus.",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "Lirik Lokal",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "Kelola Lirik yang Diunggah",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "Belum ada lirik lokal yang diunggah.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "Perbarui Daftar",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "Tambah Lirik Lokal Baru",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "Unggah Lirik Lokal Baru",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "Judul Lagu",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "Nama Artis",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "Nama Album (Opsional)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "File Lirik",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "Unggah file LRC, ELRC, Apple TTML, atau JSON Anda.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "Unggah Lirik",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "Judul Lagu, Nama Artis, dan File Lirik diperlukan.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "Mengunggah lirik...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "Lirik berhasil diunggah!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "Gagal mengunggah lirik: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "Gagal membaca file.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "Lirik lokal dihapus.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "Gagal menghapus lirik: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "Hapus \"$TITLE$\"?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "Gagal memuat lirik lokal: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "Terjemahan",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "Layanan Terjemahan",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "Penyedia Terjemahan",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "Pilih layanan untuk menerjemahkan lirik.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "API Key Gemini AI",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "API Key Anda disimpan secara lokal dan tidak pernah dikirim ke server eksternal selain API Gemini Google.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Model Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "Pilih model Gemini AI untuk terjemahan.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "Pengaturan OpenRouter",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "API Key OpenRouter",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "API Key Anda disimpan secara lokal.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "Model OpenRouter (misal: google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "Tentukan ID model dari OpenRouter.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "Layanan Romanisasi (untuk aksara non-Latin)",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "Penyedia Romanisasi",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "Secara otomatis mengambil romanisasi dari API Lyrics+ jika tersedia. Jika tidak disediakan oleh Lyrics+, layanan yang dipilih akan menghasilkan romanisasi.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Model Romanisasi Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "Pilih model Gemini AI untuk romanisasi.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "Perilaku Terjemahan",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "Ganti Bahasa Target Terjemahan",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "Tentukan bahasa target terjemahan secara manual (misal: 'id', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "Kode Bahasa Target Kustom",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "Masukkan kode bahasa 2 huruf (misal: 'id' untuk bahasa Indonesia, 'en' untuk bahasa Inggris).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "Prompting Lanjutan (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "Ganti Prompt Terjemahan AI",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Gunakan prompt kustom untuk terjemahan Gemini/OpenRouter. Gunakan placeholder {targetLang} dan {lyrics}.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Prompt Terjemahan AI Kustom",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "Sesuaikan prompt yang dikirim ke AI untuk terjemahan. Gunakan {targetLang} untuk bahasa target",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "Ganti Prompt Romanisasi AI",
+    "description": "Label sakelar"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Gunakan prompt kustom untuk romanisasi Gemini/OpenRouter.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Prompt Romanisasi AI Kustom",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "Sesuaikan prompt yang dikirim ke AI untuk romanisasi.",
+    "description": "Teks bantuan"
+  },
+
+  "sectionAppearance": {
+    "message": "Tampilan",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "Tampilan Teks",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "Teks Lebih Besar: Pelafalan atau Lirik",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "Pilih apakah lirik atau pelafalan muncul lebih besar saat keduanya ditampilkan.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "Sembunyikan Pelafalan Latin",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "Sembunyikan panduan fonetik secara otomatis jika lirik sudah ditulis dalam alfabet Latin.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "Penempatan Vokal Latar Dinamis",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "Lirik latar yang dimulai sebelum lirik utama akan ditampilkan di atas.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "Performa & Kompatibilitas",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "Mengurangi animasi dan efek visual untuk performa yang lebih baik pada perangkat lama.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "Sembunyikan Baris Lirik di Luar Layar",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "Sembunyikan & hapus semua baris lirik animasi yang tidak terlihat di layar. Direkomendasikan untuk perangkat berspesifikasi rendah.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "Efek Visual",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "Buramkan Lirik Tidak Aktif",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Menerapkan efek buram pada lirik yang tidak sedang dinyanyikan, mirip dengan Apple Music.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "Aktifkan Latar Belakang Dinamis (Tampilan Pemutar)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "Menerapkan latar belakang album beranimasi saat pemutar diperluas. Pengaturan ini tidak berpengaruh dalam mode layar penuh, di mana latar belakang dinamis selalu diaktifkan.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "Denyut Latar Dinamis Berbasis Audio",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "Membuat lapisan latar belakang dinamis berdenyut mengikuti irama audio. Jika Anda menggunakan Better Lyrics Shaders atau Visualizer lain, Anda harus menonaktifkan pengaturan ini.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "Gunakan palet lagu untuk warna lirik dalam mode layar penuh video",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "Menggunakan palet warna lagu untuk lirik saat dalam mode layar penuh video musik.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "Gunakan palet lagu untuk warna lirik di semua mode",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "Menggunakan palet warna lagu untuk lirik di semua mode tampilan.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "Ganti warna palet",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "Ganti warna palet lagu dengan warna kustom. (Hanya untuk warna lirik, bukan latar belakang dinamis) (kosongkan jika tidak ingin mengganti)",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "Gaya Kustom",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "CSS Kustom",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "Terapkan gaya Anda sendiri ke tampilan lirik. Gunakan dengan hatihati. Untuk membuat atau menguji, disarankan menggunakan UserStyles",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "Cache",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "Strategi Cache",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "Menentukan berapa lama lirik disimpan secara lokal untuk mengurangi waktu pemuatan.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "Agresif (2 jam)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "Moderat (1 jam)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "Tanpa Cache",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "Penggunaan Cache Saat Ini",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "Tentang",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "Ekstensi ini lahir dari ide sederhana: mendengarkan musik harus menjadi pengalaman yang imersif, bukan sekadar aktivitas latar belakang. Kami bosan dengan lirik statis YouTube dan antarmuka yang ketinggalan zaman, jadi kami memutuskan untuk membangun pemutar yang selalu kami inginkan. Tujuan kami adalah membuat sesi musik Anda lebih indah, menarik, dan menyenangkan. Kami harap Anda menyukainya. youly+ bangga menjadi sumber terbuka. Jika Anda menemukan bug, memiliki ide bagus, atau ingin berkontribusi, kami senang mendengar kabar dari Anda.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "Tautan & Dukungan",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "Kode Sumber",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "Laporkan Bug",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Dukung di Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Dukung di Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "Manajemen Konfigurasi",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "Ekspor pengaturan saat ini ke file JSON, atau impor dari file untuk memulihkan konfigurasi Anda.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "Ekspor",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "Impor",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Dibuat dengan cinta",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "Pengaturan berhasil diekspor!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "Gagal mengekspor pengaturan: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "Pengaturan berhasil diimpor! Perlu memuat ulang.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "Gagal mengimpor pengaturan: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "Tidak ada tab musik yang aktif. Silakan muat ulang secara manual.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "Tampilkan/Sembunyikan API Key",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "Hapus sumber",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "Hapus lirik lokal",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "Versi $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "Lirik",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "Pelafalan",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google Translate",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (Konten Pengguna)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (Langsung)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (Kata)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

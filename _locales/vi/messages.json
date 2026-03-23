@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Các tính năng lời bài hát nâng cao cho YouTube Music, Apple Music & Tidal với tính năng đồng bộ hóa từng dòng và từng từ.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "Cài đặt YouLy+",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "Chung",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "Giao diện",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "Nâng cao",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "Tính năng chính",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "Bật YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "Nguồn dữ liệu",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "Nhà cung cấp lời bài hát chính",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "Tích hợp SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "Cài đặt hiển thị",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "Chế độ nhẹ",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "Làm nổi bật từng từ",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "Quản lý dữ liệu",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "Bộ nhớ đã dùng:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "Số mục đã lưu đệm:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "Xóa bộ nhớ đệm",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "Làm mới",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "Cài đặt thêm",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "Đã lưu cài đặt! Vui lòng tải lại trang YouTube để áp dụng thay đổi.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "Có lỗi khi lưu cài đặt.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "Đã xóa bộ nhớ đệm thành công!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearFailed": {
+    "message": "Xóa bộ nhớ đệm thất bại.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "Lỗi giao tiếp khi xóa bộ nhớ đệm.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "Đã làm mới thông tin bộ nhớ đệm.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "Không thể xóa bộ nhớ đệm: API tiện ích không khả dụng.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "Cài đặt YouLy+",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "Chung",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "Nguồn",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "Giao diện",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "Dịch",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "Bộ nhớ đệm",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "Lời bài hát địa phương",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "Giới thiệu",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "Đã lưu cài đặt. Vui lòng khởi động lại tab nhạc để áp dụng thay đổi.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "Đã lưu cài đặt. Vui lòng khởi động lại $PLATFORMS$ để áp dụng thay đổi.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "Khởi động lại",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "Khởi động lại các tab",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "Chức năng cốt lõi",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "Bật hoặc tắt tiện ích trên toàn cầu.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "Bật làm nổi bật từ theo phong cách karaoke khi có sẵn.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "Cài đặt YouTube Music",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "Bật Thông tin bài hát Toàn màn hình",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "Hiển thị chi tiết bài hát ở chế độ toàn màn hình, bao gồm thanh tiến trình, ngày phát hành, tiêu đề và nghệ sĩ.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "Sử dụng API SponsorBlock",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "Bỏ qua các đoạn không phải âm nhạc như phần giới thiệu, phần kết thúc hoặc các đoạn được tài trợ.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Cài đặt Apple Music",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "Ưu tiên lời bài hát bên ngoài cho các bài hát được đồng bộ theo dòng",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "Nếu được bật, ứng dụng sẽ sử dụng các nguồn lời bài hát bên ngoài nếu Apple Music chỉ cung cấp tính năng đồng bộ hóa từng dòng thay vì từng từ.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "Nguồn",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "Nhà cung cấp lời bài hát",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "Nhà cung cấp lời bài hát mặc định",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Chọn nguồn lời bài hát ưa thích của bạn.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "URL máy chủ KPoe tùy chỉnh",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "Nhập URL cơ sở cho máy chủ KPoe tự lưu trữ của bạn.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Thứ tự nguồn Lyrics+",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Kéo và thả để sắp xếp lại thứ tự nguồn cho Lyrics+.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "Nguồn có sẵn",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "Thêm nguồn",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "Tất cả các nguồn đã được thêm",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "Vui lòng chọn một nguồn để thêm.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "Nguồn \"$NAME$\" đã tồn tại.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "Đã thêm \"$NAME$\".",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "Đã xóa \"$NAME$\".",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "Lời bài hát địa phương",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "Quản lý lời bài hát đã tải lên",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "Chưa có lời bài hát địa phương được tải lên.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "Làm mới danh sách",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "Thêm lời bài hát địa phương mới",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "Tải lên lời bài hát địa phương mới",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "Tiêu đề bài hát",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "Tên nghệ sĩ",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "Tên album (Tùy chọn)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "Tập tin lời bài hát",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "Vui lòng tải lên tập tin LRC, ELRC, Apple TTML hoặc JSON của bạn.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "Tải lên lời bài hát",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "Tiêu đề bài hát, Tên nghệ sĩ và Tập tin lời bài hát là bắt buộc.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "Đang tải lời bài hát lên...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "Lời bài hát đã được tải lên thành công!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "Đã xảy ra lỗi khi tải lời bài hát lên: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "Lỗi đọc tập tin.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "Đã xóa lời bài hát địa phương.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "Đã xảy ra lỗi khi xóa lời bài hát: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "Xác nhận xóa \"$TITLE$\"?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "Đã xảy ra lỗi khi tải lời bài hát địa phương: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "Dịch",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "Dịch vụ dịch thuật",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "Nhà cung cấp bản dịch",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "Chọn dịch vụ được sử dụng để dịch lời bài hát.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Khóa API Gemini AI",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "Khóa API của bạn được lưu trữ cục bộ và không bao giờ được gửi đến bất kỳ máy chủ bên ngoài nào ngoài API Gemini của Google.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Mô hình Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "Chọn mô hình Gemini AI để dịch.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "Cài đặt OpenRouter",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "Khóa API OpenRouter",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "Khóa API của bạn được lưu trữ cục bộ.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "Mô hình OpenRouter (ví dụ: google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "Chỉ định ID mô hình từ OpenRouter.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "Dịch vụ Romanization (dành cho chữ viết không phải tiếng Latinh)",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "Nhà cung cấp Romanization",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "Tự động lấy phiên âm từ Lyrics+ API nếu có. Nếu không được Lyrics+ cung cấp, dịch vụ đã chọn sẽ tạo phiên âm.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Mô hình Phiên âm Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "Chọn mô hình Gemini AI để phiên âm.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "Hành vi dịch thuật",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "Ghi đè ngôn ngữ mục tiêu dịch thuật",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "Cấu hình thủ công ngôn ngữ cần dịch sang (ví dụ: 'vi', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "Mã ngôn ngữ mục tiêu tùy chỉnh",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "Vui lòng nhập mã ngôn ngữ 2 chữ cái (ví dụ: 'vi' cho Tiếng Việt, 'en' cho Tiếng Anh).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "Cài đặt Prompt nâng cao (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "Ghi đè Prompt dịch thuật của AI",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Sử dụng các prompt tùy chỉnh để dịch Gemini/OpenRouter. Sử dụng các trình giữ chỗ {targetLang} và {lyrics}.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Lời nhắc dịch thuật AI tùy chỉnh",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "Tùy chỉnh prompt được gửi đến AI để dịch thuật. Sử dụng {targetLang} cho ngôn ngữ mục tiêu",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "Ghi đè Prompt Phiên âm của AI",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Sử dụng prompt tùy chỉnh để phiên âm Gemini/OpenRouter.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Lời nhắc Phiên âm AI tùy chỉnh",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "Tùy chỉnh prompt được gửi đến AI để phiên âm.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "Giao diện",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "Hiển thị văn bản",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "Hiển thị văn bản lớn hơn: Phiên âm hoặc Lời bài hát",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "Chọn phần văn bản nào xuất hiện lớn hơn khi cả lời bài hát và phiên âm đều được hiển thị.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "Ẩn phiên âm tiếng Latin",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "Tự động ẩn hướng dẫn ngữ âm nếu lời bài hát đã được viết bằng bảng chữ cái Latinh.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "Vị trí giọng hát nâng động",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "Lời bài hát nền bắt đầu trước lời bài hát chính sẽ được hiển thị ở phía trên.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "Hiệu suất & Khả năng tương thích",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "Giảm hoạt ảnh và hiệu ứng hình ảnh để có hiệu suất tốt hơn trên các thiết bị cũ.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "Ẩn các dòng lời bài hát ngoài màn hình",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "Ẩn và xóa tất cả các dòng lời bài hát hoạt ảnh hiện không hiển thị trên màn hình. Được khuyến nghị cho các thiết bị cấp thấp.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "Hiệu ứng hình ảnh",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "Làm mờ lời bài hát không hoạt động",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Áp dụng hiệu ứng mờ cho lời bài hát hiện không được hát, tương tự như Apple Music.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "Bật Nền động (Chế độ xem trình phát)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "Mô phỏng nền album chuyển động khi trình phát được mở rộng. Cài đặt này không ảnh hưởng trong chế độ toàn màn hình.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "Xung nhịp dựa trên âm thanh (Nền động)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "Làm cho các lớp nền động đập theo nhịp âm thanh. Nếu bạn đang sử dụng Better Lyrics Shaders hoặc Visualizer khác, bạn nên tắt tính năng này.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "Sử dụng bảng màu bài hát cho màu lời bài hát trong chế độ video toàn màn hình",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "Sử dụng bảng màu của bài hát cho lời bài hát khi ở chế độ video toàn màn hình.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "Sử dụng bảng màu bài hát cho màu lời bài hát trong tất cả các chế độ",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "Sử dụng bảng màu của bài hát cho lời bài hát trong tất cả các chế độ hiển thị.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "Ghi đè màu bảng màu",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "Ghi đè màu sắc của bài hát bằng màu tùy chỉnh (Chỉ dành cho màu lời bài hát, không bao gồm nền động) (để trống nếu không muốn ghi đè).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "Tùy chỉnh kiểu dáng",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "CSS tùy chỉnh",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "Áp dụng phong cách riêng của bạn cho màn hình lời bài hát. Sử dụng một cách thận trọng. Bạn nên sử dụng UserStyles để tạo hoặc thử nghiệm.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "Bộ nhớ đệm",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "Chiến lược lưu trữ",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "Quy định thời gian lưu trữ lời bài hát cục bộ để giảm thời gian tải.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "Mạnh mẽ (2 giờ)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "Vừa phải (1 giờ)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "Không có (Không lưu đệm)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "Mức sử dụng bộ nhớ đệm hiện tại",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "Giới thiệu",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "Tiện ích này ra đời từ một ý tưởng đơn giản: nghe nhạc phải là một trải nghiệm đắm chìm chứ không chỉ là hoạt động nền. Chúng tôi đã quá mệt mỏi với lời bài hát tĩnh và giao diện lỗi thời của YouTube, vì vậy chúng tôi quyết định xây dựng trình phát mà mình hằng mong muốn. Mục tiêu của chúng tôi là làm cho các phiên âm nhạc của bạn trở nên đẹp hơn, lôi cuốn hơn và vui vẻ hơn. youly+ tự hào vận hành dưới dạng mã nguồn mở. Cho dù bạn tìm thấy lỗi, có một ý tưởng tuyệt vời hay muốn đóng góp, chúng tôi đều mong nhận được tin từ bạn.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "Liên kết & Hỗ trợ",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "Mã nguồn",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "Báo cáo lỗi",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Hỗ trợ trên Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Hỗ trợ trên Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "Quản lý cấu hình",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "Xuất các cài đặt hiện tại của bạn sang tập tin JSON hoặc nhập từ tập tin để khôi phục cấu hình của bạn.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "Xuất",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "Nhập",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Made with love",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "Đã xuất cài đặt thành công!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "Lỗi khi xuất cài đặt: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "Đã nhập cài đặt thành công! Cần làm mới để thay đổi có hiệu lực.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "Lỗi khi nhập cài đặt: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "Không tìm thấy tab nhạc nào đang hoạt động. Vui lòng làm mới thủ công.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "Hiển thị/Ẩn khóa API",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "Xóa nguồn",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "Xóa lời bài hát địa phương",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "Phiên bản $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "Lời bài hát",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "Phiên âm",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google Dịch",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (Người dùng đóng góp)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (Trực tiếp)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (Từ)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "ميزات كلمات أغاني متقدمة لـ YouTube Music وApple Music وTidal مع مزامنة سطر بسطر وكلمة بكلمة.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "إعدادات YouLy+",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "عام",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "المظهر",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "متقدم",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "الميزات الأساسية",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "تفعيل YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "مصادر البيانات",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "مزود كلمات الأغاني الأساسي",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "دمج SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "إعدادات العرض",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "الوضع الخفيف",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "تمبيز كلمة بكلمة",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "إدارة البيانات",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "المساحة المستخدمة:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "العناصر المخزنة مؤقتاً:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "مسح ذاكرة التخزين المؤقت",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "تحديث",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "مزيد من الإعدادات",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "تم حفظ الإعدادات! يرجى إعادة تحميل صفحة YouTube لتطبيق التغييرات.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "خطأ أثناء حفظ الإعدادات.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "تم مسح ذاكرة التخزين المؤقت بنجاح!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearFailed": {
+    "message": "فشل مسح ذاكرة التخزين المؤقت.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "خطأ في الاتصال أثناء مسح ذاكرة التخزين المؤقت.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "تم تحديث معلومات التخزين المؤقت.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "تعذر مسح ذاكرة التخزين المؤقت: واجهة برمجة تطبيقات الإضافة غير متوفرة.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "إعدادات YouLy+",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "عام",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "المصادر",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "المظهر",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "الترجمة",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "ذاكرة التخزين المؤقت",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "كلمات أغاني محلية",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "حول",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "تم حفظ الإعدادات. يرجى إعادة تشغيل علامة تبويب الموسيقى لتطبيق التغييرات.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "تم حفظ الإعدادات. يرجى إعادة تشغيل $PLATFORMS$ لتطبيق التغييرات.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "إعادة تشغيل",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "إعادة تشغيل علامات التبويب",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "الوظائف الأساسية",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "تفعيل أو تعطيل الإضافة بشكل عام.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "تفعيل تمييز الكلمات كلمة بكلمة بنمط الكاراوكي عند التوفر.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "إعدادات YouTube Music",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "تفعيل معلومات الأغنية في وضع ملء الشاشة",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "يعرض تفاصيل الأغنية في وضع ملء الشاشة، بما في ذلك شريط التقدم وتاريخ الإصدار والعنوان والفنان.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "استخدام واجهة برمجة تطبيقات SponsorBlock",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "تخطي الأجزاء غير الموسيقية مثل المقدمات أو الخواتم أو المقاطع الإعلانية.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "إعدادات Apple Music",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "تفضيل الكلمات الخارجية للأغاني المتزامنة سطر بسطر",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "إذا تم تفعيله، سيستخدم التطبيق مصادر كلمات خارجية إذا كان Apple Music يوفر مزامنة سطر بسطر فقط.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "المصادر",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "مزود كلمات الأغاني",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "مزود كلمات الأغاني الافتراضي",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "اختر مصدر كلمات الأغاني المفضل لديك.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "رابط خادم KPoe مخصص",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "أدخل الرابط الأساسي لخادم KPoe الذي تستضيفه بنفسك.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "ترتيب مصادر Lyrics+",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "اسحب وأفلت لإعادة ترتيب المصادر لـ Lyrics+.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "المصادر المتاحة",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "إضافة مصدر",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "تمت إضافة جميع المصادر بالفعل",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "يرجى اختيار مصدر لإضافته.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "المصدر \"$NAME$\" موجود بالفعل.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "تم إضافة \"$NAME$\".",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "تم إزالة \"$NAME$\".",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "كلمات أغاني محلية",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "إدارة كلمات الأغاني المرفوعة",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "لم يتم رفع كلمات أغاني محلية بعد.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "تحديث القائمة",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "إضافة كلمات أغاني محلية جديدة",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "رفع كلمات أغاني محلية جديدة",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "عنوان الأغنية",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "اسم الفنان",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "اسم الألبوم (اختياري)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "ملف كلمات الأغنية",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "يرجى رفع ملف LRC أو ELRC أو Apple TTML أو JSON.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "رفع الكلمات",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "العنوان واسم الفنان والملف مطلوبة.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "جاري رفع الكلمات...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "تم رفع الكلمات بنجاح!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "خطأ أثناء الرفع: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "خطأ في قراءة الملف.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "تم حذف الكلمات المحلية.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "خطأ أثناء الحذف: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "هل تريد حذف \"$TITLE$\"؟",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "خطأ أثناء تحميل الكلمات المحلية: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "الترجمة",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "خدمة الترجمة",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "مزود الترجمة",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "اختر الخدمة المستخدمة لترجمة كلمات الأغاني.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "مفتاح API لـ Gemini AI",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "يتم تخزين مفتاحك محلياً ولا يتم إرساله أبداً إلى أي خوادم خارجية بخلاف Google Gemini API.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "موديل Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "اختر موديل Gemini AI للترجمة.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "إعدادات OpenRouter",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "مفتاح API لـ OpenRouter",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "يتم تخزين مفتاحك محلياً.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "موديل OpenRouter (مثال: google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "حدد معرف الموديل من OpenRouter.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "خدمة الرومنة (للكتابات غير اللاتينية)",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "مزود الرومنة",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "يجلب تلقائياً الرومنة من Lyrics+ API إذا كانت متوفرة. وإلا، ستقوم الخدمة المختارة بإنتاجها.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "موديل الرومنة لـ Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "اختر موديل Gemini AI للرومنة.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "سلوك الترجمة",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "تجاوز اللغة المستهدفة للترجمة",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "حدد يدوياً اللغة التي ستترجم إليها (مثال: 'ar', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "رمز اللغة المستهدفة المخصص",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "أدخل رمز اللغة المكون من حرفين (مثال: 'ar' للعربية).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "إعدادات الأوامر المتقدمة (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "تجاوز أمر ترجمة الذكاء الاصطناعي",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "استخدم أوامر مخصصة لترجمة Gemini/OpenRouter. استخدم {targetLang} و {lyrics}.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "أمر ترجمة الذكاء الاصطناعي المخصص",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "خصص الأمر المرسل للذكاء الاصطناعي للترجمة. استخدم {targetLang} للغة المستهدفة.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "تجاوز أمر الرومنة للذكاء الاصطناعي",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "استخدم أوامر مخصصة لرومنة Gemini/OpenRouter.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "أمر رومنة الذكاء الاصطناعي المخصص",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "خصص الأمر المرسل للذكاء الاصطناعي للرومنة.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "المظهر",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "عرض النص",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "عرض نص أكبر لـ: الرومنة أو كلمات الأغنية",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "اختر أي جزء من النص يجب أن يظهر بحجم أكبر.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "إخفاء الرومنة اللاتينية",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "إخفاء الدليل الصوتي تلقائياً إذا كانت كلمات الأغاني لاتينية بالفعل.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "الوضع الديناميكي للكورال",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "سيتم عرض كلمات الكورال التي تبدأ قبل الكلمات الأساسية في الأعلى.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "الأداء والتوافق",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "يقلل من الرسوم المتحركة والمؤثرات البصرية لأداء أفضل على الأجهزة القديمة.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "إخفاء أسطر كلمات الأغاني خارج الشاشة",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "يخفي ويزيل جميع أسطر الكلمات المتحركة التي ليست في العرض حالياً. موصى به للأجهزة ضعيفة الأداء.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "المؤثرات البصرية",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "تمويه الكلمات غير النشطة",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "يطبق تأثير تمويه على الأسطر التي لا يتم غناؤها حالياً، على غرار Apple Music.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "تفعيل الخلفية الديناميكية (عرض المشغل)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "يطبق خلفية ألبوم متحركة عندما يكون المشغل مكبراً. هذا الإعداد لا يعمل في وضع ملء الشاشة.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "نبضات متزامنة مع الصوت (الخلفية الديناميكية)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "يجعل طبقات الخلفية الديناميكية تنبض مع إيقاع الصوت. يجب تعطيله إذا كنت تستخدم Better Lyrics Shaders.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "استخدام لوحة ألوان الأغنية للنصوص في وضع ملء الشاشة",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "يطبق ألوان الألبوم على الكلمات في وضع فيديو ملء الشاشة.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "استخدام لوحة ألوان الأغنية للنصوص في جميع الأوضاع",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "يطبق ألوان الألبوم على الكلمات في جميع أوضاع العرض.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "تجاوز لون لوحة الألوان",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "تغيير لون الكلمات بلون مخصص (النصوص فقط، وليس الخلفية) (اتركه فارغاً للاستخدام الافتراضي).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "تنسيق مخصص",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "CSS مخصص",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "طبق تنسيقاتك الخاصة على عرض الكلمات. استخدمه بحذر.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "ذاكرة التخزين المؤقت",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "استراتيجية التخزين المؤقت",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "يحدد مدة بقاء كلمات الأغاني مخزنة محلياً.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "عنيف (ساعتان)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "معتدل (ساعة واحدة)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "بلا (لا يوجد تخزين مؤقت)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "استخدام ذاكرة التخزين المؤقت الحالي",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "حول",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "هذه الإضافة ولدت من فكرة بسيطة: الاستماع للموسيقى يجب أن يكون تجربة غامرة، وليس مجرد نشاط خلفية. كنا متعبين من الكلمات الثابتة في YouTube والواجهات القديمة، فقررنا بناء المشغل الذي طالما أردناه. هدفنا هو جعل جلساتك الموسيقية أكثر جمالاً وتفاعلاً ومتعة. youly+ مفتوح المصدر بكل فخر. إذا وجدت خطأً أو كان لديك فكرة، يسعدنا تواصلك معنا.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "الروابط والدعم",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "كود المصدر",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "الإبلاغ عن خطأ",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "الدعم عبر Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "الدعم عبر Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "إدارة الإعدادات",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "تصدير إعداداتك إلى ملف JSON أو استيرادها من ملف.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "تصدير",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "استيراد",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "صنع بكل حب",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "تم تصدير الإعدادات بنجاح!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "خطأ أثناء التصدير: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "تم استيراد الإعدادات بنجاح! يلزم إعادة التحميل.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "خطأ أثناء الاستيراد: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "لم يتم العثور على علامات تبويب موسيقى نشطة. يرجى إعادة التحميل يدوياً.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "إظهار/إخفاء مفتاح API",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "إزالة المصدر",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "حذف الكلمات المحلية",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "الإصدار $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "كلمات الأغاني",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "الرومنة",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "ترجمة Google",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (مساهمات المستخدمين)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (مباشر)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (كلمة)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

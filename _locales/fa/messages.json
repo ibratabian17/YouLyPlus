@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "ویژگی‌های پیشرفته متن آهنگ برای YouTube Music، Apple Music و Tidal با هماهنگی خط به خط و کلمه به کلمه.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "تنظیمات YouLy+",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "عمومی",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "ظاهر",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "پیشرفته",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "ویژگی‌های اصلی",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "فعال‌سازی YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "منابع داده",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "ارائه‌دهنده اصلی متن آهنگ",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "ادغام با SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "تنظیمات صفحه نمایش",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "حالت سبک",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "هایلایت کلمه به کلمه",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "مدیریت داده‌ها",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "فضای ذخیره‌سازی استفاده شده:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "موارد کش شده:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "پاک کردن کش",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "بروزرسانی",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "تنظیمات بیشتر",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "تنظیمات ذخیره شد! لطفاً برای اعمال تغییرات، صفحه YouTube را دوباره بارگذاری کنید.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "خطا در ذخیره تنظیمات.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "کش با موفقیت پاک شد!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearFailed": {
+    "message": "پاک کردن کش با شکست مواجه شد.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "خطای ارتباطی هنگام پاک کردن کش.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "اطلاعات کش بروزرسانی شد.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "کش قابل پاک کردن نیست: API افزونه در دسترس نیست.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "تنظیمات YouLy+",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "عمومی",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "منابع",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "ظاهر",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "ترجمه",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "کش",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "متن‌های محلی",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "درباره",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "تنظیمات ذخیره شد. لطفاً برای اعمال تغییرات، تب موسیقی خود را دوباره راه‌اندازی کنید.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "تنظیمات ذخیره شد. لطفاً برای اعمال تغییرات، $PLATFORMS$ را دوباره راه‌اندازی کنید.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "راه‌اندازی مجدد",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "راه‌اندازی مجدد تب‌ها",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "عملکرد اصلی",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "افزونه را به صورت کلی فعال یا غیرفعال کنید.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "در صورت در دسترس بودن، هایلایت کلمه به کلمه کارائوکه را فعال کنید.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "تنظیمات YouTube Music",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "فعال‌سازی اطلاعات آهنگ در حالت تمام صفحه",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "جزئیات آهنگ را در حالت تمام صفحه، شامل نوار پیشرفت، تاریخ انتشار، عنوان و هنرمند نشان می‌دهد.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "استفاده از SponsorBlock API",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "بخش‌های غیرموسیقایی مانند مقدمه، بخش پایانی یا بخش‌های تبلیغاتی را نادیده بگیرید.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "تنظیمات Apple Music",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "ترجیح منابع خارجی برای هماهنگی خط به خط",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "در صورت فعال بودن، اگر Apple Music فقط هماهنگی خط به خط را ارائه دهد، برنامه از منابع خارجی متن آهنگ استفاده خواهد کرد.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "منابع",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "ارائه‌دهنده متن آهنگ",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "ارائه‌دهنده پیش‌فرض متن آهنگ",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "منبع متن آهنگ مورد علاقه خود را انتخاب کنید.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "آدرس سرور KPoe سفارشی",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "آدرس پایه سرور KPoe خود را وارد کنید.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "ترتیب منابع Lyrics+",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "برای تغییر ترتیب منابع در Lyrics+ بکشید و رها کنید.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "منابع موجود",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "افزودن منبع",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "تمام منابع قبلاً اضافه شده‌اند",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "لطفاً یک منبع را برای اضافه کردن انتخاب کنید.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "منبع \"$NAME$\" از قبل وجود دارد.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "\"$NAME$\" اضافه شد.",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "\"$NAME$\" حذف شد.",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "متن‌های محلی",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "مدیریت متن‌های آپلود شده",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "هنوز هیچ متن آهنگ محلی آپلود نشده است.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "بروزرسانی لیست",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "افزودن متن آهنگ محلی جدید",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "آپلود متن آهنگ محلی جدید",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "عنوان آهنگ",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "نام هنرمند",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "نام آلبوم (اختیاری)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "فایل متن آهنگ",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "لطفاً یک فایل LRC، ELRC، Apple TTML یا JSON آپلود کنید.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "آپلود متن آهنگ",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "عنوان، هنرمند و فایل الزامی هستند.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "در حال آپلود متن آهنگ...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "متن آهنگ با موفقیت آپلود شد!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "خطا هنگام آپلود: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "خطا در خواندن فایل.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "متن آهنگ محلی حذف شد.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "خطا هنگام حذف: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "آیا می‌خواهید \"$TITLE$\" را حذف کنید؟",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "خطا در بارگذاری متن‌های محلی: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "ترجمه",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "سرویس ترجمه",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "ارائه‌دهنده ترجمه",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "سرویس مورد استفاده برای ترجمه متن آهنگ را انتخاب کنید.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "کلید API برای Gemini AI",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "کلید شما به صورت محلی ذخیره می‌شود و هرگز به هیچ سرور خارجی به جز Google Gemini API ارسال نمی‌شود.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "مدل Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "مدل Gemini AI را برای ترجمه انتخاب کنید.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "تنظیمات OpenRouter",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "کلید API برای OpenRouter",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "کلید شما به صورت محلی ذخیره می‌شود.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "مدل OpenRouter (مثلاً google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "شناسه مدل را از OpenRouter مشخص کنید.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "سرویس رومی‌سازی (برای خط‌های غیرلاتین)",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "ارائه‌دهنده رومی‌سازی",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "در صورت امکان، رومی‌سازی را به صورت خودکار از API Lyrics+ دریافت می‌کند. در غیر این صورت، سرویس انتخاب شده آن را تولید خواهد کرد.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "مدل رومی‌سازی Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "مدل Gemini AI را برای رومی‌سازی انتخاب کنید.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "رفتار ترجمه",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "تغییر زبان مقصد ترجمه",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "زبانی که ترجمه باید به آن انجام شود را دستی تنظیم کنید (مثلاً: 'fa', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "کد زبان مقصد سفارشی",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "کد زبان ۲ حرفی را وارد کنید (مثلاً: 'fa' برای فارسی).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "تنظیمات پیشرفته Prompt (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "تغییر پرامپت ترجمه AI",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "از پرامپت‌های سفارشی برای ترجمه Gemini/OpenRouter استفاده کنید. از {targetLang} و {lyrics} استفاده کنید.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "پرامپت ترجمه AI سفارشی",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "پرامپتی که برای ترجمه به AI ارسال می‌شود را سفارشی کنید. از {targetLang} برای زبان مقصد استفاده کنید.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "تغییر پرامپت رومی‌سازی AI",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "از پرامپت‌های سفارشی برای رومی‌سازی Gemini/OpenRouter استفاده کنید.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "پرامپت رومی‌سازی AI سفارشی",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "پرامپتی که برای رومی‌سازی به AI ارسال می‌شود را سفارشی کنید.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "ظاهر",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "نمایش متن",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "نمایش متن بزرگتر برای: رومی‌سازی یا متن آهنگ",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "انتخاب کنید کدام بخش از متن بزرگتر نمایش داده شود.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "پنهان کردن تلفظ لاتین",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "در صورتی که متن آهنگ از قبل به خط لاتین باشد، راهنمای آوایی را به طور خودکار پنهان کنید.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "حالت پویای همخوانی (برک‌گراند ووکال)",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "همخوانی‌هایی که قبل از متن اصلی شروع می‌شوند در بالا نمایش داده خواهند شد.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "عملکرد و سازگاری",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "انیمیشن‌ها و جلوه‌های بصری را برای عملکرد بهتر در دستگاه‌های قدیمی کاهش می‌دهد.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "پنهان کردن خطوط متن آهنگ خارج از صفحه",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "تمام خطوط متن آهنگ متحرک که در حال حاضر در دید نیستند را پنهان و حذف می‌کند. برای دستگاه‌های ضعیف توصیه می‌شود.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "جلوه‌های بصری",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "مات کردن متن‌های غیرفعال",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "جلوه ماتی را روی خطوطی که در حال حاضر خوانده نمی‌شوند اعمال می‌کند، مشابه Apple Music.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "فعال‌سازی پس‌زمینه پویا (نمای پلیر)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "هنگامی که پلیر بزرگ می‌شود، یک پس‌زمینه آلبوم متحرک اعمال می‌کند. این تنظیم در حالت تمام صفحه کار نمی‌کند.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "همگام‌سازی ضرب‌آهنگ (پس‌زمینه پویا)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "باعث می‌شود لایه‌های پس‌زمینه پویا با ریتم صدا به تپش درآیند. در صورت استفاده از Better Lyrics Shaders باید غیرفعال شود.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "استفاده از پالت رنگ آهنگ برای متن در حالت تمام صفحه",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "رنگ‌های آلبوم را روی متن آهنگ در حالت ویدیوی تمام صفحه اعمال می‌کند.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "استفاده از پالت رنگ آهنگ برای متن در تمام حالت‌ها",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "رنگ‌های آلبوم را روی متن آهنگ در تمام حالت‌های نمایش اعمال می‌کند.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "تغییر رنگ پالت",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "رنگ متن آهنگ را به یک رنگ سفارشی تغییر دهید (فقط متن، نه پس‌زمینه) (برای استفاده از پیش‌فرض خالی بگذارید).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "استایل سفارشی",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "CSS سفارشی",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "استایل‌های خود را روی نمایش متن آهنگ اعمال کنید. با احتیاط استفاده کنید.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "کش",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "استراتژی کش",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "تعیین می‌کند که متن آهنگ تا چه مدت به صورت محلی ذخیره شود.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "تهاجمی (۲ ساعت)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "متعادل (۱ ساعت)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "هیچ‌کدام (بدون کش)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "استفاده فعلی از کش",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "درباره",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "این افزونه از یک ایده ساده متولد شد: گوش دادن به موسیقی باید تجربه‌ای غوطه‌ورکننده باشد، نه فقط یک فعالیت در پس‌زمینه. ما از متن‌های ایستا در YouTube و رابط‌های کاربری قدیمی خسته شده بودیم، بنابراین تصمیم گرفتیم پلیری را بسازیم که همیشه می‌خواستیم. هدف ما زیباتر، تعاملی‌تر و لذت‌بخش‌تر کردن جلسات موسیقی شماست. youly+ با افتخار متن‌باز است. اگر با باگی روبرو شدید یا ایده‌ای دارید، مشتاق شنیدن آن هستیم.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "لینک‌ها و پشتیبانی",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "کد منبع",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "گزارش باگ",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "حمایت در Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "حمایت در Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "مدیریت پیکربندی",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "تنظیمات خود را در یک فایل JSON صادر یا از یک فایل وارد کنید.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "صدور",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "وارد کردن",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "ساخته شده با عشق",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "تنظیمات با موفقیت صادر شد!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "خطا هنگام صدور: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "تنظیمات با موفقیت وارد شد! راه‌اندازی مجدد الزامی است.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "خطا هنگام وارد کردن: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "هیچ تب موسیقی فعالی پیدا نشد. لطفاً به صورت دستی بروزرسانی کنید.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "نمایش/پنهان کردن کلید API",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "حذف منبع",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "حذف متن‌های محلی",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "نسخه $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "متن آهنگ",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "رومی‌سازی",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "گوگل ترنسلیت",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (مشارکت کاربران)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (مستقیم)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (کلمه)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

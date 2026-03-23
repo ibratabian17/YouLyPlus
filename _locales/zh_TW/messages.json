@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "針對 YouTube Music、Apple Music 及 Tidal 的進階歌詞功能，支援逐行及逐字同步。",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "YouLy+ 設定",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "一般",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "外觀",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "進階",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "核心功能",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "啟用 YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "資料來源",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "主要歌詞提供者",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "整合 SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "顯示設定",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "輕量模式",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "逐字高亮",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "資料管理",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "已使用儲存空間：",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "已快取項目：",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "清除快取",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "重新整理",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "更多設定",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "設定已儲存！請重新整理 YouTube 頁面以套用變更。",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "儲存設定時發生錯誤。",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "已成功清除快取！",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearFailed": {
+    "message": "清除快取失敗。",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "清除快取時发生通訊錯誤。",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "快取資訊已更新。",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "無法清除快取：擴充功能 API 無法使用。",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "YouLy+ 設定",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "一般",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "來源",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "外觀",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "翻譯",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "快取",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "本機歌詞",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "關於",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "設定已儲存。請重新啟動音樂分頁以套用變更。",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "設定已儲存。請重新啟動 $PLATFORMS$ 以套用變更。",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "重新啟動",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "重新啟動分頁",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "核心功能",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "全域啟用或停用擴充功能。",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "啟用卡拉 OK 風格的逐字高亮（如果可用）。",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "YouTube Music 設定",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "啟用全螢幕曲目資訊",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "在全螢幕模式下顯示曲目詳情，包括進度條、發行日期、標題和演出者。",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "使用 SponsorBlock API",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "跳過非音樂部分，如片頭、片尾或贊助片段。",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Apple Music 設定",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "針對逐行同步曲目優先使用外部歌詞",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "啟用後，如果 Apple Music 僅提供逐行同步而非逐字同步，應用程式將使用外部歌詞來源。",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "來源",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "歌詞提供者",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "預設歌詞提供者",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "選擇您偏好的歌詞來源。",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "自訂 KPoe 伺服器 URL",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "輸入您自行架設的 KPoe 伺服器基礎 URL。",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Lyrics+ 來源順序",
+    "description": "Label for source order configuration"
+  },
+  "helperSourceOrder": {
+    "message": "拖放以重新排序 Lyrics+ 的來源。",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "可用來源",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "新增來源",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "所有來源皆已新增",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "請選擇要新增的來源。",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "來源 \"$NAME$\" 已存在。",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "\"$NAME$\" 已新增。",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "\"$NAME$\" 已移除。",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "本機歌詞",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "管理已上傳歌詞",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "尚未上傳本機歌詞。",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "重新整理列表",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "新增本機歌詞",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "上傳新本機歌詞",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "曲名",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "演出者名稱",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "專輯名稱（選填）",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "歌詞檔案",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "上傳您的 LRC、ELRC、Apple TTML 或 JSON 檔案。",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "上傳歌詞",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "曲名、演出者名稱及歌詞檔案為必填項。",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "正在上傳歌詞...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "歌詞已成功上傳！",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "上傳歌詞時發生錯誤：$ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "檔案讀取錯誤。",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "本機歌詞已刪除。",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "刪除歌詞時發生錯誤：$ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "確定要刪除「$TITLE$」嗎？",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "載入本機歌詞時發生錯誤：$ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "翻譯",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "翻譯服務",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "翻譯提供者",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "選擇用於翻譯歌詞的服務。",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Gemini AI API 金鑰",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "您的 API 金鑰儲存在本機，絕不會發送到 Google Gemini API 以外的外部伺服器。",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Gemini AI 模型",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "選擇用於翻譯的 Gemini AI 模型。",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "OpenRouter 設定",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "OpenRouter API 金鑰",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "您的 API 金鑰儲存在本機。",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "OpenRouter 模型（例如：google/gemini-2.0-flash-001）",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "從 OpenRouter 指定模型 ID。",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "注音/拼音服務（針對非拉丁指令碼）",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "注音/拼音提供者",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "如果可用，自動從 Lyrics+ API 獲取拼音/注音。如果 Lyrics+ 未提供，則使用所選服務生成。",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Gemini AI 注音/拼音模型",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "選擇用於注音/拼音的 Gemini AI 模型。",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "翻譯行為",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "覆蓋翻譯目標語言",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "手動指定翻譯的目標語言（例如：'zh-TW'、'en'、'ko'）。",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "自訂目標語言代碼",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "輸入 2 位或多位語言代碼（例如：繁體中文為 'zh-TW'，英文為 'en'）。",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "進階提示詞設定 (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "覆蓋 AI 翻譯提示詞",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "針對 Gemini/OpenRouter 翻譯使用自訂提示詞。請使用 {targetLang} 和 {lyrics} 佔位符。",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "自訂 AI 翻譯提示詞",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "自訂發送到 AI 用於翻譯的提示詞。請使用 {targetLang} 作為目標語言。",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "覆蓋 AI 拼音/注音提示詞",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "針對 Gemini/OpenRouter 拼音/注音使用自訂提示詞。",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "自訂 AI 拼音/注音提示詞",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "自訂發送到 AI 用於拼音/注音的提示詞。",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "外觀",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "文字顯示",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "顯示較大文字：拼音/注音 或 歌詞",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "選擇當兩者同時顯示時，哪一部分文字顯示得較大。",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "隱藏拉丁文字拼音",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "如果歌詞已是拉丁字母，則自動隱藏注音指南。",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "動態背景和聲位置",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "早於主歌詞開始的背景歌詞將顯示在頂部。",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "效能與相容性",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "減少動畫和視覺效果，以提升在舊裝置上的效能。",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "隱藏螢幕外歌詞行",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "隱藏並移除所有目前在螢幕上不可見的動畫歌詞行。建議低階裝置開啟。",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "視覺效果",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "模糊非使用中歌詞",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "對目前未演唱的歌詞套用模糊效果，類似於 Apple Music。",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "啟用動態背景（播放器視圖）",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "當播放器展開時套用動畫專輯背景。此設定在全螢幕模式下無效（全螢幕始終啟用動態背景）。",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "基於音訊的動態背景節拍脈衝",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "使動態背景層隨音訊節拍脈衝。如果您使用 Better Lyrics Shaders 或其他視覺化工具，應停用此設定。",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "在影像全螢幕模式下使用曲目調色盤",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "在音軌影像全螢幕模式下，為歌詞套用曲目的調色盤顏色。",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "在所有模式下使用曲目調色盤",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "在所有顯示模式下為歌詞套用曲目的調色盤顏色。",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "覆蓋調色盤顏色",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "使用自訂顏色覆蓋曲目調色盤顏色（僅限歌詞顏色，不包括動態背景）（留空則不覆蓋）。",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "自訂樣式",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "自訂 CSS",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "為歌詞顯示套用您自己的樣式。請謹慎使用。建議使用 UserStyles 進行建立或測試。",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "快取",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "快取策略",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "決定歌詞在本地儲存的時間長短，以減少載入時間。",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "積極（2 小時）",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "中等（1 小時）",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "無（不快取）",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "目前快取用量",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "關於",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "這個擴充功能誕生於一個簡單的想法：聽音樂應該是一種沉浸式體驗，而不僅僅是背景活動。我們厭倦了 YouTube 靜態歌詞和過時的介面，因此決定打造我們一直想要的播放器。我們的目標是讓您的音樂時光更美麗、更迷人及更有趣。我們希望您會喜歡。youly+ 以前身為傲地以開源形式運作。無論您發現了錯誤、有絕佳創意或想做出貢獻，我們都非常期待收到您的訊息。",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "連結與支援",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "原始碼",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "回報錯誤",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "在 Patreon 上支持我們",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "在 Ko-fi 上支持我們",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "設定管理",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "將您目前的設定匯出為 JSON 檔案，或從檔案匯入以還原您的配置。",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "匯出",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "匯入",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "用心製作",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "設定匯出成功！",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "匯出設定時發生錯誤：$ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "設定匯入成功！需要重新整理分頁以生效。",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "匯入設定時發生錯誤：$ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "未找到作用中的音樂分頁。請手動重新整理。",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "顯示/隱藏 API 金鑰",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "移除來源",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "刪除本機歌詞",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "版本 $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "歌詞",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "注音/拼音",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google 翻譯",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (使用者生成)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (直接)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (單字)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

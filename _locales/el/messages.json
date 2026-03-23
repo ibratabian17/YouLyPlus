@@ -1,0 +1,801 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Προηγμένες λειτουργίες στίχων για YouTube Music, Apple Music και Tidal, με συγχρονισμό γραμμή-προς-γραμμή και λέξη-προς-λέξη.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "Ρυθμίσεις YouLy+",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "Γενικά",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "Εμφάνιση",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "Για Προχωρημένους",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "Βασικές Λειτουργίες",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "Ενεργοποίηση YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "Πηγές Δεδομένων",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "Κύριος Πάροχος Στίχων",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "Ενσωμάτωση SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "Ρυθμίσεις Προβολής",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "Ελαφριά Λειτουργία",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "Επισήμανση Λέξη-προς-Λέξη",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "Διαχείριση Δεδομένων",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "Χρησιμοποιημένος χώρος:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "Στοιχεία στην προσωρινή μνήμη:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "Εκκαθάριση μνήμης",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "Ανανέωση",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "Περισσότερες Ρυθμίσεις",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "Οι ρυθμίσεις αποθηκεύτηκαν! Ανανεώστε τη σελίδα του YouTube για εφαρμογή.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "Σφάλμα κατά την αποθήκευση των ρυθμίσεων.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "Η προσωρινή μνήμη εκκαθαρίστηκε επιτυχώς!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Αποτυχία εκκαθάρισης προσωρινής μνήμης.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "Σφάλμα επικοινωνίας κατά την εκκαθάριση της προσωρινής μνήμης.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "Οι πληροφορίες προσωρινής μνήμης ανανεώθηκαν.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "Αδυναμία εκκαθάρισης: Το API επέκτασης δεν είναι διαθέσιμο.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "Ρυθμίσεις YouLy+",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "Γενικά",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "Πηγές",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "Εμφάνιση",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "Μετάφραση",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "Προσωρινή Μνήμη",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "Τοπικοί Στίχοι",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "Σχετικά",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "Οι ρυθμίσεις αποθηκεύτηκαν. Επανεκκινήστε την καρτέλα μουσικής για εφαρμογή.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "Οι ρυθμίσεις αποθηκεύτηκαν. Επανεκκινήστε το $PLATFORMS$ για εφαρμογή.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "Επανεκκίνηση",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "Επανεκκίνηση Καρτελών",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "Βασική Λειτουργικότητα",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "Ενεργοποίηση ή απενεργοποίηση της επέκτασης καθολικά.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "Ενεργοποίηση επισήμανσης καραόκε λέξη-προς-λέξη όταν είναι διαθέσιμη.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "Ρυθμίσεις YouTube Music",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "Πληροφορίες τραγουδιού σε πλήρη οθόνη",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "Εμφανίζει λεπτομέρειες τραγουδιού, συμπεριλαμβανομένης της γραμμής προόδου, ημερομηνίας κυκλοφορίας, τίτλου και καλλιτέχνη σε λειτουργία πλήρους οθόνης.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "Χρήση SponsorBlock API",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "Παράκαμψη μη μουσικών τμημάτων όπως εισαγωγές, αποφωνήσεις ή διαφημιστικά τμήματα.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Ρυθμίσεις Apple Music",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "Προτίμηση εξωτερικών στίχων για συγχρονισμό γραμμή-προς-γραμμή",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "Εάν ενεργοποιηθεί, η εφαρμογή θα χρησιμοποιεί εξωτερικές πηγές στίχων εάν το Apple Music παρέχει μόνο συγχρονισμό γραμμή-προς-γραμμή.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "Πηγές",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "Πάροχος Στίχων",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "Προεπιλεγμένος Πάροχος Στίχων",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Επιλέξτε την αγαπημένη σας πηγή στίχων.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "Διεύθυνση URL προσαρμοσμένου διακομιστή KPoe",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "Εισαγάγετε τη βασική διεύθυνση URL ενός αυτόνομα φιλοξενούμενου διακομιστή KPoe.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Σειρά Πηγών Lyrics+",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Σύρετε και αποθέστε για να ταξινομήσετε τις πηγές για το Lyrics+.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "Διαθέσιμες Πηγές",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "Προσθήκη Πηγής",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "Όλες οι πηγές έχουν ήδη προστεθεί",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "Επιλέξτε μια πηγή για προσθήκη.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "Η πηγή \"$NAME$\" υπάρχει ήδη.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "Η πηγή \"$NAME$\" προστέθηκε.",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "Η πηγή \"$NAME$\" αφαιρέθηκε.",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "Τοπικοί Στίχοι",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "Διαχείριση Ανεβασμένων Στίχων",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "Δεν έχουν ανεβεί ακόμα τοπικοί στίχοι.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "Ανανέωση Λίστας",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "Προσθήκη Νέων Τοπικών Στίχων",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "Ανέβασμα Νέων Τοπικών Στίχων",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "Τίτλος Τραγουδιού",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "Όνομα Καλλιτέχνη",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "Όνομα Άλμπουμ (προαιρετικό)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "Αρχείο Στίχων",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "Ανεβάστε αρχείο LRC, ELRC, Apple TTML ή JSON.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "Ανέβασμα Στίχων",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "Απαιτείται τίτλος, καλλιτέχνης και αρχείο.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "Ανέβασμα στίχων...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "Οι στίχοι ανέβηκαν επιτυχώς!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "Σφάλμα κατά το ανέβασμα: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "Σφάλμα κατά την ανάγνωση του αρχείου.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "Οι τοπικοί στίχοι διαγράφηκαν.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "Σφάλμα κατά τη διαγραφή: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "Θέλετε να διαγράψετε το \"$TITLE$\";",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "confirmClearLocalLyrics": {
+    "message": "Θέλετε να διαγράψετε όλους τους τοπικούς στίχους;",
+    "description": "Confirm dialog for clearing all local lyrics"
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "Σφάλμα κατά τη φόρτωση τοπικών στίχων: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "Μετάφραση",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "Υπηρεσία Μετάφρασης",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "Πάροχος Μετάφρασης",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "Επιλέξτε την υπηρεσία που θα χρησιμοποιηθεί για τη μετάφραση των στίχων.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Κλειδί API Gemini AI",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "Το κλειδί σας αποθηκεύεται τοπικά και δεν αποστέλλεται ποτέ σε εξωτερικούς διακομιστές εκτός από το Google Gemini API.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Μοντέλο Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "Επιλέξτε το μοντέλο Gemini AI για μετάφραση.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "Ρυθμίσεις OpenRouter",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "Κλειδί API OpenRouter",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "Το κλειδί σας αποθηκεύεται τοπικά.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "Μοντέλο OpenRouter (π.χ. google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "Καθορίστε το αναγνωριστικό μοντέλου από το OpenRouter.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "Υπηρεσία Λατινοποίησης (για μη Λατινικά αλφάβητα)",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "Πάροχος Λατινοποίησης",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "Λαμβάνει αυτόματα τη λατινοποίηση από το Lyrics+ API αν είναι δυνατόν. Διαφορετικά, η επιλεγμένη υπηρεσία θα την δημιουργήσει.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Μοντέλο Λατινοποίησης Gemini AI",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "Επιλέξτε το μοντέλο Gemini AI για λατινοποίηση.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "Συμπεριφορά Μετάφρασης",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "Παράκαμψη γλώσσας-στόχου μετάφρασης",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "Ορίστε χειροκίνητα τη γλώσσα στην οποία θα μεταφράζονται οι στίχοι (π.χ. 'el', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "Προσαρμοσμένος κωδικός γλώσσας στόχου",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "Εισαγάγετε τον 2-ψήφιο κωδικό γλώσσας (π.χ. 'el' για Ελληνικά).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "Ρυθμίσεις Προηγμένων Εντολών (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "Παράκαμψη εντολής μετάφρασης AI",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Χρησιμοποιήστε προσαρμοσμένες εντολές για μετάφραση Gemini/OpenRouter. Χρησιμοποιήστε {targetLang} και {lyrics}.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Προσαρμοσμένη εντολή μετάφρασης AI",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "Προσαρμόστε την εντολή που αποστέλλεται στο AI για μετάφραση. Χρησιμοποιήστε {targetLang} για τη γλώσσα στόχο.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "Παράκαμψη εντολής λατινοποίησης AI",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Χρησιμοποιήστε προσαρμοσμένες εντολές για λατινοποίηση Gemini/OpenRouter.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Προσαρμοσμένη εντολή λατινοποίησης AI",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "Προσαρμόστε την εντολή που αποστέλλεται στο AI για λατινοποίηση.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "Εμφάνιση",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "Προβολή Κειμένου",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "Μεγαλύτερο κείμενο για: Λατινοποίηση ή Στίχους",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "Επιλέξτε ποιο τμήμα του κειμένου πρέπει να εμφανίζεται μεγαλύτερο.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "Απόκρυψη λατινικής προφοράς",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "Αυτόματη απόκρυψη του οδηγού προφοράς εάν οι στίχοι είναι ήδη σε λατινικούς χαρακτήρες.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "Λειτουργία δυναμικών φωνητικών φόντου",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "Τα φωνητικά φόντου που ξεκινούν πριν από τις κύριες γραμμές θα εμφανίζονται από πάνω.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "Απόδοση και Συμβατότητα",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "Μειώνει τα εφέ κίνησης και οπτικής απεικόνισης για καλύτερη απόδοση σε παλιότερες συσκευές.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "Απόκρυψη στίχων εκτός οθόνης",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "Αποκρύπτει και αφαιρεί όλες τις κινούμενες γραμμές που δεν είναι επί του παρόντος ορατές. Συνιστάται για συσκευές χαμηλών προδιαγραφών.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "Οπτικά Εφέ",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "Θόλωση ανενεργών γραμμών",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Εφαρμόζει εφέ θόλωσης σε γραμμές που δεν τραγουδιούνται επί του παρόντος, παρόμοια με το Apple Music.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "Ενεργοποίηση δυναμικού φόντου (Προβολή παίκτη)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "Χρησιμοποιεί ένα κινούμενο φόντο άλμπουμ όταν ο παίκτης είναι ανεπτυγμένος. Αυτή η ρύθμιση δεν λειτουργεί σε λειτουργία πλήρους οθόνης.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "Συγχρονισμός ρυθμού ήχου (Δυναμικό Φόντο)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "Κάνει τα στρώματα του δυναμικού φόντου να παλλόμαστε στον ρυθμό του ήχου. Πρέπει να απενεργοποιηθεί εάν χρησιμοποιείτε Better Lyrics Shaders.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "Χρήση παλέτας τραγουδιού για στίχους πλήρους οθόνης",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "Εφαρμόζει χρώματα άλμπουμ στους στίχους σε λειτουργία πλήρους οθόνης βίντεο.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "Χρήση παλέτας τραγουδιού για κείμενο σε όλες τις λειτουργίες",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "Εφαρμόζει χρώματα άλμπουμ στους στίχους σε όλες τις λειτουργίες προβολής.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "Παράκαμψη χρώματος παλέτας",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "Αλλάξτε το χρώμα των στίχων σε ένα προσαρμοσμένο χρώμα (μόνο κείμενο, όχι φόντο) (αφήστε κενό για το προεπιλεγμένο).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "Προσαρμοσμένο Στυλ",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "Προσαρμοσμένο CSS",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "Εφαρμόστε τα δικά σας στυλ στην προβολή των στίχων. Χρησιμοποιήστε το με προσοχή.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "Προσωρινή Μνήμη",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "Στρατηγική προσωρινής αποθήκευσης",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "Προσδιορίζει πόσο καιρό οι στίχοι θα αποθηκεύονται τοπικά.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "Επιθετική (2 ώρες)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "Μέτρια (1 ώρα)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "Καμία (χωρίς cache)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "Τρέχουσα χρήση προσωρινής μνήμης",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "Σχετικά",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "Αυτή η επέκταση γεννήθηκε από μια απλή ιδέα: η ακρόαση μουσικής πρέπει να είναι μια καθηλωτική εμπειρία, όχι απλά μια παρασκηνιακή δραστηριότητα. Κουραστήκαμε από τους τυπικούς στίχους και τις παρωχημένες διεπαφές του YouTube, έτσι αποφασίσαμε να φτιάξουμε τον παίκτη που πάντα θέλαμε. Στόχος μας είναι να κάνουμε τις μουσικές σας συνεδρίες πιο όμορφες, διαδραστικές και διασκεδαστικές. Το youly+ είναι περήφανα ανοιχτού κώδικα. Αν βρείτε κάποιο σφάλμα ή έχετε μια ιδέα, θα θέλαμε να σας ακούσουμε.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "Σύνδεσμοι και Υποστήριξη",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "Πηγαίος Κώδικας",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "Αναφορά Σφάλματος",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Υποστήριξη στο Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Υποστήριξη στο Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "Διαχείριση Ρυθμίσεων",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "Εξαγωγή των ρυθμίσεων σας σε αρχείο JSON ή εισαγωγή από αρχείο.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "Εξαγωγή",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "Εισαγωγή",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Φτιαγμένο με αγάπη",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "Οι ρυθμίσεις εξήχθησαν επιτυχώς!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "Σφάλμα κατά την εξαγωγή: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "Οι ρυθμίσεις εισήχθησαν επιτυχώς! Απαιτείται ανανέωση.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "Σφάλμα κατά την εισαγωγή: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "Δεν βρέθηκαν ενεργές καρτέλες μουσικής. Παρακαλώ ανανεώστε χειροκίνητα.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "Εμφάνιση/Απόκρυψη κλειδιού API",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "Αφαίρεση Πηγής",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "Διαγραφή τοπικών στίχων",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "Έκδοση $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "Στίχοι",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "Λατινοποίηση",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google Translate",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (Συνεισφορές Χρηστών)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (Άμεση)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (Λέξη)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "YouTube Music、Apple Music、Tidal向けの高度な歌詞機能。行ごとおよび単語ごとの同期に対応。",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "YouLy+ 設定",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "全般",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "外観",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "詳細",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "主要機能",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "YouLy+ を有効にする",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "データソース",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "優先歌詞プロバイダー",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "SponsorBlock と統合",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "表示設定",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "軽量モード",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "単語ごとのハイライト",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "データ管理",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "使用中のストレージ:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "キャッシュ済みアイテム:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "キャッシュを消去",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "更新",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "詳細設定",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "設定を保存しました。変更を適用するにはYouTubeのページを再読み込みしてください。",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "設定の保存中にエラーが発生しました。",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "キャッシュを正常に消去しました。",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearFailed": {
+    "message": "キャッシュの消去に失敗しました。",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "キャッシュ消去の通信中にエラーが発生しました。",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "キャッシュ情報を更新しました。",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "キャッシュを消去できません: 拡張機能APIが利用不可です。",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "YouLy+ 設定",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "全般",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "ソース",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "外観",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "翻訳",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "キャッシュ",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "ローカル歌詞",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "この拡張機能について",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "設定を保存しました。変更を適用するには音楽タブを再起動してください。",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "設定を保存しました。変更を適用するには $PLATFORMS$ を再起動してください。",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "再起動",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "タブを再起動",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "コア機能",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "拡張機能全体の有効/無効を切り替えます。",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "利用可能な場合にカラオケスタイルの単語ハイライトを有効にします。",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "YouTube Music 設定",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "全画面表示での曲情報を有効にする",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "全画面モードで、プログレスバー、リリース日、タイトル、アーティスト名などの曲情報を表示します。",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "SponsorBlock API を使用する",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "イントロ、アウトロ、スポンサーセグメントなどの音楽以外のセクションをスキップします。",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Apple Music 設定",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "行同期トラックで外部歌詞を優先する",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "有効にすると、Apple Music が行ごとの同期のみを提供し、単語ごとの同期を提供しない場合に、外部の歌詞ソースを使用します。",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "ソース",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "歌詞プロバイダー",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "デフォルトの歌詞プロバイダー",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "優先する歌詞ソースを選択してください。",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "カスタム KPoe サーバー URL",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "セルフホストしている KPoe サーバーのベース URL を入力してください。",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Lyrics+ ソース順序",
+    "description": "Label for source order configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Lyrics+ のソースの順序をドラッグアンドドロップで並べ替えます。",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "利用可能なソース",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "ソースを追加",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "すべてのソースが追加済みです",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "追加するソースを選択してください。",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "ソース「$NAME$」は既に追加されています。",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "「$NAME$」を追加しました。",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "「$NAME$」を削除しました。",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "ローカル歌詞",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "アップロード済みの歌詞を管理",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "アップロード済みのローカル歌詞はありません。",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "リストを更新",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "新しいローカル歌詞を追加",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "新しいローカル歌詞をアップロード",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "曲名",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "アーティスト名",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "アルバム名 (任意)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "歌詞ファイル",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "LRC、ELRC、Apple TTML、または JSON ファイルをアップロードしてください。",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "歌詞をアップロード",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "曲名、アーティスト名、および歌詞ファイルが必要です。",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "歌詞をアップロード中...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "歌詞を正常にアップロードしました！",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "歌詞のアップロード中にエラーが発生しました: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "ファイルの読み取り中にエラーが発生しました。",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "ローカル歌詞を削除しました。",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "歌詞の削除中にエラーが発生しました: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "「$TITLE$」を削除しますか？",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "ローカル歌詞の読み込み中にエラーが発生しました: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "翻訳",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "翻訳サービス",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "翻訳プロバイダー",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "歌詞の翻訳に使用するサービスを選択してください。",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Gemini AI API キー",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "API キーはローカルに保存され、Google の Gemini API 以外の外部サーバーに送信されることはありません。",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Gemini AI モデル",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "翻訳に使用する Gemini AI モデルを選択してください。",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "OpenRouter 設定",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "OpenRouter API キー",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "API キーはローカルに保存されます。",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "OpenRouter モデル (例: google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "OpenRouter からモデル ID を指定してください。",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "発音ガイド (ローマ字化) サービス",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "発音ガイドプロバイダー",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "利用可能な場合は Lyrics+ API から発音ガイドを自動的に取得します。Lyrics+ から提供されない場合は、選択したサービスを使用して発音ガイドを生成します。",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Gemini AI 発音ガイドモデル",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "発音ガイドに使用する Gemini AI モデルを選択してください。",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "翻訳の動作",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "翻訳先言語を上書きする",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "翻訳先の言語を手動で指定します (例: 'ja', 'en', 'ko')。",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "カスタムターゲット言語コード",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "2文字の言語コードを入力してください (例: 日本語なら 'ja', 英語なら 'en')。",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "高度なプロンプト設定 (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "AI 翻訳プロンプトを上書きする",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Gemini/OpenRouter 翻訳にカスタムプロンプトを使用します。{targetLang} と {lyrics} プレースホルダーを使用してください。",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "カスタム AI 翻訳プロンプト",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "AI に送信する翻訳プロンプトをカスタマイズします。ターゲット言語には {targetLang} を使用してください。",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "AI 発音ガイドプロンプトを上書きする",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Gemini/OpenRouter 発音ガイドにカスタムプロンプトを使用します。",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "カスタム AI 発音ガイドプロンプト",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "AI に送信する発音ガイドプロンプトをカスタマイズします。",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "外観",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "テキスト表示",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "大きく表示するテキスト: 発音 または 歌詞",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "歌詞と発音の両方が表示されているときに、どちらを大きく表示するかを選択します。",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "ラテン文字の発音ガイドを隠す",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "歌詞がすでにラテン文字で書かれている場合、音声ガイドを自動的に非表示にします。",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "ダイナミックなバックグラウンドボーカル配置",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "メインの歌詞より前に始まるバックグラウンド歌詞を上部に表示します。",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "パフォーマンスと互換性",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "古いデバイスでのパフォーマンスを向上させるために、アニメーションや視覚効果を削減します。",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "画面外の歌詞行を隠す",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "現在画面に表示されていないすべてのアニメーション歌詞行を非表示にして削除します。低スペックのデバイスに推奨されます。",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "視覚効果",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "非アクティブな歌詞をぼかす",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Apple Music のように、現在歌われていない歌詞にぼかし効果を適用します。",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "ダイナミックバックグラウンドを有効にする (プレーヤービュー)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "プレーヤーが展開されているときに、アニメーション付きのアルバム背景を適用します。この設定は、ダイナミックバックグラウンドが常に有効になっている全画面モードには影響しません。",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "オーディオベースのビートパルス (ダイナミックバックグラウンド)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "ダイナミックバックグラウンドのレイヤーをオーディオのビートに合わせてパルスさせます。Better Lyrics Shaders または別のビジュアライザーを使用している場合は、この設定を無効にする必要があります。",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "全画面ビデオモードで歌詞の色に曲のパレットを使用する",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "ビデオミュージックの全画面モードのときに、歌詞に曲のカラーパレットを使用します。",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "すべてのモードで歌詞の色に曲のパレットを使用する",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "すべての表示モードで、歌詞に曲のカラーパレットを使用します。",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "パレットの色を上書きする",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "曲のパレットカラーをカスタムカラーで上書きします (歌詞の色のみ。ダイナミックバックグラウンドには適用されません。上書きしたくない場合は空のままにしてください)。",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "カスタムスタイリング",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "カスタム CSS",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "歌詞の表示に独自のスタイルを適用します。注意して使用してください。作成やテストには UserStyles の使用をお勧めします。",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "キャッシュ",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "キャッシュ戦略",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "読み込み時間を短縮するために歌詞をローカルに保存する期間を決定します。",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "積極的 (2時間)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "標準 (1時間)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "なし (キャッシュしない)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "現在のキャッシュ使用量",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "この拡張機能について",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "この拡張機能は、シンプルなアイデアから生まれました。「音楽を聴くことは、単なるバックグラウンドアクティビティではなく、没入型の体験であるべきだ」ということです。YouTube の静的な歌詞や時代遅れのインターフェースに飽き飽きしていたため、私たちがずっと欲しかったプレーヤーを作ることにしました。私たちの目標は、あなたの音楽セッションをより美しく、実用的で、楽しいものにすることです。youly+ は誇りを持ってオープンソースで提供されています。バグを見つけた場合、素晴らしいアイデアがある場合、または貢献したい場合は、ぜひご連絡ください。",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "リンクとサポート",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "ソースコード",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "バグを報告",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Patreon でサポートする",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Ko-fi でサポートする",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "設定の管理",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "現在の設定を JSON ファイルにエクスポートしたり、ファイルからインポートして設定を復元したりできます。",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "エクスポート",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "インポート",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "愛を込めて作成",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "設定を正常にエクスポートしました！",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "設定のエクスポート中にエラーが発生しました: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "設定を正常にインポートしました！変更を適用するには再読み込みが必要です。",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "設定のインポート中にエラーが発生しました: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "アクティブな音楽タブが見つかりませんでした。手動で再読み込みしてください。",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "API キーの表示/非表示",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "ソースを削除",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "ローカル歌詞を削除",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "バージョン $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "歌詞",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "発音",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google 翻訳",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (ユーザー投稿)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (直接取得)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (単語同期)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "YouTube Music, Apple Music ve Tidal için satır satır ve kelime kelime senkronizasyon ile gelişmiş şarkı sözü özellikleri.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "YouLy+ Ayarları",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "Genel",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "Görünüm",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "Gelişmiş",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "Temel Özellikler",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "YouLy+'ı Etkinleştir",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "Veri Kaynakları",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "Birincil Söz Sağlayıcı",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "SponsorBlock'u Entegre Et",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "Ekran Ayarları",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "Hafif Mod",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "Kelime Kelime Vurgulama",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "Veri Yönetimi",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "Kullanılan Depolama:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "Önbelleğe Alınan Öğeler:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "Önbelleği Temizle",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "Yenile",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "Daha Fazla Ayar",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "Ayarlar kaydedildi! Değişiklikleri uygulamak için lütfen YouTube sayfasını yenileyin.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "Ayarlar kaydedilirken hata oluştu.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "Önbellek başarıyla temizlendi!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearFailed": {
+    "message": "Önbellek temizlenemedi.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "Önbellek temizlenirken iletişim hatası.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "Önbellek bilgileri yenilendi.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "Önbellek temizlenemedi: Uzantı API'si kullanılamıyor.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "YouLy+ Ayarları",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "Genel",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "Kaynaklar",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "Görünüm",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "Çeviri",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "Önbellek",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "Yerel Şarkı Sözleri",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "Hakkında",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "Ayarlar kaydedildi. Değişiklikleri uygulamak için lütfen müzik sekmenizi yeniden başlatın.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "Ayarlar kaydedildi. Değişiklikleri uygulamak için lütfen $PLATFORMS$'ı yeniden başlatın.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "Yeniden Başlat",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "Sekmeleri Yeniden Başlat",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "Temel İşlevsellik",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "Uzantıyı küresel olarak etkinleştirin veya devre dışı bırakın.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "Mevcut olduğunda kelime kelime karaoke vurgulamasını etkinleştirin.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "YouTube Music Ayarları",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "Tam Ekranda Şarkı Bilgisini Etkinleştir",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "Tam ekran modunda ilerleme çubuğu, çıkış tarihi, başlık ve sanatçı dahil şarkı ayrıntılarını gösterir.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "SponsorBlock API'sini Kullan",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "Giriş, çıkış veya reklam gibi müzik dışı bölümleri atlayın.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Apple Music Ayarları",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "Satır Satır Senkronizasyon İçin Harici Sözleri Tercih Et",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "Etkinleştirilirse, Apple Music yalnızca satır satır senkronizasyon sağlıyorsa uygulama harici söz kaynaklarını kullanacaktır.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "Kaynaklar",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "Şarkı Sözü Sağlayıcı",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "Varsayılan Şarkı Sözü Sağlayıcı",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Tercih ettiğiniz şarkı sözü kaynağını seçin.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "Özel KPoe Sunucu URL'si",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "Kendi barındırdığınız KPoe sunucusunun temel URL'sini girin.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Lyrics+ Kaynak Sıralaması",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Lyrics+ kaynaklarını yeniden sıralamak için sürükleyip bırakın.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "Mevcut Kaynaklar",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "Kaynak Ekle",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "Tüm kaynaklar zaten eklendi",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "Lütfen eklemek için bir kaynak seçin.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "\"$NAME$\" kaynağı zaten mevcut.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "\"$NAME$\" eklendi.",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "\"$NAME$\" kaldırıldı.",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "Yerel Şarkı Sözleri",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "Yüklenen Sözleri Yönet",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "Henüz yerel şarkı sözü yüklenmedi.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "Listeyi Yenile",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "Yeni Yerel Söz Ekle",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "Yeni Yerel Söz Yükle",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "Şarkı Adı",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "Sanatçı Adı",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "Albüm Adı (Opsiyonel)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "Söz Dosyası",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "Lütfen bir LRC, ELRC, Apple TTML veya JSON dosyası yükleyin.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "Sözleri Yükle",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "Başlık, sanatçı ve dosya gereklidir.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "Sözler yükleniyor...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "Sözler başarıyla yüklendi!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "Yükleme sırasında hata: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "Dosya okuma hatası.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "Yerel sözler silindi.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "Silme sırasında hata: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "\"$TITLE$\" silinsin mi?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "Yerel sözler yüklenirken hata oluştu: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "Çeviri",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "Çeviri Servisi",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "Çeviri Sağlayıcı",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "Şarkı sözlerini çevirmek için kullanılacak servisi seçin.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Gemini AI API Anahtarı",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "Anahtarınız yerel olarak saklanır ve Google Gemini API dışındaki harici sunuculara asla gönderilmez.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Gemini AI Modeli",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "Çeviri için Gemini AI modelini seçin.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "OpenRouter Ayarları",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "OpenRouter API Anahtarı",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "Anahtarınız yerel olarak saklanır.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "OpenRouter Modeli (örn. google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "OpenRouter'dan model kimliğini belirtin.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "Romanizasyon (Okunuş) Servisi",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "Romanizasyon Sağlayıcı",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "Mümkünse Lyrics+ API'sinden otomatik olarak romanizasyon alır. Aksi takdirde, seçilen servis bunu üretecektir.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Gemini AI Romanizasyon Modeli",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "Romanizasyon için Gemini AI modelini seçin.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "Çeviri Davranışı",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "Çeviri Hedef Dilini Geçersiz Kıl",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "Çevirinin yapılacağı dili manuel olarak ayarlayın (örn: 'tr', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "Özel Hedef Dil Kodu",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "2 harfli dil kodunu girin (örn: Türkçe için 'tr').",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "Gelişmiş Komut Ayarları (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "AI Çeviri Komutunu Geçersiz Kıl",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Gemini/OpenRouter çevirisi için özel komutlar kullanın. {targetLang} ve {lyrics} kullanın.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Özel AI Çeviri Komutu",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "AI'ya çeviri için gönderilen komutu özelleştirin. Hedef dil için {targetLang} kullanın.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "AI Romanizasyon Komutunu Geçersiz Kıl",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Gemini/OpenRouter romanizasyonu için özel komutlar kullanın.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Özel AI Romanizasyon Komutu",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "AI'ya romanizasyon için gönderilen komutu özelleştirin.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "Görünüm",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "Metin Ekranı",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "Şunun İçin Daha Büyük Metin: Romanizasyon veya Şarkı Sözleri",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "Metnin hangi bölümünün daha büyük görüneceğini seçin.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "Latin Okunuşları Gizle",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "Sözler zaten Latin alfabesindeyse fonetik kılavuzu otomatik olarak gizleyin.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "Dinamik Arka Plan Vokal Modu",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "Ana sözlerden önce başlayan arka plan vokalleri üstte gösterilecektir.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "Performans ve Uyumluluk",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "Eski cihazlarda daha iyi performans için animasyonları ve görsel efektleri azaltır.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "Ekran Dışı Söz Satırlarını Gizle",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "Şu anda görünümde olmayan tüm animasyonlu söz satırlarını gizler ve kaldırır. Düşük kaliteli cihazlar için önerilir.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "Görsel Efektler",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "Aktif Olmayan Sözleri Bulanıklaştır",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Apple Music'e benzer şekilde, şu anda söylenmeyen satırlara bulanıklık efekti uygular.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "Dinamik Arka Planı Etkinleştir (Oynatıcı Görünümü)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "Oynatıcı büyütüldüğünde animasyonlu bir albüm arka planı uygular. Bu ayar tam ekran modunda çalışmaz.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "Ses Vuruşu Senkronizasyonu (Dinamik Arka Plan)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "Dinamik arka plan katmanlarının ses ritmiyle nabız gibi atmasını sağlar. Better Lyrics Shaders kullanılıyorsa devre dışı bırakılmalıdır.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "Tam Ekran Metinler İçin Şarkı Paletini Kullan",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "Tam ekran video modunda sözlere albüm renklerini uygular.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "Tüm Modlarda Metinler İçin Şarkı Paletini Kullan",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "Tüm görünüm modlarında sözlere albüm renklerini uygular.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "Palet Rengini Geçersiz Kıl",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "Sözlerin rengini özel bir renkle değiştirin (yalnızca metin, arka plan değil) (varsayılan kullanım için boş bırakın).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "Özel Stil",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "Özel CSS",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "Söz ekranına kendi stillerinizi uygulayın. Dikkatli kullanın.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "Önbellek",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "Önbellek Stratejisi",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "Şarkı sözlerinin ne kadar süreyle yerel olarak saklanacağını belirler.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "Agresif (2 Saat)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "Ilımlı (1 Saat)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "Yok (Önbelleğe Alma Yok)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "Mevcut Önbellek Kullanımı",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "Hakkında",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "Bu uzantı basit bir fikirden doğdu: müzik dinlemek, sadece bir arka plan etkinliği değil, sürükleyici bir deneyim olmalıdır. YouTube'un durağan sözlerinden ve eski arayüzlerinden yorulmuştuk, bu yüzden her zaman istediğimiz oynatıcıyı kurmaya karar verdik. Amacımız müzik seanslarınızı daha güzel, etkileşimli ve eğlenceli hale getirmektir. youly+ gururla açık kaynaklıdır. Bir hata bulursanız veya bir fikriniz varsa, sizden haber almaktan memnuniyet duyarız.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "Bağlantılar ve Destek",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "Kaynak Kod",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "Hata Bildir",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Patreon'da Destekleyin",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Ko-fi'de Destekleyin",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "Yapılandırma Yönetimi",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "Ayarlarınızı bir JSON dosyasına aktarın veya bir dosyadan içe aktarın.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "Dışa Aktar",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "İçe Aktar",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Sevgiyle yapıldı",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "Ayarlar başarıyla dışa aktarıldı!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "Dışa aktarma sırasında hata: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "Ayarlar başarıyla içe aktarıldı! Yeniden yükleme gerekiyor.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "İçe aktarma sırasında hata: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "Aktif müzik sekmesi bulunamadı. Lütfen manuel olarak yenileyin.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "API Anahtarını Göster/Gizle",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "Kaynağı Kaldır",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "Yerel Sözleri Sil",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "Sürüm $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "Şarkı Sözleri",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "Romanizasyon",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google Çeviri",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (Kullanıcı Katkıları)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (Direkt)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (Kelime)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

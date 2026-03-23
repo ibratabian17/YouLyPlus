@@ -1,0 +1,801 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Gevorderde lirieke-kenmerke vir YouTube Music, Apple Music en Tidal, met reël-vir-reël en woord-vir-woord sinkronisering.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "YouLy+ Instellings",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "Algemeen",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "Voorkoms",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "Gevorderd",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "Kernkenmerke",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "Aktiveer YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "Databronne",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "Primêre lirieke-verskaffer",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "Integreer SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "Vertooninstellings",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "Ligte Modus",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "Woord-vir-woord uitligging",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "Datagebruik",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "Berging gebruik:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "Gekasde items:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "Maak kas skoon",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "Herlaai",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "Meer instellings",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "Instellings gestoor! Herlaai die YouTube-bladsy om veranderinge toe te pas.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "Fout tydens stoor van instellings.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "Kas suksesvol skoongemaak!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Kon nie kas skoonmaak nie.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "Kommunikasiefout tydens skoonmaak van kas.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "Kas-inligting herlaai.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "Kan nie kas skoonmaak nie: Uitbreidings-API nie beskikbaar nie.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "YouLy+ Instellings",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "Algemeen",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "Bronne",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "Voorkoms",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "Vertaling",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "Kas",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "Plaaslike lirieke",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "Oor",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "Instellings gestoor. Herbegin jou musiek-oortjie om veranderinge toe te pas.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "Instellings gestoor. Herbegin $PLATFORMS$ om veranderinge toe te pas.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "Herbegin",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "Herbegin oortjies",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "Kernfunksionaliteit",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "Aktiveer of deaktiveer die uitbreiding wêreldwyd.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "Aktiveer woord-vir-woord karaoke-uitligging wanneer beskikbaar.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "YouTube Music-instellings",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "Wys liedjie-inligting in volskerm",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "Wys liedjiebesonderhede insluitend vorderingbalk, vrystellingsdatum, titel en kunstenaar in volskerm-modus.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "Gebruik SponsorBlock API",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "Slaan nie-musikale dele oor soos intros, outros of advertensie-segmente.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Apple Music-instellings",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "Verkies eksterne lirieke vir reël-vir-reël sinkronisering",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "Indien geaktiveer, sal die toepassing eksterne liriekebronne gebruik as Apple Music slegs reël-vir-reël sinkronisering verskaf.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "Bronne",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "Lirieke-verskaffer",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "Standaard lirieke-verskaffer",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Kies jou gunsteling liriekebron.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "Gepasmaakte KPoe-bediener-URL",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "Voer die basis-URL van 'n self-gehuisvesde KPoe-bediener in.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Lyrics+ bronvolgorde",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Sleep en los om bronne vir Lyrics+ te sorteer.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "Beskikbare bronne",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "Voeg bron by",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "Alle bronne is reeds bygevoeg",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "Kies asseblief 'n bron om by te voeg.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "Die bron \"$NAME$\" bestaan reeds.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "Bron \"$NAME$\" bygevoeg.",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "Bron \"$NAME$\" verwyder.",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "Plaaslike lirieke",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "Bestuur opgelaaide lirieke",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "Geen plaaslike lirieke is nog opgelaai nie.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "Verfris lys",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "Voeg nuwe plaaslike lirieke by",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "Laai nuwe plaaslike lirieke op",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "Liedjie-titel",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "Kunstenaar-naam",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "Album-naam (opsioneel)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "Lirieke-lêer",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "Laai 'n LRC, ELRC, Apple TTML of JSON-lêer op.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "Laai lirieke op",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "Titel, kunstenaar en lêer word vereis.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "Laai lirieke op...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "Lirieke suksesvol opgelaai!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "Fout tydens oplaai: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "Fout met lees van lêer.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "Plaaslike lirieke verwyder.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "Fout tydens verwydering: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "Wil jy \"$TITLE$\" verwyder?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "confirmClearLocalLyrics": {
+    "message": "Wil jy alle plaaslike lirieke verwyder?",
+    "description": "Confirm dialog for clearing all local lyrics"
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "Fout tydens laai van plaaslike lirieke: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "Vertaling",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "Vertaaldiens",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "Vertaalverskaffer",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "Kies die diens wat gebruik moet word om lirieke te vertaal.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Gemini AI API-sleutel",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "Jou sleutel word plaaslik gestoor en nooit na enige eksterne bedieners gestuur behalwe die Google Gemini API nie.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Gemini AI-model",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "Kies die Gemini AI-model vir vertaling.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "OpenRouter-instellings",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "OpenRouter API-sleutel",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "Jou sleutel word plaaslik gestoor.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "OpenRouter-model (bv. google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "Spesifiseer die model-ID vanaf OpenRouter.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "Romaniseringsdiens (vir nie-Latynse skrifte)",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "Romaniseringsverskaffer",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "Kry outomaties romanisering vanaf Lyrics+ API indien moontlik. Andersins sal die gekose diens dit genereer.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Gemini AI Romaniseringsmodel",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "Kies die Gemini AI-model vir romanisering.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "Vertaalgedrag",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "Oorskryf vertalingsteiken-taal",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "Stel die taal waarheen lirieke vertaal moet word handmatig in (bv. 'af', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "Gepasmaakte teikentaal-kode",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "Voer die 2-letter taalkode in (bv. 'af' vir Afrikaans).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "Gevorderde instruksie-instellings (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "Oorskryf AI-vertaalinstruksie",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Gebruik gepasmaakte instruksies vir Gemini/OpenRouter vertaling. Gebruik {targetLang} en {lyrics}.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Gepasmaakte AI-vertaalinstruksie",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "Pasmaak die instruksie wat na die AI gestuur word vir vertaling. Gebruik {targetLang} vir die teikentaal.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "Oorskryf AI-romaniseringsinstruksie",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Gebruik gepasmaakte instruksies vir Gemini/OpenRouter romanisering.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Gepasmaakte AI-romaniseringsinstruksie",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "Pasmaak die instruksie wat na die AI gestuur word vir romanisering.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "Voorkoms",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "Tekstoon",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "Groter tekstoon vir: Romanisering of Lirieke",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "Kies watter deel van die teks groter moet verskyn.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "Versteek Latynse uitspraak",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "Versteek outomaties die uitspraakgids as die lirieke reeds in Latynse karakters is.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "Dinamiese Agtergrondstem-modus",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "Agtergrondstemme wat voor die hoofreëls begin, sal boontoe gewys word.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "Prestasie en Verenigbaarheid",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "Verminder animasies en visuele effekte vir beter prestasie op ouer toestelle.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "Versteek lirieke buite die skerm",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "Versteek en verwyder alle geanimeerde reëls wat nie tans sigbaar is nie. Word aanbeveel vir laer spesifikasie toestelle.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "Visuele Effekte",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "Verdowf onaktiewe reëls",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Pas 'n verdowwingseffek (blur) toe op reëls wat nie tans gesing word nie, soortgelyk aan Apple Music.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "Aktiveer dinamiese agtergrond (Speler-uitsig)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "Gebruik 'n geanimeerde album-agtergrond wanneer die speler uitgebrei is. Hierdie instelling werk nie in volskerm-modus nie.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "Klank-ritme-sinkronisering (Dinamiese Agtergrond)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "Laat dinamiese agtergrondlae reageer op die ritme van die klank. Moet gedeaktiveer word as jy Better Lyrics Shaders gebruik.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "Gebruik liedjie-palet vir volskerm-lirieke",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "Pas album-kleure toe op lirieke in video-volskerm-modus.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "Gebruik liedjie-palet vir teks in alle modusse",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "Pas album-kleure toe op lirieke in alle vertoon-modusse.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "Oorskryf palet-kleur",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "Verander lirieke-kleur na 'n pasgemaakte kleur (slegs teks, nie agtergrond nie) (laat leeg vir standaard).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "Gepasmaakte Stilering",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "Gepasmaakte CSS",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "Pas jou eie style toe op die liriekevertoning. Gebruik met versigtigheid.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "Kas",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "Kas-strategie",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "Bepaal hoe lank lirieke plaaslik gestoor word.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "Aggressief (2 uur)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "Gemiddeld (1 uur)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "Geen (geen kas nie)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "Huidige kaskagebruik",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "Oor",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "Hierdie uitbreiding is gebore uit 'n eenvoudige idee: om na musiek te luister behoort 'n meesleurende ervaring te wees, nie net 'n agtergrondaktiwiteit nie. Ons het moeg geword vir YouTube se standaardlirieke en verouderde koppelvlakke, so ons het besluit om die speler te bou wat ons altyd wou hê. Ons doel is om jou musieksessies mooier, meer interaktief en lekkerder te maak. youly+ is met trots oopbron. As jy 'n fout vind of 'n idee het, hoor ons graag van jou.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "Skakels en Ondersteuning",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "Bronkode",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "Rapporteer 'n fout",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Ondersteun op Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Ondersteun op Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "Konfigurasiebestuur",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "Voer jou instellings uit na 'n JSON-lêer of voer in vanaf lêer.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "Voer uit",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "Voer in",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Gemaak met liefde",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "Instellings suksesvol uitgevoer!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "Fout tydens uitvoer: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "Instellings suksesvol ingevoer! Herlaai word vereis.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "Fout tydens invoer: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "Geen aktiewe musiek-oortjies gevind nie. Herlaai asseblief handmatig.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "Wys/versteek API-sleutel",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "Verwyder bron",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "Verwyder plaaslike lirieke",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "Weergawe $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "Lirieke",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "Romanisering",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google Translate",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (Gebruikersbydraes)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (Direk)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (Woord)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

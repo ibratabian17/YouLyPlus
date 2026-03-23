@@ -1,0 +1,797 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "లైన్-బై-లైన్ మరియు వర్డ్-బై-వర్డ్ సింక్రొనైజేషన్‌తో YouTube Music, Apple Music మరియు Tidal కోసం అధునాతన లిరిక్స్ ఫీచర్లు.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "YouLy+ సెట్టింగ్‌లు",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "సాధారణ",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "ప్రదర్శన",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "అధునాతన",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "ప్రధాన ఫీచర్లు",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "YouLy+ ని ప్రారంభించు",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "డేటా మూలాధారాలు",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "ప్రాథమిక లిరిక్స్ ప్రదాత",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "SponsorBlock ని అనుసంధానించు",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "డిస్‌ప్లే సెట్టింగ్‌లు",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "లైట్‌వెయిట్ మోడ్",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "వర్డ్-బై-వర్డ్ హైలైటింగ్",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "డేటా నిర్వహణ",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "ఉపయోగించిన స్టోరేజ్:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "కాష్ చేయబడిన వస్తువులు:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "కాష్‌ని క్లియర్ చేయి",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "రిఫ్రెష్",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "మరిన్ని సెట్టింగ్‌లు",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "సెట్టింగ్‌లు సేవ్ చేయబడ్డాయి! మార్పులను అమలు చేయడానికి YouTube పేజీని రీలోడ్ చేయండి.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "సెట్టింగ్‌లను సేవ్ చేయడంలో లోపం.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "కాష్ విజయవంతంగా క్లియర్ చేయబడింది!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearedFailed": {
+    "message": "కాష్‌ని క్లియర్ చేయడంలో విఫలమైంది.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "కాష్‌ని క్లియర్ చేసేటప్పుడు కమ్యూనికేషన్ లోపం.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "కాష్ సమాచారం రిఫ్రెష్ చేయబడింది.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "కాష్‌ని క్లియర్ చేయడం సాధ్యపడలేదు: ఎక్స్‌టెన్షన్ API అందుబాటులో లేదు.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "YouLy+ సెట్టింగ్‌లు",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "సాధారణ",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "మూలాధారాలు",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "ప్రదర్శన",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "అనువాదం",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "కాష్",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "స్థానిక లిరిక్స్",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "గురించి",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "సెట్టింగ్‌లు సేవ్ చేయబడ్డాయి. మార్పులను అమలు చేయడానికి మీ మ్యూజిక్ ట్యాబ్‌ను రీస్టార్ట్ చేయండి.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "సెట్టింగ్‌లు సేవ్ చేయబడ్డాయి. మార్పులను అమలు చేయడానికి $PLATFORMS$ ని రీస్టార్ట్ చేయండి.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "రీస్టార్ట్",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "ట్యాబ్‌లను రీస్టార్ట్ చేయి",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "ప్రధాన కార్యాచరణ",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "ఎక్స్‌టెన్షన్‌ను ప్రపంచవ్యాప్తంగా ప్రారంభించండి లేదా నిలిపివేయండి.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "అందుబాటులో ఉన్నప్పుడు వర్డ్-బై-వర్డ్ కరోకే హైలైటింగ్‌ను ప్రారంభించండి.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "YouTube Music సెట్టింగ్‌లు",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "ఫుల్ స్క్రీన్‌లో పాట సమాచారాన్ని చూపించు",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "ప్రోగ్రెస్ బార్, విడుదల తేదీ, శీర్షిక మరియు కళాకారుడితో సహా పాట వివరాలను ఫుల్ స్క్రీన్ మోడ్‌లో ప్రదర్శిస్తుంది.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "SponsorBlock API ని ఉపయోగించు",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "పరిచయం, ముగింపు లేదా ప్రకటనల విభాగాలు వంటి సంగీత రహిత భాగాలను దాటవేయండి.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Apple Music సెట్టింగ్‌లు",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "లైన్-బై-లైన్ కోసం బాహ్య లిరిక్స్‌ను ఎంచుకో",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "ఎనేబుల్ చేస్తే, Apple Music కేవలం లైన్-బై-లైన్ మాత్రమే అందిస్తే యాప్ బాహ్య లిరిక్స్ మూలాధారాలను ఉపయోగిస్తుంది.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "మూలాధారాలు",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "లిరిక్స్ ప్రదాత",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "డిఫాల్ట్ లిరిక్స్ ప్రదాత",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "మీకు నచ్చిన లిరిక్స్ మూలాధారాన్ని ఎంచుకోండి.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "కస్టమ్ KPoe సర్వర్ URL",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "మీ స్వంత హోస్ట్ చేసిన KPoe సర్వర్ యొక్క బేస్ URL ని నమోదు చేయండి.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Lyrics+ మూలాధార క్రమం",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Lyrics+ కోసం మూలాధారాలను క్రమబద్ధీకరించడానికి డ్రాగ్ అండ్ డ్రాప్ చేయండి.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "అందుబాటులో ఉన్న మూలాధారాలు",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "మూలాధారాన్ని జోడించు",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "అన్ని మూలాధారాలు ఇప్పటికే జోడించబడ్డాయి",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "జోడించడానికి ఒక మూలాధారాన్ని ఎంచుకోండి.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "\"$NAME$\" మూలాధారం ఇప్పటికే ఉంది.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "\"$NAME$\" జోడించబడింది.",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "\"$NAME$\" తీసివేయబడింది.",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "స్థానిక లిరిక్స్",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "అప్‌లోడ్ చేసిన లిరిక్స్‌ను నిర్వహించండి",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "ఇంతవరకు స్థానిక లిరిక్స్ ఏవీ అప్‌లోడ్ చేయబడలేదు.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "జాబితాను రిఫ్రెష్ చేయి",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "కొత్త స్థానిక లిరిక్స్‌ను జోడించు",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "కొత్త స్థానిక లిరిక్స్‌ను అప్‌లోడ్ చేయండి",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "పాట శీర్షిక",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "కళాకారుడి పేరు",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "ఆల్బమ్ పేరు (ఐచ్ఛికం)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "లిరిక్స్ ఫైల్",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "LRC, ELRC, Apple TTML లేదా JSON ఫైల్‌ను అప్‌లోడ్ చేయండి.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "లిరిక్స్‌ను అప్‌లోడ్ చేయి",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "శీర్షిక, కళాకారుడు మరియు ఫైల్ అవసరం.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "లిరిక్స్ అప్‌లోడ్ అవుతున్నాయి...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "లిరిక్స్ విజయవంతంగా అప్‌లోడ్ చేయబడ్డాయి!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "అప్‌లోడ్ చేసేటప్పుడు లోపం: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "ఫైల్‌ను చదవడంలో లోపం.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "స్థానిక లిరిక్స్ తొలగించబడ్డాయి.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "తొలగించేటప్పుడు లోపం: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "\"$TITLE$\" ని తొలగించాలనుకుంటున్నారా?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "స్థానిక లిరిక్స్‌ను లోడ్ చేసేటప్పుడు లోపం: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "అనువాదం",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "అనువాద సేవ",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "అనువాద ప్రదాత",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "లిరిక్స్‌ను అనువదించడానికి ఉపయోగించాల్సిన సేవను ఎంచుకోండి.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Gemini AI API కీ",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "మీ కీ స్థానిక స్టోరేజ్‌లో సేవ్ చేయబడుతుంది మరియు Google Gemini API కాకుండా వేరే బాహ్య సర్వర్‌లకు ఎప్పుడూ పంపబడదు.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Gemini AI మోడల్",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "అనువాదం కోసం Gemini AI మోడల్‌ను ఎంచుకోండి.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "OpenRouter సెట్టింగ్‌లు",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "OpenRouter API కీ",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "మీ కీ స్థానిక స్టోరేజ్‌లో సేవ్ చేయబడుతుంది.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "OpenRouter మోడల్ (ఉదా. google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "OpenRouter నుండి మోడల్ ID ని పేర్కొనండి.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "రోమనైజేషన్ (లాటిన్యేతర లిపిల కోసం) సేవ",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "రోమనైజేషన్ ప్రదాత",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "సాధ్యమైతే Lyrics+ API నుండి రోమనైజేషన్‌ను ఆటోమేటిక్‌గా పొందుతుంది. లేనిపక్షంలో, ఎంచుకున్న సేవ దానిని రూపొందిస్తుంది.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Gemini AI రోమనైజేషన్ మోడల్",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "రోమనైజేషన్ కోసం Gemini AI మోడల్‌ను ఎంచుకోండి.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "అనువాద ప్రవర్తన",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "అనువాద లక్ష్య భాషను మార్చు",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "అనువాదం చేయవలసిన భాషను మాన్యువల్‌గా సెట్ చేయండి (ఉదా: 'te', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "కస్టమ్ భాషా కోడ్",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "2-అక్షరాల భాషా కోడ్‌ను నమోదు చేయండి (ఉదా: తెలుగుకు 'te').",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "అధునాతన ప్రాంప్ట్ సెట్టింగ్‌లు (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "AI అనువాద ప్రాంప్ట్‌ను మార్చు",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Gemini/OpenRouter అనువాదం కోసం కస్టమ్ ప్రాంప్ట్‌లను ఉపయోగించండి. {targetLang} మరియు {lyrics} ఉపయోగించండి.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "కస్టమ్ AI అనువాద ప్రాంప్ట్",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "అనువాదం కోసం AI కి పంపే ప్రాంప్ట్‌ను అనుకూలీకరించండి. లక్ష్య భాష కోసం {targetLang} ఉపయోగించండి.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "AI రోమనైజేషన్ ప్రాంప్ట్‌ను మార్చు",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Gemini/OpenRouter రోమనైజేషన్ కోసం కస్టమ్ ప్రాంప్ట్‌లను ఉపయోగించండి.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "కస్టమ్ AI రోమనైజేషన్ ప్రాంప్ట్",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "రోమనైజేషన్ కోసం AI కి పంపే ప్రాంప్ట్‌ను అనుకూలీకరించండి.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "ప్రదర్శన",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "టెక్స్ట్ డిస్‌ప్లే",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "దీని కోసం పెద్ద టెక్స్ట్ డిస్‌ప్లే: రోమనైజేషన్ లేదా లిరిక్స్",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "టెక్స్ట్‌లో ఏ భాగం పెద్దదిగా కనిపించాలో ఎంచుకోండి.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "లాటిన్ ఉచ్చారణను దాచు",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "లిరిక్స్ ఇప్పటికే లాటిన్ అక్షరాలలో ఉంటే ఉచ్చారణ గైడ్‌ను ఆటోమేటిక్‌గా దాచు.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "డైనమిక్ బ్యాక్‌గ్రౌండ్ వోకల్ మోడ్",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "ప్రధాన లైన్ల కంటే ముందే ప్రారంభమయ్యే బ్యాక్‌గ్రౌండ్ వోకల్స్ పైన చూపబడతాయి.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "పనితీరు మరియు అనుకూలత",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "పాత పరికరాలలో మెరుగైన పనితీరు కోసం యానిమేషన్లు మరియు దృశ్య ప్రభావాలను తగ్గిస్తుంది.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "స్క్రీన్ వెలుపల ఉన్న లిరిక్స్‌ను దాచు",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "ప్రస్తుతం చూపులో లేని అన్ని యానిమేషన్ లైన్లను దాచి తొలగిస్తుంది. తక్కువ సామర్థ్యం గల పరికరాలకు సిఫార్సు చేయబడింది.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "దృశ్య ప్రభావాలు",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "నిష్క్రియ లైన్లను బ్లర్ చేయి",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Apple Music మాదిరిగానే, ప్రస్తుతం పాడని లైన్లకు బ్లర్ ఎఫెక్ట్‌ను వర్తింపజేస్తుంది.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "డైనమిక్ బ్యాక్‌గ్రౌండ్‌ని ప్రారంభించు (ప్లేయర్ వ్యూ)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "ప్లేయర్ విస్తరించినప్పుడు యానిమేటెడ్ ఆల్బమ్ బ్యాక్‌గ్రౌండ్‌ను ఉపయోగిస్తుంది. ఫుల్ స్క్రీన్ మోడ్‌లో ఉండగా ఈ సెట్టింగ్ పని చేయదు.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "ఆడియో బీట్ సింక్ (డైనమిక్ బ్యాక్‌గ్రౌండ్)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "డైనమిక్ బ్యాక్‌గ్రౌండ్ లేయర్లను ఆడియో లయకు అనుగుణంగా స్పందించేలా చేస్తుంది. Better Lyrics Shaders ఉపయోగిస్తే నిలిపివేయాలి.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "ఫుల్ స్క్రీన్ లిరిక్స్ కోసం సాంగ్ ప్యాలెట్‌ని ఉపయోగించు",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "వీడియో ఫుల్ స్క్రీన్ మోడ్‌లో ఉన్నప్పుడు లిరిక్స్‌కు ఆల్బమ్ రంగులను వర్తింపజేస్తుంది.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "అన్ని మోడ్లలో టెక్స్ట్ కోసం సాంగ్ ప్యాలెట్‌ని ఉపయోగించు",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "అన్ని డిస్‌ప్లే మోడ్లలో లిరిక్స్‌కు ఆల్బమ్ రంగులను వర్తింపజేస్తుంది.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "ప్యాలెట్ రంగును మార్చు",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "లిరిక్స్ రంగును కస్టమ్ రంగుగా మార్చండి (టెక్స్ట్ మాత్రమే, బ్యాక్‌గ్రౌండ్ కాదు) (డిఫాల్ట్ కోసం ఖాళీగా వదిలేయండి).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "కస్టమ్ స్టైలింగ్",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "కస్టమ్ CSS",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "లిరిక్స్ డిస్‌ప్లేకు మీ స్వంత స్టైల్స్‌ని వర్తింపజేయండి. జాగ్రత్తగా ఉపయోగించండి.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "కాష్",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "కాష్ వ్యూహం",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "లిరిక్స్ ఎంత కాలం స్థానికంగా నిల్వ చేయబడతాయో నిర్ణయిస్తుంది.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "అగ్రెసివ్ (2 గంటలు)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "మోడరేట్ (1 గంట)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "ఏమీ లేదు (కాష్ లేదు)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "ప్రస్తుత కాష్ వినియోగం",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "గురించి",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "ఈ ఎక్స్‌టెన్షన్ ఒక సాధారణ ఆలోచనతో పుట్టింది: సంగీతం వినడం అనేది కేవలం బ్యాక్‌గ్రౌండ్ యాక్టివిటీ మాత్రమే కాదు, ఒక లీనమయ్యే అనుభవం కావాలి. YouTube లోని ప్రామాణిక లిరిక్స్ మరియు పాత ఇంటర్‌ఫేస్‌లతో మేము విసిగిపోయాము, అందుకే మేము ఎప్పుడూ కోరుకున్న ప్లేయర్‌ను నిర్మించాలనుకున్నాము. మీ మ్యూజిక్ సెషన్‌లను మరింత అందంగా, ఇంటరాక్టివ్‌గా మరియు సరదాగా మార్చడమే మా లక్ష్యం. youly+ గర్వంగా ఓపెన్ సోర్స్. మీకు ఏదైనా బగ్ కనిపిస్తే లేదా ఏదైనా ఆలోచన ఉంటే, మేము మీ నుండి వినాలనుకుంటున్నాము.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "లింకులు మరియు మద్దతు",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "సోర్స్ కోడ్",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "బగ్‌ని నివేదించు",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Patreon లో మద్దతు ఇవ్వండి",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Ko-fi లో మద్దతు ఇవ్వండి",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "కాన్ఫిగరేషన్ మేనేజ్‌మెంట్",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "మీ సెట్టింగ్‌లను JSON ఫైల్‌కు ఎగుమతి చేయండి లేదా ఫైల్ నుండి దిగుమతి చేయండి.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "ఎగుమతి",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "దిగుమతి",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "ప్రేమతో నిర్మించబడింది",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "సెట్టింగ్‌లు విజయవంతంగా ఎగుమతి చేయబడ్డాయి!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "ఎగుమతి చేసేటప్పుడు లోపం: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "సెట్టింగ్‌లు విజయవంతంగా దిగుమతి చేయబడ్డాయి! రీలోడ్ అవసరం.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "దిగుమతి చేసేటప్పుడు లోపం: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "యాక్టివ్ మ్యూజిక్ ట్యాబ్‌లు ఏవీ లేవు. దయచేసి మాన్యువల్‌గా రిఫ్రెష్ చేయండి.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "API కీని చూపించు/దాచు",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "మూలాధారాన్ని తీసివేయి",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "స్థానిక లిరిక్స్‌ను తొలగించు",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "వెర్షన్ $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "లిరిక్స్",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "రోమనైజేషన్",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "గూగుల్ ట్రాన్స్‌లేట్",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (యూజర్ కాంట్రిబ్యూషన్స్)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (డైరెక్ట్)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (వర్డ్)",
+    "description": "Display name for musixmatch-word source"
+  }
+}

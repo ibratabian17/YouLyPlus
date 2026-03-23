@@ -1,0 +1,801 @@
+{
+  "extensionName": {
+    "message": "YouLy+",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Avancerede sangtekstfunktioner til YouTube Music, Apple Music og Tidal, med linje-for-linje og ord-for-ord synkronisering.",
+    "description": "Extension description"
+  },
+
+  "popupTitle": {
+    "message": "YouLy+ Indstillinger",
+    "description": "Title shown in the popup header and page title"
+  },
+  "tabGeneral": {
+    "message": "Generelt",
+    "description": "General tab label"
+  },
+  "tabAppearance": {
+    "message": "Udseende",
+    "description": "Appearance tab label"
+  },
+  "tabAdvanced": {
+    "message": "Avanceret",
+    "description": "Advanced tab label"
+  },
+
+  "sectionCoreFeatures": {
+    "message": "Kernefunktioner",
+    "description": "Section title in popup General tab"
+  },
+  "settingEnableExtension": {
+    "message": "Aktiver YouLy+",
+    "description": "Label for the master enable toggle"
+  },
+  "sectionDataSources": {
+    "message": "Datakilder",
+    "description": "Section title in popup General tab"
+  },
+  "settingPrimaryProvider": {
+    "message": "Primær tekstudbyder",
+    "description": "Label for lyrics provider dropdown"
+  },
+  "settingIntegrateSponsorBlock": {
+    "message": "Integrer SponsorBlock",
+    "description": "Label for SponsorBlock toggle in popup"
+  },
+
+  "sectionDisplaySettings": {
+    "message": "Visningsindstillinger",
+    "description": "Section title in popup Appearance tab"
+  },
+  "settingLightweightMode": {
+    "message": "Letvægtstilstand",
+    "description": "Label for lightweight mode toggle"
+  },
+  "settingWordByWord": {
+    "message": "Ord-for-ord fremhævning",
+    "description": "Label for word-by-word highlighting toggle"
+  },
+
+  "sectionDataManagement": {
+    "message": "Datastyring",
+    "description": "Section title in popup Advanced tab"
+  },
+  "labelStorageUsed": {
+    "message": "Lagerplads brugt:",
+    "description": "Label before storage size value"
+  },
+  "labelCachedItems": {
+    "message": "Cachelagrede elementer:",
+    "description": "Label before cached items count"
+  },
+  "buttonClearCache": {
+    "message": "Ryd cache",
+    "description": "Clear cache button text"
+  },
+  "buttonRefresh": {
+    "message": "Opdater",
+    "description": "Refresh button text"
+  },
+  "buttonMoreSettings": {
+    "message": "Flere indstillinger",
+    "description": "Link to full settings page"
+  },
+
+  "msgSettingsSaved": {
+    "message": "Indstillinger gemt! Genindlæs YouTube-siden for at anvende ændringer.",
+    "description": "Snackbar message after saving settings in popup"
+  },
+  "msgErrorSavingSettings": {
+    "message": "Fejl ved lagring af indstillinger.",
+    "description": "Snackbar error message when settings save fails"
+  },
+  "msgCacheCleared": {
+    "message": "Cache ryddet med succes!",
+    "description": "Snackbar message after cache clear"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Kunne ikke rydde cache.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "msgCacheClearError": {
+    "message": "Kommunikationsfejl ved rydning af cache.",
+    "description": "Snackbar error when cache clear communication fails"
+  },
+  "msgCacheRefreshed": {
+    "message": "Cache-information opdateret.",
+    "description": "Snackbar message after cache info refresh"
+  },
+  "msgCacheClearApiUnavailable": {
+    "message": "Kan ikke rydde cache: Udvidelses-API er ikke tilgængelig.",
+    "description": "Error when chrome runtime API is unavailable"
+  },
+
+  "settingsTitle": {
+    "message": "YouLy+ Indstillinger",
+    "description": "Title shown in full settings page header and nav drawer"
+  },
+  "navGeneral": {
+    "message": "Generelt",
+    "description": "Navigation drawer label"
+  },
+  "navSources": {
+    "message": "Kilder",
+    "description": "Navigation drawer label"
+  },
+  "navAppearance": {
+    "message": "Udseende",
+    "description": "Navigation drawer label"
+  },
+  "navTranslation": {
+    "message": "Oversættelse",
+    "description": "Navigation drawer label"
+  },
+  "navCache": {
+    "message": "Cache",
+    "description": "Navigation drawer label"
+  },
+  "navLocalLyrics": {
+    "message": "Lokale tekster",
+    "description": "Navigation drawer label"
+  },
+  "navAbout": {
+    "message": "Om",
+    "description": "Navigation drawer label"
+  },
+
+  "msgSettingsSavedRestart": {
+    "message": "Indstillinger gemt. Genstart din musikfane for at anvende ændringer.",
+    "description": "Notification text when no platform tabs are found"
+  },
+  "msgSettingsSavedRestartPlatform": {
+    "message": "Indstillinger gemt. Genstart $PLATFORMS$ for at anvende ændringer.",
+    "description": "Notification text with platform names",
+    "placeholders": {
+      "PLATFORMS": {
+        "content": "$1",
+        "example": "YouTube Music & Apple Music"
+      }
+    }
+  },
+  "buttonRestart": {
+    "message": "Genstart",
+    "description": "Restart button text"
+  },
+  "buttonRestartTabs": {
+    "message": "Genstart faner",
+    "description": "Restart button text for multiple tabs"
+  },
+
+  "categoryCoreFunc": {
+    "message": "Kernefunktionalitet",
+    "description": "Settings category title"
+  },
+  "descEnableExtension": {
+    "message": "Aktiver eller deaktiver udvidelsen globalt.",
+    "description": "Description for enable toggle"
+  },
+  "descWordByWord": {
+    "message": "Aktiver ord-for-ord karaoke-fremhævning, når det er tilgængeligt.",
+    "description": "Description for word-by-word toggle"
+  },
+
+  "categoryYouTubeMusic": {
+    "message": "YouTube Music Indstillinger",
+    "description": "Settings category title"
+  },
+  "settingFullscreenSongInfo": {
+    "message": "Vis sanginfo i fuld skærm",
+    "description": "Label for fullscreen song info toggle"
+  },
+  "descFullscreenSongInfo": {
+    "message": "Viser sangdetaljer inklusive statuslinje, udgivelsesdato, titel og kunstner i fuldskærmstilstand.",
+    "description": "Description for fullscreen song info"
+  },
+  "settingUseSponsorBlock": {
+    "message": "Brug SponsorBlock API",
+    "description": "Label for SponsorBlock toggle in settings"
+  },
+  "descUseSponsorBlock": {
+    "message": "Spring ikke-musikalske dele over, såsom introer, outroer eller reklamesegmenter.",
+    "description": "Description for SponsorBlock toggle"
+  },
+
+  "categoryAppleMusic": {
+    "message": "Apple Music Indstillinger",
+    "description": "Settings category title"
+  },
+  "settingPreferExternal": {
+    "message": "Foretræk eksterne tekster til linje-for-linje synkronisering",
+    "description": "Label for Apple Music bypass toggle"
+  },
+  "descPreferExternal": {
+    "message": "Hvis aktiveret, vil appen bruge eksterne tekstkilder, hvis Apple Music kun leverer linje-for-linje synkronisering.",
+    "description": "Description for Apple Music bypass toggle"
+  },
+
+  "sectionSources": {
+    "message": "Kilder",
+    "description": "Sources section title"
+  },
+  "categoryLyricsProvider": {
+    "message": "Tekstudbyder",
+    "description": "Category title"
+  },
+  "labelDefaultProvider": {
+    "message": "Standard tekstudbyder",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Vælg din foretrukne tekstkilde.",
+    "description": "Description for provider dropdown"
+  },
+  "labelCustomKpoeUrl": {
+    "message": "Brugerdefineret KPoe-server-URL",
+    "description": "Label for custom server URL input"
+  },
+  "helperCustomKpoeUrl": {
+    "message": "Indtast basis-URL'en for en selv-hostet KPoe-server.",
+    "description": "Helper text for custom KPoe URL"
+  },
+  "labelSourceOrder": {
+    "message": "Lyrics+ kilderækkefølge",
+    "description": "Label for configuration"
+  },
+  "helperSourceOrder": {
+    "message": "Træk og slip for at sortere kilder til Lyrics+.",
+    "description": "Helper text for source ordering"
+  },
+  "labelAvailableSources": {
+    "message": "Tilgængelige kilder",
+    "description": "Label for available sources dropdown"
+  },
+  "buttonAddSource": {
+    "message": "Tilføj kilde",
+    "description": "Add source button text"
+  },
+  "msgAllSourcesAdded": {
+    "message": "Alle kilder er allerede tilføjet",
+    "description": "Shown when all sources are already active"
+  },
+  "msgSelectSource": {
+    "message": "Vælg en kilde at tilføje.",
+    "description": "Error when no source selected"
+  },
+  "msgSourceExists": {
+    "message": "Kilden \"$NAME$\" findes allerede.",
+    "description": "Error when source already present",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceAdded": {
+    "message": "Tilføjede kilde \"$NAME$\".",
+    "description": "Status message after adding source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+  "msgSourceRemoved": {
+    "message": "Fjernede kilde \"$NAME$\".",
+    "description": "Status message after removing source",
+    "placeholders": {
+      "NAME": { "content": "$1", "example": "Apple Music" }
+    }
+  },
+
+  "sectionLocalLyrics": {
+    "message": "Lokale tekster",
+    "description": "Local lyrics section title"
+  },
+  "categoryManageLocalLyrics": {
+    "message": "Administrer uploadede tekster",
+    "description": "Category title"
+  },
+  "msgNoLocalLyrics": {
+    "message": "Ingen lokale sangtekster uploadet endnu.",
+    "description": "Placeholder when no local lyrics exist"
+  },
+  "buttonRefreshList": {
+    "message": "Opdater liste",
+    "description": "Refresh local lyrics list button"
+  },
+  "titleAddLocalLyrics": {
+    "message": "Tilføj nye lokale tekster",
+    "description": "FAB tooltip"
+  },
+  "modalUploadTitle": {
+    "message": "Upload nye lokale tekster",
+    "description": "Modal dialog title"
+  },
+  "labelSongTitle": {
+    "message": "Sangtitel",
+    "description": "Input label"
+  },
+  "labelArtistName": {
+    "message": "Kunstnernavn",
+    "description": "Input label"
+  },
+  "labelAlbumName": {
+    "message": "Albumnavn (valgfrit)",
+    "description": "Input label"
+  },
+  "labelLyricsFile": {
+    "message": "Sangtekstfil",
+    "description": "File input label"
+  },
+  "helperLyricsFile": {
+    "message": "Upload en LRC, ELRC, Apple TTML eller JSON fil.",
+    "description": "Helper text for lyrics file input"
+  },
+  "buttonUploadLyrics": {
+    "message": "Upload tekster",
+    "description": "Upload button text"
+  },
+  "msgUploadRequired": {
+    "message": "Titel, kunstner og fil er påkrævet.",
+    "description": "Error when required fields are missing"
+  },
+  "msgUploading": {
+    "message": "Uploader tekster...",
+    "description": "Status during upload"
+  },
+  "msgUploadSuccess": {
+    "message": "Sangtekster uploadet med succes!",
+    "description": "Status after successful upload"
+  },
+  "msgUploadError": {
+    "message": "Fejl under upload: $ERROR$",
+    "description": "Error during upload",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid format" }
+    }
+  },
+  "msgFileReadError": {
+    "message": "Fejl ved læsning af fil.",
+    "description": "Error when file read fails"
+  },
+  "msgLocalLyricsDeleted": {
+    "message": "Lokale tekster slettet.",
+    "description": "Status after deleting local lyrics"
+  },
+  "msgDeleteError": {
+    "message": "Fejl ved sletning: $ERROR$",
+    "description": "Error when deleting local lyrics",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Not found" }
+    }
+  },
+  "confirmDeleteLyrics": {
+    "message": "Vil du slette \"$TITLE$\"?",
+    "description": "Confirm dialog for deleting local lyrics",
+    "placeholders": {
+      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+    }
+  },
+  "confirmClearLocalLyrics": {
+    "message": "Vil du slette alle lokale tekster?",
+    "description": "Confirm dialog for clearing all local lyrics"
+  },
+  "msgErrorLoadingLocalLyrics": {
+    "message": "Fejl ved indlæsning af lokale tekster: $ERROR$",
+    "description": "Error when loading lyrics list fails",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Storage error" }
+    }
+  },
+
+  "sectionTranslation": {
+    "message": "Oversættelse",
+    "description": "Translation section title"
+  },
+  "categoryTranslationService": {
+    "message": "Oversættelsestjeneste",
+    "description": "Category title"
+  },
+  "labelTranslationProvider": {
+    "message": "Oversættelsesudbyder",
+    "description": "Dropdown label"
+  },
+  "descTranslationProvider": {
+    "message": "Vælg den tjeneste, der skal bruges til at oversætte sangtekster.",
+    "description": "Description for translation provider"
+  },
+  "labelGeminiApiKey": {
+    "message": "Gemini AI API-nøgle",
+    "description": "Input label"
+  },
+  "helperGeminiApiKey": {
+    "message": "Din nøgle gemmes lokalt og sendes aldrig til andre eksterne servere end Google Gemini API.",
+    "description": "Helper text for Gemini API key"
+  },
+  "labelGeminiModel": {
+    "message": "Gemini AI Model",
+    "description": "Dropdown label"
+  },
+  "descGeminiModel": {
+    "message": "Vælg Gemini AI-modellen til oversættelse.",
+    "description": "Description for Gemini model selector"
+  },
+  "categoryOpenRouterSettings": {
+    "message": "OpenRouter indstillinger",
+    "description": "Category title"
+  },
+  "labelOpenRouterApiKey": {
+    "message": "OpenRouter API-nøgle",
+    "description": "Input label"
+  },
+  "helperOpenRouterApiKey": {
+    "message": "Din nøgle gemmes lokalt.",
+    "description": "Helper text"
+  },
+  "labelOpenRouterModel": {
+    "message": "OpenRouter model (f.eks. google/gemini-2.0-flash-001)",
+    "description": "Input label"
+  },
+  "helperOpenRouterModel": {
+    "message": "Angiv model-id fra OpenRouter.",
+    "description": "Helper text"
+  },
+  "categoryRomanization": {
+    "message": "Romaniseringstjeneste (for ikke-latinske alfabeter)",
+    "description": "Category title"
+  },
+  "labelRomanizationProvider": {
+    "message": "Romaniseringsudbyder",
+    "description": "Dropdown label"
+  },
+  "descRomanizationProvider": {
+    "message": "Henter automatisk romanisering fra Lyrics+ API hvis muligt. Ellers vil den valgte tjeneste generere den.",
+    "description": "Description for romanization provider"
+  },
+  "labelGeminiRomanizationModel": {
+    "message": "Gemini AI Romaniseringsmodel",
+    "description": "Dropdown label"
+  },
+  "descGeminiRomanizationModel": {
+    "message": "Vælg Gemini AI-modellen til romanisering.",
+    "description": "Description"
+  },
+  "categoryTranslationBehavior": {
+    "message": "Oversættelsesadfærd",
+    "description": "Category title"
+  },
+  "settingOverrideTranslateTarget": {
+    "message": "Tilsidesæt målsprog for oversættelse",
+    "description": "Toggle label"
+  },
+  "descOverrideTranslateTarget": {
+    "message": "Indstil manuelt det sprog, sangtekster skal oversættes til (f.eks. 'da', 'en', 'ja').",
+    "description": "Description"
+  },
+  "labelCustomTranslateTarget": {
+    "message": "Brugerdefineret målsprogskode",
+    "description": "Input label"
+  },
+  "helperCustomTranslateTarget": {
+    "message": "Indtast 2-bogstavs sprogkode (f.eks. 'da' for dansk).",
+    "description": "Helper text"
+  },
+  "categoryAdvancedPrompting": {
+    "message": "Avancerede prompt-indstillinger (Gemini / OpenRouter)",
+    "description": "Category title"
+  },
+  "settingOverrideAIPrompt": {
+    "message": "Tilsidesæt AI-oversættelsesprompt",
+    "description": "Toggle label"
+  },
+  "descOverrideAIPrompt": {
+    "message": "Brug brugerdefinerede prompter til Gemini/OpenRouter oversættelse. Brug {targetLang} og {lyrics}.",
+    "description": "Description"
+  },
+  "labelCustomAIPrompt": {
+    "message": "Brugerdefineret AI-oversættelsesprompt",
+    "description": "Textarea label"
+  },
+  "helperCustomAIPrompt": {
+    "message": "Tilpas den prompt, der sendes til AI for oversættelse. Brug {targetLang} for målsproget.",
+    "description": "Helper text"
+  },
+  "settingOverrideRomanizePrompt": {
+    "message": "Tilsidesæt AI-romaniseringsprompt",
+    "description": "Toggle label"
+  },
+  "descOverrideRomanizePrompt": {
+    "message": "Brug brugerdefinerede prompter til Gemini/OpenRouter romanisering.",
+    "description": "Description"
+  },
+  "labelCustomRomanizePrompt": {
+    "message": "Brugerdefineret AI-romaniseringsprompt",
+    "description": "Textarea label"
+  },
+  "helperCustomRomanizePrompt": {
+    "message": "Tilpas den prompt, der sendes til AI for romanisering.",
+    "description": "Helper text"
+  },
+
+  "sectionAppearance": {
+    "message": "Udseende",
+    "description": "Appearance section title"
+  },
+  "categoryTextDisplay": {
+    "message": "Tekstvisning",
+    "description": "Category title"
+  },
+  "labelLargerTextMode": {
+    "message": "Større tekstvisning for: Romanisering eller Sangtekster",
+    "description": "Dropdown label"
+  },
+  "descLargerTextMode": {
+    "message": "Vælg hvilken del af teksten der skal vises større.",
+    "description": "Description"
+  },
+  "settingHideLatinPronunciation": {
+    "message": "Skjul latinsk udtale",
+    "description": "Toggle label"
+  },
+  "descHideLatinPronunciation": {
+    "message": "Skjul automatisk udtaleguiden, hvis teksterne allerede er i latinske tegn.",
+    "description": "Description"
+  },
+  "settingDynamicBkgVocal": {
+    "message": "Dynamisk baggrundsvokal-tilstand",
+    "description": "Toggle label"
+  },
+  "descDynamicBkgVocal": {
+    "message": "Baggrundsvokaler, der starter før hovedlinjerne, vil blive vist ovenover.",
+    "description": "Description"
+  },
+  "categoryPerformance": {
+    "message": "Ydeevne og kompatibilitet",
+    "description": "Category title"
+  },
+  "descLightweightMode": {
+    "message": "Reducerer animationer og visuelle effekter for bedre ydeevne på ældre enheder.",
+    "description": "Description"
+  },
+  "settingHideOffscreen": {
+    "message": "Skjul sangtekster uden for skærmen",
+    "description": "Toggle label"
+  },
+  "descHideOffscreen": {
+    "message": "Skjuler og fjerner alle animerede linjer, der ikke er synlige i øjeblikket. Anbefales til enheder med lave specifikationer.",
+    "description": "Description"
+  },
+  "categoryVisualEffects": {
+    "message": "Visuelle effekter",
+    "description": "Category title"
+  },
+  "settingBlurInactive": {
+    "message": "Slør inaktive linjer",
+    "description": "Toggle label"
+  },
+  "descBlurInactive": {
+    "message": "Anvender en sløringseffekt på linjer, der ikke synges i øjeblikket, svarende til Apple Music.",
+    "description": "Description"
+  },
+  "settingDynamicBackground": {
+    "message": "Aktiver dynamisk baggrund (Player view)",
+    "description": "Toggle label"
+  },
+  "descDynamicBackground": {
+    "message": "Bruger en animeret albumbaggrund, når afspilleren er udvidet. Fungerer ikke i fuldskærmstilstand.",
+    "description": "Description"
+  },
+  "settingAudioBeatSync": {
+    "message": "Audio beat synkronisering (Dynamisk baggrund)",
+    "description": "Toggle label"
+  },
+  "descAudioBeatSync": {
+    "message": "Får dynamiske baggrundslag til να παλλομαστε στο ρυθμό του ήχου. Skal deaktiveres, hvis du bruger Better Lyrics Shaders.",
+    "description": "Description"
+  },
+  "settingSongPaletteFullscreen": {
+    "message": "Brug sangpalette til fuldskærmstekster",
+    "description": "Toggle label"
+  },
+  "descSongPaletteFullscreen": {
+    "message": "Anvender albumfarver på sangtekster i video fuldskærmstilstand.",
+    "description": "Description"
+  },
+  "settingSongPaletteAll": {
+    "message": "Brug sangpalette til tekst i alle tilstande",
+    "description": "Toggle label"
+  },
+  "descSongPaletteAll": {
+    "message": "Anvender albumfarver på sangtekster i alle visningstilstande.",
+    "description": "Description"
+  },
+  "labelOverridePaletteColor": {
+    "message": "Tilsidesæt palettefarve",
+    "description": "Input label"
+  },
+  "helperOverridePaletteColor": {
+    "message": "Skift sangtekstfarve til en brugerdefineret farve (kun tekst, ikke baggrund) (lad være tom for standard).",
+    "description": "Helper text"
+  },
+  "categoryCustomStyling": {
+    "message": "Brugerdefineret styling",
+    "description": "Category title"
+  },
+  "labelCustomCSS": {
+    "message": "Brugerdefineret CSS",
+    "description": "Textarea label"
+  },
+  "helperCustomCSS": {
+    "message": "Anvend dine egne styles på sangtekstvisningen. Brug med forsigtighed.",
+    "description": "Helper text"
+  },
+
+  "sectionCache": {
+    "message": "Cache",
+    "description": "Cache section title"
+  },
+  "labelCacheStrategy": {
+    "message": "Cache-strategi",
+    "description": "Dropdown label"
+  },
+  "descCacheStrategy": {
+    "message": "Bestemmer, hvor længe sangtekster gemmes lokalt.",
+    "description": "Description"
+  },
+  "optionAggressive": {
+    "message": "Aggressiv (2 timer)",
+    "description": "Cache strategy option"
+  },
+  "optionModerate": {
+    "message": "Moderat (1 time)",
+    "description": "Cache strategy option"
+  },
+  "optionNone": {
+    "message": "Ingen (ingen cache)",
+    "description": "Cache strategy option"
+  },
+  "labelCurrentCacheUsage": {
+    "message": "Nuværende cache-forbrug",
+    "description": "Label for cache usage display"
+  },
+
+  "sectionAbout": {
+    "message": "Om",
+    "description": "About section"
+  },
+  "aboutDescription": {
+    "message": "Denne udvidelse blev født ud fra en enkel idé: at lytte til musik skal være en medrivende oplevelse, ikke bare en baggrundsaktivitet. Vi blev trætte af YouTubes standardtekster og forældede grænseflader, så vi besluttede os for at bygge den afspiller, vi altid havde ønsket os. Vores mål er at gøre dine musiksessioner smukkere, mere interaktive og sjovere. youly+ er stolt open source. Hvis du finder en fejl eller har en idé, vil vi meget gerne høre fra dig.",
+    "description": "About page description text"
+  },
+  "categoryLinksSupport": {
+    "message": "Links og support",
+    "description": "Category title"
+  },
+  "linkSourceCode": {
+    "message": "Kildekode",
+    "description": "Link text"
+  },
+  "linkReportBug": {
+    "message": "Rapporter en fejl",
+    "description": "Link text"
+  },
+  "linkPatreon": {
+    "message": "Støt på Patreon",
+    "description": "Link text"
+  },
+  "linkKofi": {
+    "message": "Støt på Ko-fi",
+    "description": "Link text"
+  },
+  "categoryConfigManagement": {
+    "message": "Konfigurationsstyring",
+    "description": "Category title"
+  },
+  "descConfigManagement": {
+    "message": "Eksporter dine indstillinger til en JSON-fil eller importer fra fil.",
+    "description": "Description"
+  },
+  "buttonExport": {
+    "message": "Eksporter",
+    "description": "Export button text"
+  },
+  "buttonImport": {
+    "message": "Importer",
+    "description": "Import button text"
+  },
+  "footerMadeWithLove": {
+    "message": "Lavet med kærlighed",
+    "description": "Footer text"
+  },
+
+  "msgExportSuccess": {
+    "message": "Indstillinger eksporteret med succes!",
+    "description": "Status message"
+  },
+  "msgExportError": {
+    "message": "Fejl under eksport: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Permission denied" }
+    }
+  },
+  "msgImportSuccess": {
+    "message": "Indstillinger importeret med succes! Genindlæsning er nødvendig.",
+    "description": "Status message"
+  },
+  "msgImportError": {
+    "message": "Fejl under import: $ERROR$",
+    "description": "Error message",
+    "placeholders": {
+      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+    }
+  },
+  "msgNoActiveTabs": {
+    "message": "Ingen aktive musikfaner fundet. Opdater venligst manuelt.",
+    "description": "Alert when no music tabs found for restart"
+  },
+  "titleShowHideApiKey": {
+    "message": "Vis/skjul API-nøgle",
+    "description": "Tooltip for API key visibility toggle"
+  },
+  "titleRemoveSource": {
+    "message": "Fjern kilde",
+    "description": "Tooltip for remove source button"
+  },
+  "titleDeleteLocalLyrics": {
+    "message": "Slet lokale tekster",
+    "description": "Tooltip for delete local lyrics button"
+  },
+  "labelVersion": {
+    "message": "Version $VERSION$",
+    "description": "Version display text",
+    "placeholders": {
+      "VERSION": { "content": "$1", "example": "4.2.0" }
+    }
+  },
+
+  "optionLyrics": {
+    "message": "Sangtekster",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionPronunciation": {
+    "message": "Romanisering",
+    "description": "Option in larger text mode dropdown"
+  },
+  "optionGoogleTranslate": {
+    "message": "Google Translate",
+    "description": "Translation provider option"
+  },
+  "optionGeminiAI": {
+    "message": "Gemini AI",
+    "description": "Translation provider option"
+  },
+  "optionOpenRouter": {
+    "message": "OpenRouter (LLM)",
+    "description": "Translation provider option"
+  },
+
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+ (Brugerbidrag)",
+    "description": "Display name for lyricsplus source"
+  },
+  "sourceNameApple": {
+    "message": "Apple Music",
+    "description": "Display name for apple source"
+  },
+  "sourceNameQQ": {
+    "message": "QQ Music",
+    "description": "Display name for qq source"
+  },
+  "sourceNameSpotify": {
+    "message": "Musixmatch (Spotify)",
+    "description": "Display name for spotify source"
+  },
+  "sourceNameMusixmatch": {
+    "message": "Musixmatch (Direkte)",
+    "description": "Display name for musixmatch source"
+  },
+  "sourceNameMusixmatchWord": {
+    "message": "Musixmatch (Ord)",
+    "description": "Display name for musixmatch-word source"
+  }
+}
