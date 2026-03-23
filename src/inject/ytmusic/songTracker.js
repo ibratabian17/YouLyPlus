@@ -14,6 +14,7 @@
     function init() {
         setupMutationObserver();
         setupSeekListener();
+        checkForSongChange();
     }
 
     function getPlayer() {
