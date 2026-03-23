@@ -51,11 +51,11 @@ async function showReloadNotification(changedKey) {
                 ? names.slice(0, -1).join(', ') + ' & ' + names.slice(-1)
                 : names[0];
 
-            notificationText.innerHTML = `Settings saved. Restart <strong>${platformString}</strong> for changes to take effect.`;
-            if (reloadBtnText) reloadBtnText.textContent = `Restart ${availablePlatforms.length > 1 ? 'Tabs' : names[0]}`;
+            notificationText.innerHTML = msg('msgSettingsSavedRestartPlatform', platformString).replace(platformString, `<strong>${platformString}</strong>`);
+            if (reloadBtnText) reloadBtnText.textContent = availablePlatforms.length > 1 ? msg('buttonRestartTabs') : `${msg('buttonRestart')} ${names[0]}`;
         } else {
-            notificationText.textContent = 'Settings saved. Restart your music tab for changes to take effect.';
-            if (reloadBtnText) reloadBtnText.textContent = 'Restart';
+            notificationText.textContent = msg('msgSettingsSavedRestart');
+            if (reloadBtnText) reloadBtnText.textContent = msg('buttonRestart');
         }
         notification.style.display = 'flex';
     }
@@ -253,15 +253,18 @@ setupSettingsMessageListener(updateUI);
 let draggedItem = null;
 
 function getSourceDisplayName(sourceName) {
-    switch (sourceName) {
-        case 'lyricsplus': return 'Lyrics+ (User Gen.)';
-        case 'apple': return 'Apple Music';
-        case 'qq': return 'QQ Music';
-        case 'spotify': return 'Musixmatch (Spotify)';
-        case 'musixmatch': return 'Musixmatch (Direct)';
-        case 'musixmatch-word': return 'Musixmatch (Word)';
-        default: return sourceName.charAt(0).toUpperCase() + sourceName.slice(1).replace('-', ' ');
+    const sourceKeys = {
+        'lyricsplus': 'sourceNameLyricsPlus',
+        'apple': 'sourceNameApple',
+        'qq': 'sourceNameQQ',
+        'spotify': 'sourceNameSpotify',
+        'musixmatch': 'sourceNameMusixmatch',
+        'musixmatch-word': 'sourceNameMusixmatchWord'
+    };
+    if (sourceKeys[sourceName]) {
+        return msg(sourceKeys[sourceName]) || sourceName;
     }
+    return sourceName.charAt(0).toUpperCase() + sourceName.slice(1).replace('-', ' ');
 }
 
 function createDraggableSourceItem(sourceName) {
@@ -304,7 +307,7 @@ function populateDraggableSources() {
     const addSourceButton = document.getElementById('add-source-button');
 
     if (sourcesToAdd.length === 0) {
-        availableSourcesDropdown.innerHTML = '<option value="" disabled>All sources added</option>';
+        availableSourcesDropdown.innerHTML = `<option value="" disabled>${msg('msgAllSourcesAdded')}</option>`;
         if (addSourceButton) addSourceButton.disabled = true;
     } else {
         if (addSourceButton) addSourceButton.disabled = false;
@@ -354,13 +357,13 @@ function saveSourceOrder() {
 function addSource() {
     const sourceName = document.getElementById('available-sources-dropdown').value;
     if (!sourceName) {
-        showStatusMessage('add-source-status', 'Please select a source to add.', true);
+        showStatusMessage('add-source-status', msg('msgSelectSource'), true);
         return;
     }
 
     const sources = (currentSettings.lyricsSourceOrder || '').split(',').filter(s => s?.trim());
     if (sources.includes(sourceName)) {
-        showStatusMessage('add-source-status', `Source "${getSourceDisplayName(sourceName)}" already exists.`, true);
+        showStatusMessage('add-source-status', msg('msgSourceExists', getSourceDisplayName(sourceName)), true);
         return;
     }
 
@@ -371,7 +374,7 @@ function addSource() {
     showReloadNotification('lyricsSourceOrder');
 
     populateDraggableSources();
-    showStatusMessage('add-source-status', `"${getSourceDisplayName(sourceName)}" added.`, false);
+    showStatusMessage('add-source-status', msg('msgSourceAdded', getSourceDisplayName(sourceName)), false);
 }
 
 function removeSource(sourceName) {
@@ -384,7 +387,7 @@ function removeSource(sourceName) {
     showReloadNotification('lyricsSourceOrder');
 
     populateDraggableSources();
-    showStatusMessage('add-source-status', `"${getSourceDisplayName(sourceName)}" removed.`, false);
+    showStatusMessage('add-source-status', msg('msgSourceRemoved', getSourceDisplayName(sourceName)), false);
 }
 
 function addDragDropListeners() {
@@ -610,7 +613,7 @@ async function handleUploadLocalLyrics() {
     const lyricsFile = lyricsFileInput.files[0];
 
     if (!title || !artist || !lyricsFile) {
-        showStatusMessage('modal-upload-status', 'Song Title, Artist Name, and a Lyrics File are required.', true);
+        showStatusMessage('modal-upload-status', msg('msgUploadRequired'), true);
         return;
     }
 
@@ -619,7 +622,7 @@ async function handleUploadLocalLyrics() {
 
     uploadButton.disabled = true;
     uploadButtonIcon.textContent = 'hourglass_empty';
-    showStatusMessage('modal-upload-status', 'Uploading lyrics...', false);
+    showStatusMessage('modal-upload-status', msg('msgUploading'), false);
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -640,19 +643,19 @@ async function handleUploadLocalLyrics() {
             }
             const jsonLyrics = format === 'json' ? parsedLyrics : convertToStandardJson(parsedLyrics);
             await uploadLocalLyrics(songInfo, jsonLyrics);
-            showStatusMessage('modal-upload-status', 'Lyrics uploaded successfully!', false);
+            showStatusMessage('modal-upload-status', msg('msgUploadSuccess'), false);
             titleInput.value = ''; artistInput.value = ''; albumInput.value = ''; lyricsFileInput.value = '';
             document.getElementById('upload-lyrics-modal').style.display = 'none';
             populateLocalLyricsList();
         } catch (error) {
-            showStatusMessage('modal-upload-status', `Error uploading lyrics: ${error.message || error}`, true);
+            showStatusMessage('modal-upload-status', msg('msgUploadError', String(error.message || error)), true);
         } finally {
             uploadButton.disabled = false;
             uploadButtonIcon.textContent = 'upload_file';
         }
     };
     reader.onerror = () => {
-        showStatusMessage('modal-upload-status', 'Error reading file.', true);
+        showStatusMessage('modal-upload-status', msg('msgFileReadError'), true);
         uploadButton.disabled = false;
         uploadButtonIcon.textContent = 'upload_file';
     };
@@ -684,13 +687,13 @@ async function populateLocalLyricsList() {
             `;
             listItem.querySelector('.remove-source-button').addEventListener('click', async (e) => {
                 e.stopPropagation();
-                if (confirm(`Delete "${item.songInfo.title} - ${item.songInfo.artist}"?`)) {
+                if (confirm(msg('confirmDeleteLyrics', `${item.songInfo.title} - ${item.songInfo.artist}`))) {
                     try {
                         await deleteLocalLyrics(item.songId);
-                        showStatusMessage('local-lyrics-status', 'Local lyrics deleted.', false);
+                        showStatusMessage('local-lyrics-status', msg('msgLocalLyricsDeleted'), false);
                         populateLocalLyricsList();
                     } catch (error) {
-                        showStatusMessage('local-lyrics-status', `Error deleting lyrics: ${error}`, true);
+                        showStatusMessage('local-lyrics-status', msg('msgDeleteError', String(error)), true);
                     }
                 }
             });
@@ -698,7 +701,7 @@ async function populateLocalLyricsList() {
         });
     } catch (error) {
         console.error("Failed to load local lyrics list:", error);
-        noLyricsMessage.textContent = `Error loading local lyrics: ${error.message || error}`;
+        noLyricsMessage.textContent = msg('msgErrorLoadingLocalLyrics', String(error.message || error));
         noLyricsMessage.style.display = 'block';
     }
 }
@@ -730,7 +733,7 @@ document.getElementById('toggle-openrouter-api-key-visibility').addEventListener
 function setAppVersion() {
     try {
         const version = chrome.runtime.getManifest().version;
-        document.querySelector('.version').textContent = `Version ${version}`;
+        document.querySelector('.version').textContent = msg('labelVersion', version);
     } catch (e) {
         console.error("Could not retrieve extension version:", e);
     }
@@ -750,10 +753,10 @@ function exportSettings() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        showStatusMessage('config-status', 'Settings exported successfully!', false);
+        showStatusMessage('config-status', msg('msgExportSuccess'), false);
     } catch (error) {
         console.error('Failed to export settings:', error);
-        showStatusMessage('config-status', `Error exporting settings: ${error.message}`, true);
+        showStatusMessage('config-status', msg('msgExportError', error.message), true);
     }
 }
 
@@ -775,17 +778,17 @@ function importSettings(event) {
             updateSettings(importedSettings);
             saveSettings();
             updateUI(getSettings());
-            showStatusMessage('config-status', 'Settings imported successfully! Reload required.', false);
+            showStatusMessage('config-status', msg('msgImportSuccess'), false);
             showReloadNotification();
         } catch (error) {
             console.error('Failed to import settings:', error);
-            showStatusMessage('config-status', `Error importing settings: ${error.message}`, true);
+            showStatusMessage('config-status', msg('msgImportError', error.message), true);
         } finally {
             event.target.value = '';
         }
     };
     reader.onerror = () => {
-        showStatusMessage('config-status', 'Error reading file.', true);
+        showStatusMessage('config-status', msg('msgFileReadError'), true);
     };
     reader.readAsText(file);
 }
@@ -816,7 +819,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await Promise.all(reloadPromises);
             hideReloadNotification();
         } else {
-            alert("No active music tabs found. Please reload them manually.");
+            alert(msg('msgNoActiveTabs'));
         }
     });
 

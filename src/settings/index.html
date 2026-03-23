@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouLy+ Settings</title>
+    <title data-i18n="settingsTitle">YouLy+ Settings</title>
     <link rel="stylesheet" type="text/css" href="../inject/stylesheet.css">
     <link rel="stylesheet" type="text/css" href="ui.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="../lib/material3.css" rel="stylesheet" />
+    <script src="../lib/i18n.js" defer></script>
     <script src="../modules/lyrics/settings.js" defer></script>
 </head>
 
@@ -16,36 +17,36 @@
     <aside class="navigation-drawer">
         <header class="drawer-header">
             <span class="material-symbols-outlined logo-icon">lyrics</span>
-            <h1 class="drawer-title">YouLy+ Settings</h1>
+            <h1 class="drawer-title" data-i18n="settingsTitle">YouLy+ Settings</h1>
         </header>
         <nav class="drawer-nav">
             <a href="#" class="nav-item active" data-section="general">
                 <span class="material-symbols-outlined">tune</span>
-                <span class="nav-item-label">General</span>
+                <span class="nav-item-label" data-i18n="navGeneral">General</span>
             </a>
             <a href="#" class="nav-item" data-section="sources">
                 <span class="material-symbols-outlined">library_music</span>
-                <span class="nav-item-label">Sources</span>
+                <span class="nav-item-label" data-i18n="navSources">Sources</span>
             </a>
             <a href="#" class="nav-item" data-section="appearance">
                 <span class="material-symbols-outlined">palette</span>
-                <span class="nav-item-label">Appearance</span>
+                <span class="nav-item-label" data-i18n="navAppearance">Appearance</span>
             </a>
             <a href="#" class="nav-item" data-section="translation">
                 <span class="material-symbols-outlined">translate</span>
-                <span class="nav-item-label">Translation</span>
+                <span class="nav-item-label" data-i18n="navTranslation">Translation</span>
             </a>
             <a href="#" class="nav-item" data-section="cache">
                 <span class="material-symbols-outlined">cached</span>
-                <span class="nav-item-label">Cache</span>
+                <span class="nav-item-label" data-i18n="navCache">Cache</span>
             </a>
             <a href="#" class="nav-item" data-section="local-lyrics">
                 <span class="material-symbols-outlined">folder_open</span>
-                <span class="nav-item-label">Local Lyrics</span>
+                <span class="nav-item-label" data-i18n="navLocalLyrics">Local Lyrics</span>
             </a>
             <a href="#" class="nav-item" data-section="about">
                 <span class="material-symbols-outlined">info</span>
-                <span class="nav-item-label">About</span>
+                <span class="nav-item-label" data-i18n="navAbout">About</span>
             </a>
         </nav>
     </aside>
@@ -56,14 +57,14 @@
             <button id="mobile-menu-button" class="m3-button icon">
                 <span class="material-symbols-outlined">menu</span>
             </button>
-            <h1 class="mobile-title">YouLy+ Settings</h1>
+            <h1 class="mobile-title" data-i18n="settingsTitle">YouLy+ Settings</h1>
         </header>
         <!-- Notification bar for reloading -->
         <div id="reload-notification" class="reload-notification">
-            <span id="notification-text">Settings saved. Restart your music tabs for changes to take effect.</span>
+            <span id="notification-text" data-i18n="msgSettingsSavedRestart">Settings saved. Restart your music tabs for changes to take effect.</span>
             <button id="reload-button" class="m3-button tonal">
                 <span class="material-symbols-outlined">refresh</span>
-                <span id="reload-button-text">Restart</span>
+                <span id="reload-button-text" data-i18n="buttonRestart">Restart</span>
             </button>
         </div>
 
@@ -71,19 +72,19 @@
 
             <!-- General Settings Section -->
             <section class="settings-card active" id="general">
-                <h2 class="card-title">General</h2>
+                <h2 class="card-title" data-i18n="navGeneral">General</h2>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Core Functionality</h3>
+                    <h3 class="category-title" data-i18n="categoryCoreFunc">Core Functionality</h3>
                     <div class="setting-item">
                         <label class="m3-switch">
                             <input type="checkbox" id="enabled" checked>
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Enable YouLy+</span>
+                            <span class="label" data-i18n="settingEnableExtension">Enable YouLy+</span>
                         </label>
-                        <p class="setting-description">Globally enable or disable the extension.</p>
+                        <p class="setting-description" data-i18n="descEnableExtension">Globally enable or disable the extension.</p>
                     </div>
                     <div class="setting-item">
                         <label class="m3-switch">
@@ -91,23 +92,23 @@
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Word-by-Word Highlighting</span>
+                            <span class="label" data-i18n="settingWordByWord">Word-by-Word Highlighting</span>
                         </label>
-                        <p class="setting-description">Enable karaoke-style word highlighting if available.</p>
+                        <p class="setting-description" data-i18n="descWordByWord">Enable karaoke-style word highlighting if available.</p>
                     </div>
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title">YouTube Music Settings</h3>
+                    <h3 class="category-title" data-i18n="categoryYouTubeMusic">YouTube Music Settings</h3>
                     <div class="setting-item">
                         <label class="m3-switch">
                             <input type="checkbox" id="ytsonginfo">
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Enable Fullscreen Song Info</span>
+                            <span class="label" data-i18n="settingFullscreenSongInfo">Enable Fullscreen Song Info</span>
                         </label>
-                        <p class="setting-description">
+                        <p class="setting-description" data-i18n="descFullscreenSongInfo">
                             Display song details in fullscreen mode, including progress bar, release date, title, and
                             artist.
                         </p>
@@ -118,24 +119,24 @@
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Use SponsorBlock API</span>
+                            <span class="label" data-i18n="settingUseSponsorBlock">Use SponsorBlock API</span>
                         </label>
-                        <p class="setting-description">Skip non-music sections like intros, outros, or sponsor segments.
+                        <p class="setting-description" data-i18n="descUseSponsorBlock">Skip non-music sections like intros, outros, or sponsor segments.
                         </p>
                     </div>
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Apple Music Settings</h3>
+                    <h3 class="category-title" data-i18n="categoryAppleMusic">Apple Music Settings</h3>
                     <div class="setting-item">
                         <label class="m3-switch">
                             <input type="checkbox" id="bypass-apple">
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Prefer External Lyrics for Line-Synced Tracks</span>
+                            <span class="label" data-i18n="settingPreferExternal">Prefer External Lyrics for Line-Synced Tracks</span>
                         </label>
-                        <p class="setting-description">When enabled, the app will use an external lyrics source if Apple
+                        <p class="setting-description" data-i18n="descPreferExternal">When enabled, the app will use an external lyrics source if Apple
                             Music only provides line-by-line synchronization instead of word-by-word.</p>
                     </div>
                 </div>
@@ -144,10 +145,10 @@
 
             <!-- Sources Settings Section -->
             <section class="settings-card" id="sources">
-                <h2 class="card-title">Sources</h2>
+                <h2 class="card-title" data-i18n="navSources">Sources</h2>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Lyrics Provider</h3>
+                    <h3 class="category-title" data-i18n="categoryLyricsProvider">Lyrics Provider</h3>
                     <div class="setting-item">
                         <div class="form-group">
                             <select id="default-provider" placeholder=" ">
@@ -156,34 +157,34 @@
                                 <option value="customKpoe">Custom KPoe Server</option>
                                 <option value="lrclib">LRCLIB</option>
                             </select>
-                            <label for="default-provider">Default Lyrics Provider</label>
+                            <label for="default-provider" data-i18n="labelDefaultProvider">Default Lyrics Provider</label>
                         </div>
-                        <p class="setting-description">Choose your preferred source for lyrics.</p>
+                        <p class="setting-description" data-i18n="descDefaultProvider">Choose your preferred source for lyrics.</p>
                     </div>
                     <div class="setting-item" id="custom-kpoe-url-group" style="display: none;">
                         <div class="form-group">
                             <input type="text" id="custom-kpoe-url" placeholder=" ">
-                            <label for="custom-kpoe-url">Custom KPoe Server URL</label>
+                            <label for="custom-kpoe-url" data-i18n="labelCustomKpoeUrl">Custom KPoe Server URL</label>
                         </div>
-                        <p class="helper-text">Enter the base URL for your self-hosted KPoe server.</p>
+                        <p class="helper-text" data-i18n="helperCustomKpoeUrl">Enter the base URL for your self-hosted KPoe server.</p>
                     </div>
                     <div class="setting-item" id="kpoe-sources-group">
-                        <label class="form-group-label">Lyrics+ Source Order</label>
+                        <label class="form-group-label" data-i18n="labelSourceOrder">Lyrics+ Source Order</label>
                         <div id="lyrics-source-order-draggable" class="draggable-list">
                             <!-- Draggable items will be populated by ui.js -->
                         </div>
-                        <p class="setting-description helper-text">Drag and drop to reorder the sources for Lyrics+.</p>
+                        <p class="setting-description helper-text" data-i18n="helperSourceOrder">Drag and drop to reorder the sources for Lyrics+.</p>
                         <div class="add-source-container">
                             <div class="form-group">
                                 <select id="available-sources-dropdown" placeholder=" ">
                                     <option value="" disabled selected></option>
                                     <!-- Options will be populated by ui.js -->
                                 </select>
-                                <label for="available-sources-dropdown">Available Sources</label>
+                                <label for="available-sources-dropdown" data-i18n="labelAvailableSources">Available Sources</label>
                             </div>
                             <button id="add-source-button" class="m3-button tonal">
                                 <span class="material-symbols-outlined">add</span>
-                                Add Source
+                                <span data-i18n="buttonAddSource">Add Source</span>
                             </button>
                         </div>
                         <p id="add-source-status" class="status-message"></p>
@@ -193,23 +194,23 @@
 
             <!-- Local Lyrics Section -->
             <section class="settings-card" id="local-lyrics">
-                <h2 class="card-title">Local Lyrics</h2>
+                <h2 class="card-title" data-i18n="navLocalLyrics">Local Lyrics</h2>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Manage Uploaded Lyrics</h3>
+                    <h3 class="category-title" data-i18n="categoryManageLocalLyrics">Manage Uploaded Lyrics</h3>
                     <div id="local-lyrics-list" class="draggable-list">
-                        <p class="helper-text" id="no-local-lyrics-message">No local lyrics uploaded yet.</p>
+                        <p class="helper-text" id="no-local-lyrics-message" data-i18n="msgNoLocalLyrics">No local lyrics uploaded yet.</p>
                     </div>
                     <div class="card-actions">
                         <button id="refresh-local-lyrics-list" class="m3-button outlined">
                             <span class="material-symbols-outlined">refresh</span>
-                            Refresh List
+                            <span data-i18n="buttonRefreshList">Refresh List</span>
                         </button>
                     </div>
                     <p id="local-lyrics-status" class="status-message"></p>
                 </div>
 
-                <button class="fab" id="add-lyrics-fab" title="Add New Local Lyrics">
+                <button class="fab" id="add-lyrics-fab" data-i18n-title="titleAddLocalLyrics" title="Add New Local Lyrics">
                     <span class="material-symbols-outlined">add</span>
                 </button>
 
@@ -217,32 +218,32 @@
                     <div class="modal-scrim"></div>
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h2 class="modal-title">Upload New Local Lyrics</h2>
+                            <h2 class="modal-title" data-i18n="modalUploadTitle">Upload New Local Lyrics</h2>
                             <button class="close-button m3-button icon">
                                 <span class="material-symbols-outlined">close</span>
                             </button>
                         </div>
                         <div class="form-group">
                             <input type="text" id="modal-upload-song-title" placeholder=" ">
-                            <label for="modal-upload-song-title">Song Title</label>
+                            <label for="modal-upload-song-title" data-i18n="labelSongTitle">Song Title</label>
                         </div>
                         <div class="form-group">
                             <input type="text" id="modal-upload-artist-name" placeholder=" ">
-                            <label for="modal-upload-artist-name">Artist Name</label>
+                            <label for="modal-upload-artist-name" data-i18n="labelArtistName">Artist Name</label>
                         </div>
                         <div class="form-group">
                             <input type="text" id="modal-upload-album-name" placeholder=" ">
-                            <label for="modal-upload-album-name">Album Name (Optional)</label>
+                            <label for="modal-upload-album-name" data-i18n="labelAlbumName">Album Name (Optional)</label>
                         </div>
                         <div class="setting-item">
-                            <label for="modal-upload-lyrics-file" class="form-group-label">Lyrics File</label>
+                            <label for="modal-upload-lyrics-file" class="form-group-label" data-i18n="labelLyricsFile">Lyrics File</label>
                             <input type="file" id="modal-upload-lyrics-file" accept=".lrc,.elrc,.ttml,.json">
-                            <p class="helper-text">Upload your LRC, ELRC, Apple TTML, or JSON file.</p>
+                            <p class="helper-text" data-i18n="helperLyricsFile">Upload your LRC, ELRC, Apple TTML, or JSON file.</p>
                         </div>
                         <div class="modal-actions">
                             <button id="modal-upload-lyrics-button" class="m3-button filled">
                                 <span class="material-symbols-outlined">upload_file</span>
-                                Upload Lyrics
+                                <span data-i18n="buttonUploadLyrics">Upload Lyrics</span>
                             </button>
                         </div>
                         <p id="modal-upload-status" class="status-message"></p>
@@ -252,34 +253,34 @@
 
             <!-- Translation Settings Section -->
             <section class="settings-card" id="translation">
-                <h2 class="card-title">Translation</h2>
+                <h2 class="card-title" data-i18n="navTranslation">Translation</h2>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Translation Service</h3>
+                    <h3 class="category-title" data-i18n="categoryTranslationService">Translation Service</h3>
                     <div class="setting-item">
                         <div class="form-group">
                             <select id="translation-provider" placeholder=" ">
                                 <option value="" disabled selected></option>
-                                <option value="google">Google Translate</option>
-                                <option value="gemini">Gemini AI</option>
-                                <option value="openrouter">OpenRouter (LLM)</option>
+                                <option value="google" data-i18n="optionGoogleTranslate">Google Translate</option>
+                                <option value="gemini" data-i18n="optionGeminiAI">Gemini AI</option>
+                                <option value="openrouter" data-i18n="optionOpenRouter">OpenRouter (LLM)</option>
                             </select>
-                            <label for="translation-provider">Translation Provider</label>
+                            <label for="translation-provider" data-i18n="labelTranslationProvider">Translation Provider</label>
                         </div>
-                        <p class="setting-description">Select the service for translating lyrics.</p>
+                        <p class="setting-description" data-i18n="descTranslationProvider">Select the service for translating lyrics.</p>
                     </div>
                     <div class="setting-item" id="gemini-api-key-group" style="display: none;">
                         <div class="input-with-button">
                             <div class="form-group">
                                 <input type="password" id="gemini-api-key" placeholder=" " autocomplete="off">
-                                <label for="gemini-api-key">Gemini AI API Key</label>
+                                <label for="gemini-api-key" data-i18n="labelGeminiApiKey">Gemini AI API Key</label>
                             </div>
                             <button type="button" id="toggle-gemini-api-key-visibility" class="m3-button icon"
-                                title="Show/Hide API Key">
+                                data-i18n-title="titleShowHideApiKey" title="Show/Hide API Key">
                                 <span class="material-symbols-outlined">visibility</span>
                             </button>
                         </div>
-                        <p class="helper-text">Your API key is stored locally and never sent to external servers other
+                        <p class="helper-text" data-i18n="helperGeminiApiKey">Your API key is stored locally and never sent to external servers other
                             than Google's Gemini API.</p>
                     </div>
                     <div class="setting-item" id="gemini-model-group" style="display: none;">
@@ -303,49 +304,49 @@
                                 <option value="gemma-3-12b-it">Gemma 3-12B</option>
                                 <option value="gemma-3-4b-it">Gemma 3-4B</option>
                             </select>
-                            <label for="gemini-model">Gemini AI Model</label>
+                            <label for="gemini-model" data-i18n="labelGeminiModel">Gemini AI Model</label>
                         </div>
-                        <p class="setting-description">Choose the Gemini AI model for translations.</p>
+                        <p class="setting-description" data-i18n="descGeminiModel">Choose the Gemini AI model for translations.</p>
                     </div>
                 </div>
 
                 <div class="settings-category" id="openrouter-settings-category" style="display: none;">
-                    <h3 class="category-title">OpenRouter Settings</h3>
+                    <h3 class="category-title" data-i18n="categoryOpenRouterSettings">OpenRouter Settings</h3>
                     <div class="setting-item">
                         <div class="input-with-button">
                             <div class="form-group">
                                 <input type="password" id="openrouter-api-key" placeholder=" " autocomplete="off">
-                                <label for="openrouter-api-key">OpenRouter API Key</label>
+                                <label for="openrouter-api-key" data-i18n="labelOpenRouterApiKey">OpenRouter API Key</label>
                             </div>
                             <button type="button" id="toggle-openrouter-api-key-visibility" class="m3-button icon"
-                                title="Show/Hide API Key">
+                                data-i18n-title="titleShowHideApiKey" title="Show/Hide API Key">
                                 <span class="material-symbols-outlined">visibility</span>
                             </button>
                         </div>
-                        <p class="helper-text">Your API key is stored locally.</p>
+                        <p class="helper-text" data-i18n="helperOpenRouterApiKey">Your API key is stored locally.</p>
                     </div>
                     <div class="setting-item">
                         <div class="form-group">
                             <input type="text" id="openrouter-model" placeholder=" ">
-                            <label for="openrouter-model">OpenRouter Model (e.g., google/gemini-2.0-flash-001)</label>
+                            <label for="openrouter-model" data-i18n="labelOpenRouterModel">OpenRouter Model (e.g., google/gemini-2.0-flash-001)</label>
                         </div>
-                        <p class="helper-text">Specify the model ID from OpenRouter.</p>
+                        <p class="helper-text" data-i18n="helperOpenRouterModel">Specify the model ID from OpenRouter.</p>
                     </div>
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Romanization Service (for non-Latin scripts)</h3>
+                    <h3 class="category-title" data-i18n="categoryRomanization">Romanization Service (for non-Latin scripts)</h3>
                     <div class="setting-item">
                         <div class="form-group">
                             <select id="romanization-provider" placeholder=" ">
                                 <option value="" disabled selected></option>
-                                <option value="google">Google Translate</option>
-                                <option value="gemini">Gemini AI</option>
-                                <option value="openrouter">OpenRouter (LLM)</option>
+                                <option value="google" data-i18n="optionGoogleTranslate">Google Translate</option>
+                                <option value="gemini" data-i18n="optionGeminiAI">Gemini AI</option>
+                                <option value="openrouter" data-i18n="optionOpenRouter">OpenRouter (LLM)</option>
                             </select>
-                            <label for="romanization-provider">Romanization Provider</label>
+                            <label for="romanization-provider" data-i18n="labelRomanizationProvider">Romanization Provider</label>
                         </div>
-                        <p class="setting-description">Automatically fetches romanization from the Lyrics+ API when
+                        <p class="setting-description" data-i18n="descRomanizationProvider">Automatically fetches romanization from the Lyrics+ API when
                             available. If not provided by Lyrics+, it falls back to generating romanization using the
                             selected service.</p>
                     </div>
@@ -369,55 +370,55 @@
                                 <option value="gemma-3-12b-it">Gemma 3-12B</option>
                                 <option value="gemma-3-4b-it">Gemma 3-4B</option>
                             </select>
-                            <label for="gemini-romanization-model">Gemini AI Romanization Model</label>
+                            <label for="gemini-romanization-model" data-i18n="labelGeminiRomanizationModel">Gemini AI Romanization Model</label>
                         </div>
-                        <p class="setting-description">Choose the Gemini AI model for romanization.</p>
+                        <p class="setting-description" data-i18n="descGeminiRomanizationModel">Choose the Gemini AI model for romanization.</p>
                     </div>
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Translation Behavior</h3>
+                    <h3 class="category-title" data-i18n="categoryTranslationBehavior">Translation Behavior</h3>
                     <div class="setting-item">
                         <label class="m3-switch">
                             <input type="checkbox" id="override-translate-target">
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Override Translation Target Language</span>
+                            <span class="label" data-i18n="settingOverrideTranslateTarget">Override Translation Target Language</span>
                         </label>
-                        <p class="setting-description">Manually specify the target language for translation (e.g., 'en',
+                        <p class="setting-description" data-i18n="descOverrideTranslateTarget">Manually specify the target language for translation (e.g., 'en',
                             'ko', 'ja').</p>
                     </div>
                     <div class="setting-item" id="custom-translate-target-group" style="display: none;">
                         <div class="form-group">
                             <input type="text" id="custom-translate-target" placeholder=" ">
-                            <label for="custom-translate-target">Custom Target Language Code</label>
+                            <label for="custom-translate-target" data-i18n="labelCustomTranslateTarget">Custom Target Language Code</label>
                         </div>
-                        <p class="helper-text">Enter the 2-letter language code (e.g., 'en' for English, 'ko' for
+                        <p class="helper-text" data-i18n="helperCustomTranslateTarget">Enter the 2-letter language code (e.g., 'en' for English, 'ko' for
                             Korean).</p>
                     </div>
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Advanced Prompting (Gemini / OpenRouter)</h3>
+                    <h3 class="category-title" data-i18n="categoryAdvancedPrompting">Advanced Prompting (Gemini / OpenRouter)</h3>
                     <div class="setting-item" id="override-gemini-prompt-group" style="display: none;">
                         <label class="m3-switch">
                             <input type="checkbox" id="override-gemini-prompt">
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Override AI Translation Prompt</span>
+                            <span class="label" data-i18n="settingOverrideAIPrompt">Override AI Translation Prompt</span>
                         </label>
-                        <p class="setting-description">Use a custom prompt for Gemini/OpenRouter translations. Use
+                        <p class="setting-description" data-i18n="descOverrideAIPrompt">Use a custom prompt for Gemini/OpenRouter translations. Use
                             <code>{targetLang}</code> and <code>{lyrics}</code> placeholders.
                         </p>
                     </div>
                     <div class="setting-item" id="custom-gemini-prompt-group" style="display: none;">
                         <div class="form-group">
                             <textarea id="custom-gemini-prompt" placeholder=" "></textarea>
-                            <label for="custom-gemini-prompt">Custom AI Translation Prompt</label>
+                            <label for="custom-gemini-prompt" data-i18n="labelCustomAIPrompt">Custom AI Translation Prompt</label>
                         </div>
-                        <p class="helper-text">Customize the prompt sent to the AI for translations. Use
+                        <p class="helper-text" data-i18n="helperCustomAIPrompt">Customize the prompt sent to the AI for translations. Use
                             <code>{targetLang}</code> for the target language
                         </p>
                     </div>
@@ -427,16 +428,16 @@
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Override AI Romanization Prompt</span>
+                            <span class="label" data-i18n="settingOverrideRomanizePrompt">Override AI Romanization Prompt</span>
                         </label>
-                        <p class="setting-description">Use a custom prompt for Gemini/OpenRouter romanization.</p>
+                        <p class="setting-description" data-i18n="descOverrideRomanizePrompt">Use a custom prompt for Gemini/OpenRouter romanization.</p>
                     </div>
                     <div class="setting-item" id="custom-gemini-romanize-prompt-group" style="display: none;">
                         <div class="form-group">
                             <textarea id="custom-gemini-romanize-prompt" placeholder=" "></textarea>
-                            <label for="custom-gemini-romanize-prompt">Custom AI Romanization Prompt</label>
+                            <label for="custom-gemini-romanize-prompt" data-i18n="labelCustomRomanizePrompt">Custom AI Romanization Prompt</label>
                         </div>
-                        <p class="helper-text">Customize the prompt sent to the AI for romanization.</p>
+                        <p class="helper-text" data-i18n="helperCustomRomanizePrompt">Customize the prompt sent to the AI for romanization.</p>
                     </div>
                 </div>
 
@@ -445,20 +446,20 @@
 
             <!-- Appearance Section -->
             <section class="settings-card" id="appearance">
-                <h2 class="card-title">Appearance</h2>
+                <h2 class="card-title" data-i18n="navAppearance">Appearance</h2>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Text Display</h3>
+                    <h3 class="category-title" data-i18n="categoryTextDisplay">Text Display</h3>
                     <div class="setting-item">
                         <div class="form-group">
                             <select id="larger-text-mode" placeholder=" ">
                                 <option value="" disabled selected></option>
-                                <option value="lyrics">Lyrics</option>
-                                <option value="romanization">Pronunciation</option>
+                                <option value="lyrics" data-i18n="optionLyrics">Lyrics</option>
+                                <option value="romanization" data-i18n="optionPronunciation">Pronunciation</option>
                             </select>
-                            <label for="larger-text-mode">Larger Text: Pronunciation Or Lyrics</label>
+                            <label for="larger-text-mode" data-i18n="labelLargerTextMode">Larger Text: Pronunciation Or Lyrics</label>
                         </div>
-                        <p class="setting-description">Choose whether lyrics or pronunciation appears larger when both
+                        <p class="setting-description" data-i18n="descLargerTextMode">Choose whether lyrics or pronunciation appears larger when both
                             are displayed.</p>
                     </div>
                     <div class="setting-item">
@@ -467,9 +468,9 @@
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Hide Latin Pronunciation</span>
+                            <span class="label" data-i18n="settingHideLatinPronunciation">Hide Latin Pronunciation</span>
                         </label>
-                        <p class="setting-description">Automatically hide phonetic guides if the lyrics are already
+                        <p class="setting-description" data-i18n="descHideLatinPronunciation">Automatically hide phonetic guides if the lyrics are already
                             written in the Latin alphabet.</p>
                     </div>
                     <div class="setting-item">
@@ -478,24 +479,24 @@
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Dynamic Background Vocal Positioning</span>
+                            <span class="label" data-i18n="settingDynamicBkgVocal">Dynamic Background Vocal Positioning</span>
                         </label>
-                        <p class="setting-description">Background lyrics that start before main lyrics will 
+                        <p class="setting-description" data-i18n="descDynamicBkgVocal">Background lyrics that start before main lyrics will 
                             be displayed on top.</p>
                     </div>
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Performance & Compatibility</h3>
+                    <h3 class="category-title" data-i18n="categoryPerformance">Performance & Compatibility</h3>
                     <div class="setting-item">
                         <label class="m3-switch">
                             <input type="checkbox" id="lightweight">
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Lightweight Mode</span>
+                            <span class="label" data-i18n="settingLightweightMode">Lightweight Mode</span>
                         </label>
-                        <p class="setting-description">Reduces animations and visual effects for better performance on
+                        <p class="setting-description" data-i18n="descLightweightMode">Reduces animations and visual effects for better performance on
                             older devices.</p>
                     </div>
                     <div class="setting-item">
@@ -504,24 +505,24 @@
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Hide Off-screen Lyrics Line</span>
+                            <span class="label" data-i18n="settingHideOffscreen">Hide Off-screen Lyrics Line</span>
                         </label>
-                        <p class="setting-description">Hides & remove all animation lyrics lines that are not currently
+                        <p class="setting-description" data-i18n="descHideOffscreen">Hides & remove all animation lyrics lines that are not currently
                             visible on the screen. Recommended for low-end devices.</p>
                     </div>
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Visual Effects</h3>
+                    <h3 class="category-title" data-i18n="categoryVisualEffects">Visual Effects</h3>
                     <div class="setting-item">
                         <label class="m3-switch">
                             <input type="checkbox" id="blur-inactive">
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Blur Inactive Lyrics</span>
+                            <span class="label" data-i18n="settingBlurInactive">Blur Inactive Lyrics</span>
                         </label>
-                        <p class="setting-description">Applies a blur effect to lyrics not currently being sung, similar
+                        <p class="setting-description" data-i18n="descBlurInactive">Applies a blur effect to lyrics not currently being sung, similar
                             to Apple Music.</p>
                     </div>
                     <div class="setting-item">
@@ -530,9 +531,9 @@
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Enable Dynamic Background (Player View)</span>
+                            <span class="label" data-i18n="settingDynamicBackground">Enable Dynamic Background (Player View)</span>
                         </label>
-                        <p class="setting-description">Applies animated album backgrounds when the player is expanded.
+                        <p class="setting-description" data-i18n="descDynamicBackground">Applies animated album backgrounds when the player is expanded.
                             This setting has no effect in fullscreen mode, where dynamic background is always enabled.
                         </p>
                     </div>
@@ -542,9 +543,9 @@
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Audio-based Beat Pulse for Dynamic Background</span>
+                            <span class="label" data-i18n="settingAudioBeatSync">Audio-based Beat Pulse for Dynamic Background</span>
                         </label>
-                        <p class="setting-description">Makes the dynamic background layers pulse to the beat of the audio.
+                        <p class="setting-description" data-i18n="descAudioBeatSync">Makes the dynamic background layers pulse to the beat of the audio.
                             If you use Better Lyrics Shaders or another Visualizer, you should disable this setting.
                         </p>
                     </div>
@@ -554,9 +555,9 @@
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Use song palette for lyrics color in fullscreen video-mode</span>
+                            <span class="label" data-i18n="settingSongPaletteFullscreen">Use song palette for lyrics color in fullscreen video-mode</span>
                         </label>
-                        <p class="setting-description">Uses the song's color palette for the lyrics when in video music
+                        <p class="setting-description" data-i18n="descSongPaletteFullscreen">Uses the song's color palette for the lyrics when in video music
                             fullscreen
                             mode.</p>
                     </div>
@@ -566,29 +567,29 @@
                             <div class="track">
                                 <div class="handle"></div>
                             </div>
-                            <span class="label">Use song palette for lyrics color in all modes</span>
+                            <span class="label" data-i18n="settingSongPaletteAll">Use song palette for lyrics color in all modes</span>
                         </label>
-                        <p class="setting-description">Uses the song's color palette for the lyrics in all display
+                        <p class="setting-description" data-i18n="descSongPaletteAll">Uses the song's color palette for the lyrics in all display
                             modes.</p>
                     </div>
                     <div class="setting-item">
                         <div class="form-group">
                             <input type="text" id="overridePaletteColor" placeholder=" ">
-                            <label for="overridePaletteColor">Override palette color</label>
+                            <label for="overridePaletteColor" data-i18n="labelOverridePaletteColor">Override palette color</label>
                         </div>
-                        <p class="helper-text">Override the song palette color with a custom one. (Only for lyrics
+                        <p class="helper-text" data-i18n="helperOverridePaletteColor">Override the song palette color with a custom one. (Only for lyrics
                             color, not dynamic background) (keep empty if don't want to override)</p>
                     </div>
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Custom Styling</h3>
+                    <h3 class="category-title" data-i18n="categoryCustomStyling">Custom Styling</h3>
                     <div class="setting-item">
                         <div class="form-group">
                             <textarea id="custom-css" placeholder=" "></textarea>
-                            <label for="custom-css">Custom CSS</label>
+                            <label for="custom-css" data-i18n="labelCustomCSS">Custom CSS</label>
                         </div>
-                        <p class="helper-text">Apply your own styles to the lyrics display. Use with caution. To create
+                        <p class="helper-text" data-i18n="helperCustomCSS">Apply your own styles to the lyrics display. Use with caution. To create
                             or testing, it is recommended to use UserStyles</p>
                     </div>
                 </div>
@@ -598,28 +599,28 @@
 
             <!-- Cache Options Section -->
             <section class="settings-card" id="cache">
-                <h2 class="card-title">Cache</h2>
+                <h2 class="card-title" data-i18n="navCache">Cache</h2>
                 <div class="setting-item">
                     <div class="form-group">
                         <select id="cache-strategy" placeholder=" ">
                             <option value="" disabled selected></option>
-                            <option value="aggressive">Aggressive (2 hours)</option>
-                            <option value="moderate">Moderate (1 hour)</option>
-                            <option value="none">None (no caching)</option>
+                            <option value="aggressive" data-i18n="optionAggressive">Aggressive (2 hours)</option>
+                            <option value="moderate" data-i18n="optionModerate">Moderate (1 hour)</option>
+                            <option value="none" data-i18n="optionNone">None (no caching)</option>
                         </select>
-                        <label for="cache-strategy">Cache Strategy</label>
+                        <label for="cache-strategy" data-i18n="labelCacheStrategy">Cache Strategy</label>
                     </div>
-                    <p class="setting-description">Determines how long lyrics are stored locally to reduce loading
+                    <p class="setting-description" data-i18n="descCacheStrategy">Determines how long lyrics are stored locally to reduce loading
                         times.</p>
                 </div>
                 <div class="setting-item">
-                    <label class="form-group-label">Current Cache Usage</label>
+                    <label class="form-group-label" data-i18n="labelCurrentCacheUsage">Current Cache Usage</label>
                     <p id="cache-size" class="cache-info">0.00 MB used (0 songs cached)</p>
                 </div>
                 <div class="card-actions">
                     <button id="clear-cache" class="m3-button outlined error">
                         <span class="material-symbols-outlined">delete_sweep</span>
-                        Clear Cache
+                        <span data-i18n="buttonClearCache">Clear Cache</span>
                     </button>
                 </div>
             </section>
@@ -634,7 +635,7 @@
                     </div>
                 </div>
                 <div class="about-content">
-                    <p class="about-description">
+                    <p class="about-description" data-i18n="aboutDescription">
                         This extension was born from a simple idea: listening to music should be an immersive
                         experience,
                         not just a background activity. We were tired of YouTube's static lyrics and dated interface, so
@@ -649,45 +650,45 @@
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Links & Support</h3>
+                    <h3 class="category-title" data-i18n="categoryLinksSupport">Links & Support</h3>
                     <div class="setting-item">
                         <a href="https://github.com/ibratabian17/youlyplus" target="_blank" rel="noopener noreferrer"
                             class="m3-button outlined">
                             <span class="material-symbols-outlined">code</span>
-                            Source Code
+                            <span data-i18n="linkSourceCode">Source Code</span>
                         </a>
                         <a href="https://github.com/ibratabian17/youlyplus/issues" target="_blank"
                             rel="noopener noreferrer" class="m3-button outlined">
                             <span class="material-symbols-outlined">bug_report</span>
-                            Report a Bug
+                            <span data-i18n="linkReportBug">Report a Bug</span>
                         </a>
                         <a href="https://patreon.com/ibratabian17" target="_blank" rel="noopener noreferrer"
                             class="m3-button outlined">
                             <span class="material-symbols-outlined">volunteer_activism</span>
-                            Support on Patreon
+                            <span data-i18n="linkPatreon">Support on Patreon</span>
                         </a>
                         <a href="https://ko-fi.com/ibratabian17" target="_blank" rel="noopener noreferrer"
                             class="m3-button outlined">
                             <span class="material-symbols-outlined">local_cafe</span>
-                            Support on Ko-fi
+                            <span data-i18n="linkKofi">Support on Ko-fi</span>
                         </a>
                     </div>
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title">Configuration Management</h3>
+                    <h3 class="category-title" data-i18n="categoryConfigManagement">Configuration Management</h3>
                     <div class="setting-item">
-                        <p class="setting-description">Export your current settings to a JSON file, or import from a
+                        <p class="setting-description" data-i18n="descConfigManagement">Export your current settings to a JSON file, or import from a
                             file to
                             restore your configuration.</p>
                         <div class="links-container" style="margin-top: 16px;">
                             <button id="export-settings-button" class="m3-button outlined">
                                 <span class="material-symbols-outlined">file_download</span>
-                                Export
+                                <span data-i18n="buttonExport">Export</span>
                             </button>
                             <button id="import-settings-button" class="m3-button outlined">
                                 <span class="material-symbols-outlined">file_upload</span>
-                                Import
+                                <span data-i18n="buttonImport">Import</span>
                             </button>
                             <input type="file" id="import-settings-file" accept=".json" style="display: none;">
                         </div>
@@ -697,7 +698,7 @@
             </section>
 
             <footer class="content-footer">
-                <p>Made with love</p>
+                <p data-i18n="footerMadeWithLove">Made with love</p>
             </footer>
         </div>
     </main>

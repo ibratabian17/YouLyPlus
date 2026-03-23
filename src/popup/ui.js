@@ -132,11 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             await storageLocalSet(currentSettings);
-            showSnackbar('Settings saved! Reload YouTube pages for changes.');
+            showSnackbar(msg('msgSettingsSaved'));
             notifyContentScripts(currentSettings);
         } catch (error) {
             console.error("YouLy+: Error saving settings:", error);
-            showSnackbar('Error saving settings.', true);
+            showSnackbar(msg('msgErrorSavingSettings'), true);
         }
     }
 
@@ -211,27 +211,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     clearCacheButton.addEventListener('click', async () => {
         if (typeof pBrowser === 'undefined' || !pBrowser.runtime || !pBrowser.runtime.sendMessage) {
-            showSnackbar('Cannot clear cache: Extension API not available.', true);
+            showSnackbar(msg('msgCacheClearApiUnavailable'), true);
             return;
         }
         try {
             const response = await pBrowser.runtime.sendMessage({ type: 'RESET_CACHE' });
             if (response && response.success) {
-                showSnackbar('Cache cleared successfully!');
+                showSnackbar(msg('msgCacheCleared'));
                 updateCacheDisplay();
             } else {
-                showSnackbar('Failed to clear cache.', true);
+                showSnackbar(msg('msgCacheClearFailed'), true);
                 console.error("YouLy+: Error resetting cache:", response ? response.error : "No response");
             }
         } catch (error) {
-            showSnackbar('Error communicating to clear cache.', true);
+            showSnackbar(msg('msgCacheClearError'), true);
             console.error("YouLy+: Failed to send RESET_CACHE message:", error);
         }
     });
 
     refreshCacheButton.addEventListener('click', () => {
         updateCacheDisplay();
-        showSnackbar('Cache info refreshed.');
+        showSnackbar(msg('msgCacheRefreshed'));
     });
 
     // --- Initial Load ---
