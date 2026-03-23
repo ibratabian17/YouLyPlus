@@ -23,7 +23,7 @@ if (-not (Test-Path -Path "dist" -PathType Container)) {
 }
 
 # Define common files/directories to bundle
-$COMMON_FILES = @("LICENSE", "icons", "src", "readme.md")
+$COMMON_FILES = @("LICENSE", "icons", "src", "readme.md", "_locales")
 
 # Function to create zip archive using 7z.exe or zip.exe
 function Create-ZipArchive {

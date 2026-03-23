@@ -16,7 +16,7 @@ echo "Bundling YouLy+ version $VERSION"
 mkdir -p dist
 
 # Define common files/directories to bundle
-COMMON_FILES="LICENSE icons src readme.md"
+COMMON_FILES="LICENSE icons src readme.md _locales"
 
 # --- Bundle for Chrome/Edge (Manifest V3, no browser_specific_settings, no background.scripts) ---
 echo "Creating youlyplus-v${VERSION}-chrome-edge.zip..."
