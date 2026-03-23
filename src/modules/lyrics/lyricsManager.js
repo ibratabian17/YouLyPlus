@@ -445,7 +445,6 @@ window.addEventListener('YOUPLUS_SETTINGS_UPDATED', ({ detail }) => {
 
   if (shouldRender) {
     console.log("Live settings update received, re-rendering lyrics...", changedKeys);
-    const shouldForceReload = changedKeys.some(k => LYRICS_SOURCE_KEYS.includes(k));
-    fetchAndDisplayLyrics(lastKnownSongInfo, false, shouldForceReload);
+    fetchAndDisplayLyrics(lastKnownSongInfo, false, false);
   }
 });
