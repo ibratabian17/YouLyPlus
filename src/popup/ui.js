@@ -1,10 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const lyricsProviderSelect = document.getElementById('lyricsProvider');
-    const wordByWordSwitchInput = document.getElementById('wordByWord');
-    const lightweightSwitchInput = document.getElementById('lightweight');
     const lyEnabledSwitchInput = document.getElementById('lyEnabled');
     const sponsorBlockSwitchInput = document.getElementById('sponsorblock');
+
+    // Appearance - Readability
+    const largerTextModeSelect = document.getElementById('largerTextMode');
+    const wordByWordSwitchInput = document.getElementById('wordByWord');
+    const hidePhoneticDupSwitchInput = document.getElementById('hidePhoneticDup');
+    const bkgOverlapSwitchInput = document.getElementById('bkgOverlap');
+
+    // Advanced - Performance
+    const lightweightSwitchInput = document.getElementById('lightweight');
+    const hideOffscreenSwitchInput = document.getElementById('hideOffscreen');
+    const blurInactiveSwitchInput = document.getElementById('blurInactive');
 
     const clearCacheButton = document.getElementById('clearCache');
     const refreshCacheButton = document.getElementById('refreshCache');
@@ -101,10 +110,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Load Settings ---
     function loadSettingsUI() {
         lyricsProviderSelect.value = currentSettings.lyricsProvider;
-        wordByWordSwitchInput.checked = currentSettings.wordByWord;
-        lightweightSwitchInput.checked = currentSettings.lightweight;
         lyEnabledSwitchInput.checked = currentSettings.isEnabled;
         sponsorBlockSwitchInput.checked = currentSettings.useSponsorBlock;
+
+        // Appearance - Readability
+        largerTextModeSelect.value = currentSettings.largerTextMode;
+        wordByWordSwitchInput.checked = currentSettings.wordByWord;
+        hidePhoneticDupSwitchInput.checked = currentSettings.hidePhoneticDup;
+        bkgOverlapSwitchInput.checked = currentSettings.bkgOverlap;
+
+        // Advanced - Performance
+        lightweightSwitchInput.checked = currentSettings.lightweight;
+        hideOffscreenSwitchInput.checked = currentSettings.hideOffscreen;
+        blurInactiveSwitchInput.checked = currentSettings.blurInactive;
     }
 
     async function fetchAndLoadSettings() {
@@ -123,10 +141,17 @@ document.addEventListener('DOMContentLoaded', () => {
     async function saveAndApplySettings() {
         const newSettings = {
             lyricsProvider: lyricsProviderSelect.value,
-            wordByWord: wordByWordSwitchInput.checked,
-            lightweight: lightweightSwitchInput.checked,
             isEnabled: lyEnabledSwitchInput.checked,
             useSponsorBlock: sponsorBlockSwitchInput.checked,
+            // Readability
+            largerTextMode: largerTextModeSelect.value,
+            wordByWord: wordByWordSwitchInput.checked,
+            hidePhoneticDup: hidePhoneticDupSwitchInput.checked,
+            bkgOverlap: bkgOverlapSwitchInput.checked,
+            // Performance
+            lightweight: lightweightSwitchInput.checked,
+            hideOffscreen: hideOffscreenSwitchInput.checked,
+            blurInactive: blurInactiveSwitchInput.checked,
         };
         currentSettings = { ...currentSettings, ...newSettings };
 
@@ -142,8 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners for Settings ---
     lyricsProviderSelect.addEventListener('change', saveAndApplySettings);
+    largerTextModeSelect.addEventListener('change', saveAndApplySettings);
     // For switches, the 'change' event is dispatched manually by the .m3-switch click handler
-    [wordByWordSwitchInput, lightweightSwitchInput, lyEnabledSwitchInput, sponsorBlockSwitchInput].forEach(input => {
+    [lyEnabledSwitchInput, sponsorBlockSwitchInput, wordByWordSwitchInput, hidePhoneticDupSwitchInput, bkgOverlapSwitchInput, lightweightSwitchInput, hideOffscreenSwitchInput, blurInactiveSwitchInput].forEach(input => {
         input.addEventListener('change', saveAndApplySettings);
     });
 

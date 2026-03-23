@@ -46,6 +46,10 @@
     "description": "Label for SponsorBlock toggle in popup"
   },
 
+  "sectionReadability": {
+    "message": "Readability",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Display Settings",
     "description": "Section title in popup Appearance tab"
@@ -522,6 +526,10 @@
   },
   "labelLargerTextMode": {
     "message": "Larger Text: Pronunciation Or Lyrics",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Larger Text",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {

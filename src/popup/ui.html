@@ -77,14 +77,16 @@
             <div class="tab-content" id="appearance-tab">
                 <section class="settings-section">
                     <h2 class="section-title">
-                        <span class="material-symbols-outlined section-icon">palette</span><span data-i18n="sectionDisplaySettings">Display Settings</span>
+                        <span class="material-symbols-outlined section-icon">text_fields</span><span data-i18n="sectionReadability">Readability</span>
                     </h2>
                     <div class="setting-item">
-                        <label for="lightweight" class="setting-label" data-i18n="settingLightweightMode">Lightweight Mode</label>
-                        <div class="m3-switch" role="switch" aria-labelledby="lightweight">
-                            <input type="checkbox" id="lightweight" class="m3-switch-input">
-                            <span class="m3-switch-track"></span>
-                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
+                        <label for="largerTextMode" class="setting-label" data-i18n="labelLargerTextModeShort">Larger Text</label>
+                        <div class="m3-select-wrapper">
+                            <select id="largerTextMode" class="m3-select">
+                                <option value="lyrics" data-i18n="optionLyrics">Lyrics</option>
+                                <option value="romanization" data-i18n="optionPronunciation">Pronunciation</option>
+                            </select>
+                            <span class="material-symbols-outlined select-arrow">expand_more</span>
                         </div>
                     </div>
                     <div class="setting-item">
@@ -95,11 +97,56 @@
                             <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
                         </div>
                     </div>
+                    <div class="setting-item">
+                        <label for="hidePhoneticDup" class="setting-label" data-i18n="settingHideLatinPronunciation">Hide Latin Pronunciation</label>
+                        <div class="m3-switch" role="switch" aria-labelledby="hidePhoneticDup">
+                            <input type="checkbox" id="hidePhoneticDup" class="m3-switch-input">
+                            <span class="m3-switch-track"></span>
+                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="bkgOverlap" class="setting-label" data-i18n="settingDynamicBkgVocal">Dynamic Background Vocal Positioning</label>
+                        <div class="m3-switch" role="switch" aria-labelledby="bkgOverlap">
+                            <input type="checkbox" id="bkgOverlap" class="m3-switch-input">
+                            <span class="m3-switch-track"></span>
+                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
+                        </div>
+                    </div>
                 </section>
             </div>
 
             <!-- Advanced Tab Content -->
             <div class="tab-content" id="advanced-tab">
+                <section class="settings-section">
+                    <h2 class="section-title">
+                        <span class="material-symbols-outlined section-icon">speed</span><span data-i18n="sectionPerformance">Performance</span>
+                    </h2>
+                    <div class="setting-item">
+                        <label for="lightweight" class="setting-label" data-i18n="settingLightweightMode">Lightweight Mode</label>
+                        <div class="m3-switch" role="switch" aria-labelledby="lightweight">
+                            <input type="checkbox" id="lightweight" class="m3-switch-input">
+                            <span class="m3-switch-track"></span>
+                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="hideOffscreen" class="setting-label" data-i18n="settingHideOffscreen">Hide Off-screen Lyrics</label>
+                        <div class="m3-switch" role="switch" aria-labelledby="hideOffscreen">
+                            <input type="checkbox" id="hideOffscreen" class="m3-switch-input">
+                            <span class="m3-switch-track"></span>
+                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="blurInactive" class="setting-label" data-i18n="settingBlurInactive">Blur Inactive Lyrics</label>
+                        <div class="m3-switch" role="switch" aria-labelledby="blurInactive">
+                            <input type="checkbox" id="blurInactive" class="m3-switch-input">
+                            <span class="m3-switch-track"></span>
+                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
+                        </div>
+                    </div>
+                </section>
                 <section class="settings-section">
                     <h2 class="section-title">
                         <span class="material-symbols-outlined section-icon">database</span><span data-i18n="sectionDataManagement">Data Management</span>
