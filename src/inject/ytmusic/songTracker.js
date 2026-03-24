@@ -134,22 +134,6 @@
         return navigator.mediaSession?.metadata?.artist || "";
     }
 
-    // Splits "Artist - Title" / "Artist — Title" patterns common in user uploads.
-    // Returns { artist, title } or null if the pattern doesn't match.
-    function parseArtistTitle(rawTitle) {
-        if (!rawTitle) return null;
-
-        const match = rawTitle.match(/^(.+?)\s*[–—-]\s*(.+)$/);
-        if (!match) return null;
-
-        const left = match[1].trim();
-        const right = match[2].trim();
-
-        if (!left || !right || /^\d+(:\d+)+$/.test(left) || /^\d+$/.test(left)) return null;
-
-        return { artist: left, title: right };
-    }
-
     function extractAlbumFromDescription(description, title) {
         if (!description) return null;
 
@@ -254,12 +238,10 @@
             const apiData = await fetchMetadataDual(videoId);
 
             const rawTitle = apiData?.title || domInfo?.title || "";
-            const parsed = parseArtistTitle(rawTitle);
 
-            const finalTitle = parsed?.title || rawTitle || "Unknown Title";
+            const finalTitle = rawTitle || "Unknown Title";
             const finalArtist =
                 apiData?.artist         ||
-                parsed?.artist          ||
                 domInfo?.artist         ||
                 getMediaSessionArtist() ||
                 "Unknown Artist";
