@@ -36,7 +36,9 @@ let blurTextureA = null;
 
 // Constants
 const BLUR_DOWNSAMPLE = 1;
+const BLUR_DOWNSAMPLE_LIGHTWEIGHT = 2;
 const BLUR_RADIUS = 7;
+const BLUR_RADIUS_LIGHTWEIGHT = 7;
 const TARGET_FPS = 40;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
 
@@ -294,7 +296,10 @@ const blurFragmentShaderSource = `
         float sigma = 9.0;
         float k = 2.0 * sigma * sigma;
         
+       
+        float maxSteps = min(u_blurRadius * 2.0, 20.0);
         for (float i = 1.0; i <= 20.0; i++) {
+            if (i > maxSteps) break;
             float w = exp(-(i * i) / k);
             vec2 offset = step * i;
             
@@ -554,14 +559,14 @@ function handleResize() {
     canvasDimensions.height = h;
     webglCanvas.width = w;
     webglCanvas.height = h;
-    blurDimensions.width = w;
-    blurDimensions.height = h;
+    blurDimensions.width = Math.max(1, Math.floor(w / (typeof currentSettings !== 'undefined' && currentSettings.lightweight ? BLUR_DOWNSAMPLE_LIGHTWEIGHT : BLUR_DOWNSAMPLE)));
+    blurDimensions.height = Math.max(1, Math.floor(h / (typeof currentSettings !== 'undefined' && currentSettings.lightweight ? BLUR_DOWNSAMPLE_LIGHTWEIGHT : BLUR_DOWNSAMPLE)));
 
     // Resize textures
     gl.bindTexture(gl.TEXTURE_2D, renderTexture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, blurDimensions.width, blurDimensions.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 }
 
 function createDefaultTexture() {
@@ -643,7 +648,6 @@ function processNextArtworkFromQueue() {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         finalize(tex, pal);
     };
-    img.onerror = () => finalize(createDefaultTexture(), currentTargetMasterArtworkPalette);
 
     const pBrowser = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
 
@@ -683,31 +687,51 @@ function animateWebGLBackground(timestamp) {
     lastDrawTime = timestamp - (elapsed % FRAME_INTERVAL);
 
     const currentTime = lastDrawTime / 1000 - startTime;
-    if (artworkTransitionProgress < 1.0) {
+
+    const isTransitioning = artworkTransitionProgress < 1.0;
+    if (isTransitioning) {
         artworkTransitionProgress = Math.min(1.0, artworkTransitionProgress + ARTWORK_TRANSITION_SPEED * 1.5);
         if (artworkTransitionProgress >= 1.0) needsAnimation = false;
     }
 
-    const shouldRender = (typeof currentSettings === 'undefined' || !currentSettings.lightweight || needsAnimation || currentSettings.audioBeatSync);
-
+   
     processAudioPulse();
-    const pulse = typeof LYPLUS_audioState !== 'undefined' ? LYPLUS_audioState.beatPulse : 0;
+    const pulse = LYPLUS_audioState?.beatPulse ?? 0;
+
+    const isLightweight = typeof currentSettings !== 'undefined' && currentSettings.lightweight;
+
+   
+    const shouldRender =
+        typeof currentSettings === 'undefined' ||
+        !currentSettings.lightweight ||
+        isTransitioning ||
+        needsAnimation ||
+        (currentSettings.audioBeatSync && pulse > 0.001);
+
+   
+    if (!shouldRender) {
+        globalAnimationId = null;
+        return;
+    }
 
     beatEnergyBaseline += (pulse - beatEnergyBaseline) * Math.min(1.0, 0.8 * elapsedSec);
     const relativePulse = Math.max(0, pulse - beatEnergyBaseline);
 
-    for (let i = 0; i < 3; i++) {
-        layerPerimTime[i]  += elapsedSec * (1.0 + pulse * BEAT_SPD_BOOST[i]);
+   
+    if (!isLightweight) {
+        for (let i = 0; i < 3; i++) {
+            layerPerimTime[i] += elapsedSec * (1.0 + pulse * BEAT_SPD_BOOST[i]);
 
-        const attackSpeed = 12.0;
-        const decaySpeed  = BEAT_SCALE_DECAY;
-        const speed = relativePulse > layerBeatScale[i] ? attackSpeed : decaySpeed;
+            const attackSpeed = 12.0;
+            const decaySpeed  = BEAT_SCALE_DECAY;
+            const speed = relativePulse > layerBeatScale[i] ? attackSpeed : decaySpeed;
 
-        // Scale — smooth attack/decay + smoothstep
-        layerBeatScale[i] += (relativePulse - layerBeatScale[i]) * Math.min(1.0, speed * elapsedSec);
+            // Scale — smooth attack/decay + smoothstep
+            layerBeatScale[i] += (relativePulse - layerBeatScale[i]) * Math.min(1.0, speed * elapsedSec);
 
-        // Rotation — same smooth system as scale
-        layerBeatRot[i] += (relativePulse - layerBeatRot[i]) * Math.min(1.0, speed * elapsedSec);
+            // Rotation — same smooth system as scale
+            layerBeatRot[i] += (relativePulse - layerBeatRot[i]) * Math.min(1.0, speed * elapsedSec);
+        }
     }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
@@ -736,29 +760,34 @@ function animateWebGLBackground(timestamp) {
         gl.uniform1f(u_main_transitionProgress, progress);
 
         for (let i = 0; i < 3; i++) {
-            const bs = layerBeatScale[i];
-            const smoothBS = bs * bs * (3.0 - 2.0 * bs);
+            if (isLightweight) {
+                _layerParams[0] = 0.0;
+                _layerParams[1] = LAYER_SCALES[i];
+                _layerParams[2] = 0.0;
+                _layerParams[3] = 0.0;
+            } else {
+                const bs = layerBeatScale[i];
+                const smoothBS = bs * bs * (3.0 - 2.0 * bs);
 
-            const br = layerBeatRot[i];
-            const smoothBR = br * br * (3.0 - 2.0 * br);
+                const br = layerBeatRot[i];
+                const smoothBR = br * br * (3.0 - 2.0 * br);
 
-            const rot = INITIAL_ROTATIONS[i] + (ROTATION_SPEEDS[i] * currentTime * ROTATION_POWER) + smoothBR * BEAT_ROT_BOOST[i];
+                const rot = INITIAL_ROTATIONS[i] + (ROTATION_SPEEDS[i] * currentTime * ROTATION_POWER) + smoothBR * BEAT_ROT_BOOST[i];
 
-            const bx = LAYER_BASE_POSITIONS[i * 2];
-            const by = LAYER_BASE_POSITIONS[i * 2 + 1];
+                const bx = LAYER_BASE_POSITIONS[i * 2];
+                const by = LAYER_BASE_POSITIONS[i * 2 + 1];
 
-            const offset = i * 0.33;
-            const t = ((offset + PERIMETER_DIRECTION[i] * PERIMETER_SPEEDS[i] * layerPerimTime[i]) % 1.0);
-            const angle = t * 6.283185307;
-            const px = Math.abs(bx) * Math.cos(angle);
-            const py = Math.abs(by) * Math.sin(angle);
+                const offset = i * 0.33;
+                const t = ((offset + PERIMETER_DIRECTION[i] * PERIMETER_SPEEDS[i] * layerPerimTime[i]) % 1.0);
+                const angle = t * 6.283185307;
+                const px = Math.abs(bx) * Math.cos(angle);
+                const py = Math.abs(by) * Math.sin(angle);
 
-            const scale = LAYER_SCALES[i] + smoothBS * BEAT_SCALE_BOOST[i];
-
-            _layerParams[0] = rot;
-            _layerParams[1] = scale;
-            _layerParams[2] = px;
-            _layerParams[3] = py;
+                _layerParams[0] = rot;
+                _layerParams[1] = LAYER_SCALES[i] + smoothBS * BEAT_SCALE_BOOST[i];
+                _layerParams[2] = px;
+                _layerParams[3] = py;
+            }
 
             gl.uniform4fv(u_main_layerTransform, _layerParams);
             gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -771,7 +800,7 @@ function animateWebGLBackground(timestamp) {
     if (vaoExt) vaoExt.bindVertexArrayOES(null);
 
     gl.useProgram(blurProgram);
-    gl.uniform1f(u_blur_radius, BLUR_RADIUS);
+    gl.uniform1f(u_blur_radius, isLightweight ? BLUR_RADIUS_LIGHTWEIGHT : BLUR_RADIUS);
 
     if (vaoExt) {
         vaoExt.bindVertexArrayOES(blurVAO);
@@ -798,11 +827,8 @@ function animateWebGLBackground(timestamp) {
 
     if (vaoExt) vaoExt.bindVertexArrayOES(null);
 
-    if (shouldRender) {
-        globalAnimationId = requestAnimationFrame(animateWebGLBackground);
-    } else {
-        globalAnimationId = null;
-    }
+    // Schedule next frame (shouldRender already confirmed true to reach here)
+    globalAnimationId = requestAnimationFrame(animateWebGLBackground);
 }
 
 let bgCheckRetryTimeout = null;
