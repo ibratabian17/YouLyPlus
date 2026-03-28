@@ -150,14 +150,29 @@
                 <div class="settings-category">
                     <h3 class="category-title" data-i18n="categoryLyricsProvider">Lyrics Provider</h3>
                     <div class="setting-item">
-                        <div class="form-group">
-                            <select id="default-provider" placeholder=" ">
-                                <option value="" disabled selected></option>
-                                <option value="kpoe">Lyrics+</option>
-                                <option value="customKpoe">Custom KPoe Server</option>
-                                <option value="lrclib">LRCLIB</option>
-                            </select>
-                            <label for="default-provider" data-i18n="labelDefaultProvider">Default Lyrics Provider</label>
+                        <div class="setting-item full-width" id="setting-provider-order" style="display: block;">
+                            <div class="setting-text">
+                                <span class="setting-label" data-i18n="labelProviderOrder">Lyrics Provider Order</span>
+                                <span class="setting-desc" data-i18n="helperProviderOrder">Drag and drop to prioritize which provider is checked first. The top provider acts as the fast-path choice.</span>
+                            </div>
+                            <div class="source-order-container">
+                                <div id="provider-order-draggable" class="draggable-list">
+                                    <!-- Populated by JS -->
+                                </div>
+                                <div class="add-source-container">
+                                    <div class="form-group margin-0 grow-1">
+                                        <select id="available-providers-dropdown" placeholder=" ">
+                                            <!-- Populated by JS -->
+                                        </select>
+                                        <label for="available-providers-dropdown" data-i18n="labelAvailableProviders">Available Providers</label>
+                                    </div>
+                                    <button class="m3-button tonal" id="add-provider-button" type="button">
+                                        <span class="material-symbols-outlined">add</span>
+                                        <span data-i18n="buttonAddProvider">Add Provider</span>
+                                    </button>
+                                </div>
+                                <span id="add-provider-status" class="status-message"></span>
+                            </div>
                         </div>
                         <p class="setting-description" data-i18n="descDefaultProvider">Choose your preferred source for lyrics.</p>
                     </div>

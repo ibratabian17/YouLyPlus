@@ -2,6 +2,8 @@
 // DATA PARSERS
 // ==================================================================================================
 
+import { parseSyncedLyrics, parseAppleTTML } from '../../lib/parser.js';
+
 export class DataParser {
   static parseKPoeFormat(data) {
     if (!data?.lyrics || !Array.isArray(data.lyrics) || data.lyrics.length === 0) {
@@ -133,4 +135,54 @@ export class DataParser {
       }
     };
   }
+
+  static parseUnisonFormat(data) {
+    if (!data?.lyrics) return null;
+
+    const format = (data.format || '').toLowerCase();
+    const syncType = (data.syncType || 'plain').toLowerCase();
+
+    // Map Unison syncType to internal type
+    const typeMap = { richsync: 'Word', linesync: 'Line', plain: 'Plain' };
+    const internalType = typeMap[syncType] || 'Line';
+
+    const metadata = {
+      title: data.song || '',
+      artist: data.artist || '',
+      album: data.album || '',
+      language: data.language || '',
+      source: 'Unison'
+    };
+
+    if (format === 'ttml') {
+      const kpoeData = parseAppleTTML(data.lyrics);
+      if (!kpoeData?.lyrics?.length) return null;
+
+      kpoeData.metadata.source = 'Unison';
+      return this.parseKPoeFormat(kpoeData);
+    }
+
+    if (format === 'lrc') {
+      const kpoeData = parseSyncedLyrics(data.lyrics);
+      if (!kpoeData?.lyrics?.length) return null;
+
+      kpoeData.metadata.source = 'Unison';
+      return this.parseKPoeFormat(kpoeData);
+    }
+
+    const lines = data.lyrics.split('\n').filter(l => l.trim());
+    if (lines.length === 0) return null;
+
+    return {
+      type: 'Plain',
+      data: lines.map(text => ({
+        text: text.trim(),
+        startTime: 0,
+        endTime: 0,
+        duration: 0
+      })),
+      metadata
+    };
+  }
 }
+

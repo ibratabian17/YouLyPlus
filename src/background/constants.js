@@ -38,6 +38,7 @@ export const CONFIG = {
 export const PROVIDERS = {
   KPOE: 'kpoe',
   CUSTOM_KPOE: 'customKpoe',
+  UNISON: 'unison',
   LRCLIB: 'lrclib',
   LOCAL: 'local',
   GEMINI: 'gemini',

@@ -10,6 +10,7 @@ import { DataParser } from '../utils/dataParser.js';
 import { Utilities } from '../utils/utilities.js';
 import { KPoeService } from '../services/kpoeService.js';
 import { LRCLibService } from '../services/lrclibService.js';
+import { UnisonService } from '../services/unisonService.js';
 import { YouTubeService } from '../services/youtubeService.js';
 
 export class LyricsService {
@@ -149,14 +150,45 @@ export class LyricsService {
       const fetchOptions = settings.cacheStrategy === 'none' ? { cache: 'no-store' } : {};
 
       const providers = this.getProviderOrder(settings);
-
+      
       let lyrics = null;
-      for (const provider of providers) {
-        lyrics = await this.fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload);
-        if (!Utilities.isEmptyLyrics(lyrics)) break;
+      let highestScore = -1;
+
+      const preferredProvider = providers[0];
+      const preferredLyrics = await this.fetchFromProvider(preferredProvider, songInfo, settings, fetchOptions, forceReload);
+      
+      if (!Utilities.isEmptyLyrics(preferredLyrics)) {
+        const score = this.scoreLyrics(preferredLyrics);
+        if (score === 3) {
+          lyrics = preferredLyrics;
+        } else {
+          lyrics = preferredLyrics;
+          highestScore = score;
+        }
       }
 
-      // Fallback to YouTube subtitles
+      if (!lyrics || highestScore < 3) {
+        const remainingProviders = providers.slice(1);
+        
+        const fetchPromises = remainingProviders.map(async (provider, index) => {
+          const result = await this.fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload);
+          return { lyrics: result, index: index + 1 };
+        });
+
+        const results = await Promise.allSettled(fetchPromises);
+
+        for (const res of results) {
+          if (res.status === 'fulfilled' && !Utilities.isEmptyLyrics(res.value.lyrics)) {
+            const score = this.scoreLyrics(res.value.lyrics);
+            
+            if (score > highestScore || (score === highestScore && !lyrics)) {
+              lyrics = res.value.lyrics;
+              highestScore = score;
+            }
+          }
+        }
+      }
+
       if (Utilities.isEmptyLyrics(lyrics) && songInfo.videoId && songInfo.subtitle) {
         lyrics = await YouTubeService.fetchSubtitles(songInfo);
       }
@@ -181,15 +213,29 @@ export class LyricsService {
     }
   }
 
-  static getProviderOrder(settings) {
-    const allProviders = Object.values(PROVIDERS).filter(
-      p => p !== PROVIDERS.GOOGLE && p !== PROVIDERS.GEMINI
-    );
+  static scoreLyrics(lyrics) {
+    if (Utilities.isEmptyLyrics(lyrics)) return 0;
+    const type = (lyrics.type || '').toUpperCase();
+    if (type === 'WORD') return 3;
+    if (type === 'LINE') return 2;
+    return 1;
+  }
 
-    return [
-      settings.lyricsProvider,
-      ...allProviders.filter(p => p !== settings.lyricsProvider)
-    ];
+  static getProviderOrder(settings) {
+    const defaultOrder = ['kpoe', 'unison', 'lrclib'];
+    
+    let providersList = (settings.lyricsProviderOrder || '').split(',').map(p => p.trim()).filter(Boolean);
+    if (!providersList.length) providersList = defaultOrder;
+
+    let validProviders = providersList.filter(p => [
+      PROVIDERS.KPOE, PROVIDERS.CUSTOM_KPOE, PROVIDERS.UNISON, PROVIDERS.LRCLIB
+    ].includes(p));
+    
+    if (!settings.customKpoeUrl) {
+      validProviders = validProviders.filter(p => p !== PROVIDERS.CUSTOM_KPOE);
+    }
+
+    return validProviders;
   }
 
   static async fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload) {
@@ -208,6 +254,9 @@ export class LyricsService {
           );
         }
         return null;
+
+      case PROVIDERS.UNISON:
+        return UnisonService.fetch(songInfo, fetchOptions);
 
       case PROVIDERS.LRCLIB:
         return LRCLibService.fetch(songInfo, fetchOptions);

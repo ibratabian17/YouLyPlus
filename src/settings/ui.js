@@ -91,7 +91,6 @@ function setupAutoSaveListeners() {
         { id: 'bypass-apple', key: 'appleMusicTTMLBypass', type: 'checkbox' },
 
         // Sources
-        { id: 'default-provider', key: 'lyricsProvider', type: 'value' },
         { id: 'custom-kpoe-url', key: 'customKpoeUrl', type: 'value', debounce: 500 },
 
         // Translation
@@ -174,8 +173,6 @@ function updateUI(settings) {
     setCheck('bypass-apple', currentSettings.appleMusicTTMLBypass);
 
     // Sources
-    setVal('default-provider', currentSettings.lyricsProvider);
-    updateCustomSelectDisplay('default-provider');
     setVal('custom-kpoe-url', currentSettings.customKpoeUrl);
 
     // Translation
@@ -229,6 +226,7 @@ function updateUI(settings) {
     toggleGeminiRomanizePromptVisibility();
     toggleRomanizationModelVisibility();
 
+    populateDraggableProviders();
     populateDraggableSources();
     updateCacheSize();
     populateLocalLyricsList();
@@ -254,17 +252,255 @@ let draggedItem = null;
 
 function getSourceDisplayName(sourceName) {
     const sourceKeys = {
+        'kpoe': 'sourceNameLyricsPlusProvider',
+        'customKpoe': 'sourceNameCustomKpoe',
+        'unison': 'sourceNameUnison',
+        'lrclib': 'sourceNameLRCLib',
         'lyricsplus': 'sourceNameLyricsPlus',
         'apple': 'sourceNameApple',
         'qq': 'sourceNameQQ',
         'spotify': 'sourceNameSpotify',
         'musixmatch': 'sourceNameMusixmatch',
-        'musixmatch-word': 'sourceNameMusixmatchWord'
+        'musixmatch-word': 'sourceNameMusixmatchWord',
+        'unison': 'sourceNameUnison'
     };
     if (sourceKeys[sourceName]) {
         return msg(sourceKeys[sourceName]) || sourceName;
     }
     return sourceName.charAt(0).toUpperCase() + sourceName.slice(1).replace('-', ' ');
+}
+
+function createDraggableProviderItem(providerName) {
+    const li = document.createElement('div');
+    li.className = 'draggable-source-item';
+    li.dataset.provider = providerName;
+    li.setAttribute('draggable', true);
+
+    const dragHandle = document.createElement('span');
+    dragHandle.className = 'material-symbols-outlined drag-handle';
+    dragHandle.textContent = 'drag_indicator';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'source-name';
+    nameSpan.textContent = getSourceDisplayName(providerName);
+    
+    // Add subtitle for fast path indicator on the first item
+    const subtitle = document.createElement('span');
+    subtitle.className = 'provider-fast-path-indicator';
+    subtitle.textContent = ' (Fast Path)';
+    subtitle.style.fontSize = '0.8em';
+    subtitle.style.opacity = '0.7';
+    subtitle.style.marginLeft = '8px';
+    nameSpan.appendChild(subtitle);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'm3-button icon remove-source-button';
+    removeBtn.title = msg('titleRemoveSource') || 'Remove';
+    
+    const deleteIcon = document.createElement('span');
+    deleteIcon.className = 'material-symbols-outlined';
+    deleteIcon.textContent = 'delete';
+    
+    removeBtn.appendChild(deleteIcon);
+    removeBtn.onclick = () => removeProvider(providerName);
+
+    li.appendChild(dragHandle);
+    li.appendChild(nameSpan);
+    li.appendChild(removeBtn);
+
+    return li;
+}
+
+function populateDraggableProviders() {
+    const draggableContainer = document.getElementById('provider-order-draggable');
+    const availableProvidersDropdown = document.getElementById('available-providers-dropdown');
+    const allowedProviders = ['kpoe', 'customKpoe', 'unison', 'lrclib'];
+
+    if (!draggableContainer || !availableProvidersDropdown) return;
+
+    draggableContainer.innerHTML = '';
+    availableProvidersDropdown.innerHTML = '<option value="" disabled selected></option>';
+
+    const currentActiveProviders = (currentSettings.lyricsProviderOrder || 'kpoe,unison,lrclib').split(',').filter(s => s?.trim());
+    currentActiveProviders.forEach(provider => {
+        if (allowedProviders.includes(provider.trim())) {
+            draggableContainer.appendChild(createDraggableProviderItem(provider.trim()));
+        }
+    });
+    
+    updateFastPathIndicators();
+
+    const providersToAdd = allowedProviders.filter(provider => !currentActiveProviders.includes(provider));
+    const addProviderButton = document.getElementById('add-provider-button');
+
+    if (providersToAdd.length === 0) {
+        availableProvidersDropdown.innerHTML = `<option value="" disabled>${msg('msgAllSourcesAdded')}</option>`;
+        if (addProviderButton) addProviderButton.disabled = true;
+    } else {
+        if (addProviderButton) addProviderButton.disabled = false;
+        providersToAdd.forEach(provider => {
+            const option = document.createElement('option');
+            option.value = provider;
+            option.textContent = getSourceDisplayName(provider);
+            availableProvidersDropdown.appendChild(option);
+        });
+    }
+    updateCustomSelectDisplay('available-providers-dropdown');
+    addProviderDragDropListeners();
+    addProviderTouchListeners();
+}
+
+function updateFastPathIndicators() {
+    const draggableContainer = document.getElementById('provider-order-draggable');
+    if (!draggableContainer) return;
+    
+    Array.from(draggableContainer.children).forEach((child, index) => {
+        const indicator = child.querySelector('.provider-fast-path-indicator');
+        if (indicator) {
+            indicator.style.display = index === 0 ? 'inline' : 'none';
+        }
+    });
+}
+
+function saveProviderOrder() {
+    const draggableContainer = document.getElementById('provider-order-draggable');
+    if (!draggableContainer) return;
+
+    const orderedProviders = Array.from(draggableContainer.children)
+        .map(item => item.dataset.provider);
+
+    updateSettings({
+        lyricsProviderOrder: orderedProviders.join(',')
+    });
+    saveSettings();
+    updateFastPathIndicators();
+    toggleKpoeSourcesVisibility();
+    toggleCustomKpoeUrlVisibility();
+    showReloadNotification('lyricsProviderOrder');
+}
+
+function addProvider() {
+    const providerName = document.getElementById('available-providers-dropdown').value;
+    if (!providerName) {
+        showStatusMessage('add-provider-status', msg('msgSelectSource'), true);
+        return;
+    }
+
+    const providers = (currentSettings.lyricsProviderOrder || 'kpoe,unison,lrclib').split(',').filter(s => s?.trim());
+    if (providers.includes(providerName)) {
+        showStatusMessage('add-provider-status', msg('msgSourceExists', getSourceDisplayName(providerName)), true);
+        return;
+    }
+
+    providers.push(providerName);
+    currentSettings.lyricsProviderOrder = providers.join(',');
+    updateSettings({ lyricsProviderOrder: currentSettings.lyricsProviderOrder });
+    saveSettings();
+    showReloadNotification('lyricsProviderOrder');
+
+    populateDraggableProviders();
+    showStatusMessage('add-provider-status', msg('msgSourceAdded', getSourceDisplayName(providerName)), false);
+}
+
+function removeProvider(providerName) {
+    const providers = (currentSettings.lyricsProviderOrder || 'kpoe,unison,lrclib').split(',').filter(s => s?.trim());
+    
+    if (providers.length <= 1) {
+        showStatusMessage('add-provider-status', "Cannot remove last provider", true);
+        return;
+    }
+    
+    currentSettings.lyricsProviderOrder = providers.filter(s => s !== providerName).join(',');
+
+    updateSettings({ lyricsProviderOrder: currentSettings.lyricsProviderOrder });
+    saveSettings();
+    showReloadNotification('lyricsProviderOrder');
+
+    populateDraggableProviders();
+    toggleKpoeSourcesVisibility();
+    toggleCustomKpoeUrlVisibility();
+    showStatusMessage('add-provider-status', msg('msgSourceRemoved', getSourceDisplayName(providerName)), false);
+}
+
+function addProviderDragDropListeners() {
+    const draggableContainer = document.getElementById('provider-order-draggable');
+    if (!draggableContainer || draggableContainer.dataset.dragListenersAttached) return;
+
+    const onDragEnd = () => {
+        if (draggedItem) {
+            draggedItem.classList.remove('dragging');
+        }
+        draggedItem = null;
+        saveProviderOrder();
+    };
+
+    draggableContainer.addEventListener('dragstart', (e) => {
+        if (e.target.classList.contains('draggable-source-item')) {
+            draggedItem = e.target;
+            setTimeout(() => draggedItem?.classList.add('dragging'), 0);
+        }
+    });
+
+    draggableContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(draggableContainer, e.clientY);
+        const currentDraggable = document.querySelector('.draggable-source-item.dragging');
+        if (currentDraggable && currentDraggable.parentNode === draggableContainer) {
+            if (afterElement) {
+                draggableContainer.insertBefore(currentDraggable, afterElement);
+            } else {
+                draggableContainer.appendChild(currentDraggable);
+            }
+            updateFastPathIndicators();
+        }
+    });
+
+    draggableContainer.addEventListener('dragend', onDragEnd);
+    draggableContainer.dataset.dragListenersAttached = 'true';
+}
+
+function addProviderTouchListeners() {
+    const draggableContainer = document.getElementById('provider-order-draggable');
+    if (!draggableContainer || draggableContainer.dataset.touchListenersAttached) return;
+
+    let touchDraggedItem = null;
+
+    draggableContainer.addEventListener('touchstart', (e) => {
+        const handle = e.target.closest('.drag-handle');
+        if (!handle) return;
+        const item = handle.closest('.draggable-source-item');
+        if (!item) return;
+
+        e.preventDefault();
+        touchDraggedItem = item;
+        touchDraggedItem.classList.add('dragging');
+        touchDraggedItem.style.opacity = '0.5';
+    }, { passive: false });
+
+    draggableContainer.addEventListener('touchmove', (e) => {
+        if (!touchDraggedItem || touchDraggedItem.parentNode !== draggableContainer) return;
+        e.preventDefault();
+
+        const touchLocation = e.targetTouches[0];
+        const afterElement = getDragAfterElement(draggableContainer, touchLocation.clientY);
+
+        if (afterElement) {
+            draggableContainer.insertBefore(touchDraggedItem, afterElement);
+        } else {
+            draggableContainer.appendChild(touchDraggedItem);
+        }
+        updateFastPathIndicators();
+    }, { passive: false });
+
+    draggableContainer.addEventListener('touchend', (e) => {
+        if (touchDraggedItem) {
+            touchDraggedItem.classList.remove('dragging');
+            touchDraggedItem.style.opacity = '1';
+            touchDraggedItem = null;
+            saveProviderOrder();
+        }
+    });
+    draggableContainer.dataset.touchListenersAttached = 'true';
 }
 
 function createDraggableSourceItem(sourceName) {
@@ -488,13 +724,8 @@ function addTouchListeners() {
     draggableContainer.dataset.touchListenersAttached = 'true';
 }
 
+document.getElementById('add-provider-button').addEventListener('click', addProvider);
 document.getElementById('add-source-button').addEventListener('click', addSource);
-
-document.getElementById('default-provider').addEventListener('change', (e) => {
-    currentSettings.lyricsProvider = e.target.value;
-    toggleKpoeSourcesVisibility();
-    toggleCustomKpoeUrlVisibility();
-});
 
 document.getElementById('add-lyrics-fab').addEventListener('click', () => {
     document.getElementById('upload-lyrics-modal').style.display = 'flex';
@@ -545,12 +776,20 @@ function toggleElementVisibility(elementId, isVisible) {
 }
 
 function toggleKpoeSourcesVisibility() {
-    const isVisible = ['kpoe', 'customKpoe'].includes(document.getElementById('default-provider').value);
-    toggleElementVisibility('kpoe-sources-group', isVisible);
+    const providerOrderStr = currentSettings.lyricsProviderOrder || 'kpoe,unison,lrclib';
+    const providers = providerOrderStr.split(',').map(s => s.trim());
+    const isVisible = providers.includes('kpoe') || providers.includes('customKpoe');
+    const sourceOrderContainer = document.getElementById('setting-source-order');
+    if (sourceOrderContainer) {
+        sourceOrderContainer.style.display = isVisible ? 'block' : 'none';
+        sourceOrderContainer.style.opacity = isVisible ? '1' : '0';
+    }
 }
 
 function toggleCustomKpoeUrlVisibility() {
-    const isVisible = document.getElementById('default-provider').value === 'customKpoe';
+    const providerOrderStr = currentSettings.lyricsProviderOrder || 'kpoe,unison,lrclib';
+    const providers = providerOrderStr.split(',').map(s => s.trim());
+    const isVisible = providers.includes('customKpoe');
     toggleElementVisibility('custom-kpoe-url-group', isVisible);
 }
 

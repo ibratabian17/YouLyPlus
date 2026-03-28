@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
-    const lyricsProviderSelect = document.getElementById('lyricsProvider');
     const lyEnabledSwitchInput = document.getElementById('lyEnabled');
     const sponsorBlockSwitchInput = document.getElementById('sponsorblock');
 
@@ -109,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Load Settings ---
     function loadSettingsUI() {
-        lyricsProviderSelect.value = currentSettings.lyricsProvider;
         lyEnabledSwitchInput.checked = currentSettings.isEnabled;
         sponsorBlockSwitchInput.checked = currentSettings.useSponsorBlock;
 
@@ -140,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Save Settings ---
     async function saveAndApplySettings() {
         const newSettings = {
-            lyricsProvider: lyricsProviderSelect.value,
             isEnabled: lyEnabledSwitchInput.checked,
             useSponsorBlock: sponsorBlockSwitchInput.checked,
             // Readability
@@ -166,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Event Listeners for Settings ---
-    lyricsProviderSelect.addEventListener('change', saveAndApplySettings);
     largerTextModeSelect.addEventListener('change', saveAndApplySettings);
     // For switches, the 'change' event is dispatched manually by the .m3-switch click handler
     [lyEnabledSwitchInput, sponsorBlockSwitchInput, wordByWordSwitchInput, hidePhoneticDupSwitchInput, bkgOverlapSwitchInput, lightweightSwitchInput, hideOffscreenSwitchInput, blurInactiveSwitchInput].forEach(input => {

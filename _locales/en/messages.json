@@ -228,13 +228,21 @@
     "message": "Lyrics Provider",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Default Lyrics Provider",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Lyrics Provider Order",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Choose your preferred source for lyrics.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Drag and drop to prioritize which provider is checked first. The top provider acts as the fast-path choice.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Available Providers",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Add Provider",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "Custom KPoe Server URL",
@@ -742,8 +750,8 @@
     "description": "Tooltip for API key visibility toggle"
   },
   "titleRemoveSource": {
-    "message": "Remove source",
-    "description": "Tooltip for remove source button"
+    "message": "Remove item",
+    "description": "Tooltip for remove button"
   },
   "titleDeleteLocalLyrics": {
     "message": "Delete local lyrics",
@@ -801,5 +809,21 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (Word)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "Custom KPoe Server",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (Better Lyrics)",
+    "description": "Unison provider name"
   }
 }
