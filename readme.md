@@ -127,8 +127,8 @@ YouLy+ is proudly open-source.
  
 YouLy+ integrates with several third-party lyrics providers. By using this extension, you agree to the respective Terms of Service of these platforms:
  
-* **[Unison](https://github.com/better-lyrics/unison):** Powers our high-fidelity synchronization engine using data from the Better-Lyrics community.
-* **[LRCLIB](https://github.com/tranxuanthang/lrclib):** A massive, crowdsourced database used as a primary fallback for synchronized lyrics.
+* **[Unison](https://github.com/better-lyrics/unison):** As our alternate word-sync API lyrics using data from the Better-Lyrics community.
+* **[LRCLIB](https://github.com/tranxuanthang/lrclib):** A massive, crowdsourced database API that used as a primary fallback for synchronized lyrics.
 * **Lyrics+ Backend:** Our internal engine that prioritizes official metadata from Apple Music, QQ Music, and Musixmatch to ensure professional-grade accuracy. while it has our own community-driven source too!
 
 ## Development
