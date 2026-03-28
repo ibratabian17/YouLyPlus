@@ -123,6 +123,14 @@ YouLy+ is proudly open-source.
 
 **Backend API (Lyrics+):** YouLy+ mainly utilises Lyrics+ for lyrics. This API is also fully open-source. If you could host your instance, YouLy+ would benefit lots from it! See instructions at the repo: [**ibratabian17/lyricsplus**](https://github.com/ibratabian17/lyricsplus)
 
+### External Services & Data Sources
+ 
+YouLy+ integrates with several third-party lyrics providers. By using this extension, you agree to the respective Terms of Service of these platforms:
+ 
+* **[Unison](https://github.com/better-lyrics/unison):** Powers our high-fidelity synchronization engine using data from the Better-Lyrics community.
+* **[LRCLIB](https://github.com/tranxuanthang/lrclib):** A massive, crowdsourced database used as a primary fallback for synchronized lyrics.
+* **Lyrics+ Backend:** Our internal engine that prioritizes official metadata from Apple Music, QQ Music, and Musixmatch to ensure professional-grade accuracy. while it has our own community-driven source too!
+
 ## Development
 
 If you're interested in contributing to or modifying YouLy+:
