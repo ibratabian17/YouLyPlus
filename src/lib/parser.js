@@ -213,7 +213,7 @@ function parseSyncedLyrics(lrcContent) {
  * @returns 
  */
 function parseAppleTTML(ttml, offset = 0, separate = false) {
-  const KPOE = '1.7-ConvertTTMLtoJSON-DOMParser';
+  const KPOE = '1.7-1-ConvertTTMLtoJSON-DOMParser';
 
   const NS = {
     tt: 'http://www.w3.org/ns/ttml',
@@ -251,7 +251,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
         const v = el.getAttributeNS(nsUri, localName);
         if (v !== null) return v;
       }
-    } catch (e) { }
+    } catch (e) {}
     if (prefixedName) {
       const v2 = el.getAttribute(prefixedName);
       if (v2 !== null) return v2;
@@ -262,7 +262,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
   function collectTailText(node) {
     let txt = '';
     let sib = node.nextSibling;
-    while (sib && sib.nodeType === 3) {
+    while (sib && sib.nodeType === 3) { 
       txt += sib.nodeValue || '';
       sib = sib.nextSibling;
     }
@@ -291,8 +291,8 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
   const timingMode = getAttr(root, NS.itunes, 'timing', 'itunes:timing') || 'Word';
 
   const metadata = {
-    source: 'Apple Music',
-    songWriters: [],
+    source: 'Apple Music', 
+    songWriters: [], 
     title: '',
     language: getAttr(root, NS.xml, 'lang', 'xml:lang') || '',
     agents: {},
@@ -392,7 +392,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
 
               const tail = collectTailText(span);
               if (tail && !separate) spanText += decodeHtmlEntities(tail);
-
+              
               if (spanText.trim() === '') continue;
 
               const begin = getAttr(span, null, 'begin', 'begin');
@@ -425,24 +425,24 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
     const div = divs[i];
     const songPart = getAttr(div, NS.itunes, 'song-part', 'itunes:song-part') || getAttr(div, NS.itunes, 'songPart', 'itunes:songPart') || '';
     const ps = div.getElementsByTagName('p');
-
+    
     // Metadata: Song Parts
     let divBegin = getAttr(div, null, 'begin', 'begin');
     let divEnd = getAttr(div, null, 'end', 'end');
-
+    
     // Fallback if div has no timing but ps do
     if ((!divBegin || !divEnd) && ps.length > 0) {
-      if (!divBegin) divBegin = getAttr(ps[0], null, 'begin', 'begin');
-      if (!divEnd) divEnd = getAttr(ps[ps.length - 1], null, 'end', 'end');
+        if (!divBegin) divBegin = getAttr(ps[0], null, 'begin', 'begin');
+        if (!divEnd) divEnd = getAttr(ps[ps.length - 1], null, 'end', 'end');
     }
-
+    
     const partTime = timeToMs(divBegin) + (divBegin ? offset : 0);
     const partDur = Math.max(0, timeToMs(divEnd) - timeToMs(divBegin));
 
     metadata.songParts.push({
-      name: songPart,
-      time: partTime,
-      duration: partDur
+        name: songPart,
+        time: partTime !== 0 ? partTime : undefined,
+        duration: partDur !== 0 ? partDur : undefined,
     });
 
     for (let j = 0; j < ps.length; j++) {
@@ -450,7 +450,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
       const key = getAttr(p, NS.itunes, 'key', 'itunes:key') || '';
       const singerId = getAttr(p, NS.ttm, 'agent', 'ttm:agent') || '';
       const singer = singerId.replace('voice', 'v');
-
+      
       const pBegin = getAttr(p, null, 'begin', 'begin');
       const pEnd = getAttr(p, null, 'end', 'end');
 
@@ -459,75 +459,75 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
         duration: 0,
         text: '',
         syllabus: [],
-        element: { key, songPart, singer, songPartIndex: i }
+        element: { key, singer, songPartIndex: i }
       };
 
       // Set line timing based on P tag first
       if (pBegin && pEnd) {
-        currentLine.time = timeToMs(pBegin) + offset;
-        currentLine.duration = timeToMs(pEnd) - timeToMs(pBegin);
+          currentLine.time = timeToMs(pBegin) + offset;
+          currentLine.duration = timeToMs(pEnd) - timeToMs(pBegin);
       }
 
       if (timingMode === 'Word') {
         const allSpansInP = Array.from(p.getElementsByTagName('span')).filter(span => getAttr(span, null, 'begin', 'begin'));
-
+        
         if (allSpansInP.length > 0) {
-          const processedSpans = new Set();
-          for (const sp of allSpansInP) {
-            if (processedSpans.has(sp)) continue;
+            const processedSpans = new Set();
+            for (const sp of allSpansInP) {
+              if (processedSpans.has(sp)) continue;
 
-            const isBg = isInsideBackgroundWrapper(sp, p);
-            if (isBg) {
-              Array.from(sp.getElementsByTagName('span')).forEach(nested => processedSpans.add(nested));
+              const isBg = isInsideBackgroundWrapper(sp, p);
+              if (isBg) {
+                Array.from(sp.getElementsByTagName('span')).forEach(nested => processedSpans.add(nested));
+              }
+              processedSpans.add(sp);
+
+              const begin = getAttr(sp, null, 'begin', 'begin') || '0';
+              const end = getAttr(sp, null, 'end', 'end') || '0';
+
+              let spanText = '';
+              for (const child of sp.childNodes) {
+                if (child.nodeType === 3) spanText += child.nodeValue || '';
+              }
+              spanText = decodeHtmlEntities(spanText);
+
+              const tail = collectTailText(sp);
+              if (tail && !separate) spanText += decodeHtmlEntities(tail);
+
+              if (spanText.trim() === '' && (!tail || !tail.includes(' '))) continue;
+
+              const syllabusEntry = {
+                time: timeToMs(begin) + offset,
+                duration: timeToMs(end) - timeToMs(begin),
+                text: spanText
+              };
+              if (isBg) syllabusEntry.isBackground = true;
+
+              currentLine.syllabus.push(syllabusEntry);
+              currentLine.text += spanText;
             }
-            processedSpans.add(sp);
-
-            const begin = getAttr(sp, null, 'begin', 'begin') || '0';
-            const end = getAttr(sp, null, 'end', 'end') || '0';
-
-            let spanText = '';
-            for (const child of sp.childNodes) {
-              if (child.nodeType === 3) spanText += child.nodeValue || '';
-            }
-            spanText = decodeHtmlEntities(spanText);
-
-            const tail = collectTailText(sp);
-            if (tail && !separate) spanText += decodeHtmlEntities(tail);
-
-            if (spanText.trim() === '' && (!tail || !tail.includes(' '))) continue;
-
-            const syllabusEntry = {
-              time: timeToMs(begin) + offset,
-              duration: timeToMs(end) - timeToMs(begin),
-              text: spanText
-            };
-            if (isBg) syllabusEntry.isBackground = true;
-
-            currentLine.syllabus.push(syllabusEntry);
-            currentLine.text += spanText;
-          }
         } else {
-          // Fallback for Word mode if no spans found (treat as line)
-          currentLine.text = decodeHtmlEntities(p.textContent.trim());
+             // Fallback for Word mode if no spans found (treat as line)
+            currentLine.text = decodeHtmlEntities(p.textContent.trim());
         }
       } else {
         // Line Sync or None
         let lineText = '';
         const extractText = (node) => {
-          let t = '';
-          for (const child of node.childNodes) {
-            if (child.nodeType === 3) t += child.nodeValue || '';
-            else if (child.nodeType === 1) t += extractText(child);
-          }
-          return t;
+            let t = '';
+            for (const child of node.childNodes) {
+                if (child.nodeType === 3) t += child.nodeValue || '';
+                else if (child.nodeType === 1) t += extractText(child);
+            }
+            return t;
         };
         lineText = extractText(p);
         currentLine.text = decodeHtmlEntities(lineText.trim());
-
+        
         // If Plain text (None), ensure time is 0 if not present
         if (timingMode === 'None' || (!pBegin && !pEnd)) {
-          currentLine.time = undefined;
-          currentLine.duration = undefined;
+            currentLine.time = undefined;
+            currentLine.duration = undefined;
         }
       }
 
@@ -549,6 +549,58 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
 }
 
 /**
+ * Normalizes a v2 lyrics object so every line element uses songPartIndex
+ * pointing into metadata.songParts[], replacing legacy songPart strings.
+ * If all lines already have songPartIndex, returns the object unchanged.
+ */
+function normalizeV2(data) {
+  if (data.lyrics?.length > 0 && data.lyrics.every(l => l.element?.songPartIndex != null)) {
+    return data;
+  }
+
+  const songParts = [];
+  let currentPartName = null;
+  let currentPartIndex = -1;
+
+  const normalizedLyrics = data.lyrics.map(line => {
+    const partName = line.element?.songPart || '';
+
+    if (partName !== currentPartName) {
+      currentPartName = partName;
+      currentPartIndex++;
+      songParts.push({ name: partName });
+    }
+
+    const { songPart, ...restElement } = line.element || {};
+    return {
+      ...line,
+      element: { ...restElement, songPartIndex: currentPartIndex }
+    };
+  });
+
+  // Derive time/duration for each songPart from the lines that belong to it
+  normalizedLyrics.forEach(line => {
+    const idx = line.element.songPartIndex;
+    const part = songParts[idx];
+    const endTime = line.time + line.duration;
+
+    if (part.time == null || line.time < part.time) part.time = line.time;
+    if (part._end == null || endTime > part._end) part._end = endTime;
+  });
+
+  songParts.forEach(part => {
+    if (part.time != null && part._end != null) part.duration = part._end - part.time;
+    delete part._end;
+  });
+
+  return {
+    ...data,
+    metadata: { ...data.metadata, songParts },
+    lyrics: normalizedLyrics,
+  };
+}
+
+/**
  * Update Legacy KPoe format to LyricsPlus (new KPoe) Readable Format
  * Original Implementation:
  * https://github.com/ibratabian17/LyricsPlus/blob/cookie/src/shared/parsers/kpoe.parser.js
@@ -560,33 +612,17 @@ function v1Tov2(data) {
   const groupedLyrics = [];
   let currentGroup = null;
 
-  // Check if isLineEnding is used for grouping in Word/Syllable types
-  const usesLineEndingForGrouping = data.type !== "Line" && data.lyrics.some(segment => segment.isLineEnding === 1);
-
-  if (data.type === "Line" || !usesLineEndingForGrouping) {
-    // For Line type, or Word/Syllable type where isLineEnding is not used for grouping,
-    // each segment is considered a complete line.
+  if (data.type === "Line") {
     data.lyrics.forEach(segment => {
-      const lineItem = {
+      groupedLyrics.push({
         time: segment.time,
         duration: segment.duration,
         text: segment.text,
-        syllabus: segment.syllabus || [], // Keep existing syllabus if present
+        syllabus: [],
         element: segment.element || { key: "", songPart: "", singer: "" }
-      };
-      // If it's a Word/Syllable type without explicit line endings,
-      // we might need to create a syllabus from the text if not already present.
-      if ((data.type === "Word" || data.type === "Syllable") && !lineItem.syllabus.length && lineItem.text) {
-        lineItem.syllabus = [{
-          time: segment.time,
-          duration: segment.duration,
-          text: segment.text
-        }];
-      }
-      groupedLyrics.push(lineItem);
+      });
     });
   } else {
-    // For Word or Syllable types where isLineEnding is used for grouping
     data.lyrics.forEach(segment => {
       if (!currentGroup) {
         currentGroup = {
@@ -606,7 +642,7 @@ function v1Tov2(data) {
         text: segment.text
       };
 
-      if (segment.element && segment.element.isBackground === true) {
+      if (segment.element?.isBackground === true) {
         syllabusEntry.isBackground = true;
       }
 
@@ -615,17 +651,11 @@ function v1Tov2(data) {
       if (segment.isLineEnding === 1) {
         let earliestTime = Infinity;
         let latestEndTime = 0;
-
-        currentGroup.syllabus.forEach(syllable => {
-          if (syllable.time < earliestTime) {
-            earliestTime = syllable.time;
-          }
-          const endTime = syllable.time + syllable.duration;
-          if (endTime > latestEndTime) {
-            latestEndTime = endTime;
-          }
+        currentGroup.syllabus.forEach(syl => {
+          if (syl.time < earliestTime) earliestTime = syl.time;
+          const end = syl.time + syl.duration;
+          if (end > latestEndTime) latestEndTime = end;
         });
-
         currentGroup.time = earliestTime;
         currentGroup.duration = latestEndTime - earliestTime;
         currentGroup.text = currentGroup.text.trim();
@@ -634,20 +664,14 @@ function v1Tov2(data) {
       }
     });
 
-    if (currentGroup) { // Handle any remaining group if file ends without isLineEnding=1
+    if (currentGroup) {
       let earliestTime = Infinity;
       let latestEndTime = 0;
-
-      currentGroup.syllabus.forEach(syllable => {
-        if (syllable.time < earliestTime) {
-          earliestTime = syllable.time;
-        }
-        const endTime = syllable.time + syllable.duration;
-        if (endTime > latestEndTime) {
-          latestEndTime = endTime;
-        }
+      currentGroup.syllabus.forEach(syl => {
+        if (syl.time < earliestTime) earliestTime = syl.time;
+        const end = syl.time + syl.duration;
+        if (end > latestEndTime) latestEndTime = end;
       });
-
       currentGroup.time = earliestTime;
       currentGroup.duration = latestEndTime - earliestTime;
       currentGroup.text = currentGroup.text.trim();
@@ -655,16 +679,16 @@ function v1Tov2(data) {
     }
   }
 
-  const metadata = data.metadata || {};
-  metadata.source = "Local Files"
-  return {
-    type: data.type === "syllable" ? "Word" : data.type, // Convert "syllable" to "Word" if needed
-    KpoeTools: '1.31R2-LPlusBcknd,' + (data.KpoeTools || 'UnknownV1'),
-    metadata,
+  // normalizeV2 converts element.songPart -> element.songPartIndex
+  // and builds metadata.songParts from the grouped lines
+  return normalizeV2({
+    type: data.type == "syllable" ? "Word" : data.type,
+    KpoeTools: '2.0-LPlusBcknd,' + data.KpoeTools,
+    metadata: data.metadata,
     ignoreSponsorblock: data.ignoreSponsorblock || undefined,
     lyrics: groupedLyrics,
     cached: data.cached || 'None'
-  };
+  });
 }
 
 // Utility to convert parsed lyrics to a standardized JSON format
