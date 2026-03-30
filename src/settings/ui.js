@@ -3,6 +3,34 @@ import { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2 } from
 
 let currentSettings = getSettings();
 
+// SVG icon paths (Material Icons)
+const SVG_ICONS = {
+    dragIndicator: 'M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z',
+    delete: 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',
+    musicNote: 'M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z',
+    arrowDropDown: 'M7 10l5 5 5-5z',
+    visibility: 'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z',
+    visibilityOff: 'M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z',
+    uploadFile: 'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15.01l1.41 1.41L11 14.84V19h2v-4.16l1.59 1.59L16 15.01 12.01 11z',
+    hourglassEmpty: 'M6 2v6l2 2-2 2v6h12v-6l-2-2 2-2V2H6zm10 14.5l-4-2-4 2V17h8v-.5zm0-9l-4 2-4-2V5h8v2.5z',
+};
+
+function createSvgIcon(pathD) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.classList.add('icon-svg');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathD);
+    svg.appendChild(path);
+    return svg;
+}
+
+function swapSvgIconPath(svgEl, newPathD) {
+    const path = svgEl.querySelector('path');
+    if (path) path.setAttribute('d', newPathD);
+}
+
 const RESTART_REQUIRED_KEYS = [
     'isEnabled',
     'YTSongInfo',
@@ -276,9 +304,8 @@ function createDraggableProviderItem(providerName) {
     li.dataset.provider = providerName;
     li.setAttribute('draggable', true);
 
-    const dragHandle = document.createElement('span');
-    dragHandle.className = 'material-symbols-outlined drag-handle';
-    dragHandle.textContent = 'drag_indicator';
+    const dragHandle = createSvgIcon(SVG_ICONS.dragIndicator);
+    dragHandle.classList.add('drag-handle');
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'source-name';
@@ -297,9 +324,8 @@ function createDraggableProviderItem(providerName) {
     removeBtn.className = 'm3-button icon remove-source-button';
     removeBtn.title = msg('titleRemoveSource') || 'Remove';
     
-    const deleteIcon = document.createElement('span');
-    deleteIcon.className = 'material-symbols-outlined';
-    deleteIcon.textContent = 'delete';
+    const deleteIcon = createSvgIcon(SVG_ICONS.delete);
+    deleteIcon.classList.add('icon-svg');
     
     removeBtn.appendChild(deleteIcon);
     removeBtn.onclick = () => removeProvider(providerName);
@@ -508,13 +534,22 @@ function createDraggableSourceItem(sourceName) {
     item.className = 'draggable-source-item';
     item.setAttribute('draggable', 'true');
     item.dataset.source = sourceName;
-    item.innerHTML = `
-        <span class="material-symbols-outlined drag-handle">drag_indicator</span>
-        <span class="source-name">${getSourceDisplayName(sourceName)}</span>
-        <button class="m3-button icon remove-source-button" title="Remove source">
-            <span class="material-symbols-outlined">delete</span>
-        </button>
-    `;
+    const dragHandle = createSvgIcon(SVG_ICONS.dragIndicator);
+    dragHandle.classList.add('drag-handle');
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'source-name';
+    nameSpan.textContent = getSourceDisplayName(sourceName);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'm3-button icon remove-source-button';
+    removeBtn.title = 'Remove source';
+    removeBtn.appendChild(createSvgIcon(SVG_ICONS.delete));
+
+    item.appendChild(dragHandle);
+    item.appendChild(nameSpan);
+    item.appendChild(removeBtn);
+
     item.querySelector('.remove-source-button').addEventListener('click', (e) => {
         e.stopPropagation();
         removeSource(sourceName);
@@ -844,7 +879,7 @@ async function handleUploadLocalLyrics() {
     const albumInput = document.getElementById('modal-upload-album-name');
     const lyricsFileInput = document.getElementById('modal-upload-lyrics-file');
     const uploadButton = document.getElementById('modal-upload-lyrics-button');
-    const uploadButtonIcon = uploadButton.querySelector('.material-symbols-outlined');
+    const uploadButtonIcon = uploadButton.querySelector('.icon-svg');
 
     const title = titleInput.value.trim();
     const artist = artistInput.value.trim();
@@ -860,7 +895,7 @@ async function handleUploadLocalLyrics() {
     const format = getFileExtension(lyricsFile.name);
 
     uploadButton.disabled = true;
-    uploadButtonIcon.textContent = 'hourglass_empty';
+    swapSvgIconPath(uploadButtonIcon, SVG_ICONS.hourglassEmpty);
     showStatusMessage('modal-upload-status', msg('msgUploading'), false);
 
     const reader = new FileReader();
@@ -890,13 +925,13 @@ async function handleUploadLocalLyrics() {
             showStatusMessage('modal-upload-status', msg('msgUploadError', String(error.message || error)), true);
         } finally {
             uploadButton.disabled = false;
-            uploadButtonIcon.textContent = 'upload_file';
+            swapSvgIconPath(uploadButtonIcon, SVG_ICONS.uploadFile);
         }
     };
     reader.onerror = () => {
         showStatusMessage('modal-upload-status', msg('msgFileReadError'), true);
         uploadButton.disabled = false;
-        uploadButtonIcon.textContent = 'upload_file';
+        swapSvgIconPath(uploadButtonIcon, SVG_ICONS.uploadFile);
     };
     reader.readAsText(lyricsFile);
 }
@@ -917,13 +952,21 @@ async function populateLocalLyricsList() {
             const listItem = document.createElement('div');
             listItem.className = 'draggable-source-item';
             listItem.dataset.songId = item.songId;
-            listItem.innerHTML = `
-                <span class="material-symbols-outlined drag-handle">music_note</span>
-                <span class="source-name">${item.songInfo.title} - ${item.songInfo.artist}</span>
-                <button class="m3-button icon remove-source-button" title="Delete local lyrics">
-                    <span class="material-symbols-outlined">delete</span>
-                </button>
-            `;
+            const musicIcon = createSvgIcon(SVG_ICONS.musicNote);
+            musicIcon.classList.add('drag-handle');
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'source-name';
+            nameSpan.textContent = `${item.songInfo.title} - ${item.songInfo.artist}`;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'm3-button icon remove-source-button';
+            removeBtn.title = 'Delete local lyrics';
+            removeBtn.appendChild(createSvgIcon(SVG_ICONS.delete));
+
+            listItem.appendChild(musicIcon);
+            listItem.appendChild(nameSpan);
+            listItem.appendChild(removeBtn);
             listItem.querySelector('.remove-source-button').addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (confirm(msg('confirmDeleteLyrics', `${item.songInfo.title} - ${item.songInfo.artist}`))) {
@@ -947,25 +990,25 @@ async function populateLocalLyricsList() {
 
 document.getElementById('toggle-gemini-api-key-visibility').addEventListener('click', () => {
     const apiKeyInput = document.getElementById('gemini-api-key');
-    const icon = document.querySelector('#toggle-gemini-api-key-visibility .material-symbols-outlined');
+    const iconSvg = document.querySelector('#toggle-gemini-api-key-visibility .icon-svg');
     if (apiKeyInput.type === 'password') {
         apiKeyInput.type = 'text';
-        icon.textContent = 'visibility_off';
+        swapSvgIconPath(iconSvg, SVG_ICONS.visibilityOff);
     } else {
         apiKeyInput.type = 'password';
-        icon.textContent = 'visibility';
+        swapSvgIconPath(iconSvg, SVG_ICONS.visibility);
     }
 });
 
 document.getElementById('toggle-openrouter-api-key-visibility').addEventListener('click', () => {
     const apiKeyInput = document.getElementById('openrouter-api-key');
-    const icon = document.querySelector('#toggle-openrouter-api-key-visibility .material-symbols-outlined');
+    const iconSvg = document.querySelector('#toggle-openrouter-api-key-visibility .icon-svg');
     if (apiKeyInput.type === 'password') {
         apiKeyInput.type = 'text';
-        icon.textContent = 'visibility_off';
+        swapSvgIconPath(iconSvg, SVG_ICONS.visibilityOff);
     } else {
         apiKeyInput.type = 'password';
-        icon.textContent = 'visibility';
+        swapSvgIconPath(iconSvg, SVG_ICONS.visibility);
     }
 });
 
@@ -1100,9 +1143,8 @@ function initCustomSelects() {
         const valueDisplay = document.createElement('div');
         valueDisplay.className = 'm3-select-value';
 
-        const arrow = document.createElement('span');
-        arrow.className = 'material-symbols-outlined m3-select-arrow';
-        arrow.textContent = 'arrow_drop_down';
+        const arrow = createSvgIcon(SVG_ICONS.arrowDropDown);
+        arrow.classList.add('m3-select-arrow');
 
         const menu = document.createElement('div');
         menu.className = 'm3-select-menu';

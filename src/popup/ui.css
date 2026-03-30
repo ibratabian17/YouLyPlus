@@ -204,23 +204,30 @@ h1 {
     gap: 12px;
 }
 
-.material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+/* --- SVG Icons --- */
+.icon-svg {
+    display: inline-block;
+    fill: currentColor;
+    flex-shrink: 0;
     vertical-align: middle;
-    line-height: 1;
 }
 
 .section-icon,
 .tab-icon,
-.button-icon,
-.header-icon,
-.select-arrow {
-    font-size: 1.25rem;
+.button-icon {
+    width: 1.25rem;
+    height: 1.25rem;
 }
 
 .header-icon {
-    font-size: 1.75rem;
+    width: 1.75rem;
+    height: 1.75rem;
     color: var(--md-sys-color-primary);
+}
+
+.select-arrow {
+    width: 1.5rem;
+    height: 1.5rem;
 }
 
 /* --- Header --- */
@@ -475,7 +482,6 @@ main {
     transform: translateY(-50%);
     color: var(--md-sys-color-on-surface-variant);
     pointer-events: none;
-    font-size: 1.5rem;
 }
 
 /* --- Buttons --- */

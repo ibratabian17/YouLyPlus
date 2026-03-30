@@ -298,9 +298,35 @@ body {
     height: 64px;
 }
 
-.drawer-header .logo-icon {
-    font-size: 28px;
+/* --- SVG Icons --- */
+.icon-svg {
+    display: inline-block;
+    fill: currentColor;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+/* Icon size inside buttons: M3 spec is 18dp for label buttons, 24dp for icon-only buttons */
+.m3-button .icon-svg {
+    width: 18px;
+    height: 18px;
+}
+
+.m3-button.icon .icon-svg {
+    width: 24px;
+    height: 24px;
+}
+
+.logo-icon {
+    width: 28px;
+    height: 28px;
     color: var(--md-sys-color-primary);
+}
+
+.nav-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
 }
 
 .drawer-title {
@@ -333,10 +359,7 @@ body {
     white-space: nowrap;
 }
 
-.nav-item .material-symbols-outlined {
-    font-size: 24px;
-    transition: font-variation-settings 300ms var(--animation-easing) var(--animation-easing-standard);
-}
+
 
 .nav-item::before {
     content: '';
@@ -359,9 +382,7 @@ body {
     font-weight: 700;
 }
 
-.nav-item.active .material-symbols-outlined {
-    font-variation-settings: 'FILL' 1;
-}
+
 
 /* --- Main Content Area --- */
 .content-area {
@@ -569,13 +590,24 @@ input[type="file"]::file-selector-button:hover {
     right: 16px;
     top: 50%;
     transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
     color: var(--md-sys-color-on-surface-variant);
+    fill: currentColor;
     transition: transform var(--animation-duration) var(--animation-easing-standard);
+    flex-shrink: 0;
+    pointer-events: none;
 }
 
 .m3-select.open .m3-select-arrow {
     transform: translateY(-50%) rotate(180deg);
 }
+
+/* Nav icon filled/outlined switching */
+.nav-item .nav-icon-filled { display: none; }
+.nav-item .nav-icon-outlined { display: inline-block; }
+.nav-item.active .nav-icon-filled { display: inline-block; }
+.nav-item.active .nav-icon-outlined { display: none; }
 
 .m3-select-menu {
     position: absolute;
@@ -672,11 +704,13 @@ input[type="file"]::file-selector-button:hover {
 }
 
 .m3-switch .handle::before {
-    content: 'check';
-    font-family: 'Material Symbols Outlined';
-    font-size: 16px;
-    color: transparent;
-    transition: color var(--animation-duration);
+    content: '';
+    width: 10px;
+    height: 6px;
+    border-left: 2px solid transparent;
+    border-bottom: 2px solid transparent;
+    transform: rotate(-45deg) translate(1px, -1px);
+    transition: border-color var(--animation-duration);
 }
 
 .m3-switch input:checked+.track {
@@ -694,7 +728,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 .m3-switch input:checked+.track .handle::before {
-    color: var(--md-sys-color-primary);
+    border-color: var(--md-sys-color-primary);
 }
 
 .m3-switch input:focus-visible+.track {
@@ -837,7 +871,11 @@ input[type="file"]::file-selector-button:hover {
 
 .draggable-source-item .drag-handle {
     margin-right: 16px;
+    width: 24px;
+    height: 24px;
     color: var(--md-sys-color-on-surface-variant);
+    fill: currentColor;
+    flex-shrink: 0;
     cursor: grab;
 }
 

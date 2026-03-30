@@ -14,19 +14,34 @@
 <body>
     <div class="container">
         <header class="app-header">
-            <span class="material-symbols-outlined header-icon">music_note</span>
+            <!-- music_note -->
+            <svg class="icon-svg header-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+            </svg>
             <h1 data-i18n="popupTitle">YouLy+ Settings</h1>
         </header>
 
         <nav class="tabs">
             <button class="tab active" data-tab="general-tab">
-                <span class="material-symbols-outlined tab-icon">tune</span><span data-i18n="tabGeneral">General</span>
+                <!-- tune -->
+                <svg class="icon-svg tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/>
+                </svg>
+                <span data-i18n="tabGeneral">General</span>
             </button>
             <button class="tab" data-tab="appearance-tab">
-                <span class="material-symbols-outlined tab-icon">visibility</span><span data-i18n="tabAppearance">Appearance</span>
+                <!-- visibility -->
+                <svg class="icon-svg tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+                <span data-i18n="tabAppearance">Appearance</span>
             </button>
             <button class="tab" data-tab="advanced-tab">
-                <span class="material-symbols-outlined tab-icon">settings</span><span data-i18n="tabAdvanced">Advanced</span>
+                <!-- settings -->
+                <svg class="icon-svg tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.11-.21.06-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                </svg>
+                <span data-i18n="tabAdvanced">Advanced</span>
             </button>
         </nav>
 
@@ -35,7 +50,11 @@
             <div class="tab-content active" id="general-tab">
                 <section class="settings-section">
                     <h2 class="section-title">
-                        <span class="material-symbols-outlined section-icon">toggle_on</span><span data-i18n="sectionCoreFeatures">Core Features</span>
+                        <!-- toggle_on -->
+                        <svg class="icon-svg section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M17 7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h10c2.76 0 5-2.24 5-5s-2.24-5-5-5zm0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/>
+                        </svg>
+                        <span data-i18n="sectionCoreFeatures">Core Features</span>
                     </h2>
                     <div class="setting-item">
                         <label for="lyEnabled" class="setting-label" data-i18n="settingEnableExtension">Enable YouLy+</label>
@@ -49,7 +68,11 @@
 
                 <section class="settings-section">
                     <h2 class="section-title">
-                        <span class="material-symbols-outlined section-icon">cloud_download</span><span data-i18n="sectionDataSources">Data Sources</span>
+                        <!-- cloud_download -->
+                        <svg class="icon-svg section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                        </svg>
+                        <span data-i18n="sectionDataSources">Data Sources</span>
                     </h2>
 
                     <div class="setting-item">
@@ -67,7 +90,11 @@
             <div class="tab-content" id="appearance-tab">
                 <section class="settings-section">
                     <h2 class="section-title">
-                        <span class="material-symbols-outlined section-icon">text_fields</span><span data-i18n="sectionReadability">Readability</span>
+                        <!-- text_fields -->
+                        <svg class="icon-svg section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M2.5 4v3h5v12h3V7h5V4h-13zm19 5h-9v3h3v7h3v-7h3V9z"/>
+                        </svg>
+                        <span data-i18n="sectionReadability">Readability</span>
                     </h2>
                     <div class="setting-item">
                         <label for="largerTextMode" class="setting-label" data-i18n="labelLargerTextModeShort">Larger Text</label>
@@ -76,7 +103,10 @@
                                 <option value="lyrics" data-i18n="optionLyrics">Lyrics</option>
                                 <option value="romanization" data-i18n="optionPronunciation">Pronunciation</option>
                             </select>
-                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                            <!-- expand_more -->
+                            <svg class="icon-svg select-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+                            </svg>
                         </div>
                     </div>
                     <div class="setting-item">
@@ -110,7 +140,11 @@
             <div class="tab-content" id="advanced-tab">
                 <section class="settings-section">
                     <h2 class="section-title">
-                        <span class="material-symbols-outlined section-icon">speed</span><span data-i18n="sectionPerformance">Performance</span>
+                        <!-- speed -->
+                        <svg class="icon-svg section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44zm-9.79 6.84a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z"/>
+                        </svg>
+                        <span data-i18n="sectionPerformance">Performance</span>
                     </h2>
                     <div class="setting-item">
                         <label for="lightweight" class="setting-label" data-i18n="settingLightweightMode">Lightweight Mode</label>
@@ -139,7 +173,11 @@
                 </section>
                 <section class="settings-section">
                     <h2 class="section-title">
-                        <span class="material-symbols-outlined section-icon">database</span><span data-i18n="sectionDataManagement">Data Management</span>
+                        <!-- database -->
+                        <svg class="icon-svg section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 3C7.58 3 4 4.79 4 7v10c0 2.21 3.58 4 8 4s8-1.79 8-4V7c0-2.21-3.58-4-8-4zm6 14c0 .5-2.13 2-6 2s-6-1.5-6-2v-2.23c1.61.78 3.72 1.23 6 1.23s4.39-.45 6-1.23V17zm0-4.55c-1.3.86-3.58 1.55-6 1.55s-4.7-.69-6-1.55V9.45C7.3 10.31 9.58 11 12 11s4.7-.69 6-1.55v2.99zM12 9C8.13 9 6 7.5 6 7s2.13-2 6-2 6 1.5 6 2-2.13 2-6 2z"/>
+                        </svg>
+                        <span data-i18n="sectionDataManagement">Data Management</span>
                     </h2>
                     <div class="cache-info">
                         <p><span data-i18n="labelStorageUsed">Storage Used:</span> <span class="cache-size-value">0.00 MB</span></p>
@@ -147,10 +185,18 @@
                     </div>
                     <div class="cache-controls">
                         <button class="m3-button m3-button-filled m3-button-error" id="clearCache">
-                            <span class="material-symbols-outlined button-icon">delete</span><span data-i18n="buttonClearCache">Clear Cache</span>
+                            <!-- delete -->
+                            <svg class="icon-svg button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </svg>
+                            <span data-i18n="buttonClearCache">Clear Cache</span>
                         </button>
                         <button class="m3-button m3-button-tonal" id="refreshCache">
-                            <span class="material-symbols-outlined button-icon">sync</span><span data-i18n="buttonRefresh">Refresh</span>
+                            <!-- sync -->
+                            <svg class="icon-svg button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                            </svg>
+                            <span data-i18n="buttonRefresh">Refresh</span>
                         </button>
                     </div>
                 </section>
@@ -159,7 +205,11 @@
 
         <footer class="app-footer">
             <a href="../settings/index.html" target="_blank" class="m3-button m3-button-text">
-                <span class="material-symbols-outlined button-icon">settings_applications</span><span data-i18n="buttonMoreSettings">More Settings</span>
+                <!-- settings_applications -->
+                <svg class="icon-svg button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm7-7H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-1.75 9c0 .23-.02.46-.05.68l1.48 1.16c.13.1.17.29.08.44l-1.4 2.42c-.09.15-.27.21-.43.15l-1.74-.7c-.36.28-.76.51-1.18.69l-.26 1.85c-.03.17-.18.3-.35.3h-2.8c-.17 0-.32-.13-.35-.29l-.26-1.85c-.43-.18-.82-.41-1.18-.69l-1.74.7c-.16.06-.34 0-.43-.15l-1.4-2.42c-.09-.15-.05-.34.08-.44l1.48-1.16c-.03-.23-.05-.46-.05-.69 0-.23.02-.46.05-.68l-1.48-1.16c-.13-.1-.17-.29-.08-.44l1.4-2.42c.09-.15.27-.21.43-.15l1.74.7c.36-.28.76-.51 1.18-.69l.26-1.85c.03-.17.18-.3.35-.3h2.8c.17 0 .32.13.35.29l.26 1.85c.43.18.82.41 1.18.69l1.74-.7c.16-.06.34 0 .43.15l1.4 2.42c.09.15.05.34-.08.44l-1.48 1.16c.03.23.05.46.05.69z"/>
+                </svg>
+                <span data-i18n="buttonMoreSettings">More Settings</span>
             </a>
         </footer>
     </div>
