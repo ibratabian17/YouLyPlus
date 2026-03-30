@@ -130,8 +130,8 @@
         return { title, artist, album: albumName, isVideo: albumName === "" };
     }
 
-    function getMediaSessionArtist() {
-        return navigator.mediaSession?.metadata?.artist || "";
+    function getMediaSession() {
+        return navigator.mediaSession?.metadata || null;
     }
 
     function extractAlbumFromDescription(description, title) {
@@ -237,13 +237,13 @@
 
             const apiData = await fetchMetadataDual(videoId);
 
-            const rawTitle = apiData?.title || domInfo?.title || "";
+            const rawTitle = apiData?.title || domInfo?.title || getMediaSession()?.title;
 
-            const finalTitle = rawTitle || "Unknown Title";
+            const finalTitle = rawTitle;
             const finalArtist =
                 apiData?.artist         ||
                 domInfo?.artist         ||
-                getMediaSessionArtist() ||
+                getMediaSession()?.artist ||
                 "Unknown Artist";
 
             const finalArtwork = apiData?.artwork || "";
