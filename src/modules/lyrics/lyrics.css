@@ -244,6 +244,10 @@
    ========================================================================== */
 
 /* --- Vocal Containers --- */
+.lyrics-line p {
+    margin: 0;
+}
+
 .lyrics-line:not(.lyrics-gap) .lyrics-line-container {
     overflow-wrap: break-word;
     transform-origin: left;
