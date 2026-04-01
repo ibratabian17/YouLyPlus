@@ -310,7 +310,7 @@ function createDraggableProviderItem(providerName) {
     const nameSpan = document.createElement('span');
     nameSpan.className = 'source-name';
     nameSpan.textContent = getSourceDisplayName(providerName);
-    
+
     // Add subtitle for fast path indicator on the first item
     const subtitle = document.createElement('span');
     subtitle.className = 'provider-fast-path-indicator';
@@ -323,10 +323,10 @@ function createDraggableProviderItem(providerName) {
     const removeBtn = document.createElement('button');
     removeBtn.className = 'm3-button icon remove-source-button';
     removeBtn.title = msg('titleRemoveSource') || 'Remove';
-    
+
     const deleteIcon = createSvgIcon(SVG_ICONS.delete);
     deleteIcon.classList.add('icon-svg');
-    
+
     removeBtn.appendChild(deleteIcon);
     removeBtn.onclick = () => removeProvider(providerName);
 
@@ -353,7 +353,7 @@ function populateDraggableProviders() {
             draggableContainer.appendChild(createDraggableProviderItem(provider.trim()));
         }
     });
-    
+
     updateFastPathIndicators();
 
     const providersToAdd = allowedProviders.filter(provider => !currentActiveProviders.includes(provider));
@@ -379,7 +379,7 @@ function populateDraggableProviders() {
 function updateFastPathIndicators() {
     const draggableContainer = document.getElementById('provider-order-draggable');
     if (!draggableContainer) return;
-    
+
     Array.from(draggableContainer.children).forEach((child, index) => {
         const indicator = child.querySelector('.provider-fast-path-indicator');
         if (indicator) {
@@ -430,12 +430,12 @@ function addProvider() {
 
 function removeProvider(providerName) {
     const providers = (currentSettings.lyricsProviderOrder || 'kpoe,unison,lrclib').split(',').filter(s => s?.trim());
-    
+
     if (providers.length <= 1) {
         showStatusMessage('add-provider-status', "Cannot remove last provider", true);
         return;
     }
-    
+
     currentSettings.lyricsProviderOrder = providers.filter(s => s !== providerName).join(',');
 
     updateSettings({ lyricsProviderOrder: currentSettings.lyricsProviderOrder });
@@ -909,7 +909,8 @@ async function handleUploadLocalLyrics() {
                 case 'ttml': parsedLyrics = parseAppleTTML(lyricsContent); break;
                 case 'json':
                     parsedLyrics = JSON.parse(lyricsContent);
-                    if (parsedLyrics && (parsedLyrics.KpoeTools && !parsedLyrics.KpoeTools.includes('1.31R2-LPlusBcknd') || !parsedLyrics.KpoeTools && parsedLyrics.lyrics?.[0]?.isLineEnding !== undefined)) {
+                    const firstItem = parsedLyrics.lyrics?.[0];
+                    if (firstItem && firstItem.isLineEnding !== undefined) {
                         parsedLyrics = v1Tov2(parsedLyrics);
                     }
                     break;
