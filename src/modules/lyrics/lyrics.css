@@ -23,8 +23,9 @@
     --lyplus-font-size-base: 25px;
     --lyplus-font-size-base-grow: 24;
     --lyplus-font-size-subtext: 0.6em;
-    --lyplus-font-size-metadata: 1.6em;
-    --lyplus-font-size-provider: 1.5em;
+    --lyplus-font-size-line: 1em;
+    --lyplus-font-size-metadata: .6em;
+    --lyplus-font-size-provider: .5em;
     --lyplus-font-size-status: 24px;
     --lyplus-font-size-button: 18px;
     --lyplus-font-size-dropdown-option: 13px;
@@ -56,6 +57,7 @@
     direction: ltr;
     transform: translateZ(0);
     padding-top: calc(1em + var(--lyrics-scroll-padding-top));
+    font-size: var(--lyplus-font-size-base);
 }
 
 #lyrics-plus-container.lyrics-plus-message {
@@ -97,7 +99,7 @@
     padding: var(--lyplus-padding-line);
     opacity: 0.8;
     color: var(--lyplus-text-secondary);
-    font-size: var(--lyplus-font-size-base);
+    font-size: var(--lyplus-font-size-line);
     cursor: pointer;
     transform-origin: left;
     transform: translateZ(1px);
@@ -123,6 +125,10 @@
 .lyrics-line:not(.scroll-animate),
 .lyrics-plus-metadata:not(.scroll-animate) {
     animation: none;
+}
+
+.lyrics-plus-metadata {
+    padding: 0 var(--lyplus-padding-line);
 }
 
 .line-by-line-mode .lyrics-line:not(.lyrics-gap) .main-vocal-container {
@@ -304,6 +310,7 @@
     font-size: var(--lyplus-font-size-metadata);
     font-weight: normal;
     opacity: 0.75;
+    padding: 0 var(--lyplus-padding-line);
 }
 
 #lyrics-plus-container.blur-inactive-enabled:not(.not-focused).plain-text-mode .lyrics-plus-metadata:not(.lyrics-activest) {

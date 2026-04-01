@@ -39,6 +39,8 @@ body:has([data-testid="modal"]) main {
     position: relative;
     display: block;
     padding-top: calc(1em + 36vh);
+    font-size: var(--lyrics-line-font-size);
+    line-height: var(--lyrics-line-line-height);
 }
 
 [data-testid="modal"] #lyrics-plus-buttons-wrapper {
@@ -80,12 +82,6 @@ body:has([data-testid="modal"]) main {
 
 #lyrics-plus-container::-webkit-scrollbar {
     display: none;
-}
-
-
-#lyrics-plus-container .lyrics-line {
-    font-size: var(--lyrics-line-font-size);
-    line-height: var(--lyrics-line-line-height);
 }
 
 #lyrics-plus-container .lyrics-line:not(.lyrics-gap) {
