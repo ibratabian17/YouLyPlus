@@ -91,12 +91,12 @@ ytmusic-app-layout[is-mweb-modernization-enabled] canvas#lyplus-webgl-canvas {
     transform: translate(-50%, -50%) scale(1.8, 2.15);
 }
 
-ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated {
+ytmusic-app-layout[is-mweb-modernization-enabled] #lyrics-plus-container {
     --lyplus-font-size-base: 38px;
     --lyplus-font-size-base-grow: 24;
 }
 
-ytmusic-app-layout[is-mweb-modernization-enabled] .lyrics-plus-integrated .lyrics-line:not(.lyrics-gap) {
+ytmusic-app-layout[is-mweb-modernization-enabled] #lyrics-plus-container .lyrics-line:not(.lyrics-gap) {
     margin-bottom: 0.29em;
 }
 
