@@ -38,7 +38,7 @@ export class UnisonService {
 
   static async fetchAndParse(url, fetchOptions) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     try {
       const response = await fetch(url, {
