@@ -148,62 +148,36 @@ export class LyricsService {
     try {
       const settings = await SettingsManager.getLyricsSettings();
       const fetchOptions = settings.cacheStrategy === 'none' ? { cache: 'no-store' } : {};
-
       const providers = this.getProviderOrder(settings);
-      
-      let lyrics = null;
-      let highestScore = -1;
 
-      const preferredProvider = providers[0];
-      const preferredLyrics = await this.fetchFromProvider(preferredProvider, songInfo, settings, fetchOptions, forceReload);
-      
-      if (!Utilities.isEmptyLyrics(preferredLyrics)) {
-        const score = this.scoreLyrics(preferredLyrics);
-        if (score === 3) {
-          lyrics = preferredLyrics;
-        } else {
-          lyrics = preferredLyrics;
-          highestScore = score;
-        }
+      const controllers = new Map(
+        providers.map(p => [p, new AbortController()])
+      );
+
+      const promises = providers.map(provider =>
+        this.fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload, controllers.get(provider).signal)
+          .catch(() => null)
+      );
+
+      const lyrics = await this.raceWithEarlyExit(promises, providers, controllers);
+
+      let finalLyrics = lyrics;
+
+      if (Utilities.isEmptyLyrics(finalLyrics) && songInfo.videoId && songInfo.subtitle) {
+        finalLyrics = await YouTubeService.fetchSubtitles(songInfo);
       }
 
-      if (!lyrics || highestScore < 3) {
-        const remainingProviders = providers.slice(1);
-        
-        const fetchPromises = remainingProviders.map(async (provider, index) => {
-          const result = await this.fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload);
-          return { lyrics: result, index: index + 1 };
-        });
-
-        const results = await Promise.allSettled(fetchPromises);
-
-        for (const res of results) {
-          if (res.status === 'fulfilled' && !Utilities.isEmptyLyrics(res.value.lyrics)) {
-            const score = this.scoreLyrics(res.value.lyrics);
-            
-            if (score > highestScore || (score === highestScore && !lyrics)) {
-              lyrics = res.value.lyrics;
-              highestScore = score;
-            }
-          }
-        }
-      }
-
-      if (Utilities.isEmptyLyrics(lyrics) && songInfo.videoId && songInfo.subtitle) {
-        lyrics = await YouTubeService.fetchSubtitles(songInfo);
-      }
-
-      if (Utilities.isEmptyLyrics(lyrics)) {
+      if (Utilities.isEmptyLyrics(finalLyrics)) {
         throw new Error('No lyrics found from any provider');
       }
 
       const version = Date.now();
-      const result = { lyrics, version };
+      const result = { lyrics: finalLyrics, version };
 
       state.setCached(cacheKey, result);
 
       if (settings.cacheStrategy !== 'none') {
-        await lyricsDB.set({ key: cacheKey, lyrics, version, timestamp: Date.now(), duration: songInfo.duration });
+        await lyricsDB.set({ key: cacheKey, lyrics: finalLyrics, version, timestamp: Date.now(), duration: songInfo.duration });
       }
 
       return result;
@@ -211,6 +185,53 @@ export class LyricsService {
     } finally {
       state.deleteOngoingFetch(cacheKey);
     }
+  }
+
+  static raceWithEarlyExit(promises, providers, controllers) {
+    return new Promise((resolve) => {
+      const results = new Array(promises.length).fill(undefined);
+      const pending = new Set(promises.map((_, i) => i));
+      let won = false;
+
+      const abortRemaining = () => {
+        for (const i of pending) {
+          controllers.get(providers[i])?.abort();
+        }
+      };
+
+      const tryResolve = () => {
+        if (won) return;
+
+        const bestIdx = results.findIndex(
+          (r, i) => !pending.has(i) && this.scoreLyrics(r) === 3
+        );
+
+        if (bestIdx !== -1) {
+          const blockedByEarlier = [...pending].some(i => i < bestIdx);
+          if (!blockedByEarlier) {
+            won = true;
+            abortRemaining();
+            return resolve(results[bestIdx]);
+          }
+        }
+
+        if (pending.size === 0) {
+          const best = results.reduce((b, r) =>
+            this.scoreLyrics(r) > this.scoreLyrics(b) ? r : b
+            , null);
+          resolve(best);
+        }
+      };
+
+      promises.forEach((p, i) => {
+        Promise.resolve(p).then(result => {
+          if (won) return;
+          results[i] = result;
+          pending.delete(i);
+          tryResolve();
+        });
+      });
+    });
   }
 
   static scoreLyrics(lyrics) {
@@ -223,14 +244,14 @@ export class LyricsService {
 
   static getProviderOrder(settings) {
     const defaultOrder = ['kpoe', 'unison', 'lrclib'];
-    
+
     let providersList = (settings.lyricsProviderOrder || '').split(',').map(p => p.trim()).filter(Boolean);
     if (!providersList.length) providersList = defaultOrder;
 
     let validProviders = providersList.filter(p => [
       PROVIDERS.KPOE, PROVIDERS.CUSTOM_KPOE, PROVIDERS.UNISON, PROVIDERS.LRCLIB
     ].includes(p));
-    
+
     if (!settings.customKpoeUrl) {
       validProviders = validProviders.filter(p => p !== PROVIDERS.CUSTOM_KPOE);
     }
@@ -238,28 +259,22 @@ export class LyricsService {
     return validProviders;
   }
 
-  static async fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload) {
+  static async fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload, signal) {
+    const opts = { ...fetchOptions, signal };
     switch (provider) {
       case PROVIDERS.KPOE:
-        return KPoeService.fetch(songInfo, settings.lyricsSourceOrder, forceReload, fetchOptions);
+        return KPoeService.fetch(songInfo, settings.lyricsSourceOrder, forceReload, opts);
 
       case PROVIDERS.CUSTOM_KPOE:
-        if (settings.customKpoeUrl) {
-          return KPoeService.fetchCustom(
-            songInfo,
-            settings.customKpoeUrl,
-            settings.lyricsSourceOrder,
-            forceReload,
-            fetchOptions
-          );
-        }
+        if (settings.customKpoeUrl)
+          return KPoeService.fetchCustom(songInfo, settings.customKpoeUrl, settings.lyricsSourceOrder, forceReload, opts);
+
         return null;
-
       case PROVIDERS.UNISON:
-        return UnisonService.fetch(songInfo, fetchOptions);
-
+        return UnisonService.fetch(songInfo, opts);
+        
       case PROVIDERS.LRCLIB:
-        return LRCLibService.fetch(songInfo, fetchOptions);
+        return LRCLibService.fetch(songInfo, opts);
 
       case PROVIDERS.LOCAL:
         const localResult = await this.checkLocalLyrics(songInfo);
