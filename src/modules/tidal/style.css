@@ -1,18 +1,70 @@
-/* Hide original Tidal lyrics content if present */
+/* =====================================================
+   Hide native Tidal lyrics content 
+   ===================================================== */
+
+/* Old UI */
 [data-test="lyrics-container-provider-info"] {
     display: none !important;
 }
-
 [data-test="lyrics-content-container"] {
     display: none !important;
 }
 
-/* Style for our injected lyrics container */
-#lyrics-plus-panel #lyrics-plus-container {
-    display: block;
-    min-height: 70svh;
+/* New UI */
+#nowPlaying [data-test="now-playing-lyrics"]:has(~ #lyplus-patch-container),
+#nowPlaying.lyplus-active [data-test="now-playing-lyrics"] {
+    display: none !important;
 }
 
+/* =====================================================
+   Shared patch container
+   ===================================================== */
+#lyplus-patch-container {
+    opacity: 1;
+    height: 100%;
+    width: 100%;
+    min-height: 285px;
+    z-index: 1;
+    display: none; /* shown by JS when active */
+    position: relative;
+    mix-blend-mode: plus-lighter;
+    mask-image: linear-gradient(to bottom, #0000 0%, #000 10%, #000 90%, #0000 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #0000 0%, #000 10%, #000 90%, #0000 100%);
+    overflow: scroll;
+    scrollbar-width: none;
+    --lyrics-scroll-padding-top: 15%;
+    scroll-padding-top: 25%;
+    scroll-padding-block-start: 25%;
+    overflow-anchor: auto;
+    will-change: scroll-position;
+    scroll-snap-type: y proximity;
+}
+
+/* =====================================================
+   NEW UI styles scoped to #nowPlaying
+   ===================================================== */
+
+/* Our custom Lyrics button */
+#nowPlaying #lyrics-plus-btn {
+    cursor: pointer;
+}
+
+/* Panel wrapper — make it fill available space when active */
+#nowPlaying [class*="panelWrapper"][class*="Active"] {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Lyrics content inside new panel */
+#nowPlaying #lyplus-patch-container {
+    max-height: 56svh;
+    min-height: 285px;
+}
+
+/* =====================================================
+   OLD UI #lyrics-plus-panel
+   ===================================================== */
 #lyrics-plus-panel {
     height: 100%;
     width: 100%;
@@ -21,34 +73,16 @@
     --lyplus-font-family: var(--market-core-type-display-font-family);
 }
 
-#lyplus-patch-container {
-    opacity: 1;
-    height: 100%;
-    width: 100%;
-    min-height: 285px;
-    max-height: 56svh;
-    z-index: 1;
+#lyrics-plus-panel #lyrics-plus-container {
     display: block;
-    position: relative;
-    mix-blend-mode: plus-lighter;
-    mask-image: linear-gradient(to bottom, #0000 0%, #000 10%, #000 90%, #0000 100%);
-    -webkit-mask-image: linear-gradient(to bottom, #0000 0%, #000 10%, #000 90%, #0000 100%);
-    overflow: scroll;
-    scrollbar-width: none;
-
-    --lyrics-scroll-padding-top: 15%;
-    scroll-padding-top: 25%;
-    scroll-padding-block-start: 25%;
-    overflow-anchor: auto;
-    scrollbar-width: none;
-    will-change: scroll-position;
-    scroll-snap-type: y proximity;
+    min-height: 70svh;
 }
 
-#lyrics-plus-panel .lyrics-line {
-    font-size: 40px;
+#lyrics-plus-panel #lyplus-patch-container {
+    max-height: 56svh;
 }
 
+/* Legacy tab */
 .react-tabs #lyrics-plus-buttons-wrapper {
     display: flex;
     top: 20px;
@@ -58,6 +92,22 @@
     height: min-content;
 }
 
+.react-tabs #lyrics-plus-translation-dropdown {
+    top: 4em;
+    left: 80%;
+}
+
+/* =====================================================
+   Shared lyrics line styling
+   ===================================================== */
+#lyplus-patch-container .lyrics-line,
+#lyrics-plus-panel .lyrics-line {
+    font-size: 40px;
+}
+
+/* =====================================================
+   Lyrics+ control buttons
+   ===================================================== */
 #lyrics-plus-buttons-wrapper button {
     background: #ffffff14;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -73,24 +123,21 @@
     transition: all 0.2s ease;
 }
 
-.react-tabs #lyrics-plus-translation-dropdown {
-    top: 4em;
-    left: 80%;
-}
-
-#wimp.dynamic-player [data-test="now-playing"] .lyplus-blur-container {
+/* =====================================================
+   Dynamic player background
+   ===================================================== */
+#wimp.dynamic-player [data-test="new-now-playing"] .lyplus-blur-container {
     display: block;
     position: fixed;
     opacity: 1;
 }
 
-#wimp.dynamic-player:has(#nowPlaying:not([class*="_nowPlayingVisibleAndNotFullscreen"])) ._player_1d16b04._notFullscreen_a82939e {
+#wimp.dynamic-player:has(#nowPlaying._nowPlayingHidden_7e74506) ._player_8c80ae6._notFullscreen_60c5a14 {
     background-color: #0000004d;
     backdrop-filter: blur(23px);
     box-shadow: 0 -6px 24px #0000003d;
 }
 
-#wimp.dynamic-player:has(#nowPlaying:not([class*="_nowPlayingVisibleAndNotFullscreen"])) ._mainContainer_6519c30 {
+#wimp.dynamic-player:has(#nowPlaying._nowPlayingHidden_7e74506) ._mainContainer_6519c30 {
     display: none !important;
-
 }
