@@ -311,83 +311,83 @@ class LyricsPlusRenderer {
    * @param {NodeListOf<HTMLElement> | Array<HTMLElement>} originalLines - A list of lyric elements.
    */
   _retimingActiveTimings(originalLines) {
-    if (!originalLines || originalLines.length < 1) {
-      return;
-    }
+    if (!originalLines || originalLines.length < 1) return;
 
-    const linesData = Array.from(originalLines).map((line) => ({
-      element: line,
-      startTime: parseFloat(line.dataset.startTime),
-      originalEndTime: parseFloat(line.dataset.endTime),
-      newEndTime: parseFloat(line.dataset.endTime),
+    const OVERLAP_THRESHOLD = 0.005;
+    const GAP_THRESHOLD = 0.001;
+    const MAX_EXTENSION = 1.3;
+
+    const lines = Array.from(originalLines).map((el) => ({
+      element: el,
+      startTime: parseFloat(el.dataset.startTime),
+      originalEndTime: parseFloat(el.dataset.endTime),
+      newEndTime: parseFloat(el.dataset.endTime),
     }));
 
     let i = 0;
-    while (i < linesData.length) {
-      let endIdx = i;
-      let currentMaxEnd = linesData[i].originalEndTime;
+    while (i < lines.length) {
+      let clusterEnd = i;
+      let maxEndInRange = lines[i].originalEndTime;
 
-      while (endIdx < linesData.length - 1) {
-        const nextLine = linesData[endIdx + 1];
-        if (currentMaxEnd - nextLine.startTime > 0.001) {
-          endIdx++;
-          currentMaxEnd = Math.max(currentMaxEnd, nextLine.originalEndTime);
+      while (clusterEnd < lines.length - 1) {
+        const next = lines[clusterEnd + 1];
+        const overlap = maxEndInRange - next.startTime; // positive → overlap
+
+        if (overlap > OVERLAP_THRESHOLD) {
+          clusterEnd = clusterEnd + 1;
+          maxEndInRange = Math.max(maxEndInRange, next.originalEndTime);
         } else {
           break;
         }
       }
 
-      const cluster = linesData.slice(i, endIdx + 1);
-      let clusterBaseEndTime = cluster[0].originalEndTime;
-      for (let _ci = 1; _ci < cluster.length; _ci++) {
-        if (cluster[_ci].originalEndTime > clusterBaseEndTime) clusterBaseEndTime = cluster[_ci].originalEndTime;
-      }
-      let clusterFinalEndTime = clusterBaseEndTime;
-      const lineAfterCluster = linesData[endIdx + 1];
+      const cluster = lines.slice(i, clusterEnd + 1);
 
-      if (lineAfterCluster) {
-        const gap = lineAfterCluster.startTime - clusterBaseEndTime;
-        if (gap > 0.001) {
-          const nextElement = linesData[endIdx].element.nextElementSibling;
-          const isFollowedByManualGap = nextElement && nextElement.classList.contains("lyrics-gap");
+      const clusterBaseEnd = cluster.reduce(
+        (max, l) => Math.max(max, l.originalEndTime),
+        cluster[0].originalEndTime
+      );
 
-          if (!isFollowedByManualGap) {
-            const extension = Math.min(1.3, gap);
-            clusterFinalEndTime += extension;
-          }
+      let clusterFinalEnd = clusterBaseEnd;
+      const lineAfter = lines[clusterEnd + 1];
+
+      if (lineAfter) {
+        const gap = lineAfter.startTime - clusterBaseEnd;
+        const nextEl = lines[clusterEnd].element.nextElementSibling;
+        const hasManualGapMark = nextEl?.classList.contains("lyrics-gap");
+
+        if (gap > GAP_THRESHOLD && !hasManualGapMark) {
+          clusterFinalEnd += Math.min(MAX_EXTENSION, gap);
         }
       }
 
-      for (let j = i; j <= endIdx; j++) {
-        let cutoffTime = null;
+      for (let j = i; j <= clusterEnd; j++) {
+        let cutoff = null;
 
-        for (let k = j + 1; k <= endIdx; k++) {
-          const jNotOverlapK = linesData[j].originalEndTime - linesData[k].startTime <= 0.001;
-          const chainBrokenAtK = linesData[k - 1].originalEndTime - linesData[k].startTime <= 0.001;
+        for (let k = j + 1; k <= clusterEnd; k++) {
+          const jClearsK = lines[j].originalEndTime - lines[k].startTime <= OVERLAP_THRESHOLD;
+          const chainBrokenAtK = lines[k - 1].originalEndTime - lines[k].startTime <= OVERLAP_THRESHOLD;
 
-          if (jNotOverlapK || chainBrokenAtK) {
-            cutoffTime = linesData[k].startTime;
+          if (jClearsK || chainBrokenAtK) {
+            cutoff = lines[k].startTime;
             break;
           }
         }
 
-        if (cutoffTime !== null) {
-          linesData[j].newEndTime = cutoffTime;
-        } else {
-          linesData[j].newEndTime = clusterFinalEndTime;
-        }
+        lines[j].newEndTime = cutoff ?? clusterFinalEnd;
       }
 
-      i = endIdx + 1;
+      i = clusterEnd + 1;
     }
 
-    linesData.forEach((lineData) => {
-      lineData.element.dataset.actualEndTime = lineData.originalEndTime.toFixed(3);
-      lineData.element._actualEndTimeMs = lineData.originalEndTime * 1000;
-      if (Math.abs(lineData.newEndTime - lineData.originalEndTime) > 0.001) {
-        lineData.element.dataset.endTime = lineData.newEndTime.toFixed(3);
+    for (const { element: el, originalEndTime, newEndTime } of lines) {
+      el.dataset.actualEndTime = originalEndTime.toFixed(3);
+      el._actualEndTimeMs = originalEndTime * 1000;
+
+      if (Math.abs(newEndTime - originalEndTime) > GAP_THRESHOLD) {
+        el.dataset.endTime = newEndTime.toFixed(3);
       }
-    });
+    }
   }
 
   /**
