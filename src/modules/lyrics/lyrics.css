@@ -37,7 +37,7 @@
     --lyplus-blur-amount: 0.07em;
     --lyplus-blur-amount-near: 0.035em;
 
-    --lyplus-fade-gap-timing-function: ease-out;
+    --lyplus-fade-gap-timing-function: ease;
 }
 
 #lyrics-plus-container.override-palette-color {

@@ -1291,11 +1291,18 @@ class LyricsPlusRenderer {
       for (let i = 0; i < 3; i++) {
         const syllableSpan = document.createElement("span");
         syllableSpan.className = "lyrics-syllable";
-        const syllableStart = (gapStart + (i * gapDuration) / 3) * 1000;
-        const syllableDuration = (gapDuration / 3 / 0.9) * 1000;
+
+        const segmentDurationMs = (gapDuration / 3) * 1000;
+
+        const syllableDuration = segmentDurationMs * 0.7;
+
+        const gapPadding = segmentDurationMs * 0.3;
+        const syllableStart = (gapStart * 1000) + (i * segmentDurationMs) + gapPadding;
+
         syllableSpan.dataset.startTime = syllableStart;
         syllableSpan.dataset.duration = syllableDuration;
         syllableSpan.dataset.endTime = syllableStart + syllableDuration;
+
         syllableSpan.textContent = "•";
         syllableSpan._isGap = true;
         lyricsWord.appendChild(syllableSpan);
