@@ -58,6 +58,7 @@
     transform: translateZ(0);
     padding-top: calc(1em + var(--lyrics-scroll-padding-top));
     font-size: var(--lyplus-font-size-base);
+    color-scheme: only light; /* tell browser that this only work on lightmode*/
 }
 
 #lyrics-plus-container.lyrics-plus-message {
