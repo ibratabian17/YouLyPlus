@@ -61,57 +61,96 @@ function isNewUI() {
 // ============================================================
 // NEW UI: Button-toggle based now-playing panel (2024+)
 // ============================================================
-function ensureLyricsNewUI() {
-    const nowPlaying = document.getElementById('nowPlaying');
-    if (!nowPlaying) return;
 
-    const lyricsBtn = nowPlaying.querySelector('[data-test="toggle-lyrics"]');
-    if (!lyricsBtn) return;
+// --- Inject once: CSS that hides native lyrics content and shows our container ---
+function injectHiderCSS() {
+    if (document.getElementById('lyplus-hider-css')) return;
+    const style = document.createElement('style');
+    style.id = 'lyplus-hider-css';
+    style.textContent = `
+        body.lyplus-active [data-test="now-playing-lyrics"] > :not(#lyplus-patch-container) {
+            display: none !important;
+        }
+        body.lyplus-active #lyplus-patch-container {
+            display: block !important;
+        }
+        #lyplus-patch-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+        }
+    `;
+    document.head.appendChild(style);
+}
 
-    const buttonsContainer = lyricsBtn.parentElement;
-    if (!buttonsContainer) return;
+// --- Inject our custom lyrics button once ---
+function ensureCustomButton(nativeLyricsBtn, buttonsContainer) {
+    if (document.getElementById('lyrics-plus-btn')) return;
 
-    // Find the panel wrapper — use attribute selector to survive class renames
-    const panelWrapper = nowPlaying.querySelector('[class*="panelWrapper"]');
-    if (!panelWrapper) return;
+    const customBtn = document.createElement('button');
+    customBtn.id = 'lyrics-plus-btn';
+    customBtn.setAttribute('type', 'button');
+    customBtn.innerHTML = nativeLyricsBtn.innerHTML;
+    buttonsContainer.insertBefore(customBtn, nativeLyricsBtn);
 
-    // --- Hide native lyrics button and replace with our own ---
-    lyricsBtn.style.display = 'none';
+    customBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        nativeLyricsBtn.click();
+    });
+}
 
-    let customBtn = document.getElementById('lyrics-plus-btn');
-    if (!customBtn) {
-        customBtn = document.createElement('button');
-        customBtn.id = 'lyrics-plus-btn';
-        // Copy classes from a sibling to survive updates, strip active/primary markers
-        const siblingBtn = buttonsContainer.querySelector('button:not(#lyrics-plus-btn)');
-        customBtn.className = siblingBtn
-            ? siblingBtn.className.replace(/\b\w*primary\w*\b/gi, '').trim()
-            : '';
-        customBtn.setAttribute('type', 'button');
-        customBtn.setAttribute('aria-pressed', 'false');
-        customBtn.innerHTML = `<span>Lyrics</span>`;
+function syncCustomButtonState(nativeLyricsBtn, buttonsContainer) {
+    const customBtn = document.getElementById('lyrics-plus-btn');
+    if (!customBtn) return;
 
-        buttonsContainer.insertBefore(customBtn, lyricsBtn);
+    const siblingButtons = Array.from(buttonsContainer.querySelectorAll('button:not(#lyrics-plus-btn)'));
+    let activeClass = '';
+    let inactiveClass = '';
+    let baseClasses = [];
 
-        customBtn.addEventListener('click', () => {
-            activateLyricsPlusPanel(nowPlaying, buttonsContainer, panelWrapper, customBtn);
+    siblingButtons.forEach(btn => {
+        Array.from(btn.classList).forEach(c => {
+            if (c.toLowerCase().includes('primary') || c.toLowerCase().includes('active')) activeClass = c;
+            if (c.toLowerCase().includes('secondary') || c.toLowerCase().includes('inactive')) inactiveClass = c;
         });
+    });
+
+    const refBtn = siblingButtons[0];
+    if (refBtn) {
+        baseClasses = Array.from(refBtn.classList).filter(c => c !== activeClass && c !== inactiveClass);
     }
 
-    // --- Create our patch container inside the panel content ---
+    const isNativeActive = nativeLyricsBtn.getAttribute('aria-pressed') === 'true';
+    customBtn.className = baseClasses.join(' ');
+
+    if (isNativeActive && activeClass) {
+        customBtn.classList.add(activeClass);
+        customBtn.setAttribute('aria-pressed', 'true');
+        document.body.classList.add('lyplus-active');
+    } else {
+        if (inactiveClass) customBtn.classList.add(inactiveClass);
+        customBtn.setAttribute('aria-pressed', 'false');
+        document.body.classList.remove('lyplus-active');
+    }
+}
+function ensureLyricsPatchContainer() {
+    // [data-test="now-playing-lyrics"] only exists in the DOM while lyrics tab is active
+    const lyricsPanel = document.querySelector('[data-test="now-playing-lyrics"]');
+    if (!lyricsPanel) return;
+
     let patchWrapper = document.getElementById('lyplus-patch-container');
     if (!patchWrapper) {
         patchWrapper = document.createElement('div');
         patchWrapper.id = 'lyplus-patch-container';
-
-        // Try to put it inside the panel's inner content div
-        const panelContent = panelWrapper.querySelector('[class*="panelContent"]')
-            || panelWrapper.querySelector('[class*="wrapper"]')
-            || panelWrapper;
-        panelContent.appendChild(patchWrapper);
     }
 
-    // --- Init renderer if needed ---
+    if (!lyricsPanel.contains(patchWrapper)) {
+        lyricsPanel.appendChild(patchWrapper);
+    }
+
+    // Init renderer once
     if (!lyricsRendererInstance && typeof LyricsPlusRenderer !== 'undefined') {
         const uiConfig = {
             player: 'video#video-one',
@@ -122,22 +161,7 @@ function ensureLyricsNewUI() {
         lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
     }
 
-    // --- Wire up native buttons to hide our panel ---
-    buttonsContainer.querySelectorAll('button:not(#lyrics-plus-btn)').forEach(btn => {
-        if (!btn.hasAttribute('data-lyplus-listener')) {
-            btn.setAttribute('data-lyplus-listener', 'true');
-            btn.addEventListener('click', () => {
-                deactivateLyricsPlusPanel(nowPlaying, panelWrapper, customBtn);
-            });
-        }
-    });
-
-    // If our button was previously active, re-show the panel
-    if (customBtn.getAttribute('aria-pressed') === 'true') {
-        activateLyricsPlusPanel(nowPlaying, buttonsContainer, panelWrapper, customBtn);
-    }
-
-    // Fetch lyrics if we have a current song and nothing is displayed
+    // Fetch lyrics if the panel is open and we don't have lyrics yet
     if (
         lyricsRendererInstance &&
         !lyricsRendererInstance.lyricsContainer &&
@@ -146,59 +170,49 @@ function ensureLyricsNewUI() {
     ) {
         fetchAndDisplayLyrics(LYPLUS_currentSong, true);
     }
-
-    console.log('LYPLUS: New UI lyrics panel verified');
 }
 
-function activateLyricsPlusPanel(nowPlaying, buttonsContainer, panelWrapper, customBtn) {
-    // Detect the "primary"/"active" class from the currently pressed button
-    const primaryClass = getPrimaryClass(buttonsContainer);
+function ensureLyricsNewUI() {
+    const nowPlaying = document.getElementById('nowPlaying');
+    if (!nowPlaying) return;
 
-    // Deactivate all native buttons
-    buttonsContainer.querySelectorAll('button:not(#lyrics-plus-btn)').forEach(b => {
-        b.setAttribute('aria-pressed', 'false');
-        if (primaryClass) b.classList.remove(primaryClass);
-    });
+    const nativeLyricsBtn = nowPlaying.querySelector('[data-test="toggle-lyrics"]');
+    if (!nativeLyricsBtn) return;
 
-    // Activate ours
-    customBtn.setAttribute('aria-pressed', 'true');
-    if (primaryClass) customBtn.classList.add(primaryClass);
+    const buttonsContainer = nativeLyricsBtn.parentElement;
+    if (!buttonsContainer) return;
 
-    // Hide native lyrics content, show ours
-    const nativeLyrics = nowPlaying.querySelector('[data-test="now-playing-lyrics"]');
-    if (nativeLyrics) nativeLyrics.style.display = 'none';
+    injectHiderCSS();
 
-    const patchWrapper = document.getElementById('lyplus-patch-container');
-    if (patchWrapper) patchWrapper.style.display = 'block';
+    nativeLyricsBtn.style.display = 'none';
 
-    // Activate panel wrapper if it has an active class mechanism
-    const activeClass = getActiveClass(panelWrapper);
-    if (activeClass) panelWrapper.classList.add(activeClass);
+    ensureCustomButton(nativeLyricsBtn, buttonsContainer);
 
-    console.log('LYPLUS: Lyrics+ panel activated (new UI)');
+    syncCustomButtonState(nativeLyricsBtn, buttonsContainer);
+
+    if (!nativeLyricsBtn.hasAttribute('data-lyplus-observed')) {
+        nativeLyricsBtn.setAttribute('data-lyplus-observed', 'true');
+
+        const nativeBtnObserver = new MutationObserver(() => {
+            syncCustomButtonState(nativeLyricsBtn, buttonsContainer);
+
+            if (nativeLyricsBtn.getAttribute('aria-pressed') === 'true') {
+                // Panel is now active — mount our container once it appears in DOM
+                // (slight delay to let Tidal's React render the panel element)
+                setTimeout(() => ensureLyricsPatchContainer(), 100);
+            }
+        });
+        nativeBtnObserver.observe(nativeLyricsBtn, {
+            attributes: true,
+            attributeFilter: ['aria-pressed', 'aria-disabled', 'class']
+        });
+    }
+
+    if (nativeLyricsBtn.getAttribute('aria-pressed') === 'true') {
+        ensureLyricsPatchContainer();
+    }
 }
 
-function deactivateLyricsPlusPanel(nowPlaying, panelWrapper, customBtn) {
-    customBtn.setAttribute('aria-pressed', 'false');
-
-    const nativeLyrics = nowPlaying.querySelector('[data-test="now-playing-lyrics"]');
-    if (nativeLyrics) nativeLyrics.style.display = '';
-
-    const patchWrapper = document.getElementById('lyplus-patch-container');
-    if (patchWrapper) patchWrapper.style.display = 'none';
-}
-
-function getPrimaryClass(container) {
-    const active = container.querySelector('button[aria-pressed="true"]');
-    if (!active) return null;
-    return Array.from(active.classList).find(c =>
-        c.toLowerCase().includes('primary') || c.toLowerCase().includes('active')
-    ) || null;
-}
-
-function getActiveClass(el) {
-    return Array.from(el.classList).find(c => c.toLowerCase().includes('active')) || null;
-}
 
 // ============================================================
 // OLD UI: tablist-based now-playing panel (legacy)
@@ -265,8 +279,6 @@ function ensureLyricsTab() {
                 currentLyricsPanel.style.display = 'block';
                 currentLyricsPanel.classList.add('react-tabs__tab-panel--selected');
             }
-
-            console.log('LYPLUS: Lyrics tab activated (legacy UI)');
         });
     }
 
@@ -399,11 +411,8 @@ function ensureLyricsTab() {
     if (customLyricsTab.getAttribute('aria-selected') === 'true') {
         lyricsPanel.style.display = 'block';
     }
-
-    console.log('LYPLUS: Legacy lyrics tab verified');
 }
 
-// --- Unified entry point ---
 function ensureLyricsUI() {
     if (isNewUI()) {
         ensureLyricsNewUI();
@@ -412,25 +421,36 @@ function ensureLyricsUI() {
     }
 }
 
-// --- MutationObserver ---
 const uiObserver = new MutationObserver((mutations) => {
-    let shouldCheck = false;
+    let shouldCheckUI = false;
+    let shouldCheckPanel = false;
+
     mutations.forEach(mutation => {
-        if (mutation.type === 'childList') {
-            const addedNodes = Array.from(mutation.addedNodes);
-            const hasRelevantChanges = addedNodes.some(node =>
-                node.nodeType === 1 && (
-                    node.querySelector?.('[role="tablist"]') ||
-                    node.querySelector?.('[data-test="toggle-lyrics"]') ||
-                    node.querySelector?.('[class*="panelWrapper"]') ||
-                    node.matches?.('[role="tablist"]') ||
-                    node.matches?.('[data-test="toggle-lyrics"]')
-                )
-            );
-            if (hasRelevantChanges) shouldCheck = true;
-        }
+        if (mutation.type !== 'childList') return;
+        Array.from(mutation.addedNodes).forEach(node => {
+            if (node.nodeType !== 1) return;
+
+            if (
+                node.querySelector?.('[role="tablist"]') ||
+                node.querySelector?.('[data-test="toggle-lyrics"]') ||
+                node.querySelector?.('[class*="panelWrapper"]') ||
+                node.matches?.('[role="tablist"]') ||
+                node.matches?.('[data-test="toggle-lyrics"]')
+            ) {
+                shouldCheckUI = true;
+            }
+
+            if (
+                node.matches?.('[data-test="now-playing-lyrics"]') ||
+                node.querySelector?.('[data-test="now-playing-lyrics"]')
+            ) {
+                shouldCheckPanel = true;
+            }
+        });
     });
-    if (shouldCheck) setTimeout(ensureLyricsUI, 100);
+
+    if (shouldCheckUI) setTimeout(ensureLyricsUI, 50);
+    if (shouldCheckPanel) setTimeout(ensureLyricsPatchContainer, 50);
 });
 
 function startUiObserver() {
@@ -443,7 +463,6 @@ function startUiObserver() {
             characterData: false
         });
         setTimeout(ensureLyricsUI, 500);
-        console.log('LYPLUS: UI Observer started');
     } else {
         setTimeout(startUiObserver, 1000);
     }
@@ -451,17 +470,14 @@ function startUiObserver() {
 
 // --- INITIALIZATION ---
 function initialize() {
-    console.log('LYPLUS: Initializing Tidal injector...');
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initialize);
         return;
     }
 
-    // Inject CSS
-    // injectPlatformCSS();
+    injectPlatformCSS();
     injectDOMScript();
     startUiObserver();
-    console.log('LYPLUS: Tidal injector initialized');
 }
 
 let LYPLUS_currentSong = null;
@@ -470,6 +486,14 @@ window.addEventListener('message', (event) => {
     if (event.source !== window || !event.data) return;
     if (event.data.type === 'LYPLUS_SONG_CHANGED') {
         LYPLUS_currentSong = event.data.songInfo;
+
+        const nativeLyricsBtn = document.querySelector('#nowPlaying [data-test="toggle-lyrics"]');
+        if (nativeLyricsBtn?.getAttribute('aria-pressed') === 'true') {
+            if (lyricsRendererInstance) {
+                lyricsRendererInstance.lyricsContainer = null;
+            }
+            setTimeout(() => ensureLyricsPatchContainer(), 100);
+        }
     }
 });
 

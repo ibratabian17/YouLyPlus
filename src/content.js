@@ -21,10 +21,11 @@ window.LyricsPlusAPI = {
 };
 
 function initializeLyricsPlus() {
+    // Start the watchdog, which handles the initial injection AND re-injects if deleted
+    startCssWatchdog();
+    
     // Inject the DOM script
-    injectPlatformCSS();
     injectDOMScript();
-    injectCssFile();
 
     // Listen for messages from the injected script
     window.addEventListener('message', function (event) {
@@ -51,20 +52,62 @@ function initializeLyricsPlus() {
     });
 }
 
+// --- CSS INJECTION & WATCHDOG ---
 
 function injectCssFile() {
+    if (document.querySelector('link[data-lyrics-plus-style]')) return;
+    
     const pBrowser = typeof browser !== 'undefined'
         ? browser
         : (typeof chrome !== 'undefined' ? chrome : null);
-    if (document.querySelector('link[data-lyrics-plus-style]')) return;
+        
     const lyricsElement = document.createElement('link');
     lyricsElement.rel = 'stylesheet';
     lyricsElement.type = 'text/css';
+    
     if (!pBrowser?.runtime?.getURL) {
         console.warn('LyricsPlus: runtime.getURL unavailable, skipping CSS inject');
         return;
     }
     lyricsElement.href = pBrowser.runtime.getURL('src/modules/lyrics/lyrics.css');
     lyricsElement.setAttribute('data-lyrics-plus-style', 'true');
-    document.head.appendChild(lyricsElement);
+    
+    if (document.body) {
+        document.body.insertBefore(lyricsElement, document.body.firstChild);
+    } else {
+        document.head.appendChild(lyricsElement);
+    }
+}
+
+function startCssWatchdog() {
+    const ensureStyles = () => {
+        injectPlatformCSS();
+        injectCssFile();
+    };
+    
+    if (!document.body) {
+        setTimeout(startCssWatchdog, 100);
+        return;
+    }
+    
+    ensureStyles();
+
+    const cssObserver = new MutationObserver((mutations) => {
+        let missing = false;
+        
+        if (!document.querySelector('link[data-lyrics-plus-style]') || 
+            !document.querySelector('link[data-lyrics-plus-platform-style]')) {
+            missing = true;
+        }
+
+        if (missing) {
+            ensureStyles();
+            console.log('LYPLUS: CSS Watchdog restored missing stylesheets.');
+        }
+    });
+
+    cssObserver.observe(document.body, { 
+        childList: true, 
+        subtree: false
+    });
 }

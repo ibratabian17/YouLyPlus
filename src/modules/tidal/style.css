@@ -40,6 +40,10 @@
     scroll-snap-type: y proximity;
 }
 
+#lyplus-patch-container #lyrics-plus-container {
+    display: block;
+}
+
 /* =====================================================
    NEW UI styles scoped to #nowPlaying
    ===================================================== */
@@ -136,8 +140,4 @@
     background-color: #0000004d;
     backdrop-filter: blur(23px);
     box-shadow: 0 -6px 24px #0000003d;
-}
-
-#wimp.dynamic-player:has(#nowPlaying._nowPlayingHidden_7e74506) ._mainContainer_6519c30 {
-    display: none !important;
 }
