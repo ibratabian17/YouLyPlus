@@ -71,7 +71,7 @@
                         const rawTime = player.getCurrentTime();
 
                         if (Math.abs(rawTime - lastSentTime) > 0.001) {
-                            timeUpdateMsg.currentTime = rawTime + 0.11;
+                            timeUpdateMsg.currentTime = rawTime;
                             window.postMessage(timeUpdateMsg, '*');
                             lastSentTime = rawTime;
                         }
