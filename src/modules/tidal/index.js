@@ -53,44 +53,58 @@ function injectDOMScript() {
     (document.head || document.documentElement).appendChild(parser);
 }
 
-// --- Detect which UI version is active ---
 function isNewUI() {
     return !!document.querySelector('[data-test="toggle-lyrics"]');
 }
 
 // ============================================================
-// NEW UI: Button-toggle based now-playing panel (2024+)
+// NEW UI (2024+)
+//
+// Tidal has TWO structurally identical now-playing panels:
+//   1. Sidebar  — [data-test="new-now-playing"]
+//   2. Fullscreen — #nowPlaying
+// Both have their own [data-test="toggle-lyrics"] and
+// [data-test="now-playing-lyrics"]. All helpers are scoped to
+// a `root` element so both instances work independently.
 // ============================================================
 
-// --- Inject once: CSS that hides native lyrics content and shows our container ---
-function injectHiderCSS() {
-    if (document.getElementById('lyplus-hider-css')) return;
-    const style = document.createElement('style');
-    style.id = 'lyplus-hider-css';
-    style.textContent = `
-        body.lyplus-active [data-test="now-playing-lyrics"] > :not(#lyplus-patch-container) {
-            display: none !important;
-        }
-        body.lyplus-active #lyplus-patch-container {
-            display: block !important;
-        }
-        #lyplus-patch-container {
-            display: none;
-            width: 100%;
-            height: 100%;
-            overflow-y: auto;
-        }
-    `;
-    document.head.appendChild(style);
+function getNowPlayingRoot(btn) {
+    return btn.closest('#nowPlaying, [data-test="new-now-playing"]');
 }
 
-// --- Inject our custom lyrics button once ---
-function ensureCustomButton(nativeLyricsBtn, buttonsContainer) {
-    if (document.getElementById('lyrics-plus-btn')) return;
+// Strip Tidal's private _ classes from the lyrics container so their styling
+// doesn't conflict with ours — same pattern as Radiant's hideTidalLyrics().
+function hideTidalLyricsIn(root) {
+    const line = root.querySelector('span[data-test="lyrics-line"]');
+    const container = line?.parentElement?.parentElement;
+    if (!container) return;
+    const tidalClasses = Array.from(container.classList).filter(c => c.startsWith('_'));
+    if (!container.dataset.lyplusSavedClasses && tidalClasses.length) {
+        container.dataset.lyplusSavedClasses = tidalClasses.join(' ');
+    }
+    tidalClasses.forEach(c => container.classList.remove(c));
+}
 
-    const customBtn = document.createElement('button');
-    customBtn.id = 'lyrics-plus-btn';
+function restoreTidalLyricsIn(root) {
+    const line = root.querySelector('span[data-test="lyrics-line"]');
+    const container = line?.parentElement?.parentElement;
+    if (container) {
+        const saved = container.dataset.lyplusSavedClasses;
+        if (saved) {
+            saved.split(' ').forEach(c => { if (c) container.classList.add(c); });
+            delete container.dataset.lyplusSavedClasses;
+        }
+    }
+    root.querySelector('[data-lyplus-patch]')?.remove();
+}
+
+function ensureCustomButton(nativeLyricsBtn, buttonsContainer) {
+    let customBtn = buttonsContainer.querySelector('[data-lyplus-custom-btn]');
+    if (customBtn) return customBtn;
+
+    customBtn = document.createElement('button');
     customBtn.setAttribute('type', 'button');
+    customBtn.setAttribute('data-lyplus-custom-btn', 'true');
     customBtn.innerHTML = nativeLyricsBtn.innerHTML;
     buttonsContainer.insertBefore(customBtn, nativeLyricsBtn);
 
@@ -99,69 +113,77 @@ function ensureCustomButton(nativeLyricsBtn, buttonsContainer) {
         e.stopPropagation();
         nativeLyricsBtn.click();
     });
+
+    return customBtn;
 }
 
 function syncCustomButtonState(nativeLyricsBtn, buttonsContainer) {
-    const customBtn = document.getElementById('lyrics-plus-btn');
+    const customBtn = buttonsContainer.querySelector('[data-lyplus-custom-btn]');
     if (!customBtn) return;
 
-    const siblingButtons = Array.from(buttonsContainer.querySelectorAll('button:not(#lyrics-plus-btn)'));
-    let activeClass = '';
-    let inactiveClass = '';
-    let baseClasses = [];
-
-    siblingButtons.forEach(btn => {
+    const siblings = Array.from(buttonsContainer.querySelectorAll('button:not([data-lyplus-custom-btn])'));
+    let activeClass = '', inactiveClass = '';
+    siblings.forEach(btn => {
         Array.from(btn.classList).forEach(c => {
             if (c.toLowerCase().includes('primary') || c.toLowerCase().includes('active')) activeClass = c;
             if (c.toLowerCase().includes('secondary') || c.toLowerCase().includes('inactive')) inactiveClass = c;
         });
     });
 
-    const refBtn = siblingButtons[0];
-    if (refBtn) {
-        baseClasses = Array.from(refBtn.classList).filter(c => c !== activeClass && c !== inactiveClass);
-    }
+    const baseClasses = siblings[0]
+        ? Array.from(siblings[0].classList).filter(c => c !== activeClass && c !== inactiveClass)
+        : [];
 
-    const isNativeActive = nativeLyricsBtn.getAttribute('aria-pressed') === 'true';
+    const isActive = nativeLyricsBtn.getAttribute('aria-pressed') === 'true';
     customBtn.className = baseClasses.join(' ');
+    customBtn.setAttribute('data-lyplus-custom-btn', 'true');
 
-    if (isNativeActive && activeClass) {
+    if (isActive && activeClass) {
         customBtn.classList.add(activeClass);
         customBtn.setAttribute('aria-pressed', 'true');
-        document.body.classList.add('lyplus-active');
     } else {
         if (inactiveClass) customBtn.classList.add(inactiveClass);
         customBtn.setAttribute('aria-pressed', 'false');
-        document.body.classList.remove('lyplus-active');
     }
 }
-function ensureLyricsPatchContainer() {
-    // [data-test="now-playing-lyrics"] only exists in the DOM while lyrics tab is active
-    const lyricsPanel = document.querySelector('[data-test="now-playing-lyrics"]');
+
+function ensureLyricsPatchContainer(root) {
+    if (!root) return;
+
+    const lyricsPanel = root.querySelector('[data-test="now-playing-lyrics"]');
     if (!lyricsPanel) return;
 
-    let patchWrapper = document.getElementById('lyplus-patch-container');
+    hideTidalLyricsIn(root);
+
+    let patchWrapper = lyricsPanel.querySelector('[data-lyplus-patch]');
     if (!patchWrapper) {
         patchWrapper = document.createElement('div');
-        patchWrapper.id = 'lyplus-patch-container';
-    }
-
-    if (!lyricsPanel.contains(patchWrapper)) {
+        patchWrapper.setAttribute('data-lyplus-patch', 'true');
+        patchWrapper.style.cssText = 'width:100%;height:100%;overflow-y:auto;';
         lyricsPanel.appendChild(patchWrapper);
     }
 
-    // Init renderer once
+    // Give the active patch a stable id so LyricsPlusRenderer can target it.
+    // Remove the id from any other instance first.
+    document.querySelectorAll('[data-lyplus-patch]').forEach(el => {
+        if (el !== patchWrapper) el.removeAttribute('id');
+    });
+    patchWrapper.id = 'lyplus-active-patch';
+
+    // Same for buttonParent — point to the active panel's button container.
+    document.querySelectorAll('[data-lyplus-btn-parent]').forEach(el => el.removeAttribute('data-lyplus-btn-parent'));
+    const btnParent = root.querySelector('[class*="actionButtons"], [class*="buttons"]');
+    if (btnParent) btnParent.setAttribute('data-lyplus-btn-parent', 'true');
+
     if (!lyricsRendererInstance && typeof LyricsPlusRenderer !== 'undefined') {
-        const uiConfig = {
+        lyricsRendererInstance = new LyricsPlusRenderer({
             player: 'video#video-one',
-            patchParent: '#lyplus-patch-container',
-            selectors: ['#lyplus-patch-container'],
-            buttonParent: '#nowPlaying [class*="actionButtons"], #nowPlaying [class*="buttons"]',
-        };
-        lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
+            patchParent: '#lyplus-active-patch',
+            selectors: ['#lyplus-active-patch'],
+            buttonParent: '[data-lyplus-btn-parent]',
+        });
     }
 
-    // Fetch lyrics if the panel is open and we don't have lyrics yet
     if (
         lyricsRendererInstance &&
         !lyricsRendererInstance.lyricsContainer &&
@@ -172,50 +194,44 @@ function ensureLyricsPatchContainer() {
     }
 }
 
-function ensureLyricsNewUI() {
-    const nowPlaying = document.getElementById('nowPlaying');
-    if (!nowPlaying) return;
-
-    const nativeLyricsBtn = nowPlaying.querySelector('[data-test="toggle-lyrics"]');
-    if (!nativeLyricsBtn) return;
-
+function setupNowPlayingInstance(nativeLyricsBtn) {
     const buttonsContainer = nativeLyricsBtn.parentElement;
     if (!buttonsContainer) return;
 
-    injectHiderCSS();
+    const root = getNowPlayingRoot(nativeLyricsBtn) || buttonsContainer.parentElement;
 
     nativeLyricsBtn.style.display = 'none';
-
     ensureCustomButton(nativeLyricsBtn, buttonsContainer);
-
     syncCustomButtonState(nativeLyricsBtn, buttonsContainer);
 
     if (!nativeLyricsBtn.hasAttribute('data-lyplus-observed')) {
         nativeLyricsBtn.setAttribute('data-lyplus-observed', 'true');
 
-        const nativeBtnObserver = new MutationObserver(() => {
+        new MutationObserver(() => {
             syncCustomButtonState(nativeLyricsBtn, buttonsContainer);
-
             if (nativeLyricsBtn.getAttribute('aria-pressed') === 'true') {
-                // Panel is now active — mount our container once it appears in DOM
-                // (slight delay to let Tidal's React render the panel element)
-                setTimeout(() => ensureLyricsPatchContainer(), 100);
+                setTimeout(() => ensureLyricsPatchContainer(root), 100);
+            } else {
+                restoreTidalLyricsIn(root);
             }
-        });
-        nativeBtnObserver.observe(nativeLyricsBtn, {
+        }).observe(nativeLyricsBtn, {
             attributes: true,
-            attributeFilter: ['aria-pressed', 'aria-disabled', 'class']
+            attributeFilter: ['aria-pressed', 'aria-disabled', 'class'],
         });
     }
 
     if (nativeLyricsBtn.getAttribute('aria-pressed') === 'true') {
-        ensureLyricsPatchContainer();
+        ensureLyricsPatchContainer(root);
     }
+}
+
+function ensureLyricsNewUI() {
+    document.querySelectorAll('[data-test="toggle-lyrics"]').forEach(setupNowPlayingInstance);
 }
 
 
 // ============================================================
-// OLD UI: tablist-based now-playing panel (legacy)
+// OLD UI (legacy tablist)
 // ============================================================
 function ensureLyricsTab() {
     const tablist = document.querySelector('[role="tablist"]');
@@ -225,9 +241,7 @@ function ensureLyricsTab() {
     if (!panelContainer) return;
 
     const originalLyricsTab = tablist.querySelector('[data-test="tabs-lyrics"]');
-    if (originalLyricsTab) {
-        originalLyricsTab.style.display = 'none';
-    }
+    if (originalLyricsTab) originalLyricsTab.style.display = 'none';
 
     let customLyricsTab = document.getElementById('lyrics-plus-tab');
     if (!customLyricsTab) {
@@ -256,35 +270,27 @@ function ensureLyricsTab() {
                 return Array.from(activeTab.classList).find(c => c.toLowerCase().includes('active'));
             })();
 
-            if (currentTablist) {
-                currentTablist.querySelectorAll('[role="tab"]').forEach(tab => {
-                    tab.setAttribute('aria-selected', 'false');
-                    if (activeClass) tab.classList.remove(activeClass);
-                });
-            }
-
-            const currentPanelContainer = currentTablist ? currentTablist.parentNode : null;
-            if (currentPanelContainer) {
-                currentPanelContainer.querySelectorAll('[role="tabpanel"]:not(#lyrics-plus-panel)').forEach(panel => {
-                    panel.style.display = 'none';
-                    panel.classList.remove('react-tabs__tab-panel--selected');
-                });
-            }
+            currentTablist?.querySelectorAll('[role="tab"]').forEach(tab => {
+                tab.setAttribute('aria-selected', 'false');
+                if (activeClass) tab.classList.remove(activeClass);
+            });
+            currentTablist?.parentNode?.querySelectorAll('[role="tabpanel"]:not(#lyrics-plus-panel)').forEach(panel => {
+                panel.style.display = 'none';
+                panel.classList.remove('react-tabs__tab-panel--selected');
+            });
 
             customLyricsTab.setAttribute('aria-selected', 'true');
             if (activeClass) customLyricsTab.classList.add(activeClass);
 
-            const currentLyricsPanel = document.getElementById('lyrics-plus-panel');
-            if (currentLyricsPanel) {
-                currentLyricsPanel.style.display = 'block';
-                currentLyricsPanel.classList.add('react-tabs__tab-panel--selected');
+            const lyricsPanel = document.getElementById('lyrics-plus-panel');
+            if (lyricsPanel) {
+                lyricsPanel.style.display = 'block';
+                lyricsPanel.classList.add('react-tabs__tab-panel--selected');
             }
         });
     }
 
-    if (!tablist.contains(customLyricsTab)) {
-        tablist.appendChild(customLyricsTab);
-    }
+    if (!tablist.contains(customLyricsTab)) tablist.appendChild(customLyricsTab);
 
     let lyricsPanel = document.getElementById('lyrics-plus-panel');
     if (!lyricsPanel) {
@@ -297,9 +303,7 @@ function ensureLyricsTab() {
         lyricsPanel.setAttribute('aria-labelledby', 'lyrics-plus-tab');
     }
 
-    if (!panelContainer.contains(lyricsPanel)) {
-        panelContainer.appendChild(lyricsPanel);
-    }
+    if (!panelContainer.contains(lyricsPanel)) panelContainer.appendChild(lyricsPanel);
 
     customLyricsTab.setAttribute('aria-controls', 'lyrics-plus-panel');
 
@@ -308,21 +312,17 @@ function ensureLyricsTab() {
         patchWrapper = document.createElement('div');
         patchWrapper.id = 'lyplus-patch-container';
     }
-
-    if (!lyricsPanel.contains(patchWrapper)) {
-        lyricsPanel.appendChild(patchWrapper);
-    }
+    if (!lyricsPanel.contains(patchWrapper)) lyricsPanel.appendChild(patchWrapper);
 
     if (!document.getElementById('lyrics-plus-container')) {
         if (!lyricsRendererInstance) {
-            const uiConfig = {
-                player: 'video#video-one',
-                patchParent: '#lyplus-patch-container',
-                selectors: ['#lyplus-patch-container', '#lyrics-plus-panel'],
-                buttonParent: '#lyrics-plus-panel',
-            };
             if (typeof LyricsPlusRenderer !== 'undefined') {
-                lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
+                lyricsRendererInstance = new LyricsPlusRenderer({
+                    player: 'video#video-one',
+                    patchParent: '#lyplus-patch-container',
+                    selectors: ['#lyplus-patch-container', '#lyrics-plus-panel'],
+                    buttonParent: '#lyrics-plus-panel',
+                });
             }
         } else {
             const canReuse = lyricsRendererInstance.lyricsContainer &&
@@ -362,8 +362,7 @@ function ensureLyricsTab() {
                     const lTab = document.getElementById('lyrics-plus-tab');
                     const lPanel = document.getElementById('lyrics-plus-panel');
                     const activeClass = (() => {
-                        const currentTablist2 = document.querySelector('[role="tablist"]');
-                        const activeTab = currentTablist2?.querySelector('[role="tab"][aria-selected="true"]');
+                        const activeTab = document.querySelector('[role="tablist"] [role="tab"][aria-selected="true"]');
                         if (!activeTab) return null;
                         return Array.from(activeTab.classList).find(c => c.toLowerCase().includes('active'));
                     })();
@@ -378,19 +377,14 @@ function ensureLyricsTab() {
                     }
 
                     const currentTablist = document.querySelector('[role="tablist"]');
-                    if (currentTablist) {
-                        currentTablist.querySelectorAll('[role="tab"]:not(#lyrics-plus-tab)').forEach(t => {
-                            t.setAttribute('aria-selected', 'false');
-                            if (activeClass) t.classList.remove(activeClass);
-                        });
-                    }
-
-                    if (currentTablist?.parentNode) {
-                        currentTablist.parentNode.querySelectorAll('[role="tabpanel"]:not(#lyrics-plus-panel)').forEach(panel => {
-                            panel.style.display = '';
-                            panel.classList.remove('react-tabs__tab-panel--selected');
-                        });
-                    }
+                    currentTablist?.querySelectorAll('[role="tab"]:not(#lyrics-plus-tab)').forEach(t => {
+                        t.setAttribute('aria-selected', 'false');
+                        if (activeClass) t.classList.remove(activeClass);
+                    });
+                    currentTablist?.parentNode?.querySelectorAll('[role="tabpanel"]:not(#lyrics-plus-panel)').forEach(panel => {
+                        panel.style.display = '';
+                        panel.classList.remove('react-tabs__tab-panel--selected');
+                    });
 
                     tab.setAttribute('aria-selected', 'true');
                     if (activeClass) tab.classList.add(activeClass);
@@ -423,7 +417,7 @@ function ensureLyricsUI() {
 
 const uiObserver = new MutationObserver((mutations) => {
     let shouldCheckUI = false;
-    let shouldCheckPanel = false;
+    const panelRoots = new Set();
 
     mutations.forEach(mutation => {
         if (mutation.type !== 'childList') return;
@@ -431,50 +425,45 @@ const uiObserver = new MutationObserver((mutations) => {
             if (node.nodeType !== 1) return;
 
             if (
-                node.querySelector?.('[role="tablist"]') ||
                 node.querySelector?.('[data-test="toggle-lyrics"]') ||
-                node.querySelector?.('[class*="panelWrapper"]') ||
-                node.matches?.('[role="tablist"]') ||
-                node.matches?.('[data-test="toggle-lyrics"]')
+                node.querySelector?.('[role="tablist"]') ||
+                node.matches?.('[data-test="toggle-lyrics"]') ||
+                node.matches?.('[role="tablist"]')
             ) {
                 shouldCheckUI = true;
             }
 
-            if (
-                node.matches?.('[data-test="now-playing-lyrics"]') ||
-                node.querySelector?.('[data-test="now-playing-lyrics"]')
-            ) {
-                shouldCheckPanel = true;
+            const lyricsPanelNode = node.matches?.('[data-test="now-playing-lyrics"]')
+                ? node
+                : node.querySelector?.('[data-test="now-playing-lyrics"]');
+
+            if (lyricsPanelNode) {
+                const root = lyricsPanelNode.closest('#nowPlaying, [data-test="new-now-playing"]')
+                    || lyricsPanelNode.parentElement;
+                if (root) panelRoots.add(root);
             }
         });
     });
 
     if (shouldCheckUI) setTimeout(ensureLyricsUI, 50);
-    if (shouldCheckPanel) setTimeout(ensureLyricsPatchContainer, 50);
+    panelRoots.forEach(root => setTimeout(() => ensureLyricsPatchContainer(root), 50));
 });
 
 function startUiObserver() {
     const appRoot = document.getElementById('wimp') || document.body;
     if (appRoot) {
-        uiObserver.observe(appRoot, {
-            childList: true,
-            subtree: true,
-            attributes: false,
-            characterData: false
-        });
+        uiObserver.observe(appRoot, { childList: true, subtree: true });
         setTimeout(ensureLyricsUI, 500);
     } else {
         setTimeout(startUiObserver, 1000);
     }
 }
 
-// --- INITIALIZATION ---
 function initialize() {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initialize);
         return;
     }
-
     injectPlatformCSS();
     injectDOMScript();
     startUiObserver();
@@ -487,13 +476,12 @@ window.addEventListener('message', (event) => {
     if (event.data.type === 'LYPLUS_SONG_CHANGED') {
         LYPLUS_currentSong = event.data.songInfo;
 
-        const nativeLyricsBtn = document.querySelector('#nowPlaying [data-test="toggle-lyrics"]');
-        if (nativeLyricsBtn?.getAttribute('aria-pressed') === 'true') {
-            if (lyricsRendererInstance) {
-                lyricsRendererInstance.lyricsContainer = null;
-            }
-            setTimeout(() => ensureLyricsPatchContainer(), 100);
-        }
+        document.querySelectorAll('[data-test="toggle-lyrics"][aria-pressed="true"]').forEach(btn => {
+            const root = getNowPlayingRoot(btn) || btn.parentElement?.parentElement;
+            if (!root) return;
+            if (lyricsRendererInstance) lyricsRendererInstance.lyricsContainer = null;
+            setTimeout(() => ensureLyricsPatchContainer(root), 100);
+        });
     }
 });
 
