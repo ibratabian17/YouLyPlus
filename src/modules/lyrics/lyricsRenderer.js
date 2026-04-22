@@ -476,6 +476,11 @@ class LyricsPlusRenderer {
       let pendingSyllable = null;
       let pendingSyllableFont = null;
 
+      // Check if line has both RTL characters and standard LTR script characters
+      const isLineBiDi = line.text && 
+                         this._isRTL(line.text) && 
+                         /[\p{Script=Latin}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Cyrillic}]/u.test(line.text);
+
       // --- Inner Logic Helpers ---
 
       const linkSyllables = (prevSyllable, nextSyllable, font) => {
@@ -543,6 +548,7 @@ class LyricsPlusRenderer {
 
         if (this._isRTL(this._getDataText(s, true))) {
           sylSpan.classList.add("rtl-text");
+          sylSpan.setAttribute("dir", "rtl"); // Safety
         }
 
         return sylSpan;
@@ -786,10 +792,33 @@ class LyricsPlusRenderer {
           })()
           : mainContainer;
 
-        targetContainer.appendChild(wordSpan);
+        // BIDI ISOLATION LOGIC
+        let actualTarget = targetContainer;
+        
+        if (isLineBiDi) {
+          const isWordRTL = this._isRTL(combinedText);
+          const wrapperClass = isWordRTL ? "bidi-rtl" : "bidi-ltr";
+          const wrapperDir = isWordRTL ? "rtl" : "ltr";
+          
+          let lastChild = targetContainer.lastElementChild;
+          
+          // Reuse the last wrapper if the direction matches
+          if (lastChild && lastChild.classList.contains(wrapperClass)) {
+            actualTarget = lastChild;
+          } else {
+            // Create a new directional wrapper
+            actualTarget = document.createElement("span");
+            actualTarget.className = wrapperClass;
+            actualTarget.setAttribute("dir", wrapperDir);
+            actualTarget.style.unicodeBidi = "isolate"; // Enforces strong isolation
+            targetContainer.appendChild(actualTarget);
+          }
+        }
+
+        actualTarget.appendChild(wordSpan);
 
         const trailText = combinedText.match(/\s+$/);
-        if (trailText && !isLastInContiner) targetContainer.appendChild(document.createTextNode(trailText[0]));
+        if (trailText && !isLastInContiner) actualTarget.appendChild(document.createTextNode(trailText[0]));
 
         pendingSyllable = syllableElements.length > 0 ? syllableElements[syllableElements.length - 1] : null;
         pendingSyllableFont = referenceFont;
@@ -873,18 +902,47 @@ class LyricsPlusRenderer {
         mainContainer.textContent = line.text;
       }
 
-      // 3. Final Line Cleanup
-      if (this._isRTL(mainContainer.textContent)) {
-        mainContainer.classList.add("rtl-text");
-        currentLine.classList.add("rtl-text");
+      // 3. Final Line Cleanup (With First-Word BiDi Check)
+      let applyRtlToLine = this._isRTL(mainContainer.textContent);
+
+      // If it's a mixed language line, only apply RTL to the root container if the FIRST word is RTL
+      if (applyRtlToLine && isLineBiDi) {
+        let firstSyllableText = "";
+        
+        // Try to get the text of the first actual syllable with letters
+        if (line.syllabus && line.syllabus.length > 0) {
+          const firstValid = line.syllabus.find(s => /[\p{L}\p{N}]/u.test(this._getDataText(s)));
+          if (firstValid) {
+            firstSyllableText = this._getDataText(firstValid);
+          }
+        }
+
+        // Fallback: match the first letter/number directly from the main string
+        if (!firstSyllableText) {
+          const fallbackMatch = mainContainer.textContent.match(/[\p{L}\p{N}]/u);
+          firstSyllableText = fallbackMatch ? fallbackMatch[0] : "";
+        }
+
+        // If the first real syllable/word is LTR, cancel the RTL override for the main container
+        if (firstSyllableText && !this._isRTL(firstSyllableText)) {
+          applyRtlToLine = false;
+        }
       }
+
+      if (applyRtlToLine) {
+        mainContainer.classList.add("rtl-text");
+        mainContainer.setAttribute("dir", "rtl");
+        currentLine.classList.add("rtl-text");
+        currentLine.setAttribute("dir", "rtl");
+      }
+      
       fragment.appendChild(currentLine);
 
       this._renderTranslationContainer(currentLineContainer, line, displayMode);
     });
   }
 
-  /**
+/**
    * Internal helper to render line-by-line lyrics.
    * @private
    */
@@ -903,21 +961,48 @@ class LyricsPlusRenderer {
       lineEl.append(lineContainer);
       lineEl.dataset.startTime = line.startTime;
       lineEl.dataset.endTime = line.endTime;
+      
       const singerClass = line.element?.singer
         ? singerClassMap[line.element.singer] || "singer-left"
         : "singer-left";
       lineEl.classList.add(singerClass);
+      
       const _lineText = this._getDataText(line, true);
-      const _lineIsRTL = this._isRTL(_lineText);
-      if (_lineIsRTL) lineEl.classList.add("rtl-text");
+      let _lineIsRTL = this._isRTL(_lineText);
+
+      // BiDi First-Letter Check:
+      // If the line contains RTL, verify the first strong character
+      if (_lineIsRTL) {
+        const firstCharMatch = _lineText.match(/[\p{L}\p{N}]/u);
+        if (firstCharMatch) {
+          const firstChar = firstCharMatch[0];
+          // If the first strong character is NOT RTL (e.g., an English word), 
+          // keep the root container LTR.
+          if (!this._isRTL(firstChar)) {
+            _lineIsRTL = false;
+          }
+        }
+      }
+
+      if (_lineIsRTL) {
+        lineEl.classList.add("rtl-text");
+        lineEl.setAttribute("dir", "rtl");
+      }
+      
       if (!lineEl._hasSharedListener) {
         lineEl.addEventListener("click", this._boundLyricClickHandler);
         lineEl._hasSharedListener = true;
       }
+      
       const mainContainer = document.createElement("div");
       mainContainer.className = "main-vocal-container";
       mainContainer.textContent = this._getDataText(line);
-      if (_lineIsRTL) mainContainer.classList.add("rtl-text");
+      
+      if (_lineIsRTL) {
+        mainContainer.classList.add("rtl-text");
+        mainContainer.setAttribute("dir", "rtl");
+      }
+      
       lineContainer.appendChild(mainContainer);
       this._renderTranslationContainer(lineContainer, line, displayMode);
       lineFragment.appendChild(lineEl);
