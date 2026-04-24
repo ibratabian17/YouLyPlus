@@ -477,9 +477,9 @@ class LyricsPlusRenderer {
       let pendingSyllableFont = null;
 
       // Check if line has both RTL characters and standard LTR script characters
-      const isLineBiDi = line.text && 
-                         this._isRTL(line.text) && 
-                         /[\p{Script=Latin}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Cyrillic}]/u.test(line.text);
+      const isLineBiDi = line.text &&
+        this._isRTL(line.text) &&
+        /[\p{Script=Latin}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Cyrillic}]/u.test(line.text);
 
       // --- Inner Logic Helpers ---
 
@@ -492,6 +492,13 @@ class LyricsPlusRenderer {
         prevSyllable._nextSyllableInWord = nextSyllable;
         prevSyllable._preHighlightDurationMs = physicsData.duration;
         prevSyllable._preHighlightDelayMs = physicsData.delay;
+      };
+
+      const segmentGraphemes = (text) => {
+        if (typeof Intl?.Segmenter === "function") {
+          return [...new Intl.Segmenter().segment(text)].map(s => s.segment);
+        }
+        return [...text];
       };
 
       const calculateEmphasisMetrics = (totalDuration, wordBufferLength, firstDuration) => {
@@ -557,7 +564,7 @@ class LyricsPlusRenderer {
       const renderCharWipes = (s, sylSpan, referenceFont, characterData) => {
         const syllableText = this._getDataText(s);
         const fontSizePx = getFontSizePx(referenceFont);
-        const chars = syllableText.split("");
+        const chars = segmentGraphemes(syllableText);
         const charWidths = chars.map(c => this._getTextWidth(c, referenceFont));
         const totalSyllableWidth = charWidths.reduce((a, b) => a + b, 0);
 
@@ -608,7 +615,7 @@ class LyricsPlusRenderer {
         const { easedProgress, penaltyFactor } = emphasisMetrics;
         const wordWidth = this._getTextWidth(wordSpan.textContent.trim(), referenceFont);
         const numChars = wordSpan._cachedChars.length;
-        const wordLength = combinedText.trim().length;
+        const wordLength = segmentGraphemes(combinedText.trim()).length;
 
         let maxDecayRate = 0;
         const isLongWord = wordLength > 5;
@@ -794,14 +801,14 @@ class LyricsPlusRenderer {
 
         // BIDI ISOLATION LOGIC
         let actualTarget = targetContainer;
-        
+
         if (isLineBiDi) {
           const isWordRTL = this._isRTL(combinedText);
           const wrapperClass = isWordRTL ? "bidi-rtl" : "bidi-ltr";
           const wrapperDir = isWordRTL ? "rtl" : "ltr";
-          
+
           let lastChild = targetContainer.lastElementChild;
-          
+
           // Reuse the last wrapper if the direction matches
           if (lastChild && lastChild.classList.contains(wrapperClass)) {
             actualTarget = lastChild;
@@ -908,7 +915,7 @@ class LyricsPlusRenderer {
       // If it's a mixed language line, only apply RTL to the root container if the FIRST word is RTL
       if (applyRtlToLine && isLineBiDi) {
         let firstSyllableText = "";
-        
+
         // Try to get the text of the first actual syllable with letters
         if (line.syllabus && line.syllabus.length > 0) {
           const firstValid = line.syllabus.find(s => /[\p{L}\p{N}]/u.test(this._getDataText(s)));
@@ -935,17 +942,17 @@ class LyricsPlusRenderer {
         currentLine.classList.add("rtl-text");
         currentLine.setAttribute("dir", "rtl");
       }
-      
+
       fragment.appendChild(currentLine);
 
       this._renderTranslationContainer(currentLineContainer, line, displayMode);
     });
   }
 
-/**
-   * Internal helper to render line-by-line lyrics.
-   * @private
-   */
+  /**
+     * Internal helper to render line-by-line lyrics.
+     * @private
+     */
   _renderLineByLineLyrics(
     lyrics,
     displayMode,
@@ -961,12 +968,12 @@ class LyricsPlusRenderer {
       lineEl.append(lineContainer);
       lineEl.dataset.startTime = line.startTime;
       lineEl.dataset.endTime = line.endTime;
-      
+
       const singerClass = line.element?.singer
         ? singerClassMap[line.element.singer] || "singer-left"
         : "singer-left";
       lineEl.classList.add(singerClass);
-      
+
       const _lineText = this._getDataText(line, true);
       let _lineIsRTL = this._isRTL(_lineText);
 
@@ -988,21 +995,21 @@ class LyricsPlusRenderer {
         lineEl.classList.add("rtl-text");
         lineEl.setAttribute("dir", "rtl");
       }
-      
+
       if (!lineEl._hasSharedListener) {
         lineEl.addEventListener("click", this._boundLyricClickHandler);
         lineEl._hasSharedListener = true;
       }
-      
+
       const mainContainer = document.createElement("div");
       mainContainer.className = "main-vocal-container";
       mainContainer.textContent = this._getDataText(line);
-      
+
       if (_lineIsRTL) {
         mainContainer.classList.add("rtl-text");
         mainContainer.setAttribute("dir", "rtl");
       }
-      
+
       lineContainer.appendChild(mainContainer);
       this._renderTranslationContainer(lineContainer, line, displayMode);
       lineFragment.appendChild(lineEl);
