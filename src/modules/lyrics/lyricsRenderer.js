@@ -2490,6 +2490,7 @@ class LyricsPlusRenderer {
     const targetTop = Math.max(0, -newTranslateY);
     const prevOffset = -parent.scrollTop || this.currentScrollOffset || 0;
     const delta = prevOffset - newTranslateY;
+    const scrollingDown = delta >= 0;
     this.currentScrollOffset = newTranslateY;
 
     if (forceScroll) {
@@ -2539,24 +2540,43 @@ class LyricsPlusRenderer {
     let maxAnimationDuration = 0;
     let delayCounter = 0;
 
-    for (let i = start; i < end; i++) {
-      const line = this.cachedLyricsLines[i];
-      const delay = i >= referenceIndex ? delayCounter * delayIncrement : 0;
+    if (scrollingDown) {
+      let delayCounter = 0;
+      for (let i = start; i < end; i++) {
+        const line = this.cachedLyricsLines[i];
+        const delay = i >= referenceIndex ? delayCounter * delayIncrement : 0;
 
-      if (i >= referenceIndex && !line._isGap) {
-        delayCounter++;
+        if (i >= referenceIndex && !line._isGap) {
+          delayCounter++;
+        }
+
+        line.style.setProperty('--scroll-delta', `${delta}px`);
+        line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
+        line.style.setProperty('--scroll-duration', `${duration + 100}ms`);
+        line.classList.add('scroll-animate');
+        animatingLines.push(line);
+
+        const lineDuration = duration + delay;
+        if (lineDuration > maxAnimationDuration) maxAnimationDuration = lineDuration;
       }
+    } else {
+      let delayCounter = 0;
+      for (let i = end - 1; i >= start; i--) {
+        const line = this.cachedLyricsLines[i];
+        const delay = i <= referenceIndex ? delayCounter * delayIncrement : 0;
 
-      line.style.setProperty('--scroll-delta', `${delta}px`);
-      line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-      line.style.setProperty('--scroll-duration', `${duration + 100}ms`);
-      line.classList.add('scroll-animate');
+        if (i <= referenceIndex && !line._isGap) {
+          delayCounter++;
+        }
 
-      animatingLines.push(line);
+        line.style.setProperty('--scroll-delta', `${delta}px`);
+        line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
+        line.style.setProperty('--scroll-duration', `${duration + 100}ms`);
+        line.classList.add('scroll-animate');
+        animatingLines.push(line);
 
-      const lineDuration = duration + delay;
-      if (lineDuration > maxAnimationDuration) {
-        maxAnimationDuration = lineDuration;
+        const lineDuration = duration + delay;
+        if (lineDuration > maxAnimationDuration) maxAnimationDuration = lineDuration;
       }
     }
 
