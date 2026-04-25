@@ -768,6 +768,10 @@ span.lyrics-source-provider {
     text-align: end;
 }
 
+.lyrics-line.rtl-text.singer-right .lyrics-translation-container:not(.rtl-text) {
+    text-align: start;
+}
+
 /* Case C: RTL translation under LTR line ("flipped" — e.g. Arabic is the translation) */
 .lyrics-line:not(.rtl-text) .lyrics-translation-container.rtl-text {
     direction: rtl;
