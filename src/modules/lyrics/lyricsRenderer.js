@@ -555,7 +555,6 @@ class LyricsPlusRenderer {
 
         if (this._isRTL(this._getDataText(s, true))) {
           sylSpan.classList.add("rtl-text");
-          sylSpan.setAttribute("dir", "rtl"); // Safety
         }
 
         return sylSpan;
@@ -816,8 +815,7 @@ class LyricsPlusRenderer {
             // Create a new directional wrapper
             actualTarget = document.createElement("span");
             actualTarget.className = wrapperClass;
-            actualTarget.setAttribute("dir", wrapperDir);
-            actualTarget.style.unicodeBidi = "isolate"; // Enforces strong isolation
+            actualTarget.style.unicodeBidi = "isolate";
             targetContainer.appendChild(actualTarget);
           }
         }
@@ -885,7 +883,6 @@ class LyricsPlusRenderer {
             !isBg &&
             !currentSettings.lightweight &&
             !this._isRTL(groupText) &&
-            !this._isCJK(groupText) &&
             groupText.trim().length <= 7 &&
             groupDuration >= 1000;
 
@@ -938,9 +935,7 @@ class LyricsPlusRenderer {
 
       if (applyRtlToLine) {
         mainContainer.classList.add("rtl-text");
-        mainContainer.setAttribute("dir", "rtl");
         currentLine.classList.add("rtl-text");
-        currentLine.setAttribute("dir", "rtl");
       }
 
       fragment.appendChild(currentLine);
@@ -993,7 +988,6 @@ class LyricsPlusRenderer {
 
       if (_lineIsRTL) {
         lineEl.classList.add("rtl-text");
-        lineEl.setAttribute("dir", "rtl");
       }
 
       if (!lineEl._hasSharedListener) {
@@ -1007,7 +1001,6 @@ class LyricsPlusRenderer {
 
       if (_lineIsRTL) {
         mainContainer.classList.add("rtl-text");
-        mainContainer.setAttribute("dir", "rtl");
       }
 
       lineContainer.appendChild(mainContainer);
