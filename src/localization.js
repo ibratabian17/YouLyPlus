@@ -765,18 +765,18 @@ const translations = {
         showTranslationOptions: "Показать параметры перевода"
     },
     'uk-UA': {
-        loading: "Завантаження текстів",
-        notFound: "Не вдалося знайти тексти.",
-        writtenBy: "Написано: ",
-        source: "Тексти надано: ",
-        notFoundError: "Здається, ми не можемо відобразити тексти.",
+        loading: "Завантаження тексту",
+        notFound: "Не вдалося знайти текст.",
+        writtenBy: "Авторство: ",
+        source: "Текст надано ",
+        notFoundError: "Здається, ми не можемо показати текст.",
         showTranslation: "Показати переклад",
         hideTranslation: "Сховати переклад",
         showPronunciation: "Показати вимову",
         hidePronunciation: "Сховати вимову",
-        showOriginal: "Показати Оригінал",
-        hideOriginal: "Сховати Оригінал",
-        refreshLyrics: "Оновити тексти",
+        showOriginal: "Показати оригінал",
+        hideOriginal: "Сховати оригінал",
+        refreshLyrics: "Перезавантажити текст",
         showTranslationOptions: "Показати параметри перекладу"
     },
     'el-GR': {
