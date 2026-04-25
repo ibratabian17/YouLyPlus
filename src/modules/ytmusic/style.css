@@ -487,6 +487,13 @@ div#lyrics-song-progressbar {
         transform: none !important;
     }
 
+    ytmusic-player-page[video-mode]:not(:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line .main-vocal-container,
+    ytmusic-player-page[video-mode]:not(:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line .background-vocal-container,
+    ytmusic-player-page[video-mode]:not(:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line .lyrics-translation-container,
+    ytmusic-player-page[video-mode]:not(:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line .lyrics-romanization-container {
+        text-align: center !important;
+    }
+
     /* Only show the active and adjacent lines */
     ytmusic-player-page[video-mode]:not(:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line.lyrics-activest,
     ytmusic-player-page[video-mode]:not(:has(ytmusic-player[playback-mode="ATV_PREFERRED"])):not([is-video-truncation-fix-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) .lyrics-line.next-active-line,
