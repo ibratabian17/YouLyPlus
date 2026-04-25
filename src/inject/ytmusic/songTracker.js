@@ -53,6 +53,9 @@
             const player = getPlayer();
             if (player && typeof event.data.time === 'number') {
                 player.seekTo(event.data.time, true);
+                timeUpdateMsg.currentTime = event.data.time;
+                window.postMessage(timeUpdateMsg, '*');
+                lastSentTime = event.data.time;
             }
         });
     }
