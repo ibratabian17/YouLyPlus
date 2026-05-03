@@ -95,7 +95,7 @@ Play any song, and the lyrics panel will automatically be enhanced by YouLy+.
 
 ### Translation & Romanization
 
--   **Instant Translation**: YouLy+ utilises label-provided translations but also supports **Google Translate** and **Gemini/OpenRouter** (BYO API key) translations.
+-   **Instant Translation**: YouLy+ utilises label-provided translations but also supports **Google Translate**, **DeepL**, and **Gemini/OpenRouter** (BYO API key) translations.
 -   **Romanization**: For different writing systems, YouLy+ can provide romanisations from the label or via Google Translate.
 -   **Full Gemini AI Control**: For advanced users, connect your own Gemini AI account to customize translation instructions and AI settings.
 
