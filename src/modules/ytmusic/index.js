@@ -86,6 +86,12 @@ function injectPlatformCSS() {
 }
 
 function updateTextWithMarquee(container, text) {
+    if (text !== undefined) {
+        container.dataset.currentText = text;
+    } else {
+        text = container.dataset.currentText || '';
+    }
+
     container.innerHTML = '';
 
     const wrapper = document.createElement('div');
@@ -133,6 +139,14 @@ function updateTextWithMarquee(container, text) {
         });
     });
 }
+
+const marqueeResizeObserver = new ResizeObserver(entries => {
+    for (let entry of entries) {
+        if (entry.target.dataset.currentText) {
+            updateTextWithMarquee(entry.target);
+        }
+    }
+});
 
 // Function to inject the DOM script
 function injectDOMScript() {
@@ -182,6 +196,10 @@ function injectDOMScript() {
         ytPlayer.addEventListener('pause', () => {
             progressBar.pause();
         })
+
+        // Observe for layout changes
+        marqueeResizeObserver.observe(titleElementElem);
+        marqueeResizeObserver.observe(artistElementElem);
     }
 }
 
