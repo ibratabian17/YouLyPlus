@@ -439,7 +439,7 @@ export function createTranslationPrompt(settings = { overrideGeminiPrompt: false
   }
 
   return `### ROLE
-You are a song lyrics translator. Your task is to translate the provided JSON array of lines into ${targetLang}.
+You are an expert, highly precise song lyrics translator. Your task is to translate the provided JSON array of lines into ${targetLang}.
 
 ### CONTEXT
 ${songContext}
@@ -448,36 +448,45 @@ ${sourceLangHint}
 ### STRICT RULES (Read Carefully)
 1. **Target Language Enforcement:**
    - The FINAL output must be 100% intelligible in ${targetLang}.
-   - **CRITICAL:** If a line is in a foreign script (Cyrillic, Kanji, Hangul, Arabic, etc.), you **MUST** translate it. Do NOT leave it in the original script.
-   - Example: "Я сошла с ума" -> MUST become "Aku kehilangan akal" (in Indonesian).
+   - **CRITICAL:** Translate ALL foreign scripts (Cyrillic, Kanji, Hangul, Arabic, etc.). DO NOT leave them in the original script.
 
 2. **The "Identity" Logic:**
-   - IF the line is *already* in ${targetLang} -> KEEP IT EXACTLY AS IS (Copy/Paste).
+   - IF the line is *already* in ${targetLang} -> KEEP IT EXACTLY AS IS.
    - IF the line is in *any other language* -> TRANSLATE it to ${targetLang}.
 
-3. **Formatting:**
+3. **DIRECTNESS & ANTI-HALLUCINATION (CRITICAL FOR ACCURACY):**
+   - Translate slang and idioms contextually (e.g., "Aku banyak yang mau" -> "Many people want me"), BUT DO NOT overcomplicate simple structures.
+   - **DO NOT invent words or verbs that are not there.** If the source says "[Subject] is [Adjective]", translate it exactly as "[Subject] is [Adjective]". 
+   - DO NOT add relational verbs like "you see me as", "you think I am", or "you treat me like" unless they explicitly exist in the original text.
+
+4. **Formatting:**
    - Preserve repetition ("ma-ma", "la-la-la").
-   - Preserve punctuation and casing from the source.
+   - Preserve punctuation, casing, and parentheses exactly from the source.
 
 ### FEW-SHOT EXAMPLES
-
-Input: ["Hello", "Konnichiwa", "Selamat pagi"]
-Target: Indonesian
-Output: ["Halo", "Halo", "Selamat pagi"]
-(Explanation: English translated, Japanese translated, Indonesian kept as-is.)
 
 Input: ["(Screaming)", "Я сошла с ума"]
 Target: English
 Output: ["(Screaming)", "I've lost my mind"]
 (Explanation: Parentheses kept. Cyrillic translated to English.)
 
-Input: ["Love you", "Te amo"]
-Target: Indonesian
-Output: ["Cinta kamu", "Aku mencintaimu"]
+Input: ["Aku banyak yang mau", "Walau aku tampan, kau biasa saja"]
+Target: English
+Output: ["Many people want me", "Even though I'm handsome, you are just ordinary"]
+(Explanation: Slang is translated properly. Direct Subject-Adjective structure is kept WITHOUT hallucinating extra verbs like "see me as" or "think I am".)
 
 ### TASK
 Input Lyrics:
 ${JSON.stringify(texts, null, 2)}
 
-Respond with ONLY the valid JSON string array of translations. No markdown.`;
+IMPORTANT OUTPUT FORMAT:
+Respond with ONLY a valid JSON object matching the exact structure below. Do not wrap it in Markdown code blocks (\`\`\`json). Just return the raw JSON string.
+{
+  "translated_lyrics": [
+    "translated line 1",
+    "translated line 2"
+  ],
+  "target_language": "${targetLang}",
+  "source_language": ["detected source language(s)"]
+}`;
 }
