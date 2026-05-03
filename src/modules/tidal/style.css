@@ -101,13 +101,25 @@
     left: 80%;
 }
 
-/* =====================================================
-   Shared lyrics line styling
-   ===================================================== */
-#lyplus-patch-container .lyrics-line,
-#lyrics-plus-panel .lyrics-line {
-    font-size: 40px;
-}
+.lyplus-blur-container {
+        display: block;
+        z-index: -1;
+        position: absolute;
+        height: 100vh;
+        width: 100vw;
+    }
+    #lyrics-plus-container {
+        display:block!important;
+        padding-top: 50%;
+        padding-bottom: 100%!important;
+        --lyplus-font-size-base: 35px!important;
+    }
+    ._scrollArea_200f837 [data-overlayscrollbars-contents]{
+        display: none;
+    }
+    #lyplus-active-patch {
+    scrollbar-width: none;
+    }
 
 /* =====================================================
    Lyrics+ control buttons

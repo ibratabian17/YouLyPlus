@@ -72,8 +72,6 @@ function getNowPlayingRoot(btn) {
     return btn.closest('#nowPlaying, [data-test="new-now-playing"]');
 }
 
-// Strip Tidal's private _ classes from the lyrics container so their styling
-// doesn't conflict with ours — same pattern as Radiant's hideTidalLyrics().
 function hideTidalLyricsIn(root) {
     const line = root.querySelector('span[data-test="lyrics-line"]');
     const container = line?.parentElement?.parentElement;
@@ -163,14 +161,11 @@ function ensureLyricsPatchContainer(root) {
         lyricsPanel.appendChild(patchWrapper);
     }
 
-    // Give the active patch a stable id so LyricsPlusRenderer can target it.
-    // Remove the id from any other instance first.
     document.querySelectorAll('[data-lyplus-patch]').forEach(el => {
         if (el !== patchWrapper) el.removeAttribute('id');
     });
     patchWrapper.id = 'lyplus-active-patch';
 
-    // Same for buttonParent — point to the active panel's button container.
     document.querySelectorAll('[data-lyplus-btn-parent]').forEach(el => el.removeAttribute('data-lyplus-btn-parent'));
     const btnParent = root.querySelector('[class*="actionButtons"], [class*="buttons"]');
     if (btnParent) btnParent.setAttribute('data-lyplus-btn-parent', 'true');
@@ -184,13 +179,24 @@ function ensureLyricsPatchContainer(root) {
         });
     }
 
-    if (
-        lyricsRendererInstance &&
-        !lyricsRendererInstance.lyricsContainer &&
-        LYPLUS_currentSong?.title &&
-        typeof fetchAndDisplayLyrics === 'function'
-    ) {
-        fetchAndDisplayLyrics(LYPLUS_currentSong, true);
+    if (lyricsRendererInstance) {
+        const canReuse = lyricsRendererInstance.lyricsContainer &&
+            lyricsRendererInstance.lastKnownSongInfo &&
+            LYPLUS_currentSong &&
+            lyricsRendererInstance.lastKnownSongInfo.title === LYPLUS_currentSong.title &&
+            lyricsRendererInstance.lastKnownSongInfo.artist === LYPLUS_currentSong.artist;
+
+        if (canReuse && !patchWrapper.contains(lyricsRendererInstance.lyricsContainer)) {
+            patchWrapper.appendChild(lyricsRendererInstance.lyricsContainer);
+            lyricsRendererInstance.uiConfig.patchParent = '#lyplus-active-patch';
+            lyricsRendererInstance.restore();
+        } else if (!canReuse || !document.getElementById('lyrics-plus-container')) {
+            lyricsRendererInstance.uiConfig.patchParent = '#lyplus-active-patch';
+            lyricsRendererInstance.lyricsContainer = null;
+            if (LYPLUS_currentSong?.title && typeof fetchAndDisplayLyrics === 'function') {
+                fetchAndDisplayLyrics(LYPLUS_currentSong, true);
+            }
+        }
     }
 }
 
