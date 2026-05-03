@@ -55,6 +55,7 @@ function loadSettings(callback) {
     storageLocalGet(defaultSettings).then((items) => {
         currentSettings = items;
         console.log(currentSettings);
+        injectCustomCSS(currentSettings.customCSS);
         if (callback) callback();
     });
 }
@@ -63,6 +64,9 @@ function updateSettings(newSettings) {
     currentSettings = { ...currentSettings, ...newSettings };
 
     applyDynamicPlayerClass();
+    if (newSettings.customCSS !== undefined) {
+        injectCustomCSS(currentSettings.customCSS);
+    }
 
     window.dispatchEvent(new CustomEvent('YOUPLUS_SETTINGS_UPDATED', {
         detail: {
@@ -90,4 +94,13 @@ function applyDynamicPlayerClass() {
     if (!layoutElement) return;
 
     layoutElement.classList.toggle('dynamic-player', currentSettings.dynamicPlayer);
+}
+function injectCustomCSS(customCSS) {
+    let styleTag = document.getElementById('lyrics-plus-custom-css');
+    if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'lyrics-plus-custom-css';
+        document.head.appendChild(styleTag);
+    }
+    styleTag.textContent = customCSS || '';
 }

@@ -25,10 +25,12 @@ export function loadSettings(callback) {
         console.log("Items retrieved from storage:", items);
         currentSettings = { ...defaultSettings, ...items };
         console.log("Loaded settings:", currentSettings);
+        injectCustomCSS(currentSettings.customCSS);
         if (callback) callback(currentSettings);
     }).catch(error => {
         console.error("Error loading settings:", error);
         currentSettings = { ...defaultSettings };
+        injectCustomCSS(currentSettings.customCSS);
         if (callback) callback(currentSettings);
     });
 }
@@ -50,6 +52,9 @@ export function saveSettings() {
 export function updateSettings(newSettings) {
     currentSettings = { ...currentSettings, ...newSettings };
     console.log("Updated settings object:", currentSettings);
+    if (newSettings.customCSS !== undefined) {
+        injectCustomCSS(currentSettings.customCSS);
+    }
 }
 
 export function getSettings() {
@@ -195,4 +200,14 @@ if (pBrowser && pBrowser.storage) {
             updateSettings(newSettings);
         }
     });
+}
+
+function injectCustomCSS(customCSS) {
+    let styleTag = document.getElementById('lyrics-plus-custom-css');
+    if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'lyrics-plus-custom-css';
+        document.head.appendChild(styleTag);
+    }
+    styleTag.textContent = customCSS || '';
 }

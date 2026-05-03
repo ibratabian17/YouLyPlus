@@ -83,6 +83,9 @@ function startCssWatchdog() {
     const ensureStyles = () => {
         injectPlatformCSS();
         injectCssFile();
+        if (typeof injectCustomCSS === 'function') {
+            injectCustomCSS(currentSettings.customCSS);
+        }
     };
     
     if (!document.body) {
