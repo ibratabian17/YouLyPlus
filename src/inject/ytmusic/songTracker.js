@@ -266,7 +266,7 @@
             startTimeUpdater();
 
             window.postMessage({ type: 'LYPLUS_SONG_CHANGED', songInfo: currentSong }, '*');
-            window.postMessage({ type: 'LYPLUS_updateFullScreenAnimatedBg' }, '*');
+            window.postMessage({ type: 'LYPLUS_updateFullScreenAnimatedBg', artworkUrl: finalArtwork }, '*');
         }
     }
 

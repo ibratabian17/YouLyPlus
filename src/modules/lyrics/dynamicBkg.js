@@ -215,6 +215,8 @@ let pendingArtworkUrl = null;
 let currentProcessingArtworkIdentifier = null;
 let lastAppliedArtworkIdentifier = null;
 let artworkCheckTimeoutId = null;
+let artworkRetryCount = 0;
+const MAX_ARTWORK_RETRIES = 5;
 const ARTWORK_RECHECK_DELAY = 300;
 const NO_ARTWORK_IDENTIFIER = 'LYPLUS_NO_ARTWORK';
 
@@ -583,21 +585,32 @@ function LYPLUS_requestProcessNewArtwork(url) {
     if (artworkCheckTimeoutId) { clearTimeout(artworkCheckTimeoutId); artworkCheckTimeoutId = null; }
 
     let target = NO_ARTWORK_IDENTIFIER;
+    const isBase = typeof url === 'string' && ["https://music.youtube.com/", "https://www.youtube.com/", "https://music.youtube.com"].some(b => url === b || url === b + "/");
+    const isEmpty = !url || (typeof url === 'string' && (url.trim() === "" || url === "null" || url === "undefined"));
 
-    if (typeof url === 'string' && url.startsWith('http')) {
-        const isBase = ["https://music.youtube.com/", "https://www.youtube.com/"].includes(url);
-        if (!isBase) {
-            if (/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i.test(url) || /lh3\.googleusercontent\.com|ytimg\.com/i.test(url)) {
-                target = url;
-            }
-        } else {
-            // Temporary, recheck later
+    if (typeof url === 'string' && url.startsWith('data:')) {
+        target = url;
+        artworkRetryCount = 0;
+    } else if (typeof url === 'string' && url.startsWith('http') && !isBase) {
+        target = url;
+        artworkRetryCount = 0;
+    } else if (isBase || isEmpty) {
+        if (artworkRetryCount < MAX_ARTWORK_RETRIES) {
+            artworkRetryCount++;
             artworkCheckTimeoutId = setTimeout(() => {
                 const el = LYPLUS_bgConfig.artworkSelector ? document.querySelector(LYPLUS_bgConfig.artworkSelector) : null;
                 LYPLUS_requestProcessNewArtwork(el ? el.src : null);
-            }, ARTWORK_RECHECK_DELAY);
+            }, ARTWORK_RECHECK_DELAY * artworkRetryCount);
             return;
+        } else {
+            // Give up, use fallback
+            target = NO_ARTWORK_IDENTIFIER;
+            artworkRetryCount = 0;
         }
+    } else {
+        // Not a string, or not a URL, but also not base/empty
+        target = NO_ARTWORK_IDENTIFIER;
+        artworkRetryCount = 0;
     }
 
     if (target === lastAppliedArtworkIdentifier && artworkTransitionProgress >= 1.0) return;
@@ -862,7 +875,9 @@ window.addEventListener('message', (event) => {
     if (event.source === window && event.data?.type === 'LYPLUS_updateFullScreenAnimatedBg') {
         const el = LYPLUS_bgConfig.artworkSelector ? document.querySelector(LYPLUS_bgConfig.artworkSelector) : null;
         checkBg();
-        LYPLUS_requestProcessNewArtwork(el ? el.src : null);
+        // Use the passed URL if available, otherwise fallback to the DOM element's src
+        const targetUrl = event.data?.artworkUrl || (el ? el.src : null);
+        LYPLUS_requestProcessNewArtwork(targetUrl);
     }
 
     if (event.source === window && event.data?.type === 'LYPLUS_reattachBg') {
