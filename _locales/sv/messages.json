@@ -7,7 +7,6 @@
     "message": "Avancerade sångtextfunktioner för YouTube Music, Apple Music och Tidal med rad-för-rad- och ord-för-ord-synkronisering.",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "YouLy+ Inställningar",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "Avancerat",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "Kärnfunktioner",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "Integrera SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "Skärminställningar",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "Ord-för-ord-markering",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "Datahantering",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "Fler inställningar",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "Inställningarna sparades! Uppdatera YouTube-sidan för att tillämpa ändringarna.",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "Kunde inte rensa cache: Extension API är inte tillgängligt.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "YouLy+ Inställningar",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "Om",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "Inställningarna sparades. Starta om din musikflik för att tillämpa ändringarna.",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "Starta om flikar",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "Kärnfunktionalitet",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "Aktivera ord-för-ord karaokemarkering när det är tillgängligt.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "YouTube Music Inställningar",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "Hoppa över icke-musikaliska delar som intron, outron eller reklaminslag.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Apple Music Inställningar",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "Om aktiverat kommer appen att använda externa låttextkällor om Apple Music endast erbjuder rad-för-rad-synkronisering.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "Källor",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "Källan \"$NAME$\" finns redan.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "\"$NAME$\" har lagts till.",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "\"$NAME$\" har tagits bort.",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "Lokala sångtexter",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "Fel vid uppladdning: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,24 +365,32 @@
     "message": "Fel vid radering: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "Vill du radera \"$TITLE$\"?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "Fel vid laddning av lokala texter: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "Översättning",
     "description": "Translation section title"
@@ -511,7 +519,6 @@
     "message": "Anpassa den prompt som skickas till AI:n för romanisering.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "Utseende",
     "description": "Appearance section title"
@@ -624,7 +631,6 @@
     "message": "Applicera dina egna stilar på låttextvisningen. Använd med försiktighet.",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "Cache",
     "description": "Cache section title"
@@ -653,7 +659,6 @@
     "message": "Nuvarande cacheanvändning",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "Om",
     "description": "About section"
@@ -702,7 +707,6 @@
     "message": "Skapad med kärlek",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "Inställningarna exporterades framgångsrikt!",
     "description": "Status message"
@@ -711,7 +715,10 @@
     "message": "Fel vid export: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -722,7 +729,10 @@
     "message": "Fel vid import: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -745,10 +755,12 @@
     "message": "Version $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "Sångtexter",
     "description": "Option in larger text mode dropdown"
@@ -769,7 +781,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Användarbidrag)",
     "description": "Display name for lyricsplus source"
@@ -793,5 +804,65 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (Ord)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "Läsvänlighet",
+    "description": "Section title in popup Appearance tab"
+  },
+  "msgCacheClearFailed": {
+    "message": "Det gick inte att rensa cachen.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelProviderOrder": {
+    "message": "Ordning för textleverantörer",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "Dra och släpp för att prioritera vilken leverantör som ska kontrolleras först. Den översta leverantören fungerar som förstahandsval.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Tillgängliga leverantörer",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Lägg till leverantör",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "DeepL-inställningar",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Större text",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API-nyckel",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Din API-nyckel lagras lokalt. Nycklar för gratisabonnemang slutar vanligtvis med :fx",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "Anpassad KPoe-server",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

@@ -7,7 +7,6 @@
     "message": "YouTube Music, Apple Music மற்றும் Tidal ஆகியவற்றுக்கான மேம்பட்ட பாடல் வரிகள் அம்சங்கள், வரிக்கு வரி மற்றும் வார்த்தைக்கு வார்த்தை ஒத்திசைவுடன்.",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "YouLy+ அமைப்புகள்",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "மேம்பட்டவை",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "முக்கிய அம்சங்கள்",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "SponsorBlock ஐ ஒருங்கிணைக்கவும்",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "காட்சி அமைப்புகள்",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "வார்த்தைக்கு வார்த்தை சிறப்பம்சமாக்கல்",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "தரவு மேலாண்மை",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "கூடுதல் அமைப்புகள்",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "அமைப்புகள் சேமிக்கப்பட்டன! மாற்றங்களைப் பயன்படுத்த YouTube பக்கத்தை மீண்டும் ஏற்றவும்.",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "தேக்ககத்தை அழிக்க முடியவில்லை: நீட்டிப்பு API கிடைக்கவில்லை.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "YouLy+ அமைப்புகள்",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "பற்றி",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "அமைப்புகள் சேமிக்கப்பட்டன. மாற்றங்களைப் பயன்படுத்த உங்கள் இசை தாவலை மீண்டும் தொடங்கவும்.",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "தாவல்களை மீண்டும் தொடங்கு",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "முக்கிய செயல்பாடு",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "கிடைக்கும்போது வார்த்தைக்கு வார்த்தை கரோக்கி சிறப்பம்சத்தை இயக்கவும்.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "YouTube Music அமைப்புகள்",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "முன்னுரை, முடிவுரை அல்லது விளம்பரப் பகுதிகள் போன்ற இசை அல்லாத பகுதைகளைத் தவிர்க்கவும்.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Apple Music அமைப்புகள்",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "செயல்படுத்தப்பட்டால், Apple Music வரிக்கு வரி ஒத்திசைவை மட்டுமே வழங்கினால், ஆப்ஸ் வெளிப்புற வரிகள் ஆதாரங்களைப் பயன்படுத்தும்.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "ஆதாரங்கள்",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "\"$NAME$\" ஆதாரம் ஏற்கனவே உள்ளது.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "\"$NAME$\" சேர்க்கப்பட்டது.",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "\"$NAME$\" அகற்றப்பட்டது.",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "உள்ளூர் வரிகள்",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "பதிவேற்றத்தின் போது பிழை: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,14 +365,20 @@
     "message": "நீக்கும் போது பிழை: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "\"$TITLE$\" ஐ நீக்க விரும்புகிறீர்களா?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "confirmClearLocalLyrics": {
@@ -383,10 +389,12 @@
     "message": "உள்ளூர் வரிகளை ஏற்றும் போது பிழை: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "மொழிபெயர்ப்பு",
     "description": "Translation section title"
@@ -515,7 +523,6 @@
     "message": "ரோமானைசேஷனுக்காக AI க்கு அனுப்பப்படும் ப்ராம்ட்டைத் தனிப்பயனாக்கவும்.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "தோற்றம்",
     "description": "Appearance section title"
@@ -628,7 +635,6 @@
     "message": "பாடல் வரிகளின் காட்சியில் உங்கள் சொந்த ஸ்டைல்களைப் பயன்படுத்துங்கள். எச்சரிக்கையுடன் பயன்படுத்தவும்.",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "தேக்ககம்",
     "description": "Cache section title"
@@ -657,7 +663,6 @@
     "message": "தற்போதைய தேக்ககப் பயன்பாடு",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "பற்றி",
     "description": "About section"
@@ -706,7 +711,6 @@
     "message": "அன்புடன் உருவாக்கப்பட்டது",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "அமைப்புகள் வெற்றிகரமாக ஏற்றுமதி செய்யப்பட்டன!",
     "description": "Status message"
@@ -715,7 +719,10 @@
     "message": "ஏற்றுமதியின் போது பிழை: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -726,7 +733,10 @@
     "message": "இறக்குமதியின் போது பிழை: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -749,10 +759,12 @@
     "message": "பதிப்பு $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "பாடல் வரிகள்",
     "description": "Option in larger text mode dropdown"
@@ -773,7 +785,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (பயனர் பங்களிப்புகள்)",
     "description": "Display name for lyricsplus source"
@@ -797,5 +808,65 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (வார்த்தை)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "வாசிப்புத்திறன்",
+    "description": "Section title in popup Appearance tab"
+  },
+  "msgCacheClearFailed": {
+    "message": "தற்காலிக சேமிப்பை (cache) அழிக்க முடியவில்லை.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelProviderOrder": {
+    "message": "வரிகள் வழங்கும் சேவை வரிசை",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "எந்த சேவை முதலில் சரிபார்க்கப்பட வேண்டும் என்பதை மாற்ற இழுத்து விடவும். முதலில் உள்ள சேவை வேகமான தேர்வாக செயல்படும்.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "கிடைக்கக்கூடிய சேவைகள்",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "சேவையைச் சேர்",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "DeepL அமைப்புகள்",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "பெரிய உரை",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API சாவி",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "உங்கள் API சாவி உள்ளூரில் சேமிக்கப்படும். இலவசத் திட்டச் சாவிகள் பொதுவாக :fx என்று முடியும்.",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "தனிப்பயன் KPoe சேவையகம்",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

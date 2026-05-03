@@ -7,7 +7,6 @@
     "message": "Funzioni avanzate per i testi di YouTube Music, Apple Music e Tidal con sincronizzazione riga per riga e parola per parola.",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "Impostazioni YouLy+",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "Avanzate",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "Funzioni principali",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "Integra SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "Impostazioni display",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "Evidenziazione parola per parola",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "Gestione dati",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "Più impostazioni",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "Impostazioni salvate! Ricarica la pagina di YouTube per applicare le modifiche.",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "Impossibile svuotare la cache: API estensione non disponibile.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "Impostazioni YouLy+",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "Informazioni",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "Impostazioni salvate. Riavvia la scheda musicale per applicare le modifiche.",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "Riavvia schede",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "Funzioni core",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "Abilita l'evidenziazione parola per parola (stile karaoke) quando disponibile.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "Impostazioni YouTube Music",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "Salta le sezioni non musicali come introduzioni, finali o segmenti sponsorizzati.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Impostazioni Apple Music",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "Se abilitato, l'applicazione userà fonti esterne se Apple Music fornisce solo la sincronizzazione riga per riga.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "Fonti",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "La fonte \"$NAME$\" esiste già.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "Aggiunto \"$NAME$\".",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "Rimosso \"$NAME$\".",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "Testi locali",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "Errore durante il caricamento: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,24 +365,32 @@
     "message": "Errore durante l'eliminazione: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "Confermi l'eliminazione di \"$TITLE$\"?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "Errore durante il caricamento dei testi locali: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "Traduzione",
     "description": "Translation section title"
@@ -511,7 +519,6 @@
     "message": "Personalizza il prompt inviato all'IA per la romanizzazione.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "Aspetto",
     "description": "Appearance section title"
@@ -624,7 +631,6 @@
     "message": "Applica i tuoi stili personalizzati alla visualizzazione dei testi. Usa con cautela.",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "Cache",
     "description": "Cache section title"
@@ -653,7 +659,6 @@
     "message": "Uso cache attuale",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "Informazioni",
     "description": "About section"
@@ -702,7 +707,6 @@
     "message": "Fatto con amore",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "Impostazioni esportate con successo!",
     "description": "Status message"
@@ -711,7 +715,10 @@
     "message": "Errore durante l'esportazione: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -722,7 +729,10 @@
     "message": "Errore durante l'importazione: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -745,10 +755,12 @@
     "message": "Versione $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "Testi",
     "description": "Option in larger text mode dropdown"
@@ -769,7 +781,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Contributo utenti)",
     "description": "Display name for lyricsplus source"
@@ -793,5 +804,61 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (Parola)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "Leggibilità",
+    "description": "Section title in popup Appearance tab"
+  },
+  "labelProviderOrder": {
+    "message": "Ordine provider testi",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "Trascina per dare priorità ai provider. Il provider in cima sarà la scelta predefinita.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Provider disponibili",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Aggiungi provider",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "Impostazioni DeepL",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Testo grande",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Chiave API DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "La tua chiave API è salvata localmente. Le chiavi del piano gratuito terminano solitamente con :fx",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "Server KPoe personalizzato",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

@@ -7,7 +7,6 @@
     "message": "תכונות מילים מתקדמות עבור YouTube Music, Apple Music ו-Tidal עם סנכרון שורה אחר שורה ומילה אחר מילה.",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "הגדרות YouLy+",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "מתקדם",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "תכונות ליבה",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "שלב את SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "הגדרות תצוגה",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "הדגשת מילה אחר מילה",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "ניהול נתונים",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "הגדרות נוספות",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "ההגדרות נשמרו! אנא טען מחדש את דף YouTube כדי להחיל את השינויים.",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "לא ניתן לנקות את המטמון: API של התוסף אינו זמין.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "הגדרות YouLy+",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "אודות",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "ההגדרות נשמרו. אנא הפעל מחדש את לשונית המוזיקה שלך כדי להחיל את השינויים.",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "הפעל מחדש לשוניות",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "פונקציונליות ליבה",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "אפשר הדגשת קריוקי מילה אחר מילה כאשר היא זמינה.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "הגדרות YouTube Music",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "דלג על קטעים שאינם מוזיקליים כמו פתיחים, סיומות או קטעי פרסומת.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "הגדרות Apple Music",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "אם מופעל, האפליקציה תשתמש במקורות מילים חיצוניים אם Apple Music מספקת רק סנכרון שורה אחר שורה.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "מקורות",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "המקור \"$NAME$\" כבר קיים.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "\"$NAME$\" נוסף.",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "\"$NAME$\" הוסר.",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "מילים מקומיות",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "שגיאה במהלך ההעלאה: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,24 +365,32 @@
     "message": "שגיאה במהלך המחיקה: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "האם ברצונך למחוק את \"$TITLE$\"?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "שגיאה בטעינת מילים מקומיות: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "תרגום",
     "description": "Translation section title"
@@ -511,7 +519,6 @@
     "message": "התאם אישית את ההנחיה שנשלחת ל-AI לרומניזציה.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "מראה",
     "description": "Appearance section title"
@@ -624,7 +631,6 @@
     "message": "החל סגנונות משלך על תצוגת המילים. השתמש בזהירות.",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "מטמון",
     "description": "Cache section title"
@@ -653,7 +659,6 @@
     "message": "שימוש נוכחי במטמון",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "אודות",
     "description": "About section"
@@ -702,7 +707,6 @@
     "message": "נעשה באהבה",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "ההגדרות יוצאו בהצלחה!",
     "description": "Status message"
@@ -711,7 +715,10 @@
     "message": "שגיאה במהלך הייצוא: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -722,7 +729,10 @@
     "message": "שגיאה במהלך הייבוא: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -745,10 +755,12 @@
     "message": "גרסה $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "מילים",
     "description": "Option in larger text mode dropdown"
@@ -769,7 +781,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (תרומות משתמשים)",
     "description": "Display name for lyricsplus source"
@@ -793,5 +804,61 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (מילה)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "קריאות",
+    "description": "Section title in popup Appearance tab"
+  },
+  "labelProviderOrder": {
+    "message": "סדר ספקי המילים",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "גרור ושחרר כדי לתעדף איזה ספק ייבדק ראשון. הספק העליון משמש כבחירה המהירה.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "ספקים זמינים",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "הוסף ספק",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "הגדרות DeepL",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "טקסט מוגדל",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "מפתח API של DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "מפתח ה-API שלך נשמר מקומית. מפתחות מתוכנית חינמית מסתיימים לרוב ב-:fx",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "שרת KPoe מותאם אישית",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

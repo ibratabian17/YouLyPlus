@@ -7,7 +7,6 @@
     "message": "Gevorderde lirieke-kenmerke vir YouTube Music, Apple Music en Tidal, met reël-vir-reël en woord-vir-woord sinkronisering.",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "YouLy+ Instellings",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "Gevorderd",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "Kernkenmerke",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "Integreer SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "Vertooninstellings",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "Woord-vir-woord uitligging",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "Datagebruik",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "Meer instellings",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "Instellings gestoor! Herlaai die YouTube-bladsy om veranderinge toe te pas.",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "Kan nie kas skoonmaak nie: Uitbreidings-API nie beskikbaar nie.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "YouLy+ Instellings",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "Oor",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "Instellings gestoor. Herbegin jou musiek-oortjie om veranderinge toe te pas.",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "Herbegin oortjies",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "Kernfunksionaliteit",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "Aktiveer woord-vir-woord karaoke-uitligging wanneer beskikbaar.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "YouTube Music-instellings",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "Slaan nie-musikale dele oor soos intros, outros of advertensie-segmente.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Apple Music-instellings",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "Indien geaktiveer, sal die toepassing eksterne liriekebronne gebruik as Apple Music slegs reël-vir-reël sinkronisering verskaf.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "Bronne",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "Die bron \"$NAME$\" bestaan reeds.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "Bron \"$NAME$\" bygevoeg.",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "Bron \"$NAME$\" verwyder.",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "Plaaslike lirieke",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "Fout tydens oplaai: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,14 +365,20 @@
     "message": "Fout tydens verwydering: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "Wil jy \"$TITLE$\" verwyder?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "confirmClearLocalLyrics": {
@@ -383,10 +389,12 @@
     "message": "Fout tydens laai van plaaslike lirieke: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "Vertaling",
     "description": "Translation section title"
@@ -515,7 +523,6 @@
     "message": "Pasmaak die instruksie wat na die AI gestuur word vir romanisering.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "Voorkoms",
     "description": "Appearance section title"
@@ -628,7 +635,6 @@
     "message": "Pas jou eie style toe op die liriekevertoning. Gebruik met versigtigheid.",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "Kas",
     "description": "Cache section title"
@@ -657,7 +663,6 @@
     "message": "Huidige kaskagebruik",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "Oor",
     "description": "About section"
@@ -706,7 +711,6 @@
     "message": "Gemaak met liefde",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "Instellings suksesvol uitgevoer!",
     "description": "Status message"
@@ -715,7 +719,10 @@
     "message": "Fout tydens uitvoer: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -726,7 +733,10 @@
     "message": "Fout tydens invoer: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -749,10 +759,12 @@
     "message": "Weergawe $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "Lirieke",
     "description": "Option in larger text mode dropdown"
@@ -773,7 +785,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Gebruikersbydraes)",
     "description": "Display name for lyricsplus source"
@@ -797,5 +808,65 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (Woord)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "Leesbaarheid",
+    "description": "Section title in popup Appearance tab"
+  },
+  "msgCacheClearFailed": {
+    "message": "Kon kas nie uitvee nie.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelProviderOrder": {
+    "message": "Volgorde van lirieke-verskaffers",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "Sleep en los om te prioritiseer watter verskaffer eerste nagegaan word. Die boonste verskaffer dien as die vinnigste keuse.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Beskikbare verskaffers",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Voeg verskaffer by",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "DeepL-instellings",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Groter teks",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API-sleutel",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Jou API-sleutel word plaaslik gestoor. Gratis plan-sleutels eindig gewoonlik met :fx",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "Pasgemaakte KPoe-bediener",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

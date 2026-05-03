@@ -7,7 +7,6 @@
     "message": "Izici zomculo ezithuthukisiwe ze-YouTube Music, i-Apple Music ne-Tidal, ezinokuvumelanisa komugqa nomugqa kanye nezwi nezwi.",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "Izilungiselelo ze-YouLy+",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "Okuthuthukile",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "Izici Ezibalulekile",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "Hlanganisa i-SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "Izilungiselelo Zokubonisa",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "Ukugqanyiswa kwezwi nezwi",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "Ukuphathwa Yedatha",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "Izilungiselelo Ezengeziwe",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "Izilungiselelo zigciniwe! Vuselela ikhasi le-YouTube ukuze usebenzise ushintsho.",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "Ayikwazi ukusula i-cache: I-API yesandiso ayitholakali.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "Izilungiselelo ze-YouLy+",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "Mayelana",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "Izilungiselelo zigciniwe. Qala kabusha ithebhu yakho yomculo ukuze usebenzise ushintsho.",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "Qala kabusha Amathebhu",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "Ukusebenza Okubalulekile",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "Vula ukugqanyiswa kwe-karaoke kwezwi nezwi uma kutholakala.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "Izilungiselelo ze-YouTube Music",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "Yeqa izingxenye ezingezona zomculo njengezingeniso, iziphetho noma izingxenye zezikhangiso.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Izilungiselelo ze-Apple Music",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "Uma kuvunyelwe, uhlelo lokusebenza luzosebenzisa imithombo yamagama omculo yangaphandle uma i-Apple Music ihlinzeka kuphela ngokuvumelanisa komugqa nomugqa.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "Imithombo",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "Umthombo we-\"$NAME$\" usukhona kakade.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "Umthombo owedlulisiwe we-\"$NAME$\".",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "Kukhishwe umthombo we-\"$NAME$\".",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "Amagama Omculo Wendawo",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "Iphutha ngenkathi ulayisha: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,14 +365,20 @@
     "message": "Iphutha ngenkathi ususa: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "Ingabe uyafuna ukususa i-\"$TITLE$\"?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "confirmClearLocalLyrics": {
@@ -383,10 +389,12 @@
     "message": "Iphutha ngenkathi kulayishwa amagama omculo wendawo: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "Ukuhumusha",
     "description": "Translation section title"
@@ -515,7 +523,6 @@
     "message": "Kwenze kube ngokwakho umyalo othunyelwa ku-AI ngezinhlamvu zesi-Latin.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "Ukubukeka",
     "description": "Appearance section title"
@@ -628,7 +635,6 @@
     "message": "Sebenzisa izitayela zakho ekubonisweni kwamagama omculo. Sebenzisa ngokuqaphela.",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "I-Cache",
     "description": "Cache section title"
@@ -657,7 +663,6 @@
     "message": "Ukusetshenziswa kwe-cache kwamanje",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "Mayelana",
     "description": "About section"
@@ -706,7 +711,6 @@
     "message": "Yenziwe ngothando",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "Izilungiselelo zikhishwe ngempumelelo!",
     "description": "Status message"
@@ -715,7 +719,10 @@
     "message": "Iphutha ngenkathi kukhiswa: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -726,7 +733,10 @@
     "message": "Iphutha ngenkathi kungeniswa: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -749,10 +759,12 @@
     "message": "Inguqulo $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "Amagama Omculo",
     "description": "Option in larger text mode dropdown"
@@ -773,7 +785,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Iminikelo Yabasebenzisi)",
     "description": "Display name for lyricsplus source"
@@ -797,5 +808,65 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (Zwi)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "Ukufundeka",
+    "description": "Section title in popup Appearance tab"
+  },
+  "msgCacheClearFailed": {
+    "message": "Yehlulekile ukusula inqolobane.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelProviderOrder": {
+    "message": "Ukulandelana Kwabahlinzeki Bamagama Ezingoma",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "Hudula uphonse ukuze ubeke kuqala lowo mthombo okufanele uhlolwe kuqala. Umthombo ophezulu usebenza njengendlela esheshayo yokukhetha.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Abahlinzeki Abatholakalayo",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Engeza Umhlinzeki",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "Izilungiselelo ze-DeepL",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Umbhalo Omkhulu",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Ukhiye we-API ye-DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Ukhiye wakho we-API ugcinwa endaweni yakho. Okhiye bohlelo lwamahhala imvamisa baphela ngo-:fx",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "Iseva ye-KPoe Yangokwezifiso",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

@@ -7,7 +7,6 @@
     "message": "YouTube Music, Apple Music এবং Tidal-এর জন্য উন্নত লিরিক্স বৈশিষ্ট্য, লাইন-বাই-লাইন এবং ওয়ার্ড-বাই-ওয়ার্ড সিঙ্কের সাথে।",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "YouLy+ সেটিংস",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "উন্নত",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "মূল বৈশিষ্ট্য",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "SponsorBlock একীভূত করুন",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "ডিসপ্লে সেটিংস",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "ওয়ার্ড-বাই-ওয়ার্ড হাইলাইটিং",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "ডেটা ম্যানেজমেন্ট",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "আরও সেটিংস",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "সেটিংস সংরক্ষিত হয়েছে! পরিবর্তনগুলি প্রয়োগ করতে অনুগ্রহ করে YouTube পৃষ্ঠাটি পুনরায় লোড করুন।",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "ক্যাশ পরিষ্কার করা যায়নি: এক্সটেনশন API উপলব্ধ নেই।",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "YouLy+ সেটিংস",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "সম্পর্কে",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "সেটিংস সংরক্ষিত হয়েছে। পরিবর্তনগুলি প্রয়োগ করতে অনুগ্রহ করে আপনার মিউজিক ট্যাবটি পুনরায় চালু করুন।",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "ট্যাব পুনরায় চালু করুন",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "মূল কার্যকারিতা",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "উপলব্ধ থাকলে ওয়ার্ড-বাই-ওয়ার্ড কারাওকে হাইলাইটিং সক্ষম করুন।",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "YouTube Music সেটিংস",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "ইন্ট্রো, আউটরো বা বিজ্ঞাপন সেগমেন্টের মতো অ-মিউজিক অংশগুলি এড়িয়ে যান।",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Apple Music সেটিংস",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "সক্ষম করা হলে, Apple Music শুধুমাত্র লাইন-বাই-লাইন সিঙ্ক প্রদান করলে অ্যাপটি বাহ্যিক লিরিক্স সোর্স ব্যবহার করবে।",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "সোর্স",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "সোর্স \"$NAME$\" ইতিমধ্যেই আছে।",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "\"$NAME$\" যোগ করা হয়েছে।",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "\"$NAME$\" অপসারিত হয়েছে।",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "স্থানীয় লিরিক্স",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "আপলোড করার সময় ত্রুটি: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,24 +365,32 @@
     "message": "মুছে ফেলার সময় ত্রুটি: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "আপনি কি \"$TITLE$\" মুছে ফেলতে চান?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "স্থানীয় লিরিক্স লোড করার সময় ত্রুটি: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "অনুবাদ",
     "description": "Translation section title"
@@ -511,7 +519,6 @@
     "message": "রোমানাইজেশনের জন্য AI-তে পাঠানো প্রম্পট কাস্টমাইজ করুন।",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "চেহারা",
     "description": "Appearance section title"
@@ -624,7 +631,6 @@
     "message": "লিরিক্স ডিসপ্লেতে আপনার নিজস্ব স্টাইল প্রয়োগ করুন। সাবধানে ব্যবহার করুন।",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "ক্যাশ",
     "description": "Cache section title"
@@ -653,7 +659,6 @@
     "message": "বর্তমান ক্যাশ ব্যবহার",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "সম্পর্কে",
     "description": "About section"
@@ -702,7 +707,6 @@
     "message": "ভালোবাসা দিয়ে তৈরি",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "সেটিংস সফলভাবে এক্সপোর্ট হয়েছে!",
     "description": "Status message"
@@ -711,7 +715,10 @@
     "message": "এক্সপোর্ট করার সময় ত্রুটি: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -722,7 +729,10 @@
     "message": "ইমপোর্ট করার সময় ত্রুটি: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -745,10 +755,12 @@
     "message": "সংস্করণ $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "লিরিক্স",
     "description": "Option in larger text mode dropdown"
@@ -769,7 +781,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (ব্যবহারকারীর অবদান)",
     "description": "Display name for lyricsplus source"
@@ -793,5 +804,65 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (শব্দ)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "পঠনযোগ্যতা",
+    "description": "Section title in popup Appearance tab"
+  },
+  "msgCacheClearFailed": {
+    "message": "ক্যাশে পরিষ্কার করতে ব্যর্থ হয়েছে।",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelProviderOrder": {
+    "message": "লিরিক্স প্রোভাইডারের ক্রম",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "কোন প্রোভাইডার প্রথমে চেক করা হবে তা নির্ধারণ করতে ড্র্যাগ এবং ড্রপ করুন। তালিকার উপরের প্রোভাইডারটি দ্রুততম মাধ্যম হিসেবে কাজ করবে।",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "উপলব্ধ প্রোভাইডার",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "প্রোভাইডার যোগ করুন",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "DeepL সেটিংস",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "বড় টেক্সট",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL এপিআই (API) কি",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "আপনার এপিআই কি স্থানীয়ভাবে সংরক্ষিত থাকে। ফ্রি প্ল্যান কি সাধারণত :fx দিয়ে শেষ হয়।",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "কাস্টম KPoe সার্ভার",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

@@ -7,7 +7,6 @@
     "message": "คุณสมบัติเนื้อเพลงขั้นสูงสำหรับ YouTube Music, Apple Music & Tidal พร้อมการซิงค์แบบบรรทัดต่อบรรทัดและคำต่อคำ",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "การตั้งค่า YouLy+",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "ขั้นสูง",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "คุณสมบัติหลัก",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "รวมกับ SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "การตั้งค่าการแสดงผล",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "ไฮไลต์แบบคำต่อคำ",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "การจัดการข้อมูล",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "การตั้งค่าเพิ่มเติม",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "บันทึกการตั้งค่าแล้ว! โปรดรีเฟรชหน้า YouTube เพื่อใช้การเปลี่ยนแปลง",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "ไม่สามารถล้างแคชได้: API ส่วนขยายไม่พร้อมใช้งาน",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "การตั้งค่า YouLy+",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "เกี่ยวกับ",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "บันทึกการตั้งค่าแล้ว โปรดรีสตาร์ทแท็บเพลงของคุณเพื่อให้การเปลี่ยนแปลงมีผล",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "รีสตาร์ทแท็บ",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "ฟังก์ชันหลัก",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "เปิดใช้งานการไฮไลต์แบบคำต่อคำสไตล์คาราโอเกะเมื่อมีข้อมูล",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "การตั้งค่า YouTube Music",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "ข้ามส่วนที่ไม่ใช่เพลง เช่น ช่วงแนะนำ ช่วงจบ หรือช่วงโฆษณาสปอนเซอร์",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "การตั้งค่า Apple Music",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "หากเปิดใช้งาน แอปจะใช้แหล่งเนื้อเพลงภายนอกหาก Apple Music ให้บริการเฉพาะการซิงค์แบบบรรทัดแทนที่จะเป็นแบบคำต่อคำ",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "แหล่งที่มา",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "มีแหล่งข้อมูล \"$NAME$\" อยู่แล้ว",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "เพิ่ม \"$NAME$\" แล้ว",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "ลบ \"$NAME$\" แล้ว",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "เนื้อเพลงในเครื่อง",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "เกิดข้อผิดพลาดในการอัปโหลดเนื้อเพลง: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,24 +365,32 @@
     "message": "เกิดข้อผิดพลาดในการลบเนื้อเพลง: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "ยืนยันการลบ \"$TITLE$\"?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "เกิดข้อผิดพลาดในการโหลดเนื้อเพลงในเครื่อง: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "การแปล",
     "description": "Translation section title"
@@ -511,7 +519,6 @@
     "message": "กำหนด prompt ที่ส่งไปยัง AI เพื่อการเขียนคำอ่าน",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "รูปลักษณ์",
     "description": "Appearance section title"
@@ -624,7 +631,6 @@
     "message": "ใช้สไตล์ของคุณเองกับการแสดงเนื้อเพลง โปรดใช้ด้วยความระมัดระวัง แนะนำให้ใช้ UserStyles ในการสร้างหรือทดสอบ",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "แคช",
     "description": "Cache section title"
@@ -653,7 +659,6 @@
     "message": "การใช้แคชในปัจจุบัน",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "เกี่ยวกับ",
     "description": "About section"
@@ -702,7 +707,6 @@
     "message": "สร้างขึ้นด้วยความรัก",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "ส่งออกการตั้งค่าสำเร็จแล้ว!",
     "description": "Status message"
@@ -711,7 +715,10 @@
     "message": "เกิดข้อผิดพลาดในการส่งออกการตั้งค่า: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -722,7 +729,10 @@
     "message": "เกิดข้อผิดพลาดในการนำเข้าการตั้งค่า: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -745,10 +755,12 @@
     "message": "เวอร์ชัน $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "เนื้อเพลง",
     "description": "Option in larger text mode dropdown"
@@ -769,7 +781,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (ผลงานผู้ใช้)",
     "description": "Display name for lyricsplus source"
@@ -793,5 +804,61 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (คำต่อคำ)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "ความสามารถในการอ่าน",
+    "description": "Section title in popup Appearance tab"
+  },
+  "labelProviderOrder": {
+    "message": "ลำดับผู้ให้บริการเนื้อเพลง",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "ลากและวางเพื่อจัดลำดับความสำคัญของผู้ให้บริการที่จะถูกตรวจสอบก่อน ผู้ให้บริการที่อยู่ด้านบนสุดจะถูกเลือกใช้งานเป็นช่องทางหลัก",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "ผู้ให้บริการที่มีอยู่",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "เพิ่มผู้ให้บริการ",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "การตั้งค่า DeepL",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "ข้อความขนาดใหญ่",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API Key",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "API Key ของคุณจะถูกจัดเก็บไว้ในเครื่อง คีย์สำหรับแผนฟรีมักจะลงท้ายด้วย :fx",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "เซิร์ฟเวอร์ KPoe แบบกำหนดเอง",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

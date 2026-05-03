@@ -7,7 +7,6 @@
     "message": "Vipengele vya hali ya juu vya mashairi ya YouTube Music, Apple Music na Tidal, vikiwa na usawazishaji wa mstari kwa mstari na neno kwa neno.",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "Mipangilio ya YouLy+",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "Iliyoboreshwa",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "Vipengele vya Msingi",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "Unganisha SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "Mipangilio ya Kuonyesha",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "Uangaziaji wa Neno kwa Neno",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "Usimamizi wa Data",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "Mipangilio Zaidi",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "Mipangilio imehifadhiwa! Pakia upya ukurasa wa YouTube ili kutumia mabadiliko.",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "Haiwezi kufuta cache: API ya kiendelezi haipatikani.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "Mipangilio ya YouLy+",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "Kuhusu",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "Mipangilio imehifadhiwa. Anzisha upya kichupo chako cha muziki ili kutumia mabadiliko.",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "Anzisha upya Vikichupo",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "Utendaji wa Msingi",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "Washa uangaziaji wa karaoke wa neno kwa neno inapopatikana.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "Mipangilio ya YouTube Music",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "Ruka sehemu zisizo za muziki kama vile utangulizi (intro), sehemu za mwisho (outro) au sehemu za matangazo.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Mipangilio ya Apple Music",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "Ikiwashwa, programu itatumia vyanzo vya nje vya mashairi ikiwa Apple Music inatoa usawazishaji wa mstari kwa mstari pekee.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "Vyanzo",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "Chanzo cha \"$NAME$\" tayari kipo.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "Imeongeza chanzo \"$NAME$\".",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "Imeondoa chanzo \"$NAME$\".",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "Mashairi ya Ndani",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "Hitilafu wakati wa kupakia: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,14 +365,20 @@
     "message": "Hitilafu wakati wa kufuta: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "Je, unataka kufuta \"$TITLE$\"?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "confirmClearLocalLyrics": {
@@ -383,10 +389,12 @@
     "message": "Hitilafu wakati wa kupakia mashairi ya ndani: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "Tafsiri",
     "description": "Translation section title"
@@ -515,7 +523,6 @@
     "message": "Binafsisha agizo linalotumwa kwa AI kwa ajili ya uandishi wa Kilatini.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "Muonekano",
     "description": "Appearance section title"
@@ -628,7 +635,6 @@
     "message": "Tumia mitindo yako mwenyewe kwa onyesho la mashairi. Tumia kwa tahadhari.",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "Cache",
     "description": "Cache section title"
@@ -657,7 +663,6 @@
     "message": "Matumizi ya sasa ya cache",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "Kuhusu",
     "description": "About section"
@@ -706,7 +711,6 @@
     "message": "Imetengenezwa kwa upendo",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "Mipangilio imehamishwa kwa mafanikio!",
     "description": "Status message"
@@ -715,7 +719,10 @@
     "message": "Hitilafu wakati wa kuhamisha: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -726,7 +733,10 @@
     "message": "Hitilafu wakati wa kuingiza: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -749,10 +759,12 @@
     "message": "Toleo $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "Mashairi",
     "description": "Option in larger text mode dropdown"
@@ -773,7 +785,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Michango ya Watumiaji)",
     "description": "Display name for lyricsplus source"
@@ -797,5 +808,65 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (Neno)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "Usomekaji",
+    "description": "Section title in popup Appearance tab"
+  },
+  "msgCacheClearFailed": {
+    "message": "Imeshindwa kufuta akiba.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelProviderOrder": {
+    "message": "Mpangilio wa Mtoa Huduma wa Nyimbo",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "Buruta na udondoshe ili kutoa kipaumbele kwa mtoa huduma anayekaguliwa kwanza. Mtoa huduma wa juu hufanya kazi kama njia ya haraka.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Watoa Huduma Wanaopatikana",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Ongeza Mtoa Huduma",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "Mipangilio ya DeepL",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Maandishi Makubwa",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Ufunguo wa DeepL API",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Ufunguo wako wa API umehifadhiwa ndani ya kifaa chako. Funguo za mpango wa bure kwa kawaida huishia na :fx",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "Seva ya KPoe Maalum",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

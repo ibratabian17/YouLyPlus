@@ -7,7 +7,6 @@
     "message": "Avancerede sangtekstfunktioner til YouTube Music, Apple Music og Tidal, med linje-for-linje og ord-for-ord synkronisering.",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "YouLy+ Indstillinger",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "Avanceret",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "Kernefunktioner",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "Integrer SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "Visningsindstillinger",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "Ord-for-ord fremhævning",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "Datastyring",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "Flere indstillinger",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "Indstillinger gemt! Genindlæs YouTube-siden for at anvende ændringer.",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "Kan ikke rydde cache: Udvidelses-API er ikke tilgængelig.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "YouLy+ Indstillinger",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "Om",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "Indstillinger gemt. Genstart din musikfane for at anvende ændringer.",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "Genstart faner",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "Kernefunktionalitet",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "Aktiver ord-for-ord karaoke-fremhævning, når det er tilgængeligt.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "YouTube Music Indstillinger",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "Spring ikke-musikalske dele over, såsom introer, outroer eller reklamesegmenter.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Apple Music Indstillinger",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "Hvis aktiveret, vil appen bruge eksterne tekstkilder, hvis Apple Music kun leverer linje-for-linje synkronisering.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "Kilder",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "Kilden \"$NAME$\" findes allerede.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "Tilføjede kilde \"$NAME$\".",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "Fjernede kilde \"$NAME$\".",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "Lokale tekster",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "Fejl under upload: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,14 +365,20 @@
     "message": "Fejl ved sletning: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "Vil du slette \"$TITLE$\"?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "confirmClearLocalLyrics": {
@@ -383,10 +389,12 @@
     "message": "Fejl ved indlæsning af lokale tekster: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "Oversættelse",
     "description": "Translation section title"
@@ -515,7 +523,6 @@
     "message": "Tilpas den prompt, der sendes til AI for romanisering.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "Udseende",
     "description": "Appearance section title"
@@ -628,7 +635,6 @@
     "message": "Anvend dine egne styles på sangtekstvisningen. Brug med forsigtighed.",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "Cache",
     "description": "Cache section title"
@@ -657,7 +663,6 @@
     "message": "Nuværende cache-forbrug",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "Om",
     "description": "About section"
@@ -706,7 +711,6 @@
     "message": "Lavet med kærlighed",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "Indstillinger eksporteret med succes!",
     "description": "Status message"
@@ -715,7 +719,10 @@
     "message": "Fejl under eksport: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -726,7 +733,10 @@
     "message": "Fejl under import: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -749,10 +759,12 @@
     "message": "Version $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "Sangtekster",
     "description": "Option in larger text mode dropdown"
@@ -773,7 +785,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Brugerbidrag)",
     "description": "Display name for lyricsplus source"
@@ -797,5 +808,65 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (Ord)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "Læsbarhed",
+    "description": "Section title in popup Appearance tab"
+  },
+  "msgCacheClearFailed": {
+    "message": "Kunne ikke rydde cachen.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelProviderOrder": {
+    "message": "Rækkefølge for tekstudbydere",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "Træk og slip for at prioritere, hvilken udbyder der tjekkes først. Den øverste udbyder fungerer som hurtigst mulige valg.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Tilgængelige udbydere",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Tilføj udbyder",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "DeepL-indstillinger",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Større tekst",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API-nøgle",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Din API-nøgle gemmes lokalt. Gratis abonnementsnøgler slutter normalt på :fx",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "Brugerdefineret KPoe-server",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

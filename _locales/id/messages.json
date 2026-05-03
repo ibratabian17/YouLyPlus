@@ -7,7 +7,6 @@
     "message": "Fitur lirik yang ditingkatkan untuk YouTube Music, Apple Music & Tidal dengan sinkronisasi baris demi baris dan kata demi kata",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "Pengaturan YouLy+",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "Lanjutan",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "Fitur Utama",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "Integrasikan SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "Pengaturan Tampilan",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "Penyorotan Kata demi Kata",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "Manajemen Data",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "Pengaturan Lainnya",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "Pengaturan disimpan! Muat ulang halaman YouTube untuk perubahan.",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "Tidak dapat menghapus cache: API Peramban tidak tersedia.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "Pengaturan YouLy+",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "Tentang",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "Pengaturan disimpan. Mulai ulang tab musik Anda agar perubahan diterapkan.",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "Mulai Ulang Tab",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "Fungsi Inti",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "Aktifkan penyorotan kata gaya karaoke jika tersedia.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "Pengaturan YouTube Music",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "Lewati bagian non-musik seperti intro, outro, atau segmen sponsor.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Pengaturan Apple Music",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "Jika diaktifkan, aplikasi akan menggunakan sumber lirik eksternal jika Apple Music hanya menyediakan sinkronisasi baris demi baris, bukan kata demi kata.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "Sumber",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "Sumber \"$NAME$\" sudah ada.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "\"$NAME$\" ditambahkan.",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "\"$NAME$\" dihapus.",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "Lirik Lokal",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "Gagal mengunggah lirik: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,24 +365,32 @@
     "message": "Gagal menghapus lirik: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "Hapus \"$TITLE$\"?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "Gagal memuat lirik lokal: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "Terjemahan",
     "description": "Translation section title"
@@ -511,7 +519,6 @@
     "message": "Sesuaikan prompt yang dikirim ke AI untuk romanisasi.",
     "description": "Teks bantuan"
   },
-
   "sectionAppearance": {
     "message": "Tampilan",
     "description": "Appearance section title"
@@ -624,7 +631,6 @@
     "message": "Terapkan gaya Anda sendiri ke tampilan lirik. Gunakan dengan hatihati. Untuk membuat atau menguji, disarankan menggunakan UserStyles",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "Cache",
     "description": "Cache section title"
@@ -653,7 +659,6 @@
     "message": "Penggunaan Cache Saat Ini",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "Tentang",
     "description": "About section"
@@ -702,7 +707,6 @@
     "message": "Dibuat dengan cinta",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "Pengaturan berhasil diekspor!",
     "description": "Status message"
@@ -711,7 +715,10 @@
     "message": "Gagal mengekspor pengaturan: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -722,7 +729,10 @@
     "message": "Gagal mengimpor pengaturan: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -745,10 +755,12 @@
     "message": "Versi $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "Lirik",
     "description": "Option in larger text mode dropdown"
@@ -769,7 +781,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Konten Pengguna)",
     "description": "Display name for lyricsplus source"
@@ -793,5 +804,61 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (Kata)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "Keterbacaan",
+    "description": "Section title in popup Appearance tab"
+  },
+  "labelProviderOrder": {
+    "message": "Urutan Penyedia Lirik",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "Tarik dan lepas untuk memprioritaskan penyedia mana yang diperiksa terlebih dahulu. Penyedia teratas bertindak sebagai pilihan jalur cepat.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Penyedia yang Tersedia",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Tambah Penyedia",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "Pengaturan DeepL",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Teks Lebih Besar",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Kunci API DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Kunci API Anda disimpan secara lokal. Kunci paket gratis biasanya diakhiri dengan :fx",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "Server KPoe Kustom",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

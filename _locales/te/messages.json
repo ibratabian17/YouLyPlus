@@ -7,7 +7,6 @@
     "message": "లైన్-బై-లైన్ మరియు వర్డ్-బై-వర్డ్ సింక్రొనైజేషన్‌తో YouTube Music, Apple Music మరియు Tidal కోసం అధునాతన లిరిక్స్ ఫీచర్లు.",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "YouLy+ సెట్టింగ్‌లు",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "అధునాతన",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "ప్రధాన ఫీచర్లు",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "SponsorBlock ని అనుసంధానించు",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "డిస్‌ప్లే సెట్టింగ్‌లు",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "వర్డ్-బై-వర్డ్ హైలైటింగ్",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "డేటా నిర్వహణ",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "మరిన్ని సెట్టింగ్‌లు",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "సెట్టింగ్‌లు సేవ్ చేయబడ్డాయి! మార్పులను అమలు చేయడానికి YouTube పేజీని రీలోడ్ చేయండి.",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "కాష్‌ని క్లియర్ చేయడం సాధ్యపడలేదు: ఎక్స్‌టెన్షన్ API అందుబాటులో లేదు.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "YouLy+ సెట్టింగ్‌లు",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "గురించి",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "సెట్టింగ్‌లు సేవ్ చేయబడ్డాయి. మార్పులను అమలు చేయడానికి మీ మ్యూజిక్ ట్యాబ్‌ను రీస్టార్ట్ చేయండి.",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "ట్యాబ్‌లను రీస్టార్ట్ చేయి",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "ప్రధాన కార్యాచరణ",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "అందుబాటులో ఉన్నప్పుడు వర్డ్-బై-వర్డ్ కరోకే హైలైటింగ్‌ను ప్రారంభించండి.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "YouTube Music సెట్టింగ్‌లు",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "పరిచయం, ముగింపు లేదా ప్రకటనల విభాగాలు వంటి సంగీత రహిత భాగాలను దాటవేయండి.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Apple Music సెట్టింగ్‌లు",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "ఎనేబుల్ చేస్తే, Apple Music కేవలం లైన్-బై-లైన్ మాత్రమే అందిస్తే యాప్ బాహ్య లిరిక్స్ మూలాధారాలను ఉపయోగిస్తుంది.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "మూలాధారాలు",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "\"$NAME$\" మూలాధారం ఇప్పటికే ఉంది.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "\"$NAME$\" జోడించబడింది.",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "\"$NAME$\" తీసివేయబడింది.",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "స్థానిక లిరిక్స్",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "అప్‌లోడ్ చేసేటప్పుడు లోపం: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,24 +365,32 @@
     "message": "తొలగించేటప్పుడు లోపం: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "\"$TITLE$\" ని తొలగించాలనుకుంటున్నారా?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "స్థానిక లిరిక్స్‌ను లోడ్ చేసేటప్పుడు లోపం: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "అనువాదం",
     "description": "Translation section title"
@@ -511,7 +519,6 @@
     "message": "రోమనైజేషన్ కోసం AI కి పంపే ప్రాంప్ట్‌ను అనుకూలీకరించండి.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "ప్రదర్శన",
     "description": "Appearance section title"
@@ -624,7 +631,6 @@
     "message": "లిరిక్స్ డిస్‌ప్లేకు మీ స్వంత స్టైల్స్‌ని వర్తింపజేయండి. జాగ్రత్తగా ఉపయోగించండి.",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "కాష్",
     "description": "Cache section title"
@@ -653,7 +659,6 @@
     "message": "ప్రస్తుత కాష్ వినియోగం",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "గురించి",
     "description": "About section"
@@ -702,7 +707,6 @@
     "message": "ప్రేమతో నిర్మించబడింది",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "సెట్టింగ్‌లు విజయవంతంగా ఎగుమతి చేయబడ్డాయి!",
     "description": "Status message"
@@ -711,7 +715,10 @@
     "message": "ఎగుమతి చేసేటప్పుడు లోపం: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -722,7 +729,10 @@
     "message": "దిగుమతి చేసేటప్పుడు లోపం: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -745,10 +755,12 @@
     "message": "వెర్షన్ $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "లిరిక్స్",
     "description": "Option in larger text mode dropdown"
@@ -769,7 +781,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (యూజర్ కాంట్రిబ్యూషన్స్)",
     "description": "Display name for lyricsplus source"
@@ -793,5 +804,65 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (వర్డ్)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "రీడబిలిటీ",
+    "description": "Section title in popup Appearance tab"
+  },
+  "msgCacheClearFailed": {
+    "message": "కాష్‌ను క్లియర్ చేయడం విఫలమైంది.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelProviderOrder": {
+    "message": "లిరిక్స్ ప్రొవైడర్ క్రమం",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "ఏ ప్రొవైడర్‌ను ముందుగా తనిఖీ చేయాలో ప్రాధాన్యత ఇవ్వడానికి డ్రాగ్ అండ్ డ్రాప్ చేయండి. పైన ఉన్న ప్రొవైడర్ వేగవంతమైన ఎంపికగా పనిచేస్తుంది.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "అందుబాటులో ఉన్న ప్రొవైడర్లు",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "ప్రొవైడర్‌ను జోడించండి",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "DeepL సెట్టింగ్‌లు",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "పెద్ద టెక్స్ట్",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API కీ",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "మీ API కీ స్థానికంగా నిల్వ చేయబడుతుంది. ఉచిత ప్లాన్ కీలు సాధారణంగా :fx తో ముగుస్తాయి",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "కస్టమ్ KPoe సర్వర్",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

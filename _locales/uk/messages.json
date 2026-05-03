@@ -7,7 +7,6 @@
     "message": "Покращення текстів пісень для YouTube Music, Apple Music і Tidal із синхронізацією за рядками та словами",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "Налаштування YouLy+",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "Просунуті",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "Базові функції",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "Інтеграція SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionReadability": {
     "message": "Читабельність",
     "description": "Section title in popup Appearance tab"
@@ -62,7 +59,6 @@
     "message": "Підсвічування окремих слів",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "Керування даними",
     "description": "Section title in popup Advanced tab"
@@ -87,7 +83,6 @@
     "message": "Більше налаштувань",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "Налаштування збережено! Перезавантажте вкладки YouTube, щоб зміни набули чинності.",
     "description": "Snackbar message after saving settings in popup"
@@ -116,7 +111,6 @@
     "message": "Неможливо очистити кеш: API розширення недоступне.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "Налаштування YouLy+",
     "description": "Title shown in full settings page header and nav drawer"
@@ -149,7 +143,6 @@
     "message": "Про розширення",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "Налаштування збережено. Перезавантажте вкладки з музикою, щоб зміни набули чинності.",
     "description": "Notification text when no platform tabs are found"
@@ -172,7 +165,6 @@
     "message": "Перезавантажити вкладки",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "Базовий функціонал",
     "description": "Settings category title"
@@ -185,7 +177,6 @@
     "message": "Увімкнути виділення слів у стилі караоке, коли це доступно.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "Налаштування YouTube Music",
     "description": "Settings category title"
@@ -206,7 +197,6 @@
     "message": "Пропускати не музичні фрагменти, такі як вступ, завершення або рекламні вставки.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Налаштування Apple Music",
     "description": "Settings category title"
@@ -219,7 +209,6 @@
     "message": "Якщо увімкнути, розширення використовуватиме зовнішнє джерело текстів пісень, якщо Apple Music забезпечує лише синхронізацію за рядками, а не за словами.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "Джерела",
     "description": "Sources section title"
@@ -280,24 +269,32 @@
     "message": "Джерело «$NAME$» уже існує.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "Додано «$NAME$».",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "Прибрано «$NAME$».",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "Локальні тексти",
     "description": "Local lyrics section title"
@@ -362,7 +359,10 @@
     "message": "Помилка вивантаження тексту: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -377,24 +377,32 @@
     "message": "Помилка видалення тексту: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "Видалити «$TITLE$»?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "Помилка завантаження локальних текстів: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "Переклад",
     "description": "Translation section title"
@@ -523,7 +531,6 @@
     "message": "Налаштуйте запит, що надсилатиметься ШІ для романізації.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "Вигляд",
     "description": "Appearance section title"
@@ -640,7 +647,6 @@
     "message": "Застосуйте власні стилі до відображення тексту пісні. Використовувати з обреженістю. Для створення або тестування рекомендується використовувати UserStyles",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "Кеш",
     "description": "Cache section title"
@@ -669,7 +675,6 @@
     "message": "Поточне використання кешу",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "Про розширення",
     "description": "About section"
@@ -718,7 +723,6 @@
     "message": "Зроблено з любов’ю",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "Успішно експортовано налаштування!",
     "description": "Status message"
@@ -727,7 +731,10 @@
     "message": "Помилка експортування налаштувань: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -738,7 +745,10 @@
     "message": "Помилка імпортування налаштувань: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -761,10 +771,12 @@
     "message": "Версія $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "Текст пісні",
     "description": "Option in larger text mode dropdown"
@@ -785,7 +797,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (від користувачів)",
     "description": "Display name for lyricsplus source"
@@ -823,7 +834,23 @@
     "description": "LRCLIB provider name"
   },
   "sourceNameUnison": {
-    "message": "Unison (Better Lyrics)",
+    "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "categoryDeepLSettings": {
+    "message": "Налаштування DeepL",
+    "description": "Category title"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Ключ API DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Ваш ключ API зберігається локально. Ключі безкоштовного тарифного плану зазвичай закінчуються на :fx",
+    "description": "Helper text"
   }
 }

@@ -7,7 +7,6 @@
     "message": "針對 YouTube Music、Apple Music 及 Tidal 的進階歌詞功能，支援逐行及逐字同步。",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "YouLy+ 設定",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "進階",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "核心功能",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "整合 SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "顯示設定",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "逐字高亮",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "資料管理",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "更多設定",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "設定已儲存！請重新整理 YouTube 頁面以套用變更。",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "無法清除快取：擴充功能 API 無法使用。",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "YouLy+ 設定",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "關於",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "設定已儲存。請重新啟動音樂分頁以套用變更。",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "重新啟動分頁",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "核心功能",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "啟用卡拉 OK 風格的逐字高亮（如果可用）。",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "YouTube Music 設定",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "跳過非音樂部分，如片頭、片尾或贊助片段。",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Apple Music 設定",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "啟用後，如果 Apple Music 僅提供逐行同步而非逐字同步，應用程式將使用外部歌詞來源。",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "來源",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "來源 \"$NAME$\" 已存在。",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "\"$NAME$\" 已新增。",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "\"$NAME$\" 已移除。",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "本機歌詞",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "上傳歌詞時發生錯誤：$ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,24 +365,32 @@
     "message": "刪除歌詞時發生錯誤：$ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "確定要刪除「$TITLE$」嗎？",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "載入本機歌詞時發生錯誤：$ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "翻譯",
     "description": "Translation section title"
@@ -511,7 +519,6 @@
     "message": "自訂發送到 AI 用於拼音/注音的提示詞。",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "外觀",
     "description": "Appearance section title"
@@ -624,7 +631,6 @@
     "message": "為歌詞顯示套用您自己的樣式。請謹慎使用。建議使用 UserStyles 進行建立或測試。",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "快取",
     "description": "Cache section title"
@@ -653,7 +659,6 @@
     "message": "目前快取用量",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "關於",
     "description": "About section"
@@ -702,7 +707,6 @@
     "message": "用心製作",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "設定匯出成功！",
     "description": "Status message"
@@ -711,7 +715,10 @@
     "message": "匯出設定時發生錯誤：$ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -722,7 +729,10 @@
     "message": "匯入設定時發生錯誤：$ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -745,10 +755,12 @@
     "message": "版本 $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "歌詞",
     "description": "Option in larger text mode dropdown"
@@ -769,7 +781,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (使用者生成)",
     "description": "Display name for lyricsplus source"
@@ -793,5 +804,61 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (單字)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "可讀性",
+    "description": "Section title in popup Appearance tab"
+  },
+  "labelProviderOrder": {
+    "message": "歌詞來源優先順序",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "拖曳以排列優先順序。排在最上方的來源將作為首選。",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "可用來源",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "新增來源",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "DeepL 設定",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "放大文字",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API 金鑰",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "您的 API 金鑰將儲存在本地。免費方案的金鑰通常以 :fx 結尾。",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "自訂 KPoe 伺服器",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

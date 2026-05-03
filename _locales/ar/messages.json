@@ -7,7 +7,6 @@
     "message": "ميزات كلمات أغاني متقدمة لـ YouTube Music وApple Music وTidal مع مزامنة سطر بسطر وكلمة بكلمة.",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "إعدادات YouLy+",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "متقدم",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "الميزات الأساسية",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "دمج SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "إعدادات العرض",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "تمبيز كلمة بكلمة",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "إدارة البيانات",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "مزيد من الإعدادات",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "تم حفظ الإعدادات! يرجى إعادة تحميل صفحة YouTube لتطبيق التغييرات.",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "تعذر مسح ذاكرة التخزين المؤقت: واجهة برمجة تطبيقات الإضافة غير متوفرة.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "إعدادات YouLy+",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "حول",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "تم حفظ الإعدادات. يرجى إعادة تشغيل علامة تبويب الموسيقى لتطبيق التغييرات.",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "إعادة تشغيل علامات التبويب",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "الوظائف الأساسية",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "تفعيل تمييز الكلمات كلمة بكلمة بنمط الكاراوكي عند التوفر.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "إعدادات YouTube Music",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "تخطي الأجزاء غير الموسيقية مثل المقدمات أو الخواتم أو المقاطع الإعلانية.",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "إعدادات Apple Music",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "إذا تم تفعيله، سيستخدم التطبيق مصادر كلمات خارجية إذا كان Apple Music يوفر مزامنة سطر بسطر فقط.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "المصادر",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "المصدر \"$NAME$\" موجود بالفعل.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "تم إضافة \"$NAME$\".",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "تم إزالة \"$NAME$\".",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "كلمات أغاني محلية",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "خطأ أثناء الرفع: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,24 +365,32 @@
     "message": "خطأ أثناء الحذف: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "هل تريد حذف \"$TITLE$\"؟",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "خطأ أثناء تحميل الكلمات المحلية: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "الترجمة",
     "description": "Translation section title"
@@ -511,7 +519,6 @@
     "message": "خصص الأمر المرسل للذكاء الاصطناعي للرومنة.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "المظهر",
     "description": "Appearance section title"
@@ -624,7 +631,6 @@
     "message": "طبق تنسيقاتك الخاصة على عرض الكلمات. استخدمه بحذر.",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "ذاكرة التخزين المؤقت",
     "description": "Cache section title"
@@ -653,7 +659,6 @@
     "message": "استخدام ذاكرة التخزين المؤقت الحالي",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "حول",
     "description": "About section"
@@ -702,7 +707,6 @@
     "message": "صنع بكل حب",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "تم تصدير الإعدادات بنجاح!",
     "description": "Status message"
@@ -711,7 +715,10 @@
     "message": "خطأ أثناء التصدير: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -722,7 +729,10 @@
     "message": "خطأ أثناء الاستيراد: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -745,10 +755,12 @@
     "message": "الإصدار $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "كلمات الأغاني",
     "description": "Option in larger text mode dropdown"
@@ -769,7 +781,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (مساهمات المستخدمين)",
     "description": "Display name for lyricsplus source"
@@ -793,5 +804,61 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (كلمة)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "قابلية القراءة",
+    "description": "Section title in popup Appearance tab"
+  },
+  "labelProviderOrder": {
+    "message": "ترتيب مزودي الكلمات",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "اسحب وأفلت لترتيب أولوية فحص المزودين. المزود في الأعلى يعمل كخيار سريع.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "المزودون المتاحون",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "إضافة مزود",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "إعدادات DeepL",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "نص أكبر",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "مفتاح DeepL API",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "يتم تخزين مفتاح API الخاص بك محلياً. عادة ما تنتهي مفاتيح الخطة المجانية بـ :fx",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "خادم KPoe مخصص",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }

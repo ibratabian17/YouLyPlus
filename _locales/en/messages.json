@@ -839,7 +839,7 @@
     "description": "LRCLIB provider name"
   },
   "sourceNameUnison": {
-    "message": "Unison (Better Lyrics)",
+    "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
   }
 }

@@ -7,7 +7,6 @@
     "message": "YouTube Music、Apple Music、Tidal向けの高度な歌詞機能。行ごとおよび単語ごとの同期に対応。",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "YouLy+ 設定",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "詳細",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "主要機能",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "SponsorBlock と統合",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionDisplaySettings": {
     "message": "表示設定",
     "description": "Section title in popup Appearance tab"
@@ -58,7 +55,6 @@
     "message": "単語ごとのハイライト",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "データ管理",
     "description": "Section title in popup Advanced tab"
@@ -83,7 +79,6 @@
     "message": "詳細設定",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "設定を保存しました。変更を適用するにはYouTubeのページを再読み込みしてください。",
     "description": "Snackbar message after saving settings in popup"
@@ -112,7 +107,6 @@
     "message": "キャッシュを消去できません: 拡張機能APIが利用不可です。",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "YouLy+ 設定",
     "description": "Title shown in full settings page header and nav drawer"
@@ -145,7 +139,6 @@
     "message": "この拡張機能について",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "設定を保存しました。変更を適用するには音楽タブを再起動してください。",
     "description": "Notification text when no platform tabs are found"
@@ -168,7 +161,6 @@
     "message": "タブを再起動",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "コア機能",
     "description": "Settings category title"
@@ -181,7 +173,6 @@
     "message": "利用可能な場合にカラオケスタイルの単語ハイライトを有効にします。",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "YouTube Music 設定",
     "description": "Settings category title"
@@ -202,7 +193,6 @@
     "message": "イントロ、アウトロ、スポンサーセグメントなどの音楽以外のセクションをスキップします。",
     "description": "Description for SponsorBlock toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Apple Music 設定",
     "description": "Settings category title"
@@ -215,7 +205,6 @@
     "message": "有効にすると、Apple Music が行ごとの同期のみを提供し、単語ごとの同期を提供しない場合に、外部の歌詞ソースを使用します。",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "ソース",
     "description": "Sources section title"
@@ -268,24 +257,32 @@
     "message": "ソース「$NAME$」は既に追加されています。",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "「$NAME$」を追加しました。",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "「$NAME$」を削除しました。",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "ローカル歌詞",
     "description": "Local lyrics section title"
@@ -350,7 +347,10 @@
     "message": "歌詞のアップロード中にエラーが発生しました: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -365,24 +365,32 @@
     "message": "歌詞の削除中にエラーが発生しました: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "「$TITLE$」を削除しますか？",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "ローカル歌詞の読み込み中にエラーが発生しました: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "翻訳",
     "description": "Translation section title"
@@ -511,7 +519,6 @@
     "message": "AI に送信する発音ガイドプロンプトをカスタマイズします。",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "外観",
     "description": "Appearance section title"
@@ -624,7 +631,6 @@
     "message": "歌詞の表示に独自のスタイルを適用します。注意して使用してください。作成やテストには UserStyles の使用をお勧めします。",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "キャッシュ",
     "description": "Cache section title"
@@ -653,7 +659,6 @@
     "message": "現在のキャッシュ使用量",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "この拡張機能について",
     "description": "About section"
@@ -702,7 +707,6 @@
     "message": "愛を込めて作成",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "設定を正常にエクスポートしました！",
     "description": "Status message"
@@ -711,7 +715,10 @@
     "message": "設定のエクスポート中にエラーが発生しました: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -722,7 +729,10 @@
     "message": "設定のインポート中にエラーが発生しました: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -745,10 +755,12 @@
     "message": "バージョン $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "歌詞",
     "description": "Option in larger text mode dropdown"
@@ -769,7 +781,6 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (ユーザー投稿)",
     "description": "Display name for lyricsplus source"
@@ -793,5 +804,61 @@
   "sourceNameMusixmatchWord": {
     "message": "Musixmatch (単語同期)",
     "description": "Display name for musixmatch-word source"
+  },
+  "sectionReadability": {
+    "message": "読みやすさ",
+    "description": "Section title in popup Appearance tab"
+  },
+  "labelProviderOrder": {
+    "message": "歌詞プロバイダーの優先順位",
+    "description": "Label for provider order configuration"
+  },
+  "helperProviderOrder": {
+    "message": "ドラッグ＆ドロップで検索の優先順位を変更します。一番上のプロバイダーが優先的に使用されます。",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "利用可能なプロバイダー",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "プロバイダーを追加",
+    "description": "Add provider button text"
+  },
+  "categoryDeepLSettings": {
+    "message": "DeepL設定",
+    "description": "Category title"
+  },
+  "labelLargerTextModeShort": {
+    "message": "文字サイズを拡大",
+    "description": "Dropdown label"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL APIキー",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "APIキーはローカルに保存されます。Freeプランのキーは通常 :fx で終わります。",
+    "description": "Helper text"
+  },
+  "sourceNameLyricsPlusProvider": {
+    "message": "Lyrics+",
+    "description": "Provider generic name"
+  },
+  "sourceNameCustomKpoe": {
+    "message": "カスタムKPoeサーバー",
+    "description": "Provider generic name for custom KPoe server"
+  },
+  "sourceNameLRCLib": {
+    "message": "LRCLIB",
+    "description": "LRCLIB provider name"
+  },
+  "sourceNameUnison": {
+    "message": "Unison (BetterLyrics)",
+    "description": "Unison provider name"
   }
 }
