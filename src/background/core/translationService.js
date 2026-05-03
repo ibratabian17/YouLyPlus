@@ -12,6 +12,7 @@ import { LyricsService } from './lyricsService.js';
 import { GoogleProvider } from '../services/translation/providers/GoogleProvider.js';
 import { GeminiProvider } from '../services/translation/providers/GeminiProvider.js';
 import { OpenRouterProvider } from '../services/translation/providers/OpenRouterProvider.js';
+import { DeepLProvider } from '../services/translation/providers/DeepLProvider.js';
 
 export class TranslationService {
   static createCacheKey(songInfo, action, targetLang) {
@@ -95,6 +96,8 @@ export class TranslationService {
         return new GeminiProvider(settings);
       case PROVIDERS.OPENROUTER:
         return new OpenRouterProvider(settings);
+      case PROVIDERS.DEEPL:
+        return new DeepLProvider(settings);
       case PROVIDERS.GOOGLE:
       default:
         return new GoogleProvider(settings);

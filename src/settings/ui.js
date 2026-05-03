@@ -127,6 +127,7 @@ function setupAutoSaveListeners() {
         { id: 'gemini-model', key: 'geminiModel', type: 'value' },
         { id: 'openrouter-api-key', key: 'openRouterApiKey', type: 'value', debounce: 500 },
         { id: 'openrouter-model', key: 'openRouterModel', type: 'value', debounce: 500 },
+        { id: 'deepl-api-key', key: 'deeplApiKey', type: 'value', debounce: 500 },
         { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' },
         { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' },
         { id: 'override-translate-target', key: 'overrideTranslateTarget', type: 'checkbox' },
@@ -212,6 +213,8 @@ function updateUI(settings) {
     updateCustomSelectDisplay('gemini-model');
     setVal('openrouter-api-key', currentSettings.openRouterApiKey);
     setVal('openrouter-model', currentSettings.openRouterModel);
+    setVal('deepl-api-key', currentSettings.deeplApiKey);
+    document.getElementById('deepl-api-key').type = 'password';
 
     setVal('romanization-provider', currentSettings.romanizationProvider);
     updateCustomSelectDisplay('romanization-provider');
@@ -249,6 +252,7 @@ function updateUI(settings) {
     toggleCustomKpoeUrlVisibility();
     toggleGeminiSettingsVisibility();
     toggleOpenRouterSettingsVisibility();
+    toggleDeepLSettingsVisibility();
     toggleTranslateTargetVisibility();
     toggleGeminiPromptVisibility();
     toggleGeminiRomanizePromptVisibility();
@@ -801,6 +805,7 @@ document.getElementById('translation-provider').addEventListener('change', (e) =
     currentSettings.translationProvider = e.target.value;
     toggleGeminiSettingsVisibility();
     toggleOpenRouterSettingsVisibility();
+    toggleDeepLSettingsVisibility();
 });
 
 function toggleElementVisibility(elementId, isVisible) {
@@ -848,6 +853,11 @@ function toggleOpenRouterSettingsVisibility() {
     const isTranslationOpenRouter = document.getElementById('translation-provider').value === 'openrouter';
     const isRomanizationOpenRouter = document.getElementById('romanization-provider').value === 'openrouter';
     toggleElementVisibility('openrouter-settings-category', isTranslationOpenRouter || isRomanizationOpenRouter);
+}
+
+function toggleDeepLSettingsVisibility() {
+    const isDeepL = document.getElementById('translation-provider').value === 'deepl';
+    toggleElementVisibility('deepl-settings-category', isDeepL);
 }
 
 function toggleTranslateTargetVisibility() {
@@ -1004,6 +1014,18 @@ document.getElementById('toggle-gemini-api-key-visibility').addEventListener('cl
 document.getElementById('toggle-openrouter-api-key-visibility').addEventListener('click', () => {
     const apiKeyInput = document.getElementById('openrouter-api-key');
     const iconSvg = document.querySelector('#toggle-openrouter-api-key-visibility .icon-svg');
+    if (apiKeyInput.type === 'password') {
+        apiKeyInput.type = 'text';
+        swapSvgIconPath(iconSvg, SVG_ICONS.visibilityOff);
+    } else {
+        apiKeyInput.type = 'password';
+        swapSvgIconPath(iconSvg, SVG_ICONS.visibility);
+    }
+});
+
+document.getElementById('toggle-deepl-api-key-visibility').addEventListener('click', () => {
+    const apiKeyInput = document.getElementById('deepl-api-key');
+    const iconSvg = document.querySelector('#toggle-deepl-api-key-visibility .icon-svg');
     if (apiKeyInput.type === 'password') {
         apiKeyInput.type = 'text';
         swapSvgIconPath(iconSvg, SVG_ICONS.visibilityOff);

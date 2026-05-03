@@ -431,6 +431,10 @@
     "message": "OpenRouter Settings",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "DeepL Settings",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "OpenRouter API Key",
     "description": "Input label"
@@ -784,6 +788,18 @@
   "optionOpenRouter": {
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
+  },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API Key",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Your API key is stored locally. Free plan keys usually end with :fx",
+    "description": "Helper text"
   },
 
   "sourceNameLyricsPlus": {

@@ -43,7 +43,8 @@ export const PROVIDERS = {
   LOCAL: 'local',
   GEMINI: 'gemini',
   GOOGLE: 'google',
-  OPENROUTER: 'openrouter'
+  OPENROUTER: 'openrouter',
+  DEEPL: 'deepl'
 };
 
 export const MESSAGE_TYPES = {

@@ -38,7 +38,8 @@ const defaultSettings = {
     appleMusicTTMLBypass: false,
     YTSongInfo: false,
     openRouterApiKey: '',
-    openRouterModel: 'google/gemma-3n-e2b-it:free'
+    openRouterModel: 'google/gemma-3n-e2b-it:free',
+    deeplApiKey: ''
 };
 
 let currentSettings = { ...defaultSettings };

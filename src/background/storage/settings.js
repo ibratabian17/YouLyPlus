@@ -35,7 +35,8 @@ export class SettingsManager {
       'overrideGeminiRomanizePrompt': false,
       'customGeminiRomanizePrompt': '',
       'openRouterApiKey': '',
-      'openRouterModel': 'google/gemini-2.0-flash-001'
+      'openRouterModel': 'google/gemini-2.0-flash-001',
+      'deeplApiKey': ''
     });
   }
 }

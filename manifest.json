@@ -9,7 +9,13 @@
   ],
   "host_permissions": [
     "*://*.music.youtube.com/*",
-    "*://*.tidal.com/*"
+    "*://*.tidal.com/*",
+    "*://*.music.apple.com/*",
+    "https://api.deepl.com/*",
+    "https://api-free.deepl.com/*",
+    "https://translate.googleapis.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://openrouter.ai/api/*"
   ],
   "action": {
     "default_popup": "src/popup/ui.html",
