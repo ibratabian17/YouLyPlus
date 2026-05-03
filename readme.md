@@ -73,12 +73,16 @@ For the safest and easiest experience, install YouLy+ directly from your browser
 Once installed, simply open one of the supported players:
 * **[YouTube Music](https://music.youtube.com/)**
 * **[Tidal Web Player](https://listen.tidal.com/)** *(Experimental)*
-* **[Apple Music Web](https://music.apple.com/)** *(Experimental)*
+* **[Apple Music Web](https://music.apple.com/)**
 
 Play any song, and the lyrics panel will automatically be enhanced by YouLy+.
 
 -   **Quick Settings:** Access quick toggles by clicking the YouLy+ icon in your browser's toolbar.
 -   **Full Settings:** For comprehensive customization, click **"More Settings"** from the popup.
+
+## Notes
+
+* Due to TIDAL updated the UI recently, the extension may lack of some features. I will try my best to fix them as soon as possible.
 
 ## Features
 
