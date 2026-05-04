@@ -225,10 +225,14 @@
 
         let videoId = "";
         let duration = 0;
+        let audioTrackData = null;
 
         try {
             if (player.getVideoData) videoId = player.getVideoData().video_id;
             if (player.getDuration) duration = player.getDuration();
+            if (player.getAudioTrack && typeof player.getAudioTrack === 'function') {
+                audioTrackData = player.getAudioTrack();
+            }
         } catch (e) { return; }
 
         if (!videoId) {
@@ -260,7 +264,8 @@
                 duration: finalDuration,
                 videoId,
                 artwork: finalArtwork,
-                isVideo: !finalAlbum
+                isVideo: !finalAlbum,
+                subtitle: audioTrackData
             };
 
             startTimeUpdater();
