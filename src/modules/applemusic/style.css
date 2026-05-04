@@ -2,13 +2,15 @@
     --lyrics-scroll-padding-top: 36%;
 }
 
-.lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)) {
+.lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)),
+.lyrics__container.is-lyrics-off.svelte-1n2xfan.svelte-1n2xfan:has(#lyplus-patch-container:not(.lyrics-hidden)) {
     grid-template-columns: 32vw 40vw;
     padding: 0 10vw;
 }
 
 @media (min-width: 1680px) {
-    .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)) {
+    .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)),
+    .lyrics__container.is-lyrics-off.svelte-1n2xfan.svelte-1n2xfan:has(#lyplus-patch-container:not(.lyrics-hidden)) {
         grid-template-columns: 31vw 38vw !important;
         padding: 0 12vw !important;
         column-gap: 5vw;
@@ -16,14 +18,16 @@
 }
 
 @media (min-width: 2000px) {
-    .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)) {
+    .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)),
+    .lyrics__container.is-lyrics-off.svelte-1n2xfan.svelte-1n2xfan:has(#lyplus-patch-container:not(.lyrics-hidden)) {
         grid-template-columns: 30vw 38vw !important;
         padding: 0 13vw !important;
     }
 }
 
 @media (min-width: 2561px) {
-    .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)) {
+    .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)),
+    .lyrics__container.is-lyrics-off.svelte-1n2xfan.svelte-1n2xfan:has(#lyplus-patch-container:not(.lyrics-hidden)) {
         grid-template-columns: calc(30% + 199.68px) calc(38% + 252.928px) !important;
         padding: 0 13% !important;
     }
@@ -65,8 +69,6 @@ body:has([data-testid="modal"]) main {
     mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 26%, black 70%, transparent 100%);
     overflow: scroll;
-    scrollbar-width: none;
-
     scroll-padding-top: 36%;
     scroll-padding-block-start: 36%;
     overflow-anchor: auto;

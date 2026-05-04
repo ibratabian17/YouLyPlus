@@ -176,10 +176,9 @@ function injectShowHideButton(retryCount = 0) {
 
 function disableNativeLyrics() {
     const lyricsArticle = document.querySelector('article.lyrics__container[data-testid="lyrics-fullscreen-modal"]');
-    const lyricsToggleBtn = document.querySelector('article.lyrics__container[data-testid="lyrics-fullscreen-modal"] .toggle-button.toggle-button--lyrics.lyrics-button.svelte-tqm8hb');
+    const lyricsToggleBtn = document.querySelector('article.lyrics__container[data-testid="lyrics-fullscreen-modal"] .toggle-button.toggle-button--lyrics.lyrics-button');
 
     if (lyricsArticle && lyricsToggleBtn) {
-        // if 'is-lyrics-off' is MISSING, native lyrics are VISIBLE (Active).
         const isNativeLyricsVisible = !lyricsArticle.classList.contains('is-lyrics-off');
 
         if (isNativeLyricsVisible) {
@@ -206,7 +205,7 @@ function setupObservers() {
         setTimeout(setupObservers, 1000);
     }
 
-    const lyricsButton = document.querySelector('[data-testid="lyrics-button"]');
+    const lyricsButton = document.querySelector('[data-testid="lyrics-button"], .toggle-button--lyrics');
     if (lyricsButton) {
         lyricsButton.addEventListener('click', () => {
             setTimeout(tryInject, 100);
