@@ -186,8 +186,12 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response {
     visibility: hidden !important;
 }
 
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container {
+    --webgl-post-process: brightness(0.5) saturate(3) contrast(0.95);
+    --webgl-post-process-tick: 1;
+}
+
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container::after {
-    backdrop-filter: brightness(0.5) saturate(3) contrast(0.95);
     background-color: #22222227;
 }
 
@@ -582,9 +586,14 @@ Lyrics+ without any visual bug*/
     }
 
 
+    body:has(#ThemeSong-MainContainer #DynamicLight) .lyplus-blur-container,
+    body:has(#ThemeSong-MainContainer #StaticLight) .lyplus-blur-container {
+        --webgl-post-process: saturate(2);
+        --webgl-post-process-tick: 2;
+    }
+
     body:has(#ThemeSong-MainContainer #DynamicLight) .lyplus-blur-container::after,
     body:has(#ThemeSong-MainContainer #StaticLight) .lyplus-blur-container::after {
-        backdrop-filter: saturate(2);
         background-color: transparent;
     }
 

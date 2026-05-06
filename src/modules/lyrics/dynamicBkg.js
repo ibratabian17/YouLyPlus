@@ -2,6 +2,7 @@
 let gl = null;
 let glProgram = null;
 let blurProgram = null;
+let postProgram = null;  // post-process pass
 let webglCanvas = null;
 let blurContainerElem = null;
 let needsAnimation = false;
@@ -16,11 +17,24 @@ let u_main_artworkTexture = null;
 let u_main_transitionProgress = null;
 let u_main_layerTransform = null; // [rotation, scale, offsetX, offsetY]
 
-// Uniform locations
+// Uniform locations - Blur
 let u_blur_image = null;
 let u_blur_resolution = null;
 let u_blur_direction = null;
 let u_blur_radius = null;
+
+// Uniform locations - Post-process
+let u_post_image = null;
+let u_post_brightness = null;
+let u_post_saturate = null;
+let u_post_contrast = null;
+let u_post_hueRotate = null;
+let u_post_opacity = null;
+let postVAO = null;
+
+// Cached post-process values
+let _postParams = { brightness: 0.7, saturate: 3.0, contrast: 0.95, hueRotate: 0.0, opacity: 1.0 };
+let _postParamsDirty = true;
 
 // WebGL objects
 let positionBuffer;
@@ -31,6 +45,7 @@ let previousArtworkTexture = null;
 // Framebuffers
 let renderFramebuffer = null;
 let blurFramebuffer = null;
+let postFramebuffer = null;
 let renderTexture = null;
 let blurTextureA = null;
 
@@ -319,6 +334,97 @@ const blurFragmentShaderSource = `
     }
 `;
 
+const postFragmentShaderSource = `
+    #ifdef GL_ES
+    precision mediump float;
+    #endif
+
+    varying vec2 v_texCoord;
+    uniform sampler2D u_image;
+    uniform float u_brightness;
+    uniform float u_saturate;
+    uniform float u_contrast;
+    uniform float u_hueRotate;
+    uniform float u_opacity;
+
+    vec3 rgb2hsl(vec3 c) {
+        float maxC = max(c.r, max(c.g, c.b));
+        float minC = min(c.r, min(c.g, c.b));
+        float l = (maxC + minC) * 0.5;
+        float d = maxC - minC;
+        if (d < 0.0001) return vec3(0.0, 0.0, l);
+        float s = d / (1.0 - abs(2.0 * l - 1.0));
+        float h;
+        if (maxC == c.r)      h = mod((c.g - c.b) / d, 6.0);
+        else if (maxC == c.g) h = (c.b - c.r) / d + 2.0;
+        else                  h = (c.r - c.g) / d + 4.0;
+        h /= 6.0;
+        return vec3(h, s, l);
+    }
+
+    float hue2rgb(float p, float q, float t) {
+        if (t < 0.0) t += 1.0;
+        if (t > 1.0) t -= 1.0;
+        if (t < 1.0/6.0) return p + (q - p) * 6.0 * t;
+        if (t < 0.5)     return q;
+        if (t < 2.0/3.0) return p + (q - p) * (2.0/3.0 - t) * 6.0;
+        return p;
+    }
+
+    vec3 hsl2rgb(vec3 hsl) {
+        float h = hsl.x, s = hsl.y, l = hsl.z;
+        if (s < 0.0001) return vec3(l);
+        float q = l < 0.5 ? l * (1.0 + s) : l + s - l * s;
+        float p = 2.0 * l - q;
+        return vec3(
+            hue2rgb(p, q, h + 1.0/3.0),
+            hue2rgb(p, q, h),
+            hue2rgb(p, q, h - 1.0/3.0)
+        );
+    }
+
+    void main() {
+        vec4 src = texture2D(u_image, v_texCoord);
+        vec3 c = src.rgb;
+        c *= u_brightness;
+        float luma = dot(c, vec3(0.2126, 0.7152, 0.0722));
+        c = mix(vec3(luma), c, u_saturate);
+        c = (c - 0.5) * u_contrast + 0.5;
+        if (abs(u_hueRotate) > 0.0001) {
+            vec3 hsl = rgb2hsl(clamp(c, 0.0, 1.0));
+            hsl.x = fract(hsl.x + u_hueRotate / 6.28318530718);
+            c = hsl2rgb(hsl);
+        }
+        c = clamp(c, 0.0, 1.0);
+        gl_FragColor = vec4(c, src.a * u_opacity);
+    }
+`;
+
+function _parsePostProcess(str) {
+    const out = { brightness: 1.0, saturate: 1.0, contrast: 1.0, hueRotate: 0.0, opacity: 1.0 };
+    if (!str || !str.trim()) return out;
+    const re = /([\w-]+)\(([^)]+)\)/g;
+    let m;
+    while ((m = re.exec(str)) !== null) {
+        const fn = m[1].toLowerCase();
+        const raw = m[2].trim();
+        const num = parseFloat(raw);
+        if      (fn === 'brightness')  out.brightness = isNaN(num) ? 1.0 : num;
+        else if (fn === 'saturate')    out.saturate   = isNaN(num) ? 1.0 : num;
+        else if (fn === 'contrast')    out.contrast   = isNaN(num) ? 1.0 : num;
+        else if (fn === 'opacity')     out.opacity    = isNaN(num) ? 1.0 : num;
+        else if (fn === 'hue-rotate')  out.hueRotate  = raw.endsWith('rad') ? num : (num * Math.PI) / 180.0;
+    }
+    return out;
+}
+
+function _readPostParamsFromCSS() {
+    if (!blurContainerElem) return;
+    const raw = getComputedStyle(blurContainerElem).getPropertyValue('--webgl-post-process');
+    _postParams = _parsePostProcess(raw);
+    _postParamsDirty = false;
+}
+
 function handleContextLost(event) {
     event.preventDefault();
     console.warn("LYPLUS: WebGL context lost.");
@@ -398,6 +504,11 @@ function LYPLUS_setupBlurEffect() {
     blurContainerElem.appendChild(webglCanvas);
     (document.querySelector(LYPLUS_bgConfig.blurContainerParentSelector) || document.body).prepend(blurContainerElem);
 
+    blurContainerElem.style.transition = '--webgl-post-process-tick 0.001ms step-start';
+    blurContainerElem.addEventListener('transitionstart', (e) => {
+        if (e.propertyName === '--webgl-post-process-tick') _postParamsDirty = true;
+    });
+
     const ctxAttribs = { alpha: false, depth: false, stencil: false, antialias: false, preserveDrawingBuffer: false };
     try {
         gl = webglCanvas.getContext('webgl', ctxAttribs) || webglCanvas.getContext('experimental-webgl', ctxAttribs);
@@ -434,11 +545,13 @@ function LYPLUS_setupBlurEffect() {
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const mainFragShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
     const blurFragShader = createShader(gl, gl.FRAGMENT_SHADER, blurFragmentShaderSource);
+    const postFragShader = createShader(gl, gl.FRAGMENT_SHADER, postFragmentShaderSource);
 
-    if (!vertexShader || !mainFragShader || !blurFragShader) return null;
+    if (!vertexShader || !mainFragShader || !blurFragShader || !postFragShader) return null;
 
-    glProgram = createProgram(gl, vertexShader, mainFragShader);
+    glProgram   = createProgram(gl, vertexShader, mainFragShader);
     blurProgram = createProgram(gl, vertexShader, blurFragShader);
+    postProgram = createProgram(gl, vertexShader, postFragShader);
 
     // Locations - Main
     const a_pos = gl.getAttribLocation(glProgram, 'a_position');
@@ -454,6 +567,16 @@ function LYPLUS_setupBlurEffect() {
     u_blur_resolution = gl.getUniformLocation(blurProgram, 'u_resolution');
     u_blur_direction = gl.getUniformLocation(blurProgram, 'u_direction');
     u_blur_radius = gl.getUniformLocation(blurProgram, 'u_blurRadius');
+
+    // Locations - Post-process
+    const a_post_pos = gl.getAttribLocation(postProgram, 'a_position');
+    const a_post_tex = gl.getAttribLocation(postProgram, 'a_texCoord');
+    u_post_image      = gl.getUniformLocation(postProgram, 'u_image');
+    u_post_brightness = gl.getUniformLocation(postProgram, 'u_brightness');
+    u_post_saturate   = gl.getUniformLocation(postProgram, 'u_saturate');
+    u_post_contrast   = gl.getUniformLocation(postProgram, 'u_contrast');
+    u_post_hueRotate  = gl.getUniformLocation(postProgram, 'u_hueRotate');
+    u_post_opacity    = gl.getUniformLocation(postProgram, 'u_opacity');
 
     // Buffers
     positionBuffer = gl.createBuffer();
@@ -499,7 +622,24 @@ function LYPLUS_setupBlurEffect() {
         gl.vertexAttribPointer(a_blur_tex, 2, gl.FLOAT, false, 0, 0);
 
         vaoExt.bindVertexArrayOES(null);
+
+        // Pre-record state for Post-process Program
+        postVAO = vaoExt.createVertexArrayOES();
+        vaoExt.bindVertexArrayOES(postVAO);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.enableVertexAttribArray(a_post_pos);
+        gl.vertexAttribPointer(a_post_pos, 2, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+        gl.enableVertexAttribArray(a_post_tex);
+        gl.vertexAttribPointer(a_post_tex, 2, gl.FLOAT, false, 0, 0);
+
+        vaoExt.bindVertexArrayOES(null);
     }
+
+    // Read initial post-process params from CSS
+    _postParamsDirty = true;
 
     // Textures & Framebuffers
     currentArtworkTexture = createDefaultTexture();
@@ -831,11 +971,38 @@ function animateWebGLBackground(timestamp) {
     gl.bindTexture(gl.TEXTURE_2D, renderTexture);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
     gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
     gl.uniform2f(u_blur_direction, 0.0, 1.0);
     gl.uniform2f(u_blur_resolution, blurDimensions.width, blurDimensions.height);
     gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    if (vaoExt) vaoExt.bindVertexArrayOES(null);
+
+    // --- Post-process pass: renderTexture screen ---
+    if (_postParamsDirty) _readPostParamsFromCSS();
+
+    gl.useProgram(postProgram);
+    if (vaoExt) {
+        vaoExt.bindVertexArrayOES(postVAO);
+    } else {
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.vertexAttribPointer(gl.getAttribLocation(postProgram, 'a_position'), 2, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+        gl.vertexAttribPointer(gl.getAttribLocation(postProgram, 'a_texCoord'), 2, gl.FLOAT, false, 0, 0);
+    }
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, renderTexture);
+    gl.uniform1i(u_post_image,      0);
+    gl.uniform1f(u_post_brightness, _postParams.brightness);
+    gl.uniform1f(u_post_saturate,   _postParams.saturate);
+    gl.uniform1f(u_post_contrast,   _postParams.contrast);
+    gl.uniform1f(u_post_hueRotate,  _postParams.hueRotate);
+    gl.uniform1f(u_post_opacity,    _postParams.opacity);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     if (vaoExt) vaoExt.bindVertexArrayOES(null);
