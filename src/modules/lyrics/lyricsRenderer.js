@@ -55,7 +55,48 @@ class LyricsPlusRenderer {
     this._lastActiveIndex = 0;
     this._tempActiveLines = [];
 
+    this.wakeLock = null;
+    this._isContainerVisible = false;
+
     this._getContainer();
+  }
+
+  async _requestWakeLock() {
+    if ('wakeLock' in navigator) {
+      try {
+        this.wakeLock = await navigator.wakeLock.request('screen');
+      } catch (err) {
+        console.warn(`LYPLUS: Wakelock error: ${err.name}, ${err.message}`);
+      }
+    }
+  }
+
+  _releaseWakeLock() {
+    if (this.wakeLock !== null) {
+      this.wakeLock.release().then(() => {
+        this.wakeLock = null;
+      }).catch(err => {
+         console.warn(`LYPLUS: Wakelock release error: ${err.name}, ${err.message}`);
+      });
+    }
+  }
+
+  _setupContainerObserver() {
+    if (!this.lyricsContainer) return;
+
+    if (!this.containerObserver) {
+      this.containerObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          this._isContainerVisible = entry.isIntersecting;
+          if (entry.isIntersecting) {
+            this._requestWakeLock();
+          } else {
+            this._releaseWakeLock();
+          }
+        });
+      }, { threshold: 0.01 });
+      this.containerObserver.observe(this.lyricsContainer);
+    }
   }
 
   /**
@@ -203,7 +244,10 @@ class LyricsPlusRenderer {
         this._createLyricsContainer();
       }
     }
-    if (this.lyricsContainer) this._attachScrollListeners();
+    if (this.lyricsContainer) {
+      this._attachScrollListeners();
+      this._setupContainerObserver();
+    }
     return this.lyricsContainer;
   }
 
@@ -2790,6 +2834,7 @@ class LyricsPlusRenderer {
 
     this.scrollEventHandlerAttached = false;
     this._attachScrollListeners();
+    this._setupContainerObserver();
 
     if (this.visibilityObserver) this.visibilityObserver.disconnect();
     this.visibilityObserver = this._setupVisibilityTracking();
@@ -2996,6 +3041,13 @@ class LyricsPlusRenderer {
       cancelAnimationFrame(this.lyricsAnimationFrameId);
       this.lyricsAnimationFrameId = null;
     }
+
+    // WakeLock Cleanup
+    if (this.containerObserver) {
+      this.containerObserver.disconnect();
+      this.containerObserver = null;
+    }
+    this._releaseWakeLock();
 
     // Cancel Debounced Resize Handler
     if (this._debouncedResizeHandler && this._debouncedResizeHandler.cancel) {
