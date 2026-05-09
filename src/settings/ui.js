@@ -117,6 +117,7 @@ function setupAutoSaveListeners() {
         { id: 'ytsonginfo', key: 'YTSongInfo', type: 'checkbox' },
         { id: 'sponsor-block', key: 'useSponsorBlock', type: 'checkbox' },
         { id: 'bypass-apple', key: 'appleMusicTTMLBypass', type: 'checkbox' },
+        { id: 'prefer-unison-video', key: 'preferUnisonVideo', type: 'checkbox' },
 
         // Sources
         { id: 'custom-kpoe-url', key: 'customKpoeUrl', type: 'value', debounce: 500 },
@@ -200,6 +201,7 @@ function updateUI(settings) {
     setCheck('ytsonginfo', currentSettings.YTSongInfo);
     setCheck('sponsor-block', currentSettings.useSponsorBlock);
     setCheck('bypass-apple', currentSettings.appleMusicTTMLBypass);
+    setCheck('prefer-unison-video', currentSettings.preferUnisonVideo);
 
     // Sources
     setVal('custom-kpoe-url', currentSettings.customKpoeUrl);

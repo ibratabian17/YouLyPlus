@@ -158,14 +158,21 @@ export class LyricsService {
     try {
       const settings = await SettingsManager.getLyricsSettings();
       const fetchOptions = settings.cacheStrategy === 'none' ? { cache: 'no-store' } : {};
-      const providers = this.getProviderOrder(settings);
+      const providers = this.getProviderOrder(settings, songInfo, settings.preferUnisonVideo);
 
       const controllers = new Map(
         providers.map(p => [p, new AbortController()])
       );
 
-      const promises = providers.map(provider =>
+      let usedProvider = null;
+      const promises = providers.map((provider, index) =>
         this.fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload, controllers.get(provider).signal)
+          .then(result => {
+            if (result && usedProvider === null) {
+              usedProvider = provider;
+            }
+            return result;
+          })
           .catch(() => null)
       );
 
@@ -179,6 +186,10 @@ export class LyricsService {
 
       if (Utilities.isEmptyLyrics(finalLyrics)) {
         throw new Error('No lyrics found from any provider');
+      }
+
+      if (usedProvider === PROVIDERS.UNISON && songInfo.isVideo) {
+        finalLyrics.ignoreSponsorblock = true;
       }
 
       const version = Date.now();
@@ -252,7 +263,7 @@ export class LyricsService {
     return 1;
   }
 
-  static getProviderOrder(settings) {
+  static getProviderOrder(settings, songInfo = null, preferUnisonVideo = false) {
     const defaultOrder = ['kpoe', 'unison', 'lrclib'];
 
     let providersList = (settings.lyricsProviderOrder || '').split(',').map(p => p.trim()).filter(Boolean);
@@ -264,6 +275,14 @@ export class LyricsService {
 
     if (!settings.customKpoeUrl) {
       validProviders = validProviders.filter(p => p !== PROVIDERS.CUSTOM_KPOE);
+    }
+
+    if (preferUnisonVideo && songInfo?.isVideo && validProviders.includes(PROVIDERS.UNISON)) {
+      const unisonIndex = validProviders.indexOf(PROVIDERS.UNISON);
+      if (unisonIndex > 0) {
+        validProviders.splice(unisonIndex, 1);
+        validProviders.unshift(PROVIDERS.UNISON);
+      }
     }
 
     return validProviders;

@@ -67,6 +67,12 @@ export class MessageHandler {
 
   static async fetchSponsorSegments(message, sendResponse) {
     try {
+      if (message.ignoreSponsorblock) {
+        console.log('SponsorBlock skipped: ignoreSponsorblock flag is set');
+        sendResponse({ success: true, segments: [] });
+        return;
+      }
+
       const segments = await SponsorBlockService.fetch(message.videoId);
       sendResponse({ success: true, segments });
     } catch (error) {

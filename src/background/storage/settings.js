@@ -17,7 +17,8 @@ export class SettingsManager {
       'lyricsProviderOrder': 'kpoe,unison,lrclib',
       'lyricsSourceOrder': 'apple,lyricsplus,qq,musixmatch,musixmatch-word',
       'customKpoeUrl': '',
-      'cacheStrategy': 'aggressive'
+      'cacheStrategy': 'aggressive',
+      'preferUnisonVideo': false
     });
   }
 

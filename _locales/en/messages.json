@@ -206,6 +206,14 @@
     "message": "Skip non-music sections like intros, outros, or sponsor segments.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "message": "Prefer Unison for Videos",
+    "description": "Label for prefer Unison video toggle in settings"
+  },
+  "descPreferUnisonVideo": {
+    "message": "When enabled, prioritize the Unison service for video content and ignore SponsorBlock segments when Unison provides the lyrics.",
+    "description": "Description for prefer Unison video toggle"
+  },
 
   "categoryAppleMusic": {
     "message": "Apple Music Settings",
