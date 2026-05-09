@@ -135,10 +135,18 @@ export class LyricsService {
 
   static async checkLocalLyrics(songInfo) {
     const localLyricsList = await localLyricsDB.getAll();
-    const matched = localLyricsList.find(item =>
-      item.songInfo.title === songInfo.title &&
-      item.songInfo.artist === songInfo.artist
-    );
+    const matched = localLyricsList.find(item => {
+      if (item.songInfo.title !== songInfo.title || item.songInfo.artist !== songInfo.artist) {
+        return false;
+      }
+      if (item.songInfo.duration && songInfo.duration) {
+        return Math.abs(item.songInfo.duration - songInfo.duration) < 2;
+      }
+      if (!item.songInfo.duration) {
+        return true;
+      }
+      return false;
+    });
 
     if (matched) {
       const fetchedLocal = await localLyricsDB.get(matched.songId);

@@ -166,7 +166,8 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId) {
     lastBaseLyrics &&
     lastKnownSongInfo &&
     lastKnownSongInfo.title === currentSong.title &&
-    lastKnownSongInfo.artist === currentSong.artist;
+    lastKnownSongInfo.artist === currentSong.artist &&
+    Math.abs((lastKnownSongInfo.duration || 0) - (currentSong.duration || 0)) < 2;
 
   if (!isNewSong && !forceReload && isSameSong) {
     if (LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
