@@ -1,3 +1,5 @@
+import { DOMParser } from './xmldom.min.js';
+
 /**
  * Convert LRC to KPoe Readable Format
  * Original Implementation:

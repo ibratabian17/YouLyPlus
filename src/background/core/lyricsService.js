@@ -12,6 +12,7 @@ import { KPoeService } from '../services/kpoeService.js';
 import { LRCLibService } from '../services/lrclibService.js';
 import { UnisonService } from '../services/unisonService.js';
 import { YouTubeService } from '../services/youtubeService.js';
+import { parseAppleTTML } from '../../lib/parser.js';
 
 export class LyricsService {
   static createCacheKey(songInfo) {
@@ -49,6 +50,15 @@ export class LyricsService {
 
   static async getOrFetch(songInfo, forceReload = false) {
     let embeddedFallback = null;
+
+    // Parse Apple Music TTML if provided
+    if (songInfo.appleMusicTTML && typeof songInfo.appleMusicTTML === 'string') {
+      try {
+        songInfo.lyricsJSON = parseAppleTTML(songInfo.appleMusicTTML);
+      } catch (error) {
+        console.error('Error parsing Apple Music TTML:', error);
+      }
+    }
 
     if (songInfo.lyricsJSON && songInfo.lyricsJSON.lyrics.length > 0) {
       const settings = await SettingsManager.get({ appleMusicTTMLBypass: false });
