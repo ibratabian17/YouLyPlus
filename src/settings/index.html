@@ -201,17 +201,6 @@
                             intros, outros, or sponsor segments.
                         </p>
                     </div>
-                    <div class="setting-item">
-                        <label class="m3-switch">
-                            <input type="checkbox" id="prefer-unison-video">
-                            <div class="track">
-                                <div class="handle"></div>
-                            </div>
-                            <span class="label" data-i18n="settingPreferUnisonVideo">Prefer Unison for Videos</span>
-                        </label>
-                        <p class="setting-description" data-i18n="descPreferUnisonVideo">When enabled, prioritize the Unison service for video content and ignore SponsorBlock segments.
-                        </p>
-                    </div>
                 </div>
 
                 <div class="settings-category">
@@ -237,8 +226,9 @@
             <section class="settings-card" id="sources">
                 <h2 class="card-title" data-i18n="navSources">Sources</h2>
 
+                <!-- Primary Lyrics Provider Category -->
                 <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryLyricsProvider">Lyrics Provider</h3>
+                    <h3 class="category-title" data-i18n="categoryLyricsProvider">Primary Lyrics Provider</h3>
                     <div class="setting-item">
                         <div class="setting-item full-width" id="setting-provider-order" style="display: block;">
                             <div class="setting-text">
@@ -274,6 +264,11 @@
                         <p class="setting-description" data-i18n="descDefaultProvider">Choose your preferred source for
                             lyrics.</p>
                     </div>
+                </div>
+
+                <!-- KPoe Category -->
+                <div class="settings-category">
+                    <h3 class="category-title">Custom KPoe</h3>
                     <div class="setting-item" id="custom-kpoe-url-group" style="display: none;">
                         <div class="form-group">
                             <input type="text" id="custom-kpoe-url" placeholder=" ">
@@ -282,6 +277,27 @@
                         <p class="helper-text" data-i18n="helperCustomKpoeUrl">Enter the base URL for your self-hosted
                             KPoe server.</p>
                     </div>
+                </div>
+
+                <!-- Unison Category -->
+                <div class="settings-category">
+                    <h3 class="category-title">Unison</h3>
+                    <div class="setting-item">
+                        <label class="m3-switch">
+                            <input type="checkbox" id="prefer-unison-video">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                            <span class="label" data-i18n="settingPreferUnisonVideo">Prefer Unison for Videos</span>
+                        </label>
+                        <p class="setting-description" data-i18n="descPreferUnisonVideo">When enabled, prioritize the Unison service for video content and ignore SponsorBlock segments.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Lyrics+ Category -->
+                <div class="settings-category">
+                    <h3 class="category-title">Lyrics+</h3>
                     <div class="setting-item" id="kpoe-sources-group">
                         <label class="form-group-label" data-i18n="labelSourceOrder">Lyrics+ Source Order</label>
                         <div id="lyrics-source-order-draggable" class="draggable-list">
