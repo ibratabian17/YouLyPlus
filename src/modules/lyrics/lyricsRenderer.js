@@ -539,10 +539,24 @@ class LyricsPlusRenderer {
       };
 
       const segmentGraphemes = (text) => {
+        const TRAILING_PUNCT = /^[!?.,;:~…‥。、！？]/;
+
+        let chars;
         if (typeof Intl?.Segmenter === "function") {
-          return [...new Intl.Segmenter().segment(text)].map(s => s.segment);
+          chars = [...new Intl.Segmenter().segment(text)].map(s => s.segment);
+        } else {
+          chars = [...text];
         }
-        return [...text];
+
+        const merged = [];
+        for (let i = 0; i < chars.length; i++) {
+          if (i > 0 && TRAILING_PUNCT.test(chars[i]) && merged.length > 0) {
+            merged[merged.length - 1] += chars[i];
+          } else {
+            merged.push(chars[i]);
+          }
+        }
+        return merged;
       };
 
       const calculateEmphasisMetrics = (totalDuration, wordBufferLength, firstDuration) => {
