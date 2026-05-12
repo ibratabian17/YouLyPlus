@@ -842,7 +842,6 @@ class LyricsPlusRenderer {
           })()
           : mainContainer;
 
-        // BIDI ISOLATION LOGIC
         let actualTarget = targetContainer;
 
         if (isLineBiDi) {
@@ -852,14 +851,12 @@ class LyricsPlusRenderer {
 
           let lastChild = targetContainer.lastElementChild;
 
-          // Reuse the last wrapper if the direction matches
           if (lastChild && lastChild.classList.contains(wrapperClass)) {
             actualTarget = lastChild;
           } else {
-            // Create a new directional wrapper
             actualTarget = document.createElement("span");
             actualTarget.className = wrapperClass;
-            actualTarget.style.unicodeBidi = "isolate";
+            actualTarget.setAttribute("dir", wrapperDir);
             targetContainer.appendChild(actualTarget);
           }
         }
@@ -950,14 +947,11 @@ class LyricsPlusRenderer {
         mainContainer.textContent = line.text;
       }
 
-      // 3. Final Line Cleanup (With First-Word BiDi Check)
       let applyRtlToLine = this._isRTL(mainContainer.textContent);
 
-      // If it's a mixed language line, only apply RTL to the root container if the FIRST word is RTL
       if (applyRtlToLine && isLineBiDi) {
         let firstSyllableText = "";
 
-        // Try to get the text of the first actual syllable with letters
         if (line.syllabus && line.syllabus.length > 0) {
           const firstValid = line.syllabus.find(s => /[\p{L}\p{N}]/u.test(this._getDataText(s)));
           if (firstValid) {
@@ -965,13 +959,11 @@ class LyricsPlusRenderer {
           }
         }
 
-        // Fallback: match the first letter/number directly from the main string
         if (!firstSyllableText) {
           const fallbackMatch = mainContainer.textContent.match(/[\p{L}\p{N}]/u);
           firstSyllableText = fallbackMatch ? fallbackMatch[0] : "";
         }
 
-        // If the first real syllable/word is LTR, cancel the RTL override for the main container
         if (firstSyllableText && !this._isRTL(firstSyllableText)) {
           applyRtlToLine = false;
         }
@@ -1016,14 +1008,10 @@ class LyricsPlusRenderer {
       const _lineText = this._getDataText(line, true);
       let _lineIsRTL = this._isRTL(_lineText);
 
-      // BiDi First-Letter Check:
-      // If the line contains RTL, verify the first strong character
       if (_lineIsRTL) {
         const firstCharMatch = _lineText.match(/[\p{L}\p{N}]/u);
         if (firstCharMatch) {
           const firstChar = firstCharMatch[0];
-          // If the first strong character is NOT RTL (e.g., an English word), 
-          // keep the root container LTR.
           if (!this._isRTL(firstChar)) {
             _lineIsRTL = false;
           }
