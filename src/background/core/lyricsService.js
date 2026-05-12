@@ -16,7 +16,8 @@ import { parseAppleTTML } from '../../lib/parser.js';
 
 export class LyricsService {
   static createCacheKey(songInfo) {
-    return `${songInfo.title} - ${songInfo.artist} - ${songInfo.album} - ${songInfo.duration}`;
+    const duration = songInfo.duration || '';
+    return `${songInfo.title} - ${songInfo.artist} - ${songInfo.album} - ${duration}`;
   }
 
   static async clearExpiredCache() {
@@ -142,10 +143,7 @@ export class LyricsService {
       if (item.songInfo.duration && songInfo.duration) {
         return Math.abs(item.songInfo.duration - songInfo.duration) < 2;
       }
-      if (!item.songInfo.duration) {
-        return true;
-      }
-      return false;
+      return true;
     });
 
     if (matched) {
