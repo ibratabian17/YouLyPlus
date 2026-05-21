@@ -1731,6 +1731,10 @@ class LyricsPlusRenderer {
       "hide-offscreen",
       !!currentSettings.hideOffscreen
     );
+    container.classList.toggle(
+      "relax-scroll",
+      !!currentSettings.relaxScroll
+    );
   }
 
   /**
@@ -2518,7 +2522,10 @@ class LyricsPlusRenderer {
       this._scrollAnimationTimeout = null;
     }
 
+    const isRelaxMode = this.currentSettings && this.currentSettings.relaxScroll;
     duration = Math.min(450, duration);
+    duration = isRelaxMode ? duration * 1.5 : duration;
+    const scrollDuration = duration + 100;
 
     const animatingLines = this._animatingLines;
     if (animatingLines.length > 0) {
@@ -2557,7 +2564,7 @@ class LyricsPlusRenderer {
       : this.cachedLyricsLines.indexOf(referenceLine);
     if (referenceIndex === -1) return;
 
-    const delayIncrement = duration * 0.1;
+    const delayIncrement = duration * (isRelaxMode ? 0.05 : 0.1);
     const lookAhead = 20;
     const len = this.cachedLyricsLines.length;
 
@@ -2589,7 +2596,7 @@ class LyricsPlusRenderer {
       let delayCounter = 0;
       for (let i = start; i < end; i++) {
         const line = this.cachedLyricsLines[i];
-        const delay = i >= referenceIndex ? delayCounter * delayIncrement : 0;
+        let delay = i >= referenceIndex ? delayCounter * delayIncrement : 0;
 
         if (i >= referenceIndex && !line._isGap) {
           delayCounter++;
@@ -2597,7 +2604,7 @@ class LyricsPlusRenderer {
 
         line.style.setProperty('--scroll-delta', `${delta}px`);
         line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-        line.style.setProperty('--scroll-duration', `${duration + 100}ms`);
+        line.style.setProperty('--scroll-duration', `${scrollDuration}ms`);
         line.classList.add('scroll-animate');
         animatingLines.push(line);
 
@@ -2608,15 +2615,19 @@ class LyricsPlusRenderer {
       let delayCounter = 0;
       for (let i = end - 1; i >= start; i--) {
         const line = this.cachedLyricsLines[i];
-        const delay = i <= referenceIndex ? delayCounter * delayIncrement : 0;
+        let delay = i <= referenceIndex ? delayCounter * delayIncrement : 0;
 
         if (i <= referenceIndex && !line._isGap) {
           delayCounter++;
         }
 
+        if (isRelaxMode) {
+          delay = delay / 2;
+        }
+
         line.style.setProperty('--scroll-delta', `${delta}px`);
         line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-        line.style.setProperty('--scroll-duration', `${duration + 100}ms`);
+        line.style.setProperty('--scroll-duration', `${scrollDuration}ms`);
         line.classList.add('scroll-animate');
         animatingLines.push(line);
 

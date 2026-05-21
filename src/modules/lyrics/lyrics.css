@@ -262,6 +262,11 @@
     transition: transform 0.7s ease, background-color 0.7s, color 0.7s;
 }
 
+#lyrics-plus-container.relax-scroll .lyrics-line:not(.lyrics-gap) .lyrics-line-container {
+    transform: scale3d(1, 1, 1);
+    transition: transform 0.3s ease, background-color 0.7s, color 0.7s;
+}
+
 .lyrics-line.active:not(.lyrics-gap) .lyrics-line-container {
     transform: scale3d(1.001, 1.001, 1);
     will-change: transform;
