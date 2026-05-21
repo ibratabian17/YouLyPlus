@@ -2525,7 +2525,7 @@ class LyricsPlusRenderer {
     const isRelaxMode = this.currentSettings && this.currentSettings.relaxScroll;
     duration = Math.min(450, duration);
     duration = isRelaxMode ? duration * 1.5 : duration;
-    const scrollDuration = duration + 100;
+    const scrollDuration = duration + (isRelaxMode ? 150 : 100);
 
     const animatingLines = this._animatingLines;
     if (animatingLines.length > 0) {
