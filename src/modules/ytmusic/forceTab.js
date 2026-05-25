@@ -119,7 +119,7 @@
     const tabs = Array.from(container.querySelectorAll(SELECTORS.TAB));
     if (tabs.length < 3) return;
 
-    const middleIndex = Math.floor(tabs.length / 2);
+    const middleIndex = Math.floor(tabs.length / 3);
     const middleTab = tabs[middleIndex];
 
     forceActivateMiddleTab(middleTab);
