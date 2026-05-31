@@ -255,6 +255,12 @@
 
             const finalArtwork = apiData?.artwork || "";
             const finalDuration = apiData?.duration || duration;
+
+            if (!finalDuration) {
+                setTimeout(checkForSongChange, 250);
+                return;
+            }
+
             const finalAlbum = apiData?.album || domInfo?.album || "";
 
             currentSong = {
