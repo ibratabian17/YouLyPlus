@@ -14,6 +14,36 @@ ytmusic-app-layout[player-fullscreened] .song-media-controls.ytmusic-player {
     background: none;
 }
 
+/* ==========================================================================
+   FULLSCREEN BLANK SCREEN FIX
+   YouTube Music animates the player-page into view using
+   transform: translateY(100vh) → translateY(0). When transitioning directly
+   from MINIPLAYER → FULLSCREEN, this animation gets stuck at the start
+   position, leaving the player-page pushed one viewport height below the
+   screen (completely invisible). Override the stuck transform.
+   ========================================================================== */
+
+/* THE FIX: Force the player page to translateY(0) in fullscreen */
+ytmusic-app-layout[player-fullscreened] > [slot="player-page"],
+ytmusic-app-layout[player-ui-state="FULLSCREEN"] > [slot="player-page"] {
+    transform: translateY(0) !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* Ensure side-panel is visible in fullscreen */
+ytmusic-app-layout[player-fullscreened] #side-panel,
+ytmusic-app-layout[player-ui-state="FULLSCREEN"] #side-panel {
+    visibility: visible !important;
+}
+
+/* Ensure lyrics containers are visible */
+ytmusic-app-layout[player-fullscreened] #lyrics-plus-container,
+ytmusic-app-layout[player-ui-state="FULLSCREEN"] #lyrics-plus-container {
+    display: block !important;
+    visibility: visible !important;
+}
+
 /* Use song-art palette for lyrics in word-by-word mode */
 ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened] #lyrics-plus-container.use-song-palette-fullscreen.word-by-word-mode,
 #lyrics-plus-container.use-song-palette-all-modes.word-by-word-mode {

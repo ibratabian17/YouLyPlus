@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YouLy+",
   "default_locale": "en",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "description": "__MSG_extensionDescription__",
   "permissions": [
     "storage"
