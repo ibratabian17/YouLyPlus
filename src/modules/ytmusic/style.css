@@ -14,6 +14,26 @@ ytmusic-app-layout[player-fullscreened] .song-media-controls.ytmusic-player {
     background: none;
 }
 
+ytmusic-app-layout[player-fullscreened]>[slot="player-page"],
+ytmusic-app-layout[player-ui-state="FULLSCREEN"]>[slot="player-page"] {
+    transform: translateY(0) !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* Ensure side-panel is visible in fullscreen */
+ytmusic-app-layout[player-fullscreened] #side-panel,
+ytmusic-app-layout[player-ui-state="FULLSCREEN"] #side-panel {
+    visibility: visible !important;
+}
+
+/* Ensure lyrics containers are visible */
+ytmusic-app-layout[player-fullscreened] #lyrics-plus-container,
+ytmusic-app-layout[player-ui-state="FULLSCREEN"] #lyrics-plus-container {
+    display: block !important;
+    visibility: visible !important;
+}
+
 /* Use song-art palette for lyrics in word-by-word mode */
 ytmusic-player-page[video-mode]:not([is-video-truncation-fix-enabled])[player-fullscreened] #lyrics-plus-container.use-song-palette-fullscreen.word-by-word-mode,
 #lyrics-plus-container.use-song-palette-all-modes.word-by-word-mode {
@@ -438,7 +458,7 @@ div#lyrics-song-progressbar {
         --lyplus-font-size-base: calc(1.84vh + 1.84vw);
     }
 
-    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #lyrics-plus-container .lyrics-plus-metadata{
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #lyrics-plus-container .lyrics-plus-metadata {
         font-size: 0.8em;
     }
 
