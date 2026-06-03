@@ -14,18 +14,8 @@ ytmusic-app-layout[player-fullscreened] .song-media-controls.ytmusic-player {
     background: none;
 }
 
-/* ==========================================================================
-   FULLSCREEN BLANK SCREEN FIX
-   YouTube Music animates the player-page into view using
-   transform: translateY(100vh) → translateY(0). When transitioning directly
-   from MINIPLAYER → FULLSCREEN, this animation gets stuck at the start
-   position, leaving the player-page pushed one viewport height below the
-   screen (completely invisible). Override the stuck transform.
-   ========================================================================== */
-
-/* THE FIX: Force the player page to translateY(0) in fullscreen */
-ytmusic-app-layout[player-fullscreened] > [slot="player-page"],
-ytmusic-app-layout[player-ui-state="FULLSCREEN"] > [slot="player-page"] {
+ytmusic-app-layout[player-fullscreened]>[slot="player-page"],
+ytmusic-app-layout[player-ui-state="FULLSCREEN"]>[slot="player-page"] {
     transform: translateY(0) !important;
     visibility: visible !important;
     display: block !important;
@@ -468,7 +458,7 @@ div#lyrics-song-progressbar {
         --lyplus-font-size-base: calc(1.84vh + 1.84vw);
     }
 
-    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #lyrics-plus-container .lyrics-plus-metadata{
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]>[slot="player-page"] #lyrics-plus-container .lyrics-plus-metadata {
         font-size: 0.8em;
     }
 
