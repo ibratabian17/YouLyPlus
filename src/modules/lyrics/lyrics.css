@@ -434,9 +434,10 @@
 }
 
 /* ===== CHARACTER-LEVEL ANIMATION ===== */
-.lyrics-line .lyrics-syllable:has(span.char):not(.finished) {
+.lyrics-line .lyrics-syllable:has(span.char) {
     background-color: transparent;
     color: transparent;
+    background: none!important;
 }
 
 .lyrics-line .lyrics-syllable span.char {
