@@ -369,6 +369,13 @@ div#lyrics-song-progressbar {
     ytmusic-app-layout[player-fullscreened][show-fullscreen-controls]>[slot="player-bar"] {
         width: 100%;
     }
+   
+    ytmusic-app-layout[player-fullscreened] #bls-video {
+       overflow: hidden;
+       border: 1px solid #afafaf2c;
+       overflow: hidden;
+       border-radius: 2em;
+     }
 
     ytmusic-player-page:not([video-mode]):not([player-fullscreened]):not([player-ui-state="MINIPLAYER"]) #player.ytmusic-player-page {
         left: 50%;
