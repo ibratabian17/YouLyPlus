@@ -36,6 +36,7 @@ export const PROVIDERS = {
   KPOE: 'kpoe',
   CUSTOM_KPOE: 'customKpoe',
   UNISON: 'unison',
+  BINILYRICS: 'binilyrics',
   LRCLIB: 'lrclib',
   LOCAL: 'local',
   GEMINI: 'gemini',

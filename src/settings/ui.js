@@ -291,14 +291,14 @@ function getSourceDisplayName(sourceName) {
         'kpoe': 'sourceNameLyricsPlusProvider',
         'customKpoe': 'sourceNameCustomKpoe',
         'unison': 'sourceNameUnison',
+        'binilyrics': 'sourceNameBiniLyrics',
         'lrclib': 'sourceNameLRCLib',
         'lyricsplus': 'sourceNameLyricsPlus',
         'apple': 'sourceNameApple',
         'qq': 'sourceNameQQ',
         'spotify': 'sourceNameSpotify',
         'musixmatch': 'sourceNameMusixmatch',
-        'musixmatch-word': 'sourceNameMusixmatchWord',
-        'unison': 'sourceNameUnison'
+        'musixmatch-word': 'sourceNameMusixmatchWord'
     };
     if (sourceKeys[sourceName]) {
         return msg(sourceKeys[sourceName]) || sourceName;
@@ -348,14 +348,14 @@ function createDraggableProviderItem(providerName) {
 function populateDraggableProviders() {
     const draggableContainer = document.getElementById('provider-order-draggable');
     const availableProvidersDropdown = document.getElementById('available-providers-dropdown');
-    const allowedProviders = ['kpoe', 'customKpoe', 'unison', 'lrclib'];
+    const allowedProviders = ['kpoe', 'customKpoe', 'unison', 'binilyrics', 'lrclib'];
 
     if (!draggableContainer || !availableProvidersDropdown) return;
 
     draggableContainer.innerHTML = '';
     availableProvidersDropdown.innerHTML = '<option value="" disabled selected></option>';
 
-    const currentActiveProviders = (currentSettings.lyricsProviderOrder || 'kpoe,unison,lrclib').split(',').filter(s => s?.trim());
+    const currentActiveProviders = (currentSettings.lyricsProviderOrder || 'binilyrics,kpoe,unison,lrclib').split(',').filter(s => s?.trim());
     currentActiveProviders.forEach(provider => {
         if (allowedProviders.includes(provider.trim())) {
             draggableContainer.appendChild(createDraggableProviderItem(provider.trim()));
@@ -420,7 +420,7 @@ function addProvider() {
         return;
     }
 
-    const providers = (currentSettings.lyricsProviderOrder || 'kpoe,unison,lrclib').split(',').filter(s => s?.trim());
+    const providers = (currentSettings.lyricsProviderOrder || 'binilyrics,kpoe,unison,lrclib').split(',').filter(s => s?.trim());
     if (providers.includes(providerName)) {
         showStatusMessage('add-provider-status', msg('msgSourceExists', getSourceDisplayName(providerName)), true);
         return;
@@ -437,7 +437,7 @@ function addProvider() {
 }
 
 function removeProvider(providerName) {
-    const providers = (currentSettings.lyricsProviderOrder || 'kpoe,unison,lrclib').split(',').filter(s => s?.trim());
+    const providers = (currentSettings.lyricsProviderOrder || 'binilyrics,kpoe,unison,lrclib').split(',').filter(s => s?.trim());
 
     if (providers.length <= 1) {
         showStatusMessage('add-provider-status', "Cannot remove last provider", true);

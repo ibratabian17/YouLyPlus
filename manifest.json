@@ -15,7 +15,9 @@
     "https://api-free.deepl.com/*",
     "https://translate.googleapis.com/*",
     "https://generativelanguage.googleapis.com/*",
-    "https://openrouter.ai/api/*"
+    "https://openrouter.ai/api/*",
+    "https://lyrics-api.binimum.org/*",
+    "https://lyrics-storage.binimum.org/*"
   ],
   "action": {
     "default_popup": "src/popup/ui.html",

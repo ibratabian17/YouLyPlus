@@ -849,5 +849,9 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "message": "BiniLyrics (Apple Music DB)",
+    "description": "BiniLyrics provider name"
   }
 }

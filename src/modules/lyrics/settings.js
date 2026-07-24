@@ -3,7 +3,7 @@ const pBrowser = typeof browser !== 'undefined'
     : (typeof chrome !== 'undefined' ? chrome : null);
 
 const defaultSettings = {
-    lyricsProviderOrder: 'kpoe,unison,lrclib',
+    lyricsProviderOrder: 'binilyrics,kpoe,unison,lrclib',
     lyricsSourceOrder: 'apple,lyricsplus,qq,musixmatch,musixmatch-word',
     wordByWord: true,
     lightweight: false,
