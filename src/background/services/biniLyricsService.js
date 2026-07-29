@@ -61,7 +61,7 @@ export class BiniLyricsService {
         title: match.track_name || songInfo.title,
         artist: match.artist_name || songInfo.artist,
         album: match.album_name || songInfo.album,
-        source: 'BiniLyrics'
+        source: 'Apple (via BiniLyrics)'
       };
 
       return DataParser.parseKPoeFormat(kpoeData);

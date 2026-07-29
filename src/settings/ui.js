@@ -348,7 +348,7 @@ function createDraggableProviderItem(providerName) {
 function populateDraggableProviders() {
     const draggableContainer = document.getElementById('provider-order-draggable');
     const availableProvidersDropdown = document.getElementById('available-providers-dropdown');
-    const allowedProviders = ['kpoe', 'customKpoe', 'unison', 'binilyrics', 'lrclib'];
+    const allowedProviders = ['binilyrics', 'kpoe', 'customKpoe', 'unison', 'lrclib'];
 
     if (!draggableContainer || !availableProvidersDropdown) return;
 
