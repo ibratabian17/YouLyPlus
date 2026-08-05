@@ -15,7 +15,7 @@ export class SchemaBuilder {
             properties: {
               text: {
                 type: "STRING",
-                description: "The fully romanized text of the entire line."
+                description: "The fully romanized text of the entire line in Latin script (do NOT put original non-Latin text here)."
               },
               original_line_index: {
                 type: "INTEGER",

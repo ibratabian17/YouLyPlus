@@ -40,8 +40,29 @@ export class GeminiRomanizer {
 
         // Align each line using GoogleService.alignRomanizationAnchors directly (100% same as Google Translate)
         const alignedApiLyrics = lyricsForApi.map((origLine, index) => {
-          const retLine = returnedLines.find(r => r && r.original_line_index === index) || returnedLines[index];
-          const fullLineRom = retLine?.text || (Array.isArray(retLine?.chunk) ? retLine.chunk.map(c => c?.text || '').join(' ') : origLine.text);
+          const matchingRetLines = returnedLines.filter(r => r && r.original_line_index === index);
+          const retLine = matchingRetLines[0] || returnedLines[index];
+
+          // Collect romanized chunk texts if available
+          let chunkTexts = [];
+          if (matchingRetLines.length > 0) {
+            chunkTexts = matchingRetLines.flatMap(r =>
+              Array.isArray(r.chunk) ? r.chunk.map(c => (c && typeof c.text === 'string') ? c.text.trim() : '') : []
+            ).filter(Boolean);
+          } else if (retLine && Array.isArray(retLine.chunk)) {
+            chunkTexts = retLine.chunk.map(c => (c && typeof c.text === 'string') ? c.text.trim() : '').filter(Boolean);
+          }
+
+          let fullLineRom = '';
+          if (chunkTexts.length > 0) {
+            fullLineRom = chunkTexts.join(' ');
+          } else if (matchingRetLines.length > 0) {
+            fullLineRom = matchingRetLines.map(r => r.text || '').join('');
+          } else if (retLine) {
+            fullLineRom = retLine.text || origLine.text;
+          } else {
+            fullLineRom = origLine.text;
+          }
 
           if (!origLine.chunk || origLine.chunk.length === 0) {
             return {
@@ -53,11 +74,7 @@ export class GeminiRomanizer {
           const originalSyllables = origLine.chunk;
           const M = originalSyllables.length;
 
-          let romanizedGuides = [];
-          if (retLine && Array.isArray(retLine.chunk) && retLine.chunk.length > 0) {
-            romanizedGuides = retLine.chunk.map(c => (c && c.text) ? c.text.trim() : '').filter(Boolean);
-          }
-
+          let romanizedGuides = chunkTexts;
           if (romanizedGuides.length !== M) {
             romanizedGuides = originalSyllables.map(s => s.text || '');
           }
