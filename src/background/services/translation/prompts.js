@@ -448,11 +448,12 @@ ${sourceLangHint}
 ### STRICT RULES (Read Carefully)
 1. **Target Language Enforcement:**
    - The FINAL output must be 100% intelligible in ${targetLang}.
-   - **CRITICAL:** Translate ALL foreign scripts (Cyrillic, Kanji, Hangul, Arabic, etc.). DO NOT leave them in the original script.
+   - **CRITICAL:** Translate ALL text that is not ${targetLang}, regardless of script! This includes foreign non-Latin scripts (Cyrillic, Kanji, Hangul, Arabic, etc.) AND Latin-script regional languages or dialects (e.g. Javanese, Sundanese, Malay, Tagalog, Spanish, etc.).
+   - EVEN IF the source text uses the Latin alphabet (e.g. Javanese "Apa kowe ra ngerti larane"), if it is not in standard ${targetLang}, you MUST translate it into ${targetLang} (e.g., to Indonesian "id-ID": "Apakah kamu tidak tahu sakitnya").
 
 2. **The "Identity" Logic:**
-   - IF the line is *already* in ${targetLang} -> KEEP IT EXACTLY AS IS.
-   - IF the line is in *any other language* -> TRANSLATE it to ${targetLang}.
+   - ONLY keep a line UNCHANGED if the line is *already* standard ${targetLang}.
+   - Regional languages, dialects, or related tongues (such as Javanese to Indonesian) are DIFFERENT languages and MUST be translated to standard ${targetLang}.
 
 3. **DIRECTNESS & ANTI-HALLUCINATION (CRITICAL FOR ACCURACY):**
    - Translate slang and idioms contextually (e.g., "Aku banyak yang mau" -> "Many people want me"), BUT DO NOT overcomplicate simple structures.
@@ -469,6 +470,11 @@ Input: ["(Screaming)", "Я сошла с ума"]
 Target: English
 Output: ["(Screaming)", "I've lost my mind"]
 (Explanation: Parentheses kept. Cyrillic translated to English.)
+
+Input: ["Apa kowe ra ngerti larane", "Nyatane atimu dudu nggo aku"]
+Target: id-ID
+Output: ["Apakah kamu tidak tahu sakitnya", "Kenyataannya hatimu bukan untukku"]
+(Explanation: Javanese written in Latin script is translated to standard Indonesian id-ID.)
 
 Input: ["Aku banyak yang mau", "Walau aku tampan, kau biasa saja"]
 Target: English
