@@ -212,33 +212,56 @@ function getCachedOrFetch(cachedResponse, messagePayload, fetchId, onSuccess) {
   });
 }
 
+let lastSponsorSegments = null;
+let lastSponsorVideoId = null;
+
 /**
- * Fetches translation and romanization data in parallel, reusing cached values when available.
- * Returns a [translationResponse, romanizationResponse] tuple.
+ * Initiates translation and romanization fetches independently without blocking each other.
+ * Each fetch updates the UI as soon as its data is ready.
  */
-async function fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId) {
+function fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId) {
   const needsTranslation = effectiveMode === 'translate' || effectiveMode === 'both';
   const needsRomanization = effectiveMode === 'romanize' || effectiveMode === 'both' || currentSettings.largerTextMode === "romanization";
 
-  const translationPromise = needsTranslation
-    ? getCachedOrFetch(
-      lastTranslationResponse,
-      { type: 'TRANSLATE_LYRICS', action: 'translate', songInfo: currentSong, targetLang: htmlLang },
-      fetchId,
-      response => { lastTranslationResponse = response; }
-    )
-    : Promise.resolve(null);
+  if (needsTranslation && !lastTranslationResponse) {
+    pBrowser.runtime.sendMessage({
+      type: 'TRANSLATE_LYRICS',
+      action: 'translate',
+      songInfo: currentSong,
+      targetLang: htmlLang
+    }).then(response => {
+      if (currentFetchMediaId === fetchId) {
+        lastTranslationResponse = response || { success: false };
+        updateAndRenderCombinedLyrics(currentSong, fetchId);
+      }
+    }).catch(error => {
+      console.warn("Translation request error:", error);
+      if (currentFetchMediaId === fetchId) {
+        lastTranslationResponse = { success: false, error: error.message };
+        updateAndRenderCombinedLyrics(currentSong, fetchId);
+      }
+    });
+  }
 
-  const romanizationPromise = needsRomanization
-    ? getCachedOrFetch(
-      lastRomanizationResponse,
-      { type: 'TRANSLATE_LYRICS', action: 'romanize', songInfo: currentSong, targetLang: htmlLang },
-      fetchId,
-      response => { lastRomanizationResponse = response; }
-    )
-    : Promise.resolve(null);
-
-  return Promise.all([translationPromise, romanizationPromise]);
+  if (needsRomanization && !lastRomanizationResponse) {
+    pBrowser.runtime.sendMessage({
+      type: 'TRANSLATE_LYRICS',
+      action: 'romanize',
+      songInfo: currentSong,
+      targetLang: htmlLang
+    }).then(response => {
+      if (currentFetchMediaId === fetchId) {
+        lastRomanizationResponse = response || { success: false };
+        updateAndRenderCombinedLyrics(currentSong, fetchId);
+      }
+    }).catch(error => {
+      console.warn("Romanization request error:", error);
+      if (currentFetchMediaId === fetchId) {
+        lastRomanizationResponse = { success: false, error: error.message };
+        updateAndRenderCombinedLyrics(currentSong, fetchId);
+      }
+    });
+  }
 }
 
 /**
@@ -256,6 +279,10 @@ async function applySponsorBlock(lyrics, currentSong, fetchId) {
 
   if (!shouldApply) return lyrics.data;
 
+  if (lastSponsorVideoId === currentSong.videoId && lastSponsorSegments !== null) {
+    return adjustLyricTiming(lyrics.data, lastSponsorSegments, "s");
+  }
+
   const response = await pBrowser.runtime.sendMessage({
     type: 'FETCH_SPONSOR_SEGMENTS',
     videoId: currentSong.videoId
@@ -267,7 +294,8 @@ async function applySponsorBlock(lyrics, currentSong, fetchId) {
   }
 
   if (response.success) {
-    // Both Line and Word types currently use the same "s" unit for timing adjustment
+    lastSponsorVideoId = currentSong.videoId;
+    lastSponsorSegments = response.segments;
     return adjustLyricTiming(lyrics.data, response.segments, "s");
   }
 
@@ -324,6 +352,47 @@ function renderFinalLyrics(lyrics, currentSong, displayMode) {
   }
 }
 
+/**
+ * Renders the lyrics with whatever translation and romanization data is currently available.
+ * Manages loading indicator state based on whether any required request is still pending.
+ */
+async function updateAndRenderCombinedLyrics(currentSong, fetchId) {
+  if (currentFetchMediaId !== fetchId || !lastBaseLyrics) return;
+
+  const hasTranslation = lastTranslationResponse?.success && lastTranslationResponse.translatedLyrics;
+  const hasRomanization = lastRomanizationResponse?.success && lastRomanizationResponse.translatedLyrics;
+
+  let lyrics = combineLyricsData(
+    lastBaseLyrics,
+    hasTranslation ? lastTranslationResponse.translatedLyrics : null,
+    hasRomanization ? lastRomanizationResponse.translatedLyrics : null
+  );
+
+  const finalDisplayMode = determineFinalDisplayMode(currentDisplayMode, hasTranslation, hasRomanization);
+
+  if (lyrics.type === "Word" && !currentSettings.wordByWord) {
+    lyrics = convertWordLyricsToLine(lyrics);
+  }
+
+  const adjustedData = await applySponsorBlock(lyrics, currentSong, fetchId);
+  if (adjustedData === null) return; // Song changed mid-fetch
+  lyrics.data = adjustedData;
+
+  renderFinalLyrics(lyrics, currentSong, finalDisplayMode);
+
+  lastKnownSongInfo = currentSong;
+  lastProcessedDisplayMode = finalDisplayMode;
+
+  const needsTranslation = currentDisplayMode === 'translate' || currentDisplayMode === 'both';
+  const needsRomanization = currentDisplayMode === 'romanize' || currentDisplayMode === 'both' || currentSettings.largerTextMode === "romanization";
+  const isTranslationPending = needsTranslation && !lastTranslationResponse;
+  const isRomanizationPending = needsRomanization && !lastRomanizationResponse;
+
+  if (LyricsPlusAPI.setTranslationLoading) {
+    LyricsPlusAPI.setTranslationLoading(isTranslationPending || isRomanizationPending);
+  }
+}
+
 
 /* =================================================================
    CORE LOGIC: FETCHING AND PROCESSING
@@ -354,46 +423,19 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     const needsTranslation = effectiveMode === 'translate' || effectiveMode === 'both';
     const needsRomanization = effectiveMode === 'romanize' || effectiveMode === 'both' || currentSettings.largerTextMode === "romanization";
 
-    if ((needsTranslation || needsRomanization) && LyricsPlusAPI.displayLyrics) {
-      const isMissingData =
-        (needsTranslation && !lastTranslationResponse) ||
-        (needsRomanization && !lastRomanizationResponse);
+    const isMissingTranslation = needsTranslation && !lastTranslationResponse;
+    const isMissingRomanization = needsRomanization && !lastRomanizationResponse;
 
-      if (isNewSong) renderPreliminaryBaseLyrics(baseLyrics, currentSong);
-      if (isMissingData && LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
+    if (isNewSong) {
+      renderPreliminaryBaseLyrics(baseLyrics, currentSong);
     }
+    await updateAndRenderCombinedLyrics(currentSong, fetchId);
 
-    const htmlLang = document.documentElement.getAttribute('lang');
-    const [translationResponse, romanizationResponse] = await fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId);
-
-    if (currentFetchMediaId !== fetchId) {
-      console.warn("Song changed during additional data fetch. Aborting.", currentSong);
-      return;
+    if (isMissingTranslation || isMissingRomanization) {
+      if (LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
+      const htmlLang = document.documentElement.getAttribute('lang');
+      fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId);
     }
-
-    const hasTranslation = translationResponse?.success && translationResponse.translatedLyrics;
-    const hasRomanization = romanizationResponse?.success && romanizationResponse.translatedLyrics;
-
-    let lyrics = combineLyricsData(
-      baseLyrics,
-      hasTranslation ? translationResponse.translatedLyrics : null,
-      hasRomanization ? romanizationResponse.translatedLyrics : null
-    );
-
-    const finalDisplayMode = determineFinalDisplayMode(effectiveMode, hasTranslation, hasRomanization);
-
-    if (lyrics.type === "Word" && !currentSettings.wordByWord) {
-      lyrics = convertWordLyricsToLine(lyrics);
-    }
-
-    const adjustedData = await applySponsorBlock(lyrics, currentSong, fetchId);
-    if (adjustedData === null) return; // Song changed mid-fetch
-    lyrics.data = adjustedData;
-
-    renderFinalLyrics(lyrics, currentSong, finalDisplayMode);
-
-    lastKnownSongInfo = currentSong;
-    lastProcessedDisplayMode = finalDisplayMode;
 
   } catch (error) {
     console.warn('Error in fetchAndDisplayLyrics:', error);
