@@ -552,7 +552,7 @@
     "description": "Category title"
   },
   "labelLargerTextMode": {
-    "message": "Teks Lebih Besar: Pelafalan atau Lirik",
+    "message": "Teks Lebih Besar: Pengucapan atau Lirik",
     "description": "Dropdown label"
   },
   "labelLargerTextModeShort": {
@@ -560,11 +560,11 @@
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
-    "message": "Pilih apakah lirik atau pelafalan muncul lebih besar saat keduanya ditampilkan.",
+    "message": "Pilih apakah lirik atau pengucapan muncul lebih besar saat keduanya ditampilkan.",
     "description": "Description"
   },
   "settingHideLatinPronunciation": {
-    "message": "Sembunyikan Pelafalan Latin",
+    "message": "Sembunyikan Pengucapan Latin",
     "description": "Toggle label"
   },
   "descHideLatinPronunciation": {
@@ -794,7 +794,7 @@
     "description": "Option in larger text mode dropdown"
   },
   "optionPronunciation": {
-    "message": "Pelafalan",
+    "message": "Pengucapan",
     "description": "Option in larger text mode dropdown"
   },
   "optionGoogleTranslate": {
