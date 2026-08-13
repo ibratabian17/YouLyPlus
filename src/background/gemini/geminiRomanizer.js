@@ -23,94 +23,192 @@ export class GeminiRomanizer {
     const schema = SchemaBuilder.buildRomanizationSchema(hasAnyChunks);
 
     const contents = [{ role: 'user', parts: [{ text: initialPrompt }] }];
+    const validResultsMap = new Map();
 
     let responseText;
     let lastError = null;
+    const maxAttempts = 3;
 
-    // Call Gemini API (retry max 2 times only for JSON syntax/network errors, no prompt redoing)
-    for (let attempt = 1; attempt <= 2; attempt++) {
+    let lastBrokenIndices = [];
+
+    // Call Gemini API (up to 3 turns to repair missing/unromanized lines)
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         responseText = await this.callGeminiAPI(contents, schema);
         const cleanedText = this.cleanJsonOutput(responseText);
-        const parsedJson = JSON.parse(cleanedText);
+        let parsedJson;
+
+        try {
+          parsedJson = JSON.parse(cleanedText);
+        } catch (jsonErr) {
+          if (attempt < maxAttempts) {
+            contents.push({ role: 'model', parts: [{ text: responseText || '' }] });
+            contents.push({
+              role: 'user',
+              parts: [{ text: `Your previous response was not valid JSON. Please provide valid JSON adhering to the schema. Error: ${jsonErr.message}` }]
+            });
+            continue;
+          } else {
+            throw jsonErr;
+          }
+        }
 
         const returnedLines = Array.isArray(parsedJson)
           ? parsedJson
           : (parsedJson?.romanized_lyrics || parsedJson?.fixed_lines || []);
 
-        // Align each line using GoogleService.alignRomanizationAnchors directly (100% same as Google Translate)
-        const alignedApiLyrics = lyricsForApi.map((origLine, index) => {
-          const matchingRetLines = returnedLines.filter(r => r && r.original_line_index === index);
-          const retLine = matchingRetLines[0] || returnedLines[index];
+        if (Array.isArray(returnedLines)) {
+          returnedLines.forEach((retLine, i) => {
+            if (!retLine) return;
+            let lineIndex = -1;
+            if (typeof retLine.original_line_index === 'number') {
+              lineIndex = retLine.original_line_index;
+            } else if (returnedLines.length === lyricsForApi.length) {
+              lineIndex = i;
+            } else if (lastBrokenIndices.length > 0 && returnedLines.length === lastBrokenIndices.length) {
+              lineIndex = lastBrokenIndices[i];
+            }
 
-          // Collect romanized chunk texts if available
-          let chunkTexts = [];
-          if (matchingRetLines.length > 0) {
-            chunkTexts = matchingRetLines.flatMap(r =>
-              Array.isArray(r.chunk) ? r.chunk.map(c => (c && typeof c.text === 'string') ? c.text.trim() : '') : []
-            ).filter(Boolean);
-          } else if (retLine && Array.isArray(retLine.chunk)) {
-            chunkTexts = retLine.chunk.map(c => (c && typeof c.text === 'string') ? c.text.trim() : '').filter(Boolean);
+            if (lineIndex >= 0 && lineIndex < lyricsForApi.length) {
+              const origLine = lyricsForApi[lineIndex];
+              if (this.isLineValid(origLine, retLine)) {
+                validResultsMap.set(lineIndex, {
+                  ...retLine,
+                  original_line_index: lineIndex
+                });
+              }
+            }
+          });
+        }
+
+        const brokenLineIndices = [];
+        lyricsForApi.forEach((origLine, index) => {
+          if (!validResultsMap.has(index)) {
+            brokenLineIndices.push(index);
           }
-
-          let fullLineRom = '';
-          if (chunkTexts.length > 0) {
-            fullLineRom = chunkTexts.join(' ');
-          } else if (matchingRetLines.length > 0) {
-            fullLineRom = matchingRetLines.map(r => r.text || '').join('');
-          } else if (retLine) {
-            fullLineRom = retLine.text || origLine.text;
-          } else {
-            fullLineRom = origLine.text;
-          }
-
-          if (!origLine.chunk || origLine.chunk.length === 0) {
-            return {
-              text: fullLineRom,
-              original_line_index: index
-            };
-          }
-
-          const originalSyllables = origLine.chunk;
-          const M = originalSyllables.length;
-
-          let romanizedGuides = chunkTexts;
-          if (romanizedGuides.length !== M) {
-            romanizedGuides = originalSyllables.map(s => s.text || '');
-          }
-
-          // Direct call to GoogleService's DP Anchor Alignment algorithm
-          const alignedChunks = GoogleService.alignRomanizationAnchors(fullLineRom, romanizedGuides, originalSyllables);
-
-          const formattedChunks = originalSyllables.map((s, i) => ({
-            text: alignedChunks[i] || ""
-          }));
-
-          return {
-            text: formattedChunks.map(c => c.text).join(""),
-            chunk: formattedChunks,
-            original_line_index: index
-          };
         });
+        lastBrokenIndices = brokenLineIndices;
 
-        console.log(`Gemini romanization completed using Google Translate DP alignment on attempt ${attempt}`);
-        return this.reconstructLyrics(alignedApiLyrics, reconstructionPlan, hasAnyChunks);
+        if (brokenLineIndices.length === 0) {
+          console.log(`Gemini romanization completed successfully on attempt ${attempt}`);
+          break;
+        }
+
+        if (attempt < maxAttempts) {
+          console.warn(`Gemini romanization attempt ${attempt}: ${brokenLineIndices.length} broken/missing line(s) [indices: ${brokenLineIndices.join(', ')}]. Sending targeted repair user prompt.`);
+
+          const brokenLinesForApi = brokenLineIndices.map(idx => lyricsForApi[idx]);
+
+          contents.push({ role: 'model', parts: [{ text: responseText || '' }] });
+          contents.push({
+            role: 'user',
+            parts: [{
+              text: `Your previous response was missing, incomplete, or contained unromanized non-Latin text for line index(es): [${brokenLineIndices.join(', ')}].
+
+Please fix and return ONLY the romanization for these broken line(s) below in a valid JSON array:
+
+${JSON.stringify(brokenLinesForApi, null, 2)}
+
+Requirements:
+1. Include ONLY the broken line(s) requested above. Do NOT include previously valid lines.
+2. Every item MUST include its correct "original_line_index" matching the input (${brokenLineIndices.join(', ')}).
+3. The "text" field (and "chunk" text fields if chunks were provided) MUST be properly romanized into Latin script. Do NOT leave original non-Latin script.`
+            }]
+          });
+        } else {
+          console.warn(`Gemini romanization reached max attempts (${maxAttempts}). Proceeding with best-effort results for remaining ${brokenLineIndices.length} line(s).`);
+        }
 
       } catch (e) {
         console.warn(`Gemini API call attempt ${attempt} failed:`, e.message);
         lastError = e;
-
-        if (attempt < 2 && e instanceof SyntaxError) {
-          contents.push({ role: 'model', parts: [{ text: responseText || '' }] });
-          contents.push({
-            role: 'user',
-            parts: [{ text: `Your previous response was not valid JSON. Please provide valid JSON adhering to the schema. Error: ${e.message}` }]
-          });
+        if (attempt === maxAttempts && validResultsMap.size === 0) {
+          throw e;
         }
       }
     }
 
-    throw new Error(`Gemini romanization failed: ${lastError?.message || 'Unknown error'}`);
+    if (validResultsMap.size === 0 && lastError) {
+      throw new Error(`Gemini romanization failed: ${lastError.message}`);
+    }
+
+    // Align each line using GoogleService.alignRomanizationAnchors directly
+    const alignedApiLyrics = lyricsForApi.map((origLine, index) => {
+      const retLine = validResultsMap.get(index);
+
+      let chunkTexts = [];
+      if (retLine && Array.isArray(retLine.chunk)) {
+        chunkTexts = retLine.chunk.map(c => (c && typeof c.text === 'string') ? c.text.trim() : '').filter(Boolean);
+      }
+
+      let fullLineRom = '';
+      if (chunkTexts.length > 0) {
+        fullLineRom = chunkTexts.join(' ');
+      } else if (retLine && retLine.text) {
+        fullLineRom = retLine.text;
+      } else {
+        fullLineRom = origLine.text;
+      }
+
+      if (!origLine.chunk || origLine.chunk.length === 0) {
+        return {
+          text: fullLineRom,
+          original_line_index: index
+        };
+      }
+
+      const originalSyllables = origLine.chunk;
+      const M = originalSyllables.length;
+
+      let romanizedGuides = chunkTexts;
+      if (romanizedGuides.length !== M) {
+        romanizedGuides = originalSyllables.map(s => s.text || '');
+      }
+
+      // Direct call to GoogleService's DP Anchor Alignment algorithm
+      const alignedChunks = GoogleService.alignRomanizationAnchors(fullLineRom, romanizedGuides, originalSyllables);
+
+      const formattedChunks = originalSyllables.map((s, i) => ({
+        text: alignedChunks[i] || ""
+      }));
+
+      return {
+        text: formattedChunks.map(c => c.text).join(""),
+        chunk: formattedChunks,
+        original_line_index: index
+      };
+    });
+
+    return this.reconstructLyrics(alignedApiLyrics, reconstructionPlan, hasAnyChunks);
+  }
+
+  isLineValid(origLine, retLine) {
+    if (!retLine || typeof retLine !== 'object') return false;
+
+    if (!retLine.text || typeof retLine.text !== 'string' || retLine.text.trim() === '') {
+      return false;
+    }
+
+    if (!Utilities.isPurelyLatinScript(origLine.text)) {
+      if (!Utilities.isPurelyLatinScript(retLine.text)) {
+        return false;
+      }
+      if (retLine.text.trim() === origLine.text.trim()) {
+        return false;
+      }
+    }
+
+    if (origLine.chunk && Array.isArray(origLine.chunk) && origLine.chunk.length > 0) {
+      if (!Array.isArray(retLine.chunk) || retLine.chunk.length === 0) {
+        return false;
+      }
+      for (const c of retLine.chunk) {
+        if (!c || typeof c.text !== 'string' || c.text.trim() === '') return false;
+        if (!Utilities.isPurelyLatinScript(c.text)) return false;
+      }
+    }
+
+    return true;
   }
 
   async callGeminiAPI(contents, schema) {
