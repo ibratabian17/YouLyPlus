@@ -43,6 +43,10 @@
     "message": "Integrasikan SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Keterbacaan",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Pengaturan Tampilan",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "Lewati bagian non-musik seperti intro, outro, atau segmen sponsor.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Utamakan Unison untuk Video"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Saat diaktifkan, prioritaskan layanan Unison untuk konten video dan abaikan segmen SponsorBlock ketika Unison menyediakan lirik."
+  },
   "categoryAppleMusic": {
     "message": "Pengaturan Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Penyedia Lirik",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Penyedia Lirik Default",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Urutan Penyedia Lirik",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Pilih sumber lirik pilihan Anda.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Tarik dan lepas untuk memprioritaskan penyedia mana yang diperiksa terlebih dahulu. Penyedia teratas bertindak sebagai pilihan jalur cepat.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Penyedia yang Tersedia",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Tambah Penyedia",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "URL Server KPoe Kustom",
@@ -427,6 +447,10 @@
     "message": "Pengaturan OpenRouter",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "Pengaturan DeepL",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "API Key OpenRouter",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Teks Lebih Besar: Pelafalan atau Lirik",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Teks Lebih Besar",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Kunci API DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Kunci API Anda disimpan secara lokal. Kunci paket gratis biasanya diakhiri dengan :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Konten Pengguna)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (Kata)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Keterbacaan",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "Urutan Penyedia Lirik",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Tarik dan lepas untuk memprioritaskan penyedia mana yang diperiksa terlebih dahulu. Penyedia teratas bertindak sebagai pilihan jalur cepat.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Penyedia yang Tersedia",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Tambah Penyedia",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "Pengaturan DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Teks Lebih Besar",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "Kunci API DeepL",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Kunci API Anda disimpan secara lokal. Kunci paket gratis biasanya diakhiri dengan :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (DB Apple Music)"
+  },
+  "labelDefaultProvider": {
+    "message": "Penyedia Lirik Default",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Pilih sumber lirik pilihan Anda.",
+    "description": "Description for provider dropdown"
   }
 }

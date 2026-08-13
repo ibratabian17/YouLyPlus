@@ -43,6 +43,10 @@
     "message": "Integracja ze SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Czytelność",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Ustawienia wyświetlania",
     "description": "Section title in popup Appearance tab"
@@ -91,7 +95,7 @@
     "message": "Pamięć podręczna została wyczyszczona!",
     "description": "Snackbar message after cache clear"
   },
-  "msgCacheClearedFailed": {
+  "msgCacheClearFailed": {
     "message": "Nie udało się wyczyścić pamięci podręcznej.",
     "description": "Snackbar error message when cache clear fails"
   },
@@ -193,6 +197,14 @@
     "message": "Pomijaj części niemuzyczne, takie jak wstępy, zakończenia lub segmenty reklamowe.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Preferuj Unison dla wideo"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Po włączeniu priorytetowo traktuj usługę Unison dla treści wideo i ignoruj segmenty SponsorBlock, gdy Unison dostarcza teksty piosenek."
+  },
   "categoryAppleMusic": {
     "message": "Ustawienia Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Dostawca tekstów",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Domyślny dostawca tekstów",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Kolejność dostawców tekstów",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Wybierz preferowane źródło tekstów piosenek.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Przeciągnij i upuść, aby ustalić priorytet sprawdzania dostawców. Pierwszy dostawca na liście jest wybierany jako pierwszy.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Dostępni dostawcy",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Dodaj dostawcę",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "Własny adres URL serwera KPoe",
@@ -427,6 +447,10 @@
     "message": "Ustawienia OpenRouter",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "Ustawienia DeepL",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "Klucz API OpenRouter",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Większy tekst dla: Romanizacji lub Tekstu piosenki",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Większy tekst",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Klucz API DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Twój klucz API jest przechowywany lokalnie. Klucze z darmowego planu zazwyczaj kończą się na :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Wkład użytkowników)",
     "description": "Display name for lyricsplus source"
@@ -805,50 +845,6 @@
     "message": "Musixmatch (Słowo)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Czytelność",
-    "description": "Section title in popup Appearance tab"
-  },
-  "msgCacheClearFailed": {
-    "message": "Nie udało się wyczyścić pamięci podręcznej.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelProviderOrder": {
-    "message": "Kolejność dostawców tekstów",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Przeciągnij i upuść, aby ustalić priorytet sprawdzania dostawców. Pierwszy dostawca na liście jest wybierany jako pierwszy.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Dostępni dostawcy",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Dodaj dostawcę",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "Ustawienia DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Większy tekst",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "Klucz API DeepL",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Twój klucz API jest przechowywany lokalnie. Klucze z darmowego planu zazwyczaj kończą się na :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -864,5 +860,21 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (baza danych Apple Music)"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Nie udało się wyczyścić pamięci podręcznej.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelDefaultProvider": {
+    "message": "Domyślny dostawca tekstów",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Wybierz preferowane źródło tekstów piosenek.",
+    "description": "Description for provider dropdown"
   }
 }

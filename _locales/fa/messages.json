@@ -43,6 +43,10 @@
     "message": "ادغام با SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "خوانایی",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "تنظیمات صفحه نمایش",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "بخش‌های غیرموسیقایی مانند مقدمه، بخش پایانی یا بخش‌های تبلیغاتی را نادیده بگیرید.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "ترجیح دادن Unison برای ویدیوها"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "در صورت فعال بودن، سرویس Unison را برای محتوای ویدیویی در اولویت قرار داده و زمانی که Unison متن ترانه را فراهم می‌کند، بخش‌های SponsorBlock را نادیده بگیرید."
+  },
   "categoryAppleMusic": {
     "message": "تنظیمات Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "ارائه‌دهنده متن آهنگ",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "ارائه‌دهنده پیش‌فرض متن آهنگ",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "ترتیب ارائه‌دهندگان متن",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "منبع متن آهنگ مورد علاقه خود را انتخاب کنید.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "برای اولویت‌بندی، ارائه‌دهندگان را با کشیدن و رها کردن مرتب کنید. ارائه‌دهنده اول به عنوان انتخاب سریع عمل می‌کند.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "ارائه‌دهندگان موجود",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "افزودن ارائه‌دهنده",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "آدرس سرور KPoe سفارشی",
@@ -427,6 +447,10 @@
     "message": "تنظیمات OpenRouter",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "تنظیمات DeepL",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "کلید API برای OpenRouter",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "نمایش متن بزرگتر برای: رومی‌سازی یا متن آهنگ",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "متن بزرگ‌تر",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "کلید API برای DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "کلید API شما به صورت محلی ذخیره می‌شود. کلیدهای طرح رایگان معمولاً با :fx ختم می‌شوند.",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (مشارکت کاربران)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (کلمه)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "خوانایی",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "ترتیب ارائه‌دهندگان متن",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "برای اولویت‌بندی، ارائه‌دهندگان را با کشیدن و رها کردن مرتب کنید. ارائه‌دهنده اول به عنوان انتخاب سریع عمل می‌کند.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "ارائه‌دهندگان موجود",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "افزودن ارائه‌دهنده",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "تنظیمات DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "متن بزرگ‌تر",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "کلید API برای DeepL",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "کلید API شما به صورت محلی ذخیره می‌شود. کلیدهای طرح رایگان معمولاً با :fx ختم می‌شوند.",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (پایگاه داده اپل موزیک)"
+  },
+  "labelDefaultProvider": {
+    "message": "ارائه‌دهنده پیش‌فرض متن آهنگ",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "منبع متن آهنگ مورد علاقه خود را انتخاب کنید.",
+    "description": "Description for provider dropdown"
   }
 }

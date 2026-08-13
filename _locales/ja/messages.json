@@ -43,6 +43,10 @@
     "message": "SponsorBlock と統合",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "読みやすさ",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "表示設定",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "イントロ、アウトロ、スポンサーセグメントなどの音楽以外のセクションをスキップします。",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "動画でUnisonを優先"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "有効にすると、動画コンテンツでUnisonサービスが優先され、Unisonが歌詞を提供している場合はSponsorBlockのセグメントが無視されます。"
+  },
   "categoryAppleMusic": {
     "message": "Apple Music 設定",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "歌詞プロバイダー",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "デフォルトの歌詞プロバイダー",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "歌詞プロバイダーの優先順位",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "優先する歌詞ソースを選択してください。",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "ドラッグ＆ドロップで検索の優先順位を変更します。一番上のプロバイダーが優先的に使用されます。",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "利用可能なプロバイダー",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "プロバイダーを追加",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "カスタム KPoe サーバー URL",
@@ -427,6 +447,10 @@
     "message": "OpenRouter 設定",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "DeepL設定",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "OpenRouter API キー",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "大きく表示するテキスト: 発音 または 歌詞",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "文字サイズを拡大",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL APIキー",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "APIキーはローカルに保存されます。Freeプランのキーは通常 :fx で終わります。",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (ユーザー投稿)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (単語同期)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "読みやすさ",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "歌詞プロバイダーの優先順位",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "ドラッグ＆ドロップで検索の優先順位を変更します。一番上のプロバイダーが優先的に使用されます。",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "利用可能なプロバイダー",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "プロバイダーを追加",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL設定",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "文字サイズを拡大",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL APIキー",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "APIキーはローカルに保存されます。Freeプランのキーは通常 :fx で終わります。",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "labelDefaultProvider": {
+    "message": "デフォルトの歌詞プロバイダー",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "優先する歌詞ソースを選択してください。",
+    "description": "Description for provider dropdown"
   }
 }

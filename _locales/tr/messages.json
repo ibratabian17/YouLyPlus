@@ -43,6 +43,10 @@
     "message": "SponsorBlock'u Entegre Et",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Okunabilirlik",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Ekran Ayarları",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "Giriş, çıkış veya reklam gibi müzik dışı bölümleri atlayın.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Videolar İçin Unison'u Tercih Et"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Etkinleştirildiğinde, video içeriği için Unison hizmetine öncelik verin ve Unison şarkı sözlerini sağladığında SponsorBlock bölümlerini yoksayın."
+  },
   "categoryAppleMusic": {
     "message": "Apple Music Ayarları",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Şarkı Sözü Sağlayıcı",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Varsayılan Şarkı Sözü Sağlayıcı",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Şarkı Sözü Sağlayıcı Sıralaması",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Tercih ettiğiniz şarkı sözü kaynağını seçin.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Hangi sağlayıcının önce kontrol edileceğini belirlemek için sürükleyip bırakın. En üstteki sağlayıcı hızlı yol seçeneği olarak işlev görür.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Kullanılabilir Sağlayıcılar",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Sağlayıcı Ekle",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "Özel KPoe Sunucu URL'si",
@@ -427,6 +447,10 @@
     "message": "OpenRouter Ayarları",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "DeepL Ayarları",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "OpenRouter API Anahtarı",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Şunun İçin Daha Büyük Metin: Romanizasyon veya Şarkı Sözleri",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Daha Büyük Metin",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API Anahtarı",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "API anahtarınız yerel olarak saklanır. Ücretsiz plan anahtarları genellikle :fx ile biter",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Kullanıcı Katkıları)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (Kelime)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Okunabilirlik",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "Şarkı Sözü Sağlayıcı Sıralaması",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Hangi sağlayıcının önce kontrol edileceğini belirlemek için sürükleyip bırakın. En üstteki sağlayıcı hızlı yol seçeneği olarak işlev görür.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Kullanılabilir Sağlayıcılar",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Sağlayıcı Ekle",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL Ayarları",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Daha Büyük Metin",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL API Anahtarı",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "API anahtarınız yerel olarak saklanır. Ücretsiz plan anahtarları genellikle :fx ile biter",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "labelDefaultProvider": {
+    "message": "Varsayılan Şarkı Sözü Sağlayıcı",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Tercih ettiğiniz şarkı sözü kaynağını seçin.",
+    "description": "Description for provider dropdown"
   }
 }

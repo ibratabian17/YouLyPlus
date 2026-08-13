@@ -43,6 +43,10 @@
     "message": "دمج SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "قابلية القراءة",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "إعدادات العرض",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "تخطي الأجزاء غير الموسيقية مثل المقدمات أو الخواتم أو المقاطع الإعلانية.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "تفضيل Unison للفيديوهات"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "عند التفعيل، يتم إعطاء الأولوية لخدمة Unison لمحتوى الفيديو وتجاهل مقاطع SponsorBlock عندما توفر Unison كلمات الأغاني."
+  },
   "categoryAppleMusic": {
     "message": "إعدادات Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "مزود كلمات الأغاني",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "مزود كلمات الأغاني الافتراضي",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "ترتيب مزودي الكلمات",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "اختر مصدر كلمات الأغاني المفضل لديك.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "اسحب وأفلت لترتيب أولوية فحص المزودين. المزود في الأعلى يعمل كخيار سريع.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "المزودون المتاحون",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "إضافة مزود",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "رابط خادم KPoe مخصص",
@@ -427,6 +447,10 @@
     "message": "إعدادات OpenRouter",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "إعدادات DeepL",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "مفتاح API لـ OpenRouter",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "عرض نص أكبر لـ: الرومنة أو كلمات الأغنية",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "نص أكبر",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "مفتاح DeepL API",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "يتم تخزين مفتاح API الخاص بك محلياً. عادة ما تنتهي مفاتيح الخطة المجانية بـ :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (مساهمات المستخدمين)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (كلمة)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "قابلية القراءة",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "ترتيب مزودي الكلمات",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "اسحب وأفلت لترتيب أولوية فحص المزودين. المزود في الأعلى يعمل كخيار سريع.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "المزودون المتاحون",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "إضافة مزود",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "إعدادات DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "نص أكبر",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "مفتاح DeepL API",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "يتم تخزين مفتاح API الخاص بك محلياً. عادة ما تنتهي مفاتيح الخطة المجانية بـ :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (قاعدة بيانات Apple Music)"
+  },
+  "labelDefaultProvider": {
+    "message": "مزود كلمات الأغاني الافتراضي",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "اختر مصدر كلمات الأغاني المفضل لديك.",
+    "description": "Description for provider dropdown"
   }
 }

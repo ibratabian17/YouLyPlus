@@ -43,6 +43,10 @@
     "message": "SponsorBlock একীভূত করুন",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "পঠনযোগ্যতা",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "ডিসপ্লে সেটিংস",
     "description": "Section title in popup Appearance tab"
@@ -91,8 +95,8 @@
     "message": "ক্যাশ সফলভাবে পরিষ্কার করা হয়েছে!",
     "description": "Snackbar message after cache clear"
   },
-  "msgCacheClearedFailed": {
-    "message": "ক্যাশ পরিষ্কার করতে ব্যর্থ।",
+  "msgCacheClearFailed": {
+    "message": "ক্যাশে পরিষ্কার করতে ব্যর্থ হয়েছে।",
     "description": "Snackbar error message when cache clear fails"
   },
   "msgCacheClearError": {
@@ -193,6 +197,14 @@
     "message": "ইন্ট্রো, আউটরো বা বিজ্ঞাপন সেগমেন্টের মতো অ-মিউজিক অংশগুলি এড়িয়ে যান।",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "ভিডিওর জন্য ইউনিসন (Unison) পছন্দ করুন"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "সক্ষম করা হলে, ভিডিও কন্টেন্টের জন্য ইউনিসন পরিষেবাকে অগ্রাধিকার দিন এবং ইউনিসন লিরিক্স প্রদান করলে স্পন্সরব্লক অংশগুলিকে উপেক্ষা করুন।"
+  },
   "categoryAppleMusic": {
     "message": "Apple Music সেটিংস",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "লিরিক্স প্রদানকারী",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "ডিফল্ট লিরিক্স প্রদানকারী",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "লিরিক্স প্রোভাইডারের ক্রম",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "আপনার পছন্দের লিরিক্স সোর্স চয়ন করুন।",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "কোন প্রোভাইডার প্রথমে চেক করা হবে তা নির্ধারণ করতে ড্র্যাগ এবং ড্রপ করুন। তালিকার উপরের প্রোভাইডারটি দ্রুততম মাধ্যম হিসেবে কাজ করবে।",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "উপলব্ধ প্রোভাইডার",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "প্রোভাইডার যোগ করুন",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "কাস্টম KPoe সার্ভার URL",
@@ -427,6 +447,10 @@
     "message": "OpenRouter সেটিংস",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "DeepL সেটিংস",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "OpenRouter API কী",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "এর জন্য বড় টেক্সট ডিসপ্লে: রোমানাইজেশন বা লিরিক্স",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "বড় টেক্সট",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL এপিআই (API) কি",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "আপনার এপিআই কি স্থানীয়ভাবে সংরক্ষিত থাকে। ফ্রি প্ল্যান কি সাধারণত :fx দিয়ে শেষ হয়।",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (ব্যবহারকারীর অবদান)",
     "description": "Display name for lyricsplus source"
@@ -805,50 +845,6 @@
     "message": "Musixmatch (শব্দ)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "পঠনযোগ্যতা",
-    "description": "Section title in popup Appearance tab"
-  },
-  "msgCacheClearFailed": {
-    "message": "ক্যাশে পরিষ্কার করতে ব্যর্থ হয়েছে।",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelProviderOrder": {
-    "message": "লিরিক্স প্রোভাইডারের ক্রম",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "কোন প্রোভাইডার প্রথমে চেক করা হবে তা নির্ধারণ করতে ড্র্যাগ এবং ড্রপ করুন। তালিকার উপরের প্রোভাইডারটি দ্রুততম মাধ্যম হিসেবে কাজ করবে।",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "উপলব্ধ প্রোভাইডার",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "প্রোভাইডার যোগ করুন",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL সেটিংস",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "বড় টেক্সট",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL এপিআই (API) কি",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "আপনার এপিআই কি স্থানীয়ভাবে সংরক্ষিত থাকে। ফ্রি প্ল্যান কি সাধারণত :fx দিয়ে শেষ হয়।",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -864,5 +860,21 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "বিনিলাইরিক্স (অ্যাপল মিউজিক ডিবি)"
+  },
+  "msgCacheClearedFailed": {
+    "message": "ক্যাশ পরিষ্কার করতে ব্যর্থ।",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelDefaultProvider": {
+    "message": "ডিফল্ট লিরিক্স প্রদানকারী",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "আপনার পছন্দের লিরিক্স সোর্স চয়ন করুন।",
+    "description": "Description for provider dropdown"
   }
 }

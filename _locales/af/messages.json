@@ -43,6 +43,10 @@
     "message": "Integreer SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Leesbaarheid",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Vertooninstellings",
     "description": "Section title in popup Appearance tab"
@@ -91,8 +95,8 @@
     "message": "Kas suksesvol skoongemaak!",
     "description": "Snackbar message after cache clear"
   },
-  "msgCacheClearedFailed": {
-    "message": "Kon nie kas skoonmaak nie.",
+  "msgCacheClearFailed": {
+    "message": "Kon kas nie uitvee nie.",
     "description": "Snackbar error message when cache clear fails"
   },
   "msgCacheClearError": {
@@ -193,6 +197,14 @@
     "message": "Slaan nie-musikale dele oor soos intros, outros of advertensie-segmente.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Gee voorkeur aan Unison vir video's"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Wanneer dit geaktiveer is, gee prioriteit aan die Unison-diens vir videoboodskappe en ignoreer SponsorBlock-segmente wanneer Unison die lirieke verskaf."
+  },
   "categoryAppleMusic": {
     "message": "Apple Music-instellings",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Lirieke-verskaffer",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Standaard lirieke-verskaffer",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Volgorde van lirieke-verskaffers",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Kies jou gunsteling liriekebron.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Sleep en los om te prioritiseer watter verskaffer eerste nagegaan word. Die boonste verskaffer dien as die vinnigste keuse.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Beskikbare verskaffers",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Voeg verskaffer by",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "Gepasmaakte KPoe-bediener-URL",
@@ -381,10 +401,6 @@
       }
     }
   },
-  "confirmClearLocalLyrics": {
-    "message": "Wil jy alle plaaslike lirieke verwyder?",
-    "description": "Confirm dialog for clearing all local lyrics"
-  },
   "msgErrorLoadingLocalLyrics": {
     "message": "Fout tydens laai van plaaslike lirieke: $ERROR$",
     "description": "Error when loading lyrics list fails",
@@ -429,6 +445,10 @@
   },
   "categoryOpenRouterSettings": {
     "message": "OpenRouter-instellings",
+    "description": "Category title"
+  },
+  "categoryDeepLSettings": {
+    "message": "DeepL-instellings",
     "description": "Category title"
   },
   "labelOpenRouterApiKey": {
@@ -533,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Groter tekstoon vir: Romanisering of Lirieke",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Groter teks",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -785,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API-sleutel",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Jou API-sleutel word plaaslik gestoor. Gratis plan-sleutels eindig gewoonlik met :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Gebruikersbydraes)",
     "description": "Display name for lyricsplus source"
@@ -809,50 +845,6 @@
     "message": "Musixmatch (Woord)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Leesbaarheid",
-    "description": "Section title in popup Appearance tab"
-  },
-  "msgCacheClearFailed": {
-    "message": "Kon kas nie uitvee nie.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelProviderOrder": {
-    "message": "Volgorde van lirieke-verskaffers",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Sleep en los om te prioritiseer watter verskaffer eerste nagegaan word. Die boonste verskaffer dien as die vinnigste keuse.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Beskikbare verskaffers",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Voeg verskaffer by",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL-instellings",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Groter teks",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL API-sleutel",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Jou API-sleutel word plaaslik gestoor. Gratis plan-sleutels eindig gewoonlik met :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -868,5 +860,25 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Kon nie kas skoonmaak nie.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelDefaultProvider": {
+    "message": "Standaard lirieke-verskaffer",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Kies jou gunsteling liriekebron.",
+    "description": "Description for provider dropdown"
+  },
+  "confirmClearLocalLyrics": {
+    "message": "Wil jy alle plaaslike lirieke verwyder?",
+    "description": "Confirm dialog for clearing all local lyrics"
   }
 }

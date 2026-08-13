@@ -197,6 +197,14 @@
     "message": "Пропускати не музичні фрагменти, такі як вступ, завершення або рекламні вставки.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Надавати перевагу Unison для відео"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Якщо ввімкнено, надавайте перевагу службі Unison для відеоконтенту та ігноруйте сегменти SponsorBlock, коли Unison надає текст пісні."
+  },
   "categoryAppleMusic": {
     "message": "Налаштування Apple Music",
     "description": "Settings category title"
@@ -437,6 +445,10 @@
   },
   "categoryOpenRouterSettings": {
     "message": "Налаштування OpenRouter",
+    "description": "Category title"
+  },
+  "categoryDeepLSettings": {
+    "message": "Налаштування DeepL",
     "description": "Category title"
   },
   "labelOpenRouterApiKey": {
@@ -797,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Ключ API DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Ваш ключ API зберігається локально. Ключі безкоштовного тарифного плану зазвичай закінчуються на :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (від користувачів)",
     "description": "Display name for lyricsplus source"
@@ -837,20 +861,8 @@
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
   },
-  "categoryDeepLSettings": {
-    "message": "Налаштування DeepL",
-    "description": "Category title"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "Ключ API DeepL",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Ваш ключ API зберігається локально. Ключі безкоштовного тарифного плану зазвичай закінчуються на :fx",
-    "description": "Helper text"
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
   }
 }

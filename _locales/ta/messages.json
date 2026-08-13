@@ -43,6 +43,10 @@
     "message": "SponsorBlock ஐ ஒருங்கிணைக்கவும்",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "வாசிப்புத்திறன்",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "காட்சி அமைப்புகள்",
     "description": "Section title in popup Appearance tab"
@@ -91,8 +95,8 @@
     "message": "தேக்ககம் வெற்றிகரமாக அழிக்கப்பட்டது!",
     "description": "Snackbar message after cache clear"
   },
-  "msgCacheClearedFailed": {
-    "message": "தேக்ககத்தை அழிப்பதில் தோல்வி.",
+  "msgCacheClearFailed": {
+    "message": "தற்காலிக சேமிப்பை (cache) அழிக்க முடியவில்லை.",
     "description": "Snackbar error message when cache clear fails"
   },
   "msgCacheClearError": {
@@ -193,6 +197,14 @@
     "message": "முன்னுரை, முடிவுரை அல்லது விளம்பரப் பகுதிகள் போன்ற இசை அல்லாத பகுதைகளைத் தவிர்க்கவும்.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "வீடியோக்களுக்கு Unison ஐ விரும்புக"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "இயக்கப்பட்டிருக்கும் போது, வீடியோ உள்ளடக்கத்திற்கு Unison சேமைக்கு முன்னுரிமை அளிக்கவும் மற்றும் Unison வரிகளை வழங்கும் போது SponsorBlock பிரிவுகளைப் புறக்கணிக்கவும்."
+  },
   "categoryAppleMusic": {
     "message": "Apple Music அமைப்புகள்",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "பாடல் வரிகள் வழங்குநர்",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "இயல்புநிலை பாடல் வரிகள் வழங்குநர்",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "வரிகள் வழங்கும் சேவை வரிசை",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "உங்களுக்கு பிடித்த பாடல் வரிகள் ஆதாரத்தைத் தேர்ந்தெடுக்கவும்.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "எந்த சேவை முதலில் சரிபார்க்கப்பட வேண்டும் என்பதை மாற்ற இழுத்து விடவும். முதலில் உள்ள சேவை வேகமான தேர்வாக செயல்படும்.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "கிடைக்கக்கூடிய சேவைகள்",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "சேவையைச் சேர்",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "தனிப்பயன் KPoe சேவையக URL",
@@ -381,10 +401,6 @@
       }
     }
   },
-  "confirmClearLocalLyrics": {
-    "message": "அனைத்து உள்ளூர் வரிகளையும் நீக்க விரும்புகிறீர்களா?",
-    "description": "Confirm dialog for clearing all local lyrics"
-  },
   "msgErrorLoadingLocalLyrics": {
     "message": "உள்ளூர் வரிகளை ஏற்றும் போது பிழை: $ERROR$",
     "description": "Error when loading lyrics list fails",
@@ -429,6 +445,10 @@
   },
   "categoryOpenRouterSettings": {
     "message": "OpenRouter அமைப்புகள்",
+    "description": "Category title"
+  },
+  "categoryDeepLSettings": {
+    "message": "DeepL அமைப்புகள்",
     "description": "Category title"
   },
   "labelOpenRouterApiKey": {
@@ -533,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "இதற்கான பெரிய உரை காட்சி: ரோமானைசேஷன் அல்லது பாடல் வரிகள்",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "பெரிய உரை",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -785,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API சாவி",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "உங்கள் API சாவி உள்ளூரில் சேமிக்கப்படும். இலவசத் திட்டச் சாவிகள் பொதுவாக :fx என்று முடியும்.",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (பயனர் பங்களிப்புகள்)",
     "description": "Display name for lyricsplus source"
@@ -809,50 +845,6 @@
     "message": "Musixmatch (வார்த்தை)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "வாசிப்புத்திறன்",
-    "description": "Section title in popup Appearance tab"
-  },
-  "msgCacheClearFailed": {
-    "message": "தற்காலிக சேமிப்பை (cache) அழிக்க முடியவில்லை.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelProviderOrder": {
-    "message": "வரிகள் வழங்கும் சேவை வரிசை",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "எந்த சேவை முதலில் சரிபார்க்கப்பட வேண்டும் என்பதை மாற்ற இழுத்து விடவும். முதலில் உள்ள சேவை வேகமான தேர்வாக செயல்படும்.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "கிடைக்கக்கூடிய சேவைகள்",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "சேவையைச் சேர்",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL அமைப்புகள்",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "பெரிய உரை",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL API சாவி",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "உங்கள் API சாவி உள்ளூரில் சேமிக்கப்படும். இலவசத் திட்டச் சாவிகள் பொதுவாக :fx என்று முடியும்.",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -868,5 +860,25 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "msgCacheClearedFailed": {
+    "message": "தேக்ககத்தை அழிப்பதில் தோல்வி.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelDefaultProvider": {
+    "message": "இயல்புநிலை பாடல் வரிகள் வழங்குநர்",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "உங்களுக்கு பிடித்த பாடல் வரிகள் ஆதாரத்தைத் தேர்ந்தெடுக்கவும்.",
+    "description": "Description for provider dropdown"
+  },
+  "confirmClearLocalLyrics": {
+    "message": "அனைத்து உள்ளூர் வரிகளையும் நீக்க விரும்புகிறீர்களா?",
+    "description": "Confirm dialog for clearing all local lyrics"
   }
 }

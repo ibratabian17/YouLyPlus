@@ -43,6 +43,10 @@
     "message": "Unganisha SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Usomekaji",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Mipangilio ya Kuonyesha",
     "description": "Section title in popup Appearance tab"
@@ -91,8 +95,8 @@
     "message": "Cache imefutwa kwa mafanikio!",
     "description": "Snackbar message after cache clear"
   },
-  "msgCacheClearedFailed": {
-    "message": "Imeshindwa kufuta cache.",
+  "msgCacheClearFailed": {
+    "message": "Imeshindwa kufuta akiba.",
     "description": "Snackbar error message when cache clear fails"
   },
   "msgCacheClearError": {
@@ -193,6 +197,14 @@
     "message": "Ruka sehemu zisizo za muziki kama vile utangulizi (intro), sehemu za mwisho (outro) au sehemu za matangazo.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Pendelea Unison kwa Video"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Ikiwa imewezeshwa, weka kipaumbele huduma ya Unison kwa maudhui ya video na upuuze sehemu za SponsorBlock wakati Unison inatoa maneno ya nyimbo."
+  },
   "categoryAppleMusic": {
     "message": "Mipangilio ya Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Mtoa Huduma wa Mashairi",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Mtoa huduma chaguo-msingi wa mashairi",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Mpangilio wa Mtoa Huduma wa Nyimbo",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Chagua chanzo chako cha mashairi unachokipenda.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Buruta na udondoshe ili kutoa kipaumbele kwa mtoa huduma anayekaguliwa kwanza. Mtoa huduma wa juu hufanya kazi kama njia ya haraka.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Watoa Huduma Wanaopatikana",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Ongeza Mtoa Huduma",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "URL ya Seva ya KPoe Maalum",
@@ -381,10 +401,6 @@
       }
     }
   },
-  "confirmClearLocalLyrics": {
-    "message": "Je, unataka kufuta mashairi yote ya ndani?",
-    "description": "Confirm dialog for clearing all local lyrics"
-  },
   "msgErrorLoadingLocalLyrics": {
     "message": "Hitilafu wakati wa kupakia mashairi ya ndani: $ERROR$",
     "description": "Error when loading lyrics list fails",
@@ -429,6 +445,10 @@
   },
   "categoryOpenRouterSettings": {
     "message": "Mipangilio ya OpenRouter",
+    "description": "Category title"
+  },
+  "categoryDeepLSettings": {
+    "message": "Mipangilio ya DeepL",
     "description": "Category title"
   },
   "labelOpenRouterApiKey": {
@@ -533,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Maonyesho ya maandishi makubwa kwa: Uandishi wa Kilatini au Mashairi",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Maandishi Makubwa",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -785,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Ufunguo wa DeepL API",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Ufunguo wako wa API umehifadhiwa ndani ya kifaa chako. Funguo za mpango wa bure kwa kawaida huishia na :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Michango ya Watumiaji)",
     "description": "Display name for lyricsplus source"
@@ -809,50 +845,6 @@
     "message": "Musixmatch (Neno)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Usomekaji",
-    "description": "Section title in popup Appearance tab"
-  },
-  "msgCacheClearFailed": {
-    "message": "Imeshindwa kufuta akiba.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelProviderOrder": {
-    "message": "Mpangilio wa Mtoa Huduma wa Nyimbo",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Buruta na udondoshe ili kutoa kipaumbele kwa mtoa huduma anayekaguliwa kwanza. Mtoa huduma wa juu hufanya kazi kama njia ya haraka.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Watoa Huduma Wanaopatikana",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Ongeza Mtoa Huduma",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "Mipangilio ya DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Maandishi Makubwa",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "Ufunguo wa DeepL API",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Ufunguo wako wa API umehifadhiwa ndani ya kifaa chako. Funguo za mpango wa bure kwa kawaida huishia na :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -868,5 +860,25 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Imeshindwa kufuta cache.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelDefaultProvider": {
+    "message": "Mtoa huduma chaguo-msingi wa mashairi",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Chagua chanzo chako cha mashairi unachokipenda.",
+    "description": "Description for provider dropdown"
+  },
+  "confirmClearLocalLyrics": {
+    "message": "Je, unataka kufuta mashairi yote ya ndani?",
+    "description": "Confirm dialog for clearing all local lyrics"
   }
 }

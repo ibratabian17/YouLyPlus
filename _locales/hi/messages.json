@@ -43,6 +43,10 @@
     "message": "SponsorBlock एकीकृत करें",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "पठनीयता",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "डिस्प्ले सेटिंग्स",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "इंट्रो, आउट्रो या विज्ञापनों जैसे गैर-संगीत भागों को छोड़ दें।",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "वीडियो के लिए यूनिसन (Unison) को प्राथमिकता दें"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "सक्षम होने पर, वीडियो सामग्री के लिए यूनिसन सेवा को प्राथमिकता दें और जब यूनिसन गीत (lyrics) प्रदान करता है तो SponsorBlock खंडों को अनदेखा करें।"
+  },
   "categoryAppleMusic": {
     "message": "Apple Music सेटिंग्स",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "लिरिक्स प्रदाता",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "डिफ़ॉल्ट लिरिक्स प्रदाता",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "गीत प्रदाता क्रम",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "अपना पसंदीदा लिरिक्स स्रोत चुनें।",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "प्राथमिकता तय करने के लिए ड्रैग और ड्रॉप करें। सबसे ऊपर वाला प्रदाता सबसे पहले जांचा जाता है।",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "उपलब्ध प्रदाता",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "प्रदाता जोड़ें",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "कस्टम KPoe सर्वर URL",
@@ -427,6 +447,10 @@
     "message": "OpenRouter सेटिंग्स",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "DeepL सेटिंग्स",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "OpenRouter API कुंजी",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "इसके लिए बड़ा टेक्स्ट डिस्प्ले: लिप्यंतरण या लिरिक्स",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "बड़ा टेक्स्ट",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API कुंजी",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "आपकी API कुंजी स्थानीय रूप से संग्रहीत है। फ्री प्लान कुंजियाँ आमतौर पर :fx पर समाप्त होती हैं।",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (प्रयोक्ता योगदान)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (शब्द)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "पठनीयता",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "गीत प्रदाता क्रम",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "प्राथमिकता तय करने के लिए ड्रैग और ड्रॉप करें। सबसे ऊपर वाला प्रदाता सबसे पहले जांचा जाता है।",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "उपलब्ध प्रदाता",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "प्रदाता जोड़ें",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL सेटिंग्स",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "बड़ा टेक्स्ट",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL API कुंजी",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "आपकी API कुंजी स्थानीय रूप से संग्रहीत है। फ्री प्लान कुंजियाँ आमतौर पर :fx पर समाप्त होती हैं।",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "labelDefaultProvider": {
+    "message": "डिफ़ॉल्ट लिरिक्स प्रदाता",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "अपना पसंदीदा लिरिक्स स्रोत चुनें।",
+    "description": "Description for provider dropdown"
   }
 }

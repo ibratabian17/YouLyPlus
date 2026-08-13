@@ -43,6 +43,10 @@
     "message": "Integrera SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Läsvänlighet",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Skärminställningar",
     "description": "Section title in popup Appearance tab"
@@ -91,7 +95,7 @@
     "message": "Cachen har rensats!",
     "description": "Snackbar message after cache clear"
   },
-  "msgCacheClearedFailed": {
+  "msgCacheClearFailed": {
     "message": "Det gick inte att rensa cachen.",
     "description": "Snackbar error message when cache clear fails"
   },
@@ -193,6 +197,14 @@
     "message": "Hoppa över icke-musikaliska delar som intron, outron eller reklaminslag.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Föredra Unison för videor"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "När aktiverat, prioritera Unison-tjänsten för videoinnehåll och ignorera SponsorBlock-segment när Unison tillhandahåller texterna."
+  },
   "categoryAppleMusic": {
     "message": "Apple Music Inställningar",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Sångtextleverantör",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Standard sångtextleverantör",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Ordning för textleverantörer",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Välj din föredragna låttextkälla.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Dra och släpp för att prioritera vilken leverantör som ska kontrolleras först. Den översta leverantören fungerar som förstahandsval.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Tillgängliga leverantörer",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Lägg till leverantör",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "Anpassad KPoe-server URL",
@@ -427,6 +447,10 @@
     "message": "OpenRouter Inställningar",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "DeepL-inställningar",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "OpenRouter API-nyckel",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Större textvisning för: Romanisering eller Sångtext",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Större text",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API-nyckel",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Din API-nyckel lagras lokalt. Nycklar för gratisabonnemang slutar vanligtvis med :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Användarbidrag)",
     "description": "Display name for lyricsplus source"
@@ -805,50 +845,6 @@
     "message": "Musixmatch (Ord)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Läsvänlighet",
-    "description": "Section title in popup Appearance tab"
-  },
-  "msgCacheClearFailed": {
-    "message": "Det gick inte att rensa cachen.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelProviderOrder": {
-    "message": "Ordning för textleverantörer",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Dra och släpp för att prioritera vilken leverantör som ska kontrolleras först. Den översta leverantören fungerar som förstahandsval.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Tillgängliga leverantörer",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Lägg till leverantör",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL-inställningar",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Större text",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL API-nyckel",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Din API-nyckel lagras lokalt. Nycklar för gratisabonnemang slutar vanligtvis med :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -864,5 +860,21 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Det gick inte att rensa cachen.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelDefaultProvider": {
+    "message": "Standard sångtextleverantör",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Välj din föredragna låttextkälla.",
+    "description": "Description for provider dropdown"
   }
 }

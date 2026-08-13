@@ -43,6 +43,10 @@
     "message": "Интеграция SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Читабельность",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Настройки отображения",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "Пропускать немузыкальные части: вступления, концовки или спонсорские сегменты.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Предпочитать Unison для видео"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Если включено, служба Unison для видеоконтента получает приоритет, а сегменты SponsorBlock игнорируются, когда Unison предоставляет текст песен."
+  },
   "categoryAppleMusic": {
     "message": "Настройки Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Провайдер текстов",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Провайдер по умолчанию",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Порядок провайдеров текста",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Выберите предпочтительный источник текстов.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Перетаскивайте элементы, чтобы изменить приоритет проверки провайдеров. Первый в списке будет использоваться в качестве основного.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Доступные провайдеры",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Добавить провайдера",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "Свой URL сервера KPoe",
@@ -427,6 +447,10 @@
     "message": "Настройки OpenRouter",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "Настройки DeepL",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "Ключ OpenRouter API",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Увеличить: Транскрипцию или Текст песни",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Крупный текст",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "API-ключ DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Ваш API-ключ хранится локально. Ключи бесплатного тарифа обычно заканчиваются на :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (от пользователей)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (по словам)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Читабельность",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "Порядок провайдеров текста",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Перетаскивайте элементы, чтобы изменить приоритет проверки провайдеров. Первый в списке будет использоваться в качестве основного.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Доступные провайдеры",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Добавить провайдера",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "Настройки DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Крупный текст",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "API-ключ DeepL",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Ваш API-ключ хранится локально. Ключи бесплатного тарифа обычно заканчиваются на :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "labelDefaultProvider": {
+    "message": "Провайдер по умолчанию",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Выберите предпочтительный источник текстов.",
+    "description": "Description for provider dropdown"
   }
 }

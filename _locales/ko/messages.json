@@ -43,6 +43,10 @@
     "message": "SponsorBlock 통합",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "가독성",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "표시 설정",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "인트로, 아웃로 또는 스폰서 세그먼트와 같은 음악이 아닌 섹션을 건너뜁니다.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "동영상에 Unison 우선 사용"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "활성화하면 동영상 콘텐츠에서 Unison 서비스를 우선시하며, Unison이 가사를 제공할 때 SponsorBlock 세그먼트는 무시합니다."
+  },
   "categoryAppleMusic": {
     "message": "Apple Music 설정",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "가사 제공자",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "기본 가사 제공자",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "가사 제공자 순서",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "선호하는 가사 소스를 선택하세요.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "드래그 앤 드롭으로 우선순위를 설정하세요. 맨 위에 있는 제공자가 가장 먼저 검색됩니다.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "사용 가능한 제공자",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "제공자 추가",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "사용자 지정 KPoe 서버 URL",
@@ -427,6 +447,10 @@
     "message": "OpenRouter 설정",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "DeepL 설정",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "OpenRouter API 키",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "더 크게 표시할 텍스트: 발음 또는 가사",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "큰 텍스트 모드",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API 키",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "API 키는 로컬에 저장됩니다. 무료 플랜 키는 일반적으로 :fx로 끝납니다.",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (사용자 제공)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (단어)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "가독성",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "가사 제공자 순서",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "드래그 앤 드롭으로 우선순위를 설정하세요. 맨 위에 있는 제공자가 가장 먼저 검색됩니다.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "사용 가능한 제공자",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "제공자 추가",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL 설정",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "큰 텍스트 모드",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL API 키",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "API 키는 로컬에 저장됩니다. 무료 플랜 키는 일반적으로 :fx로 끝납니다.",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "labelDefaultProvider": {
+    "message": "기본 가사 제공자",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "선호하는 가사 소스를 선택하세요.",
+    "description": "Description for provider dropdown"
   }
 }

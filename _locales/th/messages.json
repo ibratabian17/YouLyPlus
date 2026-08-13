@@ -43,6 +43,10 @@
     "message": "รวมกับ SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "ความสามารถในการอ่าน",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "การตั้งค่าการแสดงผล",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "ข้ามส่วนที่ไม่ใช่เพลง เช่น ช่วงแนะนำ ช่วงจบ หรือช่วงโฆษณาสปอนเซอร์",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Prefer Unison for Videos"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "เมื่อเปิดใช้งาน ให้จัดลำดับความสำคัญของบริการ Unison สำหรับเนื้อหาวิดีโอ และละเว้นส่วนของ SponsorBlock เมื่อ Unison เป็นผู้ระบุเนื้อเพลง"
+  },
   "categoryAppleMusic": {
     "message": "การตั้งค่า Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "ผู้ให้บริการเนื้อเพลง",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "ผู้ให้บริการเนื้อเพลงเริ่มต้น",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "ลำดับผู้ให้บริการเนื้อเพลง",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "เลือกแหล่งเนื้อเพลงที่คุณต้องการ",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "ลากและวางเพื่อจัดลำดับความสำคัญของผู้ให้บริการที่จะถูกตรวจสอบก่อน ผู้ให้บริการที่อยู่ด้านบนสุดจะถูกเลือกใช้งานเป็นช่องทางหลัก",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "ผู้ให้บริการที่มีอยู่",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "เพิ่มผู้ให้บริการ",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "URL เซิร์ฟเวอร์ KPoe แบบกำหนดเอง",
@@ -427,6 +447,10 @@
     "message": "การตั้งค่า OpenRouter",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "การตั้งค่า DeepL",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "คีย์ OpenRouter API",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "แสดงข้อความขนาดใหญ่: คำอ่าน หรือ เนื้อเพลง",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "ข้อความขนาดใหญ่",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API Key",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "API Key ของคุณจะถูกจัดเก็บไว้ในเครื่อง คีย์สำหรับแผนฟรีมักจะลงท้ายด้วย :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (ผลงานผู้ใช้)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (คำต่อคำ)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "ความสามารถในการอ่าน",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "ลำดับผู้ให้บริการเนื้อเพลง",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "ลากและวางเพื่อจัดลำดับความสำคัญของผู้ให้บริการที่จะถูกตรวจสอบก่อน ผู้ให้บริการที่อยู่ด้านบนสุดจะถูกเลือกใช้งานเป็นช่องทางหลัก",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "ผู้ให้บริการที่มีอยู่",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "เพิ่มผู้ให้บริการ",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "การตั้งค่า DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "ข้อความขนาดใหญ่",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL API Key",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "API Key ของคุณจะถูกจัดเก็บไว้ในเครื่อง คีย์สำหรับแผนฟรีมักจะลงท้ายด้วย :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "labelDefaultProvider": {
+    "message": "ผู้ให้บริการเนื้อเพลงเริ่มต้น",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "เลือกแหล่งเนื้อเพลงที่คุณต้องการ",
+    "description": "Description for provider dropdown"
   }
 }

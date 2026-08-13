@@ -43,6 +43,10 @@
     "message": "Integreer SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Leesbaarheid",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Weergave-instellingen",
     "description": "Section title in popup Appearance tab"
@@ -91,8 +95,8 @@
     "message": "Cache succesvol gewist!",
     "description": "Snackbar message after cache clear"
   },
-  "msgCacheClearedFailed": {
-    "message": "Wissen van cache mislukt.",
+  "msgCacheClearFailed": {
+    "message": "Cache legen mislukt.",
     "description": "Snackbar error message when cache clear fails"
   },
   "msgCacheClearError": {
@@ -193,6 +197,14 @@
     "message": "Sla niet-muziekgedeelten over zoals intro's, outro's of advertentiesegmenten.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Voorkeur geven aan Unison voor video's"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Indien ingeschakeld, krijgt de Unison-service voor videocontent prioriteit en worden SponsorBlock-segmenten genegeerd wanneer Unison de songtekst levert."
+  },
   "categoryAppleMusic": {
     "message": "Apple Music Instellingen",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Songtekstprovider",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Standaard songtekstprovider",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Volgorde songtekstproviders",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Kies uw favoriete songtekstbron.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Sleep om te bepalen welke provider als eerste wordt gecontroleerd. De bovenste provider wordt als snelle keuze gebruikt.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Beschikbare providers",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Provider toevoegen",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "Aangepaste KPoe server URL",
@@ -427,6 +447,10 @@
     "message": "OpenRouter Instellingen",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "DeepL-instellingen",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "OpenRouter API sleutel",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Grotere tekstweergave voor: Romanisatie of Songtekst",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Grotere tekst",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API-sleutel",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Je API-sleutel wordt lokaal opgeslagen. Sleutels voor het gratis abonnement eindigen meestal op :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Gebruikersbijdragen)",
     "description": "Display name for lyricsplus source"
@@ -805,50 +845,6 @@
     "message": "Musixmatch (Woord)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Leesbaarheid",
-    "description": "Section title in popup Appearance tab"
-  },
-  "msgCacheClearFailed": {
-    "message": "Cache legen mislukt.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelProviderOrder": {
-    "message": "Volgorde songtekstproviders",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Sleep om te bepalen welke provider als eerste wordt gecontroleerd. De bovenste provider wordt als snelle keuze gebruikt.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Beschikbare providers",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Provider toevoegen",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL-instellingen",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Grotere tekst",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL API-sleutel",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Je API-sleutel wordt lokaal opgeslagen. Sleutels voor het gratis abonnement eindigen meestal op :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -864,5 +860,21 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Wissen van cache mislukt.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelDefaultProvider": {
+    "message": "Standaard songtekstprovider",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Kies uw favoriete songtekstbron.",
+    "description": "Description for provider dropdown"
   }
 }

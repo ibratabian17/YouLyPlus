@@ -43,6 +43,10 @@
     "message": "Hlanganisa i-SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Ukufundeka",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Izilungiselelo Zokubonisa",
     "description": "Section title in popup Appearance tab"
@@ -91,8 +95,8 @@
     "message": "I-Cache isulwe ngempumelelo!",
     "description": "Snackbar message after cache clear"
   },
-  "msgCacheClearedFailed": {
-    "message": "Kuhluleke ukusula i-cache.",
+  "msgCacheClearFailed": {
+    "message": "Yehlulekile ukusula inqolobane.",
     "description": "Snackbar error message when cache clear fails"
   },
   "msgCacheClearError": {
@@ -193,6 +197,14 @@
     "message": "Yeqa izingxenye ezingezona zomculo njengezingeniso, iziphetho noma izingxenye zezikhangiso.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Khetha u-Unison kumavidiyo"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Uma kunikwe amandla, beka phambili isevisi ka-Unison yokuqukethwe kwevidiyo futhi ungazinaki izingxenye ze-SponsorBlock lapho u-Unison anikeza khona amagama izingoma."
+  },
   "categoryAppleMusic": {
     "message": "Izilungiselelo ze-Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Umhlinzeki Wamagama Omculo",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Umhlinzeki wamagama omculo ozenzakalelayo",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Ukulandelana Kwabahlinzeki Bamagama Ezingoma",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Khetha umthombo wamagama omculo owuthandayo.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Hudula uphonse ukuze ubeke kuqala lowo mthombo okufanele uhlolwe kuqala. Umthombo ophezulu usebenza njengendlela esheshayo yokukhetha.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Abahlinzeki Abatholakalayo",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Engeza Umhlinzeki",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "I-URL Yeseva ye-KPoe Ngokwezifiso",
@@ -381,10 +401,6 @@
       }
     }
   },
-  "confirmClearLocalLyrics": {
-    "message": "Ingabe uyafuna ukusula wonke amagama omculo wendawo?",
-    "description": "Confirm dialog for clearing all local lyrics"
-  },
   "msgErrorLoadingLocalLyrics": {
     "message": "Iphutha ngenkathi kulayishwa amagama omculo wendawo: $ERROR$",
     "description": "Error when loading lyrics list fails",
@@ -429,6 +445,10 @@
   },
   "categoryOpenRouterSettings": {
     "message": "Izilungiselelo ze-OpenRouter",
+    "description": "Category title"
+  },
+  "categoryDeepLSettings": {
+    "message": "Izilungiselelo ze-DeepL",
     "description": "Category title"
   },
   "labelOpenRouterApiKey": {
@@ -533,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Umbukiso wombhalo omkhulu we: Zinhlamvu Zesi-Latin noma Amagama Omculo",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Umbhalo Omkhulu",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -785,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Ukhiye we-API ye-DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Ukhiye wakho we-API ugcinwa endaweni yakho. Okhiye bohlelo lwamahhala imvamisa baphela ngo-:fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Iminikelo Yabasebenzisi)",
     "description": "Display name for lyricsplus source"
@@ -809,50 +845,6 @@
     "message": "Musixmatch (Zwi)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Ukufundeka",
-    "description": "Section title in popup Appearance tab"
-  },
-  "msgCacheClearFailed": {
-    "message": "Yehlulekile ukusula inqolobane.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelProviderOrder": {
-    "message": "Ukulandelana Kwabahlinzeki Bamagama Ezingoma",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Hudula uphonse ukuze ubeke kuqala lowo mthombo okufanele uhlolwe kuqala. Umthombo ophezulu usebenza njengendlela esheshayo yokukhetha.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Abahlinzeki Abatholakalayo",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Engeza Umhlinzeki",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "Izilungiselelo ze-DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Umbhalo Omkhulu",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "Ukhiye we-API ye-DeepL",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Ukhiye wakho we-API ugcinwa endaweni yakho. Okhiye bohlelo lwamahhala imvamisa baphela ngo-:fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -868,5 +860,25 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "I-BiniLyrics (Apple Music DB)"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Kuhluleke ukusula i-cache.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelDefaultProvider": {
+    "message": "Umhlinzeki wamagama omculo ozenzakalelayo",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Khetha umthombo wamagama omculo owuthandayo.",
+    "description": "Description for provider dropdown"
+  },
+  "confirmClearLocalLyrics": {
+    "message": "Ingabe uyafuna ukusula wonke amagama omculo wendawo?",
+    "description": "Confirm dialog for clearing all local lyrics"
   }
 }

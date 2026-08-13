@@ -43,6 +43,10 @@
     "message": "Ενσωμάτωση SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Αναγνωσιμότητα",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Ρυθμίσεις Προβολής",
     "description": "Section title in popup Appearance tab"
@@ -91,8 +95,8 @@
     "message": "Η προσωρινή μνήμη εκκαθαρίστηκε επιτυχώς!",
     "description": "Snackbar message after cache clear"
   },
-  "msgCacheClearedFailed": {
-    "message": "Αποτυχία εκκαθάρισης προσωρινής μνήμης.",
+  "msgCacheClearFailed": {
+    "message": "Αποτυχία εκκαθάρισης της προσωρινής μνήμης.",
     "description": "Snackbar error message when cache clear fails"
   },
   "msgCacheClearError": {
@@ -193,6 +197,14 @@
     "message": "Παράκαμψη μη μουσικών τμημάτων όπως εισαγωγές, αποφωνήσεις ή διαφημιστικά τμήματα.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Προτίμηση Unison για τα βίντεο"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Όταν είναι ενεργοποιημένο, δίνεται προτεραιότητα στην υπηρεσία Unison για περιεχόμενο βίντεο και παραβλέπονται τα τμήματα του SponsorBlock όταν το Unison παρέχει τους στίχους."
+  },
   "categoryAppleMusic": {
     "message": "Ρυθμίσεις Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Πάροχος Στίχων",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Προεπιλεγμένος Πάροχος Στίχων",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Σειρά Παρόχων Στίχων",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Επιλέξτε την αγαπημένη σας πηγή στίχων.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Σύρετε και αποθέστε για να ορίσετε τη σειρά προτεραιότητας των παρόχων. Ο πρώτος πάροχος λειτουργεί ως η επιλογή ταχείας πρόσβασης.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Διαθέσιμοι Πάροχοι",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Προσθήκη Παρόχου",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "Διεύθυνση URL προσαρμοσμένου διακομιστή KPoe",
@@ -381,10 +401,6 @@
       }
     }
   },
-  "confirmClearLocalLyrics": {
-    "message": "Θέλετε να διαγράψετε όλους τους τοπικούς στίχους;",
-    "description": "Confirm dialog for clearing all local lyrics"
-  },
   "msgErrorLoadingLocalLyrics": {
     "message": "Σφάλμα κατά τη φόρτωση τοπικών στίχων: $ERROR$",
     "description": "Error when loading lyrics list fails",
@@ -429,6 +445,10 @@
   },
   "categoryOpenRouterSettings": {
     "message": "Ρυθμίσεις OpenRouter",
+    "description": "Category title"
+  },
+  "categoryDeepLSettings": {
+    "message": "Ρυθμίσεις DeepL",
     "description": "Category title"
   },
   "labelOpenRouterApiKey": {
@@ -533,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Μεγαλύτερο κείμενο για: Λατινοποίηση ή Στίχους",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Μεγαλύτερο Κείμενο",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -785,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Κλειδί API DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Το κλειδί API αποθηκεύεται τοπικά. Τα κλειδιά του δωρεάν προγράμματος συνήθως λήγουν σε :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Συνεισφορές Χρηστών)",
     "description": "Display name for lyricsplus source"
@@ -809,50 +845,6 @@
     "message": "Musixmatch (Λέξη)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Αναγνωσιμότητα",
-    "description": "Section title in popup Appearance tab"
-  },
-  "msgCacheClearFailed": {
-    "message": "Αποτυχία εκκαθάρισης της προσωρινής μνήμης.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelProviderOrder": {
-    "message": "Σειρά Παρόχων Στίχων",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Σύρετε και αποθέστε για να ορίσετε τη σειρά προτεραιότητας των παρόχων. Ο πρώτος πάροχος λειτουργεί ως η επιλογή ταχείας πρόσβασης.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Διαθέσιμοι Πάροχοι",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Προσθήκη Παρόχου",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "Ρυθμίσεις DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Μεγαλύτερο Κείμενο",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "Κλειδί API DeepL",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Το κλειδί API αποθηκεύεται τοπικά. Τα κλειδιά του δωρεάν προγράμματος συνήθως λήγουν σε :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -868,5 +860,25 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Αποτυχία εκκαθάρισης προσωρινής μνήμης.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelDefaultProvider": {
+    "message": "Προεπιλεγμένος Πάροχος Στίχων",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Επιλέξτε την αγαπημένη σας πηγή στίχων.",
+    "description": "Description for provider dropdown"
+  },
+  "confirmClearLocalLyrics": {
+    "message": "Θέλετε να διαγράψετε όλους τους τοπικούς στίχους;",
+    "description": "Confirm dialog for clearing all local lyrics"
   }
 }

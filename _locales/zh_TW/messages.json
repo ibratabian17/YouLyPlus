@@ -43,6 +43,10 @@
     "message": "整合 SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "可讀性",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "顯示設定",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "跳過非音樂部分，如片頭、片尾或贊助片段。",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "影片優先使用 Unison"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "啟用後，影片內容將優先使用 Unison 服務，並在 Unison 提供歌詞時忽略 SponsorBlock 片段。"
+  },
   "categoryAppleMusic": {
     "message": "Apple Music 設定",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "歌詞提供者",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "預設歌詞提供者",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "歌詞來源優先順序",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "選擇您偏好的歌詞來源。",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "拖曳以排列優先順序。排在最上方的來源將作為首選。",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "可用來源",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "新增來源",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "自訂 KPoe 伺服器 URL",
@@ -427,6 +447,10 @@
     "message": "OpenRouter 設定",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "DeepL 設定",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "OpenRouter API 金鑰",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "顯示較大文字：拼音/注音 或 歌詞",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "放大文字",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API 金鑰",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "您的 API 金鑰將儲存在本地。免費方案的金鑰通常以 :fx 結尾。",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (使用者生成)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (單字)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "可讀性",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "歌詞來源優先順序",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "拖曳以排列優先順序。排在最上方的來源將作為首選。",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "可用來源",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "新增來源",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL 設定",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "放大文字",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL API 金鑰",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "您的 API 金鑰將儲存在本地。免費方案的金鑰通常以 :fx 結尾。",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "labelDefaultProvider": {
+    "message": "預設歌詞提供者",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "選擇您偏好的歌詞來源。",
+    "description": "Description for provider dropdown"
   }
 }

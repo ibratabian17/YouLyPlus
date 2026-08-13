@@ -43,6 +43,10 @@
     "message": "SponsorBlock ని అనుసంధానించు",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "రీడబిలిటీ",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "డిస్‌ప్లే సెట్టింగ్‌లు",
     "description": "Section title in popup Appearance tab"
@@ -91,8 +95,8 @@
     "message": "కాష్ విజయవంతంగా క్లియర్ చేయబడింది!",
     "description": "Snackbar message after cache clear"
   },
-  "msgCacheClearedFailed": {
-    "message": "కాష్‌ని క్లియర్ చేయడంలో విఫలమైంది.",
+  "msgCacheClearFailed": {
+    "message": "కాష్‌ను క్లియర్ చేయడం విఫలమైంది.",
     "description": "Snackbar error message when cache clear fails"
   },
   "msgCacheClearError": {
@@ -193,6 +197,14 @@
     "message": "పరిచయం, ముగింపు లేదా ప్రకటనల విభాగాలు వంటి సంగీత రహిత భాగాలను దాటవేయండి.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "వీడియోల కోసం Unison ని ఇష్టపడండి"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "ఎనేబుల్ చేసినప్పుడు, వీడియో కంటెంట్ కోసం Unison సేవకు ప్రాధాన్యత ఇవ్వండి మరియు Unison పాటల సాహిత్యాన్ని అందించినప్పుడు SponsorBlock భాగాలను విస్మరించండి."
+  },
   "categoryAppleMusic": {
     "message": "Apple Music సెట్టింగ్‌లు",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "లిరిక్స్ ప్రదాత",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "డిఫాల్ట్ లిరిక్స్ ప్రదాత",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "లిరిక్స్ ప్రొవైడర్ క్రమం",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "మీకు నచ్చిన లిరిక్స్ మూలాధారాన్ని ఎంచుకోండి.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "ఏ ప్రొవైడర్‌ను ముందుగా తనిఖీ చేయాలో ప్రాధాన్యత ఇవ్వడానికి డ్రాగ్ అండ్ డ్రాప్ చేయండి. పైన ఉన్న ప్రొవైడర్ వేగవంతమైన ఎంపికగా పనిచేస్తుంది.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "అందుబాటులో ఉన్న ప్రొవైడర్లు",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "ప్రొవైడర్‌ను జోడించండి",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "కస్టమ్ KPoe సర్వర్ URL",
@@ -427,6 +447,10 @@
     "message": "OpenRouter సెట్టింగ్‌లు",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "DeepL సెట్టింగ్‌లు",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "OpenRouter API కీ",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "దీని కోసం పెద్ద టెక్స్ట్ డిస్‌ప్లే: రోమనైజేషన్ లేదా లిరిక్స్",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "పెద్ద టెక్స్ట్",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API కీ",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "మీ API కీ స్థానికంగా నిల్వ చేయబడుతుంది. ఉచిత ప్లాన్ కీలు సాధారణంగా :fx తో ముగుస్తాయి",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (యూజర్ కాంట్రిబ్యూషన్స్)",
     "description": "Display name for lyricsplus source"
@@ -805,50 +845,6 @@
     "message": "Musixmatch (వర్డ్)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "రీడబిలిటీ",
-    "description": "Section title in popup Appearance tab"
-  },
-  "msgCacheClearFailed": {
-    "message": "కాష్‌ను క్లియర్ చేయడం విఫలమైంది.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelProviderOrder": {
-    "message": "లిరిక్స్ ప్రొవైడర్ క్రమం",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "ఏ ప్రొవైడర్‌ను ముందుగా తనిఖీ చేయాలో ప్రాధాన్యత ఇవ్వడానికి డ్రాగ్ అండ్ డ్రాప్ చేయండి. పైన ఉన్న ప్రొవైడర్ వేగవంతమైన ఎంపికగా పనిచేస్తుంది.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "అందుబాటులో ఉన్న ప్రొవైడర్లు",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "ప్రొవైడర్‌ను జోడించండి",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL సెట్టింగ్‌లు",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "పెద్ద టెక్స్ట్",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL API కీ",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "మీ API కీ స్థానికంగా నిల్వ చేయబడుతుంది. ఉచిత ప్లాన్ కీలు సాధారణంగా :fx తో ముగుస్తాయి",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -864,5 +860,21 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "msgCacheClearedFailed": {
+    "message": "కాష్‌ని క్లియర్ చేయడంలో విఫలమైంది.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelDefaultProvider": {
+    "message": "డిఫాల్ట్ లిరిక్స్ ప్రదాత",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "మీకు నచ్చిన లిరిక్స్ మూలాధారాన్ని ఎంచుకోండి.",
+    "description": "Description for provider dropdown"
   }
 }

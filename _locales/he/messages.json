@@ -43,6 +43,10 @@
     "message": "שלב את SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "קריאות",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "הגדרות תצוגה",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "דלג על קטעים שאינם מוזיקליים כמו פתיחים, סיומות או קטעי פרסומת.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "העדף את Unison עבור סרטונים"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "כאשר מופעל, תן עדיפות לשירות Unison עבור תוכן וידאו והתעלם מקטעי SponsorBlock כאשר Unison מספק את המילים."
+  },
   "categoryAppleMusic": {
     "message": "הגדרות Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "ספק מילים",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "ספק מילים כברירת מחדל",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "סדר ספקי המילים",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "בחר את מקור המילים המועדף עליך.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "גרור ושחרר כדי לתעדף איזה ספק ייבדק ראשון. הספק העליון משמש כבחירה המהירה.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "ספקים זמינים",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "הוסף ספק",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "כתובת URL של שרת KPoe מותאם אישית",
@@ -427,6 +447,10 @@
     "message": "הגדרות OpenRouter",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "הגדרות DeepL",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "מפתח API של OpenRouter",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "תצוגת טקסט גדולה יותר עבור: רומניזציה או מילות שיר",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "טקסט מוגדל",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "מפתח API של DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "מפתח ה-API שלך נשמר מקומית. מפתחות מתוכנית חינמית מסתיימים לרוב ב-:fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (תרומות משתמשים)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (מילה)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "קריאות",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "סדר ספקי המילים",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "גרור ושחרר כדי לתעדף איזה ספק ייבדק ראשון. הספק העליון משמש כבחירה המהירה.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "ספקים זמינים",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "הוסף ספק",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "הגדרות DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "טקסט מוגדל",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "מפתח API של DeepL",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "מפתח ה-API שלך נשמר מקומית. מפתחות מתוכנית חינמית מסתיימים לרוב ב-:fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (מסד נתונים של Apple Music)"
+  },
+  "labelDefaultProvider": {
+    "message": "ספק מילים כברירת מחדל",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "בחר את מקור המילים המועדף עליך.",
+    "description": "Description for provider dropdown"
   }
 }

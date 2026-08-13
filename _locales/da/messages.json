@@ -43,6 +43,10 @@
     "message": "Integrer SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Læsbarhed",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Visningsindstillinger",
     "description": "Section title in popup Appearance tab"
@@ -91,8 +95,8 @@
     "message": "Cache ryddet med succes!",
     "description": "Snackbar message after cache clear"
   },
-  "msgCacheClearedFailed": {
-    "message": "Kunne ikke rydde cache.",
+  "msgCacheClearFailed": {
+    "message": "Kunne ikke rydde cachen.",
     "description": "Snackbar error message when cache clear fails"
   },
   "msgCacheClearError": {
@@ -193,6 +197,14 @@
     "message": "Spring ikke-musikalske dele over, såsom introer, outroer eller reklamesegmenter.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Foretræk Unison til videoer"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Når denne indstilling er aktiveret, prioriteres Unison-tjenesten til videoindhold, og SponsorBlock-segmenter ignoreres, når Unison leverer sangteksterne."
+  },
   "categoryAppleMusic": {
     "message": "Apple Music Indstillinger",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Tekstudbyder",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Standard tekstudbyder",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Rækkefølge for tekstudbydere",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Vælg din foretrukne tekstkilde.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Træk og slip for at prioritere, hvilken udbyder der tjekkes først. Den øverste udbyder fungerer som hurtigst mulige valg.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Tilgængelige udbydere",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Tilføj udbyder",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "Brugerdefineret KPoe-server-URL",
@@ -381,10 +401,6 @@
       }
     }
   },
-  "confirmClearLocalLyrics": {
-    "message": "Vil du slette alle lokale tekster?",
-    "description": "Confirm dialog for clearing all local lyrics"
-  },
   "msgErrorLoadingLocalLyrics": {
     "message": "Fejl ved indlæsning af lokale tekster: $ERROR$",
     "description": "Error when loading lyrics list fails",
@@ -429,6 +445,10 @@
   },
   "categoryOpenRouterSettings": {
     "message": "OpenRouter indstillinger",
+    "description": "Category title"
+  },
+  "categoryDeepLSettings": {
+    "message": "DeepL-indstillinger",
     "description": "Category title"
   },
   "labelOpenRouterApiKey": {
@@ -533,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Større tekstvisning for: Romanisering eller Sangtekster",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Større tekst",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -785,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "DeepL API-nøgle",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Din API-nøgle gemmes lokalt. Gratis abonnementsnøgler slutter normalt på :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Brugerbidrag)",
     "description": "Display name for lyricsplus source"
@@ -809,50 +845,6 @@
     "message": "Musixmatch (Ord)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Læsbarhed",
-    "description": "Section title in popup Appearance tab"
-  },
-  "msgCacheClearFailed": {
-    "message": "Kunne ikke rydde cachen.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelProviderOrder": {
-    "message": "Rækkefølge for tekstudbydere",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Træk og slip for at prioritere, hvilken udbyder der tjekkes først. Den øverste udbyder fungerer som hurtigst mulige valg.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Tilgængelige udbydere",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Tilføj udbyder",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "DeepL-indstillinger",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Større tekst",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "DeepL API-nøgle",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Din API-nøgle gemmes lokalt. Gratis abonnementsnøgler slutter normalt på :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -868,5 +860,25 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "msgCacheClearedFailed": {
+    "message": "Kunne ikke rydde cache.",
+    "description": "Snackbar error message when cache clear fails"
+  },
+  "labelDefaultProvider": {
+    "message": "Standard tekstudbyder",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Vælg din foretrukne tekstkilde.",
+    "description": "Description for provider dropdown"
+  },
+  "confirmClearLocalLyrics": {
+    "message": "Vil du slette alle lokale tekster?",
+    "description": "Confirm dialog for clearing all local lyrics"
   }
 }

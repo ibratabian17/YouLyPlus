@@ -43,6 +43,10 @@
     "message": "Tích hợp SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Khả năng đọc",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Cài đặt hiển thị",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "Bỏ qua các đoạn không phải âm nhạc như phần giới thiệu, phần kết thúc hoặc các đoạn được tài trợ.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Ưu tiên Unison cho Video"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Khi được bật, hãy ưu tiên dịch vụ Unison cho nội dung video và bỏ qua các đoạn SponsorBlock khi Unison cung cấp lời bài hát."
+  },
   "categoryAppleMusic": {
     "message": "Cài đặt Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Nhà cung cấp lời bài hát",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Nhà cung cấp lời bài hát mặc định",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Thứ tự nguồn lời bài hát",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Chọn nguồn lời bài hát ưa thích của bạn.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Kéo và thả để ưu tiên nguồn nào được kiểm tra trước. Nguồn ở trên cùng sẽ là lựa chọn ưu tiên nhanh.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Các nguồn hiện có",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Thêm nguồn",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "URL máy chủ KPoe tùy chỉnh",
@@ -427,6 +447,10 @@
     "message": "Cài đặt OpenRouter",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "Cài đặt DeepL",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "Khóa API OpenRouter",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Hiển thị văn bản lớn hơn: Phiên âm hoặc Lời bài hát",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Văn bản lớn hơn",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Khóa API DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Khóa API của bạn được lưu trữ cục bộ. Khóa của gói miễn phí thường kết thúc bằng :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Người dùng đóng góp)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (Từ)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Khả năng đọc",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "Thứ tự nguồn lời bài hát",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Kéo và thả để ưu tiên nguồn nào được kiểm tra trước. Nguồn ở trên cùng sẽ là lựa chọn ưu tiên nhanh.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Các nguồn hiện có",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Thêm nguồn",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "Cài đặt DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Văn bản lớn hơn",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "Khóa API DeepL",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Khóa API của bạn được lưu trữ cục bộ. Khóa của gói miễn phí thường kết thúc bằng :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Apple Music DB)"
+  },
+  "labelDefaultProvider": {
+    "message": "Nhà cung cấp lời bài hát mặc định",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Chọn nguồn lời bài hát ưa thích của bạn.",
+    "description": "Description for provider dropdown"
   }
 }

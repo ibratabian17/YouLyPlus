@@ -43,6 +43,10 @@
     "message": "Intégrer SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
+  "sectionReadability": {
+    "message": "Lisibilité",
+    "description": "Section title in popup Appearance tab"
+  },
   "sectionDisplaySettings": {
     "message": "Paramètres d'affichage",
     "description": "Section title in popup Appearance tab"
@@ -193,6 +197,14 @@
     "message": "Passer les sections non musicales comme les intros, outros ou segments sponsorisés.",
     "description": "Description for SponsorBlock toggle"
   },
+  "settingPreferUnisonVideo": {
+    "description": "Label for prefer Unison video toggle in settings",
+    "message": "Préférer Unison pour les vidéos"
+  },
+  "descPreferUnisonVideo": {
+    "description": "Description for prefer Unison video toggle",
+    "message": "Lorsqu'activé, priorise le service Unison pour le contenu vidéo et ignore les segments SponsorBlock lorsque Unison fournit les paroles."
+  },
   "categoryAppleMusic": {
     "message": "Paramètres Apple Music",
     "description": "Settings category title"
@@ -213,13 +225,21 @@
     "message": "Fournisseur de paroles",
     "description": "Category title"
   },
-  "labelDefaultProvider": {
-    "message": "Fournisseur de paroles par défaut",
-    "description": "Label for default provider dropdown"
+  "labelProviderOrder": {
+    "message": "Ordre des fournisseurs de paroles",
+    "description": "Label for provider order configuration"
   },
-  "descDefaultProvider": {
-    "message": "Sélectionnez votre source de paroles préférée.",
-    "description": "Description for provider dropdown"
+  "helperProviderOrder": {
+    "message": "Glissez-déposez pour définir l'ordre de priorité des fournisseurs. Le premier de la liste est utilisé en priorité.",
+    "description": "Helper text for provider ordering"
+  },
+  "labelAvailableProviders": {
+    "message": "Fournisseurs disponibles",
+    "description": "Label for available providers dropdown"
+  },
+  "buttonAddProvider": {
+    "message": "Ajouter un fournisseur",
+    "description": "Add provider button text"
   },
   "labelCustomKpoeUrl": {
     "message": "URL personnalisée du serveur KPoe",
@@ -427,6 +447,10 @@
     "message": "Paramètres OpenRouter",
     "description": "Category title"
   },
+  "categoryDeepLSettings": {
+    "message": "Paramètres DeepL",
+    "description": "Category title"
+  },
   "labelOpenRouterApiKey": {
     "message": "Clé API OpenRouter",
     "description": "Input label"
@@ -529,6 +553,10 @@
   },
   "labelLargerTextMode": {
     "message": "Texte plus grand : Romanisation ou Paroles",
+    "description": "Dropdown label"
+  },
+  "labelLargerTextModeShort": {
+    "message": "Texte agrandi",
     "description": "Dropdown label"
   },
   "descLargerTextMode": {
@@ -781,6 +809,18 @@
     "message": "OpenRouter (LLM)",
     "description": "Translation provider option"
   },
+  "optionDeepL": {
+    "message": "DeepL",
+    "description": "Translation provider option"
+  },
+  "labelDeepLApiKey": {
+    "message": "Clé API DeepL",
+    "description": "Input label"
+  },
+  "helperDeepLApiKey": {
+    "message": "Votre clé API est stockée localement. Les clés du plan gratuit se terminent généralement par :fx",
+    "description": "Helper text"
+  },
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (Contenu utilisateur)",
     "description": "Display name for lyricsplus source"
@@ -805,46 +845,6 @@
     "message": "Musixmatch (Mot)",
     "description": "Display name for musixmatch-word source"
   },
-  "sectionReadability": {
-    "message": "Lisibilité",
-    "description": "Section title in popup Appearance tab"
-  },
-  "labelProviderOrder": {
-    "message": "Ordre des fournisseurs de paroles",
-    "description": "Label for provider order configuration"
-  },
-  "helperProviderOrder": {
-    "message": "Glissez-déposez pour définir l'ordre de priorité des fournisseurs. Le premier de la liste est utilisé en priorité.",
-    "description": "Helper text for provider ordering"
-  },
-  "labelAvailableProviders": {
-    "message": "Fournisseurs disponibles",
-    "description": "Label for available providers dropdown"
-  },
-  "buttonAddProvider": {
-    "message": "Ajouter un fournisseur",
-    "description": "Add provider button text"
-  },
-  "categoryDeepLSettings": {
-    "message": "Paramètres DeepL",
-    "description": "Category title"
-  },
-  "labelLargerTextModeShort": {
-    "message": "Texte agrandi",
-    "description": "Dropdown label"
-  },
-  "optionDeepL": {
-    "message": "DeepL",
-    "description": "Translation provider option"
-  },
-  "labelDeepLApiKey": {
-    "message": "Clé API DeepL",
-    "description": "Input label"
-  },
-  "helperDeepLApiKey": {
-    "message": "Votre clé API est stockée localement. Les clés du plan gratuit se terminent généralement par :fx",
-    "description": "Helper text"
-  },
   "sourceNameLyricsPlusProvider": {
     "message": "Lyrics+",
     "description": "Provider generic name"
@@ -860,5 +860,17 @@
   "sourceNameUnison": {
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
+  },
+  "sourceNameBiniLyrics": {
+    "description": "BiniLyrics provider name",
+    "message": "BiniLyrics (Base de données Apple Music)"
+  },
+  "labelDefaultProvider": {
+    "message": "Fournisseur de paroles par défaut",
+    "description": "Label for default provider dropdown"
+  },
+  "descDefaultProvider": {
+    "message": "Sélectionnez votre source de paroles préférée.",
+    "description": "Description for provider dropdown"
   }
 }
