@@ -17,14 +17,14 @@ export class DeepLProvider extends TranslationProvider {
             ? 'https://api-free.deepl.com/v2/translate' 
             : 'https://api.deepl.com/v2/translate';
 
-        // DeepL expects target_lang in uppercase (e.g., 'EN-US', 'KO')
-        // Some codes need to be mapped to DeepL's specific variants if necessary, 
-        // but generally simple uppercase works for many.
+        // DeepL expects target_lang in uppercase (e.g., 'EN-US', 'KO', 'ZH-HANS')
         let resolvedTargetLang = targetLang.toUpperCase();
         
-        // DeepL specific handling for English and Portuguese variants
+        // DeepL specific handling for English, Portuguese, and Chinese variants
         if (resolvedTargetLang === 'EN') resolvedTargetLang = 'EN-US';
         if (resolvedTargetLang === 'PT') resolvedTargetLang = 'PT-PT';
+        if (resolvedTargetLang === 'ZH' || resolvedTargetLang === 'ZH-CN' || resolvedTargetLang === 'ZH-HANS') resolvedTargetLang = 'ZH-HANS';
+        if (resolvedTargetLang === 'ZH-TW' || resolvedTargetLang === 'ZH-HANT' || resolvedTargetLang === 'ZH-HK') resolvedTargetLang = 'ZH-HANT';
 
         const body = {
             text: texts,

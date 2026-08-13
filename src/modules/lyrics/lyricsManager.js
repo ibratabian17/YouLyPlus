@@ -20,7 +20,7 @@ let lastRequestedSongKey = null;
 const DEBOUNCE_TIME_MS = 200;
 
 // Settings keys that affect which cached responses to invalidate
-const TRANSLATION_SETTING_KEYS = ['translationProvider', 'geminiApiKey', 'geminiModel', 'openRouterApiKey', 'openRouterModel', 'targetLang'];
+const TRANSLATION_SETTING_KEYS = ['translationProvider', 'geminiApiKey', 'geminiModel', 'openRouterApiKey', 'openRouterModel', 'deeplApiKey', 'targetLang'];
 const ROMANIZATION_SETTING_KEYS = ['romanizationProvider', 'geminiRomanizationModel'];
 const RESTART_REQUIRED_KEYS = ['isEnabled', 'YTSongInfo', 'dynamicPlayer'];
 const LYRICS_SOURCE_KEYS = ['lyricsProvider', 'lyricsSourceOrder', 'customKpoeUrl', 'appleMusicTTMLBypass'];

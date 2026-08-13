@@ -813,6 +813,10 @@
     "message": "DeepL",
     "description": "Translation provider option"
   },
+  "optionDeepLKeyless": {
+    "message": "DeepL (Keyless)",
+    "description": "Translation provider option"
+  },
   "labelDeepLApiKey": {
     "message": "Κλειδί API DeepL",
     "description": "Input label"

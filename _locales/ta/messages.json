@@ -813,6 +813,10 @@
     "message": "DeepL",
     "description": "Translation provider option"
   },
+  "optionDeepLKeyless": {
+    "message": "DeepL (Keyless)",
+    "description": "Translation provider option"
+  },
   "labelDeepLApiKey": {
     "message": "DeepL API சாவி",
     "description": "Input label"
