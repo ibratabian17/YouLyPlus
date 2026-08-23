@@ -480,11 +480,16 @@ function detectBlocks(matches) {
       const prev = consolidated[consolidated.length - 1];
       const prevMed = median(prev.deltas);
       const curMed = median(block.deltas);
+      const prevMaxVideo = Math.max(...prev.pairs.map(p => p.videoStartMs));
+      const curMinVideo = Math.min(...block.pairs.map(p => p.videoStartMs));
+
       const hasEnoughEvidence =
         block.pairs.length >= MIN_BLOCK_MATCHES ||
         block.pairs.filter(p => p.isAnchor).length >= MIN_BLOCK_ANCHORS;
 
-      if (!hasEnoughEvidence || Math.abs(curMed - prevMed) <= BLOCK_SPLIT_THRESHOLD_MS) {
+      const isPhysicallyPlausible = curMinVideo >= (prevMaxVideo - 2000) && curMed >= (prevMed - 1500);
+
+      if (!hasEnoughEvidence || Math.abs(curMed - prevMed) <= BLOCK_SPLIT_THRESHOLD_MS || !isPhysicallyPlausible) {
         prev.pairs.push(...block.pairs);
         prev.deltas.push(...block.deltas);
       } else {
@@ -703,22 +708,8 @@ function retimeLyricsWithSingleCueTrack(lyricsLines, cues, timeUnit = "s") {
   const score = matches.length / Math.max(1, lyricTokens.length);
   const retimedLines = applyOffsets(lyricsLines, blocks, timeUnit);
 
-  // Apply Retimer gap/overlap smoothing from Reference/Retimer
-  const retimedEntries = retimeLyrics(retimedLines);
-  const finalLines = retimedLines.map((item, k) => {
-    const retimed = retimedEntries[k];
-    if (retimed) {
-      const adjustedEnd = timeUnit === 'ms' ? retimed.adjustedEndTimeMs : (retimed.adjustedEndTimeMs / 1000);
-      item.endTime = adjustedEnd;
-      if (item.startTime !== undefined) {
-        item.duration = timeUnit === 'ms' ? Math.round(adjustedEnd - item.startTime) : (adjustedEnd - item.startTime);
-      }
-    }
-    return item;
-  });
-
   return {
-    document: finalLines,
+    document: retimedLines,
     score,
     blocks
   };
