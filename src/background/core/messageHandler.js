@@ -8,6 +8,7 @@ import { lyricsDB, translationsDB, localLyricsDB } from '../storage/database.js'
 import { LyricsService } from './lyricsService.js';
 import { TranslationService } from './translationService.js';
 import { SponsorBlockService } from '../services/sponsorblockService.js';
+import { YouTubeService } from '../services/youtubeService.js';
 import { DataParser } from '../utils/dataParser.js';
 
 export class MessageHandler {
@@ -18,6 +19,7 @@ export class MessageHandler {
       [MESSAGE_TYPES.GET_CACHED_SIZE]: () => this.getCacheSize(sendResponse),
       [MESSAGE_TYPES.TRANSLATE_LYRICS]: () => this.translateLyrics(message, sendResponse),
       [MESSAGE_TYPES.FETCH_SPONSOR_SEGMENTS]: () => this.fetchSponsorSegments(message, sendResponse),
+      [MESSAGE_TYPES.FETCH_SUBTITLES]: () => this.fetchSubtitles(message, sendResponse),
       [MESSAGE_TYPES.UPLOAD_LOCAL_LYRICS]: () => this.uploadLocalLyrics(message, sendResponse),
       [MESSAGE_TYPES.GET_LOCAL_LYRICS_LIST]: () => this.getLocalLyricsList(sendResponse),
       [MESSAGE_TYPES.DELETE_LOCAL_LYRICS]: () => this.deleteLocalLyrics(message, sendResponse),
@@ -77,6 +79,16 @@ export class MessageHandler {
       sendResponse({ success: true, segments });
     } catch (error) {
       console.error(`Failed to fetch SponsorBlock segments:`, error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  static async fetchSubtitles(message, sendResponse) {
+    try {
+      const subtitles = await YouTubeService.fetchSubtitles(message.songInfo);
+      sendResponse({ success: true, subtitles });
+    } catch (error) {
+      console.error(`Failed to fetch subtitles:`, error);
       sendResponse({ success: false, error: error.message });
     }
   }

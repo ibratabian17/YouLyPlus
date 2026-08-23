@@ -213,8 +213,10 @@
         const duration = parseInt(rDetails.lengthSeconds || 0);
         const fullDescription = lDetails.shortDescription || lMicro.description?.simpleText || "";
         const album = extractAlbumFromDescription(fullDescription, title);
+        const captions = remixData?.captions?.playerCaptionsTracklistRenderer ||
+                         legacyData?.captions?.playerCaptionsTracklistRenderer || null;
 
-        return { title, artist, album, artwork, duration, videoId };
+        return { title, artist, album, artwork, duration, videoId, captions };
     }
 
     async function checkForSongChange() {
@@ -263,6 +265,18 @@
 
             const finalAlbum = apiData?.album || domInfo?.album || "";
 
+            let captionData = apiData?.captions ||
+                              player?.getPlayerResponse?.()?.captions?.playerCaptionsTracklistRenderer;
+
+            if (!captionData?.captionTracks?.length && player?.getOption && typeof player.getOption === 'function') {
+                try {
+                    const trackList = player.getOption('captions', 'tracklist');
+                    if (trackList?.length) {
+                        captionData = { captionTracks: trackList };
+                    }
+                } catch (optErr) {}
+            }
+
             currentSong = {
                 title: finalTitle,
                 artist: finalArtist,
@@ -271,7 +285,7 @@
                 videoId,
                 artwork: finalArtwork,
                 isVideo: !finalAlbum,
-                subtitle: audioTrackData
+                subtitle: captionData || audioTrackData
             };
 
             startTimeUpdater();

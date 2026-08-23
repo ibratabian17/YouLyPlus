@@ -214,6 +214,8 @@ function getCachedOrFetch(cachedResponse, messagePayload, fetchId, onSuccess) {
 
 let lastSponsorSegments = null;
 let lastSponsorVideoId = null;
+let lastSubtitleData = null;
+let lastSubtitleVideoId = null;
 
 /**
  * Initiates translation and romanization fetches independently without blocking each other.
@@ -262,6 +264,57 @@ function fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId) {
       }
     });
   }
+}
+
+/**
+ * Attempts to retime lyrics using video subtitles for Music Videos.
+ * Returns retimed lyrics array on success, or null if subtitles are unavailable/cannot be aligned.
+ */
+async function applySubtitleRetiming(lyrics, currentSong, fetchId) {
+  const shouldApply =
+    currentSong.isVideo &&
+    currentSong.videoId &&
+    !lyrics.ignoreSponsorblock &&
+    !lyrics.metadata.ignoreSponsorblock &&
+    lyrics.metadata?.source !== "YouTube Captions" &&
+    typeof retimeLyricsWithSubtitles === "function";
+
+  if (!shouldApply) return null;
+
+  try {
+    let subtitles = null;
+    if (lastSubtitleVideoId === currentSong.videoId && lastSubtitleData !== null) {
+      subtitles = lastSubtitleData;
+    } else {
+      const response = await pBrowser.runtime.sendMessage({
+        type: 'FETCH_SUBTITLES',
+        songInfo: currentSong
+      });
+
+      if (currentFetchMediaId !== fetchId) {
+        console.warn("Song changed during Subtitle fetch. Aborting.", currentSong);
+        return null;
+      }
+
+      if (response?.success && (response.subtitles?.tracks?.length > 0 || response.subtitles?.data?.length > 0)) {
+        lastSubtitleVideoId = currentSong.videoId;
+        lastSubtitleData = response.subtitles;
+        subtitles = response.subtitles;
+      }
+    }
+
+    if (subtitles) {
+      const retimedData = retimeLyricsWithSubtitles(lyrics.data, subtitles, "s");
+      if (retimedData && retimedData.length > 0) {
+        console.log("Applied Subtitle Timeline retiming for Music Video:", currentSong.title);
+        return retimedData;
+      }
+    }
+  } catch (error) {
+    console.warn("Subtitle retiming failed:", error);
+  }
+
+  return null;
 }
 
 /**
@@ -374,8 +427,14 @@ async function updateAndRenderCombinedLyrics(currentSong, fetchId) {
     lyrics = convertWordLyricsToLine(lyrics);
   }
 
-  const adjustedData = await applySponsorBlock(lyrics, currentSong, fetchId);
-  if (adjustedData === null) return; // Song changed mid-fetch
+  let adjustedData = await applySubtitleRetiming(lyrics, currentSong, fetchId);
+  if (currentFetchMediaId !== fetchId) return; // Song changed mid-fetch
+
+  if (!adjustedData) {
+    adjustedData = await applySponsorBlock(lyrics, currentSong, fetchId);
+    if (adjustedData === null) return; // Song changed mid-fetch
+  }
+
   lyrics.data = adjustedData;
 
   renderFinalLyrics(lyrics, currentSong, finalDisplayMode);

@@ -53,6 +53,7 @@
       ],
       "js": [
         "src/lib/sponsorblock.js",
+        "src/lib/subtitleRetimer.js",
         "src/lib/polyfill.js",
         "src/lib/md3e-progress.js",
         "src/lib/colorTunes.js",
@@ -71,6 +72,7 @@
         "*://*.music.apple.com/*"
       ],
       "js": [
+        "src/lib/subtitleRetimer.js",
         "src/lib/polyfill.js",
         "src/localization.js",
         "src/modules/lyrics/settings.js",
@@ -86,6 +88,7 @@
         "*://*.tidal.com/*"
       ],
       "js": [
+        "src/lib/subtitleRetimer.js",
         "src/lib/polyfill.js",
         "src/localization.js",
         "src/modules/lyrics/settings.js",

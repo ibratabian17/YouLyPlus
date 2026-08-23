@@ -109,17 +109,39 @@ export class DataParser {
 
     const parsedLines = data.events
       .map(event => {
-        const text = event.segs?.map(seg => seg.utf8).join(' ').trim();
-        if (!text) return null;
+        if (!event.segs?.length) return null;
 
-        const startTime = event.tStartMs / 1000;
-        const duration = event.dDurationMs / 1000;
+        const text = event.segs.map(seg => seg.utf8 || '').join('').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!text || text === '♪' || text === '♪♪') return null;
+
+        const startTime = (event.tStartMs || 0) / 1000;
+        const duration = (event.dDurationMs || 0) / 1000;
+        const endTime = startTime + duration;
+
+        const syllables = [];
+        let accumulatedOffset = 0;
+        for (const seg of event.segs) {
+          const segText = (seg.utf8 || '').replace(/\n/g, ' ').trim();
+          if (segText) {
+            const segOffset = (seg.tOffsetMs !== undefined ? seg.tOffsetMs : accumulatedOffset) / 1000;
+            const sylTime = startTime + segOffset;
+            syllables.push({
+              text: segText,
+              time: Math.round(sylTime * 1000),
+              startTime: sylTime,
+              endTime
+            });
+            accumulatedOffset = (seg.tOffsetMs || accumulatedOffset) + 200;
+          }
+        }
 
         return {
           text,
           startTime,
-          endTime: startTime + duration,
-          duration
+          endTime,
+          duration,
+          time: Math.round(startTime * 1000),
+          syllabus: syllables.length > 1 ? syllables : []
         };
       })
       .filter(Boolean);
@@ -127,7 +149,7 @@ export class DataParser {
     if (parsedLines.length === 0) return null;
 
     return {
-      type: 'Line',
+      type: parsedLines.some(l => l.syllabus && l.syllabus.length > 1) ? 'Word' : 'Line',
       data: parsedLines,
       metadata: {
         ...songInfo,
