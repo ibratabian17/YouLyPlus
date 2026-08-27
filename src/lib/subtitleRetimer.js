@@ -291,7 +291,7 @@ function tokenizeSubtitles(cues) {
         ? Math.round(cue.duration * 1000)
         : (typeof cue.dDurationMs === 'number' ? cue.dDurationMs : (typeof cue.endTime === 'number' ? Math.round(cue.endTime * 1000) - cueStartMs : 3000)));
 
-    const cueWords = cue.words;
+    const cueWords = cue.words || cue.syllabus || cue.syllables;
 
     if (Array.isArray(cueWords) && cueWords.length > 0) {
       cueWords.forEach((w, wi) => {
