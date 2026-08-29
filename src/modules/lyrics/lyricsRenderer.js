@@ -1387,7 +1387,11 @@ class LyricsPlusRenderer {
 
       const hasLeft = lineSideAssignments.includes("singer-left");
       const hasRight = lineSideAssignments.includes("singer-right");
-      isDualSide = hasLeft && hasRight;
+      const leftCount = lineSideAssignments.filter((s) => s === "singer-left").length;
+      const totalSideLines = lineSideAssignments.filter((s) => s === "singer-left" || s === "singer-right").length;
+      const leftRatio = totalSideLines > 0 ? (leftCount / totalSideLines) * 100 : 0;
+
+      isDualSide = hasLeft && hasRight && leftRatio <= 90;
     }
 
     if (isDualSide) container.classList.add("dual-side-lyrics");
