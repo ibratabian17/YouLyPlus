@@ -92,60 +92,74 @@ function updateTextWithMarquee(container, text) {
         text = container.dataset.currentText || '';
     }
 
-    container.innerHTML = '';
+    let wrapper = container.querySelector('.marquee-wrapper');
+    let content = container.querySelector('.marquee-content');
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'marquee-wrapper';
+    if (!wrapper || !content) {
+        container.innerHTML = '';
+        wrapper = document.createElement('div');
+        wrapper.className = 'marquee-wrapper';
 
-    const content = document.createElement('span');
-    content.className = 'marquee-content';
-    content.textContent = text;
+        content = document.createElement('span');
+        content.className = 'marquee-content';
+        content.textContent = text;
 
-    wrapper.appendChild(content);
-    container.appendChild(wrapper);
+        wrapper.appendChild(content);
+        container.appendChild(wrapper);
+    } else if (content.textContent !== text) {
+        content.textContent = text;
+        const duplicate = wrapper.querySelector('.marquee-duplicate');
+        if (duplicate) duplicate.remove();
+        container.classList.remove('marquee-active');
+        wrapper.classList.remove('animate');
+    }
 
     requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            const containerWidth = container.clientWidth;
-            const contentWidth = content.scrollWidth;
+        const containerWidth = container.clientWidth;
+        const contentWidth = content.scrollWidth;
 
+        if (contentWidth > containerWidth && containerWidth > 0) {
+            const gap = 60;
+            let duplicate = wrapper.querySelector('.marquee-duplicate');
+            if (!duplicate) {
+                duplicate = content.cloneNode(true);
+                duplicate.className = 'marquee-content marquee-duplicate';
+                wrapper.appendChild(duplicate);
+            } else {
+                duplicate.textContent = text;
+            }
+
+            const scrollDistance = contentWidth + gap;
+            const speed = 30; // 30px per second for smooth, readable scrolling
+            const scrollDuration = scrollDistance / speed;
+            // 20% pause in CSS keyframe (0% to 20%), so movement takes 80% of totalDuration
+            const totalDuration = scrollDuration / 0.8;
+
+            wrapper.style.setProperty('--marquee-distance', `${scrollDistance}px`);
+            wrapper.style.setProperty('--total-duration', `${totalDuration.toFixed(2)}s`);
+            wrapper.style.setProperty('--gap', `${gap}px`);
+
+            container.classList.add('marquee-active');
+            wrapper.classList.add('animate');
+        } else {
+            const duplicate = wrapper.querySelector('.marquee-duplicate');
+            if (duplicate) duplicate.remove();
             container.classList.remove('marquee-active');
             wrapper.classList.remove('animate');
-
-            if (contentWidth > containerWidth) {
-                const gap = 60;
-
-                const duplicate = content.cloneNode(true);
-                wrapper.appendChild(duplicate);
-
-                const scrollDistance = contentWidth + gap;
-
-                const scrollDuration = scrollDistance / 60;
-                const pauseDuration = 2;
-                const totalDuration = scrollDuration + pauseDuration;
-
-                const pausePercent = (pauseDuration / totalDuration) * 100;
-                const scrollPercent = 100 - pausePercent;
-
-                wrapper.style.setProperty('--marquee-distance', `${scrollDistance}px`);
-                wrapper.style.setProperty('--total-duration', `${totalDuration}s`);
-                wrapper.style.setProperty('--pause-percent', pausePercent.toFixed(2));
-                wrapper.style.setProperty('--scroll-percent', scrollPercent.toFixed(2));
-                wrapper.style.setProperty('--gap', `${gap}px`);
-
-                container.classList.add('marquee-active');
-                wrapper.classList.add('animate');
-            }
-        });
+        }
     });
 }
 
+let marqueeResizeTimeout;
 const marqueeResizeObserver = new ResizeObserver(entries => {
-    for (let entry of entries) {
-        if (entry.target.dataset.currentText) {
-            updateTextWithMarquee(entry.target);
+    clearTimeout(marqueeResizeTimeout);
+    marqueeResizeTimeout = setTimeout(() => {
+        for (let entry of entries) {
+            if (entry.target.dataset.currentText) {
+                updateTextWithMarquee(entry.target);
+            }
         }
-    }
+    }, 100);
 });
 
 // Function to inject the DOM script
@@ -187,15 +201,33 @@ function injectDOMScript() {
         songInfoContainerElem.appendChild(progressBarElem);
         player.appendChild(songInfoContainerElem);
         progressBar = new WavyProgressBar(progressBarElem);
-        progressBar.play();
+
+        progressBarElem.addEventListener('seek', (e) => {
+            if (typeof e.detail?.progress === 'number' && currentSongDuration > 0) {
+                const seekTime = e.detail.progress * currentSongDuration;
+                window.postMessage({ type: 'LYPLUS_SEEK_TO', time: seekTime }, '*');
+            }
+        });
 
         const ytPlayer = document.querySelector('video');
-        ytPlayer.addEventListener('play', () => {
+        if (ytPlayer) {
+            if (!ytPlayer.paused) {
+                progressBar.play();
+            } else {
+                progressBar.pause();
+            }
+            ytPlayer.addEventListener('play', () => {
+                progressBar?.play();
+            });
+            ytPlayer.addEventListener('pause', () => {
+                progressBar?.pause();
+            });
+            ytPlayer.addEventListener('ended', () => {
+                progressBar?.pause();
+            });
+        } else {
             progressBar.play();
-        })
-        ytPlayer.addEventListener('pause', () => {
-            progressBar.pause();
-        })
+        }
 
         // Observe for layout changes
         marqueeResizeObserver.observe(titleElementElem);

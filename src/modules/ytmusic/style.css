@@ -265,6 +265,7 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response {
     gap: var(--gap, 60px);
     white-space: nowrap;
     will-change: transform;
+    transform: translateZ(0);
 }
 
 .marquee-content {
@@ -277,26 +278,6 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response {
 }
 
 @keyframes marquee-scroll-with-pause {
-    0% {
-        transform: translateX(0);
-    }
-
-    20% {
-        transform: translateX(0);
-    }
-
-    100% {
-        transform: translateX(calc(-1 * var(--marquee-distance, 0px)));
-    }
-}
-
-.marquee-wrapper.animate {
-    animation: marquee-with-pause var(--total-duration, 10s) infinite;
-    animation-timing-function: linear;
-}
-
-@keyframes marquee-with-pause {
-
     0%,
     20% {
         transform: translateX(0);
@@ -310,13 +291,13 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response {
 .marquee-active {
     -webkit-mask-image: linear-gradient(to right,
             transparent 0%,
-            black 10px,
-            black calc(100% - 10px),
+            black 12px,
+            black calc(100% - 12px),
             transparent 100%);
     mask-image: linear-gradient(to right,
             transparent 0%,
-            black 10px,
-            black calc(100% - 10px),
+            black 12px,
+            black calc(100% - 12px),
             transparent 100%);
 }
 
@@ -338,6 +319,7 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response {
     fill: none;
     stroke-width: var(--progress-stroke-width);
     stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .progress-container .track {
