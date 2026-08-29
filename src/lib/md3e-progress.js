@@ -30,7 +30,9 @@ class WavyProgressBar {
    */
   update(progress) {
     this.progress = Math.max(0, Math.min(1, progress));
-    this._draw();
+    if (!this.animationId) {
+      this._draw();
+    }
   }
 
   /**
@@ -58,6 +60,26 @@ class WavyProgressBar {
     }
   }
 
+  /**
+   * Destroy and clean up listeners/animations
+   */
+  destroy() {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+    if (this._cssRetryId) {
+      cancelAnimationFrame(this._cssRetryId);
+      this._cssRetryId = null;
+    }
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+    }
+    if (this._intersectionObserver) {
+      this._intersectionObserver.disconnect();
+    }
+  }
+
   // --- Private Methods ---
 
   _injectCSS() {
@@ -82,7 +104,7 @@ class WavyProgressBar {
 }
 
       .progress-container svg { width: 100%; height: 100%; overflow: visible; }
-      .progress-container .track, .progress-container .progress { fill: none; stroke-width: var(--progress-stroke-width); stroke-linecap: round; }
+      .progress-container .track, .progress-container .progress { fill: none; stroke-width: var(--progress-stroke-width); stroke-linecap: round; stroke-linejoin: round; }
       .progress-container .track { stroke: var(--track-color); }
       .progress-container .progress { stroke: var(--progress-color); }
       .progress-container .thumb { fill: var(--thumb-color); rx: var(--thumb-radius); ry: var(--thumb-radius); will-change: transform; }
@@ -121,7 +143,7 @@ class WavyProgressBar {
     };
 
     const maxAmplitude = parseOrDefault(style.getPropertyValue('--wave-amplitude'), 3);
-    const frequency = parseOrDefault(style.getPropertyValue('--wave-frequency'), 0.15);
+    const frequency = parseOrDefault(style.getPropertyValue('--wave-frequency'), 0.16);
     const thumbWidth = parseOrDefault(style.getPropertyValue('--thumb-width'), 5);
     const thumbHeight = parseOrDefault(style.getPropertyValue('--thumb-height'), 20);
     const pathResolution = parseOrDefault(style.getPropertyValue('--path-resolution'), 4);
@@ -153,8 +175,9 @@ class WavyProgressBar {
     this.isVisible = false;
     this.hasInitializedLayout = false;
     this.playAfterInit = false;
-    this._pathSegments = [];
     this._cssRetryId = null;
+    this._lastTimestamp = null;
+    this._lastDrawnX = -1;
   }
 
   _initializeElements() {
@@ -181,19 +204,19 @@ class WavyProgressBar {
       }));
     });
 
-    const resizeObserver = new ResizeObserver(entries => {
+    this._resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
         this._onResize(entry.contentRect);
       }
     });
-    resizeObserver.observe(this.container);
+    this._resizeObserver.observe(this.container);
 
-    const intersectionObserver = new IntersectionObserver(entries => {
+    this._intersectionObserver = new IntersectionObserver(entries => {
       for (let entry of entries) {
         this._onVisibilityChange(entry.isIntersecting);
       }
     });
-    intersectionObserver.observe(this.container);
+    this._intersectionObserver.observe(this.container);
   }
 
   _onResize(rect) {
@@ -204,6 +227,7 @@ class WavyProgressBar {
     this.svgWidth = rect.width;
     this.svgHeight = rect.height;
     this.centerY = this.svgHeight / 2;
+    this._lastDrawnX = -1;
 
     this.svg.setAttribute('viewBox', `0 0 ${this.svgWidth} ${this.svgHeight}`);
     this.trackLineEl.setAttribute('x2', this.svgWidth);
@@ -253,29 +277,48 @@ class WavyProgressBar {
       if (this.animationId) {
         cancelAnimationFrame(this.animationId);
         this.animationId = null;
+        this._lastTimestamp = null;
       }
     }
   }
 
   _startAnimationLoop() {
     if (this.animationId) return;
+    this._lastTimestamp = performance.now();
     this.animationId = requestAnimationFrame(this._animateBound);
   }
 
-  _animate() {
+  _animate(timestamp) {
+    if (!this.isVisible) {
+      this.animationId = null;
+      this._lastTimestamp = null;
+      return;
+    }
+
+    const now = timestamp || performance.now();
+    const lastTime = this._lastTimestamp || now;
+    this._lastTimestamp = now;
+
+    const deltaTime = Math.min(Math.max((now - lastTime) / 1000, 0), 0.1);
+    const deltaFrames = deltaTime * 60;
+
     let needsAnotherFrame = false;
     const amplitudeDiff = this.targetAmplitude - this.currentAmplitude;
 
     if (Math.abs(amplitudeDiff) > 0.01) {
-      this.currentAmplitude += amplitudeDiff * this.amplitudeEaseFactor;
+      const factor = 1 - Math.pow(1 - this.amplitudeEaseFactor, Math.max(deltaFrames, 0.1));
+      this.currentAmplitude += amplitudeDiff * Math.min(factor, 1);
       needsAnotherFrame = true;
     } else if (this.currentAmplitude !== this.targetAmplitude) {
       this.currentAmplitude = this.targetAmplitude;
-      needsAnotherFrame = true;
+      if (this.targetAmplitude > 0) {
+        needsAnotherFrame = true;
+      }
     }
 
-    if (this.targetAmplitude > 0) {
-      this.waveOffset += 0.3;
+    if (this.targetAmplitude > 0 || this.currentAmplitude > 0.01) {
+      const waveSpeed = 18;
+      this.waveOffset += waveSpeed * deltaTime;
       needsAnotherFrame = true;
     }
 
@@ -285,35 +328,39 @@ class WavyProgressBar {
       this.animationId = requestAnimationFrame(this._animateBound);
     } else {
       this.animationId = null;
+      this._lastTimestamp = null;
     }
   }
 
   _draw() {
-    // reportedly, our dying learning about math and writing this
     if (!this.hasInitializedLayout) return;
 
     const currentX = (Number.isFinite(this.progress) ? this.progress : 0) * this.svgWidth;
     
-    if (this.currentAmplitude > 0.01 && currentX > 0) {
-      this._pathSegments.length = 0;
-      
-      const startY = this.centerY + Math.sin(this.waveOffset * this.frequency) * this.currentAmplitude;
-      this._pathSegments.push(`M 0 ${startY}`);
-      
-      for (let x = this.pathResolution; x <= currentX; x += this.pathResolution) {
-        const y = this.centerY + Math.sin((x + this.waveOffset) * this.frequency) * this.currentAmplitude;
-        this._pathSegments.push(` L ${x} ${y}`);
-      }
-      
-      const endY = this.centerY + Math.sin((currentX + this.waveOffset) * this.frequency) * this.currentAmplitude;
-      this._pathSegments.push(` L ${currentX} ${endY}`);
-      
-      this.progressPathEl.setAttribute('d', this._pathSegments.join(''));
-    } else {
-      this.progressPathEl.setAttribute('d', `M 0 ${this.centerY} L ${currentX} ${this.centerY}`);
+    if (Math.abs(this._lastDrawnX - currentX) > 0.05) {
+      this._lastDrawnX = currentX;
+      this.trackLineEl.setAttribute('x1', currentX);
+      this.thumbEl.style.transform = `translateX(${currentX}px)`;
     }
 
-    this.trackLineEl.setAttribute('x1', currentX);
-    this.thumbEl.style.transform = `translateX(${currentX}px)`;
+    if (this.currentAmplitude > 0.01 && currentX > 0) {
+      const res = this.pathResolution || 2;
+      const startY = Math.round((this.centerY + Math.sin(this.waveOffset * this.frequency) * this.currentAmplitude) * 100) / 100;
+      let d = `M 0 ${startY}`;
+      
+      for (let x = res; x <= currentX; x += res) {
+        const y = Math.round((this.centerY + Math.sin((x + this.waveOffset) * this.frequency) * this.currentAmplitude) * 100) / 100;
+        d += ` L ${x} ${y}`;
+      }
+      
+      const endY = Math.round((this.centerY + Math.sin((currentX + this.waveOffset) * this.frequency) * this.currentAmplitude) * 100) / 100;
+      const endX = Math.round(currentX * 100) / 100;
+      d += ` L ${endX} ${endY}`;
+      
+      this.progressPathEl.setAttribute('d', d);
+    } else {
+      const roundedX = Math.round(currentX * 100) / 100;
+      this.progressPathEl.setAttribute('d', `M 0 ${this.centerY} L ${roundedX} ${this.centerY}`);
+    }
   }
 }
