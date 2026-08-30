@@ -980,5 +980,17 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },,
+  "placeholderSelectProvider": {
+    "message": "Select provider...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Select source...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "All providers added",
+    "description": "User added All providers on settings menu"
   }
 }

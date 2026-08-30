@@ -361,9 +361,12 @@ function populateDraggableProviders() {
     const addProviderButton = document.getElementById('add-provider-button');
 
     if (providersToAdd.length === 0) {
-        availableProvidersDropdown.innerHTML = `<option value="" disabled>${msg('msgAllSourcesAdded')}</option>`;
+        availableProvidersDropdown.disabled = true;
+        availableProvidersDropdown.innerHTML = `<option value="" disabled selected>${msg('msgAllSourcesAdded') || 'All sources added'}</option>`;
         if (addProviderButton) addProviderButton.disabled = true;
     } else {
+        availableProvidersDropdown.disabled = false;
+        availableProvidersDropdown.innerHTML = `<option value="" disabled selected>${msg('msgSelectSource') || 'Select provider...'}</option>`;
         if (addProviderButton) addProviderButton.disabled = false;
         providersToAdd.forEach(provider => {
             const option = document.createElement('option');
@@ -579,9 +582,12 @@ function populateDraggableSources() {
     const addSourceButton = document.getElementById('add-source-button');
 
     if (sourcesToAdd.length === 0) {
-        availableSourcesDropdown.innerHTML = `<option value="" disabled>${msg('msgAllSourcesAdded')}</option>`;
+        availableSourcesDropdown.disabled = true;
+        availableSourcesDropdown.innerHTML = `<option value="" disabled selected>${msg('msgAllSourcesAdded') || 'All sources added'}</option>`;
         if (addSourceButton) addSourceButton.disabled = true;
     } else {
+        availableSourcesDropdown.disabled = false;
+        availableSourcesDropdown.innerHTML = `<option value="" disabled selected>${msg('msgSelectSource') || 'Select source...'}</option>`;
         if (addSourceButton) addSourceButton.disabled = false;
         sourcesToAdd.forEach(source => {
             const option = document.createElement('option');
@@ -1143,12 +1149,22 @@ function updateCustomSelectDisplay(selectId) {
     const valueDisplay = nativeSelect.customSelect.valueDisplay;
     const selectedOption = nativeSelect.options[nativeSelect.selectedIndex];
 
-    if (selectedOption && selectedOption.value) {
+    if (nativeSelect.disabled) {
+        customSelect.classList.add('disabled');
+    } else {
+        customSelect.classList.remove('disabled');
+    }
+
+    if (selectedOption) {
         valueDisplay.textContent = selectedOption.textContent;
-        customSelect.classList.add('has-value');
-        const menu = nativeSelect.customSelect.menu;
-        menu.querySelector('.selected')?.classList.remove('selected');
-        menu.querySelector(`[data-value="${selectedOption.value}"]`)?.classList.add('selected');
+        if (selectedOption.value) {
+            customSelect.classList.add('has-value');
+            const menu = nativeSelect.customSelect.menu;
+            menu.querySelector('.selected')?.classList.remove('selected');
+            menu.querySelector(`[data-value="${selectedOption.value}"]`)?.classList.add('selected');
+        } else {
+            customSelect.classList.remove('has-value');
+        }
     } else {
         valueDisplay.textContent = '';
         customSelect.classList.remove('has-value');
@@ -1178,29 +1194,47 @@ function initCustomSelects() {
 
         function populateOptions() {
             menu.innerHTML = '';
+            const isSinglePlaceholder = nativeSelect.options.length === 1 && nativeSelect.options[0].disabled;
             Array.from(nativeSelect.options).forEach(option => {
-                if (option.disabled && option.value === '') return;
+                if (option.disabled && option.value === '' && !isSinglePlaceholder && nativeSelect.options.length > 1) return;
 
                 const customOption = document.createElement('div');
                 customOption.className = 'm3-select-option';
                 customOption.dataset.value = option.value;
                 customOption.textContent = option.textContent;
 
-                if (option.selected && option.value !== '') {
-                    customOption.classList.add('selected');
-                    valueDisplay.textContent = option.textContent;
-                    customSelect.classList.add('has-value');
+                if (option.disabled) {
+                    customOption.classList.add('disabled');
                 }
 
-                customOption.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    nativeSelect.value = option.value;
-                    nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                    customSelect.classList.remove('open');
-                    updateCustomSelectDisplay(nativeSelect.id);
-                });
+                if (option.selected) {
+                    if (option.value !== '') {
+                        customOption.classList.add('selected');
+                        customSelect.classList.add('has-value');
+                    } else {
+                        customSelect.classList.remove('has-value');
+                    }
+                    valueDisplay.textContent = option.textContent;
+                }
+
+                if (!option.disabled) {
+                    customOption.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        nativeSelect.value = option.value;
+                        nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        customSelect.classList.remove('open');
+                        updateCustomSelectDisplay(nativeSelect.id);
+                    });
+                }
                 menu.appendChild(customOption);
             });
+
+            if (nativeSelect.disabled || isSinglePlaceholder) {
+                customSelect.classList.add('disabled');
+            } else {
+                customSelect.classList.remove('disabled');
+            }
+
             updateCustomSelectDisplay(nativeSelect.id);
         }
 
@@ -1208,6 +1242,7 @@ function initCustomSelects() {
 
         customSelect.addEventListener('click', (e) => {
             e.stopPropagation();
+            if (nativeSelect.disabled || customSelect.classList.contains('disabled')) return;
             document.querySelectorAll('.m3-select.open').forEach(openSelect => {
                 if (openSelect !== customSelect) openSelect.classList.remove('open');
             });
@@ -1217,7 +1252,7 @@ function initCustomSelects() {
         nativeSelect.classList.add('m3-select-hidden');
         formGroup.insertBefore(customSelect, nativeSelect);
 
-        new MutationObserver(populateOptions).observe(nativeSelect, { childList: true });
+        new MutationObserver(populateOptions).observe(nativeSelect, { childList: true, attributes: true, attributeFilter: ['disabled'] });
     });
 
     document.addEventListener('click', () => {
