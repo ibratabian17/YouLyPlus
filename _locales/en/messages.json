@@ -980,7 +980,7 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
-  },,
+  },
   "placeholderSelectProvider": {
     "message": "Select provider...",
     "description": "Select a Provider on settings menu"
