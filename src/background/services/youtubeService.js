@@ -51,6 +51,7 @@ export class YouTubeService {
           if (!parsed?.data?.length) return null;
 
           return {
+            type: parsed.type || 'Line',
             languageCode: track.languageCode || track.vssId || 'unknown',
             name: track.name?.simpleText || track.name?.runs?.[0]?.text || track.languageCode || '',
             isDefault: !!track.isDefault,
@@ -66,6 +67,7 @@ export class YouTubeService {
       if (fetchedTracks.length === 0) return null;
 
       return {
+        type: fetchedTracks[0].type || 'Line',
         tracks: fetchedTracks,
         data: fetchedTracks[0].data,
         metadata: {

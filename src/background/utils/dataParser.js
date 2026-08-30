@@ -107,44 +107,103 @@ export class DataParser {
   static parseYouTubeSubtitles(data, songInfo) {
     if (!data?.events?.length) return null;
 
-    const parsedLines = data.events
-      .map(event => {
-        if (!event.segs?.length) return null;
+    const rawEvents = data.events;
+    const parsedLines = [];
 
-        const text = event.segs.map(seg => seg.utf8 || '').join('').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
-        if (!text || text === '♪' || text === '♪♪') return null;
+    for (let eIdx = 0; eIdx < rawEvents.length; eIdx++) {
+      const event = rawEvents[eIdx];
+      if (!event.segs?.length) continue;
 
-        const startTime = (event.tStartMs || 0) / 1000;
-        const duration = (event.dDurationMs || 0) / 1000;
-        const endTime = startTime + duration;
+      const fullText = event.segs
+        .map(seg => seg.utf8 || '')
+        .join('')
+        .replace(/\r?\n/g, '')
+        .replace(/\s+/g, ' ');
 
-        const syllables = [];
-        let accumulatedOffset = 0;
-        for (const seg of event.segs) {
-          const segText = (seg.utf8 || '').replace(/\n/g, ' ').trim();
-          if (segText) {
-            const segOffset = (seg.tOffsetMs !== undefined ? seg.tOffsetMs : accumulatedOffset) / 1000;
-            const sylTime = startTime + segOffset;
-            syllables.push({
-              text: segText,
-              time: Math.round(sylTime * 1000),
-              startTime: sylTime,
-              endTime
-            });
-            accumulatedOffset = (seg.tOffsetMs || accumulatedOffset) + 200;
+      if (!fullText.trim() || fullText.trim() === '♪' || fullText.trim() === '♪♪') continue;
+
+      const eventStartMs = typeof event.tStartMs === 'number' ? event.tStartMs : 0;
+      let eventDurationMs = typeof event.dDurationMs === 'number' ? event.dDurationMs : 0;
+
+      if (eventDurationMs <= 0) {
+        const nextEvent = rawEvents.slice(eIdx + 1).find(ev => ev.segs?.length && typeof ev.tStartMs === 'number' && ev.tStartMs > eventStartMs);
+        if (nextEvent && nextEvent.tStartMs > eventStartMs) {
+          eventDurationMs = nextEvent.tStartMs - eventStartMs;
+        } else {
+          eventDurationMs = 3000;
+        }
+      }
+
+      const startTime = eventStartMs / 1000;
+      const duration = eventDurationMs / 1000;
+      const endTime = startTime + duration;
+
+      const validSegs = [];
+      let accumulatedOffset = 0;
+
+      for (let sIdx = 0; sIdx < event.segs.length; sIdx++) {
+        const seg = event.segs[sIdx];
+        if (!seg.utf8 || seg.utf8 === '\n' || seg.utf8 === '\r\n') continue;
+
+        let cleanText = seg.utf8.replace(/\r?\n/g, '');
+        if (!cleanText) continue;
+
+        if (/^\s/.test(cleanText) && validSegs.length > 0) {
+          if (!/\s$/.test(validSegs[validSegs.length - 1].text)) {
+            validSegs[validSegs.length - 1].text += ' ';
           }
+          cleanText = cleanText.trimStart();
         }
 
-        return {
-          text,
-          startTime,
-          endTime,
-          duration,
-          time: Math.round(startTime * 1000),
-          syllabus: syllables.length > 1 ? syllables : []
-        };
-      })
-      .filter(Boolean);
+        const offsetMs = typeof seg.tOffsetMs === 'number' ? seg.tOffsetMs : accumulatedOffset;
+        validSegs.push({
+          text: cleanText,
+          offsetMs
+        });
+
+        accumulatedOffset = offsetMs + 200;
+      }
+
+      const hasDistinctOffsets = validSegs.some(s => s.offsetMs > 0);
+      const syllables = [];
+
+      if (validSegs.length > 1 && hasDistinctOffsets) {
+        for (let i = 0; i < validSegs.length; i++) {
+          const cur = validSegs[i];
+          const sylStartMs = eventStartMs + cur.offsetMs;
+          let sylDurationMs = 0;
+
+          if (i < validSegs.length - 1) {
+            const nextSylStartMs = eventStartMs + validSegs[i + 1].offsetMs;
+            sylDurationMs = nextSylStartMs - sylStartMs;
+          } else {
+            const lineEndMs = eventStartMs + eventDurationMs;
+            sylDurationMs = lineEndMs - sylStartMs;
+          }
+
+          if (sylDurationMs <= 0) sylDurationMs = 200;
+
+          syllables.push({
+            text: cur.text,
+            time: sylStartMs,
+            duration: sylDurationMs,
+            isBackground: false
+          });
+        }
+      }
+
+      parsedLines.push({
+        text: fullText,
+        startTime,
+        endTime,
+        duration,
+        time: eventStartMs,
+        syllabus: syllables.length > 1 ? syllables : [],
+        element: {},
+        romanizedText: undefined,
+        translation: null
+      });
+    }
 
     if (parsedLines.length === 0) return null;
 
