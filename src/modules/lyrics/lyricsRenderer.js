@@ -355,6 +355,12 @@ class LyricsPlusRenderer {
     const time = parseFloat(line.dataset.startTime);
     if (!isNaN(time)) {
       this._seekPlayerTo(time - 0.05);
+      this._resetSyllables(line, true);
+      for (const activeId of this.activeLineIds) {
+        const activeLine = (this._lineById && this._lineById.get(activeId)) || document.getElementById(activeId);
+        if (activeLine) this._resetSyllables(activeLine, true);
+      }
+      this.lastTime = 0;
       this._scrollToActiveLine(line, true);
     }
   }
@@ -541,9 +547,19 @@ class LyricsPlusRenderer {
    * @param {Event} e - The click event.
    */
   _onLyricClick(e) {
-    const time = parseFloat(e.currentTarget.dataset.startTime);
-    this._seekPlayerTo(time - 0.05);
-    this._scrollToActiveLine(e.currentTarget, true);
+    e.stopPropagation();
+    const line = e.currentTarget;
+    const time = parseFloat(line.dataset.startTime);
+    if (!isNaN(time)) {
+      this._seekPlayerTo(time - 0.05);
+      this._resetSyllables(line, true);
+      for (const activeId of this.activeLineIds) {
+        const activeLine = (this._lineById && this._lineById.get(activeId)) || document.getElementById(activeId);
+        if (activeLine) this._resetSyllables(activeLine, true);
+      }
+      this.lastTime = 0;
+      this._scrollToActiveLine(line, true);
+    }
   }
 
   /**
@@ -2529,6 +2545,10 @@ class LyricsPlusRenderer {
 
   _resetSyllable(syllable, noFade = false) {
     if (!syllable) return;
+    if (syllable._cleanupTimer) {
+      clearTimeout(syllable._cleanupTimer);
+      syllable._cleanupTimer = null;
+    }
     syllable.style.animation = "";
     if (!(syllable._state & 2) && !noFade) {
       syllable.classList.add("finished");
@@ -2539,19 +2559,26 @@ class LyricsPlusRenderer {
     syllable.style.removeProperty("--pre-wipe-delay");
 
     const charSpans = syllable._cachedCharSpans || syllable.querySelectorAll("span.char");
-    const charSpansLength = charSpans.length;
-    for (let i = 0; i < charSpansLength; i++) {
-      charSpans[i].style.animation = "";
+    if (charSpans) {
+      const charSpansLength = charSpans.length;
+      for (let i = 0; i < charSpansLength; i++) {
+        charSpans[i].style.animation = "";
+        if (this._charAnimationsMap) {
+          this._charAnimationsMap.delete(charSpans[i]);
+        }
+      }
     }
 
-    if (syllable._cleanupTimer) {
-      clearTimeout(syllable._cleanupTimer);
-    }
-    syllable._cleanupTimer = setTimeout(() => {
-      syllable._cleanupTimer = null;
+    if (noFade) {
       syllable.classList.remove("highlight", "finished", "pre-highlight", "cleanup");
       syllable._state = 0;
-    }, 32);
+    } else {
+      syllable._cleanupTimer = setTimeout(() => {
+        syllable._cleanupTimer = null;
+        syllable.classList.remove("highlight", "finished", "pre-highlight", "cleanup");
+        syllable._state = 0;
+      }, 16);
+    }
   }
 
   _resetSyllables(line, noFade = false) {
