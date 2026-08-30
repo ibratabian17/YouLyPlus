@@ -395,7 +395,6 @@ body {
     position: relative;
 }
 
-/* When .m3-switch is used as a full label row with text */
 label.m3-switch {
     display: inline-flex;
     align-items: center;
@@ -411,7 +410,6 @@ label.m3-switch .label {
     line-height: 1.4;
 }
 
-/* Native input hidden */
 .m3-switch input[type="checkbox"],
 .m3-switch .m3-switch-input {
     position: absolute;
@@ -422,7 +420,6 @@ label.m3-switch .label {
     pointer-events: none;
 }
 
-/* Switch Track */
 .m3-switch .track,
 .m3-switch .m3-switch-track {
     position: relative;
@@ -433,79 +430,43 @@ label.m3-switch .label {
     border: 2px solid var(--md-sys-color-outline);
     border-radius: var(--border-radius-full);
     box-sizing: border-box;
-    transition: background-color var(--animation-duration-short) var(--animation-easing-standard),
-        border-color var(--animation-duration-short) var(--animation-easing-standard);
+    transition: background-color 250ms cubic-bezier(0.2, 0, 0, 1),
+                border-color 250ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* Switch Thumb / Handle */
 .m3-switch .handle,
 .m3-switch .m3-switch-thumb {
     position: absolute;
-    width: 16px;
-    height: 16px;
-    left: 6px;
-    top: 6px;
-    background-color: var(--md-sys-color-outline);
-    border-radius: 50%;
-    box-shadow: var(--md-sys-elevation-level-1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform var(--animation-duration-medium) var(--animation-easing-emphasized),
-        background-color var(--animation-duration-short) var(--animation-easing-standard),
-        width var(--animation-duration-medium) var(--animation-easing-emphasized),
-        height var(--animation-duration-medium) var(--animation-easing-emphasized),
-        left var(--animation-duration-medium) var(--animation-easing-emphasized),
-        top var(--animation-duration-medium) var(--animation-easing-emphasized);
-}
-
-/* Container thumb support for existing popup thumb-container */
-.m3-switch .m3-switch-thumb-container {
-    position: absolute;
+    top: 50%;
+    left: 0;
     width: 24px;
     height: 24px;
-    left: 4px;
-    top: 4px;
+    border-radius: 50%;
+    background-color: var(--md-sys-color-outline);
+    transform: translateY(-50%) translateX(2px);
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: translateX(0);
-    transition: transform var(--animation-duration-medium) var(--animation-easing-emphasized);
-    pointer-events: none;
+    box-sizing: border-box;
+    transition: transform 250ms cubic-bezier(0.2, 0, 0, 1),
+                background-color 200ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-.m3-switch .m3-switch-thumb-container .m3-switch-thumb {
-    position: static;
-    left: auto;
-    top: auto;
-}
-
-/* Checkmark Icon inside the thumb */
 .m3-switch .handle::before,
 .m3-switch .m3-switch-thumb::before {
     content: '';
-    width: 9px;
-    height: 5px;
-    border-left: 2px solid transparent;
-    border-bottom: 2px solid transparent;
-    transform: rotate(-45deg) translate(1px, -1px);
-    transition: border-color var(--animation-duration-short) var(--animation-easing-standard);
+    width: 10px;
+    height: 10px;
+    background-color: var(--md-sys-color-surface-container-highest);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E") no-repeat center / contain;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E") no-repeat center / contain;
+    border: none;
+    border-radius: 0;
+    transition: transform 200ms cubic-bezier(0.2, 0, 0, 1),
+                opacity 150ms ease;
     flex-shrink: 0;
 }
 
-/* Hover States (Unchecked) */
-.m3-switch:hover .track .handle,
-.m3-switch:hover .m3-switch-thumb {
-    width: 20px;
-    height: 20px;
-}
-
-.m3-switch:hover .track .handle {
-    left: 4px;
-    top: 4px;
-}
-
-/* Checked Track */
 .m3-switch input[type="checkbox"]:checked + .track,
 .m3-switch input[type="checkbox"]:checked + .m3-switch-track,
 .m3-switch .m3-switch-input:checked + .m3-switch-track {
@@ -513,53 +474,30 @@ label.m3-switch .label {
     border-color: var(--md-sys-color-primary);
 }
 
-/* Checked Handle & Translation */
-.m3-switch input[type="checkbox"]:checked + .track .handle {
+.m3-switch input[type="checkbox"]:checked + .track .handle,
+.m3-switch input[type="checkbox"]:checked + .m3-switch-track .m3-switch-thumb,
+.m3-switch .m3-switch-input:checked + .m3-switch-track .m3-switch-thumb {
+    transform: translateY(-50%) translateX(22px);
     background-color: var(--md-sys-color-on-primary);
-    width: 24px;
-    height: 24px;
-    left: 2px;
-    top: 2px;
-    transform: translateX(20px);
 }
 
-.m3-switch input[type="checkbox"]:checked + .m3-switch-track + .m3-switch-thumb-container,
-.m3-switch .m3-switch-input:checked + .m3-switch-track + .m3-switch-thumb-container {
-    transform: translateX(20px);
-}
-
-.m3-switch input[type="checkbox"]:checked + .m3-switch-track + .m3-switch-thumb-container .m3-switch-thumb,
-.m3-switch .m3-switch-input:checked + .m3-switch-track + .m3-switch-thumb-container .m3-switch-thumb {
-    background-color: var(--md-sys-color-on-primary);
-    width: 24px;
-    height: 24px;
-}
-
-/* Checked Checkmark Icon Color */
 .m3-switch input[type="checkbox"]:checked + .track .handle::before,
-.m3-switch input[type="checkbox"]:checked + .m3-switch-track + .m3-switch-thumb-container .m3-switch-thumb::before,
-.m3-switch .m3-switch-input:checked + .m3-switch-track + .m3-switch-thumb-container .m3-switch-thumb::before {
-    border-color: var(--md-sys-color-primary);
+.m3-switch input[type="checkbox"]:checked + .m3-switch-track .m3-switch-thumb::before,
+.m3-switch .m3-switch-input:checked + .m3-switch-track .m3-switch-thumb::before {
+    width: 9px;
+    height: 5px;
+    background: transparent;
+    mask: none;
+    -webkit-mask: none;
+    border-left: 2px solid var(--md-sys-color-primary);
+    border-bottom: 2px solid var(--md-sys-color-primary);
+    transform: rotate(-45deg) translate(1px, -1px);
 }
 
-/* Hover States (Checked) */
-.m3-switch:hover input[type="checkbox"]:checked + .track .handle,
-.m3-switch:hover input[type="checkbox"]:checked + .m3-switch-track + .m3-switch-thumb-container .m3-switch-thumb,
-.m3-switch:hover .m3-switch-input:checked + .m3-switch-track + .m3-switch-thumb-container .m3-switch-thumb {
-    width: 26px;
-    height: 26px;
-}
-
-.m3-switch:hover input[type="checkbox"]:checked + .track .handle {
-    left: 1px;
-    top: 1px;
-}
-
-/* Focus Visible */
 .m3-switch input[type="checkbox"]:focus-visible + .track,
 .m3-switch input[type="checkbox"]:focus-visible + .m3-switch-track,
 .m3-switch .m3-switch-input:focus-visible + .m3-switch-track {
-    box-shadow: 0 0 0 2px var(--md-sys-color-surface), 0 0 0 4px var(--md-sys-color-primary);
+    outline: none;
 }
 
 /* --- M3 Outlined Text Field & Form Groups --- */
