@@ -38,27 +38,23 @@
     --lyplus-blur-amount-near: 0.035em;
 
     --lyplus-fade-gap-timing-function: ease-out;
-}
 
-#lyrics-plus-container.override-palette-color {
-    --lyplus-lyrics-pallete: var(--lyplus-override-pallete) !important;
-}
-
-/* --- Main Container --- */
-#lyrics-plus-container {
     display: none;
     width: 100%;
     height: max-content;
-    padding-top: var(--lyplus-padding-base);
+    padding-top: calc(1em + var(--lyrics-scroll-padding-top, 0px));
     box-sizing: border-box;
     color: var(--yt-spec-text-primary, var(--lyplus-text-primary));
     font-family: var(--lyplus-font-family), Roboto, Noto Naskh Arabic UI, Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     font-weight: bolder;
     direction: ltr;
     transform: translateZ(0);
-    padding-top: calc(1em + var(--lyrics-scroll-padding-top));
     font-size: var(--lyplus-font-size-base);
     color-scheme: only light; /* tell browser that this only work on lightmode*/
+}
+
+#lyrics-plus-container.override-palette-color {
+    --lyplus-lyrics-pallete: var(--lyplus-override-pallete) !important;
 }
 
 #lyrics-plus-container.lyrics-plus-message {
@@ -105,7 +101,6 @@
     transform-origin: left;
     transform: translateZ(1px);
     transition: opacity 0.3s ease, transform 0.4s cubic-bezier(.41, 0, .12, .99) var(--lyrics-line-delay, 0ms), filter 0.3s ease;
-    will-change: transform, filter, opacity;
     content-visibility: auto;
     contain-intrinsic-size: auto;
     text-rendering: optimizeLegibility;
@@ -121,6 +116,7 @@
     animation-timing-function: cubic-bezier(.41, 0, .12, .99);
     animation-fill-mode: both;
     animation-delay: var(--lyrics-line-delay, 0ms);
+    will-change: transform;
 }
 
 .lyrics-line:not(.scroll-animate),
@@ -355,7 +351,7 @@
     transition: transform 1s ease !important;
 }
 
-.lyrics-line .lyrics-syllable.finished:has(.span.char) {
+.lyrics-line .lyrics-syllable.finished:has(span.char) {
     background-color: transparent;
 }
 
@@ -437,7 +433,7 @@
 .lyrics-line .lyrics-syllable:has(span.char) {
     background-color: transparent;
     color: transparent;
-    background: none!important;
+    background: none !important;
 }
 
 .lyrics-line .lyrics-syllable span.char {
@@ -600,6 +596,8 @@ span.lyrics-source-provider {
     font-size: var(--lyplus-font-size-status);
     letter-spacing: 1px;
     text-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+    opacity: 0.7;
+    animation: fadeInUp 0.6s ease-out;
     transition: opacity 0.3s ease;
 }
 
@@ -640,11 +638,6 @@ span.lyrics-source-provider {
     height: 30px;
     margin: 0;
     animation: none;
-}
-
-#lyrics-plus-container .text-not-found {
-    opacity: 0.7;
-    animation: fadeInUp 0.6s ease-out;
 }
 
 /* ==========================================================================
