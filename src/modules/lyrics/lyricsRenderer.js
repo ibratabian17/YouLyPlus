@@ -97,7 +97,6 @@ class LyricsPlusRenderer {
     this.dropdownMenu = null;
     this.buttonsWrapper = null;
     this._boundLyricClickHandler = this._onLyricClick.bind(this);
-    this._boundContainerClickHandler = this._onContainerClick.bind(this);
 
     this.isProgrammaticScrolling = false;
     this.endProgrammaticScrollTimer = null;
@@ -314,7 +313,6 @@ class LyricsPlusRenderer {
       }
     }
     if (this.lyricsContainer) {
-      this._attachContainerClickListener();
       this._attachScrollListeners();
       this._setupContainerObserver();
     }
@@ -334,35 +332,17 @@ class LyricsPlusRenderer {
       this.lyricsContainer = null;
       return null;
     }
+    return this._renderContainer(originalLyricsSection);
+  }
+
+  _renderContainer(originalLyricsSection) {
     const container = document.createElement("div");
     container.id = "lyrics-plus-container";
+    container.className = "lyrics-plus-integrated";
     container.classList.add("lyrics-plus-integrated", "blur-inactive-enabled");
     originalLyricsSection.appendChild(container);
     this.lyricsContainer = container;
-    this._attachContainerClickListener();
     return container;
-  }
-
-  _attachContainerClickListener() {
-    if (!this.lyricsContainer || this._containerClickListenerAttached) return;
-    this.lyricsContainer.addEventListener("click", this._boundContainerClickHandler);
-    this._containerClickListenerAttached = true;
-  }
-
-  _onContainerClick(e) {
-    const line = e.target.closest(".lyrics-line");
-    if (!line || !this.lyricsContainer.contains(line)) return;
-    const time = parseFloat(line.dataset.startTime);
-    if (!isNaN(time)) {
-      this._seekPlayerTo(time - 0.05);
-      this._resetSyllables(line, true);
-      for (const activeId of this.activeLineIds) {
-        const activeLine = (this._lineById && this._lineById.get(activeId)) || document.getElementById(activeId);
-        if (activeLine) this._resetSyllables(activeLine, true);
-      }
-      this.lastTime = 0;
-      this._scrollToActiveLine(line, true);
-    }
   }
 
   _attachScrollListeners() {
@@ -547,19 +527,9 @@ class LyricsPlusRenderer {
    * @param {Event} e - The click event.
    */
   _onLyricClick(e) {
-    e.stopPropagation();
-    const line = e.currentTarget;
-    const time = parseFloat(line.dataset.startTime);
-    if (!isNaN(time)) {
-      this._seekPlayerTo(time - 0.05);
-      this._resetSyllables(line, true);
-      for (const activeId of this.activeLineIds) {
-        const activeLine = (this._lineById && this._lineById.get(activeId)) || document.getElementById(activeId);
-        if (activeLine) this._resetSyllables(activeLine, true);
-      }
-      this.lastTime = 0;
-      this._scrollToActiveLine(line, true);
-    }
+    const time = parseFloat(e.currentTarget.dataset.startTime);
+    this._seekPlayerTo(time - 0.05);
+    this._scrollToActiveLine(e.currentTarget, true);
   }
 
   /**
