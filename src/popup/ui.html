@@ -57,11 +57,12 @@
                     </h2>
                     <div class="setting-item">
                         <label for="lyEnabled" class="setting-label" data-i18n="settingEnableExtension">Enable YouLy+</label>
-                        <div class="m3-switch" role="switch" aria-labelledby="lyEnabled">
-                            <input type="checkbox" id="lyEnabled" class="m3-switch-input">
-                            <span class="m3-switch-track"></span>
-                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
-                        </div>
+                        <label class="m3-switch">
+                            <input type="checkbox" id="lyEnabled">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                        </label>
                     </div>
                 </section>
 
@@ -76,11 +77,12 @@
 
                     <div class="setting-item">
                         <label for="sponsorblock" class="setting-label" data-i18n="settingIntegrateSponsorBlock">Integrate SponsorBlock</label>
-                        <div class="m3-switch" role="switch" aria-labelledby="sponsorblock">
-                            <input type="checkbox" id="sponsorblock" class="m3-switch-input">
-                            <span class="m3-switch-track"></span>
-                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
-                        </div>
+                        <label class="m3-switch">
+                            <input type="checkbox" id="sponsorblock">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                        </label>
                     </div>
                 </section>
             </div>
@@ -110,27 +112,30 @@
                     </div>
                     <div class="setting-item">
                         <label for="wordByWord" class="setting-label" data-i18n="settingWordByWord">Word-by-Word Highlighting</label>
-                        <div class="m3-switch" role="switch" aria-labelledby="wordByWord">
-                            <input type="checkbox" id="wordByWord" class="m3-switch-input">
-                            <span class="m3-switch-track"></span>
-                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
-                        </div>
+                        <label class="m3-switch">
+                            <input type="checkbox" id="wordByWord">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                        </label>
                     </div>
                     <div class="setting-item">
                         <label for="hidePhoneticDup" class="setting-label" data-i18n="settingHideLatinPronunciation">Hide Latin Pronunciation</label>
-                        <div class="m3-switch" role="switch" aria-labelledby="hidePhoneticDup">
-                            <input type="checkbox" id="hidePhoneticDup" class="m3-switch-input">
-                            <span class="m3-switch-track"></span>
-                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
-                        </div>
+                        <label class="m3-switch">
+                            <input type="checkbox" id="hidePhoneticDup">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                        </label>
                     </div>
                     <div class="setting-item">
                         <label for="bkgOverlap" class="setting-label" data-i18n="settingDynamicBkgVocal">Dynamic Background Vocal Positioning</label>
-                        <div class="m3-switch" role="switch" aria-labelledby="bkgOverlap">
-                            <input type="checkbox" id="bkgOverlap" class="m3-switch-input">
-                            <span class="m3-switch-track"></span>
-                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
-                        </div>
+                        <label class="m3-switch">
+                            <input type="checkbox" id="bkgOverlap">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                        </label>
                     </div>
                 </section>
             </div>
@@ -147,27 +152,30 @@
                     </h2>
                     <div class="setting-item">
                         <label for="lightweight" class="setting-label" data-i18n="settingLightweightMode">Lightweight Mode</label>
-                        <div class="m3-switch" role="switch" aria-labelledby="lightweight">
-                            <input type="checkbox" id="lightweight" class="m3-switch-input">
-                            <span class="m3-switch-track"></span>
-                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
-                        </div>
+                        <label class="m3-switch">
+                            <input type="checkbox" id="lightweight">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                        </label>
                     </div>
                     <div class="setting-item">
                         <label for="hideOffscreen" class="setting-label" data-i18n="settingHideOffscreen">Hide Off-screen Lyrics</label>
-                        <div class="m3-switch" role="switch" aria-labelledby="hideOffscreen">
-                            <input type="checkbox" id="hideOffscreen" class="m3-switch-input">
-                            <span class="m3-switch-track"></span>
-                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
-                        </div>
+                        <label class="m3-switch">
+                            <input type="checkbox" id="hideOffscreen">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                        </label>
                     </div>
                     <div class="setting-item">
                         <label for="blurInactive" class="setting-label" data-i18n="settingBlurInactive">Blur Inactive Lyrics</label>
-                        <div class="m3-switch" role="switch" aria-labelledby="blurInactive">
-                            <input type="checkbox" id="blurInactive" class="m3-switch-input">
-                            <span class="m3-switch-track"></span>
-                            <span class="m3-switch-thumb-container"><span class="m3-switch-thumb"></span></span>
-                        </div>
+                        <label class="m3-switch">
+                            <input type="checkbox" id="blurInactive">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                        </label>
                     </div>
                 </section>
                 <section class="settings-section">
@@ -217,6 +225,6 @@
         <span class="snackbar-text"></span>
     </div>
 
-    <script src="ui.js" defer></script>
+    <script type="module" src="ui.js"></script>
 </body>
 </html>

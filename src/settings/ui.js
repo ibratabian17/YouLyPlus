@@ -1,4 +1,5 @@
-import { loadSettings, saveSettings, updateSettings, getSettings, updateCacheSize, clearCache, setupSettingsMessageListener, uploadLocalLyrics, getLocalLyricsList, deleteLocalLyrics } from './settingsManager.js';
+import { loadSettings, saveSettings, updateSettings, getSettings, updateCacheSize, clearCache, setupSettingsMessageListener, uploadLocalLyrics, getLocalLyricsList, deleteLocalLyrics } from '../lib/settingsManager.js';
+import { initRipple, createSvgIcon, swapSvgIconPath, debounce, bindAutoSave } from '../lib/uiUtils.js';
 import { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2 } from '../lib/parser.js';
 
 let currentSettings = getSettings();
@@ -14,22 +15,6 @@ const SVG_ICONS = {
     uploadFile: 'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15.01l1.41 1.41L11 14.84V19h2v-4.16l1.59 1.59L16 15.01 12.01 11z',
     hourglassEmpty: 'M6 2v6l2 2-2 2v6h12v-6l-2-2 2-2V2H6zm10 14.5l-4-2-4 2V17h8v-.5zm0-9l-4 2-4-2V5h8v2.5z',
 };
-
-function createSvgIcon(pathD) {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('aria-hidden', 'true');
-    svg.classList.add('icon-svg');
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', pathD);
-    svg.appendChild(path);
-    return svg;
-}
-
-function swapSvgIconPath(svgEl, newPathD) {
-    const path = svgEl.querySelector('path');
-    if (path) path.setAttribute('d', newPathD);
-}
 
 const RESTART_REQUIRED_KEYS = [
     'isEnabled',
@@ -96,89 +81,56 @@ function hideReloadNotification() {
     }
 }
 
-// Debounce function to limit the frequency of function execution
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
+const autoSaveControls = [
+    // General
+    { id: 'enabled', key: 'isEnabled', type: 'checkbox' },
+    { id: 'wordByWord', key: 'wordByWord', type: 'checkbox' },
+    { id: 'ytsonginfo', key: 'YTSongInfo', type: 'checkbox' },
+    { id: 'sponsor-block', key: 'useSponsorBlock', type: 'checkbox' },
+    { id: 'bypass-apple', key: 'appleMusicTTMLBypass', type: 'checkbox' },
+    { id: 'prefer-unison-video', key: 'preferUnisonVideo', type: 'checkbox' },
+
+    // Sources
+    { id: 'custom-kpoe-url', key: 'customKpoeUrl', type: 'value', debounce: 500 },
+
+    // Translation
+    { id: 'translation-provider', key: 'translationProvider', type: 'value' },
+    { id: 'gemini-api-key', key: 'geminiApiKey', type: 'value', debounce: 500 },
+    { id: 'gemini-model', key: 'geminiModel', type: 'value' },
+    { id: 'openrouter-api-key', key: 'openRouterApiKey', type: 'value', debounce: 500 },
+    { id: 'openrouter-model', key: 'openRouterModel', type: 'value', debounce: 500 },
+    { id: 'deepl-api-key', key: 'deeplApiKey', type: 'value', debounce: 500 },
+    { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' },
+    { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' },
+    { id: 'override-translate-target', key: 'overrideTranslateTarget', type: 'checkbox' },
+    { id: 'custom-translate-target', key: 'customTranslateTarget', type: 'value', debounce: 500 },
+    { id: 'override-gemini-prompt', key: 'overrideGeminiPrompt', type: 'checkbox' },
+    { id: 'custom-gemini-prompt', key: 'customGeminiPrompt', type: 'value', debounce: 500 },
+    { id: 'override-gemini-romanize-prompt', key: 'overrideGeminiRomanizePrompt', type: 'checkbox' },
+    { id: 'custom-gemini-romanize-prompt', key: 'customGeminiRomanizePrompt', type: 'value', debounce: 500 },
+
+    // Appearance
+    { id: 'larger-text-mode', key: 'largerTextMode', type: 'value' },
+    { id: 'hide-phoneticdup', key: 'hidePhoneticDup', type: 'checkbox' },
+    { id: 'bkg-overlap', key: 'bkgOverlap', type: 'checkbox' },
+    { id: 'lightweight', key: 'lightweight', type: 'checkbox' },
+    { id: 'hide-offscreen', key: 'hideOffscreen', type: 'checkbox' },
+    { id: 'blur-inactive', key: 'blurInactive', type: 'checkbox' },
+    { id: 'dynamic-player', key: 'dynamicPlayer', type: 'checkbox' },
+    { id: 'audio-beat-sync', key: 'audioBeatSync', type: 'checkbox' },
+    { id: 'relax-scroll', key: 'relaxScroll', type: 'checkbox' },
+    { id: 'useSongPaletteFullscreen', key: 'useSongPaletteFullscreen', type: 'checkbox' },
+    { id: 'useSongPaletteAllModes', key: 'useSongPaletteAllModes', type: 'checkbox' },
+    { id: 'overridePaletteColor', key: 'overridePaletteColor', type: 'value', debounce: 500 },
+    { id: 'custom-css', key: 'customCSS', type: 'value', debounce: 800 },
+
+    // Cache
+    { id: 'cache-strategy', key: 'cacheStrategy', type: 'value' },
+];
 
 function setupAutoSaveListeners() {
-    const autoSaveControls = [
-        // General
-        { id: 'enabled', key: 'isEnabled', type: 'checkbox' },
-        { id: 'wordByWord', key: 'wordByWord', type: 'checkbox' },
-        { id: 'ytsonginfo', key: 'YTSongInfo', type: 'checkbox' },
-        { id: 'sponsor-block', key: 'useSponsorBlock', type: 'checkbox' },
-        { id: 'bypass-apple', key: 'appleMusicTTMLBypass', type: 'checkbox' },
-        { id: 'prefer-unison-video', key: 'preferUnisonVideo', type: 'checkbox' },
-
-        // Sources
-        { id: 'custom-kpoe-url', key: 'customKpoeUrl', type: 'value', debounce: 500 },
-
-        // Translation
-        { id: 'translation-provider', key: 'translationProvider', type: 'value' },
-        { id: 'gemini-api-key', key: 'geminiApiKey', type: 'value', debounce: 500 },
-        { id: 'gemini-model', key: 'geminiModel', type: 'value' },
-        { id: 'openrouter-api-key', key: 'openRouterApiKey', type: 'value', debounce: 500 },
-        { id: 'openrouter-model', key: 'openRouterModel', type: 'value', debounce: 500 },
-        { id: 'deepl-api-key', key: 'deeplApiKey', type: 'value', debounce: 500 },
-        { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' },
-        { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' },
-        { id: 'override-translate-target', key: 'overrideTranslateTarget', type: 'checkbox' },
-        { id: 'custom-translate-target', key: 'customTranslateTarget', type: 'value', debounce: 500 },
-        { id: 'override-gemini-prompt', key: 'overrideGeminiPrompt', type: 'checkbox' },
-        { id: 'custom-gemini-prompt', key: 'customGeminiPrompt', type: 'value', debounce: 500 },
-        { id: 'override-gemini-romanize-prompt', key: 'overrideGeminiRomanizePrompt', type: 'checkbox' },
-        { id: 'custom-gemini-romanize-prompt', key: 'customGeminiRomanizePrompt', type: 'value', debounce: 500 },
-
-        // Appearance
-        { id: 'larger-text-mode', key: 'largerTextMode', type: 'value' },
-        { id: 'hide-phoneticdup', key: 'hidePhoneticDup', type: 'checkbox' },
-        { id: 'bkg-overlap', key: 'bkgOverlap', type: 'checkbox' },
-        { id: 'lightweight', key: 'lightweight', type: 'checkbox' },
-        { id: 'hide-offscreen', key: 'hideOffscreen', type: 'checkbox' },
-        { id: 'blur-inactive', key: 'blurInactive', type: 'checkbox' },
-        { id: 'dynamic-player', key: 'dynamicPlayer', type: 'checkbox' },
-        { id: 'audio-beat-sync', key: 'audioBeatSync', type: 'checkbox' },
-        { id: 'relax-scroll', key: 'relaxScroll', type: 'checkbox' },
-        { id: 'useSongPaletteFullscreen', key: 'useSongPaletteFullscreen', type: 'checkbox' },
-        { id: 'useSongPaletteAllModes', key: 'useSongPaletteAllModes', type: 'checkbox' },
-        { id: 'overridePaletteColor', key: 'overridePaletteColor', type: 'value', debounce: 500 },
-        { id: 'custom-css', key: 'customCSS', type: 'value', debounce: 800 },
-
-        // Cache
-        { id: 'cache-strategy', key: 'cacheStrategy', type: 'value' },
-    ];
-
-    autoSaveControls.forEach(control => {
-        const element = document.getElementById(control.id);
-        if (element) {
-            const eventType = (control.type === 'checkbox' || element.tagName === 'SELECT') ? 'change' : 'input';
-            const saveHandler = (e) => {
-                const value = control.type === 'checkbox' ? e.target.checked : e.target.value;
-                updateSettings({ [control.key]: value });
-                saveSettings();
-                showReloadNotification(control.key);
-
-                // Show a small "Saved" indicator near the element if possible, 
-                // or just rely on the reload notification which is prominent properly.
-                // For now, we'll just log it.
-                console.log(`Auto-saved ${control.key}: ${value}`);
-            };
-
-            if (control.debounce) {
-                element.addEventListener(eventType, debounce(saveHandler, control.debounce));
-            } else {
-                element.addEventListener(eventType, saveHandler);
-            }
-        }
+    bindAutoSave(autoSaveControls, (key) => {
+        showReloadNotification(key);
     });
 }
 
@@ -1262,29 +1214,5 @@ function initCustomSelects() {
     }
 }
 
-document.addEventListener('click', function (e) {
-    const target = e.target.closest('.m3-button, .nav-item, .draggable-source-item');
-    if (!target) return;
+initRipple();
 
-    const ripple = document.createElement('span');
-    const rect = target.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = e.clientX - rect.left - size / 2;
-    const y = e.clientY - rect.top - size / 2;
-
-    ripple.style.width = ripple.style.height = `${size}px`;
-    ripple.style.left = `${x}px`;
-    ripple.style.top = `${y}px`;
-    ripple.classList.add('ripple');
-
-    const existingRipple = target.querySelector('.ripple');
-    if (existingRipple) {
-        existingRipple.remove();
-    }
-
-    target.appendChild(ripple);
-
-    ripple.addEventListener('animationend', () => {
-        ripple.remove();
-    });
-});
