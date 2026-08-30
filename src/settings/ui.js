@@ -218,6 +218,42 @@ function updateUI(settings) {
     populateDraggableSources();
     updateCacheSize();
     populateLocalLyricsList();
+    updateGroupItemRounding();
+}
+
+function updateGroupItemRounding() {
+    document.querySelectorAll('.settings-group').forEach(group => {
+        const items = Array.from(group.children).filter(child => {
+            return child.classList.contains('setting-item') && window.getComputedStyle(child).display !== 'none';
+        });
+
+        // Clear dynamic rounding classes
+        group.querySelectorAll('.setting-item').forEach(item => {
+            item.classList.remove('is-first-visible', 'is-last-visible', 'is-only-visible');
+        });
+
+        if (items.length === 1) {
+            items[0].classList.add('is-only-visible');
+        } else if (items.length > 1) {
+            items[0].classList.add('is-first-visible');
+            items[items.length - 1].classList.add('is-last-visible');
+        }
+    });
+}
+
+function initRowClickListeners() {
+    document.querySelectorAll('.setting-item.has-switch').forEach(row => {
+        row.addEventListener('click', (e) => {
+            if (e.target.closest('input, button, a, select, .m3-switch, .drag-handle, textarea, .m3-select, .m3-select-menu')) {
+                return;
+            }
+            const switchInput = row.querySelector('.m3-switch input[type="checkbox"]');
+            if (switchInput) {
+                switchInput.checked = !switchInput.checked;
+                switchInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    });
 }
 
 document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
@@ -228,7 +264,13 @@ document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
 
         const sectionId = item.getAttribute('data-section');
         document.querySelectorAll('.settings-card').forEach(section => section.classList.remove('active'));
-        document.getElementById(sectionId)?.classList.add('active');
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            targetSection.classList.add('active');
+            updateGroupItemRounding();
+            const scrollArea = document.querySelector('.scroll-area');
+            if (scrollArea) scrollArea.scrollTop = 0;
+        }
     });
 });
 
@@ -271,10 +313,9 @@ function createDraggableProviderItem(providerName) {
     nameSpan.className = 'source-name';
     nameSpan.textContent = getSourceDisplayName(providerName);
 
-    // Add subtitle for fast path indicator on the first item
     const subtitle = document.createElement('span');
     subtitle.className = 'provider-fast-path-indicator';
-    subtitle.textContent = ' (Fast Path)';
+    subtitle.textContent = ` (${msg('labelFastPath') || 'Fast Path'})`;
     subtitle.style.fontSize = '0.8em';
     subtitle.style.opacity = '0.7';
     subtitle.style.marginLeft = '8px';
@@ -503,7 +544,7 @@ function createDraggableSourceItem(sourceName) {
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'm3-button icon remove-source-button';
-    removeBtn.title = 'Remove source';
+    removeBtn.title = msg('titleRemoveSource') || 'Remove source';
     removeBtn.appendChild(createSvgIcon(SVG_ICONS.delete));
 
     item.appendChild(dragHandle);
@@ -767,7 +808,8 @@ document.getElementById('translation-provider').addEventListener('change', (e) =
 function toggleElementVisibility(elementId, isVisible) {
     const element = document.getElementById(elementId);
     if (element) {
-        element.style.display = isVisible ? 'block' : 'none';
+        element.style.display = isVisible ? 'flex' : 'none';
+        updateGroupItemRounding();
     }
 }
 
@@ -928,7 +970,7 @@ async function populateLocalLyricsList() {
 
             const removeBtn = document.createElement('button');
             removeBtn.className = 'm3-button icon remove-source-button';
-            removeBtn.title = 'Delete local lyrics';
+            removeBtn.title = msg('titleDeleteLocalLyrics') || 'Delete local lyrics';
             removeBtn.appendChild(createSvgIcon(SVG_ICONS.delete));
 
             listItem.appendChild(musicIcon);
@@ -1059,11 +1101,13 @@ document.addEventListener('DOMContentLoaded', () => {
         initCustomSelects(); // Init custom selects first
         updateUI(settings);
         setupAutoSaveListeners();
+        initRowClickListeners();
 
         const firstNavItem = document.querySelector('.navigation-drawer .nav-item');
-        const activeSectionId = firstNavItem?.getAttribute('data-section') || 'general';
+        const activeSectionId = firstNavItem?.getAttribute('data-section') || 'appearance';
         document.querySelector(`.navigation-drawer .nav-item[data-section="${activeSectionId}"]`)?.classList.add('active');
         document.getElementById(activeSectionId)?.classList.add('active');
+        updateGroupItemRounding();
     });
 
     setAppVersion();

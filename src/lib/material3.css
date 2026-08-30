@@ -572,8 +572,7 @@ label.m3-switch .label {
 }
 
 .form-group input,
-.form-group textarea,
-.form-group .m3-select {
+.form-group textarea {
     width: 100%;
     box-sizing: border-box;
     background-color: transparent;
@@ -672,6 +671,7 @@ label.m3-switch .label {
 }
 
 /* --- Enhanced Custom Select (Settings) --- */
+/* --- Enhanced Custom Select (Settings) --- */
 .m3-select-hidden {
     display: none !important;
 }
@@ -679,11 +679,20 @@ label.m3-switch .label {
 div.m3-select {
     position: relative;
     width: 100%;
+    min-width: 160px;
     box-sizing: border-box;
-    height: 56px;
-    display: flex;
+    height: 48px;
+    display: inline-flex;
     align-items: center;
+    padding: 0 16px;
+    background-color: var(--md-sys-color-surface-container);
+    border-radius: var(--border-radius-large);
     cursor: pointer;
+    user-select: none;
+}
+
+div.m3-select.open {
+    box-shadow: 0 0 0 1px var(--md-sys-color-primary);
 }
 
 .m3-select-value {
@@ -691,15 +700,19 @@ div.m3-select {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 0.925rem;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    padding-right: 28px;
 }
 
 .m3-select-arrow {
     position: absolute;
-    right: 16px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     color: var(--md-sys-color-on-surface-variant);
     fill: currentColor;
     transition: transform var(--animation-duration) var(--animation-easing-standard);
@@ -709,58 +722,71 @@ div.m3-select {
 
 .m3-select.open .m3-select-arrow {
     transform: translateY(-50%) rotate(180deg);
+    color: var(--md-sys-color-primary);
 }
 
 .m3-select-menu {
     position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
+    top: calc(100% + 6px);
     right: 0;
+    min-width: 200px;
+    max-width: 320px;
+    width: max-content;
     background-color: var(--md-sys-color-surface-container-high);
-    border-radius: 4px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    padding: 8px 0;
+    border-radius: var(--border-radius-extra-large);
+    box-shadow: var(--md-sys-elevation-level-2);
+    padding: 6px;
     z-index: 100;
-    max-height: 240px;
+    max-height: 260px;
     overflow-y: auto;
     opacity: 0;
-    transform: scaleY(0.9);
-    transform-origin: top;
+    transform: scaleY(0.95) translateY(-4px);
+    transform-origin: top right;
     pointer-events: none;
-    transition: opacity var(--animation-duration) var(--animation-easing-standard),
-        transform var(--animation-duration) var(--animation-easing-standard);
+    transition: opacity var(--animation-duration-short) var(--animation-easing-standard),
+        transform var(--animation-duration-short) var(--animation-easing-standard);
 }
 
 .m3-select.open .m3-select-menu {
     opacity: 1;
-    transform: scaleY(1);
+    transform: scaleY(1) translateY(0);
     pointer-events: auto;
 }
 
 .m3-select-option {
-    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
     cursor: pointer;
     position: relative;
-    overflow: hidden;
-    font-size: 1rem;
+    border-radius: var(--border-radius-medium);
+    font-size: 0.9rem;
+    color: var(--md-sys-color-on-surface);
+    transition: background-color var(--animation-duration-short) var(--animation-easing-standard),
+                color var(--animation-duration-short) var(--animation-easing-standard);
 }
 
-.m3-select-option::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-color: var(--md-sys-color-primary);
-    opacity: 0;
-    transition: opacity 150ms;
-}
-
-.m3-select-option:hover::before {
-    opacity: var(--state-layer-hover);
+.m3-select-option:hover {
+    background-color: var(--md-sys-color-surface-container-highest);
 }
 
 .m3-select-option.selected {
-    font-weight: 500;
-    color: var(--md-sys-color-primary);
+    font-weight: 600;
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+}
+
+.m3-select-option.selected::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 10px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg) translate(-1px, -2px);
+    margin-right: 4px;
+    flex-shrink: 0;
 }
 
 /* --- File Input --- */

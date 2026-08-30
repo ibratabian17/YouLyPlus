@@ -7,7 +7,6 @@
     "message": "Enhanced lyrics feature for YouTube Music, Apple Music & Tidal with line-by-line and word-by-word sync",
     "description": "Extension description"
   },
-
   "popupTitle": {
     "message": "YouLy+ Settings",
     "description": "Title shown in the popup header and page title"
@@ -24,7 +23,6 @@
     "message": "Advanced",
     "description": "Advanced tab label"
   },
-
   "sectionCoreFeatures": {
     "message": "Core Features",
     "description": "Section title in popup General tab"
@@ -45,7 +43,6 @@
     "message": "Integrate SponsorBlock",
     "description": "Label for SponsorBlock toggle in popup"
   },
-
   "sectionReadability": {
     "message": "Readability",
     "description": "Section title in popup Appearance tab"
@@ -62,7 +59,6 @@
     "message": "Word-by-Word Highlighting",
     "description": "Label for word-by-word highlighting toggle"
   },
-
   "sectionDataManagement": {
     "message": "Data Management",
     "description": "Section title in popup Advanced tab"
@@ -87,7 +83,6 @@
     "message": "More Settings",
     "description": "Link to full settings page"
   },
-
   "msgSettingsSaved": {
     "message": "Settings saved! Reload YouTube pages for changes.",
     "description": "Snackbar message after saving settings in popup"
@@ -116,7 +111,6 @@
     "message": "Cannot clear cache: Extension API not available.",
     "description": "Error when chrome runtime API is unavailable"
   },
-
   "settingsTitle": {
     "message": "YouLy+ Settings",
     "description": "Title shown in full settings page header and nav drawer"
@@ -149,7 +143,6 @@
     "message": "About",
     "description": "Navigation drawer label"
   },
-
   "msgSettingsSavedRestart": {
     "message": "Settings saved. Restart your music tabs for changes to take effect.",
     "description": "Notification text when no platform tabs are found"
@@ -172,7 +165,6 @@
     "message": "Restart Tabs",
     "description": "Restart button text for multiple tabs"
   },
-
   "categoryCoreFunc": {
     "message": "Core Functionality",
     "description": "Settings category title"
@@ -185,7 +177,6 @@
     "message": "Enable karaoke-style word highlighting if available.",
     "description": "Description for word-by-word toggle"
   },
-
   "categoryYouTubeMusic": {
     "message": "YouTube Music Settings",
     "description": "Settings category title"
@@ -214,7 +205,6 @@
     "message": "When enabled, prioritize the Unison service for video content and ignore SponsorBlock segments when Unison provides the lyrics.",
     "description": "Description for prefer Unison video toggle"
   },
-
   "categoryAppleMusic": {
     "message": "Apple Music Settings",
     "description": "Settings category title"
@@ -227,7 +217,6 @@
     "message": "When enabled, the app will use an external lyrics source if Apple Music only provides line-by-line synchronization instead of word-by-word.",
     "description": "Description for Apple Music bypass toggle"
   },
-
   "sectionSources": {
     "message": "Sources",
     "description": "Sources section title"
@@ -288,24 +277,32 @@
     "message": "Source \"$NAME$\" already exists.",
     "description": "Error when source already present",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceAdded": {
     "message": "\"$NAME$\" added.",
     "description": "Status message after adding source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
   "msgSourceRemoved": {
     "message": "\"$NAME$\" removed.",
     "description": "Status message after removing source",
     "placeholders": {
-      "NAME": { "content": "$1", "example": "Apple Music" }
+      "NAME": {
+        "content": "$1",
+        "example": "Apple Music"
+      }
     }
   },
-
   "sectionLocalLyrics": {
     "message": "Local Lyrics",
     "description": "Local lyrics section title"
@@ -370,7 +367,10 @@
     "message": "Error uploading lyrics: $ERROR$",
     "description": "Error during upload",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid format" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid format"
+      }
     }
   },
   "msgFileReadError": {
@@ -385,24 +385,32 @@
     "message": "Error deleting lyrics: $ERROR$",
     "description": "Error when deleting local lyrics",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Not found" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Not found"
+      }
     }
   },
   "confirmDeleteLyrics": {
     "message": "Delete \"$TITLE$\"?",
     "description": "Confirm dialog for deleting local lyrics",
     "placeholders": {
-      "TITLE": { "content": "$1", "example": "Song Name - Artist" }
+      "TITLE": {
+        "content": "$1",
+        "example": "Song Name - Artist"
+      }
     }
   },
   "msgErrorLoadingLocalLyrics": {
     "message": "Error loading local lyrics: $ERROR$",
     "description": "Error when loading lyrics list fails",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Storage error" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Storage error"
+      }
     }
   },
-
   "sectionTranslation": {
     "message": "Translation",
     "description": "Translation section title"
@@ -535,7 +543,6 @@
     "message": "Customize the prompt sent to the AI for romanization.",
     "description": "Helper text"
   },
-
   "sectionAppearance": {
     "message": "Appearance",
     "description": "Appearance section title"
@@ -652,7 +659,6 @@
     "message": "Apply your own styles to the lyrics display. Use with caution. To create or testing, it is recommended to use UserStyles",
     "description": "Helper text"
   },
-
   "sectionCache": {
     "message": "Cache",
     "description": "Cache section title"
@@ -681,7 +687,6 @@
     "message": "Current Cache Usage",
     "description": "Label for cache usage display"
   },
-
   "sectionAbout": {
     "message": "About",
     "description": "About section"
@@ -730,7 +735,6 @@
     "message": "Made with love",
     "description": "Footer text"
   },
-
   "msgExportSuccess": {
     "message": "Settings exported successfully!",
     "description": "Status message"
@@ -739,7 +743,10 @@
     "message": "Error exporting settings: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Permission denied" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Permission denied"
+      }
     }
   },
   "msgImportSuccess": {
@@ -750,7 +757,10 @@
     "message": "Error importing settings: $ERROR$",
     "description": "Error message",
     "placeholders": {
-      "ERROR": { "content": "$1", "example": "Invalid JSON" }
+      "ERROR": {
+        "content": "$1",
+        "example": "Invalid JSON"
+      }
     }
   },
   "msgNoActiveTabs": {
@@ -773,10 +783,12 @@
     "message": "Version $VERSION$",
     "description": "Version display text",
     "placeholders": {
-      "VERSION": { "content": "$1", "example": "4.2.0" }
+      "VERSION": {
+        "content": "$1",
+        "example": "4.2.0"
+      }
     }
   },
-
   "optionLyrics": {
     "message": "Lyrics",
     "description": "Option in larger text mode dropdown"
@@ -813,7 +825,6 @@
     "message": "Your API key is stored locally. Free plan keys usually end with :fx",
     "description": "Helper text"
   },
-
   "sourceNameLyricsPlus": {
     "message": "Lyrics+ (User Gen.)",
     "description": "Display name for lyricsplus source"
@@ -857,5 +868,117 @@
   "sourceNameBiniLyrics": {
     "message": "BiniLyrics (Apple Music DB)",
     "description": "BiniLyrics provider name"
+  },
+  "navCatInterface": {
+    "message": "Interface",
+    "description": "Navigation category for interface settings"
+  },
+  "navCatLyricsSources": {
+    "message": "Lyrics Sources",
+    "description": "Navigation category for lyrics sources"
+  },
+  "navCatStorageData": {
+    "message": "Storage & Data",
+    "description": "Navigation category for storage & data"
+  },
+  "navCatApplication": {
+    "message": "Application",
+    "description": "Navigation category for application info"
+  },
+  "navSubtitleAppearance": {
+    "message": "Visual effects, theme, typography",
+    "description": "Subtitle for Appearance navigation item"
+  },
+  "navSubtitleGeneral": {
+    "message": "Core features, YTM & Apple Music",
+    "description": "Subtitle for General navigation item"
+  },
+  "navSubtitleSources": {
+    "message": "Lyrics providers & order",
+    "description": "Subtitle for Sources navigation item"
+  },
+  "navSubtitleTranslation": {
+    "message": "AI models, prompts, romanization",
+    "description": "Subtitle for Translation navigation item"
+  },
+  "navSubtitleCache": {
+    "message": "Storage usage & caching policy",
+    "description": "Subtitle for Cache navigation item"
+  },
+  "navSubtitleLocalLyrics": {
+    "message": "Manage uploaded LRC & TTML files",
+    "description": "Subtitle for Local Lyrics navigation item"
+  },
+  "navSubtitleAbout": {
+    "message": "Version, backup, export & links",
+    "description": "Subtitle for About navigation item"
+  },
+  "categoryCustomKpoe": {
+    "message": "Custom KPoe",
+    "description": "Category title for Custom KPoe settings"
+  },
+  "categoryUnison": {
+    "message": "Unison",
+    "description": "Category title for Unison settings"
+  },
+  "categoryLyricsPlus": {
+    "message": "Lyrics+",
+    "description": "Category title for Lyrics+ settings"
+  },
+  "categoryCacheConfig": {
+    "message": "Cache Configuration & Storage",
+    "description": "Category title for cache settings"
+  },
+  "labelFastPath": {
+    "message": "Fast Path",
+    "description": "Label indicator for primary fast path provider"
+  },
+  "placeholderCustomKpoeUrl": {
+    "message": "https://example.com/api",
+    "description": "Placeholder for custom KPoe server URL input"
+  },
+  "placeholderOpenRouterModel": {
+    "message": "google/gemini-2.0-flash-001",
+    "description": "Placeholder for OpenRouter model ID"
+  },
+  "placeholderCustomTranslateTarget": {
+    "message": "en",
+    "description": "Placeholder for custom translation target language code"
+  },
+  "placeholderCustomTranslationPrompt": {
+    "message": "Custom translation prompt...",
+    "description": "Placeholder for custom translation prompt textarea"
+  },
+  "placeholderCustomRomanizationPrompt": {
+    "message": "Custom romanization prompt...",
+    "description": "Placeholder for custom romanization prompt textarea"
+  },
+  "placeholderCustomCSS": {
+    "message": "/* Custom CSS */",
+    "description": "Placeholder for custom CSS textarea"
+  },
+  "placeholderPaletteColor": {
+    "message": "#ffb5a0",
+    "description": "Placeholder for override palette color"
+  },
+  "labelCacheUsageFormat": {
+    "message": "$SIZE$ MB used ($COUNT$ songs cached)",
+    "description": "Cache size and count display format",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1"
+      },
+      "COUNT": {
+        "content": "$2"
+      }
+    }
+  },
+  "msgErrorLoadingCache": {
+    "message": "Error loading cache size.",
+    "description": "Error message when loading cache size fails"
+  },
+  "msgCacheUnavailable": {
+    "message": "Cache info unavailable.",
+    "description": "Message when cache info is unavailable"
   }
 }

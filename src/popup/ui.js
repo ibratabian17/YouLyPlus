@@ -1,8 +1,3 @@
-// ==========================================================================
-// YouLy+ Popup UI Logic
-// Uses shared settingsManager and uiUtils
-// ==========================================================================
-
 import {
     loadSettings,
     updateSettings,
@@ -20,16 +15,12 @@ import {
 } from '../lib/uiUtils.js';
 
 const popupControls = [
-    // General - Core Features
     { id: 'lyEnabled', key: 'isEnabled', type: 'checkbox' },
-    // General - Data Sources
     { id: 'sponsorblock', key: 'useSponsorBlock', type: 'checkbox' },
-    // Appearance - Readability
     { id: 'largerTextMode', key: 'largerTextMode', type: 'value' },
     { id: 'wordByWord', key: 'wordByWord', type: 'checkbox' },
     { id: 'hidePhoneticDup', key: 'hidePhoneticDup', type: 'checkbox' },
     { id: 'bkgOverlap', key: 'bkgOverlap', type: 'checkbox' },
-    // Advanced - Performance
     { id: 'lightweight', key: 'lightweight', type: 'checkbox' },
     { id: 'hideOffscreen', key: 'hideOffscreen', type: 'checkbox' },
     { id: 'blurInactive', key: 'blurInactive', type: 'checkbox' }
@@ -85,10 +76,26 @@ function initCacheControls() {
     });
 }
 
+function initRowClickListeners() {
+    document.querySelectorAll('.setting-item.has-switch').forEach(row => {
+        row.addEventListener('click', (e) => {
+            if (e.target.closest('input, button, a, select, .m3-switch, textarea')) {
+                return;
+            }
+            const switchInput = row.querySelector('.m3-switch input[type="checkbox"]');
+            if (switchInput) {
+                switchInput.checked = !switchInput.checked;
+                switchInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initSwitches();
     initCacheControls();
+    initRowClickListeners();
 
     loadSettings((settings) => {
         updatePopupUI(settings);
@@ -102,5 +109,4 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCacheSize();
 });
 
-// Initialize global ripple effect
 initRipple();

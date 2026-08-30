@@ -876,5 +876,117 @@
   "descDefaultProvider": {
     "message": "優先する歌詞ソースを選択してください。",
     "description": "Description for provider dropdown"
+  },
+  "navCatInterface": {
+    "message": "インターフェース",
+    "description": "Navigation category for interface settings"
+  },
+  "navCatLyricsSources": {
+    "message": "歌詞ソース",
+    "description": "Navigation category for lyrics sources"
+  },
+  "navCatStorageData": {
+    "message": "ストレージとデータ",
+    "description": "Navigation category for storage & data"
+  },
+  "navCatApplication": {
+    "message": "アプリケーション",
+    "description": "Navigation category for application info"
+  },
+  "navSubtitleAppearance": {
+    "message": "視覚効果、テーマ、タイポグラフィ",
+    "description": "Subtitle for Appearance navigation item"
+  },
+  "navSubtitleGeneral": {
+    "message": "コア機能、YTMとApple Music",
+    "description": "Subtitle for General navigation item"
+  },
+  "navSubtitleSources": {
+    "message": "歌詞プロバイダーと順序",
+    "description": "Subtitle for Sources navigation item"
+  },
+  "navSubtitleTranslation": {
+    "message": "AIモデル、プロンプト、ローマ字化",
+    "description": "Subtitle for Translation navigation item"
+  },
+  "navSubtitleCache": {
+    "message": "ストレージ使用量とキャッシュ設定",
+    "description": "Subtitle for Cache navigation item"
+  },
+  "navSubtitleLocalLyrics": {
+    "message": "アップロードされたLRCおよびTTMLファイルの管理",
+    "description": "Subtitle for Local Lyrics navigation item"
+  },
+  "navSubtitleAbout": {
+    "message": "バージョン、バックアップ、エクスポート、リンク",
+    "description": "Subtitle for About navigation item"
+  },
+  "categoryCustomKpoe": {
+    "message": "カスタムKPoe",
+    "description": "Category title for Custom KPoe settings"
+  },
+  "categoryUnison": {
+    "message": "Unison",
+    "description": "Category title for Unison settings"
+  },
+  "categoryLyricsPlus": {
+    "message": "Lyrics+",
+    "description": "Category title for Lyrics+ settings"
+  },
+  "categoryCacheConfig": {
+    "message": "キャッシュ設定とストレージ",
+    "description": "Category title for cache settings"
+  },
+  "labelFastPath": {
+    "message": "ファストパス",
+    "description": "Label indicator for primary fast path provider"
+  },
+  "placeholderCustomKpoeUrl": {
+    "message": "https://example.com/api",
+    "description": "Placeholder for custom KPoe server URL input"
+  },
+  "placeholderOpenRouterModel": {
+    "message": "google/gemini-2.0-flash-001",
+    "description": "Placeholder for OpenRouter model ID"
+  },
+  "placeholderCustomTranslateTarget": {
+    "message": "en",
+    "description": "Placeholder for custom translation target language code"
+  },
+  "placeholderCustomTranslationPrompt": {
+    "message": "カスタム翻訳プロンプト...",
+    "description": "Placeholder for custom translation prompt textarea"
+  },
+  "placeholderCustomRomanizationPrompt": {
+    "message": "カスタムローマ字化プロンプト...",
+    "description": "Placeholder for custom romanization prompt textarea"
+  },
+  "placeholderCustomCSS": {
+    "message": "/* Custom CSS */",
+    "description": "Placeholder for custom CSS textarea"
+  },
+  "placeholderPaletteColor": {
+    "message": "#ffb5a0",
+    "description": "Placeholder for override palette color"
+  },
+  "labelCacheUsageFormat": {
+    "message": "$SIZE$ MB 使用中 ($COUNT$ 曲キャッシュ済み)",
+    "description": "Cache size and count display format",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1"
+      },
+      "COUNT": {
+        "content": "$2"
+      }
+    }
+  },
+  "msgErrorLoadingCache": {
+    "message": "キャッシュサイズの読み込みエラー。",
+    "description": "Error message when loading cache size fails"
+  },
+  "msgCacheUnavailable": {
+    "message": "キャッシュ情報は利用できません。",
+    "description": "Message when cache info is unavailable"
   }
 }

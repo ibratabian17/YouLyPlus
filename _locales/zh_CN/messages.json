@@ -876,5 +876,117 @@
   "descDefaultProvider": {
     "message": "选择您首选的歌词来源。",
     "description": "Description for provider dropdown"
+  },
+  "navCatInterface": {
+    "message": "界面",
+    "description": "Navigation category for interface settings"
+  },
+  "navCatLyricsSources": {
+    "message": "歌词来源",
+    "description": "Navigation category for lyrics sources"
+  },
+  "navCatStorageData": {
+    "message": "存储与数据",
+    "description": "Navigation category for storage & data"
+  },
+  "navCatApplication": {
+    "message": "应用程序",
+    "description": "Navigation category for application info"
+  },
+  "navSubtitleAppearance": {
+    "message": "视觉效果、主题、排版",
+    "description": "Subtitle for Appearance navigation item"
+  },
+  "navSubtitleGeneral": {
+    "message": "核心功能、YTM 与 Apple Music",
+    "description": "Subtitle for General navigation item"
+  },
+  "navSubtitleSources": {
+    "message": "歌词源与优先级",
+    "description": "Subtitle for Sources navigation item"
+  },
+  "navSubtitleTranslation": {
+    "message": "AI 模型、提示词、罗马音化",
+    "description": "Subtitle for Translation navigation item"
+  },
+  "navSubtitleCache": {
+    "message": "存储占用与缓存策略",
+    "description": "Subtitle for Cache navigation item"
+  },
+  "navSubtitleLocalLyrics": {
+    "message": "管理已上传的 LRC 与 TTML 文件",
+    "description": "Subtitle for Local Lyrics navigation item"
+  },
+  "navSubtitleAbout": {
+    "message": "版本、备份、导出与链接",
+    "description": "Subtitle for About navigation item"
+  },
+  "categoryCustomKpoe": {
+    "message": "自定义 KPoe",
+    "description": "Category title for Custom KPoe settings"
+  },
+  "categoryUnison": {
+    "message": "Unison",
+    "description": "Category title for Unison settings"
+  },
+  "categoryLyricsPlus": {
+    "message": "Lyrics+",
+    "description": "Category title for Lyrics+ settings"
+  },
+  "categoryCacheConfig": {
+    "message": "缓存配置与存储",
+    "description": "Category title for cache settings"
+  },
+  "labelFastPath": {
+    "message": "快速路径",
+    "description": "Label indicator for primary fast path provider"
+  },
+  "placeholderCustomKpoeUrl": {
+    "message": "https://example.com/api",
+    "description": "Placeholder for custom KPoe server URL input"
+  },
+  "placeholderOpenRouterModel": {
+    "message": "google/gemini-2.0-flash-001",
+    "description": "Placeholder for OpenRouter model ID"
+  },
+  "placeholderCustomTranslateTarget": {
+    "message": "en",
+    "description": "Placeholder for custom translation target language code"
+  },
+  "placeholderCustomTranslationPrompt": {
+    "message": "自定义翻译提示词...",
+    "description": "Placeholder for custom translation prompt textarea"
+  },
+  "placeholderCustomRomanizationPrompt": {
+    "message": "自定义罗马音提示词...",
+    "description": "Placeholder for custom romanization prompt textarea"
+  },
+  "placeholderCustomCSS": {
+    "message": "/* Custom CSS */",
+    "description": "Placeholder for custom CSS textarea"
+  },
+  "placeholderPaletteColor": {
+    "message": "#ffb5a0",
+    "description": "Placeholder for override palette color"
+  },
+  "labelCacheUsageFormat": {
+    "message": "已使用 $SIZE$ MB（已缓存 $COUNT$ 首歌曲）",
+    "description": "Cache size and count display format",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1"
+      },
+      "COUNT": {
+        "content": "$2"
+      }
+    }
+  },
+  "msgErrorLoadingCache": {
+    "message": "加载缓存大小出错。",
+    "description": "Error message when loading cache size fails"
+  },
+  "msgCacheUnavailable": {
+    "message": "缓存信息不可用。",
+    "description": "Message when cache info is unavailable"
   }
 }

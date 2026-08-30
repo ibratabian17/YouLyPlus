@@ -876,5 +876,117 @@
   "descDefaultProvider": {
     "message": "선호하는 가사 소스를 선택하세요.",
     "description": "Description for provider dropdown"
+  },
+  "navCatInterface": {
+    "message": "인터페이스",
+    "description": "Navigation category for interface settings"
+  },
+  "navCatLyricsSources": {
+    "message": "가사 소스",
+    "description": "Navigation category for lyrics sources"
+  },
+  "navCatStorageData": {
+    "message": "저장공간 및 데이터",
+    "description": "Navigation category for storage & data"
+  },
+  "navCatApplication": {
+    "message": "애플리케이션",
+    "description": "Navigation category for application info"
+  },
+  "navSubtitleAppearance": {
+    "message": "시각 효과, 테마, 서체",
+    "description": "Subtitle for Appearance navigation item"
+  },
+  "navSubtitleGeneral": {
+    "message": "핵심 기능, YTM 및 Apple Music",
+    "description": "Subtitle for General navigation item"
+  },
+  "navSubtitleSources": {
+    "message": "가사 제공자 및 순서",
+    "description": "Subtitle for Sources navigation item"
+  },
+  "navSubtitleTranslation": {
+    "message": "AI 모델, 프롬프트, 발음 표기",
+    "description": "Subtitle for Translation navigation item"
+  },
+  "navSubtitleCache": {
+    "message": "저장공간 사용량 및 캐시 정책",
+    "description": "Subtitle for Cache navigation item"
+  },
+  "navSubtitleLocalLyrics": {
+    "message": "업로드된 LRC 및 TTML 파일 관리",
+    "description": "Subtitle for Local Lyrics navigation item"
+  },
+  "navSubtitleAbout": {
+    "message": "버전, 백업, 내보내기 및 링크",
+    "description": "Subtitle for About navigation item"
+  },
+  "categoryCustomKpoe": {
+    "message": "커스텀 KPoe",
+    "description": "Category title for Custom KPoe settings"
+  },
+  "categoryUnison": {
+    "message": "Unison",
+    "description": "Category title for Unison settings"
+  },
+  "categoryLyricsPlus": {
+    "message": "Lyrics+",
+    "description": "Category title for Lyrics+ settings"
+  },
+  "categoryCacheConfig": {
+    "message": "캐시 설정 및 저장공간",
+    "description": "Category title for cache settings"
+  },
+  "labelFastPath": {
+    "message": "빠른 경로",
+    "description": "Label indicator for primary fast path provider"
+  },
+  "placeholderCustomKpoeUrl": {
+    "message": "https://example.com/api",
+    "description": "Placeholder for custom KPoe server URL input"
+  },
+  "placeholderOpenRouterModel": {
+    "message": "google/gemini-2.0-flash-001",
+    "description": "Placeholder for OpenRouter model ID"
+  },
+  "placeholderCustomTranslateTarget": {
+    "message": "en",
+    "description": "Placeholder for custom translation target language code"
+  },
+  "placeholderCustomTranslationPrompt": {
+    "message": "사용자 지정 번역 프롬프트...",
+    "description": "Placeholder for custom translation prompt textarea"
+  },
+  "placeholderCustomRomanizationPrompt": {
+    "message": "사용자 지정 발음 표기 프롬프트...",
+    "description": "Placeholder for custom romanization prompt textarea"
+  },
+  "placeholderCustomCSS": {
+    "message": "/* Custom CSS */",
+    "description": "Placeholder for custom CSS textarea"
+  },
+  "placeholderPaletteColor": {
+    "message": "#ffb5a0",
+    "description": "Placeholder for override palette color"
+  },
+  "labelCacheUsageFormat": {
+    "message": "$SIZE$ MB 사용됨 ($COUNT$개 곡 캐시됨)",
+    "description": "Cache size and count display format",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1"
+      },
+      "COUNT": {
+        "content": "$2"
+      }
+    }
+  },
+  "msgErrorLoadingCache": {
+    "message": "캐시 크기를 불러오는 중 오류가 발생했습니다.",
+    "description": "Error message when loading cache size fails"
+  },
+  "msgCacheUnavailable": {
+    "message": "캐시 정보를 사용할 수 없습니다.",
+    "description": "Message when cache info is unavailable"
   }
 }

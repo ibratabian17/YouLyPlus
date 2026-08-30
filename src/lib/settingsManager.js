@@ -149,6 +149,14 @@ export function getSettings() {
     return { ...currentSettings };
 }
 
+function getI18nMsg(key, substitutions) {
+    if (typeof msg === 'function') {
+        return msg(key, substitutions);
+    }
+    const api = (typeof browser !== 'undefined' && browser.i18n) ? browser.i18n : (typeof chrome !== 'undefined' ? chrome.i18n : null);
+    return api ? api.getMessage(key, substitutions) : '';
+}
+
 export function updateCacheSize() {
     return new Promise((resolve) => {
         if (pBrowser && pBrowser.runtime && typeof pBrowser.runtime.sendMessage === 'function') {
@@ -156,7 +164,7 @@ export function updateCacheSize() {
                 if (pBrowser.runtime.lastError) {
                     console.error("YouLy+: Error getting cache size:", pBrowser.runtime.lastError.message);
                     const cacheSizeEl = document.getElementById('cache-size');
-                    if (cacheSizeEl) cacheSizeEl.textContent = `Error loading cache size.`;
+                    if (cacheSizeEl) cacheSizeEl.textContent = getI18nMsg('msgErrorLoadingCache') || 'Error loading cache size.';
                     resolve({ success: false, error: pBrowser.runtime.lastError.message });
                     return;
                 }
@@ -164,7 +172,8 @@ export function updateCacheSize() {
                     const sizeMB = (response.sizeKB / 1024).toFixed(2);
                     const cacheSizeEl = document.getElementById('cache-size');
                     if (cacheSizeEl) {
-                        cacheSizeEl.textContent = `${sizeMB} MB used (${response.cacheCount} songs cached)`;
+                        const formatted = getI18nMsg('labelCacheUsageFormat', [sizeMB, String(response.cacheCount)]);
+                        cacheSizeEl.textContent = formatted || `${sizeMB} MB used (${response.cacheCount} songs cached)`;
                     }
                     const popupSizeEl = document.querySelector('.cache-size-value');
                     const popupCountEl = document.querySelector('.cache-count-value');
@@ -175,7 +184,7 @@ export function updateCacheSize() {
                     const err = response ? response.error : "No response";
                     console.error("YouLy+: Error getting cache size from response:", err);
                     const cacheSizeEl = document.getElementById('cache-size');
-                    if (cacheSizeEl) cacheSizeEl.textContent = `Could not retrieve cache size.`;
+                    if (cacheSizeEl) cacheSizeEl.textContent = getI18nMsg('msgErrorLoadingCache') || 'Could not retrieve cache size.';
                     const popupSizeEl = document.querySelector('.cache-size-value');
                     const popupCountEl = document.querySelector('.cache-count-value');
                     if (popupSizeEl) popupSizeEl.textContent = 'N/A';
@@ -186,7 +195,7 @@ export function updateCacheSize() {
         } else {
             console.warn("YouLy+: pBrowser.runtime.sendMessage is not available. Skipping cache size update.");
             const cacheSizeEl = document.getElementById('cache-size');
-            if (cacheSizeEl) cacheSizeEl.textContent = `Cache info unavailable.`;
+            if (cacheSizeEl) cacheSizeEl.textContent = getI18nMsg('msgCacheUnavailable') || 'Cache info unavailable.';
             const popupSizeEl = document.querySelector('.cache-size-value');
             const popupCountEl = document.querySelector('.cache-count-value');
             if (popupSizeEl) popupSizeEl.textContent = 'N/A';

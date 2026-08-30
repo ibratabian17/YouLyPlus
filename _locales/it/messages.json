@@ -876,5 +876,117 @@
   "descDefaultProvider": {
     "message": "Seleziona la tua fonte preferita per i testi.",
     "description": "Description for provider dropdown"
+  },
+  "navCatInterface": {
+    "message": "Interface",
+    "description": "Navigation category for interface settings"
+  },
+  "navCatLyricsSources": {
+    "message": "Lyrics Sources",
+    "description": "Navigation category for lyrics sources"
+  },
+  "navCatStorageData": {
+    "message": "Storage & Data",
+    "description": "Navigation category for storage & data"
+  },
+  "navCatApplication": {
+    "message": "Application",
+    "description": "Navigation category for application info"
+  },
+  "navSubtitleAppearance": {
+    "message": "Visual effects, theme, typography",
+    "description": "Subtitle for Appearance navigation item"
+  },
+  "navSubtitleGeneral": {
+    "message": "Core features, YTM & Apple Music",
+    "description": "Subtitle for General navigation item"
+  },
+  "navSubtitleSources": {
+    "message": "Lyrics providers & order",
+    "description": "Subtitle for Sources navigation item"
+  },
+  "navSubtitleTranslation": {
+    "message": "AI models, prompts, romanization",
+    "description": "Subtitle for Translation navigation item"
+  },
+  "navSubtitleCache": {
+    "message": "Storage usage & caching policy",
+    "description": "Subtitle for Cache navigation item"
+  },
+  "navSubtitleLocalLyrics": {
+    "message": "Manage uploaded LRC & TTML files",
+    "description": "Subtitle for Local Lyrics navigation item"
+  },
+  "navSubtitleAbout": {
+    "message": "Version, backup, export & links",
+    "description": "Subtitle for About navigation item"
+  },
+  "categoryCustomKpoe": {
+    "message": "Custom KPoe",
+    "description": "Category title for Custom KPoe settings"
+  },
+  "categoryUnison": {
+    "message": "Unison",
+    "description": "Category title for Unison settings"
+  },
+  "categoryLyricsPlus": {
+    "message": "Lyrics+",
+    "description": "Category title for Lyrics+ settings"
+  },
+  "categoryCacheConfig": {
+    "message": "Cache Configuration & Storage",
+    "description": "Category title for cache settings"
+  },
+  "labelFastPath": {
+    "message": "Fast Path",
+    "description": "Label indicator for primary fast path provider"
+  },
+  "placeholderCustomKpoeUrl": {
+    "message": "https://example.com/api",
+    "description": "Placeholder for custom KPoe server URL input"
+  },
+  "placeholderOpenRouterModel": {
+    "message": "google/gemini-2.0-flash-001",
+    "description": "Placeholder for OpenRouter model ID"
+  },
+  "placeholderCustomTranslateTarget": {
+    "message": "en",
+    "description": "Placeholder for custom translation target language code"
+  },
+  "placeholderCustomTranslationPrompt": {
+    "message": "Custom translation prompt...",
+    "description": "Placeholder for custom translation prompt textarea"
+  },
+  "placeholderCustomRomanizationPrompt": {
+    "message": "Custom romanization prompt...",
+    "description": "Placeholder for custom romanization prompt textarea"
+  },
+  "placeholderCustomCSS": {
+    "message": "/* Custom CSS */",
+    "description": "Placeholder for custom CSS textarea"
+  },
+  "placeholderPaletteColor": {
+    "message": "#ffb5a0",
+    "description": "Placeholder for override palette color"
+  },
+  "labelCacheUsageFormat": {
+    "message": "$SIZE$ MB used ($COUNT$ songs cached)",
+    "description": "Cache size and count display format",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1"
+      },
+      "COUNT": {
+        "content": "$2"
+      }
+    }
+  },
+  "msgErrorLoadingCache": {
+    "message": "Error loading cache size.",
+    "description": "Error message when loading cache size fails"
+  },
+  "msgCacheUnavailable": {
+    "message": "Cache info unavailable.",
+    "description": "Message when cache info is unavailable"
   }
 }
