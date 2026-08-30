@@ -728,7 +728,7 @@ function LYPLUS_setupBlurEffect() {
 
 function handleResize() {
     if (!gl || !webglCanvas) return;
-    const w = 128; const h = 128;
+    const w = 256; const h = 256;
     if (w === canvasDimensions.width && h === canvasDimensions.height) return;
 
     canvasDimensions.width = w;
