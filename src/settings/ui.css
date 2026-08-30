@@ -786,7 +786,6 @@ div#local-lyrics-list .draggable-source-item:only-of-type {
         width: 300px;
         max-width: 85%;
         transform: translateX(-100%);
-        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
         z-index: 200;
         background-color: var(--md-sys-color-surface-container-low);
     }
