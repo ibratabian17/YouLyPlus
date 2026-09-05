@@ -6,7 +6,8 @@ export const CONFIG = {
   DB: {
     CACHE: { name: "LyricsCacheDB", version: 2, store: "lyrics" },
     TRANSLATIONS: { name: "TranslationsDB", version: 2, store: "translations" },
-    LOCAL: { name: "LocalLyricsDB", version: 2, store: "localLyrics" }
+    LOCAL: { name: "LocalLyricsDB", version: 2, store: "localLyrics" },
+    OFFSETS: { name: "LyricsOffsetDB", version: 1, store: "offsets" }
   },
 
   CACHE_EXPIRY: {
@@ -57,5 +58,8 @@ export const MESSAGE_TYPES = {
   DELETE_LOCAL_LYRICS: 'DELETE_LOCAL_LYRICS',
   FETCH_LOCAL_LYRICS: 'FETCH_LOCAL_LYRICS',
   FETCH_IMAGE: 'FETCH_IMAGE',
-  FETCH_SUBTITLES: 'FETCH_SUBTITLES'
+  FETCH_SUBTITLES: 'FETCH_SUBTITLES',
+  SAVE_LYRICS_OFFSET: 'SAVE_LYRICS_OFFSET',
+  GET_LYRICS_OFFSET: 'GET_LYRICS_OFFSET',
+  SWITCH_LYRICS_PROVIDER: 'SWITCH_LYRICS_PROVIDER'
 };

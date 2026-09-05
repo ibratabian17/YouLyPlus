@@ -686,40 +686,224 @@ span.lyrics-source-provider {
 }
 
 /* --- Dropdown Menu --- */
-#lyrics-plus-translation-dropdown {
+#lyrics-plus-translation-dropdown,
+#lyrics-plus-options-dropdown {
     position: absolute;
-    top: -10em;
-    /* Positioned above the button */
-    left: 50%;
+    bottom: calc(100% + 8px);
+    right: 0;
     z-index: 999;
-    min-width: 140px;
+    min-width: 175px;
     padding: 4px 0;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
+    border-radius: 8px;
     background-color: rgba(24, 24, 24, 0.96);
-    backdrop-filter: blur(4px);
-    font-family: Roboto, Arial, sans-serif;
-    transform: translateX(-50%);
+    backdrop-filter: blur(16px);
+    font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    user-select: none;
+    height: max-content;
 }
 
-#lyrics-plus-translation-dropdown.hidden {
+#lyrics-plus-translation-dropdown.hidden,
+#lyrics-plus-options-dropdown.hidden {
     display: none;
 }
 
+
 .dropdown-option {
-    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
     color: rgba(255, 255, 255, 0.87);
     font-size: 13px;
     line-height: 1.4;
-    text-align: left;
-    white-space: nowrap;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.15s ease;
+    gap: 12px;
 }
 
 .dropdown-option:hover {
     background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dropdown-option:active {
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+.dropdown-item-label {
+    flex: 1;
+    white-space: nowrap;
+}
+
+.dropdown-item-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.lyrics-option-value-preview {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    font-variant-numeric: tabular-nums;
+}
+
+.dropdown-chevron-svg,
+.dropdown-item-icon-svg {
+    fill: currentColor;
+    flex-shrink: 0;
+}
+
+.dropdown-header-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.87);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.dropdown-header-back:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dropdown-back-svg {
+    fill: currentColor;
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+
+.dropdown-separator {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.08);
+    margin: 4px 0;
+}
+
+.lyrics-source-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.lyrics-source-option.selected {
+    color: #fff;
+    font-weight: 500;
+}
+
+.dropdown-check-svg {
+    fill: #fff;
+    flex-shrink: 0;
+}
+
+/* --- Inline Offset Panel inside Dropdown --- */
+.dropdown-offset-panel {
+    padding: 8px 12px 10px;
+}
+
+.offset-display-row {
+    text-align: center;
+    margin: 2px 0 10px;
+}
+
+.offset-current-value {
+    font-size: 20px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    letter-spacing: -0.3px;
+}
+
+.offset-stepper-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.offset-step-pill {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.87);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 6px 0;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    font-family: inherit;
+}
+
+.offset-step-pill:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+}
+
+.offset-step-pill:active {
+    background: rgba(255, 255, 255, 0.24);
+}
+
+.offset-reset-row {
+    text-align: center;
+    margin-top: 2px;
+}
+
+.offset-reset-link {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 4px;
+    transition: color 0.15s ease;
+    font-family: inherit;
+}
+
+.offset-reset-link:hover {
+    color: rgba(255, 255, 255, 0.87);
+}
+
+/* --- Lyrics Toast Notification --- */
+.lyrics-plus-toast {
+    position: absolute;
+    bottom: 5em;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1001;
+    background: rgba(30, 30, 30, 0.92);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 12px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    white-space: nowrap;
+    animation: lyplus-toast-in 0.2s ease-out;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.lyrics-plus-toast.fade-out {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+}
+
+@keyframes lyplus-toast-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 6px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
 }
 
 /* --- Translated/Romanized Text --- */

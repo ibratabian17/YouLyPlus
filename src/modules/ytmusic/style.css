@@ -142,7 +142,8 @@ ytmusic-app-layout[is-mweb-modernization-enabled] #lyrics-plus-buttons-wrapper {
     z-index: 999;
 }
 
-ytmusic-app-layout[is-mweb-modernization-enabled] #lyrics-plus-translation-dropdown {
+ytmusic-app-layout[is-mweb-modernization-enabled] #lyrics-plus-translation-dropdown,
+ytmusic-app-layout[is-mweb-modernization-enabled] #lyrics-plus-options-dropdown {
     left: 20%;
 }
 
@@ -432,9 +433,9 @@ div#lyrics-song-progressbar {
         width: min-content;
     }
 
-    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) #lyrics-plus-translation-dropdown {
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) #lyrics-plus-translation-dropdown,
+    ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened]:has(#lyrics-plus-container[style*="display: block"]) #lyrics-plus-options-dropdown {
         top: 5em;
-        left: -0px;
     }
 
     ytmusic-app-layout:not([is-mweb-modernization-enabled])[player-fullscreened] .lyplus-blur-container .lyplus-gradient-overlay {

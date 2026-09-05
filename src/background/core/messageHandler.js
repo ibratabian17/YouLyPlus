@@ -24,7 +24,10 @@ export class MessageHandler {
       [MESSAGE_TYPES.GET_LOCAL_LYRICS_LIST]: () => this.getLocalLyricsList(sendResponse),
       [MESSAGE_TYPES.DELETE_LOCAL_LYRICS]: () => this.deleteLocalLyrics(message, sendResponse),
       [MESSAGE_TYPES.FETCH_LOCAL_LYRICS]: () => this.fetchLocalLyrics(message, sendResponse),
-      [MESSAGE_TYPES.FETCH_IMAGE]: () => this.fetchImage(message, sendResponse)
+      [MESSAGE_TYPES.FETCH_IMAGE]: () => this.fetchImage(message, sendResponse),
+      [MESSAGE_TYPES.SAVE_LYRICS_OFFSET]: () => this.saveLyricsOffset(message, sendResponse),
+      [MESSAGE_TYPES.GET_LYRICS_OFFSET]: () => this.getLyricsOffset(message, sendResponse),
+      [MESSAGE_TYPES.SWITCH_LYRICS_PROVIDER]: () => this.switchLyricsProvider(message, sendResponse)
     };
 
     const handler = handlers[message.type];
@@ -44,7 +47,7 @@ export class MessageHandler {
 
   static async fetchLyrics(message, sendResponse) {
     try {
-      const { lyrics } = await LyricsService.getOrFetch(message.songInfo, message.forceReload);
+      const { lyrics } = await LyricsService.getOrFetch(message.songInfo, message.forceReload, message.requestedSource);
       sendResponse({ success: true, lyrics, metadata: message.songInfo });
     } catch (error) {
       console.error(`Failed to fetch lyrics for "${message.songInfo?.title}":`, error);
@@ -199,6 +202,40 @@ export class MessageHandler {
       reader.readAsDataURL(blob);
     } catch (error) {
       console.error("Error fetching image:", error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  static async saveLyricsOffset(message, sendResponse) {
+    try {
+      await LyricsService.saveLyricsOffset(message.songInfo, message.offsetMs);
+      sendResponse({ success: true });
+    } catch (error) {
+      console.error("Error saving lyrics offset:", error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  static async getLyricsOffset(message, sendResponse) {
+    try {
+      const offsetMs = await LyricsService.getLyricsOffset(message.songInfo);
+      sendResponse({ success: true, offsetMs });
+    } catch (error) {
+      console.error("Error getting lyrics offset:", error);
+      sendResponse({ success: false, error: error.message, offsetMs: 0 });
+    }
+  }
+
+  static async switchLyricsProvider(message, sendResponse) {
+    try {
+      const result = await LyricsService.getProviderLyrics(message.songInfo, message.provider);
+      if (result && result.lyrics) {
+        sendResponse({ success: true, lyrics: result.lyrics, provider: message.provider, fromCache: result.fromCache });
+      } else {
+        sendResponse({ success: false, error: "No lyrics available from this provider" });
+      }
+    } catch (error) {
+      console.error(`Failed to switch lyrics provider to "${message.provider}":`, error);
       sendResponse({ success: false, error: error.message });
     }
   }

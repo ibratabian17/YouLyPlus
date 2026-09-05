@@ -96,7 +96,8 @@
     height: min-content;
 }
 
-.react-tabs #lyrics-plus-translation-dropdown {
+.react-tabs #lyrics-plus-translation-dropdown,
+.react-tabs #lyrics-plus-options-dropdown {
     top: 4em;
     left: 80%;
 }

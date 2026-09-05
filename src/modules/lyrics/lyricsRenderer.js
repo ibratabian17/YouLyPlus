@@ -95,6 +95,14 @@ class LyricsPlusRenderer {
     this.translationButton = null;
     this.reloadButton = null;
     this.dropdownMenu = null;
+    this.optionsDropdown = null;
+    this.offsetController = null;
+    this.userOffsetMs = 0;
+    this.currentLyrics = null;
+    this._userSelectedSource = null;
+    this._saveOffsetTimeout = null;
+    this._toastElement = null;
+    this._toastTimeout = null;
     this.buttonsWrapper = null;
     this._boundLyricClickHandler = this._onLyricClick.bind(this);
 
@@ -528,7 +536,8 @@ class LyricsPlusRenderer {
    */
   _onLyricClick(e) {
     const time = parseFloat(e.currentTarget.dataset.startTime);
-    this._seekPlayerTo(time - 0.05);
+    const offsetSec = (this.userOffsetMs || 0) / 1000;
+    this._seekPlayerTo(time - offsetSec - 0.05);
     this._scrollToActiveLine(e.currentTarget, true);
   }
 
@@ -1680,7 +1689,7 @@ class LyricsPlusRenderer {
     this.currentPrimaryActiveLine = null;
 
     if (this.cachedLyricsLines.length > 0) {
-      const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000;
+      const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 + (this.userOffsetMs || 0);
       let activeIndex = this._getLineIndexAtTime(currentTime);
       if (activeIndex === -1) activeIndex = 0;
 
@@ -1717,14 +1726,34 @@ class LyricsPlusRenderer {
     fetchAndDisplayLyricsFn,
     setCurrentDisplayModeAndRefetchFn,
     largerTextMode = "lyrics",
-    offsetLatency = 0
+    offsetLatency = 0,
+    switchLyricsProviderFn = null
   ) {
+    if (this.lastKnownSongInfo && songInfo && (this.lastKnownSongInfo.title !== songInfo.title || this.lastKnownSongInfo.artist !== songInfo.artist)) {
+      this._userSelectedProvider = null;
+    }
+    this.currentLyrics = lyrics;
     this.lastKnownSongInfo = songInfo;
     this.currentSettings = currentSettings;
     this.fetchAndDisplayLyricsFn = fetchAndDisplayLyricsFn;
     this.setCurrentDisplayModeAndRefetchFn = setCurrentDisplayModeAndRefetchFn;
     this.largerTextMode = largerTextMode;
-    this.offsetLatency = offsetLatency
+    this.offsetLatency = offsetLatency;
+    if (switchLyricsProviderFn) {
+      this.switchLyricsProviderFn = switchLyricsProviderFn;
+    }
+
+    if (songInfo && typeof pBrowser !== "undefined" && pBrowser.runtime?.sendMessage) {
+      pBrowser.runtime.sendMessage({
+        type: 'GET_LYRICS_OFFSET',
+        songInfo
+      }).then(response => {
+        if (response && typeof response.offsetMs === 'number') {
+          this.userOffsetMs = response.offsetMs;
+          this._updateOffsetDisplay();
+        }
+      }).catch(err => console.warn('Failed to load lyrics offset:', err));
+    }
 
     // Reset translation loading state if it was active
     this.setTranslationLoading(false);
@@ -1964,10 +1993,10 @@ class LyricsPlusRenderer {
       if (!this.uiConfig.disableNativeTick)
         cancelAnimationFrame(this.lyricsAnimationFrameId);
     }
-    this.lastTime = this._getCurrentPlayerTime() * 1000;
+    this.lastTime = this._getCurrentPlayerTime() * 1000 + (this.userOffsetMs || 0);
     if (!this.uiConfig.disableNativeTick) {
       const sync = () => {
-        const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000;
+        const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 + (this.userOffsetMs || 0);
         if (currentTime !== this.lastTime) {
           const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
           this._updateLyricsHighlight(
@@ -2001,7 +2030,7 @@ class LyricsPlusRenderer {
   updateCurrentTick(currentTime) {
     currentTime = currentTime * 1000;
     const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
-    this._updateLyricsHighlight((currentTime - this.offsetLatency), isForceScroll, this.currentSettings || {});
+    this._updateLyricsHighlight((currentTime - this.offsetLatency + (this.userOffsetMs || 0)), isForceScroll, this.currentSettings || {});
     this.lastTime = currentTime;
   }
 
@@ -2989,6 +3018,31 @@ class LyricsPlusRenderer {
       }
     }
 
+    // Shared Document Click Handler
+    if (!this._boundDocumentClickHandler) {
+      this._boundDocumentClickHandler = (event) => {
+        if (
+          this.dropdownMenu &&
+          !this.dropdownMenu.classList.contains("hidden") &&
+          !this.dropdownMenu.contains(event.target) &&
+          event.target !== this.translationButton &&
+          !this.translationButton?.contains(event.target)
+        ) {
+          this.dropdownMenu.classList.add("hidden");
+        }
+        if (
+          this.optionsDropdown &&
+          !this.optionsDropdown.classList.contains("hidden") &&
+          !this.optionsDropdown.contains(event.target) &&
+          event.target !== this.reloadButton &&
+          !this.reloadButton?.contains(event.target)
+        ) {
+          this.optionsDropdown.classList.add("hidden");
+        }
+      };
+      document.addEventListener("click", this._boundDocumentClickHandler);
+    }
+
     // Translation Button Logic
     if (this.setCurrentDisplayModeAndRefetchFn && this.currentLyricsType !== "None") {
       if (!this.translationButton) {
@@ -2999,41 +3053,29 @@ class LyricsPlusRenderer {
 
         this.translationButton.addEventListener("click", (event) => {
           event.stopPropagation();
+          if (this.optionsDropdown) this.optionsDropdown.classList.add("hidden");
           this._createDropdownMenu(this.buttonsWrapper);
           if (this.dropdownMenu) this.dropdownMenu.classList.toggle("hidden");
         });
-
-        if (!this._boundDocumentClickHandler) {
-          this._boundDocumentClickHandler = (event) => {
-            if (
-              this.dropdownMenu &&
-              !this.dropdownMenu.classList.contains("hidden") &&
-              !this.dropdownMenu.contains(event.target) &&
-              event.target !== this.translationButton
-            ) {
-              this.dropdownMenu.classList.add("hidden");
-            }
-          };
-          document.addEventListener("click", this._boundDocumentClickHandler);
-        }
       } else if (!this.buttonsWrapper.contains(this.translationButton)) {
         this.buttonsWrapper.appendChild(this.translationButton);
       }
     }
 
-    // Reload Button Logic
+    // Reload / Options Button Logic
     if (!this.reloadButton) {
       this.reloadButton = document.createElement("button");
       this.reloadButton.id = "lyrics-plus-reload-button";
       this.reloadButton.innerHTML =
         '<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="M480-192q-120 0-204-84t-84-204q0-120 84-204t204-84q65 0 120.5 27t95.5 72v-99h72v240H528v-72h131q-29-44-76-70t-103-26q-90 0-153 63t-63 153q0 90 63 153t153 63q84 0 144-55.5T693-456h74q-9 112-91 188t-196 76Z"/></svg>';
-      this.reloadButton.title = t("refreshLyrics") || "Refresh Lyrics";
+      this.reloadButton.title = t("lyricsOptions") || t("refreshLyrics") || "Lyrics Options";
       this.buttonsWrapper.appendChild(this.reloadButton);
 
-      this.reloadButton.addEventListener("click", () => {
-        if (this.lastKnownSongInfo && this.fetchAndDisplayLyricsFn) {
-          this.fetchAndDisplayLyricsFn(this.lastKnownSongInfo, true, true);
-        }
+      this.reloadButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (this.dropdownMenu) this.dropdownMenu.classList.add("hidden");
+        this._createOptionsMenu(this.buttonsWrapper);
+        if (this.optionsDropdown) this.optionsDropdown.classList.toggle("hidden");
       });
     } else if (!this.buttonsWrapper.contains(this.reloadButton)) {
       this.buttonsWrapper.appendChild(this.reloadButton);
@@ -3133,6 +3175,302 @@ class LyricsPlusRenderer {
     this.translationButton.title = t("showTranslationOptions") || "Translation";
   }
 
+  _createOptionsMenu(parentWrapper) {
+    if (this.optionsDropdown) {
+      this.optionsDropdown.innerHTML = "";
+    } else {
+      this.optionsDropdown = document.createElement("div");
+      this.optionsDropdown.id = "lyrics-plus-options-dropdown";
+      this.optionsDropdown.className = "lyrics-plus-menu-dropdown hidden";
+      parentWrapper?.appendChild(this.optionsDropdown);
+    }
+    this._renderOptionsMenuMain();
+  }
+
+  _renderOptionsMenuMain() {
+    if (!this.optionsDropdown) return;
+    this.optionsDropdown.innerHTML = "";
+
+    const chevronSvg = '<svg class="dropdown-chevron-svg" width="16" height="16" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>';
+    const reloadSvg = '<svg class="dropdown-item-icon-svg" width="16" height="16" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
+
+    // 1. Lyrics Offset Option
+    const offsetOpt = document.createElement("div");
+    offsetOpt.className = "dropdown-option";
+    const offsetDisplay = this.userOffsetMs ? `${this.userOffsetMs > 0 ? '+' : ''}${this.userOffsetMs}ms` : '0ms';
+    offsetOpt.innerHTML = `
+      <span class="dropdown-item-label">${t("offsetLyrics") || "Lyrics Offset"}</span>
+      <div class="dropdown-item-right">
+        <span class="lyrics-option-value-preview">${offsetDisplay}</span>
+        ${chevronSvg}
+      </div>
+    `;
+    offsetOpt.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this._renderOptionsMenuOffset();
+    });
+    this.optionsDropdown.appendChild(offsetOpt);
+
+    // 2. Change Lyrics Source Option
+    const sourceOpt = document.createElement("div");
+    sourceOpt.className = "dropdown-option";
+    const activeProvider = (
+      this._userSelectedProvider ||
+      this.currentLyrics?.provider ||
+      this.currentLyrics?.metadata?.provider ||
+      this._detectProviderFromSource(this.currentLyrics?.metadata?.source) ||
+      'Lyrics+'
+    );
+    const providerDisplayNames = {
+      'binilyrics': 'BiniLyrics',
+      'kpoe': 'Lyrics+',
+      'customKpoe': 'Custom Lyrics+',
+      'unison': 'Unison',
+      'lrclib': 'LRCLib',
+      'local': 'Local Lyrics',
+      'subtitles': 'YouTube Subtitles'
+    };
+    const activeProviderName = providerDisplayNames[activeProvider] || (activeProvider.charAt(0).toUpperCase() + activeProvider.slice(1));
+    sourceOpt.innerHTML = `
+      <span class="dropdown-item-label">${t("changeLyricsSource") || "Change Lyrics Source"}</span>
+      <div class="dropdown-item-right">
+        <span class="lyrics-option-value-preview">${activeProviderName}</span>
+        ${chevronSvg}
+      </div>
+    `;
+    sourceOpt.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this._renderOptionsMenuSources();
+    });
+    this.optionsDropdown.appendChild(sourceOpt);
+
+    // Separator
+    const sep = document.createElement("div");
+    sep.className = "dropdown-separator";
+    this.optionsDropdown.appendChild(sep);
+
+    // 3. Reload Lyrics Option
+    const reloadOpt = document.createElement("div");
+    reloadOpt.className = "dropdown-option";
+    reloadOpt.innerHTML = `
+      <span class="dropdown-item-label">${t("reloadLyrics") || t("refreshLyrics") || "Reload Lyrics"}</span>
+      ${reloadSvg}
+    `;
+    reloadOpt.addEventListener("click", () => {
+      this.optionsDropdown.classList.add("hidden");
+      if (this.lastKnownSongInfo && this.fetchAndDisplayLyricsFn) {
+        this.fetchAndDisplayLyricsFn(this.lastKnownSongInfo, true, true);
+      }
+    });
+    this.optionsDropdown.appendChild(reloadOpt);
+  }
+
+  _renderOptionsMenuOffset() {
+    if (!this.optionsDropdown) return;
+    this.optionsDropdown.innerHTML = "";
+
+    const backSvg = '<svg class="dropdown-back-svg" width="18" height="18" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>';
+
+    // Back Option
+    const backOpt = document.createElement("div");
+    backOpt.className = "dropdown-header-back";
+    backOpt.innerHTML = `${backSvg} <span>${t("offsetLyrics") || "Lyrics Offset"}</span>`;
+    backOpt.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this._renderOptionsMenuMain();
+    });
+    this.optionsDropdown.appendChild(backOpt);
+
+    const sep = document.createElement("div");
+    sep.className = "dropdown-separator";
+    this.optionsDropdown.appendChild(sep);
+
+    // Panel inside dropdown
+    const panel = document.createElement("div");
+    panel.className = "dropdown-offset-panel";
+
+    const ms = this.userOffsetMs || 0;
+    const formatted = `${ms > 0 ? '+' : ''}${ms} ms`;
+
+    panel.innerHTML = `
+      <div class="offset-display-row">
+        <div class="offset-current-value">${formatted}</div>
+      </div>
+      <div class="offset-stepper-row">
+        <button class="offset-step-pill" data-step="-100" type="button">-100ms</button>
+        <button class="offset-step-pill" data-step="-10" type="button">-10ms</button>
+        <button class="offset-step-pill" data-step="10" type="button">+10ms</button>
+        <button class="offset-step-pill" data-step="100" type="button">+100ms</button>
+      </div>
+      <div class="offset-reset-row" style="${ms === 0 ? 'display: none;' : ''}">
+        <button class="offset-reset-link" type="button">${t("reset") || "Reset to 0ms"}</button>
+      </div>
+    `;
+
+    panel.querySelectorAll(".offset-step-pill").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const step = parseInt(btn.dataset.step, 10) || 0;
+        this._adjustOffset((this.userOffsetMs || 0) + step);
+      });
+    });
+
+    panel.querySelector(".offset-reset-link").addEventListener("click", (e) => {
+      e.stopPropagation();
+      this._adjustOffset(0);
+    });
+
+    this.optionsDropdown.appendChild(panel);
+  }
+
+  _detectProviderFromSource(source) {
+    if (!source) return '';
+    const s = source.toLowerCase();
+    if (s.includes('bini')) return 'binilyrics';
+    if (s.includes('unison')) return 'unison';
+    if (s.includes('lrclib')) return 'lrclib';
+    if (s.includes('local')) return 'local';
+    if (s.includes('subtitles') || s.includes('captions')) return 'subtitles';
+    if (s.includes('apple') || s.includes('spotify') || s.includes('musixmatch') || s.includes('qq') || s.includes('kpoe') || s.includes('lyrics+')) return 'kpoe';
+    return '';
+  }
+
+  _renderOptionsMenuSources() {
+    if (!this.optionsDropdown) return;
+    this.optionsDropdown.innerHTML = "";
+
+    const backSvg = '<svg class="dropdown-back-svg" width="18" height="18" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>';
+    const checkSvg = '<svg class="dropdown-check-svg" width="16" height="16" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+
+    // Back Option
+    const backOpt = document.createElement("div");
+    backOpt.className = "dropdown-header-back";
+    backOpt.innerHTML = `${backSvg} <span>${t("changeLyricsSource") || "Change Lyrics Source"}</span>`;
+    backOpt.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this._renderOptionsMenuMain();
+    });
+    this.optionsDropdown.appendChild(backOpt);
+
+    const sep = document.createElement("div");
+    sep.className = "dropdown-separator";
+    this.optionsDropdown.appendChild(sep);
+
+    // Populate providers strictly based on user's configured Lyrics Provider Order
+    const providerOrderStr = this.currentSettings?.lyricsProviderOrder || 'binilyrics,kpoe,unison,lrclib';
+    const providerKeys = providerOrderStr.split(',').map(s => s.trim()).filter(Boolean);
+
+    if (this.currentSettings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
+      providerKeys.push('customKpoe');
+    }
+
+    const providerDisplayNames = {
+      'binilyrics': 'BiniLyrics',
+      'kpoe': 'Lyrics+',
+      'customKpoe': 'Custom Lyrics+',
+      'unison': 'Unison',
+      'lrclib': 'LRCLib',
+      'local': 'Local Lyrics',
+      'subtitles': 'YouTube Subtitles'
+    };
+
+    const activeProvider = (
+      this._userSelectedProvider ||
+      this.currentLyrics?.provider ||
+      this.currentLyrics?.metadata?.provider ||
+      this._detectProviderFromSource(this.currentLyrics?.metadata?.source)
+    ).toLowerCase();
+
+    providerKeys.forEach((providerId) => {
+      const name = providerDisplayNames[providerId] || (providerId.charAt(0).toUpperCase() + providerId.slice(1));
+      const opt = document.createElement("div");
+      opt.className = "dropdown-option lyrics-source-option";
+      const isSelected = activeProvider === providerId.toLowerCase();
+
+      if (isSelected) opt.classList.add("selected");
+
+      opt.innerHTML = `
+        <span class="source-name">${name}</span>
+        ${isSelected ? checkSvg : ''}
+      `;
+
+      opt.addEventListener("click", () => {
+        this._userSelectedProvider = providerId;
+        this.optionsDropdown.classList.add("hidden");
+        if (this.switchLyricsProviderFn) {
+          this.switchLyricsProviderFn(providerId);
+        }
+      });
+
+      this.optionsDropdown.appendChild(opt);
+    });
+  }
+
+  _adjustOffset(newOffsetMs) {
+    this.userOffsetMs = Math.round(newOffsetMs / 10) * 10;
+    this._updateOffsetDisplay();
+    if (this.lastKnownSongInfo) {
+      this._debouncedSaveOffset(this.lastKnownSongInfo, this.userOffsetMs);
+    }
+    const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 + this.userOffsetMs;
+    this._updateLyricsHighlight(currentTime, false, this.currentSettings || {});
+  }
+
+  _updateOffsetDisplay() {
+    const valueEl = this.optionsDropdown?.querySelector(".offset-current-value");
+    if (valueEl) {
+      const ms = this.userOffsetMs || 0;
+      valueEl.textContent = `${ms > 0 ? '+' : ''}${ms} ms`;
+    }
+    const resetRow = this.optionsDropdown?.querySelector(".offset-reset-row");
+    if (resetRow) {
+      resetRow.style.display = (this.userOffsetMs || 0) === 0 ? "none" : "";
+    }
+    const previewEl = this.optionsDropdown?.querySelector(".lyrics-option-value-preview");
+    if (previewEl) {
+      const ms = this.userOffsetMs || 0;
+      previewEl.textContent = `${ms > 0 ? '+' : ''}${ms}ms`;
+    }
+  }
+
+  _debouncedSaveOffset(songInfo, offsetMs) {
+    clearTimeout(this._saveOffsetTimeout);
+    this._saveOffsetTimeout = setTimeout(() => {
+      if (typeof pBrowser !== "undefined" && pBrowser.runtime?.sendMessage) {
+        pBrowser.runtime.sendMessage({
+          type: 'SAVE_LYRICS_OFFSET',
+          songInfo,
+          offsetMs
+        }).catch(err => console.warn('Failed to save offset:', err));
+      }
+    }, 400);
+  }
+
+  showToast(message, duration = 3000) {
+    if (this._toastElement) {
+      this._toastElement.remove();
+      clearTimeout(this._toastTimeout);
+    }
+    this._toastElement = document.createElement("div");
+    this._toastElement.className = "lyrics-plus-toast";
+    this._toastElement.textContent = message;
+
+    const parent = document.querySelector(
+      this.uiConfig.buttonParent || this.uiConfig.patchParent
+    ) || this.buttonsWrapper?.parentElement || document.body;
+    parent.appendChild(this._toastElement);
+
+    this._toastTimeout = setTimeout(() => {
+      if (this._toastElement) {
+        this._toastElement.classList.add("fade-out");
+        setTimeout(() => {
+          this._toastElement?.remove();
+          this._toastElement = null;
+        }, 300);
+      }
+    }, duration);
+  }
+
   /**
    * Removes a button element from the DOM by cloning it (to strip all event
    * listeners) and then removing it. Nulls the provided ref after removal.
@@ -3212,6 +3550,25 @@ class LyricsPlusRenderer {
       this.dropdownMenu.remove();
       this.dropdownMenu = null;
     }
+    if (this.optionsDropdown) {
+      this.optionsDropdown.remove();
+      this.optionsDropdown = null;
+    }
+    if (this.offsetController) {
+      this.offsetController.remove();
+      this.offsetController = null;
+    }
+    if (this._toastElement) {
+      this._toastElement.remove();
+      this._toastElement = null;
+    }
+    if (this._saveOffsetTimeout) clearTimeout(this._saveOffsetTimeout);
+    if (this._toastTimeout) clearTimeout(this._toastTimeout);
+    this._saveOffsetTimeout = null;
+    this._toastTimeout = null;
+    this.userOffsetMs = 0;
+    this.currentLyrics = null;
+    this._userSelectedSource = null;
 
     // DOM & Cache Cleanup
     const container = this._getContainer();

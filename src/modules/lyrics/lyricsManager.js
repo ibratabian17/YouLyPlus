@@ -161,7 +161,7 @@ function resolveEffectiveMode(isNewSong) {
  * Fetches the base lyrics for the current song, using the cache when appropriate.
  * Returns null if the song changed mid-request or if the fetch failed.
  */
-async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId) {
+async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId, requestedSource = null) {
   const isSameSong =
     lastBaseLyrics &&
     lastKnownSongInfo &&
@@ -181,7 +181,7 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId) {
   const response = await pBrowser.runtime.sendMessage({
     type: 'FETCH_LYRICS',
     songInfo: currentSong,
-    forceReload
+    forceReload: forceReload
   });
 
   if (currentFetchMediaId !== fetchId) {
@@ -360,6 +360,56 @@ async function applySponsorBlock(lyrics, currentSong, fetchId) {
    RENDERING HELPERS
    ================================================================= */
 
+function getProviderDisplayName(provider) {
+  const map = {
+    'binilyrics': 'BiniLyrics',
+    'kpoe': 'Lyrics+',
+    'customKpoe': 'Custom Lyrics+',
+    'unison': 'Unison',
+    'lrclib': 'LRCLib',
+    'local': 'Local Lyrics',
+    'subtitles': 'YouTube Subtitles'
+  };
+  return map[provider] || (provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : 'Unknown');
+}
+
+async function switchLyricsProvider(providerId) {
+  if (!lastKnownSongInfo) return;
+  const currentSong = lastKnownSongInfo;
+  const fetchId = currentFetchMediaId;
+  const providerName = getProviderDisplayName(providerId);
+
+  try {
+    const response = await pBrowser.runtime.sendMessage({
+      type: 'SWITCH_LYRICS_PROVIDER',
+      songInfo: currentSong,
+      provider: providerId
+    });
+
+    if (currentFetchMediaId !== fetchId) {
+      console.warn("Song changed during lyrics provider switch. Aborting.", currentSong);
+      return;
+    }
+
+    if (response?.success && response.lyrics) {
+      lastBaseLyrics = response.lyrics;
+      await updateAndRenderCombinedLyrics(currentSong, fetchId);
+      if (LyricsPlusAPI.showToast) {
+        LyricsPlusAPI.showToast(`Switched lyrics to ${providerName}`);
+      }
+    } else {
+      if (LyricsPlusAPI.showToast) {
+        LyricsPlusAPI.showToast(`No lyrics found from ${providerName}`);
+      }
+    }
+  } catch (error) {
+    console.warn("Failed to switch lyrics provider:", error);
+    if (LyricsPlusAPI.showToast) {
+      LyricsPlusAPI.showToast("Failed to switch lyrics provider");
+    }
+  }
+}
+
 /**
  * Calls the LyricsPlusAPI display function with the standard argument set.
  */
@@ -372,7 +422,8 @@ function callDisplayLyricsAPI(lyrics, currentSong, displayMode) {
     fetchAndDisplayLyrics,
     setCurrentDisplayModeAndRender,
     currentSettings.largerTextMode,
-    audioCtx.outputLatency || 0
+    audioCtx.outputLatency || 0,
+    switchLyricsProvider
   );
 }
 

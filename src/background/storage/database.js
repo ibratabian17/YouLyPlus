@@ -148,3 +148,4 @@ class DatabaseManager {
 export const lyricsDB = new DatabaseManager(CONFIG.DB.CACHE);
 export const translationsDB = new DatabaseManager(CONFIG.DB.TRANSLATIONS);
 export const localLyricsDB = new DatabaseManager(CONFIG.DB.LOCAL);
+export const offsetsDB = new DatabaseManager(CONFIG.DB.OFFSETS);

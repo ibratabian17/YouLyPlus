@@ -17,7 +17,8 @@ const LyricsPlusAPI = {
     displaySongError: () => lyricsRendererInstance?.displaySongError(),
     cleanupLyrics: () => lyricsRendererInstance?.cleanupLyrics(),
     updateDisplayMode: (...args) => lyricsRendererInstance?.updateDisplayMode(...args),
-    setTranslationLoading: (...args) => lyricsRendererInstance?.setTranslationLoading(...args)
+    setTranslationLoading: (...args) => lyricsRendererInstance?.setTranslationLoading(...args),
+    showToast: (...args) => lyricsRendererInstance?.showToast(...args)
 };
 
 function injectPlatformCSS() {

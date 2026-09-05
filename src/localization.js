@@ -42,7 +42,15 @@ const translations = {
         showOriginal: "Tampilkan Asli",
         hideOriginal: "Sembunyikan Asli",
         refreshLyrics: "Muat ulang lirik",
-        showTranslationOptions: "Tampilkan opsi terjemahan"
+        showTranslationOptions: "Tampilkan opsi terjemahan",
+        offsetLyrics: "Offset Lirik",
+        changeLyricsSource: "Ganti Sumber Lirik",
+        reloadLyrics: "Muat Ulang Lirik",
+        lyricsOptions: "Opsi Lirik",
+        back: "Kembali",
+        reset: "Reset",
+        autoSource: "Otomatis (Bawaan)",
+        sourceNotFound: "Lirik tidak ditemukan dari sumber ini"
     },
     'ms-MY': {
         loading: "Memuatkan lirik",
@@ -162,7 +170,15 @@ const translations = {
         showOriginal: "Show Original",
         hideOriginal: "Hide Original",
         refreshLyrics: "Refresh Lyrics",
-        showTranslationOptions: "Show Translation Options"
+        showTranslationOptions: "Show Translation Options",
+        offsetLyrics: "Lyrics Offset",
+        changeLyricsSource: "Change Lyrics Source",
+        reloadLyrics: "Reload Lyrics",
+        lyricsOptions: "Lyrics Options",
+        back: "Back",
+        reset: "Reset",
+        autoSource: "Automatic (Default)",
+        sourceNotFound: "No lyrics found from this source"
     },
     'en-GB': {
         loading: "Loading lyrics",
@@ -177,7 +193,15 @@ const translations = {
         showOriginal: "Show Original",
         hideOriginal: "Hide Original",
         refreshLyrics: "Refresh Lyrics",
-        showTranslationOptions: "Show Translation Options"
+        showTranslationOptions: "Show Translation Options",
+        offsetLyrics: "Lyrics Offset",
+        changeLyricsSource: "Change Lyrics Source",
+        reloadLyrics: "Reload Lyrics",
+        lyricsOptions: "Lyrics Options",
+        back: "Back",
+        reset: "Reset",
+        autoSource: "Automatic (Default)",
+        sourceNotFound: "No lyrics found from this source"
     },
     'en-US': {
         loading: "Loading lyrics",
@@ -192,7 +216,15 @@ const translations = {
         showOriginal: "Show Original",
         hideOriginal: "Hide Original",
         refreshLyrics: "Refresh Lyrics",
-        showTranslationOptions: "Show Translation Options"
+        showTranslationOptions: "Show Translation Options",
+        offsetLyrics: "Lyrics Offset",
+        changeLyricsSource: "Change Lyrics Source",
+        reloadLyrics: "Reload Lyrics",
+        lyricsOptions: "Lyrics Options",
+        back: "Back",
+        reset: "Reset",
+        autoSource: "Automatic (Default)",
+        sourceNotFound: "No lyrics found from this source"
     },
     'es-ES': {
         loading: "Cargando letras",
