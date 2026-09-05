@@ -1,5 +1,6 @@
 const translations = {
     'af-ZA': {
+
         loading: "Besig om lirieke te laai",
         notFound: "Kon nie die lirieke vind nie.",
         writtenBy: "Geskryf deur: ",
@@ -12,9 +13,18 @@ const translations = {
         showOriginal: "Wys Oorspronklike",
         hideOriginal: "Versteek Oorspronklike",
         refreshLyrics: "Verfris lirieke",
-        showTranslationOptions: "Wys vertaalopsies"
+        showTranslationOptions: "Wys vertaalopsies",
+        offsetLyrics: "Liriek-verrekening",
+        changeLyricsSource: "Verander liriekebron",
+        reloadLyrics: "Herlaai lirieke",
+        lyricsOptions: "Lirieke-opsies",
+        back: "Terug",
+        reset: "Herstel",
+        autoSource: "Outomaties (Verstek)",
+        sourceNotFound: "Geen lirieke vanaf hierdie bron gevind nie"
     },
     'az-AZ': {
+
         loading: "Mahnı sözləri yüklənir",
         notFound: "Mahnı sözləri tapılmadı.",
         writtenBy: "Müəllif: ",
@@ -27,7 +37,15 @@ const translations = {
         showOriginal: "Orijinalı Göstər",
         hideOriginal: "Orijinalı Gizlət",
         refreshLyrics: "Mahnı sözlərini yenilə",
-        showTranslationOptions: "Tərcümə seçimlərini göstər"
+        showTranslationOptions: "Tərcümə seçimlərini göstər",
+        offsetLyrics: "Mahnı sözü ofseti",
+        changeLyricsSource: "Mənbəni dəyişdir",
+        reloadLyrics: "Sözləri yenidən yüklə",
+        lyricsOptions: "Mahnı sözləri seçimləri",
+        back: "Geri",
+        reset: "Sıfırla",
+        autoSource: "Avtomatik (Standart)",
+        sourceNotFound: "Bu mənbədən mahnı sözləri tapılmadı"
     },
     'id-ID': {
         loading: "Memuat lirik",
@@ -53,6 +71,7 @@ const translations = {
         sourceNotFound: "Lirik tidak ditemukan dari sumber ini"
     },
     'ms-MY': {
+
         loading: "Memuatkan lirik",
         notFound: "Tidak dapat mencari lirik.",
         writtenBy: "Ditulis oleh: ",
@@ -65,9 +84,18 @@ const translations = {
         showOriginal: "Tunjukkan Asal",
         hideOriginal: "Sembunyikan Asal",
         refreshLyrics: "Muat semula lirik",
-        showTranslationOptions: "Tunjukkan pilihan terjemahan"
+        showTranslationOptions: "Tunjukkan pilihan terjemahan",
+        offsetLyrics: "Ofset Lirik",
+        changeLyricsSource: "Tukar Sumber Lirik",
+        reloadLyrics: "Muat Semula Lirik",
+        lyricsOptions: "Pilihan Lirik",
+        back: "Kembali",
+        reset: "Tetapkan Semula",
+        autoSource: "Automatik (Lalai)",
+        sourceNotFound: "Tiada lirik dijumpai daripada sumber ini"
     },
     'bs-BA': {
+
         loading: "Učitavanje teksta",
         notFound: "Nije moguće pronaći tekst.",
         writtenBy: "Napisao/la: ",
@@ -80,9 +108,18 @@ const translations = {
         showOriginal: "Prikaži Original",
         hideOriginal: "Sakrij Original",
         refreshLyrics: "Osvježi tekst",
-        showTranslationOptions: "Prikaži opcije prijevoda"
+        showTranslationOptions: "Prikaži opcije prijevoda",
+        offsetLyrics: "Pomak teksta",
+        changeLyricsSource: "Promijeni izvor teksta",
+        reloadLyrics: "Ponovo učitaj tekst",
+        lyricsOptions: "Opcije teksta",
+        back: "Nazad",
+        reset: "Poništi",
+        autoSource: "Automatski (Zadano)",
+        sourceNotFound: "Nisu pronađene riječi iz ovog izvora"
     },
     'ca-ES': {
+
         loading: "Carregant lletres",
         notFound: "No s'han pogut trobar les lletres.",
         writtenBy: "Escrit per: ",
@@ -95,9 +132,18 @@ const translations = {
         showOriginal: "Mostra Original",
         hideOriginal: "Amaga Original",
         refreshLyrics: "Actualitza lletres",
-        showTranslationOptions: "Mostra opcions de traducció"
+        showTranslationOptions: "Mostra opcions de traducció",
+        offsetLyrics: "Desplaçament de lletra",
+        changeLyricsSource: "Canvia la font de lletra",
+        reloadLyrics: "Recarrega la lletra",
+        lyricsOptions: "Opcions de lletra",
+        back: "Enrere",
+        reset: "Restableix",
+        autoSource: "Automàtic (Per defecte)",
+        sourceNotFound: "No s'han trobat lletres d'aquesta font"
     },
     'cs-CZ': {
+
         loading: "Načítání textů",
         notFound: "Nepodařilo se najít texty.",
         writtenBy: "Napsal(a): ",
@@ -110,9 +156,18 @@ const translations = {
         showOriginal: "Zobrazit Originál",
         hideOriginal: "Skrýt Originál",
         refreshLyrics: "Obnovit texty",
-        showTranslationOptions: "Zobrazit možnosti překladu"
+        showTranslationOptions: "Zobrazit možnosti překladu",
+        offsetLyrics: "Posun textu",
+        changeLyricsSource: "Změnit zdroj textu",
+        reloadLyrics: "Znovu načíst text",
+        lyricsOptions: "Možnosti textu",
+        back: "Zpět",
+        reset: "Obnovit",
+        autoSource: "Automaticky (Výchozí)",
+        sourceNotFound: "Z tohoto zdroje nebyl nalezen žádný text"
     },
     'da-DK': {
+
         loading: "Indlæser sangtekster",
         notFound: "Kunne ikke finde sangteksterne.",
         writtenBy: "Skrevet af: ",
@@ -125,9 +180,18 @@ const translations = {
         showOriginal: "Vis Original",
         hideOriginal: "Skjul Original",
         refreshLyrics: "Genindlæs sangtekster",
-        showTranslationOptions: "Vis oversættelsesmuligheder"
+        showTranslationOptions: "Vis oversættelsesmuligheder",
+        offsetLyrics: "Tekstforskydning",
+        changeLyricsSource: "Skift tekstkilde",
+        reloadLyrics: "Genindlæs tekst",
+        lyricsOptions: "Tekstindstillinger",
+        back: "Tilbage",
+        reset: "Nulstil",
+        autoSource: "Automatisk (Standard)",
+        sourceNotFound: "Ingen sangtekst fundet fra denne kilde"
     },
     'de-DE': {
+
         loading: "Lade Liedtexte",
         notFound: "Konnte die Liedtexte nicht finden.",
         writtenBy: "Geschrieben von: ",
@@ -140,9 +204,18 @@ const translations = {
         showOriginal: "Original anzeigen",
         hideOriginal: "Original ausblenden",
         refreshLyrics: "Liedtexte aktualisieren",
-        showTranslationOptions: "Übersetzungsoptionen anzeigen"
+        showTranslationOptions: "Übersetzungsoptionen anzeigen",
+        offsetLyrics: "Songtext-Versatz",
+        changeLyricsSource: "Songtext-Quelle ändern",
+        reloadLyrics: "Songtext neu laden",
+        lyricsOptions: "Songtext-Optionen",
+        back: "Zurück",
+        reset: "Zurücksetzen",
+        autoSource: "Automatisch (Standard)",
+        sourceNotFound: "Kein Songtext von dieser Quelle gefunden"
     },
     'et-EE': {
+
         loading: "Laulude sõnade laadimine",
         notFound: "Laulusõnu ei leitud.",
         writtenBy: "Kirjutanud: ",
@@ -155,7 +228,15 @@ const translations = {
         showOriginal: "Kuva Originaal",
         hideOriginal: "Peida Originaal",
         refreshLyrics: "Värskenda laulusõnad",
-        showTranslationOptions: "Kuva tõlkevalikud"
+        showTranslationOptions: "Kuva tõlkevalikud",
+        offsetLyrics: "Sõnade nihe",
+        changeLyricsSource: "Muuda sõnade allikat",
+        reloadLyrics: "Laadi sõnad uuesti",
+        lyricsOptions: "Sõnade valikud",
+        back: "Tagasi",
+        reset: "Lähtesta",
+        autoSource: "Automaatne (Vaikimisi)",
+        sourceNotFound: "Sellest allikast sõnu ei leitud"
     },
     'en-IN': {
         loading: "Loading lyrics",
@@ -227,6 +308,7 @@ const translations = {
         sourceNotFound: "No lyrics found from this source"
     },
     'es-ES': {
+
         loading: "Cargando letras",
         notFound: "No se pudo encontrar la letra.",
         writtenBy: "Escrito por: ",
@@ -239,9 +321,18 @@ const translations = {
         showOriginal: "Mostrar Original",
         hideOriginal: "Ocultar Original",
         refreshLyrics: "Actualizar letras",
-        showTranslationOptions: "Mostrar opciones de traducción"
+        showTranslationOptions: "Mostrar opciones de traducción",
+        offsetLyrics: "Desfase de letra",
+        changeLyricsSource: "Cambiar fuente de letra",
+        reloadLyrics: "Recargar letra",
+        lyricsOptions: "Opciones de letra",
+        back: "Atrás",
+        reset: "Restablecer",
+        autoSource: "Automático (Predeterminado)",
+        sourceNotFound: "No se encontraron letras de esta fuente"
     },
     'es-419': {
+
         loading: "Cargando letras",
         notFound: "No se pudo encontrar la letra.",
         writtenBy: "Escrito por: ",
@@ -254,9 +345,18 @@ const translations = {
         showOriginal: "Mostrar Original",
         hideOriginal: "Ocultar Original",
         refreshLyrics: "Actualizar letras",
-        showTranslationOptions: "Mostrar opciones de traducción"
+        showTranslationOptions: "Mostrar opciones de traducción",
+        offsetLyrics: "Desfase de letra",
+        changeLyricsSource: "Cambiar fuente de letra",
+        reloadLyrics: "Recargar letra",
+        lyricsOptions: "Opciones de letra",
+        back: "Atrás",
+        reset: "Restablecer",
+        autoSource: "Automático (Predeterminado)",
+        sourceNotFound: "No se encontraron letras de esta fuente"
     },
     'es-US': {
+
         loading: "Cargando letras",
         notFound: "No se pudo encontrar la letra.",
         writtenBy: "Escrito por: ",
@@ -269,9 +369,18 @@ const translations = {
         showOriginal: "Mostrar Original",
         hideOriginal: "Ocultar Original",
         refreshLyrics: "Actualizar letras",
-        showTranslationOptions: "Mostrar opciones de traducción"
+        showTranslationOptions: "Mostrar opciones de traducción",
+        offsetLyrics: "Desfase de letra",
+        changeLyricsSource: "Cambiar fuente de letra",
+        reloadLyrics: "Recargar letra",
+        lyricsOptions: "Opciones de letra",
+        back: "Atrás",
+        reset: "Restablecer",
+        autoSource: "Automático (Predeterminado)",
+        sourceNotFound: "No se encontraron letras de esta fuente"
     },
     'eu-ES': {
+
         loading: "Letrak kargatzen",
         notFound: "Ezin izan da letra aurkitu.",
         writtenBy: "Egilea: ",
@@ -284,9 +393,18 @@ const translations = {
         showOriginal: "Erakutsi Originala",
         hideOriginal: "Ezkutatu Originala",
         refreshLyrics: "Letrak freskatu",
-        showTranslationOptions: "Itzulpen aukerak erakutsi"
+        showTranslationOptions: "Itzulpen aukerak erakutsi",
+        offsetLyrics: "Letren desplazamendua",
+        changeLyricsSource: "Aldatu letraren iturburua",
+        reloadLyrics: "Kargatu berriro letrak",
+        lyricsOptions: "Letren aukerak",
+        back: "Atzera",
+        reset: "Berrezarri",
+        autoSource: "Automatikoa (Lehenetsia)",
+        sourceNotFound: "Ez da letrarik aurkitu iturburu honetatik"
     },
     'fil-PH': {
+
         loading: "Nilo-load ang lyrics",
         notFound: "Hindi mahanap ang lyrics.",
         writtenBy: "Isinulat ni: ",
@@ -299,9 +417,18 @@ const translations = {
         showOriginal: "Ipakita ang Orihinal",
         hideOriginal: "Itago ang Orihinal",
         refreshLyrics: "I-refresh ang lyrics",
-        showTranslationOptions: "Ipakita ang mga opsyon sa pagsasalin"
+        showTranslationOptions: "Ipakita ang mga opsyon sa pagsasalin",
+        offsetLyrics: "Offset ng Lyrics",
+        changeLyricsSource: "Palitan ang Source ng Lyrics",
+        reloadLyrics: "I-reload ang Lyrics",
+        lyricsOptions: "Mga Opsyon ng Lyrics",
+        back: "Bumalik",
+        reset: "I-reset",
+        autoSource: "Awtomatiko (Default)",
+        sourceNotFound: "Walang nahanap na lyrics mula sa source na ito"
     },
     'fr-FR': {
+
         loading: "Chargement des paroles",
         notFound: "Impossible de trouver les paroles.",
         writtenBy: "Écrit par: ",
@@ -314,9 +441,18 @@ const translations = {
         showOriginal: "Afficher l'Original",
         hideOriginal: "Masquer l'Original",
         refreshLyrics: "Actualiser les paroles",
-        showTranslationOptions: "Afficher les options de traduction"
+        showTranslationOptions: "Afficher les options de traduction",
+        offsetLyrics: "Décalage des paroles",
+        changeLyricsSource: "Changer la source des paroles",
+        reloadLyrics: "Recharger les paroles",
+        lyricsOptions: "Options des paroles",
+        back: "Retour",
+        reset: "Réinitialiser",
+        autoSource: "Automatique (Par défaut)",
+        sourceNotFound: "Aucune parole trouvée depuis cette source"
     },
     'fr-CA': {
+
         loading: "Chargement des paroles",
         notFound: "Impossible de trouver les paroles.",
         writtenBy: "Écrit par: ",
@@ -329,9 +465,18 @@ const translations = {
         showOriginal: "Afficher l'Original",
         hideOriginal: "Masquer l'Original",
         refreshLyrics: "Actualiser les paroles",
-        showTranslationOptions: "Afficher les options de traduction"
+        showTranslationOptions: "Afficher les options de traduction",
+        offsetLyrics: "Décalage des paroles",
+        changeLyricsSource: "Changer la source des paroles",
+        reloadLyrics: "Recharger les paroles",
+        lyricsOptions: "Options des paroles",
+        back: "Retour",
+        reset: "Réinitialiser",
+        autoSource: "Automatique (Par défaut)",
+        sourceNotFound: "Aucune parole trouvée depuis cette source"
     },
     'gl-ES': {
+
         loading: "Cargando letras",
         notFound: "Non se puideron atopar as letras.",
         writtenBy: "Escrito por: ",
@@ -344,9 +489,18 @@ const translations = {
         showOriginal: "Mostrar Orixinal",
         hideOriginal: "Ocultar Orixinal",
         refreshLyrics: "Actualizar letras",
-        showTranslationOptions: "Mostrar opcións de tradución"
+        showTranslationOptions: "Mostrar opcións de tradución",
+        offsetLyrics: "Desprazamento da letra",
+        changeLyricsSource: "Cambiar fonte da letra",
+        reloadLyrics: "Recargar letra",
+        lyricsOptions: "Opcións de letra",
+        back: "Atrás",
+        reset: "Restablecer",
+        autoSource: "Automático (Predeterminado)",
+        sourceNotFound: "Non se atoparon letras desta fonte"
     },
     'hr-HR': {
+
         loading: "Učitavanje stihova",
         notFound: "Nije moguće pronaći stihove.",
         writtenBy: "Napisao/la: ",
@@ -359,9 +513,18 @@ const translations = {
         showOriginal: "Prikaži Original",
         hideOriginal: "Sakrij Original",
         refreshLyrics: "Osvježi stihove",
-        showTranslationOptions: "Prikaži opcije prijevoda"
+        showTranslationOptions: "Prikaži opcije prijevoda",
+        offsetLyrics: "Pomak teksta",
+        changeLyricsSource: "Promijeni izvor teksta",
+        reloadLyrics: "Ponovno učitaj tekst",
+        lyricsOptions: "Opcije teksta",
+        back: "Natrag",
+        reset: "Poništi",
+        autoSource: "Automatski (Zadano)",
+        sourceNotFound: "Nisu pronađene riječi iz ovog izvora"
     },
     'zu-ZA': {
+
         loading: "Iyalayisha amagama",
         notFound: "Ayikwazanga ukuthola amagama.",
         writtenBy: "Ibhalwe ngu: ",
@@ -374,9 +537,18 @@ const translations = {
         showOriginal: "Bonisa Okwangempela",
         hideOriginal: "Fihla Okwangempela",
         refreshLyrics: "Vuselela Amagama",
-        showTranslationOptions: "Bonisa Izinketho Zokuhumusha"
+        showTranslationOptions: "Bonisa Izinketho Zokuhumusha",
+        offsetLyrics: "Ukucheza kwamazwi",
+        changeLyricsSource: "Shintsha umthombo wamazwi",
+        reloadLyrics: "Layisha kabusha amazwi",
+        lyricsOptions: "Izinketho zamazwi",
+        back: "Emuva",
+        reset: "Setha kabusha",
+        autoSource: "Ngokuzenzakalelayo (Okuzenzakalelayo)",
+        sourceNotFound: "Awekho amazwi atholakele kulo mthombo"
     },
     'is-IS': {
+
         loading: "Hleð textum",
         notFound: "Gat ekki fundið textana.",
         writtenBy: "Höfundur: ",
@@ -389,9 +561,18 @@ const translations = {
         showOriginal: "Sýna Frumrit",
         hideOriginal: "Fela Frumrit",
         refreshLyrics: "Endurhlaða texta",
-        showTranslationOptions: "Sýna þýðingarvalkosti"
+        showTranslationOptions: "Sýna þýðingarvalkosti",
+        offsetLyrics: "Textahliðrun",
+        changeLyricsSource: "Breyta textauppsprettu",
+        reloadLyrics: "Endurhlaða texta",
+        lyricsOptions: "Textavalkostir",
+        back: "Til baka",
+        reset: "Endurstilla",
+        autoSource: "Sjálfvirkt (Sjálfgefið)",
+        sourceNotFound: "Enginn texti fannst úr þessari uppsprettu"
     },
     'it-IT': {
+
         loading: "Caricamento dei testi",
         notFound: "Impossibile trovare i testi.",
         writtenBy: "Scritto da: ",
@@ -404,9 +585,18 @@ const translations = {
         showOriginal: "Mostra Originale",
         hideOriginal: "Nascondi Originale",
         refreshLyrics: "Aggiorna testi",
-        showTranslationOptions: "Mostra opzioni di traduzione"
+        showTranslationOptions: "Mostra opzioni di traduzione",
+        offsetLyrics: "Offset del testo",
+        changeLyricsSource: "Cambia sorgente del testo",
+        reloadLyrics: "Ricarica testo",
+        lyricsOptions: "Opzioni testo",
+        back: "Indietro",
+        reset: "Reimposta",
+        autoSource: "Automatico (Predefinito)",
+        sourceNotFound: "Nessun testo trovato da questa sorgente"
     },
     'sw-KE': {
+
         loading: "Inapakia maneno ya wimbo",
         notFound: "Imeshindwa kupata maneno ya wimbo.",
         writtenBy: "Imeandikwa na: ",
@@ -419,9 +609,18 @@ const translations = {
         showOriginal: "Onyesha Asili",
         hideOriginal: "Ficha Asili",
         refreshLyrics: "Onyesha upya maneno ya wimbo",
-        showTranslationOptions: "Onyesha chaguo za tafsiri"
+        showTranslationOptions: "Onyesha chaguo za tafsiri",
+        offsetLyrics: "Mkengeuko wa maneno",
+        changeLyricsSource: "Badilisha chanzo cha maneno",
+        reloadLyrics: "Pakia upya maneno",
+        lyricsOptions: "Chaguo za maneno",
+        back: "Nyuma",
+        reset: "Weka upya",
+        autoSource: "Otomatiki (Chaguomsingi)",
+        sourceNotFound: "Hakuna maneno yaliyopatikana kutoka chanzo hiki"
     },
     'lv-LV': {
+
         loading: "Notiek dziesmu vārdu ielāde",
         notFound: "Nevarēja atrast dziesmas vārdus.",
         writtenBy: "Autors: ",
@@ -434,9 +633,18 @@ const translations = {
         showOriginal: "Rādīt Oriģinālu",
         hideOriginal: "Slēpt Oriģinālu",
         refreshLyrics: "Atsvaidzināt dziesmu vārdus",
-        showTranslationOptions: "Rādīt tulkošanas iespējas"
+        showTranslationOptions: "Rādīt tulkošanas iespējas",
+        offsetLyrics: "Vārdu nobīde",
+        changeLyricsSource: "Mainīt vārdu avotu",
+        reloadLyrics: "Pārlādēt vārdus",
+        lyricsOptions: "Vārdu opcijas",
+        back: "Atpakaļ",
+        reset: "Atiestatīt",
+        autoSource: "Automātiski (Noklusējums)",
+        sourceNotFound: "Šajā avotā dziesmas vārdi netika atrasti"
     },
     'lt-LT': {
+
         loading: "Įkeliami dainų žodžiai",
         notFound: "Nepavyko rasti dainų žodžių.",
         writtenBy: "Parašė: ",
@@ -449,9 +657,18 @@ const translations = {
         showOriginal: "Rodyti Originalą",
         hideOriginal: "Slėpti Originalą",
         refreshLyrics: "Atnaujinti dainų žodžius",
-        showTranslationOptions: "Rodyti vertimo parinktis"
+        showTranslationOptions: "Rodyti vertimo parinktis",
+        offsetLyrics: "Žodžių poslinkis",
+        changeLyricsSource: "Keisti žodžių šaltinį",
+        reloadLyrics: "Iš naujo įkelti žodžius",
+        lyricsOptions: "Žodžių parinktys",
+        back: "Atgal",
+        reset: "Atkurti",
+        autoSource: "Automatinis (Numatytasis)",
+        sourceNotFound: "Šiame šaltinyje dainos žodžių nerasta"
     },
     'hu-HU': {
+
         loading: "Dalszövegek betöltése",
         notFound: "Nem található a dalszöveg.",
         writtenBy: "Írta: ",
@@ -464,9 +681,18 @@ const translations = {
         showOriginal: "Eredeti Megjelenítése",
         hideOriginal: "Eredeti Elrejtése",
         refreshLyrics: "Dalszövegek frissítése",
-        showTranslationOptions: "Fordítási lehetőségek megjelenítése"
+        showTranslationOptions: "Fordítási lehetőségek megjelenítése",
+        offsetLyrics: "Dalszöveg eltolás",
+        changeLyricsSource: "Dalszöveg forrásának módosítása",
+        reloadLyrics: "Dalszöveg újratöltése",
+        lyricsOptions: "Dalszöveg beállításai",
+        back: "Vissza",
+        reset: "Visszaállítás",
+        autoSource: "Automatikus (Alapértelmezett)",
+        sourceNotFound: "Nem található dalszöveg ebből a forrásból"
     },
     'nl-NL': {
+
         loading: "Songtekst laden",
         notFound: "Songtekst niet gevonden.",
         writtenBy: "Geschreven door: ",
@@ -479,9 +705,18 @@ const translations = {
         showOriginal: "Origineel Weergeven",
         hideOriginal: "Origineel Verbergen",
         refreshLyrics: "Songtekst vernieuwen",
-        showTranslationOptions: "Vertalingsopties weergeven"
+        showTranslationOptions: "Vertalingsopties weergeven",
+        offsetLyrics: "Songtekst-vertraging",
+        changeLyricsSource: "Songtekstbron wijzigen",
+        reloadLyrics: "Songtekst opnieuw laden",
+        lyricsOptions: "Songtekstopties",
+        back: "Terug",
+        reset: "Herstellen",
+        autoSource: "Automatisch (Standaard)",
+        sourceNotFound: "Geen songtekst gevonden van deze bron"
     },
     'no-NO': {
+
         loading: "Laster inn sangtekster",
         notFound: "Fant ikke sangtekstene.",
         writtenBy: "Skrevet av: ",
@@ -494,9 +729,18 @@ const translations = {
         showOriginal: "Vis Original",
         hideOriginal: "Skjul Original",
         refreshLyrics: "Last inn sangtekster på nytt",
-        showTranslationOptions: "Vis oversettelsesalternativer"
+        showTranslationOptions: "Vis oversettelsesalternativer",
+        offsetLyrics: "Tekstforskyvning",
+        changeLyricsSource: "Endre tekstkilde",
+        reloadLyrics: "Last inn tekst på nytt",
+        lyricsOptions: "Tekstalternativer",
+        back: "Tilbake",
+        reset: "Tilbakestill",
+        autoSource: "Automatisk (Standard)",
+        sourceNotFound: "Ingen sangtekst funnet fra denne kilden"
     },
     'uz-UZ': {
+
         loading: "Qo'shiq matnlari yuklanmoqda",
         notFound: "Qo'shiq matnlari topilmadi.",
         writtenBy: "Muallif: ",
@@ -509,9 +753,18 @@ const translations = {
         showOriginal: "Aslini Ko'rsatish",
         hideOriginal: "Aslini Yashirish",
         refreshLyrics: "Qo'shiq matnlarini yangilash",
-        showTranslationOptions: "Tarjima variantlarini ko'rsatish"
+        showTranslationOptions: "Tarjima variantlarini ko'rsatish",
+        offsetLyrics: "Matn siljishi",
+        changeLyricsSource: "Matn manbasini o'zgartirish",
+        reloadLyrics: "Matnni qayta yuklash",
+        lyricsOptions: "Matn parametrlari",
+        back: "Orqaga",
+        reset: "Qayta sozlash",
+        autoSource: "Avtomatik (Birlamchi)",
+        sourceNotFound: "Ushbu manbadan matn topilmadi"
     },
     'pl-PL': {
+
         loading: "Ładowanie tekstu piosenki",
         notFound: "Nie można znaleźć tekstu piosenki.",
         writtenBy: "Napisane przez: ",
@@ -524,9 +777,18 @@ const translations = {
         showOriginal: "Pokaż Oryginał",
         hideOriginal: "Ukryj Oryginał",
         refreshLyrics: "Odśwież tekst piosenki",
-        showTranslationOptions: "Pokaż opcje tłumaczenia"
+        showTranslationOptions: "Pokaż opcje tłumaczenia",
+        offsetLyrics: "Przesunięcie tekstu",
+        changeLyricsSource: "Zmień źródło tekstu",
+        reloadLyrics: "Przeładuj tekst",
+        lyricsOptions: "Opcje tekstu",
+        back: "Wstecz",
+        reset: "Resetuj",
+        autoSource: "Automatycznie (Domyślnie)",
+        sourceNotFound: "Nie znaleziono tekstu z tego źródła"
     },
     'pt-PT': {
+
         loading: "A carregar letras",
         notFound: "Não foi possível encontrar as letras.",
         writtenBy: "Escrito por: ",
@@ -539,9 +801,18 @@ const translations = {
         showOriginal: "Mostrar Original",
         hideOriginal: "Ocultar Original",
         refreshLyrics: "Atualizar Letras",
-        showTranslationOptions: "Mostrar Opções de Tradução"
+        showTranslationOptions: "Mostrar Opções de Tradução",
+        offsetLyrics: "Deslocamento da letra",
+        changeLyricsSource: "Alterar fonte da letra",
+        reloadLyrics: "Recarregar letra",
+        lyricsOptions: "Opções de letra",
+        back: "Voltar",
+        reset: "Repor",
+        autoSource: "Automático (Predefinição)",
+        sourceNotFound: "Nenhuma letra encontrada a partir desta fonte"
     },
     'pt-BR': {
+
         loading: "Carregando letras",
         notFound: "Não foi possível encontrar a letra.",
         writtenBy: "Escrito por: ",
@@ -554,9 +825,18 @@ const translations = {
         showOriginal: "Mostrar Original",
         hideOriginal: "Ocultar Original",
         refreshLyrics: "Atualizar Letras",
-        showTranslationOptions: "Mostrar Opções de Tradução"
+        showTranslationOptions: "Mostrar Opções de Tradução",
+        offsetLyrics: "Deslocamento da letra",
+        changeLyricsSource: "Alterar fonte da letra",
+        reloadLyrics: "Recarregar letra",
+        lyricsOptions: "Opções de letra",
+        back: "Voltar",
+        reset: "Redefinir",
+        autoSource: "Automático (Padrão)",
+        sourceNotFound: "Nenhuma letra encontrada a partir desta fonte"
     },
     'ro-RO': {
+
         loading: "Se încarcă versurile",
         notFound: "Nu s-au găsit versurile.",
         writtenBy: "Scris de: ",
@@ -569,9 +849,18 @@ const translations = {
         showOriginal: "Afișează Originalul",
         hideOriginal: "Ascunde Originalul",
         refreshLyrics: "Reîmprospătează versurile",
-        showTranslationOptions: "Afișează opțiunile de traducere"
+        showTranslationOptions: "Afișează opțiunile de traducere",
+        offsetLyrics: "Decalaj versuri",
+        changeLyricsSource: "Schimbă sursa versurilor",
+        reloadLyrics: "Reîncarcă versurile",
+        lyricsOptions: "Opțiuni versuri",
+        back: "Înapoi",
+        reset: "Resetează",
+        autoSource: "Automat (Implicit)",
+        sourceNotFound: "Nu s-au găsit versuri din această sursă"
     },
     'sq-AL': {
+
         loading: "Po ngarkohen tekstet",
         notFound: "Nuk u gjetën tekstet.",
         writtenBy: "Shkruar nga: ",
@@ -584,9 +873,18 @@ const translations = {
         showOriginal: "Shfaq Origjinalin",
         hideOriginal: "Fshih Origjinalin",
         refreshLyrics: "Rifresko tekstet",
-        showTranslationOptions: "Shfaq opsionet e përkthimit"
+        showTranslationOptions: "Shfaq opsionet e përkthimit",
+        offsetLyrics: "Zhbendja e tekstit",
+        changeLyricsSource: "Ndrysho burimin e tekstit",
+        reloadLyrics: "Ringarko tekstin",
+        lyricsOptions: "Opsionet e tekstit",
+        back: "Prapa",
+        reset: "Rivendos",
+        autoSource: "Automatik (Parazgjedhur)",
+        sourceNotFound: "Nuk u gjet asnjë tekst nga ky burim"
     },
     'sk-SK': {
+
         loading: "Načítavajú sa texty",
         notFound: "Nepodarilo sa nájsť texty.",
         writtenBy: "Autor: ",
@@ -599,9 +897,18 @@ const translations = {
         showOriginal: "Zobraziť Originál",
         hideOriginal: "Skryť Originál",
         refreshLyrics: "Obnoviť texty",
-        showTranslationOptions: "Zobraziť možnosti prekladu"
+        showTranslationOptions: "Zobraziť možnosti prekladu",
+        offsetLyrics: "Posun textu",
+        changeLyricsSource: "Zmeniť zdroj textu",
+        reloadLyrics: "Znova načítať text",
+        lyricsOptions: "Možnosti textu",
+        back: "Späť",
+        reset: "Obnoviť",
+        autoSource: "Automaticky (Predvolené)",
+        sourceNotFound: "Z tohto zdroja sa nenašiel žiadny text"
     },
     'sl-SI': {
+
         loading: "Nalaganje besedil",
         notFound: "Ni mogoče najti besedil.",
         writtenBy: "Avtor: ",
@@ -614,7 +921,15 @@ const translations = {
         showOriginal: "Prikaži Izvirnik",
         hideOriginal: "Skrij Izvirnik",
         refreshLyrics: "Osveži besedila",
-        showTranslationOptions: "Prikaži možnosti prevajanja"
+        showTranslationOptions: "Prikaži možnosti prevajanja",
+        offsetLyrics: "Zamik besedila",
+        changeLyricsSource: "Spremeni vir besedila",
+        reloadLyrics: "Znova naloži besedilo",
+        lyricsOptions: "Možnosti besedila",
+        back: "Nazaj",
+        reset: "Ponastavi",
+        autoSource: "Samodejno (Privzeto)",
+        sourceNotFound: "Iz tega vira ni bilo najdeno besedilo"
     },
     'sr-Latn': {
         loading: "Učitavanje teksta",
@@ -632,6 +947,7 @@ const translations = {
         showTranslationOptions: "Prikaži opcije prevoda"
     },
     'fi-FI': {
+
         loading: "Ladataan sanoituksia",
         notFound: "Sanoituksia ei löytynyt.",
         writtenBy: "Kirjoittanut: ",
@@ -644,9 +960,18 @@ const translations = {
         showOriginal: "Näytä Alkuperäinen",
         hideOriginal: "Piilota Alkuperäinen",
         refreshLyrics: "Päivitä sanoitukset",
-        showTranslationOptions: "Näytä käännösvaihtoehdot"
+        showTranslationOptions: "Näytä käännösvaihtoehdot",
+        offsetLyrics: "Sanoitusten viive",
+        changeLyricsSource: "Vaihda sanoitusten lähdettä",
+        reloadLyrics: "Lataa sanoitukset uudelleen",
+        lyricsOptions: "Sanoitusasetukset",
+        back: "Takaisin",
+        reset: "Palauta",
+        autoSource: "Automaattinen (Oletus)",
+        sourceNotFound: "Tästä lähteestä ei löytynyt sanoituksia"
     },
     'sv-SE': {
+
         loading: "Laddar låttexter",
         notFound: "Kunde inte hitta låttexten.",
         writtenBy: "Skriven av: ",
@@ -659,9 +984,18 @@ const translations = {
         showOriginal: "Visa Original",
         hideOriginal: "Dölj Original",
         refreshLyrics: "Uppdatera låttexter",
-        showTranslationOptions: "Visa översättningsalternativ"
+        showTranslationOptions: "Visa översättningsalternativ",
+        offsetLyrics: "Textförskjutning",
+        changeLyricsSource: "Byt textkälla",
+        reloadLyrics: "Ladda om text",
+        lyricsOptions: "Textalternativ",
+        back: "Tillbaka",
+        reset: "Återställ",
+        autoSource: "Automatiskt (Standard)",
+        sourceNotFound: "Ingen text hittades från denna källa"
     },
     'vi-VN': {
+
         loading: "Đang tải lời bài hát",
         notFound: "Không tìm thấy lời bài hát.",
         writtenBy: "Sáng tác: ",
@@ -674,9 +1008,18 @@ const translations = {
         showOriginal: "Hiển thị Bản gốc",
         hideOriginal: "Ẩn Bản gốc",
         refreshLyrics: "Làm mới lời bài hát",
-        showTranslationOptions: "Hiển thị tùy chọn dịch"
+        showTranslationOptions: "Hiển thị tùy chọn dịch",
+        offsetLyrics: "Độ trễ lời bài hát",
+        changeLyricsSource: "Đổi nguồn lời bài hát",
+        reloadLyrics: "Tải lại lời bài hát",
+        lyricsOptions: "Tùy chọn lời bài hát",
+        back: "Quay lại",
+        reset: "Đặt lại",
+        autoSource: "Tự động (Mặc định)",
+        sourceNotFound: "Không tìm thấy lời bài hát từ nguồn này"
     },
     'tr-TR': {
+
         loading: "Şarkı sözleri yükleniyor",
         notFound: "Şarkı sözleri bulunamadı.",
         writtenBy: "Yazan: ",
@@ -689,9 +1032,18 @@ const translations = {
         showOriginal: "Orijinali Göster",
         hideOriginal: "Orijinali Gizle",
         refreshLyrics: "Şarkı Sözlerini Yenile",
-        showTranslationOptions: "Çeviri Seçeneklerini Göster"
+        showTranslationOptions: "Çeviri Seçeneklerini Göster",
+        offsetLyrics: "Şarkı Sözü Zamanlaması",
+        changeLyricsSource: "Şarkı Sözü Kaynağını Değiştir",
+        reloadLyrics: "Sözleri Yeniden Yükle",
+        lyricsOptions: "Şarkı Sözü Seçenekleri",
+        back: "Geri",
+        reset: "Sıfırla",
+        autoSource: "Otomatik (Varsayılan)",
+        sourceNotFound: "Bu kaynaktan şarkı sözü bulunamadı"
     },
     'be-BY': {
+
         loading: "Загрузка тэкстаў",
         notFound: "Немагчыма знайсці тэксты.",
         writtenBy: "Аўтар: ",
@@ -704,9 +1056,18 @@ const translations = {
         showOriginal: "Паказаць Арыгінал",
         hideOriginal: "Схаваць Арыгінал",
         refreshLyrics: "Абнавіць тэксты",
-        showTranslationOptions: "Паказаць параметры перакладу"
+        showTranslationOptions: "Паказаць параметры перакладу",
+        offsetLyrics: "Зрух тэксту",
+        changeLyricsSource: "Змяніць крыніцу тэксту",
+        reloadLyrics: "Перазагрузіць тэкст",
+        lyricsOptions: "Параметры тэксту",
+        back: "Назад",
+        reset: "Скінуць",
+        autoSource: "Аўтаматычна (Па змаўчанні)",
+        sourceNotFound: "Тэкст з гэтай крыніцы не знойдзены"
     },
     'bg-BG': {
+
         loading: "Зареждане на текстове",
         notFound: "Не могат да бъдат намерени текстовете.",
         writtenBy: "Написано от: ",
@@ -719,9 +1080,18 @@ const translations = {
         showOriginal: "Показване на Оригинала",
         hideOriginal: "Скриване на Оригинала",
         refreshLyrics: "Опресняване на текстове",
-        showTranslationOptions: "Показване на опции за превод"
+        showTranslationOptions: "Показване на опции за превод",
+        offsetLyrics: "Изместване на текста",
+        changeLyricsSource: "Смяна на източника на текст",
+        reloadLyrics: "Презареждане на текста",
+        lyricsOptions: "Опции за текста",
+        back: "Назад",
+        reset: "Нулиране",
+        autoSource: "Автоматично (По подразбиране)",
+        sourceNotFound: "Не е намерен текст от този източник"
     },
     'ky-KG': {
+
         loading: "Ырдын текстин жүктөө",
         notFound: "Ырдын тексти табылган жок.",
         writtenBy: "Автору: ",
@@ -734,9 +1104,18 @@ const translations = {
         showOriginal: "Түп нусканы Көрсөтүү",
         hideOriginal: "Түп нусканы Жашыруу",
         refreshLyrics: "Ырдын текстин жаңыртуу",
-        showTranslationOptions: "Котормо параметрлерин көрсөтүү"
+        showTranslationOptions: "Котормо параметрлерин көрсөтүү",
+        offsetLyrics: "Сөздөрдүн жылышы",
+        changeLyricsSource: "Сөз булагын өзгөртүү",
+        reloadLyrics: "Сөздөрдү кайра жүктөө",
+        lyricsOptions: "Сөз параметрлери",
+        back: "Артка",
+        reset: "Баштапкы абалга кайтаруу",
+        autoSource: "Автоматтык (Демейки)",
+        sourceNotFound: "Бул булактан сөздөр табылган жок"
     },
     'kk-KZ': {
+
         loading: "Мәтіндерді жүктеу",
         notFound: "Мәтіндер табылмады.",
         writtenBy: "Авторы: ",
@@ -749,9 +1128,18 @@ const translations = {
         showOriginal: "Түпнұсқаны Көрсету",
         hideOriginal: "Түпнұсқаны Жасыру",
         refreshLyrics: "Мәтіндерді жаңарту",
-        showTranslationOptions: "Аударма опцияларын көрсету"
+        showTranslationOptions: "Аударма опцияларын көрсету",
+        offsetLyrics: "Мәтін ығысуы",
+        changeLyricsSource: "Мәтін көзін өзгерту",
+        reloadLyrics: "Мәтінді қайта жүктеу",
+        lyricsOptions: "Мәтін параметрлері",
+        back: "Артқа",
+        reset: "Қалпына келтіру",
+        autoSource: "Автоматты (Әдепкі)",
+        sourceNotFound: "Бұл дереккөзден мәтін табылмады"
     },
     'mk-MK': {
+
         loading: "Вчитување на текстови",
         notFound: "Не може да се најдат текстовите.",
         writtenBy: "Напишано од: ",
@@ -764,9 +1152,18 @@ const translations = {
         showOriginal: "Прикажи Оригинал",
         hideOriginal: "Сокриј Оригинал",
         refreshLyrics: "Освежи текстови",
-        showTranslationOptions: "Прикажи опции за превод"
+        showTranslationOptions: "Прикажи опции за превод",
+        offsetLyrics: "Поместување на текстот",
+        changeLyricsSource: "Промени извор на текст",
+        reloadLyrics: "Превчитај текст",
+        lyricsOptions: "Опции за текст",
+        back: "Назад",
+        reset: "Ресетирај",
+        autoSource: "Автоматски (Стандардно)",
+        sourceNotFound: "Не е пронајден текст од овој извор"
     },
     'mn-MN': {
+
         loading: "Дууны үг ачааллаж байна",
         notFound: "Дууны үг олдсонгүй.",
         writtenBy: "Бичсэн: ",
@@ -779,9 +1176,18 @@ const translations = {
         showOriginal: "Эх хувийг Харуулах",
         hideOriginal: "Эх хувийг Нуух",
         refreshLyrics: "Дууны үгийг шинэчлэх",
-        showTranslationOptions: "Орчуулгын сонголтуудыг харуулах"
+        showTranslationOptions: "Орчуулгын сонголтуудыг харуулах",
+        offsetLyrics: "Үгийн шилжилт",
+        changeLyricsSource: "Үгийн эх сурвалжийг өөрчлөх",
+        reloadLyrics: "Үгийг дахин ачаалах",
+        lyricsOptions: "Үгийн сонголтууд",
+        back: "Буцах",
+        reset: "Шинэчлэх",
+        autoSource: "Автомат (Үндсэн)",
+        sourceNotFound: "Энэ эх сурвалжаас дууны үг олдсонгүй"
     },
     'ru-RU': {
+
         loading: "Загрузка текста песни",
         notFound: "Не удалось найти текст песни.",
         writtenBy: "Написано: ",
@@ -794,9 +1200,18 @@ const translations = {
         showOriginal: "Показать Оригинал",
         hideOriginal: "Скрыть Оригинал",
         refreshLyrics: "Обновить текст песни",
-        showTranslationOptions: "Показать параметры перевода"
+        showTranslationOptions: "Показать параметры перевода",
+        offsetLyrics: "Смещение текста",
+        changeLyricsSource: "Сменить источник текста",
+        reloadLyrics: "Перезагрузить текст",
+        lyricsOptions: "Параметры текста",
+        back: "Назад",
+        reset: "Сброс",
+        autoSource: "Автоматически (По умолчанию)",
+        sourceNotFound: "Текст песни из этого источника не найден"
     },
     'uk-UA': {
+
         loading: "Завантаження тексту",
         notFound: "Не вдалося знайти текст.",
         writtenBy: "Авторство: ",
@@ -809,9 +1224,18 @@ const translations = {
         showOriginal: "Показати оригінал",
         hideOriginal: "Сховати оригінал",
         refreshLyrics: "Перезавантажити текст",
-        showTranslationOptions: "Показати параметри перекладу"
+        showTranslationOptions: "Показати параметри перекладу",
+        offsetLyrics: "Зсув тексту",
+        changeLyricsSource: "Змінити джерело тексту",
+        reloadLyrics: "Перезавантажити текст",
+        lyricsOptions: "Параметри тексту",
+        back: "Назад",
+        reset: "Скинути",
+        autoSource: "Автоматично (За замовчуванням)",
+        sourceNotFound: "Текст пісні з цього джерела не знайдено"
     },
     'el-GR': {
+
         loading: "Φόρτωση στίχων",
         notFound: "Δεν ήταν δυνατή η εύρεση των στίχων.",
         writtenBy: "Συνθέτης: ",
@@ -824,9 +1248,18 @@ const translations = {
         showOriginal: "Εμφάνιση Πρωτότυπου",
         hideOriginal: "Απόκρυψη Πρωτότυπου",
         refreshLyrics: "Ανανέωση στίχων",
-        showTranslationOptions: "Εμφάνιση επιλογών μετάφρασης"
+        showTranslationOptions: "Εμφάνιση επιλογών μετάφρασης",
+        offsetLyrics: "Μετατόπιση στίχων",
+        changeLyricsSource: "Αλλαγή πηγής στίχων",
+        reloadLyrics: "Επαναφόρτωση στίχων",
+        lyricsOptions: "Επιλογές στίχων",
+        back: "Πίσω",
+        reset: "Επαναφορά",
+        autoSource: "Αυτόματο (Προεπιλογή)",
+        sourceNotFound: "Δεν βρέθηκαν στίχοι από αυτήν την πηγή"
     },
     'hy-AM': {
+
         loading: "Բեռնվում են բառերը",
         notFound: "Չհաջողվեց գտնել բառերը:",
         writtenBy: "Հեղինակ՝ ",
@@ -839,9 +1272,18 @@ const translations = {
         showOriginal: "Ցուցադրել Բնօրինակը",
         hideOriginal: "Թաքցնել Բնօրինակը",
         refreshLyrics: "Թարմացնել բառերը",
-        showTranslationOptions: "Ցուցադրել թարգմանության ընտրանքները"
+        showTranslationOptions: "Ցուցադրել թարգմանության ընտրանքները",
+        offsetLyrics: "Խոսքերի շեղում",
+        changeLyricsSource: "Փոխել խոսքերի աղբյուրը",
+        reloadLyrics: "Վերբեռնել խոսքերը",
+        lyricsOptions: "Խոսքերի ընտրանքներ",
+        back: "Հետ",
+        reset: "Վերականգնել",
+        autoSource: "Ավտոմատ (Լռելյայն)",
+        sourceNotFound: "Այս աղբյուրից խոսքեր չեն գտնվել"
     },
     'he-IL': {
+
         loading: "טוען מילים",
         notFound: "לא ניתן למצוא את המילים.",
         writtenBy: "נכתב על ידי: ",
@@ -854,9 +1296,18 @@ const translations = {
         showOriginal: "הצג מקור",
         hideOriginal: "הסתר מקור",
         refreshLyrics: "רענן מילים",
-        showTranslationOptions: "הצג אפשרויות תרגום"
+        showTranslationOptions: "הצג אפשרויות תרגום",
+        offsetLyrics: "היסט מילים",
+        changeLyricsSource: "שנה מקור מילים",
+        reloadLyrics: "טען מילים מחדש",
+        lyricsOptions: "אפשרויות מילים",
+        back: "חזרה",
+        reset: "איפוס",
+        autoSource: "אוטומטי (ברירת מחדל)",
+        sourceNotFound: "לא נמצאו מילים ממקור זה"
     },
     'ur-PK': {
+
         loading: "دھن لوڈ ہو رہی ہے",
         notFound: "دھن نہیں مل سکی۔",
         writtenBy: "لکھا ہوا: ",
@@ -869,9 +1320,18 @@ const translations = {
         showOriginal: "اصل دکھائیں",
         hideOriginal: "اصل چھپائیں",
         refreshLyrics: "دھن تازہ کریں",
-        showTranslationOptions: "ترجمہ کے اختیارات دکھائیں"
+        showTranslationOptions: "ترجمہ کے اختیارات دکھائیں",
+        offsetLyrics: "بول کا وقت آفسیٹ",
+        changeLyricsSource: "بول کا ذریعہ تبدیل کریں",
+        reloadLyrics: "بول دوبارہ لوڈ کریں",
+        lyricsOptions: "بول کے اختیارات",
+        back: "پیچھے",
+        reset: "ری سیٹ کریں",
+        autoSource: "خودکار (ڈیفالٹ)",
+        sourceNotFound: "اس ذریعے سے کوئی بول نہیں ملا"
     },
     'ar-SA': {
+
         loading: "جارٍ تحميل كلمات الأغنية",
         notFound: "تعذر العثور على كلمات الأغنية.",
         writtenBy: "كتبه: ",
@@ -884,9 +1344,18 @@ const translations = {
         showOriginal: "عرض الأصل",
         hideOriginal: "إخفاء الأصل",
         refreshLyrics: "تحديث كلمات الأغنية",
-        showTranslationOptions: "إظهار خيارات الترجمة"
+        showTranslationOptions: "إظهار خيارات الترجمة",
+        offsetLyrics: "إزاحة كلمات الأغاني",
+        changeLyricsSource: "تغيير مصدر الكلمات",
+        reloadLyrics: "إعادة تحميل الكلمات",
+        lyricsOptions: "خيارات الكلمات",
+        back: "رجوع",
+        reset: "إعادة ضبط",
+        autoSource: "تلقائي (افتراضي)",
+        sourceNotFound: "لم يتم العثور على كلمات من هذا المصدر"
     },
     'fa-IR': {
+
         loading: "در حال بارگیری متن ترانه",
         notFound: "متن ترانه پیدا نشد.",
         writtenBy: "نوشته شده توسط: ",
@@ -899,9 +1368,18 @@ const translations = {
         showOriginal: "نمایش اصلی",
         hideOriginal: "پنهان کردن اصلی",
         refreshLyrics: "بازخوانی متن ترانه",
-        showTranslationOptions: "نمایش گزینه های ترجمه"
+        showTranslationOptions: "نمایش گزینه های ترجمه",
+        offsetLyrics: "افست متن آهنگ",
+        changeLyricsSource: "تغییر منبع متن آهنگ",
+        reloadLyrics: "بارگیری مجدد متن آهنگ",
+        lyricsOptions: "گزینه‌های متن آهنگ",
+        back: "بازگشت",
+        reset: "بازنشانی",
+        autoSource: "خودکار (پیش‌فرض)",
+        sourceNotFound: "متن آهنگی از این منبع یافت نشد"
     },
     'ne-NP': {
+
         loading: "गीतको बोल लोड हुँदैछ",
         notFound: "गीतको बोल फेला पार्न सकिएन।",
         writtenBy: "द्वारा लिखित: ",
@@ -914,9 +1392,18 @@ const translations = {
         showOriginal: "मूल देखाउनुहोस्",
         hideOriginal: "मूल लुकाउनुहोस्",
         refreshLyrics: "गीतको बोल रिफ्रेस गर्नुहोस्",
-        showTranslationOptions: "अनुवाद विकल्पहरू देखाउनुहोस्"
+        showTranslationOptions: "अनुवाद विकल्पहरू देखाउनुहोस्",
+        offsetLyrics: "गीतको अफसेट",
+        changeLyricsSource: "गीतको स्रोत बदल्नुहोस्",
+        reloadLyrics: "गीत पुनः लोड गर्नुहोस्",
+        lyricsOptions: "गीत विकल्पहरू",
+        back: "पछाडि",
+        reset: "रिसेट गर्नुहोस्",
+        autoSource: "स्वचालित (पूर्वनिर्धारित)",
+        sourceNotFound: "यस स्रोतबाट कुनै गीत फेला परेन"
     },
     'mr-IN': {
+
         loading: "गीत लोड होत आहे",
         notFound: "गीत सापडले नाही.",
         writtenBy: "लिहिले आहे: ",
@@ -929,9 +1416,18 @@ const translations = {
         showOriginal: "मूळ दर्शवा",
         hideOriginal: "मूळ लपवा",
         refreshLyrics: "गीत रीफ्रेश करा",
-        showTranslationOptions: "अनुवाद पर्याय दर्शवा"
+        showTranslationOptions: "अनुवाद पर्याय दर्शवा",
+        offsetLyrics: "गीताचा ऑफसेट",
+        changeLyricsSource: "गीताचा स्रोत बदला",
+        reloadLyrics: "गीत पुन्हा लोड करा",
+        lyricsOptions: "गीत पर्याय",
+        back: "मागे",
+        reset: "रीसेट करा",
+        autoSource: "स्वयंचलित (डीफॉल्ट)",
+        sourceNotFound: "या स्रोताकडून कोणतेही बोल आढळले नाहीत"
     },
     'hi-IN': {
+
         loading: "गीत लोड हो रहा है",
         notFound: "गीत के बोल नहीं मिले।",
         writtenBy: "लेखक: ",
@@ -944,9 +1440,18 @@ const translations = {
         showOriginal: "मूल दिखाएँ",
         hideOriginal: "मूल छिपाएँ",
         refreshLyrics: "गीत रीफ्रेश करें",
-        showTranslationOptions: "अनुवाद विकल्प दिखाएँ"
+        showTranslationOptions: "अनुवाद विकल्प दिखाएँ",
+        offsetLyrics: "गीत का ऑफसेट",
+        changeLyricsSource: "गीत का स्रोत बदलें",
+        reloadLyrics: "गीत पुनः लोड करें",
+        lyricsOptions: "गीत विकल्प",
+        back: "वापस",
+        reset: "रीसेट",
+        autoSource: "स्वचालित (डिफ़ॉल्ट)",
+        sourceNotFound: "इस स्रोत से कोई गीत नहीं मिला"
     },
     'as-IN': {
+
         loading: "गीতৰ কথা লোড হৈ আছে",
         notFound: "गीতৰ কথা বিচাৰি পোৱা ন'গ'ল।",
         writtenBy: "द्वारा লিখিত: ",
@@ -959,9 +1464,18 @@ const translations = {
         showOriginal: "মূল দেখুৱাওক",
         hideOriginal: "মূল লুকুৱাওক",
         refreshLyrics: "গানের কথা সতেজ কৰক",
-        showTranslationOptions: "অনুবাদ বিকল্প দেখুৱাওক"
+        showTranslationOptions: "অনুবাদ বিকল্প দেখুৱাওক",
+        offsetLyrics: "গীতৰ অফচেট",
+        changeLyricsSource: "গীতৰ উৎস সলনি কৰক",
+        reloadLyrics: "গীত পুনৰ ল’ড কৰক",
+        lyricsOptions: "গীতৰ বিকল্পসমূহ",
+        back: "উভতি যাওক",
+        reset: "ৰিছেট কৰক",
+        autoSource: "স্বয়ংক্ৰিয় (ডিফল্ট)",
+        sourceNotFound: "এই উৎসৰ পৰা কোনো গীত পোৱা নগ’ল"
     },
     'bn-IN': {
+
         loading: "গানের কথা লোড হচ্ছে",
         notFound: "গানের কথা খুঁজে পাওয়া যায়নি।",
         writtenBy: "লিখেছেন: ",
@@ -974,9 +1488,18 @@ const translations = {
         showOriginal: "মূল দেখান",
         hideOriginal: "মূল লুকান",
         refreshLyrics: "গানের কথা রিফ্রেশ করুন",
-        showTranslationOptions: "অনুবাদ বিকল্প দেখান"
+        showTranslationOptions: "অনুবাদ বিকল্প দেখান",
+        offsetLyrics: "গানের অফসেট",
+        changeLyricsSource: "গানের উৎস পরিবর্তন করুন",
+        reloadLyrics: "গান পুনরায় লোড করুন",
+        lyricsOptions: "গানের বিকল্পসমূহ",
+        back: "পেছনে",
+        reset: "রিসেট",
+        autoSource: "স্বয়ংক্রিয় (ডিফল্ট)",
+        sourceNotFound: "এই উৎস থেকে কোনো লিরিক্স পাওয়া যায়নি"
     },
     'pa-IN': {
+
         loading: "ਬੋਲ ਲੋਡ ਹੋ ਰਹੇ ਹਨ",
         notFound: "ਬੋਲ ਨਹੀਂ ਮਿਲ ਸਕੇ।",
         writtenBy: "ਦੁਆਰਾ ਲਿਖਿਆ ਗਿਆ: ",
@@ -989,9 +1512,18 @@ const translations = {
         showOriginal: "ਮੂਲ ਦਿਖਾਓ",
         hideOriginal: "ਮੂਲ ਛੁਪਾਓ",
         refreshLyrics: "ਬੋਲ ਤਾਜ਼ਾ ਕਰੋ",
-        showTranslationOptions: "ਅਨੁਵਾਦ ਵਿਕਲਪ ਦਿਖਾਓ"
+        showTranslationOptions: "ਅਨੁਵਾਦ ਵਿਕਲਪ ਦਿਖਾਓ",
+        offsetLyrics: "ਬੋਲਾਂ ਦਾ ਆਫਸੈੱਟ",
+        changeLyricsSource: "ਬੋਲਾਂ ਦਾ ਸਰੋਤ ਬਦਲੋ",
+        reloadLyrics: "ਬੋਲ ਦੁਬਾਰਾ ਲੋਡ ਕਰੋ",
+        lyricsOptions: "ਬੋਲਾਂ ਦੇ ਵਿਕਲਪ",
+        back: "ਪਿੱਛੇ",
+        reset: "ਰੀਸੈੱਟ",
+        autoSource: "ਆਟੋਮੈਟਿਕ (ਡਿਫਾਲਟ)",
+        sourceNotFound: "ਇਸ ਸਰੋਤ ਤੋਂ ਕੋਈ ਬੋਲ ਨਹੀਂ ਮਿਲੇ"
     },
     'gu-IN': {
+
         loading: "ગીતના બોલ લોડ થઈ રહ્યા છે",
         notFound: "ગીતના બોલ શોધી શકાયા નથી.",
         writtenBy: "દ્વારા લખાયેલ: ",
@@ -1004,9 +1536,18 @@ const translations = {
         showOriginal: "મૂળ બતાવો",
         hideOriginal: "મૂળ છુપાવો",
         refreshLyrics: "ગીતના બોલ તાજા કરો",
-        showTranslationOptions: "અનુવાદ વિકલ્પો બતાવો"
+        showTranslationOptions: "અનુવાદ વિકલ્પો બતાવો",
+        offsetLyrics: "ગીતના શબ્દોનો ઑફસેટ",
+        changeLyricsSource: "ગીતના શબ્દોનો સ્ત્રોત બદલો",
+        reloadLyrics: "ગીત ફરીથી લોડ કરો",
+        lyricsOptions: "ગીતના વિકલ્પો",
+        back: "પાછા",
+        reset: "રીસેટ",
+        autoSource: "સ્વચાલિત (ડિફૉલ્ટ)",
+        sourceNotFound: "આ સ્ત્રોતમાંથી કોઈ ગીતના શબ્દો મળ્યા નથી"
     },
     'or-IN': {
+
         loading: "ଗୀତର ବୋଲ ଲୋଡ୍ କରୁଛି",
         notFound: "ଗୀତର ବୋଲ ମିଳିଲା ନାହିଁ |",
         writtenBy: "ଏହା ଦ୍ୱାରା ଲିଖିତ: ",
@@ -1019,9 +1560,18 @@ const translations = {
         showOriginal: "ମୂଳ ଦେଖାନ୍ତୁ",
         hideOriginal: "ମୂଳ ଲୁଚାନ୍ତୁ",
         refreshLyrics: "ଗୀତର ବୋଲ ରିଫ୍ରେସ୍ କରନ୍ତୁ",
-        showTranslationOptions: "ଅନୁବାଦ ବିକଳ୍ପ ଦେଖାନ୍ତୁ"
+        showTranslationOptions: "ଅନୁବାଦ ବିକଳ୍ପ ଦେଖାନ୍ତୁ",
+        offsetLyrics: "ଗୀତ ଅଫସେଟ୍",
+        changeLyricsSource: "ଗୀତର ଉତ୍ସ ପରିବର୍ତ୍ତନ କରନ୍ତୁ",
+        reloadLyrics: "ଗୀତ ପୁନଃ ଲୋଡ୍ କରନ୍ତୁ",
+        lyricsOptions: "ଗୀତ ବିକଳ୍ପ",
+        back: "ପଛକୁ",
+        reset: "ରିସେଟ୍",
+        autoSource: "ସ୍ୱୟଂଚାଳିତ (ଡିଫଲ୍ଟ)",
+        sourceNotFound: "ଏହି ଉତ୍ସରୁ କୌଣସି ଗୀତ ମିଳିଲା ନାହିଁ"
     },
     'ta-IN': {
+
         loading: "பாடல் வரிகள் ஏற்றಲಾಗುತ್ತಿದೆ",
         notFound: "பாடல் வரிகளைக் கண்டுபிடிக்க முடியவில்லை.",
         writtenBy: "எழுதியவர்: ",
@@ -1034,9 +1584,18 @@ const translations = {
         showOriginal: "அசல் காட்டு",
         hideOriginal: "அசல் மறை",
         refreshLyrics: "பாடல் வரிகளைப் புதுப்பி",
-        showTranslationOptions: "மொழிபெயர்ப்பு விருப்பங்களைக் காட்டு"
+        showTranslationOptions: "மொழிபெயர்ப்பு விருப்பங்களைக் காட்டு",
+        offsetLyrics: "வரிகள் ஆஃப்செட்",
+        changeLyricsSource: "வரிகள் மூலத்தை மாற்றவும்",
+        reloadLyrics: "வரிகளை மீண்டும் ஏற்றவும்",
+        lyricsOptions: "வரிகள் விருப்பங்கள்",
+        back: "பின்செல்",
+        reset: "மீட்டமை",
+        autoSource: "தானியங்கி (இயல்புநிலை)",
+        sourceNotFound: "இந்த மூலத்திலிருந்து வரிகள் எதுவும் கிடைக்கவில்லை"
     },
     'te-IN': {
+
         loading: "సాహిత్యం లోడ్ అవుతోంది",
         notFound: "సాహిత్యాన్ని కనుగొనలేకపోయింది.",
         writtenBy: "రాసినవారు: ",
@@ -1049,9 +1608,18 @@ const translations = {
         showOriginal: "అసలు చూపించు",
         hideOriginal: "అసలు దాచు",
         refreshLyrics: "సాహిత్యాన్ని రిఫ్రెష్ చేయండి",
-        showTranslationOptions: "అనువాద ఎంపికలను చూపించు"
+        showTranslationOptions: "అనువాద ఎంపికలను చూపించు",
+        offsetLyrics: "సాహిత్యం ఆఫ్‌సెట్",
+        changeLyricsSource: "సాహిత్యం మూలాన్ని మార్చండి",
+        reloadLyrics: "సాహిత్యాన్ని మళ్లీ లోడ్ చేయండి",
+        lyricsOptions: "సాహిత్యం ఎంపికలు",
+        back: "వెనుకకు",
+        reset: "రీసెట్",
+        autoSource: "స్వయంచాలక (డిఫాల్ట్)",
+        sourceNotFound: "ఈ మూలం నుండి సాహిత్యం కనుగొనబడలేదు"
     },
     'kn-IN': {
+
         loading: "ಸಾಹಿತ್ಯವನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ",
         notFound: "ಸಾಹಿತ್ಯವನ್ನು ಹುಡುಕಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
         writtenBy: "ಬರೆದವರು: ",
@@ -1064,9 +1632,18 @@ const translations = {
         showOriginal: "ಮೂಲವನ್ನು ತೋರಿಸಿ",
         hideOriginal: "ಮೂಲವನ್ನು ಮರೆಮಾಡಿ",
         refreshLyrics: "ಸಾಹಿತ್ಯವನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ",
-        showTranslationOptions: "ಅನುವಾದ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸಿ"
+        showTranslationOptions: "ಅನುವಾದ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸಿ",
+        offsetLyrics: "ಸಾಹಿತ್ಯದ ಆಫ್‌ಸೆಟ್",
+        changeLyricsSource: "ಸಾಹಿತ್ಯದ ಮೂಲವನ್ನು ಬದಲಾಯಿಸಿ",
+        reloadLyrics: "ಸಾಹಿತ್ಯವನ್ನು ಮರುಲೋಡ್ ಮಾಡಿ",
+        lyricsOptions: "ಸಾಹಿತ್ಯದ ಆಯ್ಕೆಗಳು",
+        back: "ಹಿಂದೆ",
+        reset: "ಮರುಹೊಂದಿಸಿ",
+        autoSource: "ಸ್ವಯಂಚಾಲಿತ (ಡೀಫಾಲ್ಟ್)",
+        sourceNotFound: "ಈ ಮೂಲದಿಂದ ಯಾವುದೇ ಸಾಹಿತ್ಯ ಕಂಡುಬಂದಿಲ್ಲ"
     },
     'ml-IN': {
+
         loading: "വരികൾ ലോഡുചെയ്യുന്നു",
         notFound: "വരികൾ കണ്ടെത്താനായില്ല.",
         writtenBy: "എഴുതിയത്: ",
@@ -1079,9 +1656,18 @@ const translations = {
         showOriginal: "യഥാർത്ഥ കാണിക്കുക",
         hideOriginal: "യഥാർത്ഥ മറയ്ക്കുക",
         refreshLyrics: "വരികൾ പുതുക്കുക",
-        showTranslationOptions: "വിവർത്തന ഓപ്ഷനുകൾ കാണിക്കുക"
+        showTranslationOptions: "വിവർത്തന ഓപ്ഷനുകൾ കാണിക്കുക",
+        offsetLyrics: "വരികളുടെ ഓഫ്‌സെറ്റ്",
+        changeLyricsSource: "വരികളുടെ ഉറവിടം മാറ്റുക",
+        reloadLyrics: "വരികൾ വീണ്ടും ലോഡുചെയ്യുക",
+        lyricsOptions: "വരികളുടെ ഓപ്ഷനുകൾ",
+        back: "പിന്നിലേക്ക്",
+        reset: "റീസെറ്റ് ചെയ്യുക",
+        autoSource: "യാന്ത്രികം (സ്ഥിരസ്ഥിതി)",
+        sourceNotFound: "ഈ ഉറവിടത്തിൽ നിന്ന് വരികളൊന്നും കണ്ടെത്തിയില്ല"
     },
     'si-LK': {
+
         loading: "පද රචනය පූරණය වෙමින් පවතී",
         notFound: "පද රචනය සොයාගත නොහැකි විය.",
         writtenBy: "ලියන ලද්දේ: ",
@@ -1094,9 +1680,18 @@ const translations = {
         showOriginal: "මුල් පිටපත පෙන්වන්න",
         hideOriginal: "මුල් පිටපත සඟවන්න",
         refreshLyrics: "පද රචනය නැවත පූരණය කරන්න",
-        showTranslationOptions: "පරිවර්තන විකල්ප පෙන්වන්න"
+        showTranslationOptions: "පරිවර්තන විකල්ප පෙන්වන්න",
+        offsetLyrics: "පද පේළි ඕෆ්සෙට්",
+        changeLyricsSource: "පද මූලාශ්‍රය වෙනස් කරන්න",
+        reloadLyrics: "පද නැවත පූරණය කරන්න",
+        lyricsOptions: "පද විකල්ප",
+        back: "ආපසු",
+        reset: "යළි පිහිටුවන්න",
+        autoSource: "ස්වයංක්‍රීය (පෙරනිමි)",
+        sourceNotFound: "මෙම මූලාශ්‍රයෙන් පද හමු නොවීය"
     },
     'th-TH': {
+
         loading: "กำลังโหลดเนื้อเพลง",
         notFound: "ไม่พบเนื้อเพลง",
         writtenBy: "ประพันธ์โดย: ",
@@ -1109,9 +1704,18 @@ const translations = {
         showOriginal: "แสดงต้นฉบับ",
         hideOriginal: "ซ่อนต้นฉบับ",
         refreshLyrics: "รีเฟรชเนื้อเพลง",
-        showTranslationOptions: "แสดงตัวเลือกการแปล"
+        showTranslationOptions: "แสดงตัวเลือกการแปล",
+        offsetLyrics: "การปรับหน่วงเวลาเนื้อเพลง",
+        changeLyricsSource: "เปลี่ยนแหล่งที่มาของเนื้อเพลง",
+        reloadLyrics: "โหลดเนื้อเพลงใหม่",
+        lyricsOptions: "ตัวเลือกเนื้อเพลง",
+        back: "ย้อนกลับ",
+        reset: "รีเซ็ต",
+        autoSource: "อัตโนมัติ (ค่าเริ่มต้น)",
+        sourceNotFound: "ไม่พบเนื้อเพลงจากแหล่งนี้"
     },
     'lo-LA': {
+
         loading: "ກຳລັງໂຫລດເນື້ອເພງ",
         notFound: "ບໍ່ສາມາດຊອກຫາເນື້ອເພງໄດ້.",
         writtenBy: "ຂຽນໂດຍ: ",
@@ -1124,9 +1728,18 @@ const translations = {
         showOriginal: "ສະແດງຕົ້ນສະບັບ",
         hideOriginal: "ເຊື່ອງຕົ້ນສະບັບ",
         refreshLyrics: "ໂຫຼດເນື້ອເພງຄືນໃໝ່",
-        showTranslationOptions: "ສະແດງຕົວເລືອກການແປ"
+        showTranslationOptions: "ສະແດງຕົວເລືອກການແປ",
+        offsetLyrics: "ໄລຍະເລື່ອນເນື້ອເພງ",
+        changeLyricsSource: "ປ່ຽນແຫຼ່ງເນື້ອເພງ",
+        reloadLyrics: "ໂຫລດເນື້ອເພງຄືນໃໝ່",
+        lyricsOptions: "ຕົວເລືອກເນື້ອເພງ",
+        back: "ກັບຄືນ",
+        reset: "ຣີເຊັດ",
+        autoSource: "ອັດຕະໂນມັດ (ຄ່າເລີ່ມຕົ້ນ)",
+        sourceNotFound: "ບໍ່ພົບເນື້ອເພງຈາກແຫຼ່ງນີ້"
     },
     'my-MM': {
+
         loading: "စာသားများအား တင်နေသည်",
         notFound: "စာသားများ ရှာမတွေ့ပါ။",
         writtenBy: "ရေးသားသူ: ",
@@ -1139,9 +1752,18 @@ const translations = {
         showOriginal: "မူရင်းကို ပြပါ",
         hideOriginal: "မူရင်းကို ဖျောက်ပါ",
         refreshLyrics: "စာသားများအား ပြန်လည်စတင်ပါ",
-        showTranslationOptions: "ဘာသာပြန်ရွေးချယ်စရာများကို ပြပါ"
+        showTranslationOptions: "ဘာသာပြန်ရွေးချယ်စရာများကို ပြပါ",
+        offsetLyrics: "စာသား အချိန်ညှိမှု",
+        changeLyricsSource: "စာသား ရင်းမြစ် ပြောင်းရန်",
+        reloadLyrics: "စာသား ပြန်လည်ဖွင့်ရန်",
+        lyricsOptions: "စာသား ရွေးချယ်စရာများ",
+        back: "နောက်သို့",
+        reset: "ပြန်လည်သတ်မှတ်ရန်",
+        autoSource: "အလိုအလျောက် (မူရင်း)",
+        sourceNotFound: "ဤရင်းမြစ်မှ စာသား မတွေ့ရှိပါ"
     },
     'ka-GE': {
+
         loading: "იტვირთება ტექსტები",
         notFound: "ტექსტები ვერ მოიძებნა.",
         writtenBy: "ავტორი: ",
@@ -1154,9 +1776,18 @@ const translations = {
         showOriginal: "ორიგინალის ჩვენება",
         hideOriginal: "ორიგინალის დამალვა",
         refreshLyrics: "ტექსტების განახლება",
-        showTranslationOptions: "თარგმანის პარამეტრების ჩვენება"
+        showTranslationOptions: "თარგმანის პარამეტრების ჩვენება",
+        offsetLyrics: "ტექსტის წანაცვლება",
+        changeLyricsSource: "ტექსტის წყაროს შეცვლა",
+        reloadLyrics: "ტექსტის ხელახლა ჩატვირთვა",
+        lyricsOptions: "ტექსტის პარამეტრები",
+        back: "უკან",
+        reset: "ჩამოყრა",
+        autoSource: "ავტომატური (ნაგულისხმევი)",
+        sourceNotFound: "ამ წყაროდან ტექსტი ვერ მოიძებნა"
     },
     'am-ET': {
+
         loading: "ግጥሞችን በመጫን ላይ",
         notFound: "ግጥሞቹን ማግኘት አልተቻለም።",
         writtenBy: "የተፃፈው በ: ",
@@ -1169,9 +1800,18 @@ const translations = {
         showOriginal: "ዋናውን አሳይ",
         hideOriginal: "ዋናውን ደብቅ",
         refreshLyrics: "ግጥሞችን አድስ",
-        showTranslationOptions: "የትርጉም አማራጮችን አሳይ"
+        showTranslationOptions: "የትርጉም አማራጮችን አሳይ",
+        offsetLyrics: "የግጥም ማካካሻ",
+        changeLyricsSource: "የግጥም ምንጭ ቀይር",
+        reloadLyrics: "ግጥሙን እንደገና ጫን",
+        lyricsOptions: "የግጥም አማራጮች",
+        back: "ተመለስ",
+        reset: "ዳግም አስጀምር",
+        autoSource: "አውቶማቲክ (ነባሪ)",
+        sourceNotFound: "ከዚህ ምንጭ ምንም ግጥሞች አልተገኙም"
     },
     'km-KH': {
+
         loading: "កំពុង​ផ្ទុក​អត្ថបទ​ចម្រៀង",
         notFound: "​មិន​អាច​រក​ឃើញ​អត្ថបទ​ចម្រៀង​ទេ។",
         writtenBy: "និពន្ធ​โดย: ",
@@ -1184,9 +1824,18 @@ const translations = {
         showOriginal: "បង្ហាញ​ដើម",
         hideOriginal: "លាក់​ដើម",
         refreshLyrics: "ផ្ទុក​អត្ថបទ​ចម្រៀង​ឡើងវិញ",
-        showTranslationOptions: "បង្ហាញ​ជម្រើស​បកប្រែ"
+        showTranslationOptions: "បង្ហាញ​ជម្រើស​បកប្រែ",
+        offsetLyrics: "គម្លាតទំនុកច្រៀង",
+        changeLyricsSource: "ផ្លាស់ប្តូរប្រភពទំនុកច្រៀង",
+        reloadLyrics: "ផ្ទុកទំនុកច្រៀងឡើងវិញ",
+        lyricsOptions: "ជម្រើសទំនុកច្រៀង",
+        back: "ថយក្រោយ",
+        reset: "កំណត់ឡើងវិញ",
+        autoSource: "ស្វ័យប្រវត្តិ (លំនាំដើម)",
+        sourceNotFound: "រកមិនឃើញទំនុកច្រៀងពីប្រភពនេះទេ"
     },
     'zh-CN': {
+
         loading: "加载歌词",
         notFound: "无法找到歌词。",
         writtenBy: "作者: ",
@@ -1199,9 +1848,18 @@ const translations = {
         showOriginal: "显示原文",
         hideOriginal: "隐藏原文",
         refreshLyrics: "刷新歌词",
-        showTranslationOptions: "显示翻译选项"
+        showTranslationOptions: "显示翻译选项",
+        offsetLyrics: "歌词延迟调整",
+        changeLyricsSource: "更改歌词源",
+        reloadLyrics: "重新加载歌词",
+        lyricsOptions: "歌词选项",
+        back: "返回",
+        reset: "重置",
+        autoSource: "自动（默认）",
+        sourceNotFound: "未从该源找到歌词"
     },
     'zh-TW': {
+
         loading: "載入歌詞",
         notFound: "找不到歌詞。",
         writtenBy: "作者：",
@@ -1214,9 +1872,18 @@ const translations = {
         showOriginal: "顯示原文",
         hideOriginal: "隱藏原文",
         refreshLyrics: "重新整理歌詞",
-        showTranslationOptions: "顯示翻譯選項"
+        showTranslationOptions: "顯示翻譯選項",
+        offsetLyrics: "歌詞延遲調整",
+        changeLyricsSource: "變更歌詞來源",
+        reloadLyrics: "重新載入歌詞",
+        lyricsOptions: "歌詞選項",
+        back: "返回",
+        reset: "重設",
+        autoSource: "自動（預設）",
+        sourceNotFound: "未從此來源找到歌詞"
     },
     'zh-HK': {
+
         loading: "載入歌詞",
         notFound: "找不到歌詞。",
         writtenBy: "作者：",
@@ -1229,9 +1896,18 @@ const translations = {
         showOriginal: "顯示原文",
         hideOriginal: "隱藏原文",
         refreshLyrics: "重新整理歌詞",
-        showTranslationOptions: "顯示翻譯選項"
+        showTranslationOptions: "顯示翻譯選項",
+        offsetLyrics: "歌詞延遲調整",
+        changeLyricsSource: "變更歌詞來源",
+        reloadLyrics: "重新載入歌詞",
+        lyricsOptions: "歌詞選項",
+        back: "返回",
+        reset: "重設",
+        autoSource: "自動（預設）",
+        sourceNotFound: "未從此來源找到歌詞"
     },
     'ja-JP': {
+
         loading: "歌詞を読み込んでいます",
         notFound: "歌詞が見つかりませんでした。",
         writtenBy: "作詞: ",
@@ -1244,9 +1920,18 @@ const translations = {
         showOriginal: "オリジナルを表示",
         hideOriginal: "オリジナルを非表示",
         refreshLyrics: "歌詞を更新",
-        showTranslationOptions: "翻訳オプションを表示"
+        showTranslationOptions: "翻訳オプションを表示",
+        offsetLyrics: "歌詞のオフセット",
+        changeLyricsSource: "歌詞のソースを変更",
+        reloadLyrics: "歌詞を再読み込み",
+        lyricsOptions: "歌詞のオプション",
+        back: "戻る",
+        reset: "リセット",
+        autoSource: "自動（デフォルト）",
+        sourceNotFound: "このソースから歌詞が見つかりませんでした"
     },
     'ko-KR': {
+
         loading: "가사 불러오는 중",
         notFound: "가사를 찾을 수 없습니다.",
         writtenBy: "작사: ",
@@ -1259,7 +1944,15 @@ const translations = {
         showOriginal: "원본 보기",
         hideOriginal: "원본 숨기기",
         refreshLyrics: "가사 새로고침",
-        showTranslationOptions: "번역 옵션 표시"
+        showTranslationOptions: "번역 옵션 표시",
+        offsetLyrics: "가사 오프셋",
+        changeLyricsSource: "가사 출처 변경",
+        reloadLyrics: "가사 다시 로드",
+        lyricsOptions: "가사 옵션",
+        back: "뒤로",
+        reset: "재설정",
+        autoSource: "자동 (기본값)",
+        sourceNotFound: "이 출처에서 가사를 찾을 수 없습니다"
     }
 };
 
