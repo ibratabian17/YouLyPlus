@@ -100,6 +100,9 @@ class LyricsPlusRenderer {
     this.userOffsetMs = 0;
     this.currentLyrics = null;
     this._userSelectedSource = null;
+    this._userSelectedProvider = null;
+    this.availableProviders = new Set();
+    this._notFoundProviders = new Set();
     this._saveOffsetTimeout = null;
     this._toastElement = null;
     this._toastTimeout = null;
@@ -1633,10 +1636,12 @@ class LyricsPlusRenderer {
 
       metadataContainer.appendChild(songWritersDiv);
     }
-    const sourceDiv = document.createElement("span");
-    sourceDiv.className = "lyrics-source-provider";
-    sourceDiv.innerText = `${t("source")} ${lyrics.metadata.source}`;
-    metadataContainer.appendChild(sourceDiv);
+    if (this._isValidLyricsSource(lyrics.metadata?.source)) {
+      const sourceDiv = document.createElement("span");
+      sourceDiv.className = "lyrics-source-provider";
+      sourceDiv.innerText = `${t("source")} ${lyrics.metadata.source}`;
+      metadataContainer.appendChild(sourceDiv);
+    }
     container.appendChild(metadataContainer);
 
     const emptyDiv = document.createElement("div");
@@ -1731,8 +1736,17 @@ class LyricsPlusRenderer {
   ) {
     if (this.lastKnownSongInfo && songInfo && (this.lastKnownSongInfo.title !== songInfo.title || this.lastKnownSongInfo.artist !== songInfo.artist)) {
       this._userSelectedProvider = null;
+      if (this.availableProviders) this.availableProviders.clear();
+      if (this._notFoundProviders) this._notFoundProviders.clear();
     }
+    if (!this.availableProviders) this.availableProviders = new Set();
+    if (!this._notFoundProviders) this._notFoundProviders = new Set();
     this.currentLyrics = lyrics;
+    this.currentLyricsType = lyrics?.type;
+    if (lyrics?.provider) {
+      this._userSelectedProvider = lyrics.provider;
+      this.availableProviders.add(lyrics.provider.toLowerCase());
+    }
     this.lastKnownSongInfo = songInfo;
     this.currentSettings = currentSettings;
     this.fetchAndDisplayLyricsFn = fetchAndDisplayLyricsFn;
@@ -1753,6 +1767,15 @@ class LyricsPlusRenderer {
           this._updateOffsetDisplay();
         }
       }).catch(err => console.warn('Failed to load lyrics offset:', err));
+
+      pBrowser.runtime.sendMessage({
+        type: 'GET_AVAILABLE_PROVIDERS',
+        songInfo
+      }).then(response => {
+        if (response?.success && Array.isArray(response.availableProviders)) {
+          this.setAvailableProviders(response.availableProviders);
+        }
+      }).catch(() => {});
     }
 
     // Reset translation loading state if it was active
@@ -1805,10 +1828,12 @@ class LyricsPlusRenderer {
         metadataContainer.appendChild(songWritersDiv);
       }
 
-      const sourceDiv = document.createElement("span");
-      sourceDiv.className = "lyrics-source-provider";
-      sourceDiv.innerText = `${t("source")} ${lyrics.metadata?.source || "Unknown"}`;
-      metadataContainer.appendChild(sourceDiv);
+      if (this._isValidLyricsSource(lyrics.metadata?.source)) {
+        const sourceDiv = document.createElement("span");
+        sourceDiv.className = "lyrics-source-provider";
+        sourceDiv.innerText = `${t("source")} ${lyrics.metadata.source}`;
+        metadataContainer.appendChild(sourceDiv);
+      }
 
       fragment.appendChild(metadataContainer);
 
@@ -3212,37 +3237,66 @@ class LyricsPlusRenderer {
     this.optionsDropdown.appendChild(offsetOpt);
 
     // 2. Change Lyrics Source Option
-    const sourceOpt = document.createElement("div");
-    sourceOpt.className = "dropdown-option";
+    const providerOrderStr = this.currentSettings?.lyricsProviderOrder || 'binilyrics,kpoe,unison,lrclib';
+    const providerKeys = providerOrderStr.split(',').map(s => s.trim()).filter(Boolean);
+
+    if (this.currentSettings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
+      providerKeys.push('customKpoe');
+    }
+
     const activeProvider = (
       this._userSelectedProvider ||
       this.currentLyrics?.provider ||
       this.currentLyrics?.metadata?.provider ||
       this._detectProviderFromSource(this.currentLyrics?.metadata?.source) ||
-      'Lyrics+'
-    );
-    const providerDisplayNames = {
-      'binilyrics': 'BiniLyrics',
-      'kpoe': 'Lyrics+',
-      'customKpoe': 'Custom Lyrics+',
-      'unison': 'Unison',
-      'lrclib': 'LRCLib',
-      'local': 'Local Lyrics',
-      'subtitles': 'YouTube Subtitles'
-    };
-    const activeProviderName = providerDisplayNames[activeProvider] || (activeProvider.charAt(0).toUpperCase() + activeProvider.slice(1));
-    sourceOpt.innerHTML = `
-      <span class="dropdown-item-label">${t("changeLyricsSource") || "Change Lyrics Source"}</span>
-      <div class="dropdown-item-right">
-        <span class="lyrics-option-value-preview">${activeProviderName}</span>
-        ${chevronSvg}
-      </div>
-    `;
-    sourceOpt.addEventListener("click", (e) => {
-      e.stopPropagation();
-      this._renderOptionsMenuSources();
-    });
-    this.optionsDropdown.appendChild(sourceOpt);
+      'kpoe'
+    ).toLowerCase();
+
+    // Include subtitles if video / captions available or active
+    if ((this.lastKnownSongInfo?.isVideo || this.lastKnownSongInfo?.subtitle || activeProvider === 'subtitles') && !providerKeys.includes('subtitles')) {
+      providerKeys.push('subtitles');
+    }
+
+    // Include local if local lyrics active
+    if (activeProvider === 'local' && !providerKeys.includes('local')) {
+      providerKeys.push('local');
+    }
+
+    // Determine how many alternative sources actually exist
+    let availableList = [];
+    if (this.availableProviders && this.availableProviders.size > 0) {
+      availableList = Array.from(this.availableProviders).filter(p => !this._notFoundProviders?.has(p.toLowerCase()));
+    } else {
+      availableList = providerKeys.filter(p => !this._notFoundProviders?.has(p.toLowerCase()));
+    }
+
+    // Only render the option if there are multiple providers (i.e. at least one alternative source found)
+    if (availableList.length > 1) {
+      const sourceOpt = document.createElement("div");
+      sourceOpt.className = "dropdown-option";
+      const providerDisplayNames = {
+        'binilyrics': 'BiniLyrics',
+        'kpoe': 'Lyrics+',
+        'customKpoe': 'Custom Lyrics+',
+        'unison': 'Unison',
+        'lrclib': 'LRCLib',
+        'local': 'Local Lyrics',
+        'subtitles': 'YouTube Subtitles'
+      };
+      const activeProviderName = providerDisplayNames[activeProvider] || (activeProvider.charAt(0).toUpperCase() + activeProvider.slice(1));
+      sourceOpt.innerHTML = `
+        <span class="dropdown-item-label">${t("changeLyricsSource") || "Change Lyrics Source"}</span>
+        <div class="dropdown-item-right">
+          <span class="lyrics-option-value-preview">${activeProviderName}</span>
+          ${chevronSvg}
+        </div>
+      `;
+      sourceOpt.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this._renderOptionsMenuSources();
+      });
+      this.optionsDropdown.appendChild(sourceOpt);
+    }
 
     // Separator
     const sep = document.createElement("div");
@@ -3323,6 +3377,52 @@ class LyricsPlusRenderer {
     this.optionsDropdown.appendChild(panel);
   }
 
+  _isValidLyricsSource(source) {
+    if (!source || typeof source !== "string") return false;
+    const s = source.trim().toLowerCase();
+    if (!s || s === "unknown" || s === "undefined" || s === "null" || s === "none") return false;
+
+    const knownSources = [
+      "lyricsplus", "lyrics+", "apple", "apple music", "qq", "musixmatch", "musixmatch-word",
+      "unison", "lrclib", "binilyrics", "subtitles", "youtube captions", "youtube subtitles",
+      "local", "local lyrics", "spotify", "kpoe", "customkpoe"
+    ];
+    const configuredSources = (this.currentSettings?.lyricsSourceOrder || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
+    const configuredProviders = (this.currentSettings?.lyricsProviderOrder || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
+    const allValid = new Set([...knownSources, ...configuredSources, ...configuredProviders]);
+
+    return Array.from(allValid).some(known => s.includes(known) || known.includes(s));
+  }
+
+  setAvailableProviders(providers) {
+    if (!this.availableProviders) this.availableProviders = new Set();
+    if (Array.isArray(providers)) {
+      providers.forEach(p => {
+        if (p && !this._notFoundProviders?.has(p.toLowerCase())) {
+          this.availableProviders.add(p.toLowerCase());
+        }
+      });
+    }
+    const activeProvider = (
+      this._userSelectedProvider ||
+      this.currentLyrics?.provider ||
+      this.currentLyrics?.metadata?.provider ||
+      this._detectProviderFromSource(this.currentLyrics?.metadata?.source)
+    );
+    if (activeProvider) {
+      this.availableProviders.add(activeProvider.toLowerCase());
+    }
+
+    if (this.optionsDropdown && !this.optionsDropdown.classList.contains("hidden")) {
+      const isSubmenu = this.optionsDropdown.querySelector(".dropdown-header-back");
+      if (isSubmenu) {
+        this._renderOptionsMenuSources();
+      } else {
+        this._renderOptionsMenuMain();
+      }
+    }
+  }
+
   _detectProviderFromSource(source) {
     if (!source) return '';
     const s = source.toLowerCase();
@@ -3356,12 +3456,30 @@ class LyricsPlusRenderer {
     sep.className = "dropdown-separator";
     this.optionsDropdown.appendChild(sep);
 
-    // Populate providers strictly based on user's configured Lyrics Provider Order
+    // Populate providers based on user's configured Lyrics Provider Order
     const providerOrderStr = this.currentSettings?.lyricsProviderOrder || 'binilyrics,kpoe,unison,lrclib';
     const providerKeys = providerOrderStr.split(',').map(s => s.trim()).filter(Boolean);
 
     if (this.currentSettings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
       providerKeys.push('customKpoe');
+    }
+
+    const activeProvider = (
+      this._userSelectedProvider ||
+      this.currentLyrics?.provider ||
+      this.currentLyrics?.metadata?.provider ||
+      this._detectProviderFromSource(this.currentLyrics?.metadata?.source) ||
+      'kpoe'
+    ).toLowerCase();
+
+    // Include subtitles if video / captions available or active
+    if ((this.lastKnownSongInfo?.isVideo || this.lastKnownSongInfo?.subtitle || activeProvider === 'subtitles') && !providerKeys.includes('subtitles')) {
+      providerKeys.push('subtitles');
+    }
+
+    // Include local if local lyrics active
+    if (activeProvider === 'local' && !providerKeys.includes('local')) {
+      providerKeys.push('local');
     }
 
     const providerDisplayNames = {
@@ -3374,14 +3492,22 @@ class LyricsPlusRenderer {
       'subtitles': 'YouTube Subtitles'
     };
 
-    const activeProvider = (
-      this._userSelectedProvider ||
-      this.currentLyrics?.provider ||
-      this.currentLyrics?.metadata?.provider ||
-      this._detectProviderFromSource(this.currentLyrics?.metadata?.source)
-    ).toLowerCase();
+    // Filter providers: hide any provider that is not found on the list of available providers
+    const visibleProviders = providerKeys.filter((providerId) => {
+      const pLower = providerId.toLowerCase();
+      if (this._notFoundProviders?.has(pLower)) return false;
+      if (this.availableProviders && this.availableProviders.size > 0) {
+        return this.availableProviders.has(pLower) || pLower === activeProvider;
+      }
+      return true;
+    });
 
-    providerKeys.forEach((providerId) => {
+    if (visibleProviders.length <= 1) {
+      this._renderOptionsMenuMain();
+      return;
+    }
+
+    visibleProviders.forEach((providerId) => {
       const name = providerDisplayNames[providerId] || (providerId.charAt(0).toUpperCase() + providerId.slice(1));
       const opt = document.createElement("div");
       opt.className = "dropdown-option lyrics-source-option";
@@ -3394,11 +3520,27 @@ class LyricsPlusRenderer {
         ${isSelected ? checkSvg : ''}
       `;
 
-      opt.addEventListener("click", () => {
-        this._userSelectedProvider = providerId;
-        this.optionsDropdown.classList.add("hidden");
+      opt.addEventListener("click", async () => {
         if (this.switchLyricsProviderFn) {
-          this.switchLyricsProviderFn(providerId);
+          const success = await this.switchLyricsProviderFn(providerId);
+          if (success) {
+            this._userSelectedProvider = providerId;
+            if (!this.availableProviders) this.availableProviders = new Set();
+            this.availableProviders.add(providerId.toLowerCase());
+            this.optionsDropdown.classList.add("hidden");
+          } else {
+            // Not found from this provider: hide it immediately from the list!
+            if (!this._notFoundProviders) this._notFoundProviders = new Set();
+            this._notFoundProviders.add(providerId.toLowerCase());
+            if (this.availableProviders) {
+              this.availableProviders.delete(providerId.toLowerCase());
+            }
+            opt.remove();
+            const remaining = this.optionsDropdown.querySelectorAll(".lyrics-source-option");
+            if (remaining.length <= 1) {
+              this._renderOptionsMenuMain();
+            }
+          }
         }
       });
 
@@ -3568,7 +3710,12 @@ class LyricsPlusRenderer {
     this._toastTimeout = null;
     this.userOffsetMs = 0;
     this.currentLyrics = null;
+    this.currentLyricsType = null;
     this._userSelectedSource = null;
+    this._userSelectedProvider = null;
+    this.switchLyricsProviderFn = null;
+    if (this.availableProviders) this.availableProviders.clear();
+    if (this._notFoundProviders) this._notFoundProviders.clear();
 
     // DOM & Cache Cleanup
     const container = this._getContainer();

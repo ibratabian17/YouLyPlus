@@ -65,7 +65,8 @@ const LyricsPlusAPI = {
     updateDisplayMode: (...args) => lyricsRendererInstance?.updateDisplayMode(...args),
     updateCurrentTick: (...args) => lyricsRendererInstance?.updateCurrentTick(...args),
     setTranslationLoading: (...args) => lyricsRendererInstance?.setTranslationLoading(...args),
-    showToast: (...args) => lyricsRendererInstance?.showToast(...args)
+    showToast: (...args) => lyricsRendererInstance?.showToast(...args),
+    setAvailableProviders: (...args) => lyricsRendererInstance?.setAvailableProviders(...args)
 };
 
 // --- Injection ---

@@ -17,16 +17,38 @@ import { parseAppleTTML } from '../../lib/parser.js';
 
 export class LyricsService {
   static songProvidersCache = new Map();
+  static ongoingProviderFetches = new Map();
 
   static cacheProviderLyrics(cacheKey, provider, lyrics) {
+    if (!lyrics || Utilities.isEmptyLyrics(lyrics)) return;
+    if (!lyrics.metadata) lyrics.metadata = {};
+    lyrics.metadata.provider = provider;
+    lyrics.provider = provider;
+
     if (!this.songProvidersCache.has(cacheKey)) {
       if (this.songProvidersCache.size > 30) {
         const firstKey = this.songProvidersCache.keys().next().value;
         this.songProvidersCache.delete(firstKey);
+        this.ongoingProviderFetches.delete(firstKey);
       }
       this.songProvidersCache.set(cacheKey, new Map());
     }
     this.songProvidersCache.get(cacheKey).set(provider, lyrics);
+  }
+
+  static setOngoingProviderFetch(cacheKey, provider, promise) {
+    if (!this.ongoingProviderFetches.has(cacheKey)) {
+      if (this.ongoingProviderFetches.size > 30) {
+        const firstKey = this.ongoingProviderFetches.keys().next().value;
+        this.ongoingProviderFetches.delete(firstKey);
+      }
+      this.ongoingProviderFetches.set(cacheKey, new Map());
+    }
+    this.ongoingProviderFetches.get(cacheKey).set(provider, promise);
+    promise.finally(() => {
+      const m = this.ongoingProviderFetches.get(cacheKey);
+      if (m) m.delete(provider);
+    });
   }
 
   static getProviderLyricsFromCache(cacheKey, provider) {
@@ -112,7 +134,10 @@ export class LyricsService {
         if (result) state.setCached(cacheKey, result);
       }
       if (result?.lyrics) {
-        const prov = this.detectProvider(result.lyrics);
+        const prov = result.lyrics.provider || this.detectProvider(result.lyrics);
+        result.lyrics.provider = prov;
+        if (!result.lyrics.metadata) result.lyrics.metadata = {};
+        result.lyrics.metadata.provider = prov;
         this.cacheProviderLyrics(cacheKey, prov, result.lyrics);
       }
     }
@@ -176,6 +201,9 @@ export class LyricsService {
         console.log(`Found local lyrics for "${songInfo.title}"`);
         const lyrics = DataParser.parseKPoeFormat(fetchedLocal.lyrics);
         lyrics.provider = PROVIDERS.LOCAL;
+        if (!lyrics.metadata) lyrics.metadata = {};
+        lyrics.metadata.provider = PROVIDERS.LOCAL;
+        this.cacheProviderLyrics(this.createCacheKey(songInfo), PROVIDERS.LOCAL, lyrics);
         return {
           lyrics: lyrics,
           version: fetchedLocal.timestamp || matched.songId
@@ -192,34 +220,45 @@ export class LyricsService {
       const fetchOptions = settings.cacheStrategy === 'none' ? { cache: 'no-store' } : {};
       const providers = this.getProviderOrder(settings, songInfo, settings.preferUnisonVideo);
 
-      const controllers = new Map(
-        providers.map(p => [p, new AbortController()])
-      );
-
-      let usedProvider = null;
-      const promises = providers.map((provider, index) =>
-        this.fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload, controllers.get(provider).signal)
+      const promises = providers.map((provider) => {
+        const fetchPromise = this.fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload, null)
           .then(result => {
             if (result && !Utilities.isEmptyLyrics(result)) {
               this.cacheProviderLyrics(cacheKey, provider, result);
-              if (usedProvider === null) {
-                usedProvider = provider;
-              }
             }
             return result;
           })
-          .catch(() => null)
-      );
+          .catch(() => null);
 
-      const lyrics = await this.raceWithEarlyExit(promises, providers, controllers);
+        this.setOngoingProviderFetch(cacheKey, provider, fetchPromise);
+        return fetchPromise;
+      });
+
+      if (songInfo.videoId && songInfo.subtitle) {
+        const subPromise = YouTubeService.fetchSubtitles(songInfo)
+          .then(subLyrics => {
+            if (subLyrics && !Utilities.isEmptyLyrics(subLyrics)) {
+              this.cacheProviderLyrics(cacheKey, 'subtitles', subLyrics);
+            }
+            return subLyrics;
+          })
+          .catch(() => null);
+        this.setOngoingProviderFetch(cacheKey, 'subtitles', subPromise);
+      }
+
+      const lyrics = await this.raceWithEarlyExit(promises, providers);
 
       let finalLyrics = lyrics;
 
       if (Utilities.isEmptyLyrics(finalLyrics) && songInfo.videoId && songInfo.subtitle) {
-        finalLyrics = await YouTubeService.fetchSubtitles(songInfo);
-        if (finalLyrics && !Utilities.isEmptyLyrics(finalLyrics)) {
-          finalLyrics.provider = 'subtitles';
-          this.cacheProviderLyrics(cacheKey, 'subtitles', finalLyrics);
+        const cachedSub = this.getProviderLyricsFromCache(cacheKey, 'subtitles');
+        if (cachedSub) {
+          finalLyrics = cachedSub;
+        } else {
+          finalLyrics = await YouTubeService.fetchSubtitles(songInfo);
+          if (finalLyrics && !Utilities.isEmptyLyrics(finalLyrics)) {
+            this.cacheProviderLyrics(cacheKey, 'subtitles', finalLyrics);
+          }
         }
       }
 
@@ -227,12 +266,13 @@ export class LyricsService {
         throw new Error('No lyrics found from any provider');
       }
 
-      if (usedProvider === PROVIDERS.UNISON && songInfo.isVideo) {
+      const winningProvider = finalLyrics?.provider || this.detectProvider(finalLyrics);
+      if (winningProvider === PROVIDERS.UNISON && songInfo.isVideo) {
         finalLyrics.ignoreSponsorblock = true;
       }
 
-      if (usedProvider && finalLyrics) {
-        this.cacheProviderLyrics(cacheKey, usedProvider, finalLyrics);
+      if (winningProvider && finalLyrics) {
+        this.cacheProviderLyrics(cacheKey, winningProvider, finalLyrics);
       }
 
       const version = Date.now();
@@ -251,17 +291,11 @@ export class LyricsService {
     }
   }
 
-  static raceWithEarlyExit(promises, providers, controllers) {
+  static raceWithEarlyExit(promises, providers) {
     return new Promise((resolve) => {
       const results = new Array(promises.length).fill(undefined);
       const pending = new Set(promises.map((_, i) => i));
       let won = false;
-
-      const abortRemaining = () => {
-        for (const i of pending) {
-          controllers.get(providers[i])?.abort();
-        }
-      };
 
       const tryResolve = () => {
         if (won) return;
@@ -274,12 +308,12 @@ export class LyricsService {
           const blockedByEarlier = [...pending].some(i => i < bestIdx);
           if (!blockedByEarlier) {
             won = true;
-            abortRemaining();
             return resolve(results[bestIdx]);
           }
         }
 
         if (pending.size === 0) {
+          won = true;
           const best = results.reduce((b, r) =>
             this.scoreLyrics(r) > this.scoreLyrics(b) ? r : b
             , null);
@@ -289,7 +323,6 @@ export class LyricsService {
 
       promises.forEach((p, i) => {
         Promise.resolve(p).then(result => {
-          if (won) return;
           results[i] = result;
           pending.delete(i);
           tryResolve();
@@ -393,6 +426,18 @@ export class LyricsService {
       return { lyrics: cachedLyrics, version: Date.now(), fromCache: true };
     }
 
+    const ongoingSongMap = this.ongoingProviderFetches.get(cacheKey);
+    if (ongoingSongMap && ongoingSongMap.has(provider)) {
+      try {
+        const ongoingLyrics = await ongoingSongMap.get(provider);
+        if (ongoingLyrics && !Utilities.isEmptyLyrics(ongoingLyrics)) {
+          return { lyrics: ongoingLyrics, version: Date.now(), fromCache: true };
+        }
+      } catch (err) {
+        // Fallback to fetch below
+      }
+    }
+
     const settings = await SettingsManager.getLyricsSettings();
     const fetchOptions = settings.cacheStrategy === 'none' ? { cache: 'no-store' } : {};
     let lyrics = null;
@@ -474,5 +519,30 @@ export class LyricsService {
     } else {
       await offsetsDB.set({ key, offsetMs, updatedAt: Date.now() });
     }
+  }
+
+  static async getAvailableProviders(songInfo) {
+    if (!songInfo || !songInfo.title) return [];
+    const cacheKey = this.createCacheKey(songInfo);
+
+    const ongoingMap = this.ongoingProviderFetches.get(cacheKey);
+    if (ongoingMap && ongoingMap.size > 0) {
+      const ongoingPromises = Array.from(ongoingMap.values());
+      await Promise.race([
+        Promise.allSettled(ongoingPromises),
+        new Promise(resolve => setTimeout(resolve, 1200))
+      ]);
+    }
+
+    const available = [];
+    const cachedMap = this.songProvidersCache.get(cacheKey);
+    if (cachedMap) {
+      for (const [provider, lyrics] of cachedMap.entries()) {
+        if (lyrics && !Utilities.isEmptyLyrics(lyrics)) {
+          available.push(provider);
+        }
+      }
+    }
+    return available;
   }
 }

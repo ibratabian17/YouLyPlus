@@ -27,7 +27,8 @@ export class MessageHandler {
       [MESSAGE_TYPES.FETCH_IMAGE]: () => this.fetchImage(message, sendResponse),
       [MESSAGE_TYPES.SAVE_LYRICS_OFFSET]: () => this.saveLyricsOffset(message, sendResponse),
       [MESSAGE_TYPES.GET_LYRICS_OFFSET]: () => this.getLyricsOffset(message, sendResponse),
-      [MESSAGE_TYPES.SWITCH_LYRICS_PROVIDER]: () => this.switchLyricsProvider(message, sendResponse)
+      [MESSAGE_TYPES.SWITCH_LYRICS_PROVIDER]: () => this.switchLyricsProvider(message, sendResponse),
+      [MESSAGE_TYPES.GET_AVAILABLE_PROVIDERS]: () => this.getAvailableLyricsProviders(message, sendResponse)
     };
 
     const handler = handlers[message.type];
@@ -48,9 +49,9 @@ export class MessageHandler {
   static async fetchLyrics(message, sendResponse) {
     try {
       const { lyrics } = await LyricsService.getOrFetch(message.songInfo, message.forceReload, message.requestedSource);
-      sendResponse({ success: true, lyrics, metadata: message.songInfo });
+      const availableProviders = await LyricsService.getAvailableProviders(message.songInfo);
+      sendResponse({ success: true, lyrics, metadata: message.songInfo, availableProviders });
     } catch (error) {
-      console.error(`Failed to fetch lyrics for "${message.songInfo?.title}":`, error);
       sendResponse({ success: false, error: error.message, metadata: message.songInfo });
     }
   }
@@ -230,13 +231,24 @@ export class MessageHandler {
     try {
       const result = await LyricsService.getProviderLyrics(message.songInfo, message.provider);
       if (result && result.lyrics) {
-        sendResponse({ success: true, lyrics: result.lyrics, provider: message.provider, fromCache: result.fromCache });
+        const availableProviders = await LyricsService.getAvailableProviders(message.songInfo);
+        sendResponse({ success: true, lyrics: result.lyrics, provider: message.provider, fromCache: result.fromCache, availableProviders });
       } else {
         sendResponse({ success: false, error: "No lyrics available from this provider" });
       }
     } catch (error) {
       console.error(`Failed to switch lyrics provider to "${message.provider}":`, error);
       sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  static async getAvailableLyricsProviders(message, sendResponse) {
+    try {
+      const availableProviders = await LyricsService.getAvailableProviders(message.songInfo);
+      sendResponse({ success: true, availableProviders });
+    } catch (error) {
+      console.error("Error getting available providers:", error);
+      sendResponse({ success: false, error: error.message, availableProviders: [] });
     }
   }
 }

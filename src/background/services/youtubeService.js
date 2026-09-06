@@ -72,8 +72,10 @@ export class YouTubeService {
         data: fetchedTracks[0].data,
         metadata: {
           ...songInfo,
-          source: "YouTube Captions"
-        }
+          source: "YouTube Captions",
+          provider: "subtitles"
+        },
+        provider: "subtitles"
       };
     } catch (error) {
       console.error("YouTube subtitles error:", error);

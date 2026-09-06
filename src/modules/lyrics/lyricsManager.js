@@ -120,7 +120,8 @@ function convertWordLyricsToLine(lyrics) {
     type: "Line",
     data: lyrics.data.map(line => ({ ...line, syllabus: [] })),
     metadata: lyrics.metadata,
-    ignoreSponsorblock: lyrics.ignoreSponsorblock
+    ignoreSponsorblock: lyrics.ignoreSponsorblock,
+    provider: lyrics.provider
   };
 }
 
@@ -196,6 +197,9 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId, req
   }
 
   lastBaseLyrics = response.lyrics;
+  if (response.availableProviders && LyricsPlusAPI.setAvailableProviders) {
+    LyricsPlusAPI.setAvailableProviders(response.availableProviders);
+  }
   return lastBaseLyrics;
 }
 
@@ -374,7 +378,7 @@ function getProviderDisplayName(provider) {
 }
 
 async function switchLyricsProvider(providerId) {
-  if (!lastKnownSongInfo) return;
+  if (!lastKnownSongInfo) return false;
   const currentSong = lastKnownSongInfo;
   const fetchId = currentFetchMediaId;
   const providerName = getProviderDisplayName(providerId);
@@ -388,25 +392,47 @@ async function switchLyricsProvider(providerId) {
 
     if (currentFetchMediaId !== fetchId) {
       console.warn("Song changed during lyrics provider switch. Aborting.", currentSong);
-      return;
+      return false;
     }
 
     if (response?.success && response.lyrics) {
+      if (response.availableProviders && LyricsPlusAPI.setAvailableProviders) {
+        LyricsPlusAPI.setAvailableProviders(response.availableProviders);
+      }
+
+      // Clear previous translation and romanization responses as lyrics lines/timing differ
+      lastTranslationResponse = null;
+      lastRomanizationResponse = null;
+
       lastBaseLyrics = response.lyrics;
       await updateAndRenderCombinedLyrics(currentSong, fetchId);
+
+      // Re-trigger translation / romanization fetch if enabled
+      const needsTranslation = currentDisplayMode === 'translate' || currentDisplayMode === 'both';
+      const needsRomanization = currentDisplayMode === 'romanize' || currentDisplayMode === 'both' || currentSettings.largerTextMode === "romanization";
+      if (needsTranslation || needsRomanization) {
+        if (LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
+        const htmlLang = document.documentElement.getAttribute('lang');
+        fetchAdditionalData(currentSong, currentDisplayMode, htmlLang, fetchId);
+      }
+
       if (LyricsPlusAPI.showToast) {
         LyricsPlusAPI.showToast(`Switched lyrics to ${providerName}`);
       }
+      return true;
     } else {
       if (LyricsPlusAPI.showToast) {
-        LyricsPlusAPI.showToast(`No lyrics found from ${providerName}`);
+        const notFoundMsg = (typeof t === 'function' && t("sourceNotFound")) || `No lyrics found from ${providerName}`;
+        LyricsPlusAPI.showToast(notFoundMsg);
       }
+      return false;
     }
   } catch (error) {
     console.warn("Failed to switch lyrics provider:", error);
     if (LyricsPlusAPI.showToast) {
       LyricsPlusAPI.showToast("Failed to switch lyrics provider");
     }
+    return false;
   }
 }
 
