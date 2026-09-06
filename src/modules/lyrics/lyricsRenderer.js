@@ -540,7 +540,7 @@ class LyricsPlusRenderer {
   _onLyricClick(e) {
     const time = parseFloat(e.currentTarget.dataset.startTime);
     const offsetSec = (this.userOffsetMs || 0) / 1000;
-    this._seekPlayerTo(time - offsetSec - 0.05);
+    this._seekPlayerTo(time + offsetSec - 0.05);
     this._scrollToActiveLine(e.currentTarget, true);
   }
 
@@ -1694,7 +1694,7 @@ class LyricsPlusRenderer {
     this.currentPrimaryActiveLine = null;
 
     if (this.cachedLyricsLines.length > 0) {
-      const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 + (this.userOffsetMs || 0);
+      const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 - (this.userOffsetMs || 0);
       let activeIndex = this._getLineIndexAtTime(currentTime);
       if (activeIndex === -1) activeIndex = 0;
 
@@ -2018,10 +2018,10 @@ class LyricsPlusRenderer {
       if (!this.uiConfig.disableNativeTick)
         cancelAnimationFrame(this.lyricsAnimationFrameId);
     }
-    this.lastTime = this._getCurrentPlayerTime() * 1000 + (this.userOffsetMs || 0);
+    this.lastTime = this._getCurrentPlayerTime() * 1000 - (this.userOffsetMs || 0);
     if (!this.uiConfig.disableNativeTick) {
       const sync = () => {
-        const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 + (this.userOffsetMs || 0);
+        const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 - (this.userOffsetMs || 0);
         if (currentTime !== this.lastTime) {
           const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
           this._updateLyricsHighlight(
@@ -2055,7 +2055,7 @@ class LyricsPlusRenderer {
   updateCurrentTick(currentTime) {
     currentTime = currentTime * 1000;
     const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
-    this._updateLyricsHighlight((currentTime - this.offsetLatency + (this.userOffsetMs || 0)), isForceScroll, this.currentSettings || {});
+    this._updateLyricsHighlight((currentTime - (this.offsetLatency * 1000) - (this.userOffsetMs || 0)), isForceScroll, this.currentSettings || {});
     this.lastTime = currentTime;
   }
 
@@ -3554,7 +3554,7 @@ class LyricsPlusRenderer {
     if (this.lastKnownSongInfo) {
       this._debouncedSaveOffset(this.lastKnownSongInfo, this.userOffsetMs);
     }
-    const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 + this.userOffsetMs;
+    const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 - this.userOffsetMs;
     this._updateLyricsHighlight(currentTime, false, this.currentSettings || {});
   }
 
