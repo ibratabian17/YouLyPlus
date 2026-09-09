@@ -1854,7 +1854,7 @@ class LyricsPlusRenderer {
       this.cachedSyllables = [];
       this.activeLineIds.clear();
       this.visibleLineIds.clear();
-      this._lineById.clear();
+      this._lineById = new Map();
     }
 
 
