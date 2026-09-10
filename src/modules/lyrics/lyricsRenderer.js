@@ -1267,10 +1267,6 @@ class LyricsPlusRenderer {
               const transTxt = ((isBackground ? this._getDataText(s, false).replace(/[()]/g, "") : (this._getDataText(s, false))) || "");
               if (!transTxt) continue;
 
-              // Skip lines whose syllable was already written in the target script
-              // (no meaningful transliteration to display).
-              if (transTxt.trim() === this._getDataText(s, true).trim()) continue;
-
               const tr = document.createElement("span");
               tr.className = "lyrics-syllable transliteration";
               if (this._isRTL(transTxt)) tr.classList.add("rtl-text");
