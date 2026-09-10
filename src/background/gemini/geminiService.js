@@ -103,7 +103,7 @@ Do not wrap in Markdown code blocks. Just the raw JSON string.`;
     }
   }
 
-  static async romanize(originalLyrics, settings, songInfo = {}, targetLang) {
+  static async romanize(originalLyrics, settings, songInfo = {}, targetLang, targetScript = 'latin') {
     if (!settings.geminiApiKey) {
       throw new Error('Gemini API Key is not provided');
     }
@@ -111,7 +111,7 @@ Do not wrap in Markdown code blocks. Just the raw JSON string.`;
     const structuredInput = this.prepareStructuredInput(originalLyrics);
     const romanizer = new GeminiRomanizer(settings);
 
-    return romanizer.romanize(structuredInput, songInfo, targetLang);
+    return romanizer.romanize(structuredInput, songInfo, targetLang, targetScript);
   }
 
   static prepareStructuredInput(originalLyrics) {

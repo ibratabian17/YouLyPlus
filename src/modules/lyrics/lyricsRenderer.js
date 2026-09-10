@@ -1207,18 +1207,32 @@ class LyricsPlusRenderer {
     const hasSyl = Array.isArray(lineData.syllabus) && lineData.syllabus.length > 0;
 
     if (displayMode === "romanize" || displayMode === "both") {
-      if (!this._isPurelyLatinScript(lineData.text)) {
+      const targetScript = (typeof currentSettings !== 'undefined' && currentSettings.transliterationTargetScript) || 'latin';
+      if (targetScript !== 'latin' || !this._isPurelyLatinScript(lineData.text)) {
         const isWordSynced = lineElement.querySelector(".lyrics-syllable-wrap") !== null;
 
-        if (hasSyl && lineData.syllabus.some(s => (this._getDataText(s, false) || "").trim()) && isWordSynced) {
+        const hasPerSyllableTransliteration =
+          hasSyl &&
+          lineData.syllabus.some(s => {
+            const orig = (this._getDataText(s, true) || "").trim();
+            const trans = (this._getDataText(s, false) || "").trim();
+            return trans && orig && trans !== orig;
+          });
 
-          if (isRTL) {
+        if (hasPerSyllableTransliteration && isWordSynced) {
+          const translitIsRtl = lineData.syllabus.some(s => {
+            const trans = this._getDataText(s, false);
+            return trans && this._isRTL(trans) && trans.trim() !== this._getDataText(s, true).trim();
+          });
+
+          if (isRTL || translitIsRtl) {
             const cont = document.createElement("div");
             cont.classList.add("lyrics-romanization-container");
 
             lineData.syllabus.forEach(s => {
               const txt = this._getDataText(s, false);
               if (!txt) return;
+              if (txt.trim() === this._getDataText(s, true).trim()) return;
 
               const span = document.createElement("span");
               span.className = "lyrics-syllable";
@@ -1253,9 +1267,13 @@ class LyricsPlusRenderer {
               const transTxt = ((isBackground ? this._getDataText(s, false).replace(/[()]/g, "") : (this._getDataText(s, false))) || "");
               if (!transTxt) continue;
 
+              // Skip lines whose syllable was already written in the target script
+              // (no meaningful transliteration to display).
+              if (transTxt.trim() === this._getDataText(s, true).trim()) continue;
 
               const tr = document.createElement("span");
               tr.className = "lyrics-syllable transliteration";
+              if (this._isRTL(transTxt)) tr.classList.add("rtl-text");
               wrap.appendChild(tr);
 
               if (currentSettings.hidePhoneticDup && this._getDataText(s, false).trim() === this._getDataText(s, true).trim()) {

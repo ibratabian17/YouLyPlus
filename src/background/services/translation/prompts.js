@@ -189,7 +189,70 @@ The correct handling of "ال" after a preceding word (preposition, particle, et
 - **Long vs. short vowels** (ਾ, ੀ, ੂ) must be preserved distinctly as aa/ee/oo — do not collapse to short forms, since length is phonemic here as in Hindi.`,
 };
 
-function detectScripts(lyricsForApi) {
+// Conventions the model must follow when writing the OUTPUT in the chosen target script.
+// For the latin target these are implicit in the existing language rulesets, so it stays empty.
+const TARGET_OUTPUT_RULES = {
+  japanese: `## TARGET SCRIPT: JAPANESE KATAKANA (カタカナ)
+- Write the ENTIRE transliteration in Katakana — the standard Japanese script for spelling foreign words phonetically.
+- Example: "I love you" -> アイ ラブ ユー (keep the word separation from the input).
+- Use the conventional katakana approximations for sounds Japanese lacks: v -> ヴ (or バ when established), th -> ス/ズ variants, f -> フ, l -> ル, q(u) -> ク.
+- Keep long vowel marks (ー) where the source pronunciation is lengthened (e.g., "call" -> コール).
+- This is TRANSLITERATION, not translation: never replace words with their Japanese equivalents.
+- Preserve all punctuation, digits, whitespace, and structure exactly.`,
+  korean: `## TARGET SCRIPT: KOREAN HANGUL (한글)
+- Write the ENTIRE transliteration in Hangul syllables, following Korean phonotactics and syllable-blocking (no stray Latin letters).
+- Example: "hello" -> 헬로.
+- Use the established forms for foreign sounds (f -> ㅍ/ㅎ, v -> ㅂ, z -> ㅈ, th -> ㅅ/ㅌ, sh -> ㅅ, ch -> ㅊ).
+- This is TRANSLITERATION, not translation: never replace words with their Korean equivalents.
+- Preserve all punctuation, digits, whitespace, and structure exactly.`,
+  cyrillic: `## TARGET SCRIPT: CYRILLIC (Кириллица)
+- Write the ENTIRE transliteration in Cyrillic, following the Russian practical-transcription conventions (ш -> ш, ч -> ч, ж -> ж, х -> х, й -> й/и).
+- This is TRANSLITERATION, not translation: never replace words with their Russian equivalents.
+- Preserve all punctuation, digits, whitespace, and structure exactly.`,
+  devanagari: `## TARGET SCRIPT: DEVANAGARI (देवनागरी)
+- Write the ENTIRE transliteration in Devanagari (used for Hindi and other Indic languages).
+- Example: "hello" -> हेलो.
+- Apply natural schwa handling (avoid adding unpronounced inherent-vowel sounds) for readable, natural output.
+- This is TRANSLITERATION, not translation: never replace words with their Hindi equivalents.
+- Preserve all punctuation, digits, whitespace, and structure exactly.`,
+  arabic: `## TARGET SCRIPT: ARABIC (العربية)
+- Write the ENTIRE transliteration in Arabic script, undiacritized (no harakat), matching standard lyric-writing style.
+- Example: "hello" -> هلو.
+- Choose approximations that Arabic speakers would naturally use to spell the foreign sound.
+- This is TRANSLITERATION, not translation: never replace words with their Arabic equivalents.
+- Preserve all punctuation, digits, whitespace, and structure exactly.`,
+  hebrew: `## TARGET SCRIPT: HEBREW (עברית)
+- Write the ENTIRE transliteration in Hebrew script, unvocalized (no niqqud), matching standard lyric-writing style.
+- Example: "hello" -> הלו.
+- Choose approximations that Hebrew speakers would naturally use to spell the foreign sound.
+- This is TRANSLITERATION, not translation: never replace words with their Hebrew equivalents.
+- Preserve all punctuation, digits, whitespace, and structure exactly.`,
+  greek: `## TARGET SCRIPT: GREEK (Ελληνικά)
+- Write the ENTIRE transliteration in Greek script.
+- Example: "hello" -> χελο.
+- Choose natural Greek approximations of the foreign sounds (μπ for b, τζ for j/ch, etc.).
+- This is TRANSLITERATION, not translation: never replace words with their Greek equivalents.
+- Preserve all punctuation, digits, whitespace, and structure exactly.`,
+  thai: `## TARGET SCRIPT: THAI (ภาษาไทย)
+- Write the ENTIRE transliteration in Thai script, without inserting extra spaces between words beyond the input's word slots.
+- Express vowel quality and length faithfully (short vs. long vowels are phonemic in Thai).
+- This is TRANSLITERATION, not translation: never replace words with their Thai equivalents.
+- Preserve all punctuation, digits, whitespace, and structure exactly.`,
+};
+
+const TARGET_SCRIPT_LABELS = {
+  latin: 'LATIN',
+  japanese: 'JAPANESE (KATAKANA)',
+  korean: 'KOREAN (HANGUL)',
+  cyrillic: 'CYRILLIC',
+  devanagari: 'DEVANAGARI',
+  arabic: 'ARABIC',
+  hebrew: 'HEBREW',
+  greek: 'GREEK',
+  thai: 'THAI',
+};
+
+function detectScripts(lyricsForApi, allowAllFallback = true) {
   const text = JSON.stringify(lyricsForApi);
   const found = new Set();
 
@@ -199,35 +262,53 @@ function detectScripts(lyricsForApi) {
     }
   }
 
-  if (found.size === 0) {
+  if (found.size === 0 && allowAllFallback) {
     return Object.keys(RULESETS);
   }
 
   return Array.from(found);
 }
 
-export function createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo = {}, targetLang) {
+export function createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo = {}, targetLang, targetScript = 'latin') {
   const songContext = (songInfo.title && songInfo.artist)
     ? `\n# SONG CONTEXT\n- Title: ${songInfo.title}\n- Artist: ${songInfo.artist}\n`
     : '';
 
-  const relevantScripts = detectScripts(lyricsForApi);
+  const isLatinTarget = targetScript === 'latin';
+  const targetLabel = TARGET_SCRIPT_LABELS[targetScript] || 'LATIN';
+  const targetRules = TARGET_OUTPUT_RULES[targetScript] || '';
+
+  // For non-Latin targets, source-script rules are only relevant when they were
+  // actually detected; without detected source scripts we do not dump every ruleset.
+  const relevantScripts = detectScripts(lyricsForApi, isLatinTarget);
   const languageRules = relevantScripts
     .map((key) => RULESETS[key])
     .filter(Boolean)
     .join('\n\n');
 
-  const basePrompt = `You are a professional linguistic transcription system specialized in PHONETIC ROMANIZATION.
+  const languageRulesBlock = languageRules.trim()
+    ? `# LANGUAGE-SPECIFIC SOURCE SCRIPT RULES\n\n${languageRules}\n\n`
+    : '';
+
+  const mission = isLatinTarget
+    ? `Transform non-Latin scripts into Latin alphabet representation of **actual pronunciation in natural speech context**.`
+    : `Transform the source text into ${targetLabel} script, writing a **phonetic transliteration** of how each word sounds — rendered using ${targetLabel} letters.`;
+
+  const antiNote = isLatinTarget
+    ? `This is NOT translation. This is NOT dictionary transliteration. This is PHONETIC TRANSCRIPTION of how words sound when spoken/sung naturally.`
+    : `This is NOT translation. Do NOT replace words with their translated equivalents — write only how the SOURCE words sound using ${targetLabel} script. This IS transliteration into a different alphabet.`;
+
+  const basePrompt = `You are a professional linguistic transcription system specialized in PHONETIC TRANSLITERATION.
 ${songContext}
 # ABSOLUTE MISSION
-Transform non-Latin scripts into Latin alphabet representation of **actual pronunciation in natural speech context**.
+${mission}
 
-This is NOT translation. This is NOT dictionary transliteration. This is PHONETIC TRANSCRIPTION of how words sound when spoken/sung naturally.
+${antiNote}
 
 # FUNDAMENTAL PRINCIPLES
 
 ## PRINCIPLE 1: PHONETIC FIDELITY OVER ORTHOGRAPHIC LITERALISM
-Romanize based on SOUND, not spelling:
+Transliterate based on SOUND, not spelling:
 - Represent actual pronunciation in connected speech.
 - Apply phonological rules (assimilation, liaison, reduction).
 - Preserve natural rhythm and flow of the language.
@@ -243,14 +324,17 @@ Input and output must have IDENTICAL structure:
 ## PRINCIPLE 3: NO SEMANTIC PROCESSING
 You are a transcription machine, not a translator:
 - Do NOT translate meaning.
-- Output ONLY romanized text in exact structure.
+- Output ONLY transliterated text in exact structure.
 
 ## PRINCIPLE 4: ADAPT TO REGIONAL/CULTURAL TARGET STYLES
-Romanization must follow the conventional spelling style used by native speakers of the TARGET LANGUAGE (${targetLang}) and the ARTIST'S CULTURAL CONTEXT.
+${isLatinTarget
+      ? `Romanization must follow the conventional spelling style used by native speakers of the TARGET LANGUAGE (${targetLang}) and the ARTIST'S CULTURAL CONTEXT.`
+      : `Transliteration must follow the natural writing conventions of ${targetLabel} script and the ARTIST'S CULTURAL CONTEXT.`}
 
-# LANGUAGE-SPECIFIC ROMANIZATION RULES
+${languageRulesBlock}# TARGET SCRIPT CONVENTIONS
 
-${languageRules}
+## Output script: ${targetLabel}
+${targetRules || 'Write the output using the standard phonetic romanization (Latin alphabet) conventions covered by the language rules above.'}
 
 # CRITICAL WHITESPACE & STRUCTURE RULES
 
@@ -271,7 +355,7 @@ This is a hard technical constraint, not a stylistic preference: the output JSON
   * Scenario A2 moon-letter liaison: word 1 "على" -> "'Alal ", word 2 "الغصون" -> "ghushuuni" (still 2 words/slots — "al" relocated into word 1's spelling, word 2 starts clean).
   * Scenario B (Egyptian pop): word 1 "في" -> "fe ", word 2 "الغرام" -> "el-gharam" (still 2 words/slots — no liaison needed here since this scenario keeps "el-" attached to its own word normally).
 - If you are ever unsure how to split the fused sound between two word slots, err toward keeping each slot's romanization plausible-looking and pronounceable on its own, rather than dropping all the sound into one slot and leaving the other empty or duplicated.
-- NEVER output an empty string for a word slot, and NEVER output two Latin words crammed into one slot separated by a space when the input had two separate word objects — each output "word" field corresponds 1:1 to exactly one input "word" field.
+- NEVER output an empty string for a word slot, and NEVER output two words crammed into one slot separated by a space when the input had two separate word objects — each output "word" field corresponds 1:1 to exactly one input "word" field.
 
 ## Rule 3: Line Count Preservation
 Number of lines in output MUST equal number in input.
@@ -279,12 +363,12 @@ Number of lines in output MUST equal number in input.
 ## Rule 4: Chunk Structure Preservation
 ${hasAnyChunks ?
       `**SOME lines have chunks (syllable timing data), SOME do not:**
-- For lines WITH "chunk" array in input: Output MUST include "chunk" array with romanized syllables.
+- For lines WITH "chunk" array in input: Output MUST include "chunk" array with transliterated syllables.
 - For lines WITHOUT "chunk" array in input: Output MUST NOT include "chunk" array.
 - Each chunk must preserve its timing and whitespace exactly.` :
       `**These lyrics are LINE-SYNCED ONLY (no syllable-level timing):**
 - NEVER add "chunk" arrays to any word.
-- Only provide romanized "line" and "word" fields.`
+- Only provide transliterated "line" and "word" fields.`
     }
 
 # OUTPUT FORMAT
@@ -292,22 +376,22 @@ ${hasAnyChunks ?
 Return ONLY valid JSON with this exact structure:
 {
   "romanized_lyrics": [
-    // ... array of romanized line objects matching input structure exactly
+    // ... array of transliterated line objects matching input structure exactly
   ]
 }
 
 # VALIDATION CHECKLIST
 - [ ] Checked song context (Indonesian Sholawat vs. Egyptian Pop vs. other)?
-- [ ] Vowels and consonants adapted to target dialect/region?
+- [ ] Every output word written in ${targetLabel} script (${targetLabel === 'LATIN' ? 'no original non-Latin script remaining' : 'no source-script letters remaining'} )?
 - [ ] Exact number of lines and words per line?
 - [ ] Whitespace preserved perfectly?
 - [ ] Valid JSON?
 
-# INPUT DATA TO ROMANIZE
+# INPUT DATA TO TRANSLITERATE
 ${JSON.stringify(lyricsForApi, null, 2)}
 
-# BEGIN ROMANIZATION
-Analyze the language(s) in the input, apply appropriate phonetic rules (considering dialect and regional styles), preserve exact structure, and return valid JSON.`;
+# BEGIN TRANSLITERATION
+Analyze the language(s) in the input, apply appropriate phonetic rules (considering dialect and regional styles), write every word in ${targetLabel} script, preserve exact structure, and return valid JSON.`;
 
   return basePrompt;
 }

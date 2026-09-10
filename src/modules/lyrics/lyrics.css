@@ -411,6 +411,15 @@
     align-items: start;
 }
 
+.lyrics-syllable.transliteration.rtl-text {
+    direction: rtl;
+    unicode-bidi: plaintext;
+}
+
+.lyrics-syllable-wrap:has(.lyrics-syllable.transliteration.rtl-text) {
+    align-items: end;
+}
+
 .lyrics-syllable.transliteration {
     font-size: var(--lyplus-font-size-subtext);
     white-space: pre-wrap;
@@ -921,12 +930,36 @@ span.lyrics-source-provider {
     transition: opacity 0.3s ease, color 0.3s;
 }
 
+
 .lyrics-romanization-container {
     direction: ltr !important;
+    unicode-bidi: plaintext;
+    text-align: start;
 }
 
 .lyrics-romanization-container.rtl-text {
     direction: rtl !important;
+}
+
+/* Case B: LTR transliteration under RTL (Arabic/Hebrew) line -> right-align */
+.lyrics-line.rtl-text .lyrics-romanization-container:not(.rtl-text) {
+    direction: ltr;
+    unicode-bidi: plaintext;
+    text-align: end;
+}
+
+/* Case C: RTL transliteration under LTR line ("flipped") -> right-align */
+.lyrics-line:not(.rtl-text) .lyrics-romanization-container.rtl-text {
+    direction: rtl;
+    unicode-bidi: embed;
+    text-align: start;
+}
+
+/* Case D: RTL transliteration under RTL line -> right-align */
+.lyrics-line.rtl-text .lyrics-romanization-container.rtl-text {
+    direction: rtl;
+    unicode-bidi: embed;
+    text-align: start;
 }
 
 /* --- Translation container: break out of parent RTL direction ---

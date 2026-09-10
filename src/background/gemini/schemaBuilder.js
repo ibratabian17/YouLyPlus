@@ -9,13 +9,13 @@ export class SchemaBuilder {
       properties: {
         romanized_lyrics: {
           type: "ARRAY",
-          description: "An array of romanized lyric line objects, matching the input array's order and length.",
+          description: "An array of transliterated lyric line objects, matching the input array's order and length.",
           items: {
             type: "OBJECT",
             properties: {
               text: {
                 type: "STRING",
-                description: "The fully romanized text of the entire line in Latin script (do NOT put original non-Latin text here)."
+                description: "The fully transliterated text of the entire line written in the requested target script (do NOT put the original source-script text here)."
               },
               original_line_index: {
                 type: "INTEGER",
@@ -39,7 +39,7 @@ export class SchemaBuilder {
           properties: {
             text: {
               type: "STRING",
-              description: "The text of a single romanized chunk. MUST NOT be empty."
+              description: "The text of a single transliterated chunk written in the requested target script. MUST NOT be empty."
             },
             chunkIndex: {
               type: "INTEGER",

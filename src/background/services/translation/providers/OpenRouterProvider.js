@@ -65,12 +65,12 @@ Do not wrap in Markdown code blocks. Just the raw JSON string.`;
         return this.parseResponse(rawContent, texts.length);
     }
 
-    async romanize(originalLyrics, targetLang, songInfo = {}) {
+    async romanize(originalLyrics, targetLang, songInfo = {}, targetScript = 'latin') {
         if (!this.apiKey) {
             throw new Error('OpenRouter API Key is missing. Please set it in Settings.');
         }
 
-        const { lyricsForApi, reconstructionPlan } = this.prepareLyrics(originalLyrics);
+        const { lyricsForApi, reconstructionPlan } = this.prepareLyrics(originalLyrics, targetScript);
         const hasAnyChunks = lyricsForApi.some(line => line.chunk && line.chunk.length > 0);
 
         if (lyricsForApi.length === 0) {
@@ -84,7 +84,7 @@ Do not wrap in Markdown code blocks. Just the raw JSON string.`;
                 : '';
             prompt = songContext + this.settings.customGeminiRomanizePrompt;
         } else {
-            prompt = createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo, targetLang);
+            prompt = createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo, targetLang, targetScript);
         }
 
         // Add specific instruction for OpenRouter
@@ -167,7 +167,7 @@ Do not wrap in Markdown code blocks. Just the raw JSON string.`;
 
                         if (lineIndex >= 0 && lineIndex < lyricsForApi.length) {
                             const origLine = lyricsForApi[lineIndex];
-                            if (this.isLineValid(origLine, retLine)) {
+                            if (this.isLineValid(origLine, retLine, targetScript)) {
                                 validResultsMap.set(lineIndex, {
                                     ...retLine,
                                     original_line_index: lineIndex
@@ -198,16 +198,16 @@ Do not wrap in Markdown code blocks. Just the raw JSON string.`;
                     messages.push({ role: "assistant", content: rawContent || "" });
                     messages.push({
                         role: "user",
-                        content: `Your previous response was missing, incomplete, or contained unromanized non-Latin text for line index(es): [${brokenLineIndices.join(', ')}].
+                        content: `Your previous response was missing, incomplete, or contained text that was not fully transliterated into the target script for line index(es): [${brokenLineIndices.join(', ')}].
 
-Please fix and return ONLY the romanization for these broken line(s) below in a JSON object with a "romanized_lyrics" array:
+Please fix and return ONLY the transliteration for these broken line(s) below in a JSON object with a "romanized_lyrics" array:
 
 ${JSON.stringify(brokenLinesForApi, null, 2)}
 
 Requirements:
 1. Include ONLY the broken line(s) requested above. Do NOT include previously valid lines.
 2. Every item MUST include its correct "original_line_index" matching the input (${brokenLineIndices.join(', ')}).
-3. The "text" field (and "chunk" text fields if chunks were provided) MUST be properly romanized into Latin script. Do NOT leave original non-Latin script.`
+3. The "text" field (and "chunk" text fields if chunks were provided) MUST be fully transliterated into the target script ("${targetScript}"). Do NOT leave source-script text.`
                     });
                 } else {
                     console.warn(`OpenRouter romanization reached max attempts (${maxAttempts}). Proceeding with best-effort results.`);
@@ -235,15 +235,22 @@ Requirements:
         return this.reconstructLyrics(assembledLines, reconstructionPlan, hasAnyChunks);
     }
 
-    isLineValid(origLine, retLine) {
+    isLineValid(origLine, retLine, targetScript = 'latin') {
         if (!retLine || typeof retLine !== 'object') return false;
 
         if (!retLine.text || typeof retLine.text !== 'string' || retLine.text.trim() === '') {
             return false;
         }
 
-        if (!Utilities.isPurelyLatinScript(origLine.text)) {
+        if (targetScript === 'latin') {
             if (!Utilities.isPurelyLatinScript(retLine.text)) {
+                return false;
+            }
+            if (retLine.text.trim() === origLine.text.trim()) {
+                return false;
+            }
+        } else {
+            if (!Utilities.containsScript(retLine.text, targetScript)) {
                 return false;
             }
             if (retLine.text.trim() === origLine.text.trim()) {
@@ -257,7 +264,11 @@ Requirements:
             }
             for (const c of retLine.chunk) {
                 if (!c || typeof c.text !== 'string' || c.text.trim() === '') return false;
-                if (!Utilities.isPurelyLatinScript(c.text)) return false;
+                if (targetScript === 'latin') {
+                    if (!Utilities.isPurelyLatinScript(c.text)) return false;
+                } else {
+                    if (!Utilities.containsScript(c.text, targetScript)) return false;
+                }
             }
         }
 
@@ -294,7 +305,7 @@ Requirements:
             .replace(/\s*```$/, "");
     }
 
-    prepareLyrics(originalLyrics) {
+    prepareLyrics(originalLyrics, targetScript = 'latin') {
         const lyricsForApi = [];
         const reconstructionPlan = [];
         const contentToApiIndexMap = new Map();
@@ -303,7 +314,8 @@ Requirements:
         const lines = originalLyrics.data || [];
 
         lines.forEach((line, originalIndex) => {
-            if (Utilities.isPurelyLatinScript(line.text)) {
+            // Lines already written in the requested target script are passed through unchanged.
+            if (Utilities.isInTargetScript(line.text, targetScript)) {
                 reconstructionPlan.push({ type: 'latin', data: line, originalIndex });
                 return;
             }

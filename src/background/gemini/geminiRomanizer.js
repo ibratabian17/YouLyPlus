@@ -11,15 +11,15 @@ export class GeminiRomanizer {
     this.url = `https://generativelanguage.googleapis.com/v1beta/models/${this.modelName}:generateContent?key=${settings.geminiApiKey}`;
   }
 
-  async romanize(structuredInput, songInfo = {}, targetLang) {
-    const { lyricsForApi, reconstructionPlan } = this.prepareLyrics(structuredInput);
+  async romanize(structuredInput, songInfo = {}, targetLang, targetScript = 'latin') {
+    const { lyricsForApi, reconstructionPlan } = this.prepareLyrics(structuredInput, targetScript);
     const hasAnyChunks = lyricsForApi.some(line => line.chunk && line.chunk.length > 0);
 
     if (lyricsForApi.length === 0) {
       return this.reconstructLyrics([], reconstructionPlan, hasAnyChunks);
     }
 
-    const initialPrompt = this.createInitialPrompt(lyricsForApi, hasAnyChunks, songInfo, targetLang);
+    const initialPrompt = this.createInitialPrompt(lyricsForApi, hasAnyChunks, songInfo, targetLang, targetScript);
     const schema = SchemaBuilder.buildRomanizationSchema(hasAnyChunks);
 
     const contents = [{ role: 'user', parts: [{ text: initialPrompt }] }];
@@ -71,7 +71,7 @@ export class GeminiRomanizer {
 
             if (lineIndex >= 0 && lineIndex < lyricsForApi.length) {
               const origLine = lyricsForApi[lineIndex];
-              if (this.isLineValid(origLine, retLine)) {
+              if (this.isLineValid(origLine, retLine, targetScript)) {
                 validResultsMap.set(lineIndex, {
                   ...retLine,
                   original_line_index: lineIndex
@@ -103,16 +103,16 @@ export class GeminiRomanizer {
           contents.push({
             role: 'user',
             parts: [{
-              text: `Your previous response was missing, incomplete, or contained unromanized non-Latin text for line index(es): [${brokenLineIndices.join(', ')}].
+              text: `Your previous response was missing, incomplete, or contained text that was not fully transliterated into the target script for line index(es): [${brokenLineIndices.join(', ')}].
 
-Please fix and return ONLY the romanization for these broken line(s) below in a valid JSON array:
+Please fix and return ONLY the transliteration for these broken line(s) below in a valid JSON array:
 
 ${JSON.stringify(brokenLinesForApi, null, 2)}
 
 Requirements:
 1. Include ONLY the broken line(s) requested above. Do NOT include previously valid lines.
 2. Every item MUST include its correct "original_line_index" matching the input (${brokenLineIndices.join(', ')}).
-3. The "text" field (and "chunk" text fields if chunks were provided) MUST be properly romanized into Latin script. Do NOT leave original non-Latin script.`
+3. The "text" field (and "chunk" text fields if chunks were provided) MUST be fully transliterated into the target script ("${targetScript}"). Do NOT leave source-script text.`
             }]
           });
         } else {
@@ -182,15 +182,22 @@ Requirements:
     return this.reconstructLyrics(alignedApiLyrics, reconstructionPlan, hasAnyChunks);
   }
 
-  isLineValid(origLine, retLine) {
+  isLineValid(origLine, retLine, targetScript = 'latin') {
     if (!retLine || typeof retLine !== 'object') return false;
 
     if (!retLine.text || typeof retLine.text !== 'string' || retLine.text.trim() === '') {
       return false;
     }
 
-    if (!Utilities.isPurelyLatinScript(origLine.text)) {
+    if (targetScript === 'latin') {
       if (!Utilities.isPurelyLatinScript(retLine.text)) {
+        return false;
+      }
+      if (retLine.text.trim() === origLine.text.trim()) {
+        return false;
+      }
+    } else {
+      if (!Utilities.containsScript(retLine.text, targetScript)) {
         return false;
       }
       if (retLine.text.trim() === origLine.text.trim()) {
@@ -204,7 +211,11 @@ Requirements:
       }
       for (const c of retLine.chunk) {
         if (!c || typeof c.text !== 'string' || c.text.trim() === '') return false;
-        if (!Utilities.isPurelyLatinScript(c.text)) return false;
+        if (targetScript === 'latin') {
+          if (!Utilities.isPurelyLatinScript(c.text)) return false;
+        } else {
+          if (!Utilities.containsScript(c.text, targetScript)) return false;
+        }
       }
     }
 
@@ -258,13 +269,14 @@ Requirements:
       .replace(/\s*```$/, "");
   }
 
-  prepareLyrics(structuredInput) {
+  prepareLyrics(structuredInput, targetScript = 'latin') {
     const lyricsForApi = [];
     const reconstructionPlan = [];
     const contentToApiIndexMap = new Map();
 
     structuredInput.forEach((line, originalIndex) => {
-      if (Utilities.isPurelyLatinScript(line.text)) {
+      // Lines already written in the requested target script are passed through unchanged.
+      if (Utilities.isInTargetScript(line.text, targetScript)) {
         reconstructionPlan.push({ type: 'latin', data: line, originalIndex });
         return;
       }
@@ -323,7 +335,7 @@ Requirements:
     return fullList;
   }
 
-  createInitialPrompt(lyricsForApi, hasAnyChunks, songInfo = {}, targetLang) {
+  createInitialPrompt(lyricsForApi, hasAnyChunks, songInfo = {}, targetLang, targetScript = 'latin') {
     const { overrideGeminiRomanizePrompt, customGeminiRomanizePrompt } = this.settings;
 
     if (overrideGeminiRomanizePrompt && customGeminiRomanizePrompt) {
@@ -333,6 +345,6 @@ Requirements:
       return songContext + customGeminiRomanizePrompt;
     }
 
-    return createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo, targetLang);
+    return createRomanizationPrompt(lyricsForApi, hasAnyChunks, songInfo, targetLang, targetScript);
   }
 }

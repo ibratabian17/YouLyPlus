@@ -468,23 +468,71 @@
     "description": "Helper text"
   },
   "categoryRomanization": {
-    "message": "Romanization Service (for non-Latin scripts)",
+    "message": "Transliteration Service (Script Conversion)",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "Transliteration Target Script",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Convert lyrics into this script for pronunciation guides (e.g., English to Japanese Katakana). Non-Latin targets require Gemini or OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate only supports Latin (romaji) transliteration. Select Gemini or OpenRouter as the Transliteration Provider to enable other scripts.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latin (Romaji / Phonetic)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japanese (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Korean (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Cyrillic (Russian)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arabic",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Hebrew",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Greek",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Thai",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
-    "message": "Romanization Provider",
+    "message": "Transliteration Provider",
     "description": "Dropdown label"
   },
   "descRomanizationProvider": {
-    "message": "Automatically fetches romanization from the Lyrics+ API when available. If not provided by Lyrics+, it falls back to generating romanization using the selected service.",
-    "description": "Description for romanization provider"
+    "message": "Automatically fetches transliteration from the Lyrics+ API when available. If not provided by Lyrics+, it falls back to generating transliteration using the selected service.",
+    "description": "Description for transliteration provider"
   },
   "labelGeminiRomanizationModel": {
-    "message": "Gemini AI Romanization Model",
+    "message": "Gemini AI Transliteration Model",
     "description": "Dropdown label"
   },
   "descGeminiRomanizationModel": {
-    "message": "Choose the Gemini AI model for romanization.",
+    "message": "Choose the Gemini AI model for transliteration.",
     "description": "Description"
   },
   "categoryTranslationBehavior": {

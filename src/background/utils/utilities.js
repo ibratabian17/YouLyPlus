@@ -14,6 +14,57 @@ export class Utilities {
     return /^[\p{Script=Latin}\p{N}\p{P}\p{S}\s]*$/u.test(text);
   }
 
+  /**
+   * Returns true if the text contains at least one character belonging to the
+   * polished target script. Used to validate transliteration output and decide
+   * which source lines already live in the requested target script.
+   * @param {string} text - The text to inspect.
+   * @param {string} script - One of: latin, japanese, korean, cyrillic, devanagari, arabic, hebrew, greek, thai.
+   * @returns {boolean}
+   */
+  static containsScript(text, script) {
+    if (!text) return false;
+    switch (script) {
+      case 'japanese':
+        return /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(text);
+      case 'korean':
+        return /[\p{Script=Hangul}]/u.test(text);
+      case 'cyrillic':
+        return /[\p{Script=Cyrillic}]/u.test(text);
+      case 'devanagari':
+        return /[\p{Script=Devanagari}]/u.test(text);
+      case 'arabic':
+        return /[\p{Script=Arabic}]/u.test(text);
+      case 'hebrew':
+        return /[\p{Script=Hebrew}]/u.test(text);
+      case 'greek':
+        return /[\p{Script=Greek}]/u.test(text);
+      case 'thai':
+        return /[\p{Script=Thai}]/u.test(text);
+      case 'latin':
+        return /[\p{Script=Latin}]/u.test(text);
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Returns true when the text can be considered "already in" the target script,
+   * i.e. lines that do not need to be transliterated.
+   * For the latin target this requires the whole string to be Latin;
+   * for other targets merely containing a character of that script is enough.
+   * @param {string} text - The text to inspect.
+   * @param {string} targetScript - The requested target script.
+   * @returns {boolean}
+   */
+  static isInTargetScript(text, targetScript) {
+    if (!text) return false;
+    if (targetScript === 'latin' || !targetScript) {
+      return this.isPurelyLatinScript(text);
+    }
+    return this.containsScript(text, targetScript);
+  }
+
   static normalizeText(text) {
     return text
       .replace(/\s+/g, ' ')

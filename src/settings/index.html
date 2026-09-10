@@ -731,12 +731,35 @@
                 </div>
 
                 <div class="settings-category">
-                    <h3 class="category-title" data-i18n="categoryRomanization">Romanization Service (for non-Latin scripts)</h3>
+                    <h3 class="category-title" data-i18n="categoryRomanization">Transliteration Service (Script Conversion)</h3>
                     <div class="settings-group">
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelRomanizationProvider">Romanization Provider</span>
-                                <span class="setting-description" data-i18n="descRomanizationProvider">Automatically fetches romanization from Lyrics+ or generates using the selected service.</span>
+                                <span class="setting-title" data-i18n="labelTransliterationTarget">Transliteration Target Script</span>
+                                <span class="setting-description" data-i18n="descTransliterationTarget">Convert lyrics into this script for pronunciation guides (e.g., English to Japanese Katakana). Non-Latin targets require Gemini or OpenRouter.</span>
+                            </div>
+                            <div class="setting-control">
+                                <div class="form-group margin-0">
+                                    <select id="transliteration-target" placeholder=" ">
+                                        <option value="" disabled selected></option>
+                                        <option value="latin" data-i18n="optionLatin">Latin (Romaji / Phonetic)</option>
+                                        <option value="japanese" data-i18n="optionJapanese">Japanese (Katakana)</option>
+                                        <option value="korean" data-i18n="optionKorean">Korean (Hangul)</option>
+                                        <option value="cyrillic" data-i18n="optionCyrillic">Cyrillic (Russian)</option>
+                                        <option value="devanagari" data-i18n="optionDevanagari">Devanagari (Hindi)</option>
+                                        <option value="arabic" data-i18n="optionArabic">Arabic</option>
+                                        <option value="hebrew" data-i18n="optionHebrew">Hebrew</option>
+                                        <option value="greek" data-i18n="optionGreek">Greek</option>
+                                        <option value="thai" data-i18n="optionThai">Thai</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="setting-note" id="transliteration-target-note" style="display: none;" data-i18n="noteTransliterationTargetDisabled">Google Translate only supports Latin (romaji) transliteration. Select Gemini or OpenRouter as the Transliteration Provider to enable other scripts.</div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="labelRomanizationProvider">Transliteration Provider</span>
+                                <span class="setting-description" data-i18n="descRomanizationProvider">Automatically fetches transliteration from the Lyrics+ API when available. If not provided by Lyrics+, it falls back to generating transliteration using the selected service.</span>
                             </div>
                             <div class="setting-control">
                                 <div class="form-group margin-0">
@@ -751,8 +774,8 @@
                         </div>
                         <div class="setting-item" id="gemini-romanization-model-group" style="display: none;">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelGeminiRomanizationModel">Gemini AI Romanization Model</span>
-                                <span class="setting-description" data-i18n="descGeminiRomanizationModel">Choose the Gemini AI model for romanization.</span>
+                                <span class="setting-title" data-i18n="labelGeminiRomanizationModel">Gemini AI Transliteration Model</span>
+                                <span class="setting-description" data-i18n="descGeminiRomanizationModel">Choose the Gemini AI model for transliteration.</span>
                             </div>
                             <div class="setting-control">
                                 <div class="form-group margin-0">

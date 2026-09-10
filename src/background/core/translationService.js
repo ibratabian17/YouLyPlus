@@ -16,9 +16,9 @@ import { DeepLProvider } from '../services/translation/providers/DeepLProvider.j
 import { DeepLKeylessProvider } from '../services/translation/providers/DeepLKeylessProvider.js';
 
 export class TranslationService {
-  static createCacheKey(songInfo, action, targetLang) {
+  static createCacheKey(songInfo, action, targetLang, targetScript) {
     const baseLyricsCacheKey = LyricsService.createCacheKey(songInfo);
-    return `${baseLyricsCacheKey} - ${action} - ${targetLang}`;
+    return `${baseLyricsCacheKey} - ${action} - ${targetLang} - ${targetScript}`;
   }
 
   static async getOrFetch(songInfo, action, targetLang, forceReload = false) {
@@ -28,7 +28,9 @@ export class TranslationService {
       ? settings.customTranslateTarget
       : resolvedTargetLang;
 
-    const translatedKey = this.createCacheKey(songInfo, action, actualTargetLang);
+    const targetScript = settings.transliterationTargetScript || 'latin';
+
+    const translatedKey = this.createCacheKey(songInfo, action, actualTargetLang, targetScript);
 
     const { lyrics: originalLyrics, version: originalVersion } =
       await LyricsService.getOrFetch(songInfo, forceReload);
@@ -47,7 +49,8 @@ export class TranslationService {
       action,
       actualTargetLang,
       settings,
-      songInfo
+      songInfo,
+      targetScript
     );
 
     const finalTranslatedLyrics = { ...originalLyrics, data: translatedData };
@@ -107,11 +110,11 @@ export class TranslationService {
     }
   }
 
-  static async performTranslation(originalLyrics, action, targetLang, settings, songInfo = {}) {
+  static async performTranslation(originalLyrics, action, targetLang, settings, songInfo = {}, targetScript = 'latin') {
     if (action === 'translate') {
       return this.translate(originalLyrics, targetLang, settings, songInfo);
     } else if (action === 'romanize') {
-      return this.romanize(originalLyrics, settings, songInfo, targetLang);
+      return this.romanize(originalLyrics, settings, songInfo, targetLang, targetScript);
     }
 
     return originalLyrics.data;
@@ -165,34 +168,66 @@ export class TranslationService {
     }));
   }
 
-  static async romanize(originalLyrics, settings, songInfo = {}, targetLang) {
-    // Check for prebuilt romanization
-    const hasPrebuilt = originalLyrics.data.some(line =>
-      line.romanizedText || (line.syllabus && line.syllabus.some(syl => syl.romanizedText))
-    );
+  /**
+   * Builds the ordered list of providers to try for romanization/transliteration.
+   * For Latin targets it preserves the legacy behavior: the chosen provider first,
+   * falling back to Google. For non-Latin target scripts Google is skipped entirely
+   * (it cannot transliterate into other scripts), so Gemini/OpenRouter are used
+   * when API keys are available.
+   */
+  static resolveRomanizationProviders(settings, targetScript) {
+    const candidates = [];
+    const push = (name) => {
+      if (name && !candidates.includes(name)) candidates.push(name);
+    };
 
-    if (hasPrebuilt) {
-      console.log("Using prebuilt romanization");
-      return originalLyrics.data.map(line => ({
-        text: line.romanizedText || line.text
-      }));
+    const selected = settings.romanizationProvider || PROVIDERS.GOOGLE;
+    const isAiProvider = selected === PROVIDERS.GEMINI || selected === PROVIDERS.OPENROUTER;
+
+    if (targetScript && targetScript !== 'latin') {
+      if (isAiProvider) push(selected);
+      if (settings.geminiApiKey) push(PROVIDERS.GEMINI);
+      if (settings.openRouterApiKey) push(PROVIDERS.OPENROUTER);
+    } else {
+      push(selected);
+      push(PROVIDERS.GOOGLE);
     }
 
-    const provider = this.getProvider(settings.romanizationProvider, settings);
+    return candidates;
+  }
 
-    // We might want to fallback to Google if the selected provider doesn't support romanization properly
-    // But currently only GeminiProvider and GoogleProvider implement it fully. 
-    // OpenRouter throws, so we should catch it.
+  static async romanize(originalLyrics, settings, songInfo = {}, targetLang, targetScript = 'latin') {
+    if (targetScript === 'latin') {
+      const hasPrebuilt = originalLyrics.data.some(line =>
+        line.romanizedText || (line.syllabus && line.syllabus.some(syl => syl.romanizedText))
+      );
 
-    try {
-      return await provider.romanize(originalLyrics, targetLang, songInfo);
-    } catch (error) {
-      console.warn(`Romanization with ${settings.romanizationProvider} failed, falling back to Google:`, error);
-      if (settings.romanizationProvider !== PROVIDERS.GOOGLE) {
-        const fallbackProvider = new GoogleProvider(settings);
-        return await fallbackProvider.romanize(originalLyrics, targetLang, songInfo);
+      if (hasPrebuilt) {
+        console.log("Using prebuilt romanization");
+        return originalLyrics.data.map(line => ({
+          text: line.romanizedText || line.text
+        }));
       }
-      throw error;
     }
+
+    const candidates = this.resolveRomanizationProviders(settings, targetScript);
+    let lastError = null;
+
+    for (const providerName of candidates) {
+      try {
+        const provider = this.getProvider(providerName, settings);
+        return await provider.romanize(originalLyrics, targetLang, songInfo, targetScript);
+      } catch (error) {
+        lastError = error;
+        console.warn(`Romanization with ${providerName} failed, trying next available provider:`, error.message);
+      }
+    }
+
+    if (lastError) throw lastError;
+    throw new Error(
+      targetScript !== 'latin'
+        ? `Transliteration into "${targetScript}" script requires Gemini or OpenRouter. Please set an API key in the settings.`
+        : 'Romanization failed: no provider available.'
+    );
   }
 }

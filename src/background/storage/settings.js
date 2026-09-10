@@ -26,6 +26,7 @@ export class SettingsManager {
     return this.get({
       'translationProvider': PROVIDERS.GOOGLE,
       'romanizationProvider': PROVIDERS.GOOGLE,
+      'transliterationTargetScript': 'latin',
       'geminiApiKey': '',
       'geminiModel': 'gemini-pro',
       'geminiRomanizationModel': 'gemini-pro',

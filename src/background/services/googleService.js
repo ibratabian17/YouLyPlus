@@ -18,7 +18,13 @@ export class GoogleService {
     return data?.[0]?.map(segment => segment?.[0]).join('') || text;
   }
 
-  static async romanize(originalLyrics) {
+  static async romanize(originalLyrics, targetLang, songInfo = {}, targetScript) {
+    if (targetScript && targetScript !== 'latin') {
+      throw new Error(
+        `Google Translate only supports Latin (romaji) transliteration. Select Gemini or OpenRouter for "${targetScript}" script transliteration.`
+      );
+    }
+
     let processedData;
 
     if (originalLyrics.type === "Word") {

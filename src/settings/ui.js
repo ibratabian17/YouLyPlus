@@ -101,6 +101,7 @@ const autoSaveControls = [
     { id: 'openrouter-model', key: 'openRouterModel', type: 'value', debounce: 500 },
     { id: 'deepl-api-key', key: 'deeplApiKey', type: 'value', debounce: 500 },
     { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' },
+    { id: 'transliteration-target', key: 'transliterationTargetScript', type: 'value' },
     { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' },
     { id: 'override-translate-target', key: 'overrideTranslateTarget', type: 'checkbox' },
     { id: 'custom-translate-target', key: 'customTranslateTarget', type: 'value', debounce: 500 },
@@ -173,6 +174,8 @@ function updateUI(settings) {
 
     setVal('romanization-provider', currentSettings.romanizationProvider);
     updateCustomSelectDisplay('romanization-provider');
+    setVal('transliteration-target', currentSettings.transliterationTargetScript || 'latin');
+    updateCustomSelectDisplay('transliteration-target');
     setVal('gemini-romanization-model', currentSettings.geminiRomanizationModel || 'gemini-1.5-pro-latest');
     updateCustomSelectDisplay('gemini-romanization-model');
 
@@ -213,6 +216,7 @@ function updateUI(settings) {
     toggleGeminiPromptVisibility();
     toggleGeminiRomanizePromptVisibility();
     toggleRomanizationModelVisibility();
+    applyTransliterationTargetState();
 
     populateDraggableProviders();
     populateDraggableSources();
@@ -802,6 +806,7 @@ document.getElementById('override-gemini-romanize-prompt').addEventListener('cha
 document.getElementById('romanization-provider').addEventListener('change', () => {
     toggleRomanizationModelVisibility();
     toggleOpenRouterSettingsVisibility();
+    applyTransliterationTargetState();
 });
 
 document.getElementById('translation-provider').addEventListener('change', (e) => {
@@ -885,6 +890,31 @@ function toggleGeminiRomanizePromptVisibility() {
 function toggleRomanizationModelVisibility() {
     const isVisible = document.getElementById('romanization-provider').value === 'gemini';
     toggleElementVisibility('gemini-romanization-model-group', isVisible);
+}
+
+function applyTransliterationTargetState() {
+    const targetSelect = document.getElementById('transliteration-target');
+    const note = document.getElementById('transliteration-target-note');
+    const isAi = ['gemini', 'openrouter'].includes(document.getElementById('romanization-provider').value);
+
+    if (targetSelect) {
+        targetSelect.disabled = !isAi;
+
+        if (!isAi && currentSettings.transliterationTargetScript && currentSettings.transliterationTargetScript !== 'latin') {
+            // Google Translate cannot output non-Latin scripts, so fall back to Latin
+            // to keep the saved state consistent with what actually runs.
+            currentSettings.transliterationTargetScript = 'latin';
+            targetSelect.value = 'latin';
+            updateSettings({ transliterationTargetScript: 'latin' });
+            saveSettings();
+        }
+
+        updateCustomSelectDisplay('transliteration-target');
+    }
+
+    if (note) {
+        note.style.display = isAi ? 'none' : 'block';
+    }
 }
 
 async function handleUploadLocalLyrics() {

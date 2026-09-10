@@ -389,6 +389,22 @@ h2.card-title.no-border {
     pointer-events: auto;
 }
 
+.setting-note {
+    flex-basis: 100%;
+    width: 100%;
+    font-size: 0.825rem;
+    color: var(--md-sys-color-error);
+    line-height: 1.4;
+    margin: 0;
+    padding: 0;
+}
+
+.setting-item:not(.full-width) .setting-control .m3-select.disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .setting-item.full-width {
     flex-direction: column;
     align-items: stretch;

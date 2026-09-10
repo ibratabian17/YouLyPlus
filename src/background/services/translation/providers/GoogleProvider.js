@@ -10,7 +10,7 @@ export class GoogleProvider extends TranslationProvider {
         return Promise.all(translationPromises);
     }
 
-    async romanize(originalLyrics, targetLang, songInfo = {}) {
-        return GoogleService.romanize(originalLyrics);
+    async romanize(originalLyrics, targetLang, songInfo = {}, targetScript) {
+        return GoogleService.romanize(originalLyrics, targetLang, songInfo, targetScript);
     }
 }
