@@ -142,10 +142,10 @@ Requirements:
       }
 
       let fullLineRom = '';
-      if (chunkTexts.length > 0) {
-        fullLineRom = chunkTexts.join(' ');
-      } else if (retLine && retLine.text) {
+      if (retLine && retLine.text) {
         fullLineRom = retLine.text;
+      } else if (chunkTexts.length > 0) {
+        fullLineRom = chunkTexts.join('');
       } else {
         fullLineRom = origLine.text;
       }
