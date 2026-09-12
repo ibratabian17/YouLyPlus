@@ -183,7 +183,6 @@ class LyricsPlusRenderer {
     this._animatingLines = [];
     this._charAnimationsMap = new Map();
     this._styleUpdates = [];
-    this._animationParts = [];
     this._visibilityChanges = [];
 
     this.wakeLock = null;
@@ -1620,20 +1619,19 @@ class LyricsPlusRenderer {
     }
 
     container.appendChild(fragment);
-    if (lineSideAssignments.length > 0) {
-      const generatedLines = container.querySelectorAll(".lyrics-line:not(.lyrics-gap)");
-      generatedLines.forEach((line, index) => {
-        const assignedClass = lineSideAssignments[index];
-        if (assignedClass) {
-          line.classList.remove("singer-left", "singer-right");
-          line.classList.add(assignedClass);
-        }
-      });
-    }
-
     const originalLines = Array.from(
       container.querySelectorAll(".lyrics-line:not(.lyrics-gap)")
     );
+    if (lineSideAssignments.length > 0) {
+      for (let index = 0; index < originalLines.length; index++) {
+        const assignedClass = lineSideAssignments[index];
+        if (assignedClass) {
+          const line = originalLines[index];
+          line.classList.remove("singer-left", "singer-right");
+          line.classList.add(assignedClass);
+        }
+      }
+    }
     if (originalLines.length > 0) {
       const firstLine = originalLines[0];
       const firstStartTime = parseFloat(firstLine.dataset.startTime);
@@ -2379,14 +2377,15 @@ class LyricsPlusRenderer {
    * Batch update viewport visibility
    */
   _batchUpdateViewportVisibility() {
-    if (!this._visibilityChanges || this._visibilityChanges.length === 0) return;
+    const changes = this._visibilityChanges;
+    if (!changes || changes.length === 0) return;
 
-    for (let i = 0; i < this._visibilityChanges.length; i++) {
-      const change = this._visibilityChanges[i];
-      change.target.classList.toggle("viewport-hidden", !change.isIntersecting);
+    for (let i = 0; i < changes.length; i++) {
+      const target = changes[i];
+      target.classList.toggle("viewport-hidden", !this.visibleLineIds.has(target.id));
     }
 
-    this._visibilityChanges = [];
+    changes.length = 0;
   }
 
   _updateSyllables(currentTime, activeLines) {
@@ -2482,9 +2481,6 @@ class LyricsPlusRenderer {
     const styleUpdates = this._styleUpdates;
     let styleUpdatesCount = 0;
 
-    if (!this._animationParts) this._animationParts = new Array(4);
-    const animationParts = this._animationParts;
-
     // Step 1: Grow Pass.
     if (isGrowable && isFirstSyllable && allWordCharSpans) {
       const finalDuration = (syllable._wordDurationMs !== undefined && syllable._wordDurationMs !== null) ? syllable._wordDurationMs : syllable._durationMs;
@@ -2531,10 +2527,10 @@ class LyricsPlusRenderer {
             : "wipe";
 
         const existingAnimation = charAnimationsMap.get(span) || span.style.animation;
-        let animationPartsCount = 0;
+        let combined = "";
 
         if (existingAnimation && existingAnimation.includes("grow-dynamic")) {
-          animationParts[animationPartsCount++] = existingAnimation.split(",")[0].trim();
+          combined = existingAnimation.split(",")[0].trim();
         }
 
         if (charIndex > 0) {
@@ -2544,15 +2540,17 @@ class LyricsPlusRenderer {
           const animDelay = arrivalTime - constantDuration;
 
           if (constantDuration > 0) {
-            animationParts[animationPartsCount++] = `pre-wipe-char ${constantDuration}ms linear ${animDelay}ms forwards`;
+            const part = `pre-wipe-char ${constantDuration}ms linear ${animDelay}ms forwards`;
+            combined = combined ? `${combined}, ${part}` : part;
           }
         }
 
         if (wipeDuration > 0) {
-          animationParts[animationPartsCount++] = `${charWipeAnimation} ${wipeDuration}ms linear ${wipeDelay}ms forwards`;
+          const part = `${charWipeAnimation} ${wipeDuration}ms linear ${wipeDelay}ms forwards`;
+          combined = combined ? `${combined}, ${part}` : part;
         }
 
-        charAnimationsMap.set(span, animationParts.slice(0, animationPartsCount).join(", "));
+        charAnimationsMap.set(span, combined);
       }
     } else {
       const ratio = syllable._wipeRatio || 1;
@@ -2615,9 +2613,9 @@ class LyricsPlusRenderer {
     classList.add("highlight");
     syllable._state = (syllable._state & ~4) | 1;
 
-    for (const [span, animationString] of charAnimationsMap.entries()) {
+    charAnimationsMap.forEach((animationString, span) => {
       span.style.animation = animationString;
-    }
+    });
 
     for (let i = 0; i < styleUpdatesCount; i++) {
       const update = styleUpdates[i];
@@ -3029,7 +3027,8 @@ class LyricsPlusRenderer {
     if (!container || !container.parentElement) return null;
     if (this.visibilityObserver) this.visibilityObserver.disconnect();
 
-    this._visibilityChanges = [];
+    if (!this._visibilityChanges) this._visibilityChanges = [];
+    else this._visibilityChanges.length = 0;
 
     this.visibilityObserver = new IntersectionObserver(
       (entries) => {
@@ -3038,10 +3037,7 @@ class LyricsPlusRenderer {
           const target = entry.target;
           const id = target.id;
 
-          this._visibilityChanges.push({
-            target: target,
-            isIntersecting: entry.isIntersecting
-          });
+          this._visibilityChanges.push(target);
 
           if (entry.isIntersecting) {
             if (!this.visibleLineIds.has(id)) {
