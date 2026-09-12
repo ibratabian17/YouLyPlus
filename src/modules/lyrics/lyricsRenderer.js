@@ -56,6 +56,56 @@ class LyricsPlusRenderer {
     return size;
   }
 
+  static _SPRING_EASING_CACHE = new Map();
+
+  static _cubicBezierY(t, x1, y1, x2, y2) {
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+    const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    let u = t;
+    for (let i = 0; i < 8; i++) {
+      const x = ((ax * u + bx) * u + cx) * u - t;
+      const dx = (3 * ax * u + 2 * bx) * u + cx;
+      if (Math.abs(dx) < 1e-6) break;
+      u -= x / dx;
+    }
+    return ((ay * u + by) * u + cy) * u;
+  }
+
+  static _getSpringEasing(peakTimeMs, zeta = 0.78, settleTailMs = 400, mass = 1) {
+    const key = `${peakTimeMs}:${zeta}:${settleTailMs}:${mass}`;
+    const cached = LyricsPlusRenderer._SPRING_EASING_CACHE.get(key);
+    if (cached) return cached;
+
+    const peakTimeS = peakTimeMs / 1000;
+    const settleTailS = settleTailMs / 1000;
+    const omegaD = Math.PI / peakTimeS;
+    const omega0 = omegaD / Math.sqrt(1 - zeta * zeta);
+    const decayRate = zeta * omega0;
+    const dt = 1 / 120;
+
+    let peakValue = 1;
+    for (let t = 0; t <= peakTimeS; t += dt) {
+      peakValue = 1 - Math.exp(-decayRate * t) * (Math.cos(omegaD * t) + (decayRate / omegaD) * Math.sin(omegaD * t));
+    }
+
+    const points = [];
+    for (let t = 0; t <= peakTimeS; t += dt) {
+      const u = t / peakTimeS;
+      points.push(peakValue * LyricsPlusRenderer._cubicBezierY(u, 0.41, 0, 0.12, 0.99));
+    }
+
+    for (let t = dt; t <= settleTailS; t += dt) {
+      const u = t / settleTailS;
+      points.push(1 + (peakValue - 1) * 0.5 * (1 + Math.cos(Math.PI * u)));
+    }
+
+    points.push(1);
+    const easing = `linear(${points.map((v) => v.toFixed(4)).join(",")})`;
+    const result = { easing, duration: Math.round((peakTimeS + settleTailS) * 1000) };
+    LyricsPlusRenderer._SPRING_EASING_CACHE.set(key, result);
+    return result;
+  }
+
   /**
    * Constructor for the LyricsPlusRenderer.
    * Initializes state variables and sets up the initial environment for the lyrics display.
@@ -353,6 +403,7 @@ class LyricsPlusRenderer {
     container.classList.add("lyrics-plus-integrated", "blur-inactive-enabled");
     originalLyricsSection.appendChild(container);
     this.lyricsContainer = container;
+    this._invalidateSpringConfig();
     return container;
   }
 
@@ -2665,6 +2716,25 @@ class LyricsPlusRenderer {
     return result;
   }
 
+  _resolveSpringConfig() {
+    const style = getComputedStyle(this.lyricsContainer);
+    const readNum = (prop, fallback) => {
+      const v = parseFloat(style.getPropertyValue(prop));
+      return Number.isFinite(v) ? v : fallback;
+    };
+    return {
+      enabled: style.getPropertyValue('--lyplus-spring-scroll').trim() !== 'false',
+      zeta: readNum('--lyplus-spring-zeta', 0.78),
+      settleRatio: readNum('--lyplus-spring-settle-ratio', 1.5),
+      zetaRelax: readNum('--lyplus-spring-zeta-relax', 0.8),
+      settleRatioRelax: readNum('--lyplus-spring-settle-ratio-relax', 1.5)
+    };
+  }
+
+  _invalidateSpringConfig() {
+    this._springConfigCache = null;
+  }
+
   /**
    * Applies the new scroll position with a robust buffer logic.
    * Animation delay is applied to a window of approximately two screen heights
@@ -2708,7 +2778,20 @@ class LyricsPlusRenderer {
     const isRelaxMode = this.currentSettings && this.currentSettings.relaxScroll;
     duration = Math.min(450, duration);
     duration = isRelaxMode ? duration * 1.5 : duration;
-    const scrollDuration = duration + (isRelaxMode ? 150 : 100);
+
+    const cfg = this._springConfigCache || (this._springConfigCache = this._resolveSpringConfig());
+    const springEnabled = cfg.enabled;
+    const zeta = isRelaxMode ? cfg.zetaRelax : cfg.zeta;
+    const settleTail = duration * (isRelaxMode ? cfg.settleRatioRelax : cfg.settleRatio);
+
+    let easing, scrollDuration;
+    if (springEnabled) {
+      ({ easing, duration: scrollDuration } = LyricsPlusRenderer._getSpringEasing(duration, zeta, settleTail));
+    } else {
+      easing = null;
+      scrollDuration = duration + settleTail;
+    }
+    const delayIncrement = duration * (isRelaxMode ? 0.05 : 0.1);
 
     const animatingLines = this._animatingLines;
     if (animatingLines.length > 0) {
@@ -2718,6 +2801,7 @@ class LyricsPlusRenderer {
         line.style.removeProperty('--scroll-delta');
         line.style.removeProperty('--lyrics-line-delay');
         line.style.removeProperty('--scroll-duration');
+        line.style.removeProperty('--scroll-easing');
       }
       animatingLines.length = 0;
     }
@@ -2747,10 +2831,8 @@ class LyricsPlusRenderer {
       : this.cachedLyricsLines.indexOf(referenceLine);
     if (referenceIndex === -1) return;
 
-    const delayIncrement = duration * (isRelaxMode ? 0.05 : 0.1);
     const lookAhead = 20;
     const len = this.cachedLyricsLines.length;
-
 
     let visMin = referenceIndex;
     let visMax = referenceIndex;
@@ -2764,57 +2846,42 @@ class LyricsPlusRenderer {
       }
     }
 
-    // start = earliest edge of the current visible viewport (or referenceIndex
-    //         if the active line is already above visible content).
-    // end   = target visible viewport: from referenceIndex out by lookAhead,
-    //         but never less than the current visible bottom so departing lines
-    //         also animate out smoothly.
     const start = Math.min(visMin, referenceIndex);
     const end = Math.min(len, Math.max(visMax, referenceIndex) + lookAhead);
 
     let maxAnimationDuration = 0;
+
+    const applyLine = (line, delay) => {
+      line.style.setProperty('--scroll-delta', `${delta}px`);
+      line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
+      line.style.setProperty('--scroll-duration', `${scrollDuration}ms`);
+      if (easing) {
+        line.style.setProperty('--scroll-easing', easing);
+      } else {
+        line.style.removeProperty('--scroll-easing');
+      }
+      line.classList.add('scroll-animate');
+      animatingLines.push(line);
+      const lineDuration = scrollDuration + delay;
+      if (lineDuration > maxAnimationDuration) maxAnimationDuration = lineDuration;
+    };
 
     if (scrollingDown) {
       let delayCounter = 0;
       for (let i = start; i < end; i++) {
         const line = this.cachedLyricsLines[i];
         let delay = i >= referenceIndex ? delayCounter * delayIncrement : 0;
-
-        if (i >= referenceIndex && !line._isGap) {
-          delayCounter++;
-        }
-
-        line.style.setProperty('--scroll-delta', `${delta}px`);
-        line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-        line.style.setProperty('--scroll-duration', `${scrollDuration}ms`);
-        line.classList.add('scroll-animate');
-        animatingLines.push(line);
-
-        const lineDuration = duration + delay;
-        if (lineDuration > maxAnimationDuration) maxAnimationDuration = lineDuration;
+        if (i >= referenceIndex && !line._isGap) delayCounter++;
+        applyLine(line, delay);
       }
     } else {
       let delayCounter = 0;
       for (let i = end - 1; i >= start; i--) {
         const line = this.cachedLyricsLines[i];
         let delay = i <= referenceIndex ? delayCounter * delayIncrement : 0;
-
-        if (i <= referenceIndex && !line._isGap) {
-          delayCounter++;
-        }
-
-        if (isRelaxMode) {
-          delay = delay / 2;
-        }
-
-        line.style.setProperty('--scroll-delta', `${delta}px`);
-        line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-        line.style.setProperty('--scroll-duration', `${scrollDuration}ms`);
-        line.classList.add('scroll-animate');
-        animatingLines.push(line);
-
-        const lineDuration = duration + delay;
-        if (lineDuration > maxAnimationDuration) maxAnimationDuration = lineDuration;
+        if (i <= referenceIndex && !line._isGap) delayCounter++;
+        if (isRelaxMode) delay = delay / 2;
+        applyLine(line, delay);
       }
     }
 
@@ -2838,6 +2905,7 @@ class LyricsPlusRenderer {
         line.style.removeProperty('--scroll-delta');
         line.style.removeProperty('--lyrics-line-delay');
         line.style.removeProperty('--scroll-duration');
+        line.style.removeProperty('--scroll-easing');
       }
       animatingLines.length = 0;
       this._scrollAnimationTimeout = null;
@@ -2845,6 +2913,7 @@ class LyricsPlusRenderer {
 
     parent.scrollTo({ top: targetTop, behavior: 'instant' });
   }
+
 
   _updatePositionClassesAndScroll(lineToScroll, forceScroll = false, durationScroll = 300) {
     if (
@@ -3722,6 +3791,7 @@ class LyricsPlusRenderer {
     if (this._toastTimeout) clearTimeout(this._toastTimeout);
     this._saveOffsetTimeout = null;
     this._toastTimeout = null;
+    this._invalidateSpringConfig();
     this.userOffsetMs = 0;
     this.currentLyrics = null;
     this.currentLyricsType = null;

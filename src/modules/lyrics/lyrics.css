@@ -39,6 +39,12 @@
 
     --lyplus-fade-gap-timing-function: ease-out;
 
+    --lyplus-spring-scroll: true;
+    --lyplus-spring-zeta: 0.78;
+    --lyplus-spring-settle-ratio: 1.5;
+    --lyplus-spring-zeta-relax: 0.8;
+    --lyplus-spring-settle-ratio-relax: 1.5;
+
     display: none;
     width: 100%;
     height: max-content;
@@ -112,8 +118,8 @@
 .lyrics-line.scroll-animate,
 .lyrics-plus-metadata.scroll-animate {
     animation-name: lyrics-scroll;
-    animation-duration: var(--scroll-duration, 400ms); 
-    animation-timing-function: cubic-bezier(.41, 0, .12, .99);
+    animation-duration: var(--scroll-duration, 400ms);
+    animation-timing-function: var(--scroll-easing, cubic-bezier(.41, 0, .12, .99));
     animation-fill-mode: both;
     animation-delay: var(--lyrics-line-delay, 0ms);
     will-change: transform;
