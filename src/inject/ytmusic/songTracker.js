@@ -198,7 +198,7 @@
     async function fetchMetadataDual(videoId) {
 
         const [remixData, legacyData] = await Promise.all([
-            fetchFromYouTube(videoId, "WEB_REMIX", "1.20260204.03.00"),
+            fetchFromYouTube(videoId, "WEB_REMIX", getWebClientVersion()),
             fetchFromYouTube(videoId, "WEB", "2.20230327.07.00")
         ]);
 
@@ -222,25 +222,44 @@
         return { title, artist, album, artwork, duration, videoId, captions };
     }
 
+    function getWebClientVersion() {
+        const fromCfg = window.ytcfg?.get?.('INNERTUBE_CLIENT_VERSION') ||
+                        window.ytcfg?.data_?.INNERTUBE_CLIENT_VERSION ||
+                        window.ytcfg?.data_?.INNERTUBE_CONTEXT?.client?.clientVersion;
+        if (fromCfg) return fromCfg;
+
+        const d = new Date();
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        return `1.${y}${m}${day}.01.00`;
+    }
+
     const YT_CLIENTS = {
-        web: { clientName: "WEB_REMIX", clientVersion: "1.20260901.12.00" },
-        android: { clientName: "ANDROID_MUSIC", clientVersion: "7.21.50", androidSdkVersion: 30 },
-        ios: { clientName: "IOS_MUSIC", clientVersion: "6.42.52", deviceModel: "iPhone14,3" },
+        web: {
+            clientName: "WEB_REMIX",
+            get clientVersion() { return getWebClientVersion(); }
+        },
+        android: { clientName: "ANDROID_MUSIC", clientVersion: "7.21.50", androidSdkVersion: 30 }
     };
 
     function ytCtx(c, hl = "en", gl = "US") {
-        return { context: { client: { ...YT_CLIENTS[c], hl, gl } } };
+        const client = c === "web"
+            ? { clientName: "WEB_REMIX", clientVersion: getWebClientVersion(), hl, gl }
+            : { ...YT_CLIENTS[c], hl, gl };
+        return { context: { client } };
     }
 
     async function ytRequest(path, body) {
         try {
+            const clientVer = getWebClientVersion();
             const res = await fetch(`/youtubei/v1/${path}?prettyPrint=false`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Accept-Language": "en-US,en;q=0.9",
                     "X-YouTube-Client-Name": "67",
-                    "X-YouTube-Client-Version": "1.20260901.12.00"
+                    "X-YouTube-Client-Version": clientVer
                 },
                 body: JSON.stringify(body)
             });
@@ -416,16 +435,18 @@
                 synced = false;
             }
 
+            const noLyrics = !plain && !timed.length;
             return noLyrics ? null : {
                 videoId,
                 browseId,
                 provider,
                 trackId,
-                plain: noLyrics ? null : plain,
-                timed: noLyrics ? [] : timed,
+                plain: plain || null,
+                timed: timed || [],
                 synced
             };
         } catch (e) {
+            console.error('LYPLUS: getLyrics failed', e);
             return null;
         }
     }
