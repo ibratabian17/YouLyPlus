@@ -264,7 +264,7 @@ export class LyricsService {
 
       let finalLyrics = lyrics;
 
-      if (songInfo.videoId && (Utilities.isEmptyLyrics(finalLyrics) || this.scoreLyrics(finalLyrics) < 2)) {
+      if (songInfo.videoId) {
         const cachedYt = this.getProviderLyricsFromCache(cacheKey, 'ytmusic');
         if (cachedYt && !Utilities.isEmptyLyrics(cachedYt)) {
           if (Utilities.isEmptyLyrics(finalLyrics) || this.scoreLyrics(cachedYt) >= this.scoreLyrics(finalLyrics)) {

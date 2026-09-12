@@ -3358,7 +3358,10 @@ class LyricsPlusRenderer {
     if (availableList.length > 1) {
       const sourceOpt = document.createElement("div");
       sourceOpt.className = "dropdown-option";
-      const ytMusicDisplay = this.currentLyrics?.metadata?.source || this.lastKnownSongInfo?.ytMusicLyrics?.provider || 'Lyrics';
+      const isYtMusicActive = (activeProvider === 'ytmusic');
+      const ytMusicDisplay = (isYtMusicActive ? this.currentLyrics?.metadata?.source : null)
+        || this.lastKnownSongInfo?.ytMusicLyrics?.provider
+        || 'YouTube Music';
       const providerDisplayNames = {
         'binilyrics': 'BiniLyrics',
         'kpoe': 'Lyrics+',
@@ -3581,7 +3584,10 @@ class LyricsPlusRenderer {
       providerKeys.push('ytmusic');
     }
 
-    const ytMusicDisplay = this.currentLyrics?.metadata?.source || this.lastKnownSongInfo?.ytMusicLyrics?.provider || 'Lyrics';
+    const isYtMusicActive = (activeProvider === 'ytmusic');
+    const ytMusicDisplay = (isYtMusicActive ? this.currentLyrics?.metadata?.source : null)
+      || this.lastKnownSongInfo?.ytMusicLyrics?.provider
+      || 'YouTube Music';
     const providerDisplayNames = {
       'binilyrics': 'BiniLyrics',
       'kpoe': 'Lyrics+',
