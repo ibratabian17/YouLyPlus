@@ -980,5 +980,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Цільова писемність транслітерації",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Перетворювати тексти пісень на цю писемність для допомоги у вимові (наприклад, з англійської на японську катакану). Нелатинські писемності потребують Gemini або OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Перекладач підтримує лише латинську транслітерацію (ромаджі). Виберіть Gemini або OpenRouter постачальником транслітерації, щоб увімкнути інші писемності.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Латиниця (Ромаджі / Фонетична)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Японська (Катакана)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Корейська (Хангиль)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Кирилиця (Російська)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Деванагарі (Гінді)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Арабська",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Іврит",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Грецька",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Тайська",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Оберіть постачальника...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Оберіть джерело...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Усіх постачальників додано",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Продуктивність",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Спокійне прокручування",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Повільніша анімація прокручування та вимкнення анімації зміни розміру тексту для слів пісні.",
+    "description": "Description for relax scrolling toggle"
   }
 }

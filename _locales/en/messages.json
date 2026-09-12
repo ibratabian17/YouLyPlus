@@ -59,6 +59,10 @@
     "message": "Word-by-Word Highlighting",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "Performance",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "Data Management",
     "description": "Section title in popup Advanced tab"
@@ -670,6 +674,14 @@
   "descAudioBeatSync": {
     "message": "Makes the dynamic background layers pulse to the beat of the audio. If you use Better Lyrics Shaders or another Visualizer, you should disable this setting.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "Relax Scrolling",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Slower scrolling animation & disable text resizing animation for the lyrics.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "Use song palette for lyrics color in fullscreen video-mode",

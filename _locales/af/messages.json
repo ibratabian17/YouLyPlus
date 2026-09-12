@@ -996,5 +996,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Transliterasie-teikenskrif",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Skakel lirieke om na hierdie skrif vir uitspraakgidse (bv. Engels na Japannese Katakana). Nie-Latynse teikens vereis Gemini of OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate ondersteun slegs Latynse (romaji) transliterasie. Kies Gemini of OpenRouter as die transliterasieverskaffer om ander skrifte te aktiveer.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latyn (Romaji / Foneties)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japannees (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Koreaans (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Sirillies (Russies)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arabies",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Hebreeus",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Grieks",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Thai",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Kies verskaffer...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Kies bron...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Alle verskaffers bygevoeg",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Werkverrigting",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Ontspan blaai",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Stadiger blaai-animasie en deaktiveer teksgrootte-verandering vir die lirieke.",
+    "description": "Description for relax scrolling toggle"
   }
 }

@@ -996,5 +996,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Målskrift for translitteration",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Konverter sangtekster til dette skriftsystem for udtalevejledninger (f.eks. engelsk til japansk katakana). Ikke-latinske skrifter kræver Gemini eller OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate understøtter kun latinsk (romaji) translitteration. Vælg Gemini eller OpenRouter som translitterationsudbyder for at aktivere andre skriftsystemer.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latinsk (Romaji / Fonetisk)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japansk (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Koreansk (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Kyrillisk (Russisk)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arabisk",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Hebraisk",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Græsk",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Thai",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Vælg udbyder...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Vælg kilde...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Alle udbydere tilføjet",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Ydeevne",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Afslappet rulning",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Langsommere rulleanimation og deaktiver tekststørrelsesanimation for sangtekster.",
+    "description": "Description for relax scrolling toggle"
   }
 }

@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Informasi cache tidak tersedia.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Aksara Target Transliterasi",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Ubah lirik ke dalam aksara ini untuk panduan pelafalan (misalnya, Bahasa Inggris ke Katakana Jepang). Target non-Latin memerlukan Gemini atau OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate hanya mendukung transliterasi Latin (romaji). Pilih Gemini atau OpenRouter sebagai Penyedia Transliterasi untuk mengaktifkan aksara lain.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latin (Romaji / Fonetik)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Jepang (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Korea (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Sirilik (Rusia)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arab",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Ibrani",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Yunani",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Thailand",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Pilih penyedia...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Pilih sumber...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Semua penyedia telah ditambahkan",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Performa",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Gulir Santai",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Animasi gulir lebih lambat & nonaktifkan animasi perubahan ukuran teks untuk lirik.",
+    "description": "Description for relax scrolling toggle"
   }
 }

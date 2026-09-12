@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "อักษรเป้าหมายการทับศัพท์",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "แปลงเนื้อเพลงเป็นอักษรนี้เพื่อเป็นแนวทางการออกเสียง (เช่น อังกฤษเป็นคาตาคานะญี่ปุ่น) เป้าหมายที่ไม่ใช่ละตินต้องใช้ Gemini หรือ OpenRouter",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google แปลภาษารองรับเฉพาะการทับศัพท์ภาษาละติน (โรมาจิ) ให้เลือก Gemini หรือ OpenRouter เป็นผู้ให้บริการถอดเสียงเพื่อเปิดใช้อักษรอื่น",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "ละติน (โรมาจิ / สัทศาสตร์)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "ญี่ปุ่น (คาตาคานะ)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "เกาหลี (ฮันกึล)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "ซีริลลิก (รัสเซีย)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "เทวนาครี (ฮินดี)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "อาหรับ",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "ฮีบรู",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "กรีก",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "ไทย",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "เลือกผู้ให้บริการ...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "เลือกแหล่งที่มา...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "เพิ่มผู้ให้บริการทั้งหมดแล้ว",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "ประสิทธิภาพ",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "การเลื่อนอย่างผ่อนคลาย",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "ภาพเคลื่อนไหวการเลื่อนที่ช้าลงและปิดภาพเคลื่อนไหวการปรับขนาดข้อความสำหรับเนื้อเพลง",
+    "description": "Description for relax scrolling toggle"
   }
 }

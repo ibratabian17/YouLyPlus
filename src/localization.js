@@ -944,7 +944,15 @@ const translations = {
         showOriginal: "Prikaži Original",
         hideOriginal: "Sakrij Original",
         refreshLyrics: "Osveži tekst",
-        showTranslationOptions: "Prikaži opcije prevoda"
+        showTranslationOptions: "Prikaži opcije prevoda",
+        offsetLyrics: "Pomak teksta",
+        changeLyricsSource: "Promeni izvor teksta",
+        reloadLyrics: "Ponovo učitaj tekst",
+        lyricsOptions: "Opcije teksta",
+        back: "Nazad",
+        reset: "Resetuj",
+        autoSource: "Automatski (Podrazumevano)",
+        sourceNotFound: "Nisu pronađene reči iz ovog izvora"
     },
     'fi-FI': {
 

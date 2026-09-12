@@ -992,5 +992,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Pismo docelowe transliteracji",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Konwertuj tekst piosenki na to pismo jako wskazówkę wymowy (np. z angielskiego na japońską katakanę). Pisma nielacińskie wymagają Gemini lub OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate obsługuje tylko transliterację łacińską (romaji). Wybierz Gemini lub OpenRouter jako dostawcę transliteracji, aby włączyć inne pisma.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Łaciński (Romaji / Fonetyczny)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japoński (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Koreański (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Cyrylica (Rosyjski)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Dewanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arabski",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Hebrajski",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Grecki",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Tajski",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Wybierz dostawcę...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Wybierz źródło...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Wszyscy dostawcy dodani",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Wydajność",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Spokojne przewijanie",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Wolniejsza animacja przewijania i wyłączenie animacji zmiany rozmiaru tekstu tekstu piosenki.",
+    "description": "Description for relax scrolling toggle"
   }
 }

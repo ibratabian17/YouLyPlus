@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Alfabeto de destino para transliteración",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Convierte la letra a este alfabeto como guía de pronunciación (p. ej., de inglés a katakana japonés). Los alfabetos no latinos requieren Gemini u OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate solo admite la transliteración latina (romaji). Selecciona Gemini u OpenRouter como proveedor de transliteración para habilitar otros alfabetos.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latino (Romaji / Fonético)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japonés (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Coreano (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Cirílico (Ruso)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Árabe",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Hebreo",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Griego",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Tailandés",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Seleccionar proveedor...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Seleccionar fuente...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Todos los proveedores añadidos",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Rendimiento",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Desplazamiento relajado",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Animación de desplazamiento más lenta y desactiva la animación de cambio de tamaño de texto para la letra.",
+    "description": "Description for relax scrolling toggle"
   }
 }

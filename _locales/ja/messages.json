@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "キャッシュ情報は利用できません。",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "翻字ターゲット文字",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "発音ガイド用に歌詞をこの文字体系に変換します（例：英語からカタカナ）。ラテン文字以外にはGeminiまたはOpenRouterが必要です。",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google翻訳はラテン文字（ローマ字）の翻字のみ対応しています。他の文字体系を有効にするには、翻字プロバイダーとしてGeminiまたはOpenRouterを選択してください。",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "ラテン文字（ローマ字 / 表音表記）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "日本語（カタカナ）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "韓国語（ハングル）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "キリル文字（ロシア語）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "デーヴァナーガリー（ヒンディー語）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "アラビア文字",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "ヘブライ文字",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "ギリシャ文字",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "タイ文字",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "プロバイダーを選択...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "ソースを選択...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "すべてのプロバイダーが追加されました",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "パフォーマンス",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "リラックススクロール",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "歌詞のスクロールアニメーションをゆっくりにし、文字サイズ拡大縮小アニメーションを無効化します。",
+    "description": "Description for relax scrolling toggle"
   }
 }

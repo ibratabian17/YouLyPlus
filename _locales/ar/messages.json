@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "نظام كتابة النقل الصوتي المستهدف",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "تحويل كلمات الأغاني إلى هذا النظام للمساعدة في النطق (مثل الإنجليزية إلى الكاتاكانا اليابانية). تتطلب الأنظمة غير اللاتينية استخدام Gemini أو OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "يدعم Google Translate النقل الصوتي اللاتيني (روماجي) فقط. اختر Gemini أو OpenRouter كمزود للنقل الصوتي لتمكين الأنظمة الأخرى.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "لاتيني (روماجي / صوتي)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "ياباني (كاتاكانا)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "كوري (هانغول)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "سيريلي (روسي)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "ديفاناغاري (هندي)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "عربي",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "عبري",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "يوناني",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "تايلاندي",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "اختر المزود...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "اختر المصدر...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "تمت إضافة جميع المزودين",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "الأداء",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "تمرير هادئ",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "حركة تمرير أبطأ وتعطيل تحريك تغيير حجم النص لكلمات الأغاني.",
+    "description": "Description for relax scrolling toggle"
   }
 }

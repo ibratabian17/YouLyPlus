@@ -366,11 +366,11 @@ function populateDraggableProviders() {
 
     if (providersToAdd.length === 0) {
         availableProvidersDropdown.disabled = true;
-        availableProvidersDropdown.innerHTML = `<option value="" disabled selected>${msg('msgAllSourcesAdded') || 'All sources added'}</option>`;
+        availableProvidersDropdown.innerHTML = `<option value="" disabled selected>${msg('msgAllProvidersAdded') || msg('msgAllSourcesAdded') || 'All providers added'}</option>`;
         if (addProviderButton) addProviderButton.disabled = true;
     } else {
         availableProvidersDropdown.disabled = false;
-        availableProvidersDropdown.innerHTML = `<option value="" disabled selected>${msg('msgSelectSource') || 'Select provider...'}</option>`;
+        availableProvidersDropdown.innerHTML = `<option value="" disabled selected>${msg('placeholderSelectProvider') || msg('msgSelectSource') || 'Select provider...'}</option>`;
         if (addProviderButton) addProviderButton.disabled = false;
         providersToAdd.forEach(provider => {
             const option = document.createElement('option');
@@ -591,7 +591,7 @@ function populateDraggableSources() {
         if (addSourceButton) addSourceButton.disabled = true;
     } else {
         availableSourcesDropdown.disabled = false;
-        availableSourcesDropdown.innerHTML = `<option value="" disabled selected>${msg('msgSelectSource') || 'Select source...'}</option>`;
+        availableSourcesDropdown.innerHTML = `<option value="" disabled selected>${msg('placeholderSelectSource') || msg('msgSelectSource') || 'Select source...'}</option>`;
         if (addSourceButton) addSourceButton.disabled = false;
         sourcesToAdd.forEach(source => {
             const option = document.createElement('option');

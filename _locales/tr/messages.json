@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Transliterasyon Hedef Alfabesi",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Şarkı sözlerini telaffuz kılavuzu için bu alfabeye dönüştürün (örn. İngilizceden Japonca Katakana'ya). Latin dışı hedefler Gemini veya OpenRouter gerektirir.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Çeviri yalnızca Latin (romaji) transliterasyonunu destekler. Diğer alfabeleri etkinleştirmek için Transliterasyon Sağlayıcısı olarak Gemini veya OpenRouter'ı seçin.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latin (Romaji / Fonetik)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japonca (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Korece (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Kiril (Rusça)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hintçe)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arapça",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "İbranice",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Yunanca",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Tayca",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Sağlayıcı seçin...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Kaynak seçin...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Tüm sağlayıcılar eklendi",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Performans",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Rahat Kaydırma",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Daha yavaş kaydırma animasyonu ve şarkı sözleri için metin yeniden boyutlandırma animasyonunu devre dışı bırakma.",
+    "description": "Description for relax scrolling toggle"
   }
 }

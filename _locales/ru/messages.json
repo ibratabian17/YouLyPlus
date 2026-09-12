@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Целевая письменность транслитерации",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Преобразует текст песни в эту письменность для подсказок произношения (например, с английского на японскую катакану). Нелатинские письменности требуют Gemini или OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Переводчик поддерживает только латинскую транслитерацию (ромадзи). Выберите Gemini или OpenRouter в качестве провайдера транслитерации, чтобы включить другие письменности.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Латиница (Ромадзи / Фонетическая)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Японский (Катакана)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Корейский (Хангыль)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Кириллица (Русский)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Деванагари (Хинди)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Арабский",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Иврит",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Греческий",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Тайский",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Выберите провайдера...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Выберите источник...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Все провайдеры добавлены",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Производительность",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Спокойная прокрутка",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Более плавная и медленная анимация прокрутки с отключением анимации изменения размера текста текста песни.",
+    "description": "Description for relax scrolling toggle"
   }
 }

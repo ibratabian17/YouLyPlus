@@ -996,5 +996,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Γραφή στόχου μεταγραμματισμού",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Μετατροπή στίχων σε αυτή τη γραφή για οδηγούς προφοράς (π.χ. Αγγλικά σε Ιαπωνικά Katakana). Οι μη λατινικές γραφές απαιτούν Gemini ή OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Το Google Translate υποστηρίζει μόνο λατινικό (romaji) μεταγραμματισμό. Επιλέξτε Gemini ή OpenRouter ως πάροχο μεταγραμματισμού για να ενεργοποιήσετε άλλες γραφές.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Λατινικά (Romaji / Φωνητικό)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Ιαπωνικά (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Κορεατικά (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Κυριλλικά (Ρωσικά)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Χίντι)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Αραβικά",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Εβραϊκά",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Ελληνικά",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Ταϊλανδικά",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Επιλέξτε πάροχο...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Επιλέξτε πηγή...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Όλοι οι πάροχοι προστέθηκαν",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Απόδοση",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Χαλαρή κύλιση",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Πιο αργή κίνηση κύλισης και απενεργοποίηση της κίνησης αλλαγής μεγέθους κειμένου για τους στίχους.",
+    "description": "Description for relax scrolling toggle"
   }
 }

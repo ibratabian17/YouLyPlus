@@ -992,5 +992,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Doelschrift voor transliteratie",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Zet songteksten om naar dit schrift voor uitspraakbegeleiding (bijv. Engels naar Japans Katakana). Voor niet-Latijnse doelen is Gemini of OpenRouter vereist.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate ondersteunt alleen Latijnse (romaji) transliteratie. Selecteer Gemini of OpenRouter als transliteratieprovider om andere schriften in te schakelen.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latijn (Romaji / Fonetisch)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japans (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Koreaans (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Cyrillisch (Russisch)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arabisch",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Hebreeuws",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Grieks",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Thais",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Selecteer provider...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Selecteer bron...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Alle providers toegevoegd",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Prestaties",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Ontspannen scrollen",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Langzamere scrollanimatie en uitschakelen van tekstformaatanimatie voor de songteksten.",
+    "description": "Description for relax scrolling toggle"
   }
 }

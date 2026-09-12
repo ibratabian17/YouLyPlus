@@ -992,5 +992,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "লিপ্যন্তর লক্ষ্য লিপি",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "উচ্চারণ নির্দেশিকার জন্য লিরিক্স এই লিপিতে রূপান্তর করুন (যেমন ইংরেজি থেকে জাপানি কাতাকানা)। অ-ল্যাটিন লিপির জন্য Gemini বা OpenRouter প্রয়োজন।",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate শুধুমাত্র ল্যাটিন (রোমাজি) লিপ্যন্তর সমর্থন করে। অন্যান্য লিপি সক্ষম করতে লিপ্যন্তর সরবরাহকারী হিসেবে Gemini বা OpenRouter নির্বাচন করুন।",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "ল্যাটিন (রোমাজি / ফোনেটিক)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "জাপানি (কাতাকানা)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "কোরিয়ান (হাঙ্গুল)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "সিরিলিক (রাশিয়ান)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "দেবনাগরী (হিন্দি)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "আরবি",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "হিব্রু",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "গ্রীক",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "থাই",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "সরবরাহকারী নির্বাচন করুন...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "উৎস নির্বাচন করুন...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "সব সরবরাহকারী যোগ করা হয়েছে",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "পারফরম্যান্স",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "রিল্যাক্স স্ক্রোলিং",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "ধীরগতির স্ক্রোল অ্যানিমেশন এবং লিরিক্সের জন্য টেক্সট রিসাইজিং অ্যানিমেশন নিষ্ক্রিয় করুন।",
+    "description": "Description for relax scrolling toggle"
   }
 }

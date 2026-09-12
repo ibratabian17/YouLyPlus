@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Scrittura di destinazione per la traslitterazione",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Converte il testo in questo sistema di scrittura come guida alla pronuncia (es. dall'inglese al katakana giapponese). Le scritture non latine richiedono Gemini o OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate supporta solo la traslitterazione in caratteri latini (romaji). Seleziona Gemini o OpenRouter come provider di traslitterazione per abilitare altre scritture.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latino (Romaji / Fonetico)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Giapponese (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Coreano (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Cirillico (Russo)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arabo",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Ebraico",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Greco",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Tailandese",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Seleziona provider...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Seleziona sorgente...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Tutti i provider aggiunti",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Prestazioni",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Scorrimento rilassato",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Animazione di scorrimento più lenta e disattivazione dell'animazione di ridimensionamento del testo per i testi.",
+    "description": "Description for relax scrolling toggle"
   }
 }

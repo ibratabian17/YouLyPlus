@@ -992,5 +992,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "లిప్యంతరీకరణ లక్ష్య లిపి",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "ఉచ్చారణ మార్గదర్శకాల కోసం సాహిత్యాన్ని ఈ లిపిలోకి మార్చండి (ఉదా. ఆంగ్లం నుండి జపనీస్ కటకానా). లాటిన్ కాని లక్ష్యాలకు Gemini లేదా OpenRouter అవసరం.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate లాటిన్ (రోమాజీ) లిప్యంతరీకరణను మాత్రమే మద్దతు ఇస్తుంది. ఇతర లిపులను ప్రారంభించడానికి లిప్యంతరీకరణ ప్రదాతగా Gemini లేదా OpenRouter ని ఎంచుకోండి.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "లాటిన్ (రోమాజీ / ఫొనెటిక్)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "జపనీస్ (కటకానా)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "కొరియన్ (హంగూల్)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "సిరిల్లిక్ (రష్యన్)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "దేవనాగరి (హిందీ)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "అరబిక్",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "హీబ్రూ",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "గ్రీక్",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "థాయ్",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "ప్రదాతను ఎంచుకోండి...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "మూలాన్ని ఎంచుకోండి...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "అన్ని ప్రదాతలు జోడించబడ్డాయి",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "పనితీరు",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "రిలాక్స్ స్క్రోలింగ్",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "నెమ్మదిగా స్క్రోలింగ్ యానిమేషన్ & సాహిత్యం కోసం టెక్స్ట్ రీసైజింగ్ యానిమేషన్‌ను నిలిపివేయండి.",
+    "description": "Description for relax scrolling toggle"
   }
 }

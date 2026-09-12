@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "캐시 정보를 사용할 수 없습니다.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "음역 대상 문자",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "발음 가이드를 위해 가사를 이 문자로 변환합니다 (예: 영어를 일본어 가타카나로 변환). 비라틴 문자는 Gemini 또는 OpenRouter가 필요합니다.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google 번역은 라틴 문자(로마자) 음역만 지원합니다. 다른 문자를 활성화하려면 음역 제공자로 Gemini 또는 OpenRouter를 선택하세요.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "라틴 문자 (로마자 / 발음 기호)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "일본어 (가타카나)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "한국어 (한글)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "키릴 문자 (러시아어)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "데바나가리 (힌디어)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "아랍 문자",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "히브리 문자",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "그리스 문자",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "태국 문자",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "제공자 선택...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "출처 선택...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "모든 제공자가 추가되었습니다",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "성능",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "부드러운 스크롤",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "스크롤 애니메이션 속도를 늦추고 가사 텍스트 크기 조절 애니메이션을 비활성화합니다.",
+    "description": "Description for relax scrolling toggle"
   }
 }

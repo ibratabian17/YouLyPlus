@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "خط مقصد نویسه‌گردانی",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "تبدیل متن آهنگ به این خط برای راهنمای تلفظ (مانند تبدیل انگلیسی به کاتاکانای ژاپنی). خطوط غیر لاتین به Gemini یا OpenRouter نیاز دارند.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "گوگل ترنسلیت فقط از نویسه‌گردانی لاتین (روماجی) پشتیبانی می‌کند. برای فعال‌سازی سایر خطوط، Gemini یا OpenRouter را به عنوان ارائه‌دهنده نویسه‌گردانی انتخاب کنید.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "لاتین (روماجی / آوانگاری)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "ژاپنی (کاتاکانا)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "کره‌ای (هانگول)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "سیریلیک (روسی)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "دواناگاری (هندی)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "عربی",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "عبری",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "یونانی",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "تایلندی",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "انتخاب ارائه‌دهنده...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "انتخاب منبع...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "همه ارائه‌دهنده‌ها اضافه شدند",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "عملکرد",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "پیمایش آرام",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "انیمیشن پیمایش کندتر و غیرفعال کردن انیمیشن تغییر اندازه متن ترانه.",
+    "description": "Description for relax scrolling toggle"
   }
 }

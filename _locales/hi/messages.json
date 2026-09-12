@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "लिप्यंतरण लक्ष्य लिपि",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "उच्चारण मार्गदर्शिका के लिए बोल को इस लिपि में बदलें (उदा. अंग्रेजी से जापानी काताकाना)। गैर-लैटिन लिपियों के लिए Gemini या OpenRouter आवश्यक है।",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate केवल लैटिन (रोमाजी) लिप्यंतरण का समर्थन करता है। अन्य लिपियों को सक्षम करने के लिए लिप्यंतरण प्रदाता के रूप में Gemini या OpenRouter चुनें।",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "लैटिन (रोमाजी / ध्वन्यात्मक)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "जापानी (काताकाना)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "कोरियाई (हंगुल)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "सिरिलिक (रूसी)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "देवनागरी (हिन्दी)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "अरबी",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "हिब्रू",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "ग्रीक",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "थाई",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "प्रदाता चुनें...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "स्रोत चुनें...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "सभी प्रदाता जोड़ दिए गए",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "प्रदर्शन",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "शांत स्क्रॉलिंग",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "धीमी स्क्रॉल एनीमेशन और बोल के लिए टेक्स्ट आकार बदलने वाले एनीमेशन को अक्षम करें।",
+    "description": "Description for relax scrolling toggle"
   }
 }

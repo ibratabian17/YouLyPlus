@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "缓存信息不可用。",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "音译目标文字",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "将歌词转换为此文字以提供发音指南（例如：英文转日文片假名）。非拉丁字符需要 Gemini 或 OpenRouter。",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google 翻译仅支持拉丁字母（罗马字）音译。选择 Gemini 或 OpenRouter 作为音译提供商以启用其他文字。",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "拉丁字母（罗马字 / 拼音）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "日文（片假名）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "韩文（谚文）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "西里尔字母（俄语）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "天城文（印地语）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "阿拉伯文",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "希伯来文",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "希腊文",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "泰文",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "选择提供商...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "选择来源...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "已添加所有提供商",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "性能",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "平缓滚动",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "更慢的滚动动画，并禁用歌词的文字缩放动画。",
+    "description": "Description for relax scrolling toggle"
   }
 }

@@ -996,5 +996,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Umbhalo Oqondiwe Wokuhumusha Ngomsindo",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Guqula amagama engoma abe kulo mbhalo ukuze uthole imihlahlandlela yokuphimisa (isb. IsiNgisi siye kusi-Japanese Katakana). Okuqondiwe okungewona owesi-Latin kudinga i-Gemini noma i-OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "I-Google Translate isekela kuphela ukuhumusha ngomsindo kwesi-Latin (romaji). Khetha i-Gemini noma i-OpenRouter njengomhlinzeki wokuhumusha ngomsindo ukuze unike amandla eminye imibhalo.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Isi-Latin (Romaji / Ifonetiki)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Isi-Japanese (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Isi-Korean (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Isi-Cyrillic (Isi-Russian)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Isi-Devanagari (Isi-Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Isi-Arabic",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Isi-Hebrew",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Isi-Greek",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Isi-Thai",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Khetha umhlinzeki...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Khetha umthombo...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Bonke abahlinzeki bengeziwe",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Ukusebenza",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Ukuskrola Okuthule",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Ukuskrola kancane futhi uvale ukushintsha usayizi wombhalo kumagama engoma.",
+    "description": "Description for relax scrolling toggle"
   }
 }

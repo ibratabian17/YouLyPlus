@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "כתב יעד לתעתיק",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "המרת מילות השיר לכתב זה כמדריך הגייה (למשל, מאנגלית לקטאקאנה יפנית). יעדים שאינם לטיניים דורשים את Gemini או OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate תומך בתעתיק לטיני (רומאג'י) בלבד. בחר ב-Gemini או ב-OpenRouter כספק תעתיק כדי לאפשר כתבים אחרים.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "לטינית (רומאג'י / פונטי)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "יפנית (קטאקאנה)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "קוריאנית (הנגול)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "קירילית (רוסית)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "דוונאגארי (הינדי)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "ערבית",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "עברית",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "יוונית",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "תאילנדית",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "בחר ספק...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "בחר מקור...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "כל הספקים נוספו",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "ביצועים",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "גלילה נינוחה",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "אנימציית גלילה איטית יותר וביטול אנימציית שינוי גודל הטקסט של המילים.",
+    "description": "Description for relax scrolling toggle"
   }
 }

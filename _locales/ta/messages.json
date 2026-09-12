@@ -996,5 +996,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "எழுத்துப்பெயர்ப்பு இலக்கு எழுத்துமுறை",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "உச்சரிப்பு வழிகாட்டிகளுக்காக பாடல் வரிகளை இந்த எழுத்துமுறைக்கு மாற்றவும் (எ.கா., ஆங்கிலத்திலிருந்து ஜப்பானிய கடகானா). லத்தீன் அல்லாத இலக்குகளுக்கு Gemini அல்லது OpenRouter தேவை.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate லத்தீன் (ரோமாஜி) எழுத்துப்பெயர்ப்பை மட்டுமே ஆதரிக்கிறது. பிற எழுத்துமுறைகளை இயக்க எழுத்துப்பெயர்ப்பு வழங்குநராக Gemini அல்லது OpenRouter ஐத் தேர்ந்தெடுக்கவும்.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "லத்தீன் (ரோமாஜி / ஒலிப்பு)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "ஜப்பானிய (கடகானா)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "கொரிய (ஹங்குல்)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "சிரிலிக் (ரஷ்ய)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "தேவநாகரி (இந்தி)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "அரபு",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "ஹீப்ரு",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "கிரேக்கம்",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "தாய்",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "வழங்குநரைத் தேர்ந்தெடுக்கவும்...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "மூலத்தைத் தேர்ந்தெடுக்கவும்...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "அனைத்து வழங்குநர்களும் சேர்க்கப்பட்டனர்",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "செயல்திறன்",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "மெதுவான உருளல்",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "மெதுவான உருளல் அசைவூட்டம் மற்றும் பாடல் வரிகளுக்கான உரை மறுஅளவிடல் அசைவூட்டத்தை முடக்கவும்.",
+    "description": "Description for relax scrolling toggle"
   }
 }

@@ -992,5 +992,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Målskrift för translitterering",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Konvertera sångtexter till detta skriftsystem för uttalsguider (t.ex. engelska till japansk katakana). Icke-latinska mål kräver Gemini eller OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate stöder endast latinsk (romaji) translitterering. Välj Gemini eller OpenRouter som translittereringsleverantör för att aktivera andra skriftsystem.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latinsk (Romaji / Fonetisk)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japanska (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Koreanska (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Kyrilliska (Ryska)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arabiska",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Hebreiska",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Grekiska",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Thailändska",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Välj leverantör...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Välj källa...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Alla leverantörer tillagda",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Prestanda",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Avslappnad rullning",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Långsammare rullningsanimering och inaktivera animering för textstorleksändring för sångtexter.",
+    "description": "Description for relax scrolling toggle"
   }
 }

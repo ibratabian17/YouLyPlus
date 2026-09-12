@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Alfabeto de destino para transliteração",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Converte as letras para este alfabeto para guias de pronúncia (ex.: inglês para katakana japonês). Destinos não latinos requerem Gemini ou OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "O Google Tradutor suporta apenas transliteração latina (romaji). Selecione Gemini ou OpenRouter como provedor para ativar outros alfabetos.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latino (Romaji / Fonético)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japonês (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Coreano (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Cirílico (Russo)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Árabe",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Hebraico",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Grego",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Tailandês",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Selecionar provedor...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Selecionar fonte...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Todos os provedores adicionados",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Desempenho",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Rolagem relaxada",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Animação de rolagem mais lenta e desativação da animação de redimensionamento do texto das letras.",
+    "description": "Description for relax scrolling toggle"
   }
 }

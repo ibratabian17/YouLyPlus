@@ -988,5 +988,77 @@
   "msgCacheUnavailable": {
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
+  },
+  "labelTransliterationTarget": {
+    "message": "Chữ viết đích chuyển tự",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Chuyển lời bài hát sang chữ viết này để hướng dẫn phát âm (ví dụ: tiếng Anh sang Katakana tiếng Nhật). Chữ viết phi Latinh yêu cầu Gemini hoặc OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Dịch chỉ hỗ trợ chuyển tự chữ Latinh (romaji). Chọn Gemini hoặc OpenRouter làm Nhà cung cấp chuyển tự để bật các hệ chữ khác.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latinh (Romaji / Ngữ âm)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Tiếng Nhật (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Tiếng Hàn (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Cyril (Tiếng Nga)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Tiếng Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Tiếng Ả Rập",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Tiếng Do Thái",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Tiếng Hy Lạp",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Tiếng Thái",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "placeholderSelectProvider": {
+    "message": "Chọn nhà cung cấp...",
+    "description": "Select a Provider on settings menu"
+  },
+  "placeholderSelectSource": {
+    "message": "Chọn nguồn...",
+    "description": "Select a Source on settings menu"
+  },
+  "msgAllProvidersAdded": {
+    "message": "Đã thêm tất cả nhà cung cấp",
+    "description": "User added All providers on settings menu"
+  },
+  "sectionPerformance": {
+    "message": "Hiệu năng",
+    "description": "Section title in popup Advanced tab"
+  },
+  "settingRelaxScroll": {
+    "message": "Cuộn nhẹ nhàng",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Hoạt ảnh cuộn chậm hơn & tắt hiệu ứng thu phóng kích thước chữ cho lời bài hát.",
+    "description": "Description for relax scrolling toggle"
   }
 }
