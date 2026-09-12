@@ -39,6 +39,7 @@ export const PROVIDERS = {
   UNISON: 'unison',
   BINILYRICS: 'binilyrics',
   LRCLIB: 'lrclib',
+  YTMUSIC: 'ytmusic',
   LOCAL: 'local',
   GEMINI: 'gemini',
   GOOGLE: 'google',

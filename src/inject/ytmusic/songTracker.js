@@ -193,7 +193,10 @@
         }
     }
 
+    let activeFetchVideoId = null;
+
     async function fetchMetadataDual(videoId) {
+
         const [remixData, legacyData] = await Promise.all([
             fetchFromYouTube(videoId, "WEB_REMIX", "1.20260204.03.00"),
             fetchFromYouTube(videoId, "WEB", "2.20230327.07.00")
@@ -217,6 +220,244 @@
                          legacyData?.captions?.playerCaptionsTracklistRenderer || null;
 
         return { title, artist, album, artwork, duration, videoId, captions };
+    }
+
+    const YT_CLIENTS = {
+        web: { clientName: "WEB_REMIX", clientVersion: "1.20260901.12.00" },
+        android: { clientName: "ANDROID_MUSIC", clientVersion: "7.21.50", androidSdkVersion: 30 },
+        ios: { clientName: "IOS_MUSIC", clientVersion: "6.42.52", deviceModel: "iPhone14,3" },
+    };
+
+    function ytCtx(c, hl = "en", gl = "US") {
+        return { context: { client: { ...YT_CLIENTS[c], hl, gl } } };
+    }
+
+    async function ytRequest(path, body) {
+        try {
+            const res = await fetch(`/youtubei/v1/${path}?prettyPrint=false`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "X-YouTube-Client-Name": "67",
+                    "X-YouTube-Client-Version": "1.20260901.12.00"
+                },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) return await res.json();
+            return null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function findLyricsBrowseId(next) {
+        const tabs = next?.contents?.singleColumnMusicWatchNextResultsRenderer?.tabbedRenderer?.watchNextTabbedResultsRenderer?.tabs;
+        if (Array.isArray(tabs)) {
+            for (const tab of tabs) {
+                const tr = tab?.tabRenderer;
+                if (!tr) continue;
+                if (tr.unselectable) return null;
+                const browseId = tr.endpoint?.browseEndpoint?.browseId;
+                if (typeof browseId === "string" && browseId.startsWith("MPLYt")) {
+                    return browseId;
+                }
+            }
+        }
+        let found = null;
+        let isUnselectable = false;
+        (function walk(o) {
+            if (!o || typeof o !== "object" || found) return;
+            if (o.tabRenderer && o.tabRenderer.unselectable) {
+                const bId = o.tabRenderer.endpoint?.browseEndpoint?.browseId;
+                if (typeof bId === "string" && bId.startsWith("MPLYt")) {
+                    isUnselectable = true;
+                    return;
+                }
+            }
+            if (typeof o.browseId === "string" && o.browseId.startsWith("MPLYt")) {
+                found = o.browseId;
+                return;
+            }
+            for (const v of Object.values(o)) walk(v);
+        })(next);
+        return isUnselectable ? null : found;
+    }
+
+    function decodeB64(b64) {
+        if (!b64) return null;
+        try {
+            const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+            return new TextDecoder().decode(bytes).replace(/[\x00-\x1f]/g, " ").trim();
+        } catch {
+            return null;
+        }
+    }
+
+    function extractFooterAndProvider(r) {
+        let provider = null;
+        let trackId = null;
+        (function walk(o) {
+            if (!o || typeof o !== "object") return;
+            const footerText = (
+                o.footer?.runs ? o.footer.runs.map(r => r.text || '').join('').trim() :
+                o.footer?.simpleText ? o.footer.simpleText.trim() : null
+            );
+            if (footerText) {
+                if (footerText.includes("LyricFind")) provider = "LyricFind";
+                else if (footerText.includes("Musixmatch")) provider = "Musixmatch";
+                else {
+                    const clean = footerText.split('\n')[0].replace(/^(source|lyrics provided by|lyrics)\s*:\s*/i, '').trim();
+                    if (clean && !clean.toLowerCase().includes("youtube")) {
+                        provider = clean;
+                    }
+                }
+            }
+            if (o.logLyricEventCommand?.serializedLyricInfo) {
+                trackId = decodeB64(o.logLyricEventCommand.serializedLyricInfo);
+            }
+            for (const v of Object.values(o)) walk(v);
+        })(r);
+        return { provider, trackId };
+    }
+
+    function extractPlain(r) {
+        let plain = "";
+        (function walk(o) {
+            if (!o || typeof o !== "object" || plain) return;
+            if (o.musicDescriptionShelfRenderer?.description) {
+                const desc = o.musicDescriptionShelfRenderer.description;
+                if (Array.isArray(desc.runs)) {
+                    plain = desc.runs.map(x => x.text || "").join("").trim();
+                } else if (desc.simpleText) {
+                    plain = desc.simpleText.trim();
+                }
+            }
+            if (!plain) {
+                for (const v of Object.values(o)) walk(v);
+            }
+        })(r);
+        return plain;
+    }
+
+    function extractTimed(r) {
+        const lines = [];
+        (function walk(o, parentKey) {
+            if (!o || typeof o !== "object") return;
+            if (typeof o.lyricLine === "string") {
+                if (o.cueRange) {
+                    lines.push({
+                        text: o.lyricLine,
+                        start: parseInt(o.cueRange.startTimeMilliseconds) || 0,
+                        end: parseInt(o.cueRange.endTimeMilliseconds) || 0,
+                        id: parseInt(o.cueRange.metadata?.id || "0"),
+                    });
+                } else if (parentKey === "timedLyricsData") {
+                    lines.push({
+                        text: o.lyricLine,
+                        start: 0,
+                        end: 0,
+                        id: lines.length,
+                    });
+                }
+            }
+            if (Array.isArray(o)) {
+                for (const v of o) walk(v, parentKey);
+                return;
+            }
+            for (const [k, v] of Object.entries(o)) walk(v, k);
+        })(r, undefined);
+        return lines;
+    }
+
+    async function getLyrics(videoId) {
+        if (!videoId) return null;
+
+        try {
+            const next = await ytRequest("next", { ...ytCtx("web"), videoId });
+            if (!next) return null;
+
+            const browseId = findLyricsBrowseId(next);
+            if (!browseId) {
+                return null;
+            }
+
+            // Fetch web (for plain text and provider footer) and android (for synced timed lyrics)
+            const [web, android] = await Promise.all([
+                ytRequest("browse", { ...ytCtx("web"), browseId }),
+                ytRequest("browse", { ...ytCtx("android"), browseId }),
+            ]);
+
+            const metaWeb = extractFooterAndProvider(web);
+            const metaAndroid = extractFooterAndProvider(android);
+            const provider = metaWeb.provider || metaAndroid.provider || null;
+            const trackId = metaWeb.trackId || metaAndroid.trackId || null;
+
+            const webPlain = extractPlain(web);
+            const plain = webPlain || extractPlain(android) || "";
+
+            const androidTimed = extractTimed(android);
+            const webTimed = extractTimed(web);
+            let timed = [];
+            let synced = false;
+
+            const hasAndroidSync = androidTimed.some((l) => l.start > 0 || l.end > 0);
+            const hasWebSync = webTimed.some((l) => l.start > 0 || l.end > 0);
+
+            if (hasAndroidSync) {
+                timed = androidTimed;
+                synced = true;
+            } else if (hasWebSync) {
+                timed = webTimed;
+                synced = true;
+            } else {
+                // For plain text, prefer web remix
+                timed = [];
+                synced = false;
+            }
+
+            return noLyrics ? null : {
+                videoId,
+                browseId,
+                provider,
+                trackId,
+                plain: noLyrics ? null : plain,
+                timed: noLyrics ? [] : timed,
+                synced
+            };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function getSongCredits(videoId) {
+        if (!videoId) return null;
+
+        try {
+            const r = await ytRequest("browse", { ...ytCtx("web"), browseId: "MPTC" + videoId });
+            if (!r) {
+                return null;
+            }
+            let writers = [];
+            (function walk(o) {
+                if (!o || typeof o !== "object") return;
+                if (o.dismissableDialogContentSectionRenderer) {
+                    const section = o.dismissableDialogContentSectionRenderer;
+                    const sectionTitle = section.title?.runs?.map(x => x.text || "").join("").trim().toLowerCase() || "";
+                    if (sectionTitle.includes("written by") || sectionTitle.includes("songwriter") || sectionTitle.includes("composer")) {
+                        const text = section.subtitle?.runs?.map(x => x.text || "").join("") || section.subtitle?.simpleText || "";
+                        if (text) {
+                            const list = text.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+                            writers.push(...list);
+                        }
+                    }
+                }
+                for (const v of Object.values(o)) walk(v);
+            })(r);
+            return writers.length > 0 ? Array.from(new Set(writers)) : null;
+        } catch (e) {
+            return null;
+        }
     }
 
     async function checkForSongChange() {
@@ -243,8 +484,22 @@
         }
 
         if (videoId !== currentSong.videoId || (domInfo && domInfo.title !== currentSong.title)) {
+            if (activeFetchVideoId === videoId) return;
+            activeFetchVideoId = videoId;
 
-            const apiData = await fetchMetadataDual(videoId);
+            let apiData = null;
+            let directLyrics = null;
+            let songCredits = null;
+
+            try {
+                [apiData, directLyrics, songCredits] = await Promise.all([
+                    fetchMetadataDual(videoId),
+                    getLyrics(videoId),
+                    getSongCredits(videoId)
+                ]);
+            } finally {
+                activeFetchVideoId = null;
+            }
 
             const rawTitle = apiData?.title || domInfo?.title || getMediaSession()?.title;
 
@@ -277,6 +532,11 @@
                 } catch (optErr) {}
             }
 
+            const ytLyrics = directLyrics;
+            if (ytLyrics && songCredits?.length) {
+                ytLyrics.songWriters = songCredits;
+            }
+
             currentSong = {
                 title: finalTitle,
                 artist: finalArtist,
@@ -285,7 +545,9 @@
                 videoId,
                 artwork: finalArtwork,
                 isVideo: !finalAlbum,
-                subtitle: captionData || audioTrackData
+                subtitle: captionData || audioTrackData,
+                ytMusicLyrics: ytLyrics,
+                songWriters: songCredits || []
             };
 
             startTimeUpdater();

@@ -104,6 +104,7 @@ function determineFinalDisplayMode(intendedMode, hasTranslation, hasRomanization
  */
 function normalizeLyricsType(type) {
   if (type === "None" || type === "Line") return type;
+  if ((type || '').toLowerCase() === "None") return "None";
   return "Word";
 }
 
@@ -364,13 +365,14 @@ async function applySponsorBlock(lyrics, currentSong, fetchId) {
    RENDERING HELPERS
    ================================================================= */
 
-function getProviderDisplayName(provider) {
+function getProviderDisplayName(provider, lyrics) {
   const map = {
     'binilyrics': 'BiniLyrics',
     'kpoe': 'Lyrics+',
     'customKpoe': 'Custom Lyrics+',
     'unison': 'Unison',
     'lrclib': 'LRCLib',
+    'ytmusic': lyrics?.metadata?.source || lastKnownSongInfo?.ytMusicLyrics?.provider || 'Lyrics',
     'local': 'Local Lyrics',
     'subtitles': 'YouTube Subtitles'
   };

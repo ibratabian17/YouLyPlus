@@ -3341,6 +3341,11 @@ class LyricsPlusRenderer {
       providerKeys.push('local');
     }
 
+    // Include ytmusic if videoId is present or ytmusic is active
+    if ((this.lastKnownSongInfo?.videoId || activeProvider === 'ytmusic') && !providerKeys.includes('ytmusic')) {
+      providerKeys.push('ytmusic');
+    }
+
     // Determine how many alternative sources actually exist
     let availableList = [];
     if (this.availableProviders && this.availableProviders.size > 0) {
@@ -3353,12 +3358,14 @@ class LyricsPlusRenderer {
     if (availableList.length > 1) {
       const sourceOpt = document.createElement("div");
       sourceOpt.className = "dropdown-option";
+      const ytMusicDisplay = this.currentLyrics?.metadata?.source || this.lastKnownSongInfo?.ytMusicLyrics?.provider || 'Lyrics';
       const providerDisplayNames = {
         'binilyrics': 'BiniLyrics',
         'kpoe': 'Lyrics+',
         'customKpoe': 'Custom Lyrics+',
         'unison': 'Unison',
         'lrclib': 'LRCLib',
+        'ytmusic': ytMusicDisplay,
         'local': 'Local Lyrics',
         'subtitles': 'YouTube Subtitles'
       };
@@ -3459,18 +3466,24 @@ class LyricsPlusRenderer {
   _isValidLyricsSource(source) {
     if (!source || typeof source !== "string") return false;
     const s = source.trim().toLowerCase();
-    if (!s || s === "unknown" || s === "undefined" || s === "null" || s === "none") return false;
+    if (!s || s === "unknown" || s === "undefined" || s === "null" || s === "none" || s === "youtube music" || s === "ytmusic") return false;
 
     const knownSources = [
       "lyricsplus", "lyrics+", "apple", "apple music", "qq", "musixmatch", "musixmatch-word",
       "unison", "lrclib", "binilyrics", "subtitles", "youtube captions", "youtube subtitles",
-      "local", "local lyrics", "spotify", "kpoe", "customkpoe"
+      "local", "local lyrics", "spotify", "kpoe", "customkpoe", "lyricfind"
     ];
     const configuredSources = (this.currentSettings?.lyricsSourceOrder || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
     const configuredProviders = (this.currentSettings?.lyricsProviderOrder || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
     const allValid = new Set([...knownSources, ...configuredSources, ...configuredProviders]);
 
-    return Array.from(allValid).some(known => s.includes(known) || known.includes(s));
+    if (Array.from(allValid).some(known => s.includes(known) || known.includes(s))) return true;
+
+    if (this.currentLyrics?.provider === 'ytmusic' || this.currentLyrics?.metadata?.provider === 'ytmusic') {
+      return true;
+    }
+
+    return false;
   }
 
   setAvailableProviders(providers) {
@@ -3510,6 +3523,8 @@ class LyricsPlusRenderer {
     if (s.includes('lrclib')) return 'lrclib';
     if (s.includes('local')) return 'local';
     if (s.includes('subtitles') || s.includes('captions')) return 'subtitles';
+    if (s.includes('lyricfind')) return 'ytmusic';
+    if (s.includes('youtube music') || s.includes('ytmusic')) return 'ytmusic';
     if (s.includes('apple') || s.includes('spotify') || s.includes('musixmatch') || s.includes('qq') || s.includes('kpoe') || s.includes('lyrics+')) return 'kpoe';
     return '';
   }
@@ -3561,12 +3576,19 @@ class LyricsPlusRenderer {
       providerKeys.push('local');
     }
 
+    // Include ytmusic if videoId is present or ytmusic is active
+    if ((this.lastKnownSongInfo?.videoId || activeProvider === 'ytmusic') && !providerKeys.includes('ytmusic')) {
+      providerKeys.push('ytmusic');
+    }
+
+    const ytMusicDisplay = this.currentLyrics?.metadata?.source || this.lastKnownSongInfo?.ytMusicLyrics?.provider || 'Lyrics';
     const providerDisplayNames = {
       'binilyrics': 'BiniLyrics',
       'kpoe': 'Lyrics+',
       'customKpoe': 'Custom Lyrics+',
       'unison': 'Unison',
       'lrclib': 'LRCLib',
+      'ytmusic': ytMusicDisplay,
       'local': 'Local Lyrics',
       'subtitles': 'YouTube Subtitles'
     };

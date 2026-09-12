@@ -126,6 +126,20 @@ export class LyricsService {
     const cacheKey = this.createCacheKey(songInfo);
     let result = null;
 
+    if (songInfo.ytMusicLyrics) {
+      try {
+        const parsedYT = DataParser.parseYTMusicFormat(songInfo.ytMusicLyrics, songInfo);
+        if (parsedYT && !Utilities.isEmptyLyrics(parsedYT)) {
+          parsedYT.provider = 'ytmusic';
+          if (!parsedYT.metadata) parsedYT.metadata = {};
+          parsedYT.metadata.provider = 'ytmusic';
+          this.cacheProviderLyrics(cacheKey, 'ytmusic', parsedYT);
+        }
+      } catch (e) {
+        console.error('Error parsing YouTube Music lyrics:', e);
+      }
+    }
+
     if (!forceReload) {
       if (state.hasCached(cacheKey)) {
         result = state.getCached(cacheKey);
@@ -250,6 +264,15 @@ export class LyricsService {
 
       let finalLyrics = lyrics;
 
+      if (songInfo.videoId && (Utilities.isEmptyLyrics(finalLyrics) || this.scoreLyrics(finalLyrics) < 2)) {
+        const cachedYt = this.getProviderLyricsFromCache(cacheKey, 'ytmusic');
+        if (cachedYt && !Utilities.isEmptyLyrics(cachedYt)) {
+          if (Utilities.isEmptyLyrics(finalLyrics) || this.scoreLyrics(cachedYt) >= this.scoreLyrics(finalLyrics)) {
+            finalLyrics = cachedYt;
+          }
+        }
+      }
+
       if (Utilities.isEmptyLyrics(finalLyrics) && songInfo.videoId && songInfo.subtitle) {
         const cachedSub = this.getProviderLyricsFromCache(cacheKey, 'subtitles');
         if (cachedSub) {
@@ -272,6 +295,10 @@ export class LyricsService {
       }
 
       if (winningProvider && finalLyrics) {
+        if ((!finalLyrics.metadata?.songWriters || !finalLyrics.metadata.songWriters.length) && songInfo.songWriters?.length) {
+          if (!finalLyrics.metadata) finalLyrics.metadata = {};
+          finalLyrics.metadata.songWriters = songInfo.songWriters;
+        }
         this.cacheProviderLyrics(cacheKey, winningProvider, finalLyrics);
       }
 
@@ -372,6 +399,7 @@ export class LyricsService {
     if (source.includes('unison')) return PROVIDERS.UNISON;
     if (source.includes('lrclib')) return PROVIDERS.LRCLIB;
     if (source.includes('local')) return PROVIDERS.LOCAL;
+    if (source.includes('lyricfind') || source.includes('youtube music') || source.includes('ytmusic')) return PROVIDERS.YTMUSIC;
     if (source.includes('apple') || source.includes('spotify') || source.includes('musixmatch') || source.includes('qq') || source.includes('kpoe') || source.includes('lyrics+')) return PROVIDERS.KPOE;
     return PROVIDERS.KPOE;
   }
@@ -444,6 +472,10 @@ export class LyricsService {
 
     if (provider === 'subtitles') {
       lyrics = await YouTubeService.fetchSubtitles(songInfo);
+    } else if (provider === 'ytmusic' || provider === PROVIDERS.YTMUSIC) {
+      if (songInfo.ytMusicLyrics) {
+        lyrics = DataParser.parseYTMusicFormat(songInfo.ytMusicLyrics, songInfo);
+      }
     } else {
       lyrics = await this.fetchFromProvider(provider, songInfo, settings, fetchOptions, false, null);
     }
@@ -481,6 +513,13 @@ export class LyricsService {
       lyrics = await BiniLyricsService.fetch(songInfo, fetchOptions);
     } else if (source === 'subtitles') {
       lyrics = await YouTubeService.fetchSubtitles(songInfo);
+    } else if (source === 'ytmusic' || source === PROVIDERS.YTMUSIC) {
+      const cached = this.getProviderLyricsFromCache(this.createCacheKey(songInfo), 'ytmusic');
+      if (cached && !Utilities.isEmptyLyrics(cached)) {
+        lyrics = cached;
+      } else if (songInfo.ytMusicLyrics) {
+        lyrics = DataParser.parseYTMusicFormat(songInfo.ytMusicLyrics, songInfo);
+      }
     } else if (source === PROVIDERS.LOCAL) {
       const localResult = await this.checkLocalLyrics(songInfo);
       lyrics = localResult?.lyrics || null;

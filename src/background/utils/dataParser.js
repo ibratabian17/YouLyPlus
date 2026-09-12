@@ -224,7 +224,7 @@ export class DataParser {
     const syncType = (data.syncType || 'plain').toLowerCase();
 
     // Map Unison syncType to internal type
-    const typeMap = { richsync: 'Word', linesync: 'Line', plain: 'Plain' };
+    const typeMap = { richsync: 'Word', linesync: 'Line', plain: 'None' };
     const internalType = typeMap[syncType] || 'Line';
 
     const metadata = {
@@ -255,7 +255,7 @@ export class DataParser {
     if (lines.length === 0) return null;
 
     return {
-      type: 'Plain',
+      type: 'None',
       data: lines.map(text => ({
         text: text.trim(),
         startTime: 0,
@@ -265,5 +265,137 @@ export class DataParser {
       metadata
     };
   }
+
+  static parseYTMusicFormat(ytData, songInfo = {}) {
+    if (!ytData) return null;
+
+    const { timed, plain, synced, provider, trackId, videoId, songWriters } = ytData;
+    const title = ytData.title || songInfo.title || '';
+    const artist = ytData.author || songInfo.artist || '';
+    const album = songInfo.album || '';
+    const duration = songInfo.duration || 0;
+    const sourceName = provider || null;
+    const writers = songWriters || songInfo.songWriters || [];
+
+    const metadata = {
+      title,
+      artist,
+      album,
+      duration,
+      source: sourceName,
+      provider: 'ytmusic',
+      songWriters: Array.isArray(writers) ? writers : [],
+      trackId: trackId || null,
+      videoId: videoId || songInfo.videoId || null
+    };
+
+    // If synced lines exist and synced is true, parse timed lines
+    if (synced && Array.isArray(timed) && timed.length > 0) {
+      const filteredTimed = timed.filter(
+        line => line && typeof line.text === 'string' && line.text.trim().length > 0 && line.text.trim() !== '♪' && line.text.trim() !== '♪♪'
+      );
+
+      if (filteredTimed.length > 0) {
+        const parsedLines = filteredTimed.map((line, idx) => {
+          const startTime = (line.start || 0) / 1000;
+          let endTime = (line.end || 0) / 1000;
+          if (endTime <= startTime) {
+            const next = filteredTimed.slice(idx + 1).find(nl => nl.start > line.start);
+            if (next) {
+              endTime = next.start / 1000;
+            } else {
+              endTime = startTime + 4;
+            }
+          }
+          const lineDuration = Math.max(0, endTime - startTime);
+          return {
+            text: line.text.trim(),
+            startTime,
+            endTime,
+            duration: lineDuration,
+            syllabus: [],
+            element: {},
+            romanizedText: undefined,
+            translation: null
+          };
+        });
+
+        return {
+          type: 'Line',
+          provider: 'ytmusic',
+          data: parsedLines,
+          metadata
+        };
+      }
+    }
+
+    // For plain text, prefer web remix plain text
+    if (plain && typeof plain === 'string') {
+      const normalized = plain.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+      const parts = normalized.split(/\n{2,}/);
+      const data = [];
+      let songPartIndex = 0;
+
+      for (const part of parts) {
+        const lines = part
+          .split('\n')
+          .map(l => l.trim())
+          .filter(l => l.length > 0 && l !== '♪' && l !== '♪♪');
+
+        if (lines.length > 0) {
+          for (const text of lines) {
+            data.push({
+              text,
+              startTime: 0,
+              endTime: 0,
+              duration: 0,
+              syllabus: [],
+              element: { songPartIndex },
+              romanizedText: undefined,
+              translation: null
+            });
+          }
+          songPartIndex++;
+        }
+      }
+
+      if (data.length > 0) {
+        return {
+          type: 'None',
+          provider: 'ytmusic',
+          data,
+          metadata
+        };
+      }
+    }
+
+    // Fallback if not synced and timed array was provided without plain text
+    if (Array.isArray(timed) && timed.length > 0) {
+      const filteredTimed = timed.filter(
+        line => line && typeof line.text === 'string' && line.text.trim().length > 0 && line.text.trim() !== '♪' && line.text.trim() !== '♪♪'
+      );
+
+      if (filteredTimed.length > 0) {
+        return {
+          type: 'None',
+          provider: 'ytmusic',
+          data: filteredTimed.map(line => ({
+            text: line.text.trim(),
+            startTime: 0,
+            endTime: 0,
+            duration: 0,
+            syllabus: [],
+            element: { songPartIndex: 0 },
+            romanizedText: undefined,
+            translation: null
+          })),
+          metadata
+        };
+      }
+    }
+
+    return null;
+  }
 }
+
 
