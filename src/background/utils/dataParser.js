@@ -291,25 +291,31 @@ export class DataParser {
 
     // If synced lines exist and synced is true, parse timed lines
     if (synced && Array.isArray(timed) && timed.length > 0) {
-      const filteredTimed = timed.filter(
-        line => line && typeof line.text === 'string' && line.text.trim().length > 0 && line.text.trim() !== '♪' && line.text.trim() !== '♪♪'
-      );
+      const parsedLines = [];
 
-      if (filteredTimed.length > 0) {
-        const parsedLines = filteredTimed.map((line, idx) => {
-          const startTime = (line.start || 0) / 1000;
-          let endTime = (line.end || 0) / 1000;
-          if (endTime <= startTime) {
-            const next = filteredTimed.slice(idx + 1).find(nl => nl.start > line.start);
-            if (next) {
-              endTime = next.start / 1000;
-            } else {
-              endTime = startTime + 4;
-            }
+      for (let idx = 0; idx < timed.length; idx++) {
+        const line = timed[idx];
+        if (!line || typeof line.text !== 'string') continue;
+
+        const rawText = line.text.trim();
+        const isMusicalSymbol = rawText === '♪' || rawText === '♪♪' || rawText === '♫' || rawText === '♫♫';
+
+        const startTime = (line.start || 0) / 1000;
+        let endTime = (line.end || 0) / 1000;
+
+        if (endTime <= startTime) {
+          const next = timed.slice(idx + 1).find(nl => nl && nl.start > line.start);
+          if (next) {
+            endTime = next.start / 1000;
+          } else {
+            endTime = startTime + 4;
           }
+        }
+
+        if (rawText.length > 0 && !isMusicalSymbol) {
           const lineDuration = Math.max(0, endTime - startTime);
-          return {
-            text: line.text.trim(),
+          parsedLines.push({
+            text: rawText,
             startTime,
             endTime,
             duration: lineDuration,
@@ -317,9 +323,11 @@ export class DataParser {
             element: {},
             romanizedText: undefined,
             translation: null
-          };
-        });
+          });
+        }
+      }
 
+      if (parsedLines.length > 0) {
         return {
           type: 'Line',
           provider: 'ytmusic',
