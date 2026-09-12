@@ -1294,6 +1294,49 @@ function initCustomSelects() {
     const drawerOverlay = document.getElementById('drawer-overlay');
     const navDrawer = document.querySelector('.navigation-drawer');
 
+    // Sidebar auto-hiding scrollbar with smooth fade animation
+    if (navDrawer) {
+        let currentAlpha = 0;
+        let animationFrame = null;
+        let hideTimeout = null;
+
+        function animateAlpha(targetAlpha, duration = 250) {
+            if (animationFrame) cancelAnimationFrame(animationFrame);
+            const startAlpha = currentAlpha;
+            const startTime = performance.now();
+
+            function step(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // Ease out cubic: fast start, soft stop
+                const ease = 1 - Math.pow(1 - progress, 3);
+                currentAlpha = startAlpha + (targetAlpha - startAlpha) * ease;
+                navDrawer.style.setProperty('--sidebar-scroll-alpha', currentAlpha.toFixed(3));
+
+                if (progress < 1) {
+                    animationFrame = requestAnimationFrame(step);
+                } else {
+                    currentAlpha = targetAlpha;
+                    navDrawer.style.setProperty('--sidebar-scroll-alpha', currentAlpha.toFixed(3));
+                    animationFrame = null;
+                }
+            }
+
+            animationFrame = requestAnimationFrame(step);
+        }
+
+        navDrawer.addEventListener('scroll', () => {
+            if (animationFrame) cancelAnimationFrame(animationFrame);
+            currentAlpha = 1;
+            navDrawer.style.setProperty('--sidebar-scroll-alpha', '1');
+
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(() => {
+                animateAlpha(0, 400); 
+            }, 800);
+        }, { passive: true });
+    }
+
     if (mobileMenuButton && drawerOverlay && navDrawer) {
         function toggleDrawer() {
             navDrawer.classList.toggle('open');

@@ -53,6 +53,26 @@ body {
     position: relative;
     transition: transform var(--animation-duration-medium) var(--animation-easing-emphasized);
     z-index: 100;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--md-sys-color-outline) calc(var(--sidebar-scroll-alpha, 0) * 100%), transparent) transparent;
+}
+
+.navigation-drawer::-webkit-scrollbar {
+    width: 6px;
+}
+
+.navigation-drawer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.navigation-drawer::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--md-sys-color-outline) calc(var(--sidebar-scroll-alpha, 0) * 100%), transparent);
+    border-radius: var(--border-radius-full);
+}
+
+.navigation-drawer::-webkit-scrollbar-thumb:hover,
+.navigation-drawer::-webkit-scrollbar-thumb:active {
+    background-color: var(--md-sys-color-primary);
 }
 
 .drawer-header {
