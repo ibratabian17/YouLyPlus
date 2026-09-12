@@ -9,7 +9,6 @@
   ],
   "host_permissions": [
     "*://*.music.youtube.com/*",
-    "*://*.youtube.com/*",
     "*://*.tidal.com/*",
     "*://*.music.apple.com/*",
     "https://api.deepl.com/*",
