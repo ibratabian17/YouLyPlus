@@ -25,6 +25,53 @@ if (-not (Test-Path -Path "dist" -PathType Container)) {
 # Define common files/directories to bundle
 $COMMON_FILES = @("LICENSE", "icons", "src", "readme.md", "_locales")
 
+# --- Minification setup ---
+# Resolve esbuild for minifying JS/CSS copies (local install > PATH > npm/npx).
+$esbuild = $null
+$globalEsbuild = Get-Command esbuild -ErrorAction SilentlyContinue
+if ($globalEsbuild) {
+    $esbuild = @{ Executable = $globalEsbuild.Source; Args = @() }
+} elseif (Test-Path "node_modules\.bin\esbuild.cmd") {
+    $esbuild = @{ Executable = (Resolve-Path "node_modules\.bin\esbuild.cmd").Path; Args = @() }
+} else {
+    $npxCmd = Get-Command npx.cmd -ErrorAction SilentlyContinue
+    if (-not $npxCmd) { $npxCmd = Get-Command npx -ErrorAction SilentlyContinue }
+    if ($npxCmd) {
+        $esbuild = @{ Executable = $npxCmd.Source; Args = @("--yes", "esbuild") }
+    }
+}
+
+if (-not $esbuild) {
+    Write-Warning "esbuild not found. Skipping JS/CSS minification."
+}
+
+function Invoke-Minifier {
+    param([string]$File)
+    if (-not $esbuild) { return }
+    $toolArgs = @()
+    if ($esbuild.Args) { $toolArgs += $esbuild.Args }
+    $toolArgs += @("--minify", $File, "--outfile=$File", "--log-level=warning", "--allow-overwrite")
+    & $esbuild.Executable @toolArgs
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "esbuild failed on $File (exit code $LASTEXITCODE)."
+        exit 1
+    }
+}
+
+# Minify all .js/.mjs/.css files under $Dir in place, skipping pre-minified files.
+function Invoke-MinifyDirectory {
+    param([string]$Dir)
+    if (-not $esbuild) { return }
+    Get-ChildItem -Path $Dir -Recurse -File | Where-Object {
+        $_.Extension -in @('.js', '.mjs', '.css') -and
+        $_.Name -notmatch '\.min\.(js|mjs|css)$' -and
+        $_.Name -ne 'ort-wasm-simd-threaded.mjs'
+    } | ForEach-Object {
+        Write-Host "Minifying: $($_.FullName)"
+        Invoke-Minifier -File $_.FullName
+    }
+}
+
 # Function to create zip archive using 7z.exe or zip.exe
 function Create-ZipArchive {
     param (
@@ -102,6 +149,9 @@ if ($manifestChromeEdge.background -and $manifestChromeEdge.background.scripts) 
 }
 $manifestChromeEdge | ConvertTo-Json -Depth 100 | Set-Content -Path "$TEMP_DIR/manifest.json" -Force
 
+# Minify JS/CSS copies
+Invoke-MinifyDirectory -Dir $TEMP_DIR
+
 # Create zip archive
 Create-ZipArchive -SourceDir $TEMP_DIR -DestinationZip "dist/youlyplus-v${VERSION}-chrome-edge.zip"
 
@@ -124,6 +174,9 @@ foreach ($file in $COMMON_FILES) {
     }
 }
 Copy-Item -Path "manifest.json" -Destination "$TEMP_DIR/manifest.json" -Force | Out-Null
+
+# Minify JS/CSS copies
+Invoke-MinifyDirectory -Dir $TEMP_DIR
 
 # Create zip archive
 Create-ZipArchive -SourceDir $TEMP_DIR -DestinationZip "dist/youlyplus-v${VERSION}-chrome-firefox.zip"
