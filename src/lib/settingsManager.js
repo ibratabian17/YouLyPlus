@@ -304,6 +304,63 @@ export function deleteLocalLyrics(songId) {
     });
 }
 
+export function getDictionaryStatus(dictionary = 'japanese') {
+    return new Promise((resolve, reject) => {
+        if (pBrowser && pBrowser.runtime && typeof pBrowser.runtime.sendMessage === 'function') {
+            pBrowser.runtime.sendMessage({ type: 'GET_DICTIONARY_STATUS', dictionary }, (response) => {
+                if (pBrowser.runtime.lastError) {
+                    return reject(pBrowser.runtime.lastError.message);
+                }
+                if (response && response.success) {
+                    resolve(response.status);
+                } else {
+                    reject(response ? response.error : 'Unknown error');
+                }
+            });
+        } else {
+            reject('Runtime unavailable');
+        }
+    });
+}
+
+export function downloadDictionary(dictionary = 'japanese') {
+    return new Promise((resolve, reject) => {
+        if (pBrowser && pBrowser.runtime && typeof pBrowser.runtime.sendMessage === 'function') {
+            pBrowser.runtime.sendMessage({ type: 'DOWNLOAD_DICTIONARY', dictionary }, (response) => {
+                if (pBrowser.runtime.lastError) {
+                    return reject(pBrowser.runtime.lastError.message);
+                }
+                if (response && response.success) {
+                    resolve(response.result);
+                } else {
+                    reject(response ? response.error : 'Download failed');
+                }
+            });
+        } else {
+            reject('Runtime unavailable');
+        }
+    });
+}
+
+export function deleteDictionary(dictionary = 'japanese') {
+    return new Promise((resolve, reject) => {
+        if (pBrowser && pBrowser.runtime && typeof pBrowser.runtime.sendMessage === 'function') {
+            pBrowser.runtime.sendMessage({ type: 'DELETE_DICTIONARY', dictionary }, (response) => {
+                if (pBrowser.runtime.lastError) {
+                    return reject(pBrowser.runtime.lastError.message);
+                }
+                if (response && response.success) {
+                    resolve(response);
+                } else {
+                    reject(response ? response.error : 'Delete failed');
+                }
+            });
+        } else {
+            reject('Runtime unavailable');
+        }
+    });
+}
+
 export function setupSettingsMessageListener(callback) {
     if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
         window.addEventListener('message', (event) => {

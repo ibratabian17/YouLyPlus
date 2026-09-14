@@ -10,9 +10,14 @@ import { TranslationService } from './translationService.js';
 import { SponsorBlockService } from '../services/sponsorblockService.js';
 import { YouTubeService } from '../services/youtubeService.js';
 import { DataParser } from '../utils/dataParser.js';
+import { dictionaryService } from '../services/romanization/dictionaryService.js';
 
 export class MessageHandler {
   static handle(message, sender, sendResponse) {
+    if (!message || message.target === 'rawi-offscreen') {
+      return false;
+    }
+
     const handlers = {
       [MESSAGE_TYPES.FETCH_LYRICS]: () => this.fetchLyrics(message, sendResponse),
       [MESSAGE_TYPES.RESET_CACHE]: () => this.resetCache(sendResponse),
@@ -28,7 +33,10 @@ export class MessageHandler {
       [MESSAGE_TYPES.SAVE_LYRICS_OFFSET]: () => this.saveLyricsOffset(message, sendResponse),
       [MESSAGE_TYPES.GET_LYRICS_OFFSET]: () => this.getLyricsOffset(message, sendResponse),
       [MESSAGE_TYPES.SWITCH_LYRICS_PROVIDER]: () => this.switchLyricsProvider(message, sendResponse),
-      [MESSAGE_TYPES.GET_AVAILABLE_PROVIDERS]: () => this.getAvailableLyricsProviders(message, sendResponse)
+      [MESSAGE_TYPES.GET_AVAILABLE_PROVIDERS]: () => this.getAvailableLyricsProviders(message, sendResponse),
+      [MESSAGE_TYPES.GET_DICTIONARY_STATUS]: () => this.getDictionaryStatus(message, sendResponse),
+      [MESSAGE_TYPES.DOWNLOAD_DICTIONARY]: () => this.downloadDictionary(message, sendResponse),
+      [MESSAGE_TYPES.DELETE_DICTIONARY]: () => this.deleteDictionary(message, sendResponse)
     };
 
     const handler = handlers[message.type];
@@ -249,6 +257,47 @@ export class MessageHandler {
     } catch (error) {
       console.error("Error getting available providers:", error);
       sendResponse({ success: false, error: error.message, availableProviders: [] });
+    }
+  }
+
+  static async getDictionaryStatus(message, sendResponse) {
+    try {
+      const isArabic = message.dictionary === 'arabic' || message.dictionary === 'rawi';
+      const status = isArabic
+        ? await dictionaryService.getRawiStatus()
+        : await dictionaryService.getKuromojiStatus();
+      sendResponse({ success: true, status });
+    } catch (error) {
+      console.error("Error getting dictionary status:", error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  static async downloadDictionary(message, sendResponse) {
+    try {
+      const isArabic = message.dictionary === 'arabic' || message.dictionary === 'rawi';
+      const result = isArabic
+        ? await dictionaryService.downloadRawi()
+        : await dictionaryService.downloadKuromoji();
+      sendResponse({ success: true, result });
+    } catch (error) {
+      console.error("Error downloading dictionary:", error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  static async deleteDictionary(message, sendResponse) {
+    try {
+      const isArabic = message.dictionary === 'arabic' || message.dictionary === 'rawi';
+      if (isArabic) {
+        await dictionaryService.deleteRawi();
+      } else {
+        await dictionaryService.deleteKuromoji();
+      }
+      sendResponse({ success: true });
+    } catch (error) {
+      console.error("Error deleting dictionary:", error);
+      sendResponse({ success: false, error: error.message });
     }
   }
 }

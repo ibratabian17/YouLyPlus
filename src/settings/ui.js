@@ -1,4 +1,4 @@
-import { loadSettings, saveSettings, updateSettings, getSettings, updateCacheSize, clearCache, setupSettingsMessageListener, uploadLocalLyrics, getLocalLyricsList, deleteLocalLyrics } from '../lib/settingsManager.js';
+import { loadSettings, saveSettings, updateSettings, getSettings, updateCacheSize, clearCache, setupSettingsMessageListener, uploadLocalLyrics, getLocalLyricsList, deleteLocalLyrics, getDictionaryStatus, downloadDictionary, deleteDictionary } from '../lib/settingsManager.js';
 import { initRipple, createSvgIcon, swapSvgIconPath, debounce, bindAutoSave } from '../lib/uiUtils.js';
 import { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2 } from '../lib/parser.js';
 
@@ -216,6 +216,7 @@ function updateUI(settings) {
     toggleGeminiPromptVisibility();
     toggleGeminiRomanizePromptVisibility();
     toggleRomanizationModelVisibility();
+    toggleOfflineDictionaryVisibility();
     applyTransliterationTargetState();
 
     populateDraggableProviders();
@@ -806,6 +807,7 @@ document.getElementById('override-gemini-romanize-prompt').addEventListener('cha
 document.getElementById('romanization-provider').addEventListener('change', () => {
     toggleRomanizationModelVisibility();
     toggleOpenRouterSettingsVisibility();
+    toggleOfflineDictionaryVisibility();
     applyTransliterationTargetState();
 });
 
@@ -916,6 +918,182 @@ function applyTransliterationTargetState() {
         note.style.display = isAi ? 'none' : 'block';
     }
 }
+
+function toggleOfflineDictionaryVisibility() {
+    const isOffline = document.getElementById('romanization-provider').value === 'offline';
+    toggleElementVisibility('offline-japanese-dict-group', isOffline);
+    toggleElementVisibility('offline-arabic-dict-group', isOffline);
+    if (isOffline) {
+        updateJapaneseDictStatus();
+        updateArabicDictStatus();
+    }
+}
+
+async function updateJapaneseDictStatus() {
+    const statusBadge = document.getElementById('offline-japanese-dict-status');
+    const downloadBtn = document.getElementById('btn-download-japanese-dict');
+    const downloadBtnText = document.getElementById('btn-download-japanese-dict-text');
+    const deleteBtn = document.getElementById('btn-delete-japanese-dict');
+
+    if (!statusBadge || !downloadBtn) return;
+
+    try {
+        const status = await getDictionaryStatus('japanese');
+        if (status && status.installed) {
+            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusInstalled', 'Installed (~17 MB)') : 'Installed (~17 MB)');
+            statusBadge.style.color = 'var(--md3-sys-color-primary, #625b71)';
+            downloadBtn.style.display = 'none';
+            if (deleteBtn) deleteBtn.style.display = 'inline-flex';
+        } else {
+            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusNotInstalled', 'Not Installed (~17 MB)') : 'Not Installed (~17 MB)');
+            statusBadge.style.color = 'inherit';
+            downloadBtn.style.display = 'inline-flex';
+            downloadBtn.disabled = false;
+            if (downloadBtnText) downloadBtnText.textContent = (typeof i18n === 'function' ? i18n('btnDownloadDict', 'Download') : 'Download');
+            if (deleteBtn) deleteBtn.style.display = 'none';
+        }
+    } catch (e) {
+        statusBadge.textContent = 'Unavailable';
+    }
+}
+
+async function handleDownloadJapaneseDict() {
+    const confirmMsg = typeof i18n === 'function'
+        ? i18n('confirmDownloadJapaneseDict', 'Download the Japanese Kuromoji dictionary (~17 MB)? It will be stored locally in your browser for offline Japanese pronunciation.')
+        : 'Download the Japanese Kuromoji dictionary (~17 MB)? It will be stored locally in your browser for offline Japanese pronunciation.';
+
+    if (!window.confirm(confirmMsg)) return;
+
+    const statusBadge = document.getElementById('offline-japanese-dict-status');
+    const downloadBtn = document.getElementById('btn-download-japanese-dict');
+    const downloadBtnText = document.getElementById('btn-download-japanese-dict-text');
+
+    if (downloadBtn) downloadBtn.disabled = true;
+    if (statusBadge) statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusDownloading', 'Downloading (~17 MB)...') : 'Downloading (~17 MB)...');
+    if (downloadBtnText) downloadBtnText.textContent = '...';
+
+    try {
+        await downloadDictionary('japanese');
+        await updateJapaneseDictStatus();
+    } catch (err) {
+        console.error('Download error:', err);
+        if (statusBadge) statusBadge.textContent = 'Download failed';
+        if (downloadBtn) downloadBtn.disabled = false;
+        if (downloadBtnText) downloadBtnText.textContent = (typeof i18n === 'function' ? i18n('btnDownloadDict', 'Download') : 'Download');
+        alert('Failed to download dictionary: ' + (err?.message || err));
+    }
+}
+
+async function handleDeleteJapaneseDict() {
+    const confirmMsg = typeof i18n === 'function'
+        ? i18n('confirmDeleteJapaneseDict', 'Are you sure you want to delete the offline Japanese Kuromoji dictionary?')
+        : 'Are you sure you want to delete the offline Japanese Kuromoji dictionary?';
+
+    if (!window.confirm(confirmMsg)) return;
+
+    const statusBadge = document.getElementById('offline-japanese-dict-status');
+    const deleteBtn = document.getElementById('btn-delete-japanese-dict');
+
+    if (deleteBtn) deleteBtn.disabled = true;
+    if (statusBadge) statusBadge.textContent = 'Deleting...';
+
+    try {
+        await deleteDictionary('japanese');
+        if (deleteBtn) deleteBtn.disabled = false;
+        await updateJapaneseDictStatus();
+    } catch (err) {
+        console.error('Delete error:', err);
+        if (deleteBtn) deleteBtn.disabled = false;
+        await updateJapaneseDictStatus();
+        alert('Failed to delete dictionary: ' + (err?.message || err));
+    }
+}
+
+document.getElementById('btn-download-japanese-dict')?.addEventListener('click', handleDownloadJapaneseDict);
+document.getElementById('btn-delete-japanese-dict')?.addEventListener('click', handleDeleteJapaneseDict);
+
+async function updateArabicDictStatus() {
+    const statusBadge = document.getElementById('offline-arabic-dict-status');
+    const downloadBtn = document.getElementById('btn-download-arabic-dict');
+    const downloadBtnText = document.getElementById('btn-download-arabic-dict-text');
+    const deleteBtn = document.getElementById('btn-delete-arabic-dict');
+
+    if (!statusBadge || !downloadBtn) return;
+
+    try {
+        const status = await getDictionaryStatus('arabic');
+        if (status && status.installed) {
+            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusInstalled', 'Installed (~4.9 MB)') : 'Installed (~4.9 MB)');
+            statusBadge.style.color = 'var(--md3-sys-color-primary, #625b71)';
+            downloadBtn.style.display = 'none';
+            if (deleteBtn) deleteBtn.style.display = 'inline-flex';
+        } else {
+            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusNotInstalled', 'Not Installed (~4.9 MB)') : 'Not Installed (~4.9 MB)');
+            statusBadge.style.color = 'inherit';
+            downloadBtn.style.display = 'inline-flex';
+            downloadBtn.disabled = false;
+            if (downloadBtnText) downloadBtnText.textContent = (typeof i18n === 'function' ? i18n('btnDownloadDict', 'Download') : 'Download');
+            if (deleteBtn) deleteBtn.style.display = 'none';
+        }
+    } catch (e) {
+        statusBadge.textContent = 'Unavailable';
+    }
+}
+
+async function handleDownloadArabicDict() {
+    const confirmMsg = typeof i18n === 'function'
+        ? i18n('confirmDownloadArabicDict', 'Download the Arabic Rawi diacritizer model (~4.9 MB)? It will be stored locally in your browser for offline Arabic pronunciation.')
+        : 'Download the Arabic Rawi diacritizer model (~4.9 MB)? It will be stored locally in your browser for offline Arabic pronunciation.';
+
+    if (!window.confirm(confirmMsg)) return;
+
+    const statusBadge = document.getElementById('offline-arabic-dict-status');
+    const downloadBtn = document.getElementById('btn-download-arabic-dict');
+    const downloadBtnText = document.getElementById('btn-download-arabic-dict-text');
+
+    if (downloadBtn) downloadBtn.disabled = true;
+    if (statusBadge) statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusDownloading', 'Downloading (~4.9 MB)...') : 'Downloading (~4.9 MB)...');
+    if (downloadBtnText) downloadBtnText.textContent = '...';
+
+    try {
+        await downloadDictionary('arabic');
+        await updateArabicDictStatus();
+    } catch (err) {
+        console.error('Download error:', err);
+        if (statusBadge) statusBadge.textContent = 'Download failed';
+        if (downloadBtn) downloadBtn.disabled = false;
+        if (downloadBtnText) downloadBtnText.textContent = (typeof i18n === 'function' ? i18n('btnDownloadDict', 'Download') : 'Download');
+        alert('Failed to download model: ' + (err?.message || err));
+    }
+}
+
+async function handleDeleteArabicDict() {
+    const confirmMsg = typeof i18n === 'function'
+        ? i18n('confirmDeleteArabicDict', 'Are you sure you want to delete the offline Arabic Rawi model?')
+        : 'Are you sure you want to delete the offline Arabic Rawi model?';
+
+    if (!window.confirm(confirmMsg)) return;
+
+    const statusBadge = document.getElementById('offline-arabic-dict-status');
+    const deleteBtn = document.getElementById('btn-delete-arabic-dict');
+
+    if (deleteBtn) deleteBtn.disabled = true;
+    if (statusBadge) statusBadge.textContent = 'Deleting...';
+
+    try {
+        await deleteDictionary('arabic');
+        if (deleteBtn) deleteBtn.disabled = false;
+        await updateArabicDictStatus();
+    } catch (err) {
+        console.error('Delete error:', err);
+        if (deleteBtn) deleteBtn.disabled = false;
+        await updateArabicDictStatus();
+        alert('Failed to delete model: ' + (err?.message || err));
+    }
+}
+
+document.getElementById('btn-download-arabic-dict')?.addEventListener('click', handleDownloadArabicDict);
+document.getElementById('btn-delete-arabic-dict')?.addEventListener('click', handleDeleteArabicDict);
 
 async function handleUploadLocalLyrics() {
     const titleInput = document.getElementById('modal-upload-song-title');

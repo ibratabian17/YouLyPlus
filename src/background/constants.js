@@ -7,7 +7,8 @@ export const CONFIG = {
     CACHE: { name: "LyricsCacheDB", version: 2, store: "lyrics" },
     TRANSLATIONS: { name: "TranslationsDB", version: 2, store: "translations" },
     LOCAL: { name: "LocalLyricsDB", version: 2, store: "localLyrics" },
-    OFFSETS: { name: "LyricsOffsetDB", version: 1, store: "offsets" }
+    OFFSETS: { name: "LyricsOffsetDB", version: 1, store: "offsets" },
+    DICTIONARY: { name: "DictionaryDB", version: 1, store: "dicts" }
   },
 
   CACHE_EXPIRY: {
@@ -45,7 +46,8 @@ export const PROVIDERS = {
   GOOGLE: 'google',
   OPENROUTER: 'openrouter',
   DEEPL: 'deepl',
-  DEEPL_KEYLESS: 'deepl-keyless'
+  DEEPL_KEYLESS: 'deepl-keyless',
+  OFFLINE: 'offline'
 };
 
 export const MESSAGE_TYPES = {
@@ -63,5 +65,8 @@ export const MESSAGE_TYPES = {
   SAVE_LYRICS_OFFSET: 'SAVE_LYRICS_OFFSET',
   GET_LYRICS_OFFSET: 'GET_LYRICS_OFFSET',
   SWITCH_LYRICS_PROVIDER: 'SWITCH_LYRICS_PROVIDER',
-  GET_AVAILABLE_PROVIDERS: 'GET_AVAILABLE_PROVIDERS'
+  GET_AVAILABLE_PROVIDERS: 'GET_AVAILABLE_PROVIDERS',
+  GET_DICTIONARY_STATUS: 'GET_DICTIONARY_STATUS',
+  DOWNLOAD_DICTIONARY: 'DOWNLOAD_DICTIONARY',
+  DELETE_DICTIONARY: 'DELETE_DICTIONARY'
 };

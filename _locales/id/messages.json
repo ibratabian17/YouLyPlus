@@ -797,6 +797,62 @@
     "message": "Pengucapan",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "Lokal / Offline",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "Kamus Bahasa Jepang Offline (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "Kamus morphological analyzer (~17 MB) untuk pelafalan bahasa Jepang yang akurat. Disimpan secara lokal di peramban.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "Unduh",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "Hapus",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "Terpasang (~17 MB)",
+    "description": "Status when dictionary is installed"
+  },
+  "dictStatusNotInstalled": {
+    "message": "Belum Terpasang (~17 MB)",
+    "description": "Status when dictionary is not installed"
+  },
+  "dictStatusDownloading": {
+    "message": "Mengunduh (~17 MB)...",
+    "description": "Status when dictionary is downloading"
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "Unduh kamus Kuromoji bahasa Jepang (~17 MB)? Kamus akan disimpan secara lokal di peramban untuk pelafalan lirik offline.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "Apakah Anda yakin ingin menghapus kamus Kuromoji bahasa Jepang offline?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "Model Diakritisasi Arab Offline (Rawi)",
+    "description": "Setting title for downloadable offline Arabic Rawi model"
+  },
+  "descOfflineArabicDict": {
+    "message": "Model neural diakritik (~4.9 MB) untuk mengembalikan Tashkeel dan vokal akurat lirik Arab. Disimpan secara lokal di peramban.",
+    "description": "Setting description for downloadable offline Arabic Rawi model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "Unduh model diakritisasi Arab Rawi (~4.9 MB)? Model akan disimpan secara lokal di peramban untuk pelafalan lirik Arab offline.",
+    "description": "Confirmation prompt before downloading Arabic Rawi model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "Apakah Anda yakin ingin menghapus model Arab Rawi offline?",
+    "description": "Confirmation prompt before deleting Arabic Rawi model"
+  },
   "optionGoogleTranslate": {
     "message": "Google Translate",
     "description": "Translation provider option"

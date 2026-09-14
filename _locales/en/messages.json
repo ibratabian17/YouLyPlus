@@ -857,6 +857,62 @@
     "message": "Pronunciation",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "Local / Offline",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "Offline Japanese Dictionary (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "Morphological analyzer dictionary (~17 MB) for accurate Japanese pronunciation. Stored locally in browser.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "Download",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "Delete",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "Installed (~17 MB)",
+    "description": "Status when dictionary is installed"
+  },
+  "dictStatusNotInstalled": {
+    "message": "Not Installed (~17 MB)",
+    "description": "Status when dictionary is not installed"
+  },
+  "dictStatusDownloading": {
+    "message": "Downloading (~17 MB)...",
+    "description": "Status when dictionary is downloading"
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "Download the Japanese Kuromoji dictionary (~17 MB)? It will be stored locally in your browser for offline Japanese pronunciation.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "Are you sure you want to delete the offline Japanese Kuromoji dictionary?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "Offline Arabic Diacritizer Model (Rawi)",
+    "description": "Setting title for downloadable offline Arabic Rawi model"
+  },
+  "descOfflineArabicDict": {
+    "message": "Neural diacritizer model (~4.9 MB) for restoring Tashkeel and accurate vowels in Arabic lyrics. Stored locally in browser.",
+    "description": "Setting description for downloadable offline Arabic Rawi model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "Download the Arabic Rawi diacritizer model (~4.9 MB)? It will be stored locally in your browser for offline Arabic pronunciation.",
+    "description": "Confirmation prompt before downloading Arabic Rawi model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "Are you sure you want to delete the offline Arabic Rawi model?",
+    "description": "Confirmation prompt before deleting Arabic Rawi model"
+  },
   "optionGoogleTranslate": {
     "message": "Google Translate",
     "description": "Translation provider option"

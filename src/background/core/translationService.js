@@ -14,6 +14,7 @@ import { GeminiProvider } from '../services/translation/providers/GeminiProvider
 import { OpenRouterProvider } from '../services/translation/providers/OpenRouterProvider.js';
 import { DeepLProvider } from '../services/translation/providers/DeepLProvider.js';
 import { DeepLKeylessProvider } from '../services/translation/providers/DeepLKeylessProvider.js';
+import { OfflineRomanizationProvider } from '../services/translation/providers/OfflineRomanizationProvider.js';
 
 export class TranslationService {
   static createCacheKey(songInfo, action, targetLang, targetScript) {
@@ -104,6 +105,8 @@ export class TranslationService {
         return new DeepLProvider(settings);
       case PROVIDERS.DEEPL_KEYLESS:
         return new DeepLKeylessProvider(settings);
+      case PROVIDERS.OFFLINE:
+        return new OfflineRomanizationProvider(settings);
       case PROVIDERS.GOOGLE:
       default:
         return new GoogleProvider(settings);

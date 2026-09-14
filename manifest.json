@@ -5,7 +5,8 @@
   "version": "4.5.0",
   "description": "__MSG_extensionDescription__",
   "permissions": [
-    "storage"
+    "storage",
+    "offscreen"
   ],
   "host_permissions": [
     "*://*.music.youtube.com/*",
@@ -18,7 +19,11 @@
     "https://generativelanguage.googleapis.com/*",
     "https://openrouter.ai/api/*",
     "https://lyrics-api.binimum.org/*",
-    "https://lyrics-storage.binimum.org/*"
+    "https://lyrics-storage.binimum.org/*",
+    "https://cdn.jsdelivr.net/*",
+    "https://huggingface.co/*",
+    "https://*.hf.co/*",
+    "https://cdnjs.cloudflare.com/*"
   ],
   "action": {
     "default_popup": "src/popup/ui.html",
@@ -137,8 +142,20 @@
       "matches": [
         "*://*.music.apple.com/*"
       ]
+    },
+    {
+      "resources": [
+        "src/lib/ort-wasm-simd-threaded.wasm",
+        "src/lib/ort-wasm-simd-threaded.mjs"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
   "background": {
     "service_worker": "src/background/lyricsHandler.js",
     "type": "module",

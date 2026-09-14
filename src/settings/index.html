@@ -765,6 +765,7 @@
                                 <div class="form-group margin-0">
                                     <select id="romanization-provider" placeholder=" ">
                                         <option value="" disabled selected></option>
+                                        <option value="offline" data-i18n="optionOfflineRomanizer">Local / Offline</option>
                                         <option value="google" data-i18n="optionGoogleTranslate">Google Translate</option>
                                         <option value="gemini" data-i18n="optionGeminiAI">Gemini AI</option>
                                         <option value="openrouter" data-i18n="optionOpenRouter">OpenRouter (LLM)</option>
@@ -796,6 +797,40 @@
                                         <option value="gemma-4-31b-it">Gemma 4-31B</option>
                                         <option value="gemma-4-26b-a4b-it">Gemma 4-26B MoE</option>
                                     </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="setting-item" id="offline-japanese-dict-group" style="display: none;">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="labelOfflineJapaneseDict">Offline Japanese Dictionary (Kuromoji)</span>
+                                <span class="setting-description" id="offline-japanese-dict-desc" data-i18n="descOfflineJapaneseDict">Morphological analyzer dictionary (~17 MB) for accurate Japanese pronunciation. Stored locally in browser.</span>
+                            </div>
+                            <div class="setting-control">
+                                <div class="dict-actions" style="display: flex; gap: 8px; align-items: center;">
+                                    <span id="offline-japanese-dict-status" class="setting-status-badge" style="font-size: 13px; opacity: 0.85;">Checking...</span>
+                                    <button type="button" id="btn-download-japanese-dict" class="m3-button tonal" style="height: 36px; padding: 0 16px; font-size: 13px;">
+                                        <span id="btn-download-japanese-dict-text" data-i18n="btnDownloadDict">Download</span>
+                                    </button>
+                                    <button type="button" id="btn-delete-japanese-dict" class="m3-button text" style="display: none; height: 36px; padding: 0 10px; color: var(--error-color, #ff5449); font-size: 13px;">
+                                        <span data-i18n="btnDeleteDict">Delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="setting-item" id="offline-arabic-dict-group" style="display: none;">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="labelOfflineArabicDict">Offline Arabic Diacritizer Model (Rawi)</span>
+                                <span class="setting-description" id="offline-arabic-dict-desc" data-i18n="descOfflineArabicDict">Neural diacritizer model (~4.9 MB) for restoring Tashkeel and accurate vowels in Arabic lyrics. Stored locally in browser.</span>
+                            </div>
+                            <div class="setting-control">
+                                <div class="dict-actions" style="display: flex; gap: 8px; align-items: center;">
+                                    <span id="offline-arabic-dict-status" class="setting-status-badge" style="font-size: 13px; opacity: 0.85;">Checking...</span>
+                                    <button type="button" id="btn-download-arabic-dict" class="m3-button tonal" style="height: 36px; padding: 0 16px; font-size: 13px;">
+                                        <span id="btn-download-arabic-dict-text" data-i18n="btnDownloadDict">Download</span>
+                                    </button>
+                                    <button type="button" id="btn-delete-arabic-dict" class="m3-button text" style="display: none; height: 36px; padding: 0 10px; color: var(--error-color, #ff5449); font-size: 13px;">
+                                        <span data-i18n="btnDeleteDict">Delete</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>

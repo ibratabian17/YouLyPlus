@@ -191,8 +191,8 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId, req
     return null;
   }
 
-  if (!response.success) {
-    console.warn('Failed to fetch original lyrics:', response.error);
+  if (!response?.success) {
+    console.warn('Failed to fetch original lyrics:', response?.error || response?.err || 'Unknown error');
     if (LyricsPlusAPI.displaySongNotFound) LyricsPlusAPI.displaySongNotFound();
     return null;
   }
