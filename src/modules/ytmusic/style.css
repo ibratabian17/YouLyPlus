@@ -532,7 +532,7 @@ div#lyrics-song-progressbar {
 
     ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-line.lyrics-activest) .background-vocal-container,
     ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-plus-metadata.lyrics-activest) .background-vocal-container {
-        max-height: 10em;
+        transition-delay: 250ms;
     }
 
     ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-line.lyrics-activest),

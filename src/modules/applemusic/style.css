@@ -168,7 +168,7 @@ article[data-testid="lyrics-fullscreen-modal"] .lyrics__lyrics,
 
 #lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-line.lyrics-activest) .background-vocal-container,
 #lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-plus-metadata.lyrics-activest) .background-vocal-container {
-    max-height: 10em;
+    transition-delay: 250ms;
 }
 
 #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-line.lyrics-activest),
