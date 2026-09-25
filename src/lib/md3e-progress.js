@@ -8,6 +8,34 @@
  * @fires seek - Dispatches a custom event with { detail: { progress } } when the user clicks/drags.
  */
 class WavyProgressBar {
+  static _resizeObserver = null;
+  static _intersectionObserver = null;
+  static _instances = new WeakMap();
+
+  static _getResizeObserver() {
+    if (!WavyProgressBar._resizeObserver) {
+      WavyProgressBar._resizeObserver = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          const inst = WavyProgressBar._instances.get(entry.target);
+          if (inst) inst._onResize(entry.contentRect);
+        }
+      });
+    }
+    return WavyProgressBar._resizeObserver;
+  }
+
+  static _getIntersectionObserver() {
+    if (!WavyProgressBar._intersectionObserver) {
+      WavyProgressBar._intersectionObserver = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+          const inst = WavyProgressBar._instances.get(entry.target);
+          if (inst) inst._onVisibilityChange(entry.isIntersecting);
+        }
+      });
+    }
+    return WavyProgressBar._intersectionObserver;
+  }
+
   /**
    * Start the squiggle animation
    * @param {element} element - The progressbar container
@@ -72,12 +100,13 @@ class WavyProgressBar {
       cancelAnimationFrame(this._cssRetryId);
       this._cssRetryId = null;
     }
-    if (this._resizeObserver) {
-      this._resizeObserver.disconnect();
+    if (WavyProgressBar._resizeObserver) {
+      WavyProgressBar._resizeObserver.unobserve(this.container);
     }
-    if (this._intersectionObserver) {
-      this._intersectionObserver.disconnect();
+    if (WavyProgressBar._intersectionObserver) {
+      WavyProgressBar._intersectionObserver.unobserve(this.container);
     }
+    WavyProgressBar._instances.delete(this.container);
   }
 
   // --- Private Methods ---
@@ -106,7 +135,7 @@ class WavyProgressBar {
       .progress-container svg { width: 100%; height: 100%; overflow: visible; }
       .progress-container .track, .progress-container .progress { fill: none; stroke-width: var(--progress-stroke-width); stroke-linecap: round; stroke-linejoin: round; }
       .progress-container .track { stroke: var(--track-color); }
-      .progress-container .progress { stroke: var(--progress-color); }
+      .progress-container .progress { stroke: var(--progress-color); will-change: d; }
       .progress-container .thumb { fill: var(--thumb-color); rx: var(--thumb-radius); ry: var(--thumb-radius); will-change: transform; }
     `;
     document.head.appendChild(style);
@@ -142,16 +171,18 @@ class WavyProgressBar {
       return Number.isFinite(n) ? n : d;
     };
 
-    const maxAmplitude = parseOrDefault(style.getPropertyValue('--wave-amplitude'), 3);
-    const frequency = parseOrDefault(style.getPropertyValue('--wave-frequency'), 0.16);
-    const thumbWidth = parseOrDefault(style.getPropertyValue('--thumb-width'), 5);
+    const ampRaw = style.getPropertyValue('--wave-amplitude');
+    const freqRaw = style.getPropertyValue('--wave-frequency');
+    const thumbWRaw = style.getPropertyValue('--thumb-width');
+
+    const maxAmplitude = parseOrDefault(ampRaw, 3);
+    const frequency = parseOrDefault(freqRaw, 0.16);
+    const thumbWidth = parseOrDefault(thumbWRaw, 5);
     const thumbHeight = parseOrDefault(style.getPropertyValue('--thumb-height'), 20);
     const pathResolution = parseOrDefault(style.getPropertyValue('--path-resolution'), 4);
     const amplitudeEaseFactor = parseOrDefault(style.getPropertyValue('--amplitude-ease-factor'), 0.2);
 
-    const anyRead = style.getPropertyValue('--wave-amplitude').trim() !== '' ||
-                    style.getPropertyValue('--wave-frequency').trim() !== '' ||
-                    style.getPropertyValue('--thumb-width').trim() !== '';
+    const anyRead = ampRaw.trim() !== '' || freqRaw.trim() !== '' || thumbWRaw.trim() !== '';
 
     this.maxAmplitude = maxAmplitude;
     this.frequency = frequency;
@@ -178,6 +209,7 @@ class WavyProgressBar {
     this._cssRetryId = null;
     this._lastTimestamp = null;
     this._lastDrawnX = -1;
+    this._pathBuffer = [];
   }
 
   _initializeElements() {
@@ -204,19 +236,9 @@ class WavyProgressBar {
       }));
     });
 
-    this._resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        this._onResize(entry.contentRect);
-      }
-    });
-    this._resizeObserver.observe(this.container);
-
-    this._intersectionObserver = new IntersectionObserver(entries => {
-      for (let entry of entries) {
-        this._onVisibilityChange(entry.isIntersecting);
-      }
-    });
-    this._intersectionObserver.observe(this.container);
+    WavyProgressBar._instances.set(this.container, this);
+    WavyProgressBar._getResizeObserver().observe(this.container);
+    WavyProgressBar._getIntersectionObserver().observe(this.container);
   }
 
   _onResize(rect) {
@@ -304,8 +326,9 @@ class WavyProgressBar {
 
     let needsAnotherFrame = false;
     const amplitudeDiff = this.targetAmplitude - this.currentAmplitude;
+    const isEasing = Math.abs(amplitudeDiff) > 0.01;
 
-    if (Math.abs(amplitudeDiff) > 0.01) {
+    if (isEasing) {
       const factor = 1 - Math.pow(1 - this.amplitudeEaseFactor, Math.max(deltaFrames, 0.1));
       this.currentAmplitude += amplitudeDiff * Math.min(factor, 1);
       needsAnotherFrame = true;
@@ -316,7 +339,8 @@ class WavyProgressBar {
       }
     }
 
-    if (this.targetAmplitude > 0 || this.currentAmplitude > 0.01) {
+    const isWaving = this.targetAmplitude > 0 || this.currentAmplitude > 0.01;
+    if (isWaving) {
       const waveSpeed = 18;
       this.waveOffset += waveSpeed * deltaTime;
       needsAnotherFrame = true;
@@ -336,31 +360,35 @@ class WavyProgressBar {
     if (!this.hasInitializedLayout) return;
 
     const currentX = (Number.isFinite(this.progress) ? this.progress : 0) * this.svgWidth;
-    
+
     if (Math.abs(this._lastDrawnX - currentX) > 0.05) {
       this._lastDrawnX = currentX;
       this.trackLineEl.setAttribute('x1', currentX);
-      this.thumbEl.style.transform = `translateX(${currentX}px)`;
+      this.thumbEl.style.transform = `translate3d(${currentX}px,0,0)`;
     }
 
     if (this.currentAmplitude > 0.01 && currentX > 0) {
       const res = this.pathResolution || 2;
-      const startY = Math.round((this.centerY + Math.sin(this.waveOffset * this.frequency) * this.currentAmplitude) * 100) / 100;
-      let d = `M 0 ${startY}`;
-      
+      const freq = this.frequency;
+      const amp = this.currentAmplitude;
+      const cy = this.centerY;
+      const offset = this.waveOffset;
+      const buf = this._pathBuffer;
+      buf.length = 0;
+
+      buf.push('M 0 ', (cy + Math.sin(offset * freq) * amp).toFixed(2));
+
       for (let x = res; x <= currentX; x += res) {
-        const y = Math.round((this.centerY + Math.sin((x + this.waveOffset) * this.frequency) * this.currentAmplitude) * 100) / 100;
-        d += ` L ${x} ${y}`;
+        const y = cy + Math.sin((x + offset) * freq) * amp;
+        buf.push(' L ', x.toFixed(1), ' ', y.toFixed(2));
       }
-      
-      const endY = Math.round((this.centerY + Math.sin((currentX + this.waveOffset) * this.frequency) * this.currentAmplitude) * 100) / 100;
-      const endX = Math.round(currentX * 100) / 100;
-      d += ` L ${endX} ${endY}`;
-      
-      this.progressPathEl.setAttribute('d', d);
+
+      const endY = cy + Math.sin((currentX + offset) * freq) * amp;
+      buf.push(' L ', currentX.toFixed(2), ' ', endY.toFixed(2));
+
+      this.progressPathEl.setAttribute('d', buf.join(''));
     } else {
-      const roundedX = Math.round(currentX * 100) / 100;
-      this.progressPathEl.setAttribute('d', `M 0 ${this.centerY} L ${roundedX} ${this.centerY}`);
+      this.progressPathEl.setAttribute('d', `M 0 ${this.centerY} L ${currentX.toFixed(2)} ${this.centerY}`);
     }
   }
 }
