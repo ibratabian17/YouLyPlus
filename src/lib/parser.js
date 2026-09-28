@@ -217,13 +217,6 @@ function parseSyncedLyrics(lrcContent) {
 function parseAppleTTML(ttml, offset = 0, separate = false) {
   const KPOE = '1.7-1-ConvertTTMLtoJSON-DOMParser';
 
-  const NS = {
-    tt: 'http://www.w3.org/ns/ttml',
-    itunes: 'http://music.apple.com/lyric-ttml-internal',
-    ttm: 'http://www.w3.org/ns/ttml#metadata',
-    xml: 'http://www.w3.org/XML/1998/namespace',
-  };
-
   const timeToMs = (timeStr) => {
     if (!timeStr) return 0;
     const parts = timeStr.split(':');
@@ -246,19 +239,109 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
     return text.replace(/&(amp|lt|gt|quot|#x27|#39);/g, (m) => map[m] || m);
   };
 
-  function getAttr(el, nsUri, localName, prefixedName) {
-    if (!el) return null;
-    try {
-      if (nsUri && el.getAttributeNS) {
-        const v = el.getAttributeNS(nsUri, localName);
-        if (v !== null) return v;
-      }
-    } catch (e) {}
-    if (prefixedName) {
-      const v2 = el.getAttribute(prefixedName);
-      if (v2 !== null) return v2;
+  function getAttr(el, ...attrNames) {
+    if (!el || !el.getAttribute) return null;
+
+    for (const name of attrNames) {
+      if (!name) continue;
+      try {
+        const val = el.getAttribute(name);
+        if (val !== null && val !== undefined) return val;
+      } catch (e) {}
     }
-    return el.getAttribute(localName);
+
+    if (el.attributes && el.attributes.length > 0) {
+      const targetLocals = attrNames.map(n => n.toLowerCase().split(':').pop());
+      for (let i = 0; i < el.attributes.length; i++) {
+        const attr = el.attributes[i];
+        if (!attr) continue;
+        const attrName = attr.name || '';
+        const attrLocal = (attr.localName || attrName.split(':').pop() || '').toLowerCase();
+        const attrFull = attrName.toLowerCase();
+        for (const target of targetLocals) {
+          if (attrLocal === target || attrFull === target) {
+            return attr.value;
+          }
+        }
+      }
+    }
+
+    for (const name of attrNames) {
+      if (!name) continue;
+      const local = name.split(':').pop();
+      try {
+        if (el.getAttributeNS) {
+          const val = el.getAttributeNS(null, local);
+          if (val !== null && val !== undefined) return val;
+        }
+      } catch (e) {}
+    }
+
+    return null;
+  }
+
+  function getElementsByLocalName(node, ...targetNames) {
+    if (!node) return [];
+    const results = [];
+    const targets = targetNames.map(t => t.toLowerCase());
+
+    function walk(current) {
+      if (!current) return;
+      if (current.nodeType === 1) {
+        const local = (current.localName || current.nodeName.split(':').pop() || '').toLowerCase();
+        if (targets.includes(local)) {
+          results.push(current);
+        }
+      }
+      const children = current.childNodes;
+      if (children) {
+        for (let i = 0; i < children.length; i++) {
+          walk(children[i]);
+        }
+      }
+    }
+
+    const children = node.childNodes;
+    if (children) {
+      for (let i = 0; i < children.length; i++) {
+        walk(children[i]);
+      }
+    }
+
+    return results;
+  }
+
+  function getFirstElementByLocalName(node, ...targetNames) {
+    if (!node) return null;
+    const targets = targetNames.map(t => t.toLowerCase());
+
+    function walk(current) {
+      if (!current) return null;
+      if (current.nodeType === 1) {
+        const local = (current.localName || current.nodeName.split(':').pop() || '').toLowerCase();
+        if (targets.includes(local)) {
+          return current;
+        }
+      }
+      const children = current.childNodes;
+      if (children) {
+        for (let i = 0; i < children.length; i++) {
+          const found = walk(children[i]);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
+    const children = node.childNodes;
+    if (children) {
+      for (let i = 0; i < children.length; i++) {
+        const found = walk(children[i]);
+        if (found) return found;
+      }
+    }
+
+    return null;
   }
 
   function collectTailText(node) {
@@ -274,7 +357,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
   function isInsideBackgroundWrapper(node, paragraph) {
     let current = node.parentNode;
     while (current && current !== paragraph) {
-      const roleVal = getAttr(current, NS.ttm, 'role', 'ttm:role');
+      const roleVal = getAttr(current, 'role', 'ttm:role');
       if (roleVal === 'x-bg') return true;
       current = current.parentNode;
     }
@@ -284,50 +367,56 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(ttml, 'application/xml');
 
-  if (doc.getElementsByTagName('parsererror').length > 0) {
+  if (doc.getElementsByTagName && doc.getElementsByTagName('parsererror').length > 0) {
     console.error('Failed to parse TTML document.');
     return null;
   }
 
   const root = doc.documentElement;
-  const timingMode = getAttr(root, NS.itunes, 'timing', 'itunes:timing') || 'Word';
+  if (!root) return null;
 
+  const rawTiming = getAttr(root, 'timing', 'itunes:timing');
+  const timingMode = rawTiming || 'Word';
+
+  const bodyEl = getFirstElementByLocalName(doc, 'body');
   const metadata = {
     source: 'Apple Music', 
     songWriters: [], 
     title: '',
-    language: getAttr(root, NS.xml, 'lang', 'xml:lang') || '',
+    language: getAttr(root, 'lang', 'xml:lang') || '',
     agents: {},
     songParts: [],
-    totalDuration: getAttr(doc.getElementsByTagName('body')[0], null, 'dur', 'dur') || '',
+    totalDuration: getAttr(bodyEl, 'dur') || '',
   };
 
-  const headEl = doc.getElementsByTagName('head')[0];
-  const itunesMetaEl = headEl ? headEl.getElementsByTagName('iTunesMetadata')[0] : null;
+  const headEl = getFirstElementByLocalName(doc, 'head');
+  const itunesMetaEl = headEl 
+    ? (getFirstElementByLocalName(headEl, 'iTunesMetadata', 'metadata')) 
+    : (getFirstElementByLocalName(doc, 'iTunesMetadata', 'metadata'));
 
   if (headEl) {
     // Agents
-    const agentNodes = headEl.getElementsByTagName('ttm:agent');
+    const agentNodes = getElementsByLocalName(headEl, 'agent');
     for (let i = 0; i < agentNodes.length; i++) {
       const a = agentNodes[i];
-      const agentId = getAttr(a, NS.xml, 'id', 'xml:id');
+      const agentId = getAttr(a, 'id', 'xml:id');
       if (!agentId) continue;
-      const type = getAttr(a, null, 'type', 'type') || 'person';
+      const type = getAttr(a, 'type') || 'person';
       let name = '';
-      const nameNode = a.getElementsByTagName('ttm:name')[0];
+      const nameNode = getFirstElementByLocalName(a, 'name');
       if (nameNode) name = decodeHtmlEntities(nameNode.textContent.trim());
       metadata.agents[agentId] = { type, name, alias: agentId.replace('voice', 'v') };
     }
 
     // Title & Songwriters
-    const metaContent = itunesMetaEl || headEl.getElementsByTagName('metadata')[0];
+    const metaContent = itunesMetaEl || getFirstElementByLocalName(headEl, 'metadata');
     if (metaContent) {
-      const titleEl = metaContent.getElementsByTagName('ttm:title')[0] || metaContent.getElementsByTagName('title')[0];
+      const titleEl = getFirstElementByLocalName(metaContent, 'title');
       if (titleEl) metadata.title = decodeHtmlEntities(titleEl.textContent.trim());
 
-      const songwritersEl = metaContent.getElementsByTagName('songwriters')[0];
+      const songwritersEl = getFirstElementByLocalName(metaContent, 'songwriters');
       if (songwritersEl) {
-        const songwriterNodes = songwritersEl.getElementsByTagName('songwriter');
+        const songwriterNodes = getElementsByLocalName(songwritersEl, 'songwriter');
         for (let i = 0; i < songwriterNodes.length; i++) {
           const name = decodeHtmlEntities(songwriterNodes[i].textContent.trim());
           if (name) metadata.songWriters.push(name);
@@ -341,14 +430,14 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
 
   if (itunesMetaEl) {
     // Translations
-    const translationsNode = itunesMetaEl.getElementsByTagName('translations')[0];
+    const translationsNode = getFirstElementByLocalName(itunesMetaEl, 'translations');
     if (translationsNode) {
-      const translationNodes = translationsNode.getElementsByTagName('translation');
+      const translationNodes = getElementsByLocalName(translationsNode, 'translation');
       for (const transNode of translationNodes) {
-        const lang = getAttr(transNode, NS.xml, 'lang', 'xml:lang');
-        const textNodes = transNode.getElementsByTagName('text');
+        const lang = getAttr(transNode, 'lang', 'xml:lang');
+        const textNodes = getElementsByLocalName(transNode, 'text');
         for (const textNode of textNodes) {
-          const lineId = getAttr(textNode, null, 'for', 'for');
+          const lineId = getAttr(textNode, 'for');
           if (lineId) {
             translationMap[lineId] = {
               lang: lang,
@@ -360,20 +449,20 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
     }
 
     // Transliterations
-    const transliterationsNode = itunesMetaEl.getElementsByTagName('transliterations')[0];
+    const transliterationsNode = getFirstElementByLocalName(itunesMetaEl, 'transliterations');
     if (transliterationsNode) {
-      const transliterationNodes = transliterationsNode.getElementsByTagName('transliteration');
+      const transliterationNodes = getElementsByLocalName(transliterationsNode, 'transliteration');
       for (const translitNode of transliterationNodes) {
-        const lang = getAttr(translitNode, NS.xml, 'lang', 'xml:lang');
-        const textNodes = translitNode.getElementsByTagName('text');
+        const lang = getAttr(translitNode, 'lang', 'xml:lang');
+        const textNodes = getElementsByLocalName(translitNode, 'text');
 
         for (const textNode of textNodes) {
-          const lineId = getAttr(textNode, null, 'for', 'for');
+          const lineId = getAttr(textNode, 'for');
           if (!lineId) continue;
 
           // Check if it has timing spans
-          const spans = Array.from(textNode.getElementsByTagName('span')).filter(
-            span => getAttr(span, null, 'begin', 'begin')
+          const spans = getElementsByLocalName(textNode, 'span').filter(
+            span => getAttr(span, 'begin')
           );
 
           if (spans.length > 0) {
@@ -397,8 +486,8 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
               
               if (spanText.trim() === '') continue;
 
-              const begin = getAttr(span, null, 'begin', 'begin');
-              const end = getAttr(span, null, 'end', 'end');
+              const begin = getAttr(span, 'begin');
+              const end = getAttr(span, 'end');
 
               syllabus.push({
                 time: timeToMs(begin) + offset,
@@ -421,21 +510,22 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
   }
 
   const lyrics = [];
-  const divs = doc.getElementsByTagName('div');
+  const divs = getElementsByLocalName(doc, 'div');
+  const divContainers = divs.length > 0 ? divs : (bodyEl ? [bodyEl] : [doc.documentElement]);
 
-  for (let i = 0; i < divs.length; i++) {
-    const div = divs[i];
-    const songPart = getAttr(div, NS.itunes, 'song-part', 'itunes:song-part') || getAttr(div, NS.itunes, 'songPart', 'itunes:songPart') || '';
-    const ps = div.getElementsByTagName('p');
+  for (let i = 0; i < divContainers.length; i++) {
+    const div = divContainers[i];
+    const songPart = getAttr(div, 'song-part', 'songPart', 'itunes:song-part', 'itunes:songPart') || '';
+    const ps = getElementsByLocalName(div, 'p');
     
     // Metadata: Song Parts
-    let divBegin = getAttr(div, null, 'begin', 'begin');
-    let divEnd = getAttr(div, null, 'end', 'end');
+    let divBegin = getAttr(div, 'begin');
+    let divEnd = getAttr(div, 'end');
     
     // Fallback if div has no timing but ps do
     if ((!divBegin || !divEnd) && ps.length > 0) {
-        if (!divBegin) divBegin = getAttr(ps[0], null, 'begin', 'begin');
-        if (!divEnd) divEnd = getAttr(ps[ps.length - 1], null, 'end', 'end');
+        if (!divBegin) divBegin = getAttr(ps[0], 'begin');
+        if (!divEnd) divEnd = getAttr(ps[ps.length - 1], 'end');
     }
     
     const partTime = timeToMs(divBegin) + (divBegin ? offset : 0);
@@ -449,12 +539,12 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
 
     for (let j = 0; j < ps.length; j++) {
       const p = ps[j];
-      const key = getAttr(p, NS.itunes, 'key', 'itunes:key') || '';
-      const singerId = getAttr(p, NS.ttm, 'agent', 'ttm:agent') || '';
+      const key = getAttr(p, 'key', 'itunes:key') || '';
+      const singerId = getAttr(p, 'agent', 'ttm:agent', 'singer') || '';
       const singer = singerId.replace('voice', 'v');
       
-      const pBegin = getAttr(p, null, 'begin', 'begin');
-      const pEnd = getAttr(p, null, 'end', 'end');
+      const pBegin = getAttr(p, 'begin');
+      const pEnd = getAttr(p, 'end');
 
       const currentLine = {
         time: 0,
@@ -471,7 +561,7 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
       }
 
       if (timingMode === 'Word') {
-        const allSpansInP = Array.from(p.getElementsByTagName('span')).filter(span => getAttr(span, null, 'begin', 'begin'));
+        const allSpansInP = getElementsByLocalName(p, 'span').filter(span => getAttr(span, 'begin'));
         
         if (allSpansInP.length > 0) {
             const processedSpans = new Set();
@@ -480,12 +570,12 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
 
               const isBg = isInsideBackgroundWrapper(sp, p);
               if (isBg) {
-                Array.from(sp.getElementsByTagName('span')).forEach(nested => processedSpans.add(nested));
+                getElementsByLocalName(sp, 'span').forEach(nested => processedSpans.add(nested));
               }
               processedSpans.add(sp);
 
-              const begin = getAttr(sp, null, 'begin', 'begin') || '0';
-              const end = getAttr(sp, null, 'end', 'end') || '0';
+              const begin = getAttr(sp, 'begin') || '0';
+              const end = getAttr(sp, 'end') || '0';
 
               let spanText = '';
               for (const child of sp.childNodes) {
@@ -542,9 +632,20 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
     }
   }
 
+  let detectedType = timingMode;
+  if (!rawTiming) {
+    if (lyrics.some(l => l.syllabus && l.syllabus.length > 0)) {
+      detectedType = 'Word';
+    } else if (lyrics.some(l => l.time != null && !isNaN(l.time))) {
+      detectedType = 'Line';
+    } else {
+      detectedType = 'None';
+    }
+  }
+
   return {
     KpoeTools: KPOE,
-    type: timingMode,
+    type: detectedType,
     metadata,
     lyrics,
   };
