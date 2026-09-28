@@ -19,6 +19,7 @@ const SVG_ICONS = {
 const RESTART_REQUIRED_KEYS = [
     'isEnabled',
     'YTSongInfo',
+    'YTSongInfoDisableSeekbar',
     'dynamicPlayer'
 ];
 
@@ -86,6 +87,7 @@ const autoSaveControls = [
     { id: 'enabled', key: 'isEnabled', type: 'checkbox' },
     { id: 'wordByWord', key: 'wordByWord', type: 'checkbox' },
     { id: 'ytsonginfo', key: 'YTSongInfo', type: 'checkbox' },
+    { id: 'ytsonginfo-disableseekbar', key: 'YTSongInfoDisableSeekbar', type: 'checkbox' },
     { id: 'sponsor-block', key: 'useSponsorBlock', type: 'checkbox' },
     { id: 'bypass-apple', key: 'appleMusicTTMLBypass', type: 'checkbox' },
     { id: 'prefer-unison-video', key: 'preferUnisonVideo', type: 'checkbox' },
@@ -153,6 +155,7 @@ function updateUI(settings) {
     setCheck('enabled', currentSettings.isEnabled);
     setCheck('wordByWord', currentSettings.wordByWord);
     setCheck('ytsonginfo', currentSettings.YTSongInfo);
+    setCheck('ytsonginfo-disableseekbar', currentSettings.YTSongInfoDisableSeekbar);
     setCheck('sponsor-block', currentSettings.useSponsorBlock);
     setCheck('bypass-apple', currentSettings.appleMusicTTMLBypass);
     setCheck('prefer-unison-video', currentSettings.preferUnisonVideo);
@@ -209,6 +212,7 @@ function updateUI(settings) {
     // Visibility Toggles
     toggleKpoeSourcesVisibility();
     toggleCustomKpoeUrlVisibility();
+    toggleYTSongInfoSeekbarVisibility();
     toggleGeminiSettingsVisibility();
     toggleOpenRouterSettingsVisibility();
     toggleDeepLSettingsVisibility();
@@ -817,6 +821,15 @@ document.getElementById('translation-provider').addEventListener('change', (e) =
     toggleOpenRouterSettingsVisibility();
     toggleDeepLSettingsVisibility();
 });
+
+document.getElementById('ytsonginfo').addEventListener('change', () => {
+    toggleYTSongInfoSeekbarVisibility();
+});
+
+function toggleYTSongInfoSeekbarVisibility() {
+    const isYTSongInfo = document.getElementById('ytsonginfo')?.checked;
+    toggleElementVisibility('ytsonginfo-disableseekbar-group', isYTSongInfo);
+}
 
 function toggleElementVisibility(elementId, isVisible) {
     const element = document.getElementById(elementId);

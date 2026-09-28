@@ -189,6 +189,14 @@
     "message": "Tampilkan detail lagu dalam mode layar penuh, termasuk bilah progres, tanggal rilis, judul, dan artis.",
     "description": "Description for fullscreen song info"
   },
+  "settingDisableSongInfoSeekbar": {
+    "message": "Nonaktifkan Seekbar Info Lagu",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "Sembunyikan bilah progres/seekbar pada tampilan info lagu layar penuh.",
+    "description": "Description for disabling seekbar in fullscreen song info"
+  },
   "settingUseSponsorBlock": {
     "message": "Gunakan API SponsorBlock",
     "description": "Label for SponsorBlock toggle in settings"

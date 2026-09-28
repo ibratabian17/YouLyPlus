@@ -193,6 +193,14 @@
     "message": "Display song details in fullscreen mode, including progress bar, release date, title, and artist.",
     "description": "Description for fullscreen song info"
   },
+  "settingDisableSongInfoSeekbar": {
+    "message": "Disable Song Info Seekbar",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "Hide the progress bar from the fullscreen song information display.",
+    "description": "Description for disabling seekbar in fullscreen song info"
+  },
   "settingUseSponsorBlock": {
     "message": "Use SponsorBlock API",
     "description": "Label for SponsorBlock toggle in settings"

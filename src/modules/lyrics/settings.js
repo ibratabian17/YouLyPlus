@@ -39,6 +39,7 @@ const defaultSettings = {
     customKpoeUrl: '',
     appleMusicTTMLBypass: false,
     YTSongInfo: false,
+    YTSongInfoDisableSeekbar: false,
     openRouterApiKey: '',
     openRouterModel: 'google/gemma-3n-e2b-it:free',
     deeplApiKey: ''
