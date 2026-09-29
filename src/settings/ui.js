@@ -1513,7 +1513,16 @@ function initCustomSelects() {
             document.querySelectorAll('.m3-select.open').forEach(openSelect => {
                 if (openSelect !== customSelect) openSelect.classList.remove('open');
             });
-            customSelect.classList.toggle('open');
+            const isOpen = customSelect.classList.toggle('open');
+            if (isOpen) {
+                const selectedOption = menu.querySelector('.selected');
+                if (selectedOption) {
+                    requestAnimationFrame(() => {
+                        const topOffset = selectedOption.offsetTop - (menu.clientHeight / 2) + (selectedOption.clientHeight / 2);
+                        menu.scrollTop = Math.max(0, topOffset);
+                    });
+                }
+            }
         });
 
         nativeSelect.classList.add('m3-select-hidden');
