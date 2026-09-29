@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "تجاوز اللغة المستهدفة للترجمة",
-    "description": "Toggle label"
+    "message": "اللغة المستهدفة",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "حدد يدوياً اللغة التي ستترجم إليها (مثال: 'ar', 'en', 'ja').",
+    "message": "اختر اللغة المستهدفة لترجمة كلمات الأغاني (افتراضياً لغة التطبيق/المتصفح).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "رمز اللغة المستهدفة المخصص",
-    "description": "Input label"
+    "message": "اللغة المستهدفة",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "أدخل رمز اللغة المكون من حرفين (مثال: 'ar' للعربية).",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "حركة تمرير أبطأ وتعطيل تحريك تغيير حجم النص لكلمات الأغاني.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "تلقائي (مطابقة لغة التطبيق / المتصفح)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "يدعم DeepL رسمياً 33 لغة. إذا تم طلب لغة غير مدعومة، فسيتم الرجوع تلقائياً إلى ترجمة Google.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

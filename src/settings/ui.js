@@ -105,8 +105,7 @@ const autoSaveControls = [
     { id: 'romanization-provider', key: 'romanizationProvider', type: 'value' },
     { id: 'transliteration-target', key: 'transliterationTargetScript', type: 'value' },
     { id: 'gemini-romanization-model', key: 'geminiRomanizationModel', type: 'value' },
-    { id: 'override-translate-target', key: 'overrideTranslateTarget', type: 'checkbox' },
-    { id: 'custom-translate-target', key: 'customTranslateTarget', type: 'value', debounce: 500 },
+    { id: 'custom-translate-target', key: 'customTranslateTarget', type: 'value' },
     { id: 'override-gemini-prompt', key: 'overrideGeminiPrompt', type: 'checkbox' },
     { id: 'custom-gemini-prompt', key: 'customGeminiPrompt', type: 'value', debounce: 500 },
     { id: 'override-gemini-romanize-prompt', key: 'overrideGeminiRomanizePrompt', type: 'checkbox' },
@@ -182,8 +181,8 @@ function updateUI(settings) {
     setVal('gemini-romanization-model', currentSettings.geminiRomanizationModel || 'gemini-1.5-pro-latest');
     updateCustomSelectDisplay('gemini-romanization-model');
 
-    setCheck('override-translate-target', currentSettings.overrideTranslateTarget);
-    setVal('custom-translate-target', currentSettings.customTranslateTarget);
+    setVal('custom-translate-target', currentSettings.customTranslateTarget || '');
+    updateCustomSelectDisplay('custom-translate-target');
     setCheck('override-gemini-prompt', currentSettings.overrideGeminiPrompt);
     setVal('custom-gemini-prompt', currentSettings.customGeminiPrompt);
     setCheck('override-gemini-romanize-prompt', currentSettings.overrideGeminiRomanizePrompt);
@@ -216,7 +215,6 @@ function updateUI(settings) {
     toggleGeminiSettingsVisibility();
     toggleOpenRouterSettingsVisibility();
     toggleDeepLSettingsVisibility();
-    toggleTranslateTargetVisibility();
     toggleGeminiPromptVisibility();
     toggleGeminiRomanizePromptVisibility();
     toggleRomanizationModelVisibility();
@@ -793,11 +791,6 @@ document.querySelector('#upload-lyrics-modal .modal-scrim').addEventListener('cl
 document.getElementById('modal-upload-lyrics-button').addEventListener('click', handleUploadLocalLyrics);
 document.getElementById('refresh-local-lyrics-list').addEventListener('click', populateLocalLyricsList);
 
-document.getElementById('override-translate-target').addEventListener('change', (e) => {
-    currentSettings.overrideTranslateTarget = e.target.checked;
-    toggleTranslateTargetVisibility();
-});
-
 document.getElementById('override-gemini-prompt').addEventListener('change', (e) => {
     currentSettings.overrideGeminiPrompt = e.target.checked;
     toggleGeminiPromptVisibility();
@@ -879,15 +872,66 @@ function toggleOpenRouterSettingsVisibility() {
     toggleElementVisibility('openrouter-settings-category', isTranslationOpenRouter || isRomanizationOpenRouter);
 }
 
-function toggleDeepLSettingsVisibility() {
-    const isDeepL = document.getElementById('translation-provider').value === 'deepl';
-    toggleElementVisibility('deepl-settings-category', isDeepL);
+const DEEPL_SUPPORTED_CODES = new Set([
+    '', 'ace', 'af', 'sq', 'ar', 'an', 'hy', 'as', 'ay', 'az', 'ba', 'eu', 'be', 'bn', 'bho', 'bs', 'br',
+    'bg', 'my', 'yue', 'ca', 'ceb', 'zh-CN', 'zh-TW', 'hr', 'cs', 'da', 'fa-AF', 'nl', 'en',
+    'eo', 'et', 'fi', 'fr', 'gl', 'ka', 'de', 'el', 'gn', 'gu', 'ht', 'ha', 'he', 'hi', 'hu', 'is', 'ig', 'id', 'ga', 'it', 'ja', 'jv', 'pam',
+    'kk', 'gom', 'ko', 'ku', 'ckb', 'ky', 'la', 'lv', 'ln', 'lt', 'lmo', 'lb', 'mk', 'mai', 'mg',
+    'ms', 'ml', 'mt', 'mi', 'mr', 'mn', 'ne', 'no', 'oc', 'om', 'pag', 'ps', 'fa', 'pl', 'pt',
+    'pa', 'qu', 'ro', 'ru', 'sa', 'sr', 'st', 'scn', 'sk', 'sl', 'es', 'su', 'sw', 'sv', 'tl', 'tg', 'ta', 'tt', 'te', 'th', 'ts', 'tn', 'tr', 'tk', 'uk',
+    'ur', 'uz', 'vi', 'cy', 'wo', 'xh', 'yi', 'zu'
+]);
+
+function updateTargetLanguageOptionsForProvider() {
+    const provider = document.getElementById('translation-provider')?.value;
+    const targetSelect = document.getElementById('custom-translate-target');
+    if (!targetSelect) return;
+
+    const isDeepL = provider === 'deepl' || provider === 'deepl-keyless';
+    let currentValValid = false;
+
+    Array.from(targetSelect.options).forEach(opt => {
+        if (!opt.value) {
+            opt.hidden = false;
+            return;
+        }
+        if (isDeepL) {
+            const isSupported = DEEPL_SUPPORTED_CODES.has(opt.value);
+            opt.hidden = !isSupported;
+            if (opt.value === targetSelect.value && isSupported) {
+                currentValValid = true;
+            }
+        } else {
+            opt.hidden = false;
+            if (opt.value === targetSelect.value) {
+                currentValValid = true;
+            }
+        }
+    });
+
+    if (isDeepL && targetSelect.value && !currentValValid) {
+        targetSelect.value = '';
+        currentSettings.customTranslateTarget = '';
+        updateSettings({ customTranslateTarget: '' });
+        saveSettings();
+    }
+
+    if (targetSelect.customSelect) {
+        const valueDisplay = targetSelect.customSelect.valueDisplay;
+        const selectedOption = targetSelect.options[targetSelect.selectedIndex];
+        if (selectedOption) {
+            valueDisplay.textContent = selectedOption.textContent;
+        }
+    }
 }
 
-function toggleTranslateTargetVisibility() {
-    const isVisible = document.getElementById('override-translate-target').checked;
-    toggleElementVisibility('custom-translate-target-group', isVisible);
+function toggleDeepLSettingsVisibility() {
+    const provider = document.getElementById('translation-provider').value;
+    const isDeepL = provider === 'deepl';
+    toggleElementVisibility('deepl-settings-category', isDeepL);
+    updateTargetLanguageOptionsForProvider();
 }
+
 
 function toggleGeminiPromptVisibility() {
     const isGeminiOrOpenRouter = ['gemini', 'openrouter'].includes(document.getElementById('translation-provider').value);
@@ -1378,13 +1422,14 @@ function updateCustomSelectDisplay(selectId) {
 
     if (selectedOption) {
         valueDisplay.textContent = selectedOption.textContent;
+        const menu = nativeSelect.customSelect.menu;
+        menu.querySelector('.selected')?.classList.remove('selected');
         if (selectedOption.value) {
             customSelect.classList.add('has-value');
-            const menu = nativeSelect.customSelect.menu;
-            menu.querySelector('.selected')?.classList.remove('selected');
             menu.querySelector(`[data-value="${selectedOption.value}"]`)?.classList.add('selected');
         } else {
             customSelect.classList.remove('has-value');
+            menu.querySelector(`[data-value=""]`)?.classList.add('selected');
         }
     } else {
         valueDisplay.textContent = '';
@@ -1417,6 +1462,7 @@ function initCustomSelects() {
             menu.innerHTML = '';
             const isSinglePlaceholder = nativeSelect.options.length === 1 && nativeSelect.options[0].disabled;
             Array.from(nativeSelect.options).forEach(option => {
+                if (option.hidden || option.style.display === 'none') return;
                 if (option.disabled && option.value === '' && !isSinglePlaceholder && nativeSelect.options.length > 1) return;
 
                 const customOption = document.createElement('div');
@@ -1473,7 +1519,7 @@ function initCustomSelects() {
         nativeSelect.classList.add('m3-select-hidden');
         formGroup.insertBefore(customSelect, nativeSelect);
 
-        new MutationObserver(populateOptions).observe(nativeSelect, { childList: true, attributes: true, attributeFilter: ['disabled'] });
+        new MutationObserver(populateOptions).observe(nativeSelect, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled', 'hidden', 'style'] });
     });
 
     document.addEventListener('click', () => {

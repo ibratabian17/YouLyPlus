@@ -500,20 +500,20 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Ganti Bahasa Target Terjemahan",
-    "description": "Toggle label"
+    "message": "Bahasa Target",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Tentukan bahasa target terjemahan secara manual (misal: 'id', 'en', 'ja').",
+    "message": "Pilih bahasa target untuk terjemahan lirik (default mengikuti bahasa aplikasi/browser).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Kode Bahasa Target Kustom",
-    "description": "Input label"
+    "message": "Bahasa Target",
+    "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "Masukkan kode bahasa 2 huruf (misal: 'id' untuk bahasa Indonesia, 'en' untuk bahasa Inggris).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "Otomatis (Bahasa Aplikasi / Browser)",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "Prompting Lanjutan (Gemini / OpenRouter)",
@@ -1124,5 +1124,9 @@
   "descRelaxScroll": {
     "message": "Animasi gulir lebih lambat & nonaktifkan animasi perubahan ukuran teks untuk lirik.",
     "description": "Description for relax scrolling toggle"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL resmi mendukung 33 bahasa. Jika bahasa yang tidak didukung dipilih, terjemahan akan otomatis dialihkan ke Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

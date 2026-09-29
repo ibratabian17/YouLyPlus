@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "अनुवाद लक्ष्य भाषा ओवरराइड करें",
-    "description": "Toggle label"
+    "message": "लक्ष्य भाषा",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "वह भाषा मैन्युअल रूप से सेट करें जिसमें अनुवाद किया जाना है (उदा: 'hi', 'en', 'ja')।",
+    "message": "गीत के बोल अनुवाद के लिए लक्ष्य भाषा चुनें (डिफ़ॉल्ट रूप से ऐप/ब्राउज़र भाषा)।",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "कस्टम लक्ष्य भाषा कोड",
-    "description": "Input label"
+    "message": "लक्ष्य भाषा",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "2-अक्षर वाला भाषा कोड दर्ज करें (उदा: हिंदी के लिए 'hi')।",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "धीमी स्क्रॉल एनीमेशन और बोल के लिए टेक्स्ट आकार बदलने वाले एनीमेशन को अक्षम करें।",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "स्वचालित (ऐप / ब्राउज़र भाषा से मिलान करें)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL आधिकारिक तौर पर 33 भाषाओं का समर्थन करता है। यदि कोई असमर्थित भाषा चुनी जाती है, तो अनुवाद स्वचालित रूप से Google अनुवाद पर वापस चला जाएगा।",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

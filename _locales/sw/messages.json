@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Badilisha Lugha Unayotaka Kutafsiriwa",
-    "description": "Toggle label"
+    "message": "Lugha Lengwa",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Weka kwa mkono lugha ambayo mashairi yanapaswa kutafsiriwa (k.m. 'sw', 'en', 'ja').",
+    "message": "Chagua lugha lengwa ya kutafsiri mashairi (chaguo-msingi lugha ya programu/kivinjari).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Nambari maalum ya lugha unayolenga",
-    "description": "Input label"
+    "message": "Lugha Lengwa",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "Weka nambari ya lugha yenye herufi 2 (k.m. 'sw' kwa Kiswahili).",
@@ -1068,5 +1068,13 @@
   "descRelaxScroll": {
     "message": "Uhuishaji wa polepole wa kusogeza na kulemaza uhuishaji wa kubadilisha ukubwa wa maandishi ya nyimbo.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "Otomatiki (Linganisha Lugha ya Programu / Kivinjari)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL inasaidia lugha 33 rasmi. Ikiwa lugha isiyotumika itaombwa, tafsiri itarudi kiotomatiki kwa Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "覆蓋翻譯目標語言",
-    "description": "Toggle label"
+    "message": "目標語言",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "手動指定翻譯的目標語言（例如：'zh-TW'、'en'、'ko'）。",
+    "message": "選擇歌詞翻譯的目標語言（預設比對應用程式/瀏覽器語言）。",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "自訂目標語言代碼",
-    "description": "Input label"
+    "message": "目標語言",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "輸入 2 位或多位語言代碼（例如：繁體中文為 'zh-TW'，英文為 'en'）。",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "更慢的滾動動畫，並停用歌詞的文字縮放動畫。",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "自動（比對應用程式 / 瀏覽器語言）",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL 官方支援 33 種語言。如果請求不支援的語言，翻譯將自動退回至 Google 翻譯。",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

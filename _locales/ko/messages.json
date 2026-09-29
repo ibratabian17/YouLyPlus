@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "대상 언어 직접 지정",
-    "description": "Toggle label"
+    "message": "번역 대상 언어",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "번역 대상 언어를 수동으로 지정합니다 (예: 'ko', 'en', 'ja').",
+    "message": "가사 번역 대상 언어를 선택합니다 (기본값: 앱/브라우저 언어).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "사용자 정의 대상 언어 코드",
-    "description": "Input label"
+    "message": "번역 대상 언어",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "2자리 언어 코드를 입력하세요 (예: 한국어는 'ko', 영어는 'en').",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "스크롤 애니메이션 속도를 늦추고 가사 텍스트 크기 조절 애니메이션을 비활성화합니다.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "자동 (앱 / 브라우저 언어 맞춤)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL은 공식적으로 33개 언어를 지원합니다. 지원되지 않는 언어가 선택되면 자동으로 Google 번역으로 대체됩니다.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

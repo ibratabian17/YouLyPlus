@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "மொழிபெயர்ப்பு இலக்கு மொழியை மேலெழுதவும்",
-    "description": "Toggle label"
+    "message": "இலக்கு மொழி",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "மொழிபெயர்ப்பு செய்ய வேண்டிய மொழியை கைமுறையாக அமைக்கவும் (உதாரணமாக: 'ta', 'en', 'ja').",
+    "message": "பாடல் வரிகள் மொழிபெயர்ப்பிற்கான இலக்கு மொழியைத் தேர்வுசெய்யவும் (இயல்புநிலை ஆப்/உலாவி மொழி).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "தனிப்பயன் இலக்கு மொழி குறியீடு",
-    "description": "Input label"
+    "message": "இலக்கு மொழி",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "2-எழுத்து மொழி குறியீட்டை உள்ளிடவும் (உதாரணமாக: தமிழிற்கு 'ta').",
@@ -1068,5 +1068,13 @@
   "descRelaxScroll": {
     "message": "மெதுவான உருளல் அசைவூட்டம் மற்றும் பாடல் வரிகளுக்கான உரை மறுஅளவிடல் அசைவூட்டத்தை முடக்கவும்.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "தானியங்கி (ஆப் / உலாவி மொழியைப் பொருத்து)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL அதிகாரப்பூர்வமாக 33 மொழிகளை ஆதரிக்கிறது. ஆதரிக்கப்படாத மொழி கோரப்பட்டால், மொழிபெயர்ப்பு தானாகவே Google மொழிபெயர்ப்பிற்கு மாறும்.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

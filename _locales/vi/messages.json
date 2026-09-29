@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Ghi đè ngôn ngữ mục tiêu dịch thuật",
-    "description": "Toggle label"
+    "message": "Ngôn ngữ đích",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Cấu hình thủ công ngôn ngữ cần dịch sang (ví dụ: 'vi', 'en', 'ja').",
+    "message": "Chọn ngôn ngữ đích để dịch lời bài hát (mặc định theo ngôn ngữ ứng dụng/trình duyệt).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Mã ngôn ngữ mục tiêu tùy chỉnh",
-    "description": "Input label"
+    "message": "Ngôn ngữ đích",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "Vui lòng nhập mã ngôn ngữ 2 chữ cái (ví dụ: 'vi' cho Tiếng Việt, 'en' cho Tiếng Anh).",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "Hoạt ảnh cuộn chậm hơn & tắt hiệu ứng thu phóng kích thước chữ cho lời bài hát.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "Tự động (Theo ngôn ngữ ứng dụng / trình duyệt)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL chính thức hỗ trợ 33 ngôn ngữ. Nếu yêu cầu ngôn ngữ không được hỗ trợ, bản dịch sẽ tự động chuyển sang Google Dịch.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "تغییر زبان مقصد ترجمه",
-    "description": "Toggle label"
+    "message": "زبان مقصد",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "زبانی که ترجمه باید به آن انجام شود را دستی تنظیم کنید (مثلاً: 'fa', 'en', 'ja').",
+    "message": "زبان مقصد را برای ترجمه متن آهنگ انتخاب کنید (پیش‌فرض زبان برنامه/مرورگر).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "کد زبان مقصد سفارشی",
-    "description": "Input label"
+    "message": "زبان مقصد",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "کد زبان ۲ حرفی را وارد کنید (مثلاً: 'fa' برای فارسی).",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "انیمیشن پیمایش کندتر و غیرفعال کردن انیمیشن تغییر اندازه متن ترانه.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "خودکار (مطابق با زبان برنامه / مرورگر)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "دیپ‌ال رسماً از ۳۳ زبان پشتیبانی می‌کند. در صورت درخواست زبانی که پشتیبانی نمی‌شود، ترجمه به‌طور خودکار به مترجم گوگل بازمی‌گردد.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

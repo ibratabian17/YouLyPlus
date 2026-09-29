@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Çeviri Hedef Dilini Geçersiz Kıl",
-    "description": "Toggle label"
+    "message": "Hedef Dil",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Çevirinin yapılacağı dili manuel olarak ayarlayın (örn: 'tr', 'en', 'ja').",
+    "message": "Şarkı sözü çevirisi için hedef dili seçin (varsayılan olarak uygulama/tarayıcı dili).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Özel Hedef Dil Kodu",
-    "description": "Input label"
+    "message": "Hedef Dil",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "2 harfli dil kodunu girin (örn: Türkçe için 'tr').",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "Daha yavaş kaydırma animasyonu ve şarkı sözleri için metin yeniden boyutlandırma animasyonunu devre dışı bırakma.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "Otomatik (Uygulama / Tarayıcı Diliyle Eşle)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL resmi olarak 33 dili destekler. Desteklenmeyen bir dil istendiğinde çeviri otomatik olarak Google Çeviri'ye geçer.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

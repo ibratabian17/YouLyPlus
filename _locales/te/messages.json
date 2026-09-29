@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "అనువాద లక్ష్య భాషను మార్చు",
-    "description": "Toggle label"
+    "message": "లక్ష్య భాష",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "అనువాదం చేయవలసిన భాషను మాన్యువల్‌గా సెట్ చేయండి (ఉదా: 'te', 'en', 'ja').",
+    "message": "సాహిత్య అనువాదం కోసం లక్ష్య భాషను ఎంచుకోండి (డిఫాల్ట్ యాప్/బ్రౌజర్ భాష).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "కస్టమ్ భాషా కోడ్",
-    "description": "Input label"
+    "message": "లక్ష్య భాష",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "2-అక్షరాల భాషా కోడ్‌ను నమోదు చేయండి (ఉదా: తెలుగుకు 'te').",
@@ -1064,5 +1064,13 @@
   "descRelaxScroll": {
     "message": "నెమ్మదిగా స్క్రోలింగ్ యానిమేషన్ & సాహిత్యం కోసం టెక్స్ట్ రీసైజింగ్ యానిమేషన్‌ను నిలిపివేయండి.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "ఆటోమేటిక్ (యాప్ / బ్రౌజర్ భాషకు సరిపోల్చు)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL అధికారికంగా 33 భాషలకు మద్దతు ఇస్తుంది. మద్దతు లేని భాష అభ్యర్థించబడితే, అనువాదం స్వయంచాలకంగా Google అనువాదానికి మారుతుంది.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

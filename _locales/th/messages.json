@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "กำหนดภาษาเป้าหมายการแปลเอง",
-    "description": "Toggle label"
+    "message": "ภาษาเป้าหมาย",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "ระบุภาษาที่จะแปลเป็น (เช่น 'th', 'en', 'ja') ด้วยตนเอง",
+    "message": "เลือกภาษาเป้าหมายสำหรับการแปลเนื้อเพลง (ค่าเริ่มต้นตามภาษาของแอป/เบราว์เซอร์)",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "รหัสภาษาเป้าหมายที่กำหนดเอง",
-    "description": "Input label"
+    "message": "ภาษาเป้าหมาย",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "โปรดป้อนรหัสภาษา 2 ตัวอักษร (เช่น 'th' สำหรับภาษาไทย, 'en' สำหรับภาษาอังกฤษ)",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "ภาพเคลื่อนไหวการเลื่อนที่ช้าลงและปิดภาพเคลื่อนไหวการปรับขนาดข้อความสำหรับเนื้อเพลง",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "อัตโนมัติ (ตามภาษาของแอป / เบราว์เซอร์)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL รองรับ 33 ภาษาอย่างเป็นทางการ หากเลือกภาษาที่ไม่รองรับ ระบบจะสลับไปใช้ Google Translate โดยอัตโนมัติ",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

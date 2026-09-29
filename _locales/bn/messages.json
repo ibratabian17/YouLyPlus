@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "অনুবাদ লক্ষ্য ভাষা ওভাররাইড করুন",
-    "description": "Toggle label"
+    "message": "লক্ষ্য ভাষা",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "অনুবাদ কোন ভাষায় করা হবে তা ম্যানুয়ালি সেট করুন (যেমন: 'bn', 'en', 'ja')।",
+    "message": "গানের কথা অনুবাদের জন্য লক্ষ্য ভাষা বেছে নিন (ডিফল্ট অ্যাপ/ব্রাউজার ভাষা)।",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "কাস্টম লক্ষ্য ভাষা কোড",
-    "description": "Input label"
+    "message": "লক্ষ্য ভাষা",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "২-অক্ষরের ভাষা কোড লিখুন (যেমন: বাংলার জন্য 'bn')।",
@@ -1064,5 +1064,13 @@
   "descRelaxScroll": {
     "message": "ধীরগতির স্ক্রোল অ্যানিমেশন এবং লিরিক্সের জন্য টেক্সট রিসাইজিং অ্যানিমেশন নিষ্ক্রিয় করুন।",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "স্বয়ংক্রিয় (অ্যাপ / ব্রাউজারের ভাষার সাথে মিল রাখুন)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL আনুষ্ঠানিকভাবে ৩৩টি ভাষা সমর্থন করে। অসমর্থিত কোনো ভাষা নির্বাচন করা হলে অনুবাদ স্বয়ংক্রিয়ভাবে Google অনুবাদে ফিরে যাবে।",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

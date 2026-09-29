@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Åsidosätt målspråk för översättning",
-    "description": "Toggle label"
+    "message": "Målspråk",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Ställ manuellt in det språk som översättning ska ske till (t.ex: 'sv', 'en', 'ja').",
+    "message": "Välj målspråk för översättning av låttexter (standard är app-/webbläsarspråk).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Anpassad målspråkskod",
-    "description": "Input label"
+    "message": "Målspråk",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "Ange den 2-bokstaviga språkkoden (t.ex: 'sv' för svenska).",
@@ -1064,5 +1064,13 @@
   "descRelaxScroll": {
     "message": "Långsammare rullningsanimering och inaktivera animering för textstorleksändring för sångtexter.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "Automatiskt (Följ app-/webbläsarspråk)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL stöder officiellt 33 språk. Om ett språk som inte stöds begärs återgår översättningen automatiskt till Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Перевизначити мову перекладу",
-    "description": "Toggle label"
+    "message": "Цільова мова",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Укажіть мову, на яку слід перекладати (наприклад, «en», «ko», «ja»).",
+    "message": "Оберіть цільову мову для перекладу тексту пісень (за замовчуванням мова додатка/браузера).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Власний код цільової мови перекладу",
-    "description": "Input label"
+    "message": "Цільова мова",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "Введіть дволітерний код мови (наприклад, «en» для англійської, «ko» для корейської).",
@@ -1052,5 +1052,13 @@
   "descRelaxScroll": {
     "message": "Повільніша анімація прокручування та вимкнення анімації зміни розміру тексту для слів пісні.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "Авто (Мова додатка / браузера)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL офіційно підтримує 33 мови. Якщо запитано непідтримувану мову, переклад автоматично переключиться на Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

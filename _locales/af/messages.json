@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Oorskryf vertalingsteiken-taal",
-    "description": "Toggle label"
+    "message": "Doeltaal",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Stel die taal waarheen lirieke vertaal moet word handmatig in (bv. 'af', 'en', 'ja').",
+    "message": "Kies doeltaal vir lirieke-vertaling (verstek na program-/blaaier-taal).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Gepasmaakte teikentaal-kode",
-    "description": "Input label"
+    "message": "Doeltaal",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "Voer die 2-letter taalkode in (bv. 'af' vir Afrikaans).",
@@ -1068,5 +1068,13 @@
   "descRelaxScroll": {
     "message": "Stadiger blaai-animasie en deaktiveer teksgrootte-verandering vir die lirieke.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "Outomaties (Pas by program-/blaaiertaal)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL ondersteun amptelik 33 tale. As 'n nie-ondersteunde taal versoek word, sal vertaling outomaties terugval op Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

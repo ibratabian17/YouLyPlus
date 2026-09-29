@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Sobrescribir idioma de destino de traducción",
-    "description": "Toggle label"
+    "message": "Idioma de destino",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Especifique manualmente el idioma al que desea traducir (ej: 'es', 'en', 'ja').",
+    "message": "Elige el idioma de destino para la traducción de letras (por defecto idioma de la app/navegador).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Código de idioma de destino personalizado",
-    "description": "Input label"
+    "message": "Idioma de destino",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "Ingrese el código de idioma de 2 letras (ej: 'es' para español, 'en' para inglés).",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "Animación de desplazamiento más lenta y desactiva la animación de cambio de tamaño de texto para la letra.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "Automático (Coincidir con idioma de app / navegador)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL admite oficialmente 33 idiomas. Si se solicita un idioma no admitido, la traducción recurrirá automáticamente a Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

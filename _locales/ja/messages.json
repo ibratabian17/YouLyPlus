@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "翻訳先言語を上書きする",
-    "description": "Toggle label"
+    "message": "翻訳先言語",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "翻訳先の言語を手動で指定します (例: 'ja', 'en', 'ko')。",
+    "message": "歌詞の翻訳先言語を選択します（デフォルトはアプリ／ブラウザ言語）。",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "カスタムターゲット言語コード",
-    "description": "Input label"
+    "message": "翻訳先言語",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "2文字の言語コードを入力してください (例: 日本語なら 'ja', 英語なら 'en')。",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "歌詞のスクロールアニメーションをゆっくりにし、文字サイズ拡大縮小アニメーションを無効化します。",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "自動（アプリ / ブラウザの言語に合わせる）",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepLは33言語を公式サポートしています。非対応の言語が選択された場合、自動的にGoogle翻訳へフォールバックします。",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

@@ -552,20 +552,20 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Override Translation Target Language",
-    "description": "Toggle label"
+    "message": "Target Language",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Manually specify the target language for translation (e.g., 'en', 'ko', 'ja').",
+    "message": "Choose target language for lyrics translation (defaults to app/browser language).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Custom Target Language Code",
-    "description": "Input label"
+    "message": "Target Language",
+    "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "Enter the 2-letter language code (e.g., 'en' for English, 'ko' for Korean).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "Auto (Match App / Browser Language)",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "Advanced Prompting (Gemini / OpenRouter)",
@@ -1116,5 +1116,9 @@
   "msgAllProvidersAdded": {
     "message": "All providers added",
     "description": "User added All providers on settings menu"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL officially supports 33 languages. If an unsupported language is requested, translation will automatically fall back to Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Παράκαμψη γλώσσας-στόχου μετάφρασης",
-    "description": "Toggle label"
+    "message": "Γλώσσα-στόχος",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Ορίστε χειροκίνητα τη γλώσσα στην οποία θα μεταφράζονται οι στίχοι (π.χ. 'el', 'en', 'ja').",
+    "message": "Επιλέξτε τη γλώσσα-στόχο για τη μετάφραση στίχων (προεπιλογή γλώσσα εφαρμογής/προγράμματος περιήγησης).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Προσαρμοσμένος κωδικός γλώσσας στόχου",
-    "description": "Input label"
+    "message": "Γλώσσα-στόχος",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "Εισαγάγετε τον 2-ψήφιο κωδικό γλώσσας (π.χ. 'el' για Ελληνικά).",
@@ -1068,5 +1068,13 @@
   "descRelaxScroll": {
     "message": "Πιο αργή κίνηση κύλισης και απενεργοποίηση της κίνησης αλλαγής μεγέθους κειμένου για τους στίχους.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "Αυτόματα (Γλώσσα εφαρμογής / προγράμματος περιήγησης)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "Το DeepL υποστηρίζει επίσημα 33 γλώσσες. Εάν ζητηθεί μη υποστηριζόμενη γλώσσα, η μετάφραση θα μεταβεί αυτόματα στο Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

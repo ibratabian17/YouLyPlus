@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Shintsha Ulimi Oluhlosiwe Lokuhumusha",
-    "description": "Toggle label"
+    "message": "Ulimi Oluhlosiwe",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Setha mathupha ulimi amagama omculo okufanele ahunyushelwe kulo (isib. 'zu', 'en', 'ja').",
+    "message": "Khetha ulimi oluhlosiwe lokuhumusha amazwi eculo (okuzenzakalelayo ulimi lohlelo/lwesiphequluli).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Ikhodi yolimi oluqondiswe kuyo ngokwezifiso",
-    "description": "Input label"
+    "message": "Ulimi Oluhlosiwe",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "Faka ikhodi yolimi enezinhlamvu ezi-2 (isib. 'zu' kwisi-Zulu).",
@@ -1068,5 +1068,13 @@
   "descRelaxScroll": {
     "message": "Ukuskrola kancane futhi uvale ukushintsha usayizi wombhalo kumagama engoma.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "Okuzenzakalelayo (Fanisa Ulimi Lohlelo / Lwesiphequluli)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "I-DeepL isekela ngokusemthethweni izilimi ezingu-33. Uma kucelwa ulimi olungasekelwe, ukuhumusha kuzobuyela ngokuzenzakalelayo ku-Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

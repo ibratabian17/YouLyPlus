@@ -24,10 +24,9 @@ export class TranslationService {
 
   static async getOrFetch(songInfo, action, targetLang, forceReload = false) {
     const settings = await SettingsManager.getTranslationSettings();
-    const resolvedTargetLang = targetLang || settings.customTranslateTarget || 'en';
-    const actualTargetLang = settings.overrideTranslateTarget && settings.customTranslateTarget
+    const actualTargetLang = (settings.customTranslateTarget && settings.customTranslateTarget !== 'auto')
       ? settings.customTranslateTarget
-      : resolvedTargetLang;
+      : (targetLang || 'en');
 
     const targetScript = settings.transliterationTargetScript || 'latin';
 

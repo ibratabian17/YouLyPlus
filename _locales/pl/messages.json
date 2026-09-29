@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Wymuś język docelowy tłumaczenia",
-    "description": "Toggle label"
+    "message": "Język docelowy",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Ręcznie ustaw język, na który mają być tłumaczone teksty (np: 'pl', 'en', 'ja').",
+    "message": "Wybierz język docelowy tłumaczenia tekstu piosenki (domyślnie język aplikacji/przeglądarki).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Niestandardowy kod języka docelowego",
-    "description": "Input label"
+    "message": "Język docelowy",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "Wprowadź 2-literowy kod języka (np: 'pl' dla polskiego).",
@@ -1064,5 +1064,13 @@
   "descRelaxScroll": {
     "message": "Wolniejsza animacja przewijania i wyłączenie animacji zmiany rozmiaru tekstu tekstu piosenki.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "Automatycznie (Zgodnie z językiem aplikacji / przeglądarki)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL oficjalnie obsługuje 33 języki. W przypadku wybrania nieobsługiwanego języka tłumaczenie automatycznie powróci do Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

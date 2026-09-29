@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "עקוף שפת יעד לתרגום",
-    "description": "Toggle label"
+    "message": "שפת יעד",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "הגדר ידנית את השפה אליה יש לתרגם (למשל: 'he', 'en', 'ja').",
+    "message": "בחר שפת יעד לתרגום מילות השיר (ברירת מחדל שפת האפליקציה/דפדפן).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "קוד שפת יעד מותאם אישית",
-    "description": "Input label"
+    "message": "שפת יעד",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "הזן את קוד השפה בן 2 האותיות (למשל: 'he' לעברית).",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "אנימציית גלילה איטית יותר וביטול אנימציית שינוי גודל הטקסט של המילים.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "אוטומטי (התאם לשפת האפליקציה / הדפדפן)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "‏DeepL תומך רשמית ב-33 שפות. אם נבחרה שפה שאינה נתמכת, התרגום יועבר אוטומטית ל-Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

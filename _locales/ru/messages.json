@@ -492,16 +492,16 @@
     "description": "Category title"
   },
   "settingOverrideTranslateTarget": {
-    "message": "Переопределить целевой язык перевода",
-    "description": "Toggle label"
+    "message": "Целевой язык",
+    "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Вручную укажите язык для перевода (напр: 'ru', 'en', 'ja').",
+    "message": "Выберите целевой язык для перевода текста песен (по умолчанию язык приложения/браузера).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
-    "message": "Свой код целевого языка",
-    "description": "Input label"
+    "message": "Целевой язык",
+    "description": "Dropdown label"
   },
   "helperCustomTranslateTarget": {
     "message": "Введите 2-буквенный код языка (напр: 'ru' для русского, 'en' для английского).",
@@ -1060,5 +1060,13 @@
   "descRelaxScroll": {
     "message": "Более плавная и медленная анимация прокрутки с отключением анимации изменения размера текста текста песни.",
     "description": "Description for relax scrolling toggle"
+  },
+  "optionTargetLangAuto": {
+    "message": "Авто (Язык приложения / браузера)",
+    "description": "Option in target language dropdown"
+  },
+  "noteDeepLSupportedLangs": {
+    "message": "DeepL официально поддерживает 33 языка. Если выбран неподдерживаемый язык, перевод автоматически переключится на Google Translate.",
+    "description": "Note shown under target language when DeepL is active"
   }
 }

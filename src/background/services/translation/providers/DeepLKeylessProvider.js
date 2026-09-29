@@ -17,13 +17,27 @@ export class DeepLKeylessProvider extends TranslationProvider {
     }
 
     resolveTargetLanguage(targetLang) {
-        if (!targetLang) return 'EN-US';
-        const lang = targetLang.toUpperCase();
-        if (lang === 'EN') return 'EN-US';
-        if (lang === 'PT') return 'PT-PT';
-        if (lang === 'ZH' || lang === 'ZH-CN' || lang === 'ZH-HANS') return 'ZH-HANS';
-        if (lang === 'ZH-TW' || lang === 'ZH-HANT' || lang === 'ZH-HK') return 'ZH-HANT';
-        return lang;
+        if (!targetLang) return 'en-US';
+        const raw = String(targetLang).trim();
+        const upper = raw.toUpperCase();
+        const base = raw.split(/[-_]/)[0].toLowerCase();
+
+        // The oneshot endpoint requires regional/script variants for EN, PT, ZH
+        if (upper === 'EN-GB') return 'en-GB';
+        if (upper === 'EN-US' || upper === 'EN' || base === 'en') return 'en-US';
+        if (upper === 'PT-BR') return 'pt-BR';
+        if (upper === 'PT-PT' || upper === 'PT' || base === 'pt') return 'pt-PT';
+        if (upper === 'ZH-HANT' || upper === 'ZH-TW' || upper === 'ZH-HK') return 'zh-Hant';
+        if (upper === 'ZH-HANS' || upper === 'ZH-CN' || upper === 'ZH' || base === 'zh') return 'zh-Hans';
+        if (upper === 'ES-419') return 'es-419';
+
+        // DeepL specific aliases
+        if (base === 'no') return 'nb';
+        if (base === 'ku') return 'kmr';
+        if (base === 'fa-af' || base === 'prs') return 'prs';
+
+        // Every other code passes through lowercased
+        return base;
     }
 
     async translate(texts, targetLang, songInfo = {}) {
