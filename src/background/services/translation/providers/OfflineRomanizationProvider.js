@@ -37,6 +37,34 @@ export class OfflineRomanizationProvider extends TranslationProvider {
     const arabicMatches = allText.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/g);
     const arabicCount = arabicMatches ? arabicMatches.length : 0;
 
+    const hebrewMatches = allText.match(/[\u0590-\u05FF]/g);
+    const hebrewCount = hebrewMatches ? hebrewMatches.length : 0;
+
+    const devanagariMatches = allText.match(/[\u0900-\u097F]/g);
+    const devanagariCount = devanagariMatches ? devanagariMatches.length : 0;
+
+    const thaiMatches = allText.match(/[\u0E00-\u0E7F]/g);
+    const thaiCount = thaiMatches ? thaiMatches.length : 0;
+
+    const greekMatches = allText.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g);
+    const greekCount = greekMatches ? greekMatches.length : 0;
+
+    if (hebrewCount > 0 && hebrewCount >= arabicCount && hebrewCount >= kanaCount && hebrewCount >= hangulCount && hebrewCount >= hanziCount && hebrewCount >= cyrillicCount) {
+      return 'hebrew';
+    }
+
+    if (devanagariCount > 0 && devanagariCount >= arabicCount && devanagariCount >= kanaCount && devanagariCount >= hangulCount && devanagariCount >= hanziCount && devanagariCount >= cyrillicCount) {
+      return 'devanagari';
+    }
+
+    if (thaiCount > 0 && thaiCount >= arabicCount && thaiCount >= kanaCount && thaiCount >= hangulCount && thaiCount >= hanziCount && thaiCount >= cyrillicCount) {
+      return 'thai';
+    }
+
+    if (greekCount > 0 && greekCount >= arabicCount && greekCount >= kanaCount && greekCount >= hangulCount && greekCount >= hanziCount && greekCount >= cyrillicCount) {
+      return 'greek';
+    }
+
     if (arabicCount > 0 && arabicCount >= kanaCount && arabicCount >= hangulCount && arabicCount >= hanziCount && arabicCount >= cyrillicCount) {
       return 'arabic';
     }

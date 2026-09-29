@@ -118,13 +118,16 @@ The correct handling of "ال" after a preceding word (preposition, particle, et
 ### Pinyin Romanization
 - Follow natural word boundaries (e.g., "我爱你" -> "wǒ ài nǐ" or "wo ai ni").`,
 
-  thai: `## THAI (ภาษาไทย) — Tonal Romanization
-- Thai script has no spaces between words within a phrase. If the input JSON already segments text into word objects, respect that segmentation for slot purposes even if native word boundaries would differ — represent pronunciation within each given slot, never merge/split slots to "fix" segmentation (see the structural Rule 2 below, which is a hard requirement).
-- **Vowel length is phonemic** — always distinguish short vs. long vowels (e.g., ขาว [khaao, long] vs ขัว [khua, short]); collapsing them is a meaning-changing error. Use doubled vowels for length (aa, ii, uu, ee, oo), matching common karaoke-style Thai lyric romanization.
-- **Final stops (ก ด บ) are unreleased** in natural speech — render as plain k/t/p endings without aspiration (e.g., นก -> nok, not nog).
-- **Aspirated vs. unaspirated stop pairs must stay distinct**: ก (k, unaspirated) vs ข/ค (kh, aspirated), ต (t) vs ท (th), ป (p) vs พ/ผ (ph) — do not collapse these to a single letter.
-- **ร**: rolled/tapped 'r' in formal/classical registers (เพลงไทยเดิม), frequently reduced toward 'l' or dropped in casual Bangkok pop singing — follow the casual convention for mainstream pop, the formal one for traditional genres.
-- **Tone is not marked with diacritics** in standard lyric-site romanization — represent tone indirectly through correct vowel length and consonant class rather than adding tone numbers/marks, unless the target explicitly requests IPA-style tone marking.`,
+  thai: `## THAI (ภาษาไทย) — Royal Thai General System (RTGS) Standard
+- Use ONLY standard plain English/Latin letters (a-z, A-Z).
+- **ABSOLUTELY NO DIACRITICS, ACCENTS, OR TONE MARKS** (NO á, à, â, ǎ, ā, ô, ǒ, ō, ê, è, é, ě, ī, í, ì, î, ū, ú, ù, û, etc. Use plain unaccented letters ONLY).
+- **NO intra-word hyphens or tone numbers**: Write clean compound words without internal hyphens (e.g., "sawatdi", "khopkhun", "khwamrak", "huachai", "maipenrai", "thammai", "arai", "khaochai", "talotpai", "phuakrao").
+- Follow standard RTGS transcription conventions:
+  * Vowels: a, i, u, e, ae, o, oe, ue, uea, ia, ua, ai, ao, am, ui, oi, uai, oei, io, eo, aeo, iao (all plain unaccented Latin letters).
+  * Consonants:
+    - Initial: k (ก), kh (ข/ค/ฆ), ng (ง), ch (จ/ฉ/ช/ฌ), s (ซ/ศ/ษ/ส), y (ญ/ย), d (ด/ฎ), t (ต/ฏ), th (ท/ถ/ธ/ฐ/ฑ/ฒ), n (น/ณ), b (บ), p (ป), ph (พ/ผ/ภ), f (ฟ/ฝ), m (ม), r (ร), l (ล/ฬ), w (ว), h (ห/ฮ).
+    - Final: k (ก/ข/ค), t (ด/ต/ท/ถ/ธ/จ/ช/ส/ศ/ษ), p (บ/ป/พ/ภ/ผ/ฟ), n (น/ณ/ญ/ร/ล/ฬ), m (ม), ng (ง).
+- Thai script has no spaces between words within a phrase. If the input JSON already segments text into word objects, respect that segmentation for slot purposes even if native word boundaries would differ — represent pronunciation within each given slot, never merge/split slots to "fix" segmentation (see the structural Rule 2 below, which is a hard requirement).`,
 
   hindi: `## HINDI / DEVANAGARI (हिन्दी) — Bollywood & Bhajan Conventions
 (This ruleset also governs closely related Indic scripts using the same underlying phonological principles — Tamil, Telugu, and other Indic scripts substitute their own phoneme inventory but follow the same governing philosophy below.)

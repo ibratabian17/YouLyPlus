@@ -323,8 +323,10 @@ export class ArabicRomanizer {
       }
 
       let baseRom = ARABIC_CHAR_MAP[c] !== undefined ? ARABIC_CHAR_MAP[c] : c;
-
+      let vowel = '';
+      let hasShaddah = false;
       let isExplicitSukun = false;
+      let j = i + 1;
       while (j < len && HARAKAT[chars[j]] !== undefined) {
         const dia = chars[j];
         if (dia === '\u0651') {
