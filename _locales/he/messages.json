@@ -1062,7 +1062,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "אוטומטי (התאם לשפת האפליקציה / הדפדפן)",
+    "message": "אוטומטי",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

@@ -1070,7 +1070,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "Αυτόματα (Γλώσσα εφαρμογής / προγράμματος περιήγησης)",
+    "message": "Αυτόματα",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

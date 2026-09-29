@@ -556,7 +556,7 @@
     "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Choose target language for lyrics translation (defaults to app/browser language).",
+    "message": "Choose target language for lyrics translation (defaults to web player language).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
@@ -564,7 +564,7 @@
     "description": "Dropdown label"
   },
   "optionTargetLangAuto": {
-    "message": "Auto (Match App / Browser Language)",
+    "message": "Auto",
     "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {

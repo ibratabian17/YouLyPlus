@@ -1062,7 +1062,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "Авто (Язык приложения / браузера)",
+    "message": "Автоматически",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

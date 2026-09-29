@@ -1066,7 +1066,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "স্বয়ংক্রিয় (অ্যাপ / ব্রাউজারের ভাষার সাথে মিল রাখুন)",
+    "message": "স্বয়ংক্রিয়",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

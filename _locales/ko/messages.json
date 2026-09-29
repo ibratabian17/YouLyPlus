@@ -1062,7 +1062,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "자동 (앱 / 브라우저 언어 맞춤)",
+    "message": "자동",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

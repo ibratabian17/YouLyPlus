@@ -1070,7 +1070,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "தானியங்கி (ஆப் / உலாவி மொழியைப் பொருத்து)",
+    "message": "தானியங்கி",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

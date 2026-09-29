@@ -1062,7 +1062,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "स्वचालित (ऐप / ब्राउज़र भाषा से मिलान करें)",
+    "message": "स्वचालित",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

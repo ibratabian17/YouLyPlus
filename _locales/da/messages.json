@@ -1070,7 +1070,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "Automatisk (Følg app-/browsersprog)",
+    "message": "Automatisk",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

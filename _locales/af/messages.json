@@ -1070,7 +1070,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "Outomaties (Pas by program-/blaaiertaal)",
+    "message": "Outomaties",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

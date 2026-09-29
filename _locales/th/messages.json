@@ -1062,7 +1062,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "อัตโนมัติ (ตามภาษาของแอป / เบราว์เซอร์)",
+    "message": "อัตโนมัติ",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

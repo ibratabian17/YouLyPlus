@@ -1066,7 +1066,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "ఆటోమేటిక్ (యాప్ / బ్రౌజర్ భాషకు సరిపోల్చు)",
+    "message": "స్వయంచాలక",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

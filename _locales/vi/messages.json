@@ -1062,7 +1062,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "Tự động (Theo ngôn ngữ ứng dụng / trình duyệt)",
+    "message": "Tự động",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

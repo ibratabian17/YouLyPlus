@@ -1062,7 +1062,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "تلقائي (مطابقة لغة التطبيق / المتصفح)",
+    "message": "تلقائي",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

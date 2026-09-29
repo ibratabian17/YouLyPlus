@@ -1070,7 +1070,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "Otomatiki (Linganisha Lugha ya Programu / Kivinjari)",
+    "message": "Kiotomatiki",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

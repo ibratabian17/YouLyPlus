@@ -1070,7 +1070,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "Okuzenzakalelayo (Fanisa Ulimi Lohlelo / Lwesiphequluli)",
+    "message": "Ngokuzenzakalelayo",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

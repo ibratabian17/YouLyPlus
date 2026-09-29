@@ -1062,7 +1062,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "自动（匹配应用 / 浏览器语言）",
+    "message": "自动",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

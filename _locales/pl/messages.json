@@ -1066,7 +1066,7 @@
     "description": "Description for relax scrolling toggle"
   },
   "optionTargetLangAuto": {
-    "message": "Automatycznie (Zgodnie z językiem aplikacji / przeglądarki)",
+    "message": "Automatycznie",
     "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {

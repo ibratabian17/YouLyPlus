@@ -504,7 +504,7 @@
     "description": "Dropdown label"
   },
   "descOverrideTranslateTarget": {
-    "message": "Pilih bahasa target untuk terjemahan lirik (default mengikuti bahasa aplikasi/browser).",
+    "message": "Pilih bahasa target untuk terjemahan lirik (default mengikuti bahasa web player).",
     "description": "Description"
   },
   "labelCustomTranslateTarget": {
@@ -512,7 +512,7 @@
     "description": "Dropdown label"
   },
   "optionTargetLangAuto": {
-    "message": "Otomatis (Bahasa Aplikasi / Browser)",
+    "message": "Otomatis",
     "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
