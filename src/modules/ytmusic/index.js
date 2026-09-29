@@ -281,3 +281,89 @@ window.addEventListener('message', (event) => {
         }
     }
 });
+
+// --- Fullscreen Cursor Auto-Hide ---
+let cursorIdleTimeout = null;
+const CURSOR_IDLE_DELAY = 2000;
+
+function isYTMusicFullscreen() {
+    return !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.querySelector('ytmusic-app-layout[player-fullscreened]') ||
+        document.querySelector('ytmusic-app-layout[player-ui-state="FULLSCREEN"]') ||
+        document.querySelector('ytmusic-player-page[player-fullscreened]') ||
+        document.querySelector('#layout[player-ui-state="FULLSCREEN"]')
+    );
+}
+
+function showCursor() {
+    if (document.documentElement.classList.contains('lyplus-hide-cursor')) {
+        document.documentElement.classList.remove('lyplus-hide-cursor');
+    }
+    if (document.body && document.body.classList.contains('lyplus-hide-cursor')) {
+        document.body.classList.remove('lyplus-hide-cursor');
+    }
+}
+
+function hideCursor() {
+    if (isYTMusicFullscreen()) {
+        document.documentElement.classList.add('lyplus-hide-cursor');
+        if (document.body) {
+            document.body.classList.add('lyplus-hide-cursor');
+        }
+    }
+}
+
+function resetCursorIdleTimer() {
+    showCursor();
+    if (cursorIdleTimeout) {
+        clearTimeout(cursorIdleTimeout);
+        cursorIdleTimeout = null;
+    }
+
+    if (isYTMusicFullscreen()) {
+        cursorIdleTimeout = setTimeout(hideCursor, CURSOR_IDLE_DELAY);
+    }
+}
+
+function handleFullscreenStateChange() {
+    if (isYTMusicFullscreen()) {
+        resetCursorIdleTimer();
+    } else {
+        if (cursorIdleTimeout) {
+            clearTimeout(cursorIdleTimeout);
+            cursorIdleTimeout = null;
+        }
+        showCursor();
+    }
+}
+
+function initFullscreenCursorManager() {
+    const activityEvents = ['mousemove', 'pointermove', 'mousedown', 'keydown', 'wheel', 'touchstart'];
+    activityEvents.forEach((eventType) => {
+        window.addEventListener(eventType, () => {
+            if (isYTMusicFullscreen()) {
+                resetCursorIdleTimer();
+            } else {
+                showCursor();
+            }
+        }, { passive: true });
+    });
+
+    window.addEventListener('blur', showCursor);
+    document.addEventListener('fullscreenchange', handleFullscreenStateChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenStateChange);
+
+    const observer = new MutationObserver(() => {
+        handleFullscreenStateChange();
+    });
+
+    observer.observe(document.documentElement, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: ['player-fullscreened', 'player-ui-state']
+    });
+}
+
+initFullscreenCursorManager();

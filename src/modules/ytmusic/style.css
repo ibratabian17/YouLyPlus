@@ -10,6 +10,14 @@ ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"]) .loadi
     display: none !important;
 }
 
+/* Auto-hide cursor when idle in fullscreen */
+html.lyplus-hide-cursor,
+html.lyplus-hide-cursor *,
+body.lyplus-hide-cursor,
+body.lyplus-hide-cursor * {
+    cursor: none !important;
+}
+
 ytmusic-app-layout[player-fullscreened] .song-media-controls.ytmusic-player {
     background: none;
 }
