@@ -62,7 +62,7 @@ export class OfflineRomanizer {
     if (/[\uAC00-\uD7A3\u3131-\u318E]/u.test(syllableText)) {
       romanized = KoreanRomanizer.romanize(syllableText);
     } else if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/u.test(syllableText) || langContext === 'arabic') {
-      romanized = ArabicRomanizer.romanize(syllableText, lineContext);
+      romanized = ArabicRomanizer.romanizeVocalizedLine(syllableText).trim();
     } else if (/[\p{Script=Cyrillic}]/u.test(syllableText)) {
       romanized = CyrillicRomanizer.romanize(syllableText);
     } else if (/[\u3040-\u309F\u30A0-\u30FF]/u.test(syllableText)) {

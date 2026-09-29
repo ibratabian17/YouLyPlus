@@ -102,6 +102,14 @@ const HARAKAT = {
 };
 
 export class ArabicRomanizer {
+  static isFullyVocalized(text) {
+    if (!text) return true;
+    const letters = (text.match(/[\u0621-\u063A\u0641-\u064A]/gu) || []).length;
+    if (letters === 0) return true;
+    const harakat = (text.match(/[\u064B-\u0652\u0670]/gu) || []).length;
+    return (harakat / letters) >= 0.85;
+  }
+
   static async romanize(text, lineContext = '') {
     if (!text) return '';
     return await this.romanizeLine(text);
@@ -115,7 +123,7 @@ export class ArabicRomanizer {
     if (!Array.isArray(unvocalizedSyllables)) return [];
     if (!vocalizedLine) return unvocalizedSyllables.map(s => s.text || '');
 
-    const alreadyVocalized = unvocalizedSyllables.some(s => s.text && /[\u064B-\u0652\u0670]/u.test(s.text));
+    const alreadyVocalized = this.isFullyVocalized(vocalizedLine) && unvocalizedSyllables.every(s => this.isFullyVocalized(s.text));
     if (alreadyVocalized) {
       return unvocalizedSyllables.map(s => s.text || '');
     }
@@ -125,22 +133,32 @@ export class ArabicRomanizer {
 
     return unvocalizedSyllables.map(s => {
       const origText = s.text || '';
-      const bareText = origText.replace(/[\u064B-\u0652\u0670]/gu, '');
-      let vocalizedChunk = '';
+      const match = origText.match(/^(\s*)(.*?)(\s*)$/);
+      const leadingSpace = match ? match[1] : '';
+      const coreText = match ? match[2] : origText;
+      const trailingSpace = match ? match[3] : '';
 
-      for (const ch of bareText) {
+      if (!coreText) {
+        return origText;
+      }
+
+      const bareCore = coreText.replace(/[\u064B-\u0652\u0670]/gu, '');
+      let vocalizedCore = '';
+
+      for (const ch of bareCore) {
         if (/\p{L}/u.test(ch)) {
-          while (tokenIdx < tokens.length) {
-            const tok = tokens[tokenIdx++];
-            vocalizedChunk += tok;
-            if (/\p{L}/u.test(tok)) break;
+          while (tokenIdx < tokens.length && !/\p{L}/u.test(tokens[tokenIdx])) {
+            tokenIdx++;
+          }
+          if (tokenIdx < tokens.length) {
+            vocalizedCore += tokens[tokenIdx++];
           }
         } else {
-          vocalizedChunk += ch;
+          vocalizedCore += ch;
         }
       }
 
-      return vocalizedChunk || origText;
+      return leadingSpace + (vocalizedCore || coreText) + trailingSpace;
     });
   }
 
@@ -148,7 +166,7 @@ export class ArabicRomanizer {
     if (!Array.isArray(syllables)) return [];
 
     let alignedVocalized = null;
-    const isUnvocalized = lineContext && !/[\u064B-\u0652\u0670]/u.test(lineContext);
+    const isUnvocalized = !this.isFullyVocalized(lineContext);
 
     if (isUnvocalized && cattDiacritizer.isReady()) {
       const vocalizedLine = await cattDiacritizer.diacritize(lineContext);
@@ -160,14 +178,19 @@ export class ArabicRomanizer {
     return syllables.map((s, idx) => {
       const origText = s.text || '';
       const textToRomanize = (alignedVocalized && alignedVocalized[idx]) ? alignedVocalized[idx] : origText;
-      let rom = this.romanizeVocalizedLine(textToRomanize);
 
-      const hasTrail = /\s$/.test(origText);
-      if (hasTrail && rom && !/\s$/.test(rom)) {
-        rom += ' ';
+      const match = textToRomanize.match(/^(\s*)(.*?)(\s*)$/);
+      const leadingSpace = match ? match[1] : '';
+      const coreText = match ? match[2] : textToRomanize;
+      const trailingSpace = match ? match[3] : '';
+
+      if (!coreText) {
+        return { text: origText };
       }
 
-      return { text: rom };
+      const romCore = this.romanizeVocalizedLine(coreText).trim();
+
+      return { text: leadingSpace + romCore + trailingSpace };
     });
   }
 
@@ -175,7 +198,7 @@ export class ArabicRomanizer {
     if (!lineText) return '';
 
     let textToProcess = lineText;
-    const isUnvocalized = !/[\u064B-\u0652\u0670]/u.test(lineText);
+    const isUnvocalized = !this.isFullyVocalized(lineText);
 
     if (isUnvocalized && cattDiacritizer.isReady()) {
       textToProcess = await cattDiacritizer.diacritize(lineText);
@@ -301,20 +324,26 @@ export class ArabicRomanizer {
 
       let baseRom = ARABIC_CHAR_MAP[c] !== undefined ? ARABIC_CHAR_MAP[c] : c;
 
-      let hasShaddah = false;
-      let vowel = '';
-      let j = i + 1;
-
+      let isExplicitSukun = false;
       while (j < len && HARAKAT[chars[j]] !== undefined) {
         const dia = chars[j];
         if (dia === '\u0651') {
           hasShaddah = true;
         } else if (dia === '\u0652') {
+          isExplicitSukun = true;
           vowel = '';
         } else {
           vowel = HARAKAT[dia];
         }
         j++;
+      }
+
+      if (!vowel && !isExplicitSukun && j < len) {
+        const nextC = chars[j];
+        if (c !== '\u0627' && c !== '\u0648' && c !== '\u064A' && c !== '\u0649' && c !== '\u0621' &&
+            nextC !== '\u0627' && nextC !== '\u0648' && nextC !== '\u064A' && nextC !== '\u0649' && nextC !== '\u0629') {
+          vowel = 'a';
+        }
       }
 
       if (hasSunLetterPrefix) {

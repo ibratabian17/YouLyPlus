@@ -153,13 +153,21 @@ export class CattDiacritizer {
     return this._ready;
   }
 
+  isFullyVocalized(text) {
+    if (!text) return true;
+    const letters = (text.match(/[\u0621-\u063A\u0641-\u064A]/gu) || []).length;
+    if (letters === 0) return true;
+    const harakat = (text.match(/[\u064B-\u0652\u0670]/gu) || []).length;
+    return (harakat / letters) >= 0.85;
+  }
+
   /**
    * Automatically adds Harakat (Tashkeel) to an unvocalized Arabic string.
    */
   async diacritize(text) {
     if (!text) return text;
 
-    if (/[\u064B-\u0652\u0670]/u.test(text)) {
+    if (this.isFullyVocalized(text)) {
       return text;
     }
 
