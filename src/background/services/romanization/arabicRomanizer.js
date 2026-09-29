@@ -181,6 +181,7 @@ export class ArabicRomanizer {
     return syllables.map((s, idx) => {
       const origText = s.text || '';
       const textToRomanize = (alignedVocalized && alignedVocalized[idx]) ? alignedVocalized[idx] : origText;
+      const prevSyllableText = idx > 0 ? (alignedVocalized ? alignedVocalized[idx - 1] : syllables[idx - 1]?.text) : '';
 
       const match = textToRomanize.match(/^(\s*)(.*?)(\s*)$/);
       const leadingSpace = match ? match[1] : '';
@@ -191,7 +192,8 @@ export class ArabicRomanizer {
         return { text: origText };
       }
 
-      const romCore = this.romanizeVocalizedLine(coreText).trim();
+      const prevWord = (prevSyllableText || '').trim().replace(/[\u064B-\u0652\u0670\u0640]/g, '');
+      const romCore = this.romanizeVocalizedLine(coreText, prevWord).trim();
 
       return { text: leadingSpace + romCore + trailingSpace };
     });
@@ -213,18 +215,19 @@ export class ArabicRomanizer {
     return this.romanizeVocalizedLine(textToProcess);
   }
 
-  static romanizeVocalizedLine(lineText) {
+  static romanizeVocalizedLine(lineText, initialPrevWord = '') {
     if (!lineText) return '';
 
     const tokens = lineText.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+|[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+/gu) || [lineText];
 
     let result = '';
+    let lastWord = initialPrevWord;
+
     for (let idx = 0; idx < tokens.length; idx++) {
       const token = tokens[idx];
       if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/u.test(token)) {
-        // Lookahead to check if previous word was preposition like "في"
-        const prevToken = idx >= 2 ? tokens[idx - 2] : '';
-        result += this.romanizeWordOrPhrase(token, prevToken);
+        result += this.romanizeWordOrPhrase(token, lastWord);
+        lastWord = token.replace(/[\u064B-\u0652\u0670\u0640]/g, '');
       } else {
         result += token;
       }
