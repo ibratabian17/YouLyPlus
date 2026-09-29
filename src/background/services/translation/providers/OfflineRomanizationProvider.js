@@ -1,6 +1,6 @@
 import { TranslationProvider } from '../TranslationProvider.js';
 import { OfflineRomanizer } from '../../romanization/offlineRomanizer.js';
-import { rawiDiacritizer } from '../../romanization/rawiDiacritizer.js';
+import { cattDiacritizer } from '../../romanization/cattDiacritizer.js';
 import { dictionaryService } from '../../romanization/dictionaryService.js';
 
 export class OfflineRomanizationProvider extends TranslationProvider {
@@ -79,7 +79,7 @@ export class OfflineRomanizationProvider extends TranslationProvider {
     if (langContext === 'japanese') {
       tokenizer = await dictionaryService.getKuromojiTokenizer();
     } else if (langContext === 'arabic') {
-      await rawiDiacritizer.ensureLoaded();
+      await cattDiacritizer.ensureLoaded();
     }
 
     if (originalLyrics.type === 'Word') {

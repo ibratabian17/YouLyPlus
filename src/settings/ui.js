@@ -1080,12 +1080,12 @@ async function updateArabicDictStatus() {
     try {
         const status = await getDictionaryStatus('arabic');
         if (status && status.installed) {
-            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusInstalled', 'Installed (~4.9 MB)') : 'Installed (~4.9 MB)');
+            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusInstalled', 'Installed (~74.4 MB)') : 'Installed (~74.4 MB)');
             statusBadge.style.color = 'var(--md3-sys-color-primary, #625b71)';
             downloadBtn.style.display = 'none';
             if (deleteBtn) deleteBtn.style.display = 'inline-flex';
         } else {
-            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusNotInstalled', 'Not Installed (~4.9 MB)') : 'Not Installed (~4.9 MB)');
+            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusNotInstalled', 'Not Installed (~74.4 MB)') : 'Not Installed (~74.4 MB)');
             statusBadge.style.color = 'inherit';
             downloadBtn.style.display = 'inline-flex';
             downloadBtn.disabled = false;
@@ -1099,8 +1099,8 @@ async function updateArabicDictStatus() {
 
 async function handleDownloadArabicDict() {
     const confirmMsg = typeof i18n === 'function'
-        ? i18n('confirmDownloadArabicDict', 'Download the Arabic Rawi diacritizer model (~4.9 MB)? It will be stored locally in your browser for offline Arabic pronunciation.')
-        : 'Download the Arabic Rawi diacritizer model (~4.9 MB)? It will be stored locally in your browser for offline Arabic pronunciation.';
+        ? i18n('confirmDownloadArabicDict', 'Download the Arabic CaTT diacritizer model (~74.4 MB)? It will be stored locally in your browser for offline Arabic pronunciation.')
+        : 'Download the Arabic CaTT diacritizer model (~74.4 MB)? It will be stored locally in your browser for offline Arabic pronunciation.';
 
     if (!window.confirm(confirmMsg)) return;
 
@@ -1109,7 +1109,7 @@ async function handleDownloadArabicDict() {
     const downloadBtnText = document.getElementById('btn-download-arabic-dict-text');
 
     if (downloadBtn) downloadBtn.disabled = true;
-    if (statusBadge) statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusDownloading', 'Downloading (~4.9 MB)...') : 'Downloading (~4.9 MB)...');
+    if (statusBadge) statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusDownloading', 'Downloading (~74.4 MB)...') : 'Downloading (~74.4 MB)...');
     if (downloadBtnText) downloadBtnText.textContent = '...';
 
     try {
@@ -1126,8 +1126,8 @@ async function handleDownloadArabicDict() {
 
 async function handleDeleteArabicDict() {
     const confirmMsg = typeof i18n === 'function'
-        ? i18n('confirmDeleteArabicDict', 'Are you sure you want to delete the offline Arabic Rawi model?')
-        : 'Are you sure you want to delete the offline Arabic Rawi model?';
+        ? i18n('confirmDeleteArabicDict', 'Are you sure you want to delete the offline Arabic CaTT model?')
+        : 'Are you sure you want to delete the offline Arabic CaTT model?';
 
     if (!window.confirm(confirmMsg)) return;
 

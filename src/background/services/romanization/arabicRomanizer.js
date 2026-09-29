@@ -1,10 +1,10 @@
 /**
  * Offline Arabic Romanizer.
  * Supports vocalized/Tashkeel Arabic, sun letters assimilation (الحروف الشمسية)
- * for definite article "ال", and on-the-fly diacritization via Rawi ONNX model.
+ * for definite article "ال", and on-the-fly diacritization via CaTT ONNX model.
  */
 
-import { rawiDiacritizer } from './rawiDiacritizer.js';
+import { cattDiacritizer } from './cattDiacritizer.js';
 
 const ARABIC_CHAR_MAP = {
   '\u0621': "'",
@@ -150,8 +150,8 @@ export class ArabicRomanizer {
     let alignedVocalized = null;
     const isUnvocalized = lineContext && !/[\u064B-\u0652\u0670]/u.test(lineContext);
 
-    if (isUnvocalized && rawiDiacritizer.isReady()) {
-      const vocalizedLine = await rawiDiacritizer.diacritize(lineContext);
+    if (isUnvocalized && cattDiacritizer.isReady()) {
+      const vocalizedLine = await cattDiacritizer.diacritize(lineContext);
       if (vocalizedLine && vocalizedLine !== lineContext) {
         alignedVocalized = this.alignVocalizedToSyllables(syllables, vocalizedLine);
       }
@@ -177,8 +177,8 @@ export class ArabicRomanizer {
     let textToProcess = lineText;
     const isUnvocalized = !/[\u064B-\u0652\u0670]/u.test(lineText);
 
-    if (isUnvocalized && rawiDiacritizer.isReady()) {
-      textToProcess = await rawiDiacritizer.diacritize(lineText);
+    if (isUnvocalized && cattDiacritizer.isReady()) {
+      textToProcess = await cattDiacritizer.diacritize(lineText);
     }
 
     return this.romanizeVocalizedLine(textToProcess);

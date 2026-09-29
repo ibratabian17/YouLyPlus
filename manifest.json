@@ -21,8 +21,8 @@
     "https://lyrics-api.binimum.org/*",
     "https://lyrics-storage.binimum.org/*",
     "https://cdn.jsdelivr.net/*",
-    "https://huggingface.co/*",
-    "https://*.hf.co/*",
+    "https://github.com/*",
+    "https://*.githubusercontent.com/*",
     "https://cdnjs.cloudflare.com/*"
   ],
   "action": {

@@ -262,9 +262,9 @@ export class MessageHandler {
 
   static async getDictionaryStatus(message, sendResponse) {
     try {
-      const isArabic = message.dictionary === 'arabic' || message.dictionary === 'rawi';
+      const isArabic = message.dictionary === 'arabic' || message.dictionary === 'catt' || message.dictionary === 'rawi';
       const status = isArabic
-        ? await dictionaryService.getRawiStatus()
+        ? await dictionaryService.getCattStatus()
         : await dictionaryService.getKuromojiStatus();
       sendResponse({ success: true, status });
     } catch (error) {
@@ -275,9 +275,9 @@ export class MessageHandler {
 
   static async downloadDictionary(message, sendResponse) {
     try {
-      const isArabic = message.dictionary === 'arabic' || message.dictionary === 'rawi';
+      const isArabic = message.dictionary === 'arabic' || message.dictionary === 'catt' || message.dictionary === 'rawi';
       const result = isArabic
-        ? await dictionaryService.downloadRawi()
+        ? await dictionaryService.downloadCatt()
         : await dictionaryService.downloadKuromoji();
       sendResponse({ success: true, result });
     } catch (error) {
@@ -288,9 +288,9 @@ export class MessageHandler {
 
   static async deleteDictionary(message, sendResponse) {
     try {
-      const isArabic = message.dictionary === 'arabic' || message.dictionary === 'rawi';
+      const isArabic = message.dictionary === 'arabic' || message.dictionary === 'catt' || message.dictionary === 'rawi';
       if (isArabic) {
-        await dictionaryService.deleteRawi();
+        await dictionaryService.deleteCatt();
       } else {
         await dictionaryService.deleteKuromoji();
       }
