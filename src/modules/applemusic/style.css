@@ -126,7 +126,7 @@ article[data-testid="lyrics-fullscreen-modal"] .lyrics__lyrics,
     border-radius: 6px;
     backdrop-filter: blur(60px) saturate(220%);
     top: -7em;
-    left: 74.5%;
+    right: 0.5%;
     background-color: transparent;
     border: 0px solid transparent;
     box-shadow: 0 0 35px #00000059;
