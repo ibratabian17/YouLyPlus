@@ -71,12 +71,6 @@ function bw2ar(text) {
   return out;
 }
 
-function cleanText(text) {
-  let t = text.replace(/\u0640/g, '').replace(/\u0671/g, '\u0627');
-  t = t.replace(/[\u064B-\u0652\u0670]/g, ''); // strip existing tashkeel
-  return t.replace(/[^\u0621-\u063A\u0641-\u064A ]/gu, ' ').trim().replace(/\s+/g, ' ');
-}
-
 function isSessionReady() {
   return encoderSession !== null && decoderSession !== null;
 }
@@ -118,11 +112,46 @@ async function ensureLoaded() {
   return loadPromise;
 }
 
-async function diacritizeSegment(arabicText) {
-  const cleaned = cleanText(arabicText);
-  if (!cleaned) return arabicText;
+function extractBaseAndDiacritics(text) {
+  const baseChars = [];
+  const diacriticsMap = [];
 
-  const bwText = ar2bw(cleaned);
+  let i = 0;
+  const len = text.length;
+
+  while (i < len) {
+    const ch = text[i];
+
+    if (/[\u0621-\u063A\u0641-\u064A\u0671 ]/u.test(ch)) {
+      const normalizedBase = (ch === '\u0671') ? '\u0627' : ch;
+      baseChars.push(normalizedBase);
+
+      let dias = '';
+      let j = i + 1;
+      while (j < len && /[\u064B-\u0652\u0670\u0640]/u.test(text[j])) {
+        if (text[j] !== '\u0640') {
+          dias += text[j];
+        }
+        j++;
+      }
+      diacriticsMap.push(dias);
+      i = j;
+    } else {
+      i++;
+    }
+  }
+
+  return {
+    cleanedText: baseChars.join(''),
+    diacriticsMap
+  };
+}
+
+async function diacritizeSegment(arabicText) {
+  const { cleanedText, diacriticsMap } = extractBaseAndDiacritics(arabicText);
+  if (!cleanedText) return arabicText;
+
+  const bwText = ar2bw(cleanedText);
   const seqLen = bwText.length;
   if (seqLen === 0) return arabicText;
 
@@ -155,6 +184,38 @@ async function diacritizeSegment(arabicText) {
       continue;
     }
 
+    const origDias = diacriticsMap[i] || '';
+
+    // If original character had explicit harakat/tashkeel, prioritize the original
+    if (origDias) {
+      const origBwDias = ar2bw(origDias);
+      // If original had only Shaddah (~), and model predicted a vowel, combine them
+      if (origDias === '\u0651') {
+        let maxIdx = 3;
+        let maxVal = -Infinity;
+        const offset = i * numClasses;
+        for (let c = 0; c < numClasses; c++) {
+          const val = decLogits[offset + c];
+          if (val > maxVal) {
+            maxVal = val;
+            maxIdx = c;
+          }
+        }
+        const tag = TASHKEEL_LIST[maxIdx];
+        if (tag === 'a' || tag === 'u' || tag === 'i' || tag === 'F' || tag === 'N' || tag === 'K') {
+          combinedBw += '~' + tag;
+        } else if (TAGS[tag]) {
+          combinedBw += TAGS[tag];
+        } else {
+          combinedBw += '~';
+        }
+      } else {
+        combinedBw += origBwDias;
+      }
+      continue;
+    }
+
+    // Otherwise use CaTT model prediction
     let maxIdx = 3; // '<NT>'
     let maxVal = -Infinity;
     const offset = i * numClasses;

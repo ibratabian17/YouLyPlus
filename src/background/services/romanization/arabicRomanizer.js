@@ -168,10 +168,13 @@ export class ArabicRomanizer {
     let alignedVocalized = null;
     const isUnvocalized = !this.isFullyVocalized(lineContext);
 
-    if (isUnvocalized && cattDiacritizer.isReady()) {
-      const vocalizedLine = await cattDiacritizer.diacritize(lineContext);
-      if (vocalizedLine && vocalizedLine !== lineContext) {
-        alignedVocalized = this.alignVocalizedToSyllables(syllables, vocalizedLine);
+    if (isUnvocalized) {
+      await cattDiacritizer.ensureLoaded();
+      if (cattDiacritizer.isReady()) {
+        const vocalizedLine = await cattDiacritizer.diacritize(lineContext);
+        if (vocalizedLine && vocalizedLine !== lineContext) {
+          alignedVocalized = this.alignVocalizedToSyllables(syllables, vocalizedLine);
+        }
       }
     }
 
@@ -200,8 +203,11 @@ export class ArabicRomanizer {
     let textToProcess = lineText;
     const isUnvocalized = !this.isFullyVocalized(lineText);
 
-    if (isUnvocalized && cattDiacritizer.isReady()) {
-      textToProcess = await cattDiacritizer.diacritize(lineText);
+    if (isUnvocalized) {
+      await cattDiacritizer.ensureLoaded();
+      if (cattDiacritizer.isReady()) {
+        textToProcess = await cattDiacritizer.diacritize(lineText);
+      }
     }
 
     return this.romanizeVocalizedLine(textToProcess);
@@ -213,9 +219,12 @@ export class ArabicRomanizer {
     const tokens = lineText.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+|[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+/gu) || [lineText];
 
     let result = '';
-    for (const token of tokens) {
+    for (let idx = 0; idx < tokens.length; idx++) {
+      const token = tokens[idx];
       if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/u.test(token)) {
-        result += this.romanizeWordOrPhrase(token);
+        // Lookahead to check if previous word was preposition like "في"
+        const prevToken = idx >= 2 ? tokens[idx - 2] : '';
+        result += this.romanizeWordOrPhrase(token, prevToken);
       } else {
         result += token;
       }
@@ -224,26 +233,30 @@ export class ArabicRomanizer {
     return result;
   }
 
-  static romanizeWordOrPhrase(token) {
+  static romanizeWordOrPhrase(token, prevWord = '') {
     if (!token) return '';
 
     const hasTashkeel = /[\u064B-\u0652\u0670]/u.test(token);
     if (hasTashkeel) {
-      return this.romanizeVocalized(token);
+      return this.romanizeVocalized(token, prevWord);
     }
 
     if (token === 'الله') {
       return 'Allah';
     }
 
+    const isAfterPreposition = (prevWord === 'في' || prevWord === 'فِي' || prevWord === 'إلى' || prevWord === 'على' || prevWord === 'من');
+    const artPrefix = isAfterPreposition ? 'il-' : 'al-';
+
     if (token.startsWith('ال') && token.length > 2) {
       const sunChar = token[2];
       const remainder = token.substring(2);
 
       if (SUN_LETTERS.has(sunChar)) {
-        return 'a' + SUN_LETTER_ROMAN[sunChar] + '-' + this.phonotacticTransliterate(remainder);
+        const s = SUN_LETTER_ROMAN[sunChar];
+        return (isAfterPreposition ? 'i' : 'a') + s + '-' + this.phonotacticTransliterate(remainder);
       } else {
-        return 'al-' + this.phonotacticTransliterate(remainder);
+        return artPrefix + this.phonotacticTransliterate(remainder);
       }
     }
 
@@ -254,7 +267,7 @@ export class ArabicRomanizer {
    * Accurately romanizes fully/partially vocalized Arabic using Harakat rules.
    * Handles Shaddah (gemination), Tanwin, Long vowels, Sun letters, Wasla, and Attached Prefixes.
    */
-  static romanizeVocalized(text) {
+  static romanizeVocalized(text, prevWord = '') {
     if (!text) return '';
 
     const bare = text.replace(/[\u064B-\u0652\u0670\u0640]/g, '');
@@ -286,6 +299,10 @@ export class ArabicRomanizer {
       artStart = 1;
     }
 
+    const isAfterPreposition = (prevWord === 'في' || prevWord === 'فِي' || prevWord === 'إلى' || prevWord === 'على' || prevWord === 'من');
+    const defaultArticle = isAfterPreposition ? 'il-' : 'al-';
+    const defaultSunVowel = isAfterPreposition ? 'i' : 'a';
+
     let hasSunLetterPrefix = false;
     const checkIdx = prefix ? artStart : 0;
     if (len >= checkIdx + 2 && (chars[checkIdx] === 'ا' || chars[checkIdx] === 'ٱ' || chars[checkIdx] === 'أ') && chars[checkIdx + 1] === 'ل') {
@@ -299,7 +316,7 @@ export class ArabicRomanizer {
           if (prefix) {
             result += prefix + sunRom + '-';
           } else {
-            result += 'a' + sunRom + '-';
+            result += defaultSunVowel + sunRom + '-';
           }
           hasSunLetterPrefix = true;
           i = nextIdx;
@@ -307,7 +324,7 @@ export class ArabicRomanizer {
           if (prefix) {
             result += prefix + 'l-';
           } else {
-            result += 'al-';
+            result += defaultArticle;
           }
           i = nextIdx;
         }
@@ -390,9 +407,15 @@ export class ArabicRomanizer {
         baseRom = vowel ? ("'" + vowel) : "'";
         vowel = '';
       } else if (c === '\u0629') {
-        if (result.endsWith('a')) baseRom = '';
-        else baseRom = 'a';
-        vowel = '';
+        if (vowel) {
+          // Explicitly vocalized Ta Marbuta with Harakat or Tanwin (e.g. صلاةٌ -> salaatun, جنةً -> jannatan)
+          baseRom = 't';
+        } else {
+          // Unvocalized or at pause
+          if (result.endsWith('a') || result.endsWith('aa')) baseRom = '';
+          else baseRom = 'a';
+          vowel = '';
+        }
       } else if (c === '\u0649') {
         if (result.endsWith('a')) baseRom = '';
         else baseRom = 'a';
@@ -442,6 +465,15 @@ export class ArabicRomanizer {
       }
     }
 
+    // Common function words & frequent lyrics vocabulary
+    if (word === 'في' || word === 'فِي') return 'fi';
+    if (word === 'على' || word === 'عَلَى') return "'ala";
+    if (word === 'إلى' || word === 'الي' || word === 'إِلَى') return 'ila';
+    if (word === 'عن' || word === 'عَنْ') return "'an";
+    if (word === 'من' || word === 'مِنْ') return 'min';
+    if (word === 'مع' || word === 'مَعَ') return "ma'a";
+    if (word === 'قلبي' || word === 'قَلْبِي') return 'qalbi';
+    if (word === 'مدينة' || word === 'مَدِينَة') return 'madina';
     if (word === 'ولى') return 'walla';
     if (word === 'صلى') return 'salla';
     if (word === 'خلى') return 'khalla';
@@ -455,6 +487,51 @@ export class ArabicRomanizer {
     if (word === 'أمور' || word === 'امور') return 'umoor';
 
     const len = word.length;
+
+    // Pattern Fa'eela: C1 C2 ي C3 ة (e.g. مدينة -> madina, جميلة -> jamila, كبيرة -> kabira, حبيبة -> habiba)
+    if (len === 5 && word[2] === 'ي' && word[4] === 'ة') {
+      const c1 = ARABIC_CHAR_MAP[word[0]] || word[0];
+      const c2 = ARABIC_CHAR_MAP[word[1]] || word[1];
+      const c3 = ARABIC_CHAR_MAP[word[3]] || word[3];
+      return c1 + 'a' + c2 + 'i' + c3 + 'a';
+    }
+
+    // Pattern Fa'ila: C1 C2 C3 ة (e.g. ليلة -> leila, رحلة -> rihla)
+    if (len === 4 && word[3] === 'ة') {
+      const c1 = ARABIC_CHAR_MAP[word[0]] || word[0];
+      const c2 = ARABIC_CHAR_MAP[word[1]] || word[1];
+      const c3 = ARABIC_CHAR_MAP[word[2]] || word[2];
+      return c1 + 'a' + c2 + 'i' + c3 + 'a';
+    }
+
+    // Pattern Fa'eel: C1 C2 ي C3 (e.g. جميل -> jamil, كبير -> kabir, طريق -> tareeq, حبيب -> habib)
+    if (len === 4 && word[2] === 'ي') {
+      const c1 = ARABIC_CHAR_MAP[word[0]] || word[0];
+      const c2 = ARABIC_CHAR_MAP[word[1]] || word[1];
+      const c3 = ARABIC_CHAR_MAP[word[3]] || word[3];
+      return c1 + 'a' + c2 + 'ee' + c3;
+    }
+
+    // Pattern Fa'ool: C1 C2 و C3 (e.g. قلوب -> quloob, عيون -> uyoon, نجوم -> nujoom)
+    if (len === 4 && word[2] === 'و') {
+      let c1 = ARABIC_CHAR_MAP[word[0]] || word[0];
+      const c2 = ARABIC_CHAR_MAP[word[1]] || word[1];
+      const c3 = ARABIC_CHAR_MAP[word[3]] || word[3];
+      if (word[0] === 'ع') c1 = "'u";
+      else c1 = c1 + 'u';
+      return c1 + c2 + 'oo' + c3;
+    }
+
+    // Pattern Fa'aal: C1 C2 ا C3 (e.g. كلام -> kalaam, سلام -> salaam, جمال -> jamaal)
+    if (len === 4 && word[2] === 'ا') {
+      let c1 = ARABIC_CHAR_MAP[word[0]] || word[0];
+      const c2 = ARABIC_CHAR_MAP[word[1]] || word[1];
+      const c3 = ARABIC_CHAR_MAP[word[3]] || word[3];
+      if (word[0] === 'ع') c1 = "'a";
+      else c1 = c1 + 'a';
+      return c1 + c2 + 'aa' + c3;
+    }
+
     if (len === 5 && word[1] === 'ا' && word[4] === 'ا') {
       const c1 = ARABIC_CHAR_MAP[word[0]] || word[0];
       const c2 = ARABIC_CHAR_MAP[word[2]] || word[2];
