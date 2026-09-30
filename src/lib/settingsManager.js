@@ -31,7 +31,7 @@ export const defaultSettings = {
     customGeminiPrompt: '',
     overrideGeminiRomanizePrompt: false,
     customGeminiRomanizePrompt: '',
-    romanizationProvider: 'google',
+    romanizationProvider: 'offline',
     transliterationTargetScript: 'latin',
     geminiRomanizationModel: 'gemini-flash-latest',
     useSongPaletteFullscreen: false,

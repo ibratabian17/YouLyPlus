@@ -183,7 +183,7 @@ export class TranslationService {
       if (name && !candidates.includes(name)) candidates.push(name);
     };
 
-    const selected = settings.romanizationProvider || PROVIDERS.GOOGLE;
+    const selected = settings.romanizationProvider || PROVIDERS.OFFLINE;
     const isAiProvider = selected === PROVIDERS.GEMINI || selected === PROVIDERS.OPENROUTER;
 
     if (targetScript && targetScript !== 'latin') {
@@ -192,6 +192,7 @@ export class TranslationService {
       if (settings.openRouterApiKey) push(PROVIDERS.OPENROUTER);
     } else {
       push(selected);
+      push(PROVIDERS.OFFLINE);
       push(PROVIDERS.GOOGLE);
     }
 

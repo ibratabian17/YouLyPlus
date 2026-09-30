@@ -25,7 +25,7 @@ export class SettingsManager {
   static async getTranslationSettings() {
     return this.get({
       'translationProvider': PROVIDERS.GOOGLE,
-      'romanizationProvider': PROVIDERS.GOOGLE,
+      'romanizationProvider': PROVIDERS.OFFLINE,
       'transliterationTargetScript': 'latin',
       'geminiApiKey': '',
       'geminiModel': 'gemini-pro',
