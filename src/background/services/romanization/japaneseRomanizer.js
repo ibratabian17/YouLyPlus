@@ -199,7 +199,7 @@ export class JapaneseRomanizer {
           } else if (tok.reading) {
             tok.romazi = this.romanizeKana(tok.reading);
           } else {
-            tok.romazi = tok.surface_form;
+            tok.romazi = this.romanizeKana(tok.surface_form);
           }
         }
 
@@ -369,6 +369,66 @@ export class JapaneseRomanizer {
   }
 
   /**
+   * Splits a pure kana string into an array of romanized characters,
+   * properly accounting for digraphs (small kana) and chōonpu (ー).
+   * For digraphs like 'キャ', returns ['kya', ''] so that the two characters
+   * together produce 'kya'.
+   * For chōonpu like 'ポー', returns ['po', 'o'].
+   */
+  static splitKanaToCharReadings(kanaText) {
+    if (!kanaText) return [];
+    const len = kanaText.length;
+    const result = new Array(len).fill('');
+    let i = 0;
+    let lastVowel = 'a';
+
+    while (i < len) {
+      const c = kanaText[i];
+
+      // Check sokuon (っ / ッ)
+      if (c === 'っ' || c === 'ッ') {
+        result[i] = 'ッ';
+        i++;
+        continue;
+      }
+
+      // Check chōonpu (ー)
+      if (c === 'ー') {
+        result[i] = lastVowel || '-';
+        i++;
+        continue;
+      }
+
+      // Check digraphs (2-char combo like キャ, チュ, ティ, フォ, etc.)
+      if (i + 1 < len) {
+        const dig = kanaText.substring(i, i + 2);
+        if (KANA_DIGRAPHS[dig]) {
+          const rom = KANA_DIGRAPHS[dig];
+          result[i] = rom;
+          result[i + 1] = '';
+          lastVowel = rom[rom.length - 1] || 'a';
+          i += 2;
+          continue;
+        }
+      }
+
+      // Single kana
+      if (KANA_SINGLES[c]) {
+        const rom = KANA_SINGLES[c];
+        result[i] = rom;
+        lastVowel = rom[rom.length - 1] || 'a';
+        i++;
+        continue;
+      }
+
+      result[i] = c;
+      i++;
+    }
+
+    return result;
+  }
+
+  /**
    * Splits a token's Katakana reading across its constituent surface characters.
    * Handles kanji compounds (e.g. 運命 -> [ウン, メイ]) and okurigana (e.g. 見つけ -> [ミ, ツ, ケ])
    * so that individual kanji syllables don't duplicate the full word reading.
@@ -380,10 +440,7 @@ export class JapaneseRomanizer {
     const isKana = (ch) => /^[\u3040-\u309F\u30A0-\u30FF]$/.test(ch);
 
     if (/^[\u3040-\u309F\u30A0-\u30FF]+$/.test(surface)) {
-      return surface.split('').map(c => {
-        const code = c.charCodeAt(0);
-        return (code >= 0x3041 && code <= 0x3096) ? String.fromCharCode(code + 0x60) : c;
-      });
+      return this.splitKanaToCharReadings(surface);
     }
 
     const moras = [];
@@ -489,7 +546,7 @@ export class JapaneseRomanizer {
         else if (tok.surface_form === 'へ' && tok.pos === '助詞') rom = 'e';
         else if (tok.surface_form === 'を' && tok.pos === '助詞') rom = 'o';
         else if (tok.reading) rom = this.romanizeKana(tok.reading);
-        else rom = tok.surface_form;
+        else rom = this.romanizeKana(tok.surface_form);
 
         tok.romazi = rom;
 
@@ -497,12 +554,16 @@ export class JapaneseRomanizer {
         tok.hasLeadingSpace = (tIdx > 0 && !this.shouldAttachToPrev(tok, prevTok) && !/^\s+$/.test(tok.surface_form));
 
         let charReadings = [];
-        if (tok.reading && tok.surface_form.length > 1) {
+        const isAllKana = /^[\u3040-\u309F\u30A0-\u30FF]+$/.test(tok.surface_form);
+
+        if (isAllKana) {
+          charReadings = this.splitKanaToCharReadings(tok.surface_form);
+        } else if (tok.reading && tok.surface_form.length > 1) {
           charReadings = this.splitTokenReading(tok.surface_form, tok.reading).map(r => this.romanizeKana(r));
         } else if (tok.surface_form.length === 1) {
           charReadings = [tok.romazi];
         } else {
-          charReadings = tok.surface_form.split('');
+          charReadings = this.splitKanaToCharReadings(tok.surface_form);
         }
 
         for (let c = 0; c < tok.surface_form.length; c++) {
