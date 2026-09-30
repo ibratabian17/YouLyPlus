@@ -622,7 +622,7 @@ class LyricsPlusRenderer {
 
       const fontSizePx = LyricsPlusRenderer._getFontSizePx(font);
       const velocityPxPerMs = textWidthPx / currentDuration;
-      const gradientDistancePx = 0.375 * fontSizePx;
+      const gradientDistancePx = 0.75 * fontSizePx;
       const gradientDurationMs = gradientDistancePx / velocityPxPerMs;
 
       return {
@@ -758,7 +758,7 @@ class LyricsPlusRenderer {
         }
 
         const velocityPxPerMs = totalSyllableWidth / s.duration;
-        const gradientDurationMs = (0.375 * fontSizePx) / velocityPxPerMs;
+        const gradientDurationMs = (0.75 * fontSizePx) / velocityPxPerMs;
 
         let cumulativeCharWidth = 0;
         const charSpans = [];
@@ -796,7 +796,10 @@ class LyricsPlusRenderer {
           cumulativeCharWidth += charWidth;
         }
 
-        if (charSpans.length > 0) sylSpan._cachedCharSpans = charSpans;
+        if (charSpans.length > 0) {
+          sylSpan._cachedCharSpans = charSpans;
+          sylSpan.classList.add("has-chars"); // replaces :has(span.char)
+        }
       };
 
       const applyGrowthStyles = (wordSpan, referenceFont, combinedText, totalDuration, emphasisMetrics) => {
@@ -1321,6 +1324,11 @@ class LyricsPlusRenderer {
               tr.className = "lyrics-syllable transliteration";
               if (this._isRTL(transTxt)) tr.classList.add("rtl-text");
               wrap.appendChild(tr);
+              // replaces :has(.transliteration) selectors
+              wrap.classList.add("has-translit");
+              if (tr.classList.contains("rtl-text")) wrap.classList.add("has-translit-rtl");
+              const wordEl = wrap.parentElement;
+              if (wordEl && wordEl.classList.contains("lyrics-word")) wordEl.classList.add("has-translit");
 
               if (currentSettings.hidePhoneticDup && this._getDataText(s, false).trim() === this._getDataText(s, true).trim()) {
                 tr.classList.add("hidden");
