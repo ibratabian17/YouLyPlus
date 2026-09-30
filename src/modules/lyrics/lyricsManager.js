@@ -187,6 +187,7 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId, req
     lastKnownSongInfo &&
     lastKnownSongInfo.title === currentSong.title &&
     lastKnownSongInfo.artist === currentSong.artist &&
+    lastKnownSongInfo.album === currentSong.album &&
     Math.abs((lastKnownSongInfo.duration || 0) - (currentSong.duration || 0)) < 2;
 
   if (!isNewSong && !forceReload && isSameSong) {

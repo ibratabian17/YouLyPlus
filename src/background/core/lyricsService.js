@@ -545,16 +545,32 @@ export class LyricsService {
 
   static async getLyricsOffset(songInfo) {
     if (!songInfo || !songInfo.title) return 0;
-    const key = `${songInfo.title} - ${songInfo.artist}`;
-    const record = await offsetsDB.get(key);
+    const artist = songInfo.artist || '';
+    const album = (songInfo.album || '').trim();
+    if (album) {
+      const albumKey = `${songInfo.title} - ${artist} - ${album}`;
+      const record = await offsetsDB.get(albumKey);
+      if (record && typeof record.offsetMs === 'number') {
+        return record.offsetMs;
+      }
+    }
+    const legacyKey = `${songInfo.title} - ${artist}`;
+    const record = await offsetsDB.get(legacyKey);
     return record?.offsetMs || 0;
   }
 
   static async saveLyricsOffset(songInfo, offsetMs) {
     if (!songInfo || !songInfo.title) return;
-    const key = `${songInfo.title} - ${songInfo.artist}`;
+    const artist = songInfo.artist || '';
+    const album = (songInfo.album || '').trim();
+    const key = album
+      ? `${songInfo.title} - ${artist} - ${album}`
+      : `${songInfo.title} - ${artist}`;
     if (offsetMs === 0) {
       await offsetsDB.delete(key);
+      if (album) {
+        await offsetsDB.delete(`${songInfo.title} - ${artist}`);
+      }
     } else {
       await offsetsDB.set({ key, offsetMs, updatedAt: Date.now() });
     }

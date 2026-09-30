@@ -96,7 +96,8 @@ function tryInject() {
                 lyricsRendererInstance.lastKnownSongInfo &&
                 currentSongInfo &&
                 lyricsRendererInstance.lastKnownSongInfo.title === currentSongInfo.title &&
-                lyricsRendererInstance.lastKnownSongInfo.artist === currentSongInfo.artist;
+                lyricsRendererInstance.lastKnownSongInfo.artist === currentSongInfo.artist &&
+                lyricsRendererInstance.lastKnownSongInfo.album === currentSongInfo.album;
 
             if (canReuse) {
                 console.log('LyricsPlus: Reusing existing container');

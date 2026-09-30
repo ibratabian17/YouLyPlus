@@ -186,7 +186,8 @@ function ensureLyricsPatchContainer(root) {
             lyricsRendererInstance.lastKnownSongInfo &&
             LYPLUS_currentSong &&
             lyricsRendererInstance.lastKnownSongInfo.title === LYPLUS_currentSong.title &&
-            lyricsRendererInstance.lastKnownSongInfo.artist === LYPLUS_currentSong.artist;
+            lyricsRendererInstance.lastKnownSongInfo.artist === LYPLUS_currentSong.artist &&
+            lyricsRendererInstance.lastKnownSongInfo.album === LYPLUS_currentSong.album;
 
         if (canReuse && !patchWrapper.contains(lyricsRendererInstance.lyricsContainer)) {
             patchWrapper.appendChild(lyricsRendererInstance.lyricsContainer);
@@ -337,7 +338,8 @@ function ensureLyricsTab() {
                 lyricsRendererInstance.lastKnownSongInfo &&
                 LYPLUS_currentSong &&
                 lyricsRendererInstance.lastKnownSongInfo.title === LYPLUS_currentSong.title &&
-                lyricsRendererInstance.lastKnownSongInfo.artist === LYPLUS_currentSong.artist;
+                lyricsRendererInstance.lastKnownSongInfo.artist === LYPLUS_currentSong.artist &&
+                lyricsRendererInstance.lastKnownSongInfo.album === LYPLUS_currentSong.album;
 
             if (canReuse) {
                 patchWrapper.appendChild(lyricsRendererInstance.lyricsContainer);

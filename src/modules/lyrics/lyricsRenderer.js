@@ -1797,7 +1797,7 @@ class LyricsPlusRenderer {
     offsetLatency = 0,
     switchLyricsProviderFn = null
   ) {
-    if (this.lastKnownSongInfo && songInfo && (this.lastKnownSongInfo.title !== songInfo.title || this.lastKnownSongInfo.artist !== songInfo.artist)) {
+    if (this.lastKnownSongInfo && songInfo && (this.lastKnownSongInfo.title !== songInfo.title || this.lastKnownSongInfo.artist !== songInfo.artist || this.lastKnownSongInfo.album !== songInfo.album)) {
       this._userSelectedProvider = null;
       if (this.availableProviders) this.availableProviders.clear();
       if (this._notFoundProviders) this._notFoundProviders.clear();
