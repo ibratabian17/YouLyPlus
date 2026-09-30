@@ -102,6 +102,9 @@ const HARAKAT = {
 };
 
 export class ArabicRomanizer {
+  // longVowels: 'double' | 'short'   dropCaseEndings: 'pause' | 'all' | false
+  static options = { longVowels: 'double', dropCaseEndings: 'pause' };
+
   static isFullyVocalized(text) {
     if (!text) return true;
     const letters = (text.match(/[\u0621-\u063A\u0641-\u064A]/gu) || []).length;
@@ -162,6 +165,57 @@ export class ArabicRomanizer {
     });
   }
 
+  static reconcileVocalization(original, vocalized) {
+    if (!original) return '';
+    if (!vocalized) return original;
+
+    const isMark = c => /[\u064B-\u0652\u0670]/u.test(c);
+    const isLetter = c => /[\u0621-\u063A\u0641-\u064A\u0671\u06A9\u06CC]/u.test(c);
+    const KEY = { '\u0623': '\u0627', '\u0625': '\u0627', '\u0622': '\u0627', '\u0671': '\u0627',
+      '\u0649': '\u064A', '\u06CC': '\u064A', '\u0629': '\u0647', '\u0624': '\u0621', '\u0626': '\u0621', '\u06A9': '\u0643' };
+    const key = c => KEY[c] || c;
+
+    const parse = str => {
+      const units = [];
+      for (const ch of str) {
+        const last = units[units.length - 1];
+        if (isMark(ch) && last && last.letter !== null) last.marks += ch;
+        else if (isLetter(ch)) units.push({ letter: ch, marks: '' });
+        else units.push({ letter: null, raw: ch, marks: '' });
+      }
+      return units;
+    };
+
+    const O = parse(original);
+    const V = parse(vocalized).filter(u => u.letter !== null);
+    const oIdx = [];
+    O.forEach((u, i) => { if (u.letter !== null) oIdx.push(i); });
+
+    const n = oIdx.length, m = V.length;
+    const dp = Array.from({ length: n + 1 }, () => new Int32Array(m + 1));
+    for (let a = n - 1; a >= 0; a--) {
+      for (let b = m - 1; b >= 0; b--) {
+        dp[a][b] = key(O[oIdx[a]].letter) === key(V[b].letter)
+          ? dp[a + 1][b + 1] + 1
+          : Math.max(dp[a + 1][b], dp[a][b + 1]);
+      }
+    }
+    const match = new Map();
+    let a = 0, b = 0;
+    while (a < n && b < m) {
+      if (key(O[oIdx[a]].letter) === key(V[b].letter)) { match.set(oIdx[a], V[b]); a++; b++; }
+      else if (dp[a + 1][b] >= dp[a][b + 1]) a++;
+      else b++;
+    }
+
+    return O.map((u, i) => {
+      if (u.letter === null) return u.raw;
+      const v = match.get(i);
+      if (!v) return u.letter + u.marks;
+      return v.letter + (v.marks || u.marks);
+    }).join('');
+  }
+
   static async romanizeSyllables(syllables, lineContext = '') {
     if (!Array.isArray(syllables)) return [];
 
@@ -173,7 +227,7 @@ export class ArabicRomanizer {
       if (cattDiacritizer.isReady()) {
         const vocalizedLine = await cattDiacritizer.diacritize(lineContext);
         if (vocalizedLine && vocalizedLine !== lineContext) {
-          alignedVocalized = this.alignVocalizedToSyllables(syllables, vocalizedLine);
+          alignedVocalized = this.alignVocalizedToSyllables(syllables, this.reconcileVocalization(lineContext, vocalizedLine));
         }
       }
     }
@@ -193,7 +247,21 @@ export class ArabicRomanizer {
       }
 
       const prevWord = (prevSyllableText || '').trim().replace(/[\u064B-\u0652\u0670\u0640]/g, '');
-      const romCore = this.romanizeVocalizedLine(coreText, prevWord).trim();
+
+      const textAt = k => ((alignedVocalized && alignedVocalized[k]) ? alignedVocalized[k] : (syllables[k]?.text || ''));
+      let pauseAfter = true;
+      for (let k = idx + 1; k < syllables.length; k++) {
+        if (/[\u0621-\u064A\u0671]/u.test(textAt(k))) { pauseAfter = false; break; }
+      }
+      const countLetters = t => (t.match(/[\u0621-\u064A\u0671]/gu) || []).length;
+      let wordLen = countLetters(coreText);
+      for (let k = idx - 1; k >= 0; k--) {
+        const cur = textAt(k + 1), prv = textAt(k);
+        if (/^\s/.test(cur) || /\s$/.test(prv)) break;
+        wordLen += countLetters(prv);
+      }
+
+      const romCore = this.romanizeVocalizedLine(coreText, prevWord, prevSyllableText || '', !!alignedVocalized, { pauseAfter, wordLen }).trim();
 
       return { text: leadingSpace + romCore + trailingSpace };
     });
@@ -208,40 +276,50 @@ export class ArabicRomanizer {
     if (isUnvocalized) {
       await cattDiacritizer.ensureLoaded();
       if (cattDiacritizer.isReady()) {
-        textToProcess = await cattDiacritizer.diacritize(lineText);
+        textToProcess = this.reconcileVocalization(lineText, await cattDiacritizer.diacritize(lineText));
       }
     }
 
     return this.romanizeVocalizedLine(textToProcess);
   }
 
-  static romanizeVocalizedLine(lineText, initialPrevWord = '') {
+  static romanizeVocalizedLine(lineText, initialPrevWord = '', initialPrevRaw = '', force = false, ctx = {}) {
     if (!lineText) return '';
 
     const tokens = lineText.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+|[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+/gu) || [lineText];
 
     let result = '';
     let lastWord = initialPrevWord;
+    let lastRaw = initialPrevRaw;
+    let gap = '';
 
     for (let idx = 0; idx < tokens.length; idx++) {
       const token = tokens[idx];
       if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/u.test(token)) {
-        result += this.romanizeWordOrPhrase(token, lastWord);
+        const connectedRaw = /^[ \t\u00A0]*$/.test(gap) ? lastRaw : '';
+        let k = idx + 1, between = '';
+        while (k < tokens.length && !/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/u.test(tokens[k])) { between += tokens[k]; k++; }
+        let pause = /[^ \t\u00A0]/.test(between) || /[\u060C\u061B\u061F\u06D4]$/.test(token);
+        if (!pause && k >= tokens.length) pause = ctx.pauseAfter !== undefined ? ctx.pauseAfter : true;
+        result += this.romanizeWordOrPhrase(token, lastWord, connectedRaw, force, pause, ctx.wordLen || 0);
         lastWord = token.replace(/[\u064B-\u0652\u0670\u0640]/g, '');
+        lastRaw = token;
+        gap = '';
       } else {
         result += token;
+        gap += token;
       }
     }
 
     return result;
   }
 
-  static romanizeWordOrPhrase(token, prevWord = '') {
+  static romanizeWordOrPhrase(token, prevWord = '', prevRaw = '', force = false, pause = true, wordLen = 0) {
     if (!token) return '';
 
     const hasTashkeel = /[\u064B-\u0652\u0670]/u.test(token);
-    if (hasTashkeel) {
-      return this.romanizeVocalized(token, prevWord);
+    if (hasTashkeel || force) {
+      return this.romanizeVocalized(token, prevWord, prevRaw, pause, wordLen);
     }
 
     if (token === 'الله') {
@@ -266,11 +344,46 @@ export class ArabicRomanizer {
     return this.phonotacticTransliterate(token);
   }
 
+  static findArticleEnd(chars, idx) {
+    const len = chars.length;
+    if (chars[idx] !== '\u0627' && chars[idx] !== '\u0671') return -1;
+    let k = idx + 1;
+    while (k < len && HARAKAT[chars[k]] !== undefined) k++;
+    if (chars[k] !== '\u0644') return -1;
+    k++;
+    while (k < len && HARAKAT[chars[k]] !== undefined) {
+      if (chars[k] !== '\u0652') return -1;
+      k++;
+    }
+    return k < len ? k : -1;
+  }
+
+  static endsWithVowel(raw) {
+    const s = (raw || '').replace(/[\s\u0640]+$/u, '');
+    if (!s) return false;
+    const arr = Array.from(s);
+    let k = arr.length - 1;
+    let vowel = false;
+    while (k >= 0 && HARAKAT[arr[k]] !== undefined) {
+      const h = HARAKAT[arr[k]];
+      if (h === 'a' || h === 'i' || h === 'u' || h === 'aa') vowel = true;
+      else if (h === 'SUKUN' || h === 'an' || h === 'un' || h === 'in') return false;
+      k--;
+    }
+    if (k < 0 || !/[\u0621-\u064A\u0671]/u.test(arr[k])) return false;
+    if (vowel) return true;
+    const letter = arr[k];
+    if (letter === '\u0627' || letter === '\u0649') return true;
+    if (letter === '\u0648') return arr[k - 1] === '\u064F';
+    if (letter === '\u064A') return arr[k - 1] === '\u0650';
+    return false;
+  }
+
   /**
    * Accurately romanizes fully/partially vocalized Arabic using Harakat rules.
    * Handles Shaddah (gemination), Tanwin, Long vowels, Sun letters, Wasla, and Attached Prefixes.
    */
-  static romanizeVocalized(text, prevWord = '') {
+  static romanizeVocalized(text, prevWord = '', prevRaw = '', pause = true, wordLen = 0) {
     if (!text) return '';
 
     const bare = text.replace(/[\u064B-\u0652\u0670\u0640]/g, '');
@@ -284,54 +397,62 @@ export class ArabicRomanizer {
     let result = '';
     const chars = Array.from(text);
     const len = chars.length;
-
     let i = 0;
-
-    let prefix = '';
-    let artStart = 0;
-
-    if (len >= 4 && (chars[0] === 'ف' || chars[0] === 'و' || chars[0] === 'ب' || chars[0] === 'ك') && HARAKAT[chars[1]] !== undefined && (chars[2] === 'ا' || chars[2] === 'ٱ' || chars[2] === 'أ') && chars[3] === 'ل') {
-      const pChar = chars[0];
-      const pVowel = HARAKAT[chars[1]] === 'i' ? 'i' : (HARAKAT[chars[1]] === 'u' ? 'u' : 'a');
-      prefix = (pChar === 'ف' ? 'f' : (pChar === 'و' ? 'w' : (pChar === 'ب' ? 'b' : 'k'))) + pVowel;
-      artStart = 2;
-    } else if (len >= 3 && (chars[0] === 'ف' || chars[0] === 'و' || chars[0] === 'ب' || chars[0] === 'ك') && (chars[1] === 'ا' || chars[1] === 'ٱ' || chars[1] === 'أ') && chars[2] === 'ل') {
-      const pChar = chars[0];
-      const pVowel = (pChar === 'ب' ? 'i' : 'a');
-      prefix = (pChar === 'ف' ? 'f' : (pChar === 'و' ? 'w' : (pChar === 'ب' ? 'b' : 'k'))) + pVowel;
-      artStart = 1;
-    }
+    let hasSunLetterPrefix = false;
+    const wordEnd = len - (text.match(/[^\u0621-\u064A\u0671\u064B-\u0652\u0670]+$/u) || [''])[0].length;
+    const letterCount = (bare.match(/[\u0621-\u064A\u0671]/gu) || []).length;
 
     const isAfterPreposition = (prevWord === 'في' || prevWord === 'فِي' || prevWord === 'إلى' || prevWord === 'على' || prevWord === 'من');
-    const defaultArticle = isAfterPreposition ? 'il-' : 'al-';
-    const defaultSunVowel = isAfterPreposition ? 'i' : 'a';
 
-    let hasSunLetterPrefix = false;
-    const checkIdx = prefix ? artStart : 0;
-    if (len >= checkIdx + 2 && (chars[checkIdx] === 'ا' || chars[checkIdx] === 'ٱ' || chars[checkIdx] === 'أ') && chars[checkIdx + 1] === 'ل') {
-      let nextIdx = checkIdx + 2;
-      while (nextIdx < len && HARAKAT[chars[nextIdx]] !== undefined) nextIdx++;
+    const PREFIX_ROMAN = { '\u0641': 'f', '\u0648': 'w', '\u0628': 'b', '\u0643': 'k' };
+    let prefix = '';
+    let articleEnd = -1;
+    const first = chars[0];
 
-      if (nextIdx < len) {
-        const nextC = chars[nextIdx];
-        if (SUN_LETTERS.has(nextC)) {
-          const sunRom = SUN_LETTER_ROMAN[nextC];
-          if (prefix) {
-            result += prefix + sunRom + '-';
-          } else {
-            result += defaultSunVowel + sunRom + '-';
-          }
-          hasSunLetterPrefix = true;
-          i = nextIdx;
-        } else {
-          if (prefix) {
-            result += prefix + 'l-';
-          } else {
-            result += defaultArticle;
-          }
-          i = nextIdx;
+    if (PREFIX_ROMAN[first] !== undefined) {
+      let k = 1;
+      let pv = '';
+      while (k < len && HARAKAT[chars[k]] !== undefined) {
+        const h = HARAKAT[chars[k]];
+        if (h === 'a' || h === 'i' || h === 'u') pv = h;
+        k++;
+      }
+      const end = this.findArticleEnd(chars, k);
+      if (end !== -1) {
+        prefix = PREFIX_ROMAN[first] + (pv || (first === '\u0628' ? 'i' : 'a'));
+        articleEnd = end;
+      }
+    } else if (first === '\u0644') {
+      let k = 1;
+      let ok = true;
+      while (k < len && HARAKAT[chars[k]] !== undefined) {
+        if (HARAKAT[chars[k]] !== 'i') ok = false;
+        k++;
+      }
+      if (ok && chars[k] === '\u0644') {
+        let m = k + 1;
+        while (m < len && chars[m] === '\u0652') m++;
+        if (m < len && HARAKAT[chars[m]] === undefined) {
+          prefix = 'li';
+          articleEnd = m;
         }
       }
+    }
+
+    if (!prefix) articleEnd = this.findArticleEnd(chars, 0);
+
+    if (articleEnd !== -1) {
+      const nextC = chars[articleEnd];
+      const isSun = SUN_LETTERS.has(nextC);
+      const cons = isSun ? SUN_LETTER_ROMAN[nextC] : 'l';
+      let lead;
+      if (prefix) lead = prefix + cons;
+      else if (isAfterPreposition) lead = 'i' + cons;
+      else if (this.endsWithVowel(prevRaw)) lead = cons;
+      else lead = 'a' + cons;
+      result += lead + '-';
+      hasSunLetterPrefix = isSun;
+      i = articleEnd;
     }
 
     while (i < len) {
@@ -368,6 +489,11 @@ export class ArabicRomanizer {
         }
       }
 
+      if (!vowel && !isExplicitSukun && i === 0 && c === '\u0648' && j < len &&
+          !['\u0627', '\u0648', '\u064A', '\u0649', '\u0671'].includes(chars[j]) && HARAKAT[chars[j]] === undefined) {
+        vowel = 'a';
+      }
+
       if (hasSunLetterPrefix) {
         hasShaddah = false;
         hasSunLetterPrefix = false;
@@ -384,25 +510,37 @@ export class ArabicRomanizer {
 
       if (j < len) {
         const nextChar = chars[j];
+        const glideBare = !(j + 1 < len && HARAKAT[chars[j + 1]] !== undefined && chars[j + 1] !== '\u0652');
+        const dbl = this.options.longVowels === 'double';
         if (vowel === 'a' && (nextChar === '\u0627' || nextChar === '\u0649')) {
-          vowel = 'a';
+          vowel = (dbl && nextChar === '\u0627') ? 'aa' : 'a';
           j++;
-        } else if (vowel === 'i' && nextChar === '\u064A') {
-          vowel = 'i';
+        } else if (vowel === 'i' && nextChar === '\u064A' && glideBare) {
+          vowel = dbl ? 'ii' : 'i';
           j++;
-        } else if (vowel === 'u' && nextChar === '\u0648') {
-          vowel = 'oo';
+        } else if (vowel === 'u' && nextChar === '\u0648' && glideBare) {
+          vowel = dbl ? 'uu' : 'u';
           j++;
+          if (j === len - 1 && chars[j] === '\u0627') j++;
         } else if (vowel === 'an' && (nextChar === '\u0627' || nextChar === '\u0649')) {
           j++;
         }
       }
 
-      if (c === '\u0623' || c === '\u0625') {
-        if (vowel === 'u') baseRom = 'u';
-        else if (vowel === 'i') baseRom = 'i';
-        else baseRom = 'a';
-        vowel = '';
+      let prevLetterIdx = i - 1;
+      while (prevLetterIdx >= 0 && HARAKAT[chars[prevLetterIdx]] !== undefined) prevLetterIdx--;
+      const isWordInitial = prevLetterIdx < 0 || (prevLetterIdx === 0 && (chars[0] === '\u0648' || chars[0] === '\u0641'));
+      if ((c === '\u0627' || c === '\u0671') && (vowel === 'a' || vowel === 'i' || vowel === 'u')) {
+        baseRom = '';
+      } else if (c === '\u0623' || c === '\u0625') {
+        if (!isWordInitial) {
+          baseRom = "'";
+        } else {
+          if (vowel === 'u') baseRom = 'u';
+          else if (vowel === 'i') baseRom = 'i';
+          else baseRom = 'a';
+          vowel = '';
+        }
       } else if (c === '\u0622') {
         baseRom = 'aa';
         vowel = '';
@@ -425,6 +563,19 @@ export class ArabicRomanizer {
         vowel = '';
       } else if ((c === '\u0627' || c === '\u0649') && vowel === 'an') {
         baseRom = '';
+      }
+
+      const dropMode = this.options.dropCaseEndings;
+      const dropHere = dropMode === 'all' || dropMode === true || (dropMode === 'pause' && pause);
+      if (dropHere && j >= wordEnd && (wordLen || letterCount) >= 3 && c !== '\u0647' && c !== '\u0643') {
+        if (c === '\u0629') {
+          if (vowel === 'u' || vowel === 'i' || vowel === 'un' || vowel === 'in' || vowel === 'a') {
+            baseRom = result.endsWith('a') ? '' : 'a';
+            vowel = '';
+          }
+        } else if (vowel === 'u' || vowel === 'i' || vowel === 'un' || vowel === 'in') {
+          vowel = '';
+        }
       }
 
       result += baseRom + vowel;
@@ -512,7 +663,7 @@ export class ArabicRomanizer {
       const c1 = ARABIC_CHAR_MAP[word[0]] || word[0];
       const c2 = ARABIC_CHAR_MAP[word[1]] || word[1];
       const c3 = ARABIC_CHAR_MAP[word[3]] || word[3];
-      return c1 + 'a' + c2 + 'ee' + c3;
+      return c1 + 'a' + c2 + 'ii' + c3;
     }
 
     // Pattern Fa'ool: C1 C2 و C3 (e.g. قلوب -> quloob, عيون -> uyoon, نجوم -> nujoom)
@@ -522,7 +673,7 @@ export class ArabicRomanizer {
       const c3 = ARABIC_CHAR_MAP[word[3]] || word[3];
       if (word[0] === 'ع') c1 = "'u";
       else c1 = c1 + 'u';
-      return c1 + c2 + 'oo' + c3;
+      return c1 + c2 + 'uu' + c3;
     }
 
     // Pattern Fa'aal: C1 C2 ا C3 (e.g. كلام -> kalaam, سلام -> salaam, جمال -> jamaal)
@@ -548,7 +699,7 @@ export class ArabicRomanizer {
       else c1 = c1 + 'a';
       const c2 = ARABIC_CHAR_MAP[word[1]] || word[1];
       const c3 = ARABIC_CHAR_MAP[word[3]] || word[3];
-      return c1 + c2 + 'ee' + c3 + 'an';
+      return c1 + c2 + 'ii' + c3 + 'an';
     }
 
     if (len === 5 && word[1] === 'ا' && word[4] === 'ة') {
