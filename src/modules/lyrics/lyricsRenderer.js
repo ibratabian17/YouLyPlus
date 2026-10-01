@@ -1760,6 +1760,7 @@ class LyricsPlusRenderer {
       .filter(Boolean);
 
     this._ensureElementIds();
+    this._initMaskResizeObserver();
     this.activeLineIds.clear();
     this.visibleLineIds.clear();
     this.currentPrimaryActiveLine = null;
@@ -2090,11 +2091,15 @@ class LyricsPlusRenderer {
         cancelAnimationFrame(this.lyricsAnimationFrameId);
     }
     this.lastTime = this._getCurrentPlayerTime() * 1000 - (this.userOffsetMs || 0);
+    this._lastPlayerPaused = false;
     if (!this.uiConfig.disableNativeTick) {
       const sync = () => {
+        const player = this._getPlayerElement();
+        const isPaused = player ? player.paused : false;
         const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 - (this.userOffsetMs || 0);
-        if (currentTime !== this.lastTime) {
+        if (currentTime !== this.lastTime || isPaused !== this._lastPlayerPaused) {
           const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
+          this._lastPlayerPaused = isPaused;
           this._updateLyricsHighlight(
             currentTime,
             isForceScroll,
@@ -2396,6 +2401,410 @@ class LyricsPlusRenderer {
     changes.length = 0;
   }
 
+  // --- Mask Highlight Animation ---
+
+  /**
+   * Decides the wipe direction from what is actually displayed in a syllable,
+   * not from the line. An LTR transliteration under an RTL line must wipe LTR.
+   */
+  static _resolveWipeRtl(text, computedDirection) {
+    if (LyricsPlusRenderer._RTL_RE.test(text)) return true;
+    if (LyricsPlusRenderer._BIDI_CHECK_RE.test(text)) return false;
+    return computedDirection === "rtl"; // neutral text (digits, punctuation)
+  }
+
+  /**
+   * Builds the shared cursor path of a track.
+   * @param {Array} entries - Track syllables in logical order.
+   * @returns {Array<{t:number,c:number}>} Non-decreasing timeline points.
+   */
+  static _buildMaskPath(entries, lineStartTime, totalDuration, fade) {
+    const points = [];
+    let c = -fade;
+    let t = 0;
+    let lastStamp = 0;
+    let shift = -fade; // c = nominal position + shift
+
+    const push = () => {
+      const pt = Math.min(1, Math.max(0, t));
+      const last = points[points.length - 1];
+      if (last && last.t === pt && last.c === c) return;
+      points.push({ t: pt, c });
+    };
+    push();
+
+    const n = entries.length;
+    for (let j = 0; j < n; j++) {
+      const e = entries[j];
+      const stamp = e.start - lineStartTime;
+      const idle = stamp - lastStamp;
+      if (idle > 0) {
+        t += idle / totalDuration;
+        push();
+      }
+      lastStamp = stamp;
+
+      const dur = Math.max(0, e.end - e.start);
+      const segs = e.segs;
+      const segCount = segs.length;
+
+      for (let k = 0; k < segCount; k++) {
+        const s = segs[k];
+        const segStart = stamp + s.ts * dur;
+        const sub = segStart - lastStamp;
+        if (sub > 0) {
+          t += sub / totalDuration;
+          push();
+        }
+        lastStamp = segStart;
+
+        let shiftAfter = shift;
+        if (j === 0 && k === 0) shiftAfter += fade * 0.5;
+        if (j === n - 1 && k === segCount - 1) shiftAfter += fade * 0.5;
+
+        const segDur = s.td * dur;
+        t += segDur / totalDuration;
+        c += s.td * e.width + (shiftAfter - shift);
+        shift = shiftAfter;
+        if (segDur > 0) push();
+        lastStamp += segDur;
+      }
+
+      // Bridge the whitespace between this syllable and the next one.
+      if (j + 1 < n && e.gap > 0) {
+        c += e.gap;
+        push();
+      }
+    }
+
+    const tail = totalDuration - lastStamp;
+    if (tail > 0) t += tail / totalDuration;
+    t = 1;
+    push();
+    return points;
+  }
+
+  /**
+   * Turns the shared track path into WAAPI keyframes for one syllable.
+   * Positions are clamped to the covered range, with the exact clamp-crossing
+   * time interpolated so the sweep does not smear at the ends.
+   */
+  static _buildMaskFrames(points, offset, width, fade, rtl, pad = 0) {
+    const span = width + fade;
+    const minPos = -span;
+    const maxPos = 0;
+    const frames = [];
+    const qs = [];
+
+    const emit = (t, p) => {
+      const q = Math.min(maxPos, Math.max(minPos, p));
+      const n = frames.length;
+      // Collapse flat runs: keep only the first and last keyframe of a run.
+      if (n >= 2 && qs[n - 1] === q && qs[n - 2] === q) {
+        frames[n - 1].offset = t;
+        return;
+      }
+      const pos = `${((rtl ? -span - q : q) - pad).toFixed(3)}px ${(-pad).toFixed(3)}px`;
+      frames.push({ offset: t, maskPosition: pos, webkitMaskPosition: pos });
+      qs.push(q);
+    };
+
+    let lastT = points[0].t;
+    let lastP = points[0].c - offset - width;
+    emit(lastT, lastP);
+
+    for (let i = 1; i < points.length; i++) {
+      const t = Math.max(lastT, points[i].t);
+      const p = points[i].c - offset - width;
+      if (p > lastP) {
+        if (lastP < minPos && p > minPos) {
+          emit(lastT + (t - lastT) * ((minPos - lastP) / (p - lastP)), minPos);
+        }
+        if (lastP < maxPos && p > maxPos) {
+          emit(lastT + (t - lastT) * ((maxPos - lastP) / (p - lastP)), maxPos);
+        }
+      }
+      emit(t, p);
+      lastT = t;
+      lastP = p;
+    }
+    if (frames.length) frames[frames.length - 1].offset = 1;
+    return frames;
+  }
+
+  /**
+   * Pre-observes syllables across all lines at boot using ResizeObserver.
+   */
+  _initMaskResizeObserver() {
+    if (typeof ResizeObserver === "undefined") return;
+    if (this._maskResizeObserver) {
+      this._maskResizeObserver.disconnect();
+      this._maskResizeObserver = null;
+    }
+
+    this._maskResizeObserver = new ResizeObserver((entries) => {
+      const invalidatedLines = new Set();
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        const el = entry.target;
+        const newWidth = entry.contentRect ? entry.contentRect.width : 0;
+        if (newWidth > 0) {
+          const oldWidth = el._roContentWidth;
+          el._roContentWidth = newWidth;
+          if (oldWidth !== undefined && Math.abs(oldWidth - newWidth) > 0.5) {
+            const owner = el._maskOwnerLine;
+            if (owner && owner._maskAnimator) {
+              invalidatedLines.add(owner);
+            }
+          }
+        }
+      }
+      for (const line of invalidatedLines) {
+        if (line._maskAnimator) {
+          line._maskAnimator.dispose();
+        }
+      }
+    });
+
+    if (this.cachedLyricsLines) {
+      for (let i = 0; i < this.cachedLyricsLines.length; i++) {
+        const line = this.cachedLyricsLines[i];
+        if (line._isGap || line.classList.contains("lyrics-gap")) continue;
+        let syllables = line._cachedSyllableElements;
+        if (!syllables) {
+          syllables = Array.from(line.querySelectorAll(".lyrics-syllable"));
+          line._cachedSyllableElements = syllables;
+        }
+        for (let j = 0; j < syllables.length; j++) {
+          const syl = syllables[j];
+          syl._maskOwnerLine = line;
+          this._maskResizeObserver.observe(syl);
+        }
+      }
+    }
+  }
+
+  _measureMaskSyllable(syl, cs, text) {
+    const font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+
+    let width = 0;
+    if (syl._roContentWidth !== undefined && syl._roContentWidth > 0) {
+      width = syl._roContentWidth;
+    } else {
+      const padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+      const domWidth = Math.max(0, syl.clientWidth - padX);
+      if (domWidth > 0) {
+        width = domWidth;
+        syl._roContentWidth = domWidth;
+      } else {
+        width = text ? this._getTextWidth(text, font) : 0;
+        const letterSpacing = parseFloat(cs.letterSpacing) || 0;
+        if (letterSpacing && text) width += letterSpacing * [...text].length;
+      }
+    }
+
+    const gap = Math.max(0, parseFloat(cs.marginLeft) || 0) + Math.max(0, parseFloat(cs.marginRight) || 0);
+    return { width, gap, font };
+  }
+
+  /** Drops cached mask animators so they are re-measured on the next frame. */
+  _invalidateMaskAnimators() {
+    const lines = this.cachedLyricsLines;
+    if (!lines) return;
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i];
+      if (l && l._maskAnimator) l._maskAnimator.dispose();
+    }
+    this._textWidthCache.clear();
+  }
+
+  _getOrCreateLineMaskAnimator(lineElement) {
+    if (lineElement._maskAnimator) return lineElement._maskAnimator;
+    if (lineElement._isGap || lineElement.classList.contains("lyrics-gap")) return null;
+
+    let syllables = lineElement._cachedSyllableElements;
+    if (!syllables) {
+      syllables = Array.from(lineElement.querySelectorAll(".lyrics-syllable"));
+      lineElement._cachedSyllableElements = syllables;
+    }
+    if (!syllables || syllables.length === 0) return null;
+
+    const lineStartTime = lineElement._startTimeMs !== undefined
+      ? lineElement._startTimeMs
+      : parseFloat(lineElement.dataset.startTime) * 1000;
+    const lineEndTime = lineElement._endTimeMs !== undefined
+      ? lineElement._endTimeMs
+      : parseFloat(lineElement.dataset.endTime) * 1000;
+    const totalFadeDuration = Math.max(1, lineEndTime - lineStartTime);
+
+    const containers = [];
+    const tracks = new Map();
+
+    for (let i = 0; i < syllables.length; i++) {
+      const syl = syllables[i];
+      const cs = window.getComputedStyle(syl);
+      if (cs.display === "none") continue;
+
+      const text = syl.textContent || "";
+      const start = syl._startTimeMs !== undefined ? syl._startTimeMs : (parseFloat(syl.dataset.startTime) || 0);
+      const dur = syl._durationMs !== undefined ? syl._durationMs : (parseFloat(syl.dataset.duration) || 0);
+
+      const container = syl.closest(
+        ".background-vocal-container, .lyrics-romanization-container, .main-vocal-container"
+      ) || lineElement;
+      let ci = containers.indexOf(container);
+      if (ci < 0) ci = containers.push(container) - 1;
+      const key = (syl.classList.contains("transliteration") ? "t" : "m") + ci;
+
+      let track = tracks.get(key);
+      if (!track) {
+        const fontSizePx = parseFloat(cs.fontSize) || 16;
+        track = { entries: [], fade: fontSizePx * 0.75, pad: fontSizePx * 0.75, cursorOffset: 0 };
+        tracks.set(key, track);
+      }
+
+      const m = this._measureMaskSyllable(syl, cs, text);
+      const segs = [{ ts: 0, td: 1 }];
+
+      const entry = {
+        element: syl,
+        start,
+        end: start + dur,
+        width: m.width,
+        gap: m.gap,
+        offset: track.cursorOffset,
+        rtl: LyricsPlusRenderer._resolveWipeRtl(text, cs.direction),
+        segs,
+      };
+      track.cursorOffset += m.width + m.gap;
+      track.entries.push(entry);
+    }
+
+    const animations = [];
+    const styled = [];
+
+    const bright = "rgb(0 0 0 / 1)";
+    const dark = "rgb(0 0 0 / var(--lyplus-mask-dim-alpha, 0.35))";
+
+    tracks.forEach((track) => {
+      const fade = track.fade;
+      const pad = track.pad;
+      const points = LyricsPlusRenderer._buildMaskPath(
+        track.entries, lineStartTime, totalFadeDuration, fade
+      );
+
+      for (let i = 0; i < track.entries.length; i++) {
+        const e = track.entries[i];
+        const el = e.element;
+        const w = Math.max(1, e.width);
+        const maskW = 2 * w + fade;
+
+        const dir = e.rtl ? "270deg" : "90deg";
+        const gradient = `linear-gradient(${dir}, ${bright} ${(pad + w).toFixed(2)}px, ${dark} ${(pad + w + fade).toFixed(2)}px)`;
+        const size = `${(maskW + 2 * pad).toFixed(2)}px calc(100% + ${(2 * pad).toFixed(2)}px)`;
+        el.style.maskImage = gradient;
+        el.style.webkitMaskImage = gradient;
+        el.style.maskRepeat = "no-repeat";
+        el.style.webkitMaskRepeat = "no-repeat";
+        el.style.maskSize = size;
+        el.style.webkitMaskSize = size;
+        el.style.maskClip = "no-clip";
+        el.style.webkitMaskClip = "no-clip";
+        styled.push(el);
+
+        const frames = LyricsPlusRenderer._buildMaskFrames(points, e.offset, w, fade, e.rtl, pad);
+        try {
+          const anim = el.animate(frames, { duration: totalFadeDuration, fill: "both" });
+          anim.pause();
+          animations.push(anim);
+        } catch (err) {
+          console.warn("LYPLUS: WAAPI mask creation error:", err);
+        }
+      }
+    });
+
+    // Ensure any newly attached syllables are registered with the boot ResizeObserver
+    if (this._maskResizeObserver) {
+      for (let i = 0; i < syllables.length; i++) {
+        const syl = syllables[i];
+        if (!syl._maskOwnerLine) {
+          syl._maskOwnerLine = lineElement;
+          this._maskResizeObserver.observe(syl);
+        }
+      }
+    }
+
+    const animator = {
+      animations,
+      totalFadeDuration,
+      setCurrentTime(relativeTime) {
+        const t = Math.min(totalFadeDuration, Math.max(0, relativeTime));
+        const len = animations.length;
+        for (let idx = 0; idx < len; idx++) {
+          const a = animations[idx];
+          a.currentTime = t;
+          if (a.playState === "running") a.pause();
+        }
+      },
+      dispose() {
+        for (let idx = 0; idx < animations.length; idx++) {
+          animations[idx].cancel();
+        }
+        animations.length = 0;
+        for (let idx = 0; idx < styled.length; idx++) {
+          const el = styled[idx];
+          el.style.removeProperty("mask-image");
+          el.style.removeProperty("-webkit-mask-image");
+          el.style.removeProperty("mask-size");
+          el.style.removeProperty("-webkit-mask-size");
+          el.style.removeProperty("mask-clip");
+          el.style.removeProperty("-webkit-mask-clip");
+          el.style.removeProperty("mask-repeat");
+          el.style.removeProperty("-webkit-mask-repeat");
+          el.style.removeProperty("mask-position");
+          el.style.removeProperty("-webkit-mask-position");
+        }
+        styled.length = 0;
+        lineElement._maskAnimator = null;
+      },
+    };
+
+    lineElement._maskAnimator = animator;
+    return animator;
+  }
+
+  _triggerGrowable(syllable) {
+    const wordElement = syllable.parentElement?.parentElement;
+    const allWordCharSpans = wordElement?._cachedChars;
+    const isGrowable = (syllable._isGrowable !== undefined)
+      ? syllable._isGrowable
+      : (wordElement ? wordElement.classList.contains("growable") : false);
+    const isFirstSyllable = syllable._syllableIdx !== undefined
+      ? syllable._syllableIdx === 0
+      : syllable.dataset.syllableIndex === "0";
+
+    if (isGrowable && isFirstSyllable && allWordCharSpans) {
+      const finalDuration = (syllable._wordDurationMs !== undefined && syllable._wordDurationMs !== null)
+        ? syllable._wordDurationMs
+        : syllable._durationMs;
+      const baseDelayPerChar = finalDuration * 0.09;
+      const growDurationMs = finalDuration * 1.5;
+
+      const charsLength = allWordCharSpans.length;
+      for (let i = 0; i < charsLength; i++) {
+        const span = allWordCharSpans[i];
+        const horizontalOffset = (span._horizontalOffset !== undefined)
+          ? span._horizontalOffset
+          : (parseFloat(span.dataset.horizontalOffset) || 0);
+        const growDelay = baseDelayPerChar * ((span._syllableCharIndex !== undefined)
+          ? span._syllableCharIndex
+          : (parseFloat(span.dataset.syllableCharIndex) || 0));
+        span.style.animation = `grow-dynamic ${growDurationMs}ms ease-in-out ${growDelay}ms forwards`;
+        span.style.setProperty("--char-offset-x", `${horizontalOffset}`);
+      }
+    }
+  }
+
   _updateSyllables(currentTime, activeLines) {
     if (!activeLines || activeLines.length === 0) return;
 
@@ -2410,257 +2819,103 @@ class LyricsPlusRenderer {
         syllables = Array.from(parentLine.querySelectorAll(".lyrics-syllable"));
         parentLine._cachedSyllableElements = syllables;
       }
-
       const syllablesLength = syllables.length;
 
+      // 1. Advance the continuous WAAPI mask gradient
+      const lineStartTime = parentLine._startTimeMs !== undefined
+        ? parentLine._startTimeMs
+        : parseFloat(parentLine.dataset.startTime) * 1000;
+      const relativeTime = currentTime - lineStartTime;
+      const isGapLine = parentLine._isGap || parentLine.classList.contains("lyrics-gap");
+      const animator = isGapLine ? null : this._getOrCreateLineMaskAnimator(parentLine);
+      if (animator) {
+        if (relativeTime >= animator.totalFadeDuration) {
+          // Line has completely finished: release mask surfaces and inline styles
+          animator.dispose();
+          for (let j = 0; j < syllablesLength; j++) {
+            const syl = syllables[j];
+            syl.classList.remove("highlight", "pre-highlight");
+            syl.classList.add("finished");
+            syl._state = 2;
+          }
+        } else {
+          animator.setCurrentTime(relativeTime);
+        }
+      }
+
+      // 2. Drive syllable state and growable bounce animations
       for (let j = 0; j < syllablesLength; j++) {
         const syllable = syllables[j];
         const startTime = syllable._startTimeMs;
-
         if (startTime === undefined) continue;
 
         const classList = syllable.classList;
-
         const _st = syllable._state || 0;
         const hasHighlight = (_st & 1) !== 0;
         const hasFinished = (_st & 2) !== 0;
-        const hasPreHighlight = (_st & 4) !== 0;
-        const hasActiveState = _st !== 0;
-
-        // Early exit only if syllable is far 
-        if (currentTime < startTime - 1000 && !hasActiveState) continue;
-
         const endTime = syllable._endTimeMs;
 
         if (currentTime >= startTime && currentTime <= endTime) {
           if (!hasHighlight) {
-            this._updateSyllableAnimation(syllable);
+            classList.add("highlight");
+            syllable._state = (_st & ~4) | 1;
+            if (syllable._isGap) {
+              const dur = syllable._durationMs || 1000;
+              syllable.style.animation = `fade-gap ${dur}ms var(--lyplus-fade-gap-timing-function, cubic-bezier(0.25, 0.1, 0.25, 1)) forwards`;
+            } else {
+              this._triggerGrowable(syllable);
+            }
           }
           if (hasFinished) {
             classList.remove("finished");
             syllable._state &= ~2;
           }
-        }
-        else if (currentTime > endTime) {
+        } else if (currentTime > endTime) {
           if (!hasFinished) {
             if (!hasHighlight) {
-              this._updateSyllableAnimation(syllable);
+              classList.add("highlight");
+              syllable._state = (_st & ~4) | 1;
+              if (!syllable._isGap) {
+                this._triggerGrowable(syllable);
+              }
             }
             classList.add("finished");
             syllable._state |= 2;
-          }
-        }
-        else {
-          if (hasHighlight || hasFinished) {
-            this._resetSyllable(syllable);
-          } else if (hasPreHighlight) {
-            const shouldReset = j === 0 || !((syllables[j - 1] && (syllables[j - 1]._state & 1)));
-
-            if (shouldReset) {
-              this._resetSyllable(syllable, true);
+            if (syllable._isGap) {
+              syllable.style.animation = "";
             }
           }
-        }
-      }
-    }
-  }
-
-  _updateSyllableAnimation(syllable) {
-    // --- READ PHASE ---
-    if (syllable._state & 1) return;
-
-    const classList = syllable.classList;
-    const isRTL = classList.contains("rtl-text");
-    const charSpans = syllable._cachedCharSpans;
-    const wordElement = syllable.parentElement.parentElement;
-    const allWordCharSpans = wordElement?._cachedChars;
-    const isGrowable = (syllable._isGrowable !== undefined) ? syllable._isGrowable : (wordElement ? wordElement.classList.contains("growable") : false);
-    const isFirstSyllable = syllable._syllableIdx !== undefined ? syllable._syllableIdx === 0 : syllable.dataset.syllableIndex === "0";
-    const isGap = (syllable._isGap !== undefined) ? syllable._isGap : !!(syllable.parentElement && syllable.parentElement.parentElement && syllable.parentElement.parentElement.parentElement && syllable.parentElement.parentElement.parentElement.classList.contains("lyrics-gap"));
-    const nextSyllable = syllable._nextSyllableInWord;
-    const isFirstInContainer = syllable._isFirstInContainer || false;
-
-    // --- CALCULATION PHASE ---
-    if (!this._charAnimationsMap) this._charAnimationsMap = new Map();
-    else this._charAnimationsMap.clear();
-    const charAnimationsMap = this._charAnimationsMap;
-
-    if (!this._styleUpdates) this._styleUpdates = new Array(100);
-    const styleUpdates = this._styleUpdates;
-    let styleUpdatesCount = 0;
-
-    // Step 1: Grow Pass.
-    if (isGrowable && isFirstSyllable && allWordCharSpans) {
-      const finalDuration = (syllable._wordDurationMs !== undefined && syllable._wordDurationMs !== null) ? syllable._wordDurationMs : syllable._durationMs;
-      const baseDelayPerChar = finalDuration * 0.09;
-      const growDurationMs = finalDuration * 1.5;
-
-      const charsLength = allWordCharSpans.length;
-      for (let i = 0; i < charsLength; i++) {
-        const span = allWordCharSpans[i];
-        const horizontalOffset = (span._horizontalOffset !== undefined) ? span._horizontalOffset : (parseFloat(span.dataset.horizontalOffset) || 0);
-        const growDelay = baseDelayPerChar * ((span._syllableCharIndex !== undefined) ? span._syllableCharIndex : (parseFloat(span.dataset.syllableCharIndex) || 0));
-        charAnimationsMap.set(
-          span,
-          `grow-dynamic ${growDurationMs}ms ease-in-out ${growDelay}ms forwards`
-        );
-        styleUpdates[styleUpdatesCount++] = {
-          element: span,
-          property: "--char-offset-x",
-          value: `${horizontalOffset}`,
-        };
-      }
-    }
-
-    // Step 2: Wipe Pass.
-    if (charSpans && charSpans.length > 0) {
-      const syllableDuration = syllable._durationMs;
-      const charSpansLength = charSpans.length;
-
-      for (let charIndex = 0; charIndex < charSpansLength; charIndex++) {
-        const span = charSpans[charIndex];
-        const startPct = (span._wipeStart !== undefined) ? span._wipeStart : (parseFloat(span.dataset.wipeStart) || 0);
-        const durationPct = (span._wipeDuration !== undefined) ? span._wipeDuration : (parseFloat(span.dataset.wipeDuration) || 0);
-
-        const wipeDelay = syllableDuration * startPct;
-        const wipeDuration = syllableDuration * durationPct;
-
-        const useStartAnimation = isFirstInContainer && charIndex === 0;
-        const charWipeAnimation = useStartAnimation
-          ? isRTL
-            ? "start-wipe-rtl"
-            : "start-wipe"
-          : isRTL
-            ? "wipe-rtl"
-            : "wipe";
-
-        const existingAnimation = charAnimationsMap.get(span) || span.style.animation;
-        let combined = "";
-
-        if (existingAnimation && existingAnimation.includes("grow-dynamic")) {
-          combined = existingAnimation.split(",")[0].trim();
-        }
-
-        if (charIndex > 0) {
-          const arrivalTime = (span._preWipeArrival !== undefined) ? span._preWipeArrival : (parseFloat(span.dataset.preWipeArrival) || 0);
-          const constantDuration = (span._preWipeDuration !== undefined) ? span._preWipeDuration : (parseFloat(span.dataset.preWipeDuration) || 100);
-
-          const animDelay = arrivalTime - constantDuration;
-
-          if (constantDuration > 0) {
-            const part = `pre-wipe-char ${constantDuration}ms linear ${animDelay}ms forwards`;
-            combined = combined ? `${combined}, ${part}` : part;
+        } else {
+          // currentTime < startTime
+          if (hasHighlight || hasFinished) {
+            this._resetSyllable(syllable);
           }
         }
-
-        if (wipeDuration > 0) {
-          const part = `${charWipeAnimation} ${wipeDuration}ms linear ${wipeDelay}ms forwards`;
-          combined = combined ? `${combined}, ${part}` : part;
-        }
-
-        charAnimationsMap.set(span, combined);
-      }
-    } else {
-      const ratio = syllable._wipeRatio || 1;
-      const visualDuration = syllable._durationMs * ratio;
-      const wipeAnimation = isFirstInContainer
-        ? isRTL
-          ? "start-wipe-rtl"
-          : "start-wipe"
-        : isRTL
-          ? "wipe-rtl"
-          : "wipe";
-      const currentWipeAnimation = isGap ? "fade-gap" : wipeAnimation;
-      const syllableAnimation = `${currentWipeAnimation} ${visualDuration}ms ${isGap ? 'var(--lyplus-fade-gap-timing-function)' : 'linear'} forwards`;
-      styleUpdates[styleUpdatesCount++] = {
-        element: syllable,
-        property: "animation",
-        value: syllableAnimation,
-      };
-    }
-
-    // Step 3: Pre-Wipe Pass (Cross-Syllable).
-    if (nextSyllable) {
-      const preHighlightDuration = syllable._preHighlightDurationMs;
-      const preHighlightDelay = syllable._preHighlightDelayMs;
-
-      styleUpdates[styleUpdatesCount++] = {
-        element: nextSyllable,
-        property: "class",
-        action: "add",
-        value: "pre-highlight",
-      };
-      styleUpdates[styleUpdatesCount++] = {
-        element: nextSyllable,
-        property: "--pre-wipe-duration",
-        value: `${preHighlightDuration}ms`,
-      };
-      styleUpdates[styleUpdatesCount++] = {
-        element: nextSyllable,
-        property: "--pre-wipe-delay",
-        value: `${preHighlightDelay}ms`,
-      };
-
-      const nextCharSpan = nextSyllable._cachedCharSpans?.[0];
-      if (nextCharSpan) {
-        const preWipeAnim = `pre-wipe-char ${preHighlightDuration}ms linear ${preHighlightDelay}ms forwards`;
-        const existingAnimation =
-          charAnimationsMap.get(nextCharSpan) ||
-          nextCharSpan.style.animation ||
-          "";
-        const combinedAnimation =
-          existingAnimation && !existingAnimation.includes("pre-wipe-char")
-            ? `${existingAnimation}, ${preWipeAnim}`
-            : preWipeAnim;
-        charAnimationsMap.set(nextCharSpan, combinedAnimation);
-      }
-    }
-
-    // --- WRITE PHASE ---
-    classList.remove("pre-highlight");
-    classList.add("highlight");
-    syllable._state = (syllable._state & ~4) | 1;
-
-    charAnimationsMap.forEach((animationString, span) => {
-      span.style.animation = animationString;
-    });
-
-    for (let i = 0; i < styleUpdatesCount; i++) {
-      const update = styleUpdates[i];
-      if (update.action === "add") {
-        update.element.classList.add(update.value);
-        if (update.value === "pre-highlight") update.element._state = (update.element._state || 0) | 4;
-      } else if (update.property === "animation") {
-        update.element.style.animation = update.value;
-      } else {
-        update.element.style.setProperty(update.property, update.value);
       }
     }
   }
 
   _resetSyllable(syllable, noFade = false) {
     if (!syllable) return;
+    if (syllable._isGap) {
+      syllable.style.animation = "";
+    }
     if (syllable._cleanupTimer) {
       clearTimeout(syllable._cleanupTimer);
       syllable._cleanupTimer = null;
     }
-    syllable.style.animation = "";
+
     if (!(syllable._state & 2) && !noFade) {
       syllable.classList.add("finished");
       syllable._state |= 2;
     }
     syllable.classList.add("cleanup");
-    syllable.style.removeProperty("--pre-wipe-duration");
-    syllable.style.removeProperty("--pre-wipe-delay");
 
     const charSpans = syllable._cachedCharSpans || syllable.querySelectorAll("span.char");
     if (charSpans) {
       const charSpansLength = charSpans.length;
       for (let i = 0; i < charSpansLength; i++) {
         charSpans[i].style.animation = "";
-        if (this._charAnimationsMap) {
-          this._charAnimationsMap.delete(charSpans[i]);
-        }
       }
     }
 
@@ -2678,6 +2933,9 @@ class LyricsPlusRenderer {
 
   _resetSyllables(line, noFade = false) {
     if (!line) return;
+    if (line._maskAnimator) {
+      line._maskAnimator.dispose();
+    }
     let syllables = line._cachedSyllableElements;
     if (!syllables) {
       syllables = Array.from(line.getElementsByClassName("lyrics-syllable"));
@@ -3791,6 +4049,10 @@ class LyricsPlusRenderer {
     this._scrollAnimationTimeout = null;
 
     // Observer Cleanup
+    if (this._maskResizeObserver) {
+      this._maskResizeObserver.disconnect();
+      this._maskResizeObserver = null;
+    }
     if (this.visibilityObserver) {
       this.visibilityObserver.disconnect();
       this.visibilityObserver = null;

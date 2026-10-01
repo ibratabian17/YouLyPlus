@@ -5,3 +5,7 @@
 /temp_chrome_edge/
 /temp_chrome_firefox/
 /temp_generic_v2/
+/temp
+
+# Mac directory
+.DS_Store

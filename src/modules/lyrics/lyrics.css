@@ -342,11 +342,13 @@
 
 .lyrics-line .lyrics-syllable {
     display: inline-block;
+    padding: 0.5em 0.25em;
+    margin: -0.5em -0.25em;
     color: var(--lyplus-text-secondary);
     white-space: normal;
     font-variant-ligatures: none;
     font-feature-settings: "liga" 0;
-    transition: color 0.7s, transform 0.7s ease;
+    transition: transform 0.7s ease;
 }
 
 /* --- Syllable States (Finished, Highlight, etc.) --- */
@@ -359,13 +361,18 @@
     transition: transform 1s ease !important;
 }
 
+.lyrics-line:not(.active) .lyrics-syllable {
+    transition: color 0.5s ease, transform 0.7s ease;
+}
+
 .lyrics-line:not(.active) .lyrics-syllable.finished {
-    transition: color 0.18s;
+    transition: color 0.5s ease;
 }
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable {
     transform: translateY(0.001%) translateZ(1px);
-    transition: transform 1s ease, color 0.5s;
+    transition: transform 1s ease;
+    color: var(--lyplus-text-primary, #fff);
 }
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
@@ -373,46 +380,23 @@
     /* Solid primary text; the mask's alpha provides the dim (unsung) look. */
     color: var(--lyplus-text-primary, #fff);
     transition: transform 1s ease;
-    -webkit-mask-image: var(--lyplus-wipe-mask-ltr);
-    mask-image: var(--lyplus-wipe-mask-ltr);
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-size: calc(200% + 0.75em) 100%;
-    mask-size: calc(200% + 0.75em) 100%;
-    -webkit-mask-position: 100% 0%;
-    mask-position: 100% 0%;
 }
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.rtl-text,
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.pre-highlight.rtl-text {
     direction: rtl;
-    -webkit-mask-image: var(--lyplus-wipe-mask-rtl);
-    mask-image: var(--lyplus-wipe-mask-rtl);
-    -webkit-mask-position: 0% 0%;
-    mask-position: 0% 0%;
 }
 
 #lyrics-plus-container:not(.lightweight-mode) .lyrics-line.active:not(.lyrics-gap) .lyrics-word:not(.growable) .lyrics-syllable.highlight,
 #lyrics-plus-container:not(.lightweight-mode) .lyrics-word.growable .lyrics-syllable.cleanup span.char {
-    transform: translateY(-3.5%) translateZ(1px);
+    transform: translateY(-0.05em) translateZ(1px);
 }
 
-.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.finished {
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.finished,
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.finished {
     -webkit-mask-image: none;
     mask-image: none;
     color: var(--lyplus-text-primary, #fff);
-}
-
-.lyrics-syllable.pre-highlight {
-    animation-name: pre-wipe-universal;
-    animation-duration: var(--pre-wipe-duration);
-    animation-delay: var(--pre-wipe-delay);
-    animation-timing-function: linear;
-    animation-fill-mode: forwards;
-}
-
-.lyrics-syllable.pre-highlight.rtl-text {
-    animation-name: pre-wipe-universal-rtl;
 }
 
 .lyrics-syllable-wrap.has-translit {
@@ -449,24 +433,31 @@
 }
 
 /* ===== CHARACTER-LEVEL ANIMATION ===== */
-.lyrics-line span.lyrics-syllable.has-chars {
-    /* Colour lives on the chars; the syllable itself must not draw or mask. */
-    -webkit-mask-image: none !important;
-    mask-image: none !important;
-}
-
 .lyrics-line .lyrics-syllable span.char {
     display: inline-block;
+    padding: 0.5em 0.1em;
+    margin: -0.5em -0.1em;
     color: var(--lyplus-text-secondary);
     white-space: break-spaces;
     font-variant-ligatures: none;
     font-feature-settings: "liga" 0;
-    transition: color 0.7s, transform 0.7s ease;
+    transition: transform 0.7s ease;
+}
+
+.lyrics-line:not(.active) .lyrics-syllable span.char {
+    transition: color 0.5s ease, transform 0.7s ease;
+}
+
+.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable span.char {
+    color: inherit;
 }
 
 .lyrics-line .lyrics-syllable.finished span.char {
-    transition: color 0.18s;
     color: var(--lyplus-text-primary, var(--lyplus-text-primary));
+}
+
+.lyrics-line:not(.active) .lyrics-syllable.finished span.char {
+    transition: color 0.5s ease;
 }
 
 .lyrics-line.active .lyrics-syllable span.char {
@@ -475,36 +466,11 @@
             0, 1, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1);
-    transition: transform 0.7s ease, color 0.18s;
-}
-
-.lyrics-line.active .lyrics-syllable.highlight span.char,
-.lyrics-line.active .lyrics-syllable.pre-highlight span.char {
-    color: var(--lyplus-text-primary, #fff);
-    -webkit-mask-image: var(--lyplus-wipe-mask-ltr);
-    mask-image: var(--lyplus-wipe-mask-ltr);
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-size: calc(200% + 0.75em) 100%;
-    mask-size: calc(200% + 0.75em) 100%;
-    -webkit-mask-position: 100% 0%;
-    mask-position: 100% 0%;
     transition: transform 0.7s ease;
 }
 
-.lyrics-line.active .lyrics-syllable.highlight.rtl-text span.char,
-.lyrics-line.active .lyrics-syllable.pre-highlight.rtl-text span.char {
-    -webkit-mask-image: var(--lyplus-wipe-mask-rtl);
-    mask-image: var(--lyplus-wipe-mask-rtl);
-    -webkit-mask-position: 0% 0%;
-    mask-position: 0% 0%;
-}
-
 .lyrics-line.active .lyrics-syllable.highlight.finished span.char {
-    -webkit-mask-image: none;
-    mask-image: none;
     color: var(--lyplus-text-primary, #fff);
-    transition: color 0.18s;
 }
 
 .lyrics-line.lyrics-gap {
@@ -547,11 +513,14 @@
     display: inline-block;
     width: var(--lyplus-gap-dot-size);
     height: var(--lyplus-gap-dot-size);
-    margin: 0 var(--lyplus-gap-dot-margin);
+    padding: 0 !important;
+    margin: 0 var(--lyplus-gap-dot-margin) !important;
     overflow: hidden;
     border-radius: 1em;
     background-color: var(--lyplus-text-secondary);
     background-clip: unset;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
     transition: background-color 0.7s, transform 0.7s ease;
 }
 
