@@ -379,6 +379,9 @@
     mask-image: none !important;
 }
 
+.lyrics-line.active .lyrics-syllable span.char {
+    transition: none !important;
+}
 #lyrics-plus-container.use-background-wipe .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable:not(.finished) {
     color: var(--lyplus-text-secondary);
 }
