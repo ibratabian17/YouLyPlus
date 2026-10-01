@@ -165,6 +165,8 @@
 
 .lyrics-line::selection {
     color: rgb(255, 255, 255);
+    background-color: #ffffff17;
+    
 }
 
 @media (hover: hover) and (pointer: fine) {
