@@ -379,6 +379,26 @@
     color: var(--lyplus-text-primary, #fff);
 }
 
+/* Background-clip based wipe when song/override palette is active */
+#lyrics-plus-container.use-background-wipe .lyrics-syllable,
+#lyrics-plus-container.use-background-wipe .lyrics-syllable span.char {
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+}
+
+#lyrics-plus-container.use-background-wipe .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable:not(.finished) {
+    color: var(--lyplus-text-secondary);
+}
+
+#lyrics-plus-container.use-background-wipe .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.finished,
+#lyrics-plus-container.use-background-wipe .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.finished span.char {
+    color: var(--lyplus-text-primary, #fff);
+}
+
+#lyrics-plus-container.use-background-wipe .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable span.char {
+    color: inherit;
+}
+
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.pre-highlight {
     /* Solid primary text; the mask's alpha provides the dim (unsung) look. */
@@ -394,6 +414,12 @@
 #lyrics-plus-container:not(.lightweight-mode) .lyrics-line.active:not(.lyrics-gap) .lyrics-word:not(.growable) .lyrics-syllable.highlight,
 #lyrics-plus-container:not(.lightweight-mode) .lyrics-word.growable .lyrics-syllable.cleanup span.char {
     transform: translateY(-0.05em) translateZ(1px);
+}
+
+
+#lyrics-plus-container.use-background-wipe .lyrics-syllable.cleanup span.char,
+#lyrics-plus-container.use-background-wipe .lyrics-line.active:not(.lyrics-gap) span.char {
+    transition: none !important;
 }
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.finished,
@@ -443,11 +469,11 @@
     white-space: break-spaces;
     font-variant-ligatures: none;
     font-feature-settings: "liga" 0;
-    transition: transform 0.7s ease;
+    transition: color 0.5s ease, background-color 0.5s ease, transform 0.7s ease;
 }
 
 .lyrics-line:not(.active) .lyrics-syllable span.char {
-    transition: color 0.5s ease, transform 0.7s ease;
+    transition: color 0.5s ease, background-color 0.5s ease, transform 0.7s ease;
 }
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable span.char {
@@ -459,7 +485,7 @@
 }
 
 .lyrics-line:not(.active) .lyrics-syllable.finished span.char {
-    transition: color 0.5s ease;
+    transition: color 0.5s ease, background-color 0.5s ease;
 }
 
 .lyrics-line.active .lyrics-syllable span.char {
@@ -468,7 +494,7 @@
             0, 1, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1);
-    transition: transform 0.7s ease;
+    transition: color 0.5s ease, background-color 0.5s ease, transform 0.7s ease;
 }
 
 .lyrics-line.active .lyrics-syllable.highlight.finished span.char {

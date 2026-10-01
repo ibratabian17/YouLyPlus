@@ -1370,6 +1370,8 @@ class LyricsPlusRenderer {
    * @private
    */
   _applyPaletteSettings(container, currentSettings) {
+    const prevBgWipe = container.classList.contains("use-background-wipe");
+
     container.classList.toggle(
       "use-song-palette-fullscreen",
       !!currentSettings.useSongPaletteFullscreen
@@ -1407,6 +1409,23 @@ class LyricsPlusRenderer {
         }
       }
     }
+
+    const isBgWipe = this._isBackgroundWipeEnabled(container);
+    container.classList.toggle("use-background-wipe", isBgWipe);
+
+    if (prevBgWipe !== isBgWipe) {
+      this._invalidateMaskAnimators();
+    }
+  }
+
+  _isBackgroundWipeEnabled(container) {
+    if (!container) return false;
+    return (
+      container.classList.contains("override-palette-color") ||
+      container.classList.contains("use-song-palette-all-modes") ||
+      container.classList.contains("use-song-palette-fullscreen") ||
+      container.classList.contains("use-background-wipe")
+    );
   }
 
   /**
@@ -2409,11 +2428,20 @@ class LyricsPlusRenderer {
    * @param {Array} entries - Track syllables in logical order.
    * @returns {Array<{t:number,c:number}>} Non-decreasing timeline points.
    */
-  static _generateFadeGradient(widthRatio, dir = "to right") {
+  static _generateFadeGradient(widthRatio, dir = "to right", isBackground = false) {
     const totalAspect = 2 + widthRatio;
     const halfFadePercent = (widthRatio / totalAspect) * 50;
     const leftPercent = 50 - halfFadePercent;
     const rightPercent = 50 + halfFadePercent;
+
+    if (isBackground) {
+      const bright = "var(--lyplus-text-primary, #fff)";
+      const dark = "var(--lyplus-text-secondary, rgba(255, 255, 255, 0.333))";
+      return [
+        `linear-gradient(${dir}, ${bright} ${leftPercent.toFixed(3)}%, ${dark} ${rightPercent.toFixed(3)}%)`,
+        totalAspect,
+      ];
+    }
 
     const bright = "rgb(0 0 0 / 1)";
     const dark = "rgb(0 0 0 / var(--lyplus-mask-dim-alpha, 0.35))";
@@ -2424,7 +2452,7 @@ class LyricsPlusRenderer {
     ];
   }
   
-  static _buildMaskFrames(words, targetIndex, fadeWidth, lineStartTime, totalFadeDuration, rtl = false, widthBefore) {
+  static _buildMaskFrames(words, targetIndex, fadeWidth, lineStartTime, totalFadeDuration, rtl = false, widthBefore, isBackground = false) {
     const targetWord = words[targetIndex];
     if (widthBefore === undefined) {
       widthBefore = 0;
@@ -2457,10 +2485,11 @@ class LyricsPlusRenderer {
         const clamped = Math.min(Math.max(cursor.lastPos, minOffset), 0);
         const xPos = (rtl ? minOffset - clamped : clamped).toFixed(2);
         const pos = `${xPos}px 0`;
-        cursor.frames.push({
-          offset: cursor.lastTime + staticTime,
-          maskPosition: pos,
-        });
+        cursor.frames.push(
+          isBackground
+            ? { offset: cursor.lastTime + staticTime, backgroundPosition: pos }
+            : { offset: cursor.lastTime + staticTime, maskPosition: pos }
+        );
       }
 
       if (cursor.curPos > 0 && cursor.lastPos < 0) {
@@ -2468,19 +2497,21 @@ class LyricsPlusRenderer {
         const clamped = Math.min(Math.max(cursor.curPos, minOffset), 0);
         const xPos = (rtl ? minOffset - clamped : clamped).toFixed(2);
         const pos = `${xPos}px 0`;
-        cursor.frames.push({
-          offset: cursor.lastTime + staticTime,
-          maskPosition: pos,
-        });
+        cursor.frames.push(
+          isBackground
+            ? { offset: cursor.lastTime + staticTime, backgroundPosition: pos }
+            : { offset: cursor.lastTime + staticTime, maskPosition: pos }
+        );
       }
 
       const clamped = Math.min(Math.max(cursor.curPos, minOffset), 0);
       const xPos = (rtl ? minOffset - clamped : clamped).toFixed(2);
       const pos = `${xPos}px 0`;
-      cursor.frames.push({
-        offset: time,
-        maskPosition: pos,
-      });
+      cursor.frames.push(
+        isBackground
+          ? { offset: time, backgroundPosition: pos }
+          : { offset: time, maskPosition: pos }
+      );
 
       cursor.lastPos = cursor.curPos;
       cursor.lastTime = time;
@@ -2581,6 +2612,12 @@ class LyricsPlusRenderer {
           const syl = syllables[j];
           syl._maskOwnerLine = line;
           this._maskResizeObserver.observe(syl);
+          if (syl._cachedCharSpans) {
+            for (let c = 0; c < syl._cachedCharSpans.length; c++) {
+              syl._cachedCharSpans[c]._maskOwnerLine = line;
+              this._maskResizeObserver.observe(syl._cachedCharSpans[c]);
+            }
+          }
         }
       }
     }
@@ -2631,6 +2668,9 @@ class LyricsPlusRenderer {
     }
     if (!syllables || syllables.length === 0) return null;
 
+    const container = this._getContainer();
+    const useBackgroundWipe = this._isBackgroundWipeEnabled(container);
+
     const lineStartTime = lineElement._startTimeMs !== undefined
       ? lineElement._startTimeMs
       : parseFloat(lineElement.dataset.startTime) * 1000;
@@ -2651,11 +2691,11 @@ class LyricsPlusRenderer {
       const start = syl._startTimeMs !== undefined ? syl._startTimeMs : (parseFloat(syl.dataset.startTime) || 0);
       const dur = syl._durationMs !== undefined ? syl._durationMs : (parseFloat(syl.dataset.duration) || 0);
 
-      const container = syl.closest(
+      const containerEl = syl.closest(
         ".background-vocal-container, .lyrics-romanization-container, .main-vocal-container"
       ) || lineElement;
-      let ci = containers.indexOf(container);
-      if (ci < 0) ci = containers.push(container) - 1;
+      let ci = containers.indexOf(containerEl);
+      if (ci < 0) ci = containers.push(containerEl) - 1;
       const key = (syl.classList.contains("transliteration") ? "t" : "m") + ci;
 
       const padLeft = parseFloat(cs.paddingLeft) || 0;
@@ -2682,16 +2722,58 @@ class LyricsPlusRenderer {
         tracks.set(key, wordList);
       }
 
-      wordList.push({
-        word: text,
-        startTime: start,
-        endTime: start + dur,
-        mainElement: syl,
-        width,
-        height,
-        padding: padLeft,
-        rtl: LyricsPlusRenderer._resolveWipeRtl(text, cs.direction),
-      });
+      if (useBackgroundWipe && syl._cachedCharSpans && syl._cachedCharSpans.length > 0) {
+        const chars = syl._cachedCharSpans;
+        for (let c = 0; c < chars.length; c++) {
+          const charSpan = chars[c];
+          const charCs = window.getComputedStyle(charSpan);
+          const charPadLeft = parseFloat(charCs.paddingLeft) || 0;
+          const charPadRight = parseFloat(charCs.paddingRight) || 0;
+          const charPadTop = parseFloat(charCs.paddingTop) || 0;
+          const charPadBottom = parseFloat(charCs.paddingBottom) || 0;
+
+          const cText = charSpan.textContent || "";
+          let charWidth = charSpan._roContentWidth;
+          if (!charWidth || charWidth <= 0) {
+            const domWidth = charSpan.clientWidth - charPadLeft - charPadRight;
+            charWidth = domWidth > 0 ? domWidth : (cText ? this._getTextWidth(cText, `${charCs.fontStyle} ${charCs.fontWeight} ${charCs.fontSize} ${charCs.fontFamily}`) : 0);
+          }
+          charWidth = Math.max(1, charWidth);
+
+          let charHeight = charSpan._roContentHeight;
+          if (!charHeight || charHeight <= 0) {
+            const domHeight = charSpan.clientHeight - charPadTop - charPadBottom;
+            charHeight = domHeight > 0 ? domHeight : (parseFloat(charCs.fontSize) || height);
+          }
+
+          const cWipeStart = charSpan._wipeStart !== undefined ? charSpan._wipeStart : parseFloat(charSpan.dataset.wipeStart) || (c / chars.length);
+          const cWipeDur = charSpan._wipeDuration !== undefined ? charSpan._wipeDuration : parseFloat(charSpan.dataset.wipeDuration) || (1 / chars.length);
+          const cStart = start + cWipeStart * dur;
+          const cDur = Math.max(1, cWipeDur * dur);
+
+          wordList.push({
+            word: cText,
+            startTime: cStart,
+            endTime: cStart + cDur,
+            mainElement: charSpan,
+            width: charWidth,
+            height: charHeight,
+            padding: charPadLeft,
+            rtl: LyricsPlusRenderer._resolveWipeRtl(cText, charCs.direction),
+          });
+        }
+      } else {
+        wordList.push({
+          word: text,
+          startTime: start,
+          endTime: start + dur,
+          mainElement: syl,
+          width,
+          height,
+          padding: padLeft,
+          rtl: LyricsPlusRenderer._resolveWipeRtl(text, cs.direction),
+        });
+      }
     }
 
     const animations = [];
@@ -2705,17 +2787,29 @@ class LyricsPlusRenderer {
         const el = w.mainElement;
         const fadeWidth = w.height * 0.5;
         const totalWordWidth = w.width + w.padding * 2;
-        const [maskImage, totalAspect] = LyricsPlusRenderer._generateFadeGradient(
+        const [gradientImage, totalAspect] = LyricsPlusRenderer._generateFadeGradient(
           fadeWidth / totalWordWidth,
-          w.rtl ? "to left" : "to right"
+          w.rtl ? "to left" : "to right",
+          useBackgroundWipe
         );
 
-        el.style.maskImage = maskImage;
-        el.style.maskSize = `${(totalAspect * 100).toFixed(3)}% 100%`;
+        if (useBackgroundWipe) {
+          el.style.backgroundImage = gradientImage;
+          el.style.backgroundSize = `${(totalAspect * 100).toFixed(3)}% 100%`;
+          el.style.backgroundRepeat = "no-repeat";
+          el.style.webkitBackgroundClip = "text";
+          el.style.backgroundClip = "text";
+          el.style.color = "transparent";
+        } else {
+          el.style.maskImage = gradientImage;
+          el.style.webkitMaskImage = gradientImage;
+          el.style.maskSize = `${(totalAspect * 100).toFixed(3)}% 100%`;
+          el.style.webkitMaskSize = `${(totalAspect * 100).toFixed(3)}% 100%`;
+        }
         styled.push(el);
 
         const frames = LyricsPlusRenderer._buildMaskFrames(
-          words, i, fadeWidth, lineStartTime, totalFadeDuration, w.rtl, widthBefore
+          words, i, fadeWidth, lineStartTime, totalFadeDuration, w.rtl, widthBefore, useBackgroundWipe
         );
         widthBefore += w.width;
 
@@ -2724,7 +2818,7 @@ class LyricsPlusRenderer {
           anim.pause();
           animations.push(anim);
         } catch (err) {
-          console.warn("LYPLUS: WAAPI mask creation error:", err);
+          console.warn("LYPLUS: WAAPI animation creation error:", err);
         }
       }
     });
@@ -2736,6 +2830,15 @@ class LyricsPlusRenderer {
         if (!syl._maskOwnerLine) {
           syl._maskOwnerLine = lineElement;
           this._maskResizeObserver.observe(syl);
+        }
+        if (syl._cachedCharSpans) {
+          for (let c = 0; c < syl._cachedCharSpans.length; c++) {
+            const charSpan = syl._cachedCharSpans[c];
+            if (!charSpan._maskOwnerLine) {
+              charSpan._maskOwnerLine = lineElement;
+              this._maskResizeObserver.observe(charSpan);
+            }
+          }
         }
       }
     }
@@ -2759,7 +2862,18 @@ class LyricsPlusRenderer {
         for (let idx = 0; idx < styled.length; idx++) {
           const el = styled[idx];
           el.style.removeProperty("mask-image");
+          el.style.removeProperty("-webkit-mask-image");
           el.style.removeProperty("mask-size");
+          el.style.removeProperty("-webkit-mask-size");
+          el.style.removeProperty("background-image");
+          el.style.removeProperty("-webkit-background-image");
+          el.style.removeProperty("background-size");
+          el.style.removeProperty("-webkit-background-size");
+          el.style.removeProperty("background-repeat");
+          el.style.removeProperty("-webkit-background-repeat");
+          el.style.removeProperty("background-clip");
+          el.style.removeProperty("-webkit-background-clip");
+          el.style.removeProperty("color");
         }
         styled.length = 0;
         lineElement._maskAnimator = null;
