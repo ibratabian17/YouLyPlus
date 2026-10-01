@@ -2456,7 +2456,7 @@ class LyricsPlusRenderer {
     const targetWord = words[targetIndex];
     if (widthBefore === undefined) {
       widthBefore = 0;
-      for (let k = 0; k < targetIndex; k++) widthBefore += words[k].width;
+      for (let k = 0; k < targetIndex; k++) widthBefore += words[k].width + (words[k].gapAfter || 0);
     }
     const widthBeforeSelf = widthBefore + (words[0] ? fadeWidth : 0);
 
@@ -2534,7 +2534,7 @@ class LyricsPlusRenderer {
 
       // Handle otherWord movement
       const fadeDuration = Math.max(0, otherWord.endTime - otherWord.startTime);
-      let movePx = otherWord.width;
+      let movePx = otherWord.width + (otherWord.gapAfter || 0);
       if (j === 0) {
         movePx += fadeWidth * 1.5 - leadTrim;
       }
@@ -2623,6 +2623,19 @@ class LyricsPlusRenderer {
     }
   }
 
+  _getInterWordSpaceWidth(syl, cs) {
+    const wrap = syl.parentElement;
+    if (!wrap || !wrap.classList.contains("lyrics-syllable-wrap") || wrap.nextSibling) return 0;
+    const wordEl = wrap.parentElement;
+    const next = wordEl && wordEl.nextSibling;
+    if (!next || next.nodeType !== 3 || !/^\s+$/.test(next.data)) return 0;
+    const font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    let w = this._getTextWidth(" ", font);
+    const letterSpacing = parseFloat(cs.letterSpacing) || 0;
+    if (letterSpacing) w += letterSpacing;
+    return w;
+  }
+
   _measureMaskSyllable(syl, cs, text) {
     const font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
 
@@ -2709,6 +2722,7 @@ class LyricsPlusRenderer {
         width = domWidth > 0 ? domWidth : (text ? this._getTextWidth(text, `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`) : 0);
       }
       width = Math.max(1, width);
+      const gapAfter = this._getInterWordSpaceWidth(syl, cs);
 
       let height = syl._roContentHeight;
       if (!height || height <= 0) {
@@ -2759,6 +2773,7 @@ class LyricsPlusRenderer {
             width: charWidth,
             height: charHeight,
             padding: charPadLeft,
+            gapAfter: c === chars.length - 1 ? gapAfter : 0,
             rtl: LyricsPlusRenderer._resolveWipeRtl(cText, charCs.direction),
           });
         }
@@ -2771,6 +2786,7 @@ class LyricsPlusRenderer {
           width,
           height,
           padding: padLeft,
+          gapAfter,
           rtl: LyricsPlusRenderer._resolveWipeRtl(text, cs.direction),
         });
       }
@@ -2811,7 +2827,7 @@ class LyricsPlusRenderer {
         const frames = LyricsPlusRenderer._buildMaskFrames(
           words, i, fadeWidth, lineStartTime, totalFadeDuration, w.rtl, widthBefore, useBackgroundWipe
         );
-        widthBefore += w.width;
+        widthBefore += w.width + (w.gapAfter || 0);
 
         try {
           const anim = el.animate(frames, { duration: totalFadeDuration, fill: "both" });
