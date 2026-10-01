@@ -33,8 +33,8 @@
     --lyplus-text-primary: var(--lyplus-lyrics-pallete);
     --lyplus-text-secondary: #ffffff55;
     --lyplus-mask-dim-alpha: 0.333;
-    --lyplus-wipe-mask-ltr: linear-gradient(90deg, #000 calc(50% - 0.375em), rgba(0, 0, 0, var(--lyplus-mask-dim-alpha)) calc(50% + 0.375em));
-    --lyplus-wipe-mask-rtl: linear-gradient(270deg, #000 calc(50% - 0.375em), rgba(0, 0, 0, var(--lyplus-mask-dim-alpha)) calc(50% + 0.375em));
+    --lyplus-wipe-mask-ltr: linear-gradient(90deg, #000 calc(50% - 0.375em), --lyplus-text-secondary calc(50% + 0.375em));
+    --lyplus-wipe-mask-rtl: linear-gradient(270deg, #000 calc(50% - 0.375em), --lyplus-text-secondary calc(50% + 0.375em));
     --lyplus-text-button: rgba(255, 255, 255, 0.87);
 
     --lyplus-blur-amount: 0.07em;
