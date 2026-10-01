@@ -144,14 +144,14 @@
 
 .line-by-line-mode .lyrics-line:not(.lyrics-gap).active .main-vocal-container {
     opacity: 1;
-    color: var(--lyplus-text-primary, var(--lyplus-text-primary));
+    color: var(--lyplus-text-primary);
     transition: transform 0.5s ease, color 0.18s;
 }
 
 /* --- Line States & Modifiers --- */
 .lyrics-line.active {
     opacity: 1;
-    color: var(--lyplus-text-primary, var(--lyplus-text-primary));
+    color: var(--lyplus-text-primary);
     will-change: transform, opacity;
 }
 
@@ -166,7 +166,6 @@
 .lyrics-line::selection {
     color: rgb(255, 255, 255);
     background-color: #ffffff17;
-    
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -189,7 +188,6 @@
 #lyrics-plus-container.blur-inactive-enabled:not(.not-focused) .lyrics-line.lyrics-activest:not(.active):not(.lyrics-gap) {
     filter: blur(var(--lyplus-blur-amount-near));
 }
-
 
 #lyrics-plus-container.hide-offscreen .lyrics-line.viewport-hidden * {
     visibility: hidden;
@@ -357,11 +355,7 @@
 
 /* --- Syllable States (Finished, Highlight, etc.) --- */
 .lyrics-line .lyrics-syllable.finished {
-    color: var(--lyplus-text-primary, var(--lyplus-text-primary));
-    transition: transform 1s ease !important;
-}
-
-.lyrics-line.active .lyrics-syllable.finished {
+    color: var(--lyplus-text-primary);
     transition: transform 1s ease !important;
 }
 
@@ -379,7 +373,6 @@
     color: var(--lyplus-text-primary, #fff);
 }
 
-/* Background-clip based wipe when song/override palette is active */
 #lyrics-plus-container.use-background-wipe .lyrics-syllable,
 #lyrics-plus-container.use-background-wipe .lyrics-syllable span.char {
     -webkit-mask-image: none !important;
@@ -401,7 +394,6 @@
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.pre-highlight {
-    /* Solid primary text; the mask's alpha provides the dim (unsung) look. */
     color: var(--lyplus-text-primary, #fff);
     transition: transform 1s ease;
 }
@@ -416,13 +408,11 @@
     transform: translateY(-0.05em) translateZ(1px);
 }
 
-
 #lyrics-plus-container.use-background-wipe .lyrics-syllable.cleanup span.char,
 #lyrics-plus-container.use-background-wipe .lyrics-line.active:not(.lyrics-gap) span.char {
     transition: none !important;
 }
 
-.lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.finished,
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.finished {
     color: var(--lyplus-text-primary, #fff);
 }
@@ -460,7 +450,10 @@
     line-height: 1.5em;
 }
 
-/* ===== CHARACTER-LEVEL ANIMATION ===== */
+/* ==========================================================================
+   CHARACTER-LEVEL ANIMATION
+   ========================================================================== */
+
 .lyrics-line .lyrics-syllable span.char {
     display: inline-block;
     padding: 0.5em 0.1em;
@@ -472,16 +465,12 @@
     transition: color 0.5s ease, background-color 0.5s ease, transform 0.7s ease;
 }
 
-.lyrics-line:not(.active) .lyrics-syllable span.char {
-    transition: color 0.5s ease, background-color 0.5s ease, transform 0.7s ease;
-}
-
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable span.char {
     color: inherit;
 }
 
 .lyrics-line .lyrics-syllable.finished span.char {
-    color: var(--lyplus-text-primary, var(--lyplus-text-primary));
+    color: var(--lyplus-text-primary);
 }
 
 .lyrics-line:not(.active) .lyrics-syllable.finished span.char {
@@ -550,9 +539,6 @@
     -webkit-mask-image: none !important;
     mask-image: none !important;
     transition: background-color 0.7s, transform 0.7s ease;
-}
-
-.lyrics-line.lyrics-gap .lyrics-syllable.lyrics-syllable {
     color: transparent;
 }
 
@@ -571,7 +557,6 @@
 .lyrics-line.lyrics-gap.active .lyrics-syllable.finished {
     animation: none !important;
 }
-
 
 /* ==========================================================================
    METADATA & STATUS MESSAGES
@@ -650,7 +635,6 @@ span.lyrics-source-provider {
     flex-direction: column-reverse;
     opacity: 0.7;
 }
-
 
 #lyrics-plus-container .loading-loop-m3,
 #lyrics-plus-buttons-wrapper .loading-loop-m3 {
@@ -742,7 +726,6 @@ span.lyrics-source-provider {
 #lyrics-plus-options-dropdown.hidden {
     display: none;
 }
-
 
 .dropdown-option {
     display: flex;
@@ -955,6 +938,9 @@ span.lyrics-source-provider {
     transition: opacity 0.3s ease, color 0.3s;
 }
 
+.lyrics-translation-container {
+    opacity: 0.5;
+}
 
 .lyrics-romanization-container {
     direction: ltr !important;
@@ -1068,10 +1054,6 @@ span.lyrics-source-provider {
     white-space: pre-wrap;
 }
 
-.lyrics-translation-container {
-    opacity: 0.5;
-}
-
 /* ==========================================================================
    ENHANCED BACKGROUND & DYNAMIC PLAYER LAYOUT
    ========================================================================== */
@@ -1147,71 +1129,10 @@ canvas#lyplus-webgl-canvas {
     --shadow-intensity: 0.6;
 }
 
-@keyframes wipe {
-    from {
-        mask-position: calc(100% + 0.375em) 0%;
-    }
-
-    to {
-        mask-position: 0% 0%;
-    }
-}
-
-@keyframes start-wipe {
-    0% {
-        mask-position: 100% 0%;
-    }
-
-    100% {
-        mask-position: 0% 0%;
-    }
-}
-
-@keyframes wipe-rtl {
-    from {
-        mask-position: -0.375em 0%;
-    }
-
-    to {
-        mask-position: 100% 0%;
-    }
-}
-
-@keyframes start-wipe-rtl {
-    0% {
-        mask-position: 0% 0%;
-    }
-
-    100% {
-        mask-position: 100% 0%;
-    }
-}
-
-@keyframes pre-wipe-universal {
-    from {
-        mask-position: 100% 0%;
-    }
-
-    to {
-        mask-position: calc(100% + 0.375em) 0%;
-    }
-}
-
-@keyframes pre-wipe-universal-rtl {
-    from {
-        mask-position: 0% 0%;
-    }
-
-    to {
-        mask-position: -0.375em 0%;
-    }
-}
-
 @keyframes gap-loop {
     from {
         transform: scale(1.1);
     }
-
     to {
         transform: scale(0.9);
     }
@@ -1221,7 +1142,6 @@ canvas#lyplus-webgl-canvas {
     from {
         transform: translateY(var(--scroll-delta)) translateZ(1px);
     }
-
     to {
         transform: translateY(0) translateZ(1px);
     }
@@ -1231,27 +1151,11 @@ canvas#lyplus-webgl-canvas {
     0% {
         transform: translateY(-25%) scale(1) translateZ(0);
     }
-
     35% {
         transform: translateY(-25%) scale(1.2) translateZ(0);
     }
-
     100% {
         transform: translateY(-25%) scale(0) translateZ(0);
-    }
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 0.5;
-        transform: scale(0.98);
-    }
-
-    50% {
-        opacity: 0.8;
-        transform: scale(1);
     }
 }
 
@@ -1260,45 +1164,9 @@ canvas#lyplus-webgl-canvas {
         opacity: 0;
         transform: translateY(20px);
     }
-
     to {
         opacity: 0.7;
         transform: translateY(0);
-    }
-}
-
-@keyframes ellipsis {
-    0% {
-        width: 0;
-        opacity: 1;
-        mask-position: 0% 0%;
-    }
-
-    60% {
-        width: 0.8em;
-        opacity: 1;
-        mask-position: 10% 0%;
-    }
-
-    80%,
-    82% {
-        width: 0.8em;
-        opacity: 0;
-    }
-
-    100% {
-        width: 0;
-        opacity: 0;
-    }
-}
-
-@keyframes pre-wipe-char {
-    from {
-        mask-position: 100% 0%;
-    }
-
-    to {
-        mask-position: calc(100% + 0.375em) 0%;
     }
 }
 
@@ -1307,30 +1175,13 @@ canvas#lyplus-webgl-canvas {
         transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
         filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
     }
-
     25%,
     30% {
         transform: matrix3d(calc(var(--max-scale) * calc(var(--lyplus-font-size-base-grow) / 25)), 0, 0, 0, 0, calc(var(--max-scale) * calc(var(--lyplus-font-size-base-grow) / 25)), 0, 0, 0, 0, 1, 0, calc(var(--char-offset-x) * calc(var(--lyplus-font-size-base-grow) / 25)), var(--translate-y-peak, -2%), 0, 1);
         filter: drop-shadow(0 0 0.1em rgba(255, 255, 255, var(--shadow-intensity)));
     }
-
     100% {
         transform: translateY(-3.5%) translateZ(1px);
-    }
-}
-
-@keyframes grow-static {
-
-    0%,
-    100% {
-        transform: scale3d(1.01, 1.01, 1.1) translateY(-0.05%);
-        text-shadow: 0 0 0 rgba(255, 255, 255, 0);
-    }
-
-    30%,
-    40% {
-        transform: scale3d(1.10, 1.10, 1.1) translateY(-0.05%);
-        text-shadow: 0 0 0.3em rgba(255, 255, 255, 0.5);
     }
 }
 
@@ -1338,7 +1189,6 @@ canvas#lyplus-webgl-canvas {
     from {
         background-color: var(--lyplus-text-secondary);
     }
-
     to {
         background-color: var(--lyplus-text-primary);
     }
