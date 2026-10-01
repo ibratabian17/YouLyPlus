@@ -1173,18 +1173,37 @@ canvas#lyplus-webgl-canvas {
     }
 }
 
-@keyframes grow-dynamic {
-    0% {
-        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-        filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
-    }
-    25%,
-    30% {
-        transform: matrix3d(calc(var(--max-scale) * calc(var(--lyplus-font-size-base-grow) / 25)), 0, 0, 0, 0, calc(var(--max-scale) * calc(var(--lyplus-font-size-base-grow) / 25)), 0, 0, 0, 0, 1, 0, calc(var(--char-offset-x) * calc(var(--lyplus-font-size-base-grow) / 25)), var(--translate-y-peak, -2%), 0, 1);
-        filter: drop-shadow(0 0 0.1em rgba(255, 255, 255, var(--shadow-intensity)));
-    }
+/* Emphasis glow: painted once on a pseudo-element, only opacity is animated. */
+.lyrics-line .lyrics-syllable span.char.emphasis-active {
+    position: relative;
+}
+
+.lyrics-syllable span.char.emphasis-active[data-glow]::after {
+    content: attr(data-glyph);
+    position: absolute;
+    inset: 0;
+    padding: 0.5em 0.1em;
+    white-space: break-spaces;
+    pointer-events: none;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 0.2em rgb(255 255 255 / var(--char-glow-max, 0));
+    animation: char-glow var(--char-glow-duration) linear var(--char-glow-delay) both;
+}
+
+@keyframes char-glow {
+    0%,
     100% {
-        transform: translateY(-3.5%) translateZ(1px);
+        opacity: 0;
+    }
+    15% {
+        opacity: 0.8;
+    }
+    30% {
+        opacity: 1;
+    }
+    60% {
+        opacity: 0.3;
     }
 }
 

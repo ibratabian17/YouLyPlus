@@ -637,27 +637,6 @@ class LyricsPlusRenderer {
         prevSyllable._preHighlightDelayMs = physicsData.delay;
       };
 
-      const calculateEmphasisMetrics = (totalDuration, wordBufferLength, firstDuration) => {
-        const minDuration = 1000;
-        const maxDuration = 5000;
-        const easingPower = 3;
-
-        const progress = Math.min(1, Math.max(0, (totalDuration - minDuration) / (maxDuration - minDuration)));
-        const easedProgress = Math.pow(progress, easingPower);
-
-        let penaltyFactor = 1.0;
-        if (wordBufferLength > 1) {
-          const imbalanceRatio = firstDuration / totalDuration;
-          const penaltyThreshold = 0.25;
-          if (imbalanceRatio < penaltyThreshold) {
-            const minPenaltyFactor = 0.5;
-            const penaltyProgress = imbalanceRatio / penaltyThreshold;
-            penaltyFactor = minPenaltyFactor + (1.0 - minPenaltyFactor) * penaltyProgress;
-          }
-        }
-        return { easedProgress, penaltyFactor };
-      };
-
       const createSyllableElement = (s, totalDuration, idx, isBg) => {
         const sylSpan = document.createElement("span");
         sylSpan.className = "lyrics-syllable";
@@ -755,53 +734,6 @@ class LyricsPlusRenderer {
         }
       };
 
-      const applyGrowthStyles = (wordSpan, referenceFont, combinedText, totalDuration, emphasisMetrics) => {
-        if (!wordSpan._cachedChars || wordSpan._cachedChars.length === 0) return;
-
-        const { easedProgress, penaltyFactor } = emphasisMetrics;
-        const wordWidth = this._getTextWidth(wordSpan.textContent.trim(), referenceFont);
-        const numChars = wordSpan._cachedChars.length;
-        const wordLength = LyricsPlusRenderer._segmentGraphemes(combinedText.trim()).length;
-
-        let maxDecayRate = 0;
-        const isLongWord = wordLength > 5;
-        const isShortDuration = totalDuration < 1500;
-        const hasUnbalancedSyllables = penaltyFactor < 0.95;
-
-        if (isLongWord || isShortDuration || hasUnbalancedSyllables) {
-          let decayStrength = 0;
-          if (isLongWord) decayStrength += Math.min((wordLength - 5) / 3, 1.0) * 0.4;
-          if (isShortDuration) decayStrength += Math.max(0, 1.0 - (totalDuration - 1000) / 500) * 0.4;
-          if (hasUnbalancedSyllables) decayStrength += Math.pow(1.0 - penaltyFactor, 0.7) * 1.2;
-          maxDecayRate = Math.min(decayStrength, 0.85);
-        }
-
-        let cumulativeWidth = 0;
-        wordSpan._cachedChars.forEach((span, index) => {
-          const positionInWord = numChars > 1 ? index / (numChars - 1) : 0;
-          const decayFactor = 1.0 - positionInWord * maxDecayRate;
-          const charProgress = easedProgress * penaltyFactor * decayFactor;
-
-          const baseGrowth = numChars <= 3 ? 0.07 : 0.05;
-          const charMaxScale = 1.0 + baseGrowth + charProgress * 0.1;
-          const charShadowIntensity = 0.4 + charProgress * 0.4;
-          const normalizedGrowth = (charMaxScale - 1.0) / 0.13;
-          const charTranslateYPeak = -normalizedGrowth * 6;
-
-          span.style.setProperty("--max-scale", charMaxScale.toFixed(3));
-          span.style.setProperty("--shadow-intensity", charShadowIntensity.toFixed(3));
-          span.style.setProperty("--translate-y-peak", charTranslateYPeak.toFixed(3));
-
-          const charWidth = this._getTextWidth(span.textContent.trim(), referenceFont);
-          const position = (cumulativeWidth + charWidth / 2) / wordWidth;
-          const horizontalOffset = (position - 0.5) * 2 * ((charMaxScale - 1.0) * 25);
-
-          span.dataset.horizontalOffset = horizontalOffset;
-          span._horizontalOffset = horizontalOffset;
-          cumulativeWidth += charWidth;
-        });
-      };
-
       const shouldAllowBreak = (text) =>
         text.trim().length >= 16 || this._isCJK(text.trim());
 
@@ -826,10 +758,10 @@ class LyricsPlusRenderer {
           ? getComputedFont(mainContainer.firstChild)
           : "400 16px sans-serif";
 
-        let emphasisMetrics = { easedProgress: 0, penaltyFactor: 1.0 };
         if (shouldEmphasize) {
-          emphasisMetrics = calculateEmphasisMetrics(totalDuration, wordBuffer.length, wordBuffer[0].duration);
           wordSpan.classList.add("growable");
+          wordSpan._wordStartMs = currentWordStartTime;
+          wordSpan._wordDurationMs = totalDuration;
         }
 
         const characterData = [];
@@ -874,6 +806,7 @@ class LyricsPlusRenderer {
 
         if (shouldEmphasize) {
           wordSpan._cachedChars = characterData.map((cd) => cd.charSpan);
+          this._prepareEmphasis(wordSpan, totalDuration);
         }
 
         const hasText = (el) => el && el.textContent.trim().length > 0;
@@ -904,10 +837,6 @@ class LyricsPlusRenderer {
         const lastVisible = [...syllableElements].reverse().find(hasText);
         pendingSyllable = lastVisible || (syllableElements.length > 0 ? syllableElements[syllableElements.length - 1] : null);
         pendingSyllableFont = referenceFont;
-
-        if (shouldEmphasize) {
-          applyGrowthStyles(wordSpan, referenceFont, combinedText, totalDuration, emphasisMetrics);
-        }
 
         const MoveEarlier = currentSettings.bkgOverlap;
         let backgroundInnerWrap = backgroundContainer?.querySelector(".background-vocal-wrap");
@@ -1019,7 +948,8 @@ class LyricsPlusRenderer {
             !isBg &&
             !currentSettings.lightweight &&
             !this._isRTL(groupText) &&
-            groupText.trim().length <= 7 &&
+            !/[\u0590-\u08ff\u3400-\u4dbf\u4e00-\u9fff\u3040-\u30ff]/.test(groupText) &&
+            LyricsPlusRenderer._segmentGraphemes(groupText.trim()).length <= 7 &&
             groupDuration >= 1000;
 
           if (isGroupGrowable) {
@@ -2821,34 +2751,153 @@ class LyricsPlusRenderer {
     return animator;
   }
 
-  _triggerGrowable(syllable) {
+  static _springProgress(time, response) {
+    if (time <= 0) return 0;
+    const phase = (2 * Math.PI * time) / Math.max(0.001, response);
+    return 1 - (1 + phase) * Math.exp(-phase);
+  }
+
+  static _getEmphasisParams(duration, count) {
+    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+    const delay = Math.min((duration / count) * 0.4, 0.4);
+    const hold = Math.min((2 * duration) / count, 1.5);
+    const response = Math.min(3, duration);
+    const emphasis = clamp(duration - 1, 0, 1);
+    const longFalloff = 1 - 0.5 * clamp((duration - 2) / 3, 0, 1);
+    const glow = 0.45 * clamp((duration - 1) / 0.5, 0, 1);
+    const spanDuration = hold + response * 2;
+    return { delay, hold, response, emphasis, longFalloff, glow, spanDuration };
+  }
+
+  static _getEmphasisFrames(duration, count, index) {
+    const cache = (LyricsPlusRenderer._emphasisFrameCache ||= new Map());
+    const key = `${duration}:${count}:${index}`;
+    let frames = cache.get(key);
+    if (frames) return frames;
+
+    const SPREAD_EM = 0.05; 
+    const LIFT_EM = 0.035;
+    const { response, hold, emphasis, longFalloff, spanDuration } =
+      LyricsPlusRenderer._getEmphasisParams(duration, count);
+    const half = Math.max(1, (count - 1) / 2);
+    const side = (index - (count - 1) / 2) / half; // -1 .. 1
+
+    frames = Array.from({ length: 61 }, (_, frame) => {
+      const time = (spanDuration * frame) / 60;
+      const rise = frame === 60 ? 1 : LyricsPlusRenderer._springProgress(time, response);
+      const envelope = frame === 60
+        ? 0
+        : LyricsPlusRenderer._springProgress(time, response) *
+          (1 - LyricsPlusRenderer._springProgress(time - hold, response));
+      const x = side * SPREAD_EM * emphasis * longFalloff * envelope;
+      const y = -0.05 * rise - LIFT_EM * emphasis * longFalloff * envelope;
+      return {
+        offset: frame / 60,
+        transform: `translate3d(${x.toFixed(4)}em, ${y.toFixed(4)}em, 1px) scale(${(1 + 0.1 * emphasis * envelope).toFixed(4)})`,
+      };
+    });
+    if (cache.size >= 256) cache.delete(cache.keys().next().value);
+    cache.set(key, frames);
+    return frames;
+  }
+
+  _prepareEmphasis(wordSpan, durationMs) {
+    const chars = wordSpan._cachedChars;
+    if (!chars || chars.length === 0) return;
+    const duration = Math.max(0.001, durationMs / 1000);
+    const count = chars.length;
+    const { delay, glow, spanDuration } = LyricsPlusRenderer._getEmphasisParams(duration, count);
+
+    for (let i = 0; i < count; i++) {
+      const span = chars[i];
+      const startDelay = (i + 1) * delay * 1000;
+      span._emphasisFrames = LyricsPlusRenderer._getEmphasisFrames(duration, count, i);
+      span._emphasisTiming = {
+        duration: spanDuration * 1000,
+        delay: startDelay,
+        fill: "both",
+        easing: "linear",
+      };
+      span._emphasisEnd = spanDuration * 1000 + startDelay;
+      span._emphasisStartDelay = startDelay;
+      span._emphasisGlow = glow > 0;
+      if (glow > 0) {
+        span.setAttribute("data-glyph", span.textContent || "");
+        span.style.setProperty("--char-glow-max", `${glow}`);
+        span.style.setProperty("--char-glow-duration", `${spanDuration * 1000}ms`);
+      }
+    }
+  }
+
+  _clearEmphasis(chars) {
+    if (!chars) return;
+    for (let i = 0; i < chars.length; i++) {
+      const span = chars[i];
+      if (span._emphasis) {
+        span._emphasis.animation.cancel();
+        span._emphasis = null;
+      }
+      span.classList.remove("emphasis-active");
+      span.removeAttribute("data-glow");
+    }
+  }
+
+  // Playback-time: only starts / resumes the precomputed WAAPI animations.
+  _triggerGrowable(syllable, currentTime) {
     const wordElement = syllable.parentElement?.parentElement;
-    const allWordCharSpans = wordElement?._cachedChars;
+    const chars = wordElement?._cachedChars;
     const isGrowable = (syllable._isGrowable !== undefined)
       ? syllable._isGrowable
       : (wordElement ? wordElement.classList.contains("growable") : false);
     const isFirstSyllable = syllable._syllableIdx !== undefined
       ? syllable._syllableIdx === 0
       : syllable.dataset.syllableIndex === "0";
+    if (!isGrowable || !isFirstSyllable || !chars || chars.length === 0) return;
 
-    if (isGrowable && isFirstSyllable && allWordCharSpans) {
-      const finalDuration = (syllable._wordDurationMs !== undefined && syllable._wordDurationMs !== null)
-        ? syllable._wordDurationMs
-        : syllable._durationMs;
-      const baseDelayPerChar = finalDuration * 0.09;
-      const growDurationMs = finalDuration * 1.5;
+    const startMs = wordElement._wordStartMs ?? syllable._startTimeMs;
+    const elapsed = currentTime - startMs;
+    if (elapsed < 0) return;
 
-      const charsLength = allWordCharSpans.length;
-      for (let i = 0; i < charsLength; i++) {
-        const span = allWordCharSpans[i];
-        const horizontalOffset = (span._horizontalOffset !== undefined)
-          ? span._horizontalOffset
-          : (parseFloat(span.dataset.horizontalOffset) || 0);
-        const growDelay = baseDelayPerChar * ((span._syllableCharIndex !== undefined)
-          ? span._syllableCharIndex
-          : (parseFloat(span.dataset.syllableCharIndex) || 0));
-        span.style.animation = `grow-dynamic ${growDurationMs}ms ease-in-out ${growDelay}ms forwards`;
-        span.style.setProperty("--char-offset-x", `${horizontalOffset}`);
+    for (let i = 0; i < chars.length; i++) {
+      const span = chars[i];
+      if (!span._emphasisFrames) continue;
+      if (span._emphasis) span._emphasis.animation.cancel();
+
+      if (span._emphasisGlow) {
+        span.style.setProperty("--char-glow-delay", `${span._emphasisStartDelay - elapsed}ms`);
+        span.setAttribute("data-glow", "");
+      }
+      span.classList.add("emphasis-active");
+
+      const animation = span.animate(span._emphasisFrames, span._emphasisTiming);
+      animation.currentTime = Math.min(elapsed, span._emphasisEnd);
+      span._emphasis = { animation, end: span._emphasisEnd, startMs, glowEpoch: elapsed };
+    }
+  }
+
+  // Corrects seeks/drift on an already running emphasis (cheap: reads one char).
+  _syncEmphasis(wordElement, currentTime) {
+    const chars = wordElement?._cachedChars;
+    const first = chars?.[0];
+    const entry = first?._emphasis;
+    if (!entry) return;
+    const elapsed = currentTime - entry.startMs;
+    if (elapsed < 0) return;
+    if (Math.abs(Number(entry.animation.currentTime) - Math.min(elapsed, entry.end)) <= 200) return;
+
+    for (let i = 0; i < chars.length; i++) {
+      const span = chars[i];
+      const e = span._emphasis;
+      if (!e) continue;
+      e.animation.currentTime = Math.min(elapsed, e.end);
+      if (elapsed < e.end && e.animation.playState === "finished") e.animation.play();
+      if (span._emphasisGlow) {
+        for (const eff of span.getAnimations()) {
+          if (eff.animationName === "char-glow") {
+            eff.currentTime = Math.max(0, elapsed - e.glowEpoch);
+            if (elapsed < e.end) eff.play();
+          }
+        }
       }
     }
   }
@@ -2907,11 +2956,14 @@ class LyricsPlusRenderer {
           if (!hasHighlight) {
             classList.add("highlight");
             syllable._state = (_st & ~4) | 1;
-            if (!syllable._isGap) this._triggerGrowable(syllable);
+            if (!syllable._isGap) this._triggerGrowable(syllable, currentTime);
           }
           if (hasFinished) {
             classList.remove("finished");
             syllable._state &= ~2;
+          }
+          if (hasHighlight && syllable._isGrowable && syllable._syllableIdx === 0) {
+            this._syncEmphasis(syllable.parentElement?.parentElement, currentTime);
           }
         } else if (currentTime > endTime) {
           if (!hasFinished) {
@@ -2919,7 +2971,7 @@ class LyricsPlusRenderer {
               classList.add("highlight");
               syllable._state = (_st & ~4) | 1;
               if (!syllable._isGap) {
-                this._triggerGrowable(syllable);
+                this._triggerGrowable(syllable, currentTime);
               }
             }
             classList.add("finished");
@@ -2947,10 +2999,13 @@ class LyricsPlusRenderer {
     }
     syllable.classList.add("cleanup");
 
-    const charSpans = syllable._cachedCharSpans || syllable.querySelectorAll("span.char");
-    if (charSpans) {
-      const charSpansLength = charSpans.length;
-      for (let i = 0; i < charSpansLength; i++) {
+    if (syllable._isGrowable) {
+      if (syllable._syllableIdx === 0) {
+        this._clearEmphasis(syllable.parentElement?.parentElement?._cachedChars);
+      }
+    } else {
+      const charSpans = syllable._cachedCharSpans || syllable.querySelectorAll("span.char");
+      for (let i = 0; i < charSpans.length; i++) {
         charSpans[i].style.animation = "";
       }
     }
