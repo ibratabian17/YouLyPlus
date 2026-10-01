@@ -948,7 +948,6 @@ class LyricsPlusRenderer {
             !isBg &&
             !currentSettings.lightweight &&
             !this._isRTL(groupText) &&
-            !/[\u0590-\u08ff\u3400-\u4dbf\u4e00-\u9fff\u3040-\u30ff]/.test(groupText) &&
             LyricsPlusRenderer._segmentGraphemes(groupText.trim()).length <= 7 &&
             groupDuration >= 1000;
 
