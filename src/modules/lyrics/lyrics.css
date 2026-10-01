@@ -394,8 +394,6 @@
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.finished,
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.finished {
-    -webkit-mask-image: none;
-    mask-image: none;
     color: var(--lyplus-text-primary, #fff);
 }
 

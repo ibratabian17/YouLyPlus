@@ -135,7 +135,6 @@ class LyricsPlusRenderer {
     this.visibilityObserver = null;
     this.resizeObserver = null;
     this.containerObserver = null;
-    this._cachedContainerRect = null;
     this._debouncedResizeHandler = this._debounce(
       this._handleContainerResize,
       1,
@@ -305,25 +304,14 @@ class LyricsPlusRenderer {
   /**
    * Handles the actual logic for container resize, debounced by _debouncedResizeHandler.
    * @param {HTMLElement} container - The lyrics container element.
-   * @param {DOMRect} rect - Optional precomputed bounding rect.
    * @private
    */
-  _handleContainerResize(container, rect) {
+  _handleContainerResize(container) {
     if (!container) return;
 
     this._scrollPaddingTopCache = undefined;
     this._containerDisplayCache = undefined;
     this._positionClassedLines = [];
-
-    const containerTop =
-      rect && typeof rect.top === "number"
-        ? rect.top
-        : container.getBoundingClientRect().top;
-
-    this._cachedContainerRect = {
-      containerTop: containerTop - 50,
-      scrollContainerTop: containerTop - 50,
-    };
 
     if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
       this._scrollToActiveLine(this.currentPrimaryActiveLine, false, true);
@@ -2418,118 +2406,126 @@ class LyricsPlusRenderer {
    * @param {Array} entries - Track syllables in logical order.
    * @returns {Array<{t:number,c:number}>} Non-decreasing timeline points.
    */
-  static _buildMaskPath(entries, lineStartTime, totalDuration, fade) {
-    const points = [];
-    let c = -fade;
-    let t = 0;
-    let lastStamp = 0;
-    let shift = -fade; // c = nominal position + shift
+  static _generateFadeGradient(widthRatio, dir = "to right") {
+    const totalAspect = 2 + widthRatio;
+    const halfFadePercent = (widthRatio / totalAspect) * 50;
+    const leftPercent = 50 - halfFadePercent;
+    const rightPercent = 50 + halfFadePercent;
 
-    const push = () => {
-      const pt = Math.min(1, Math.max(0, t));
-      const last = points[points.length - 1];
-      if (last && last.t === pt && last.c === c) return;
-      points.push({ t: pt, c });
-    };
-    push();
+    const bright = "rgb(0 0 0 / 1)";
+    const dark = "rgb(0 0 0 / var(--lyplus-mask-dim-alpha, 0.35))";
 
-    const n = entries.length;
-    for (let j = 0; j < n; j++) {
-      const e = entries[j];
-      const stamp = e.start - lineStartTime;
-      const idle = stamp - lastStamp;
-      if (idle > 0) {
-        t += idle / totalDuration;
-        push();
-      }
-      lastStamp = stamp;
-
-      const dur = Math.max(0, e.end - e.start);
-      const segs = e.segs;
-      const segCount = segs.length;
-
-      for (let k = 0; k < segCount; k++) {
-        const s = segs[k];
-        const segStart = stamp + s.ts * dur;
-        const sub = segStart - lastStamp;
-        if (sub > 0) {
-          t += sub / totalDuration;
-          push();
-        }
-        lastStamp = segStart;
-
-        let shiftAfter = shift;
-        if (j === 0 && k === 0) shiftAfter += fade * 0.5;
-        if (j === n - 1 && k === segCount - 1) shiftAfter += fade * 0.5;
-
-        const segDur = s.td * dur;
-        t += segDur / totalDuration;
-        c += s.td * e.width + (shiftAfter - shift);
-        shift = shiftAfter;
-        if (segDur > 0) push();
-        lastStamp += segDur;
-      }
-
-      // Bridge the whitespace between this syllable and the next one.
-      if (j + 1 < n && e.gap > 0) {
-        c += e.gap;
-        push();
-      }
-    }
-
-    const tail = totalDuration - lastStamp;
-    if (tail > 0) t += tail / totalDuration;
-    t = 1;
-    push();
-    return points;
+    return [
+      `linear-gradient(${dir}, ${bright} ${leftPercent.toFixed(3)}%, ${dark} ${rightPercent.toFixed(3)}%)`,
+      totalAspect,
+    ];
   }
+  
+  static _buildMaskFrames(words, targetIndex, fadeWidth, lineStartTime, totalFadeDuration, rtl = false) {
+    const targetWord = words[targetIndex];
+    const widthBeforeSelf =
+      words.slice(0, targetIndex).reduce((sum, w) => sum + w.width, 0) +
+      (words[0] ? fadeWidth : 0);
 
-  /**
-   * Turns the shared track path into WAAPI keyframes for one syllable.
-   * Positions are clamped to the covered range, with the exact clamp-crossing
-   * time interpolated so the sweep does not smear at the ends.
-   */
-  static _buildMaskFrames(points, offset, width, fade, rtl, pad = 0) {
-    const span = width + fade;
-    const minPos = -span;
-    const maxPos = 0;
-    const frames = [];
-    const qs = [];
+    const minOffset = -(targetWord.width + targetWord.padding * 2 + fadeWidth);
+    const initialPos = -widthBeforeSelf - targetWord.width - targetWord.padding - fadeWidth;
 
-    const emit = (t, p) => {
-      const q = Math.min(maxPos, Math.max(minPos, p));
-      const n = frames.length;
-      // Collapse flat runs: keep only the first and last keyframe of a run.
-      if (n >= 2 && qs[n - 1] === q && qs[n - 2] === q) {
-        frames[n - 1].offset = t;
-        return;
-      }
-      const pos = `${((rtl ? -span - q : q) - pad).toFixed(3)}px ${(-pad).toFixed(3)}px`;
-      frames.push({ offset: t, maskPosition: pos, webkitMaskPosition: pos });
-      qs.push(q);
+    const cursor = {
+      curPos: initialPos,
+      lastPos: initialPos,
+      timeOffset: 0,
+      lastTime: 0,
+      lastTimeStamp: 0,
+      frames: [],
     };
 
-    let lastT = points[0].t;
-    let lastP = points[0].c - offset - width;
-    emit(lastT, lastP);
+    const pushClampedKeyframe = () => {
+      const moveOffset = cursor.curPos - cursor.lastPos;
+      const time = Math.min(1, Math.max(0, cursor.timeOffset));
+      const duration = time - cursor.lastTime;
+      const msPerPixel = moveOffset !== 0 ? Math.abs(duration / moveOffset) : 0;
 
-    for (let i = 1; i < points.length; i++) {
-      const t = Math.max(lastT, points[i].t);
-      const p = points[i].c - offset - width;
-      if (p > lastP) {
-        if (lastP < minPos && p > minPos) {
-          emit(lastT + (t - lastT) * ((minPos - lastP) / (p - lastP)), minPos);
-        }
-        if (lastP < maxPos && p > maxPos) {
-          emit(lastT + (t - lastT) * ((maxPos - lastP) / (p - lastP)), maxPos);
-        }
+      if (cursor.curPos > minOffset && cursor.lastPos < minOffset) {
+        const staticTime = Math.abs(cursor.lastPos - minOffset) * msPerPixel;
+        const clamped = Math.min(Math.max(cursor.lastPos, minOffset), 0);
+        const xPos = (rtl ? minOffset - clamped : clamped).toFixed(2);
+        const pos = `${xPos}px 0`;
+        cursor.frames.push({
+          offset: cursor.lastTime + staticTime,
+          maskPosition: pos,
+          webkitMaskPosition: pos,
+        });
       }
-      emit(t, p);
-      lastT = t;
-      lastP = p;
+
+      if (cursor.curPos > 0 && cursor.lastPos < 0) {
+        const staticTime = Math.abs(cursor.lastPos) * msPerPixel;
+        const clamped = Math.min(Math.max(cursor.curPos, minOffset), 0);
+        const xPos = (rtl ? minOffset - clamped : clamped).toFixed(2);
+        const pos = `${xPos}px 0`;
+        cursor.frames.push({
+          offset: cursor.lastTime + staticTime,
+          maskPosition: pos,
+          webkitMaskPosition: pos,
+        });
+      }
+
+      const clamped = Math.min(Math.max(cursor.curPos, minOffset), 0);
+      const xPos = (rtl ? minOffset - clamped : clamped).toFixed(2);
+      const pos = `${xPos}px 0`;
+      cursor.frames.push({
+        offset: time,
+        maskPosition: pos,
+        webkitMaskPosition: pos,
+      });
+
+      cursor.lastPos = cursor.curPos;
+      cursor.lastTime = time;
+    };
+
+    // Push initial frame
+    pushClampedKeyframe();
+
+    for (let j = 0; j < words.length; j++) {
+      const otherWord = words[j];
+
+      // Handle pause before otherWord
+      const curTimeStamp = otherWord.startTime - lineStartTime;
+      const staticDuration = curTimeStamp - cursor.lastTimeStamp;
+      if (staticDuration > 0) {
+        cursor.timeOffset += staticDuration / totalFadeDuration;
+        pushClampedKeyframe();
+      }
+      cursor.lastTimeStamp = curTimeStamp;
+
+      // Handle otherWord movement
+      const fadeDuration = Math.max(0, otherWord.endTime - otherWord.startTime);
+      let movePx = otherWord.width;
+      if (j === 0) {
+        movePx += fadeWidth * 1.5;
+      }
+      if (j === words.length - 1) {
+        movePx += fadeWidth * 0.5;
+      }
+
+      cursor.timeOffset += fadeDuration / totalFadeDuration;
+      cursor.curPos += movePx;
+      if (fadeDuration > 0) {
+        pushClampedKeyframe();
+      }
+      cursor.lastTimeStamp += fadeDuration;
     }
-    if (frames.length) frames[frames.length - 1].offset = 1;
-    return frames;
+
+    const wordEndStamp = cursor.lastTimeStamp;
+    const tailDuration = totalFadeDuration - wordEndStamp;
+    if (tailDuration > 0) {
+      cursor.timeOffset = 1;
+      pushClampedKeyframe();
+    }
+    if (cursor.frames.length > 0) {
+      cursor.frames[cursor.frames.length - 1].offset = 1;
+    }
+
+    return cursor.frames;
   }
 
   /**
@@ -2548,9 +2544,11 @@ class LyricsPlusRenderer {
         const entry = entries[i];
         const el = entry.target;
         const newWidth = entry.contentRect ? entry.contentRect.width : 0;
+        const newHeight = entry.contentRect ? entry.contentRect.height : 0;
         if (newWidth > 0) {
           const oldWidth = el._roContentWidth;
           el._roContentWidth = newWidth;
+          el._roContentHeight = newHeight;
           if (oldWidth !== undefined && Math.abs(oldWidth - newWidth) > 0.5) {
             const owner = el._maskOwnerLine;
             if (owner && owner._maskAnimator) {
@@ -2656,63 +2654,69 @@ class LyricsPlusRenderer {
       if (ci < 0) ci = containers.push(container) - 1;
       const key = (syl.classList.contains("transliteration") ? "t" : "m") + ci;
 
-      let track = tracks.get(key);
-      if (!track) {
-        const fontSizePx = parseFloat(cs.fontSize) || 16;
-        track = { entries: [], fade: fontSizePx * 0.75, pad: fontSizePx * 0.75, cursorOffset: 0 };
-        tracks.set(key, track);
+      const padLeft = parseFloat(cs.paddingLeft) || 0;
+      const padRight = parseFloat(cs.paddingRight) || 0;
+      const padTop = parseFloat(cs.paddingTop) || 0;
+      const padBottom = parseFloat(cs.paddingBottom) || 0;
+
+      let width = syl._roContentWidth;
+      if (!width || width <= 0) {
+        const domWidth = syl.clientWidth - padLeft - padRight;
+        width = domWidth > 0 ? domWidth : (text ? this._getTextWidth(text, `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`) : 0);
+      }
+      width = Math.max(1, width);
+
+      let height = syl._roContentHeight;
+      if (!height || height <= 0) {
+        const domHeight = syl.clientHeight - padTop - padBottom;
+        height = domHeight > 0 ? domHeight : (parseFloat(cs.fontSize) || 24);
       }
 
-      const m = this._measureMaskSyllable(syl, cs, text);
-      const segs = [{ ts: 0, td: 1 }];
+      let wordList = tracks.get(key);
+      if (!wordList) {
+        wordList = [];
+        tracks.set(key, wordList);
+      }
 
-      const entry = {
-        element: syl,
-        start,
-        end: start + dur,
-        width: m.width,
-        gap: m.gap,
-        offset: track.cursorOffset,
+      wordList.push({
+        word: text,
+        startTime: start,
+        endTime: start + dur,
+        mainElement: syl,
+        width,
+        height,
+        padding: padLeft,
         rtl: LyricsPlusRenderer._resolveWipeRtl(text, cs.direction),
-        segs,
-      };
-      track.cursorOffset += m.width + m.gap;
-      track.entries.push(entry);
+      });
     }
 
     const animations = [];
     const styled = [];
 
-    const bright = "rgb(0 0 0 / 1)";
-    const dark = "rgb(0 0 0 / var(--lyplus-mask-dim-alpha, 0.35))";
+    tracks.forEach((words) => {
+      if (!words.length) return;
+      for (let i = 0; i < words.length; i++) {
+        const w = words[i];
+        const el = w.mainElement;
+        const fadeWidth = w.height * 0.5;
+        const totalWordWidth = w.width + w.padding * 2;
+        const [maskImage, totalAspect] = LyricsPlusRenderer._generateFadeGradient(
+          fadeWidth / totalWordWidth,
+          w.rtl ? "to left" : "to right"
+        );
 
-    tracks.forEach((track) => {
-      const fade = track.fade;
-      const pad = track.pad;
-      const points = LyricsPlusRenderer._buildMaskPath(
-        track.entries, lineStartTime, totalFadeDuration, fade
-      );
-
-      for (let i = 0; i < track.entries.length; i++) {
-        const e = track.entries[i];
-        const el = e.element;
-        const w = Math.max(1, e.width);
-        const maskW = 2 * w + fade;
-
-        const dir = e.rtl ? "270deg" : "90deg";
-        const gradient = `linear-gradient(${dir}, ${bright} ${(pad + w).toFixed(2)}px, ${dark} ${(pad + w + fade).toFixed(2)}px)`;
-        const size = `${(maskW + 2 * pad).toFixed(2)}px calc(100% + ${(2 * pad).toFixed(2)}px)`;
-        el.style.maskImage = gradient;
-        el.style.webkitMaskImage = gradient;
+        el.style.maskImage = maskImage;
+        el.style.webkitMaskImage = maskImage;
         el.style.maskRepeat = "no-repeat";
         el.style.webkitMaskRepeat = "no-repeat";
-        el.style.maskSize = size;
-        el.style.webkitMaskSize = size;
-        el.style.maskClip = "no-clip";
-        el.style.webkitMaskClip = "no-clip";
+        el.style.maskSize = `${(totalAspect * 100).toFixed(3)}% 100%`;
+        el.style.webkitMaskSize = `${(totalAspect * 100).toFixed(3)}% 100%`;
         styled.push(el);
 
-        const frames = LyricsPlusRenderer._buildMaskFrames(points, e.offset, w, fade, e.rtl, pad);
+        const frames = LyricsPlusRenderer._buildMaskFrames(
+          words, i, fadeWidth, lineStartTime, totalFadeDuration, w.rtl
+        );
+
         try {
           const anim = el.animate(frames, { duration: totalFadeDuration, fill: "both" });
           anim.pause();
@@ -2959,7 +2963,7 @@ class LyricsPlusRenderer {
         const paddingTopValue =
           style.getPropertyValue("--lyrics-scroll-padding-top") || "25%";
         const result = paddingTopValue.includes("%")
-          ? element.getBoundingClientRect().height *
+          ? (element.clientHeight || 0) *
           (parseFloat(paddingTopValue) / 100)
           : parseFloat(paddingTopValue) || 0;
         this._scrollPaddingTopCache = result;
@@ -3252,19 +3256,14 @@ class LyricsPlusRenderer {
 
     const paddingTop = this._getScrollPaddingTop();
     const targetTranslateY = paddingTop - activeLine.offsetTop;
-    const scrollContainerTop = this._cachedContainerRect
-      ? this._cachedContainerRect.scrollContainerTop
-      : scrollContainer.getBoundingClientRect().top;
+    const targetScrollTop = -targetTranslateY;
 
     if (
       !forceScroll &&
-      Math.abs(
-        activeLine.getBoundingClientRect().top - scrollContainerTop - paddingTop
-      ) < 1
+      Math.abs(scrollContainer.scrollTop - targetScrollTop) < 1
     ) {
       return;
     }
-    this._cachedContainerRect = null;
 
     this.lyricsContainer.classList.remove("not-focused", "user-scrolling");
     this.isProgrammaticScrolling = true;
@@ -4160,8 +4159,6 @@ class LyricsPlusRenderer {
     this._styleUpdates = null;
     this._scrollPaddingTopCache = undefined;
     this._containerDisplayCache = undefined;
-
-    this._cachedContainerRect = null;
 
     this.currentScrollOffset = 0;
     this.isProgrammaticScrolling = false;
