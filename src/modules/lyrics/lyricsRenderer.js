@@ -12,6 +12,7 @@ class LyricsPlusRenderer {
   static _FONT_SIZE_RE = /(\d+(?:\.\d+)?)px/;
   static _SEGMENTER = typeof Intl !== "undefined" && typeof Intl.Segmenter === "function" ? new Intl.Segmenter() : null;
   static _fontSizeCache = new Map();
+  static _MASK_LEAD_TRIM = 1;
 
   /**
    * Helper function to segment text into graphemes efficiently.
@@ -21,22 +22,19 @@ class LyricsPlusRenderer {
    */
   static _segmentGraphemes(text) {
     if (!text) return [];
-    let chars;
-    if (LyricsPlusRenderer._SEGMENTER) {
-      chars = [...LyricsPlusRenderer._SEGMENTER.segment(text)].map((s) => s.segment);
-    } else {
-      chars = [...text];
-    }
-
     const merged = [];
     const punctRe = LyricsPlusRenderer._TRAILING_PUNCT_RE;
-    for (let i = 0; i < chars.length; i++) {
-      const char = chars[i];
-      if (i > 0 && punctRe.test(char) && merged.length > 0) {
+    const add = (char) => {
+      if (merged.length > 0 && punctRe.test(char)) {
         merged[merged.length - 1] += char;
       } else {
         merged.push(char);
       }
+    };
+    if (LyricsPlusRenderer._SEGMENTER) {
+      for (const s of LyricsPlusRenderer._SEGMENTER.segment(text)) add(s.segment);
+    } else {
+      for (const ch of text) add(ch);
     }
     return merged;
   }
@@ -1589,6 +1587,7 @@ class LyricsPlusRenderer {
 
         syllableSpan.textContent = "•";
         syllableSpan._isGap = true;
+        syllableSpan.style.setProperty("--lyplus-gap-duration", `${syllableDuration || 1000}ms`);
         lyricsWord.appendChild(syllableSpan);
       }
       mainContainer.appendChild(lyricsWord);
@@ -2047,9 +2046,13 @@ class LyricsPlusRenderer {
 
   _ensureElementIds() {
     if (!this.cachedLyricsLines || !this.cachedSyllables) return;
-    this.cachedLyricsLines.forEach((line, i) => {
-      if (line && !line.id) line.id = `line-${i}`;
-    });
+    const lines = this.cachedLyricsLines;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line) continue;
+      if (!line.id) line.id = `line-${i}`;
+      line._idx = i;
+    }
   }
 
   /**
@@ -2421,14 +2424,18 @@ class LyricsPlusRenderer {
     ];
   }
   
-  static _buildMaskFrames(words, targetIndex, fadeWidth, lineStartTime, totalFadeDuration, rtl = false) {
+  static _buildMaskFrames(words, targetIndex, fadeWidth, lineStartTime, totalFadeDuration, rtl = false, widthBefore) {
     const targetWord = words[targetIndex];
-    const widthBeforeSelf =
-      words.slice(0, targetIndex).reduce((sum, w) => sum + w.width, 0) +
-      (words[0] ? fadeWidth : 0);
+    if (widthBefore === undefined) {
+      widthBefore = 0;
+      for (let k = 0; k < targetIndex; k++) widthBefore += words[k].width;
+    }
+    const widthBeforeSelf = widthBefore + (words[0] ? fadeWidth : 0);
 
     const minOffset = -(targetWord.width + targetWord.padding * 2 + fadeWidth);
-    const initialPos = -widthBeforeSelf - targetWord.width - targetWord.padding - fadeWidth;
+    const leadTrim = LyricsPlusRenderer._MASK_LEAD_TRIM *
+      Math.max(0, fadeWidth - (words[0] ? words[0].padding : 0));
+    const initialPos = -widthBeforeSelf - targetWord.width - targetWord.padding - fadeWidth + leadTrim;
 
     const cursor = {
       curPos: initialPos,
@@ -2453,7 +2460,6 @@ class LyricsPlusRenderer {
         cursor.frames.push({
           offset: cursor.lastTime + staticTime,
           maskPosition: pos,
-          webkitMaskPosition: pos,
         });
       }
 
@@ -2465,7 +2471,6 @@ class LyricsPlusRenderer {
         cursor.frames.push({
           offset: cursor.lastTime + staticTime,
           maskPosition: pos,
-          webkitMaskPosition: pos,
         });
       }
 
@@ -2475,7 +2480,6 @@ class LyricsPlusRenderer {
       cursor.frames.push({
         offset: time,
         maskPosition: pos,
-        webkitMaskPosition: pos,
       });
 
       cursor.lastPos = cursor.curPos;
@@ -2501,7 +2505,7 @@ class LyricsPlusRenderer {
       const fadeDuration = Math.max(0, otherWord.endTime - otherWord.startTime);
       let movePx = otherWord.width;
       if (j === 0) {
-        movePx += fadeWidth * 1.5;
+        movePx += fadeWidth * 1.5 - leadTrim;
       }
       if (j === words.length - 1) {
         movePx += fadeWidth * 0.5;
@@ -2695,6 +2699,7 @@ class LyricsPlusRenderer {
 
     tracks.forEach((words) => {
       if (!words.length) return;
+      let widthBefore = 0;
       for (let i = 0; i < words.length; i++) {
         const w = words[i];
         const el = w.mainElement;
@@ -2706,16 +2711,13 @@ class LyricsPlusRenderer {
         );
 
         el.style.maskImage = maskImage;
-        el.style.webkitMaskImage = maskImage;
-        el.style.maskRepeat = "no-repeat";
-        el.style.webkitMaskRepeat = "no-repeat";
         el.style.maskSize = `${(totalAspect * 100).toFixed(3)}% 100%`;
-        el.style.webkitMaskSize = `${(totalAspect * 100).toFixed(3)}% 100%`;
         styled.push(el);
 
         const frames = LyricsPlusRenderer._buildMaskFrames(
-          words, i, fadeWidth, lineStartTime, totalFadeDuration, w.rtl
+          words, i, fadeWidth, lineStartTime, totalFadeDuration, w.rtl, widthBefore
         );
+        widthBefore += w.width;
 
         try {
           const anim = el.animate(frames, { duration: totalFadeDuration, fill: "both" });
@@ -2741,14 +2743,13 @@ class LyricsPlusRenderer {
     const animator = {
       animations,
       totalFadeDuration,
+      _lastT: -1,
       setCurrentTime(relativeTime) {
         const t = Math.min(totalFadeDuration, Math.max(0, relativeTime));
+        if (t === this._lastT) return;
+        this._lastT = t;
         const len = animations.length;
-        for (let idx = 0; idx < len; idx++) {
-          const a = animations[idx];
-          a.currentTime = t;
-          if (a.playState === "running") a.pause();
-        }
+        for (let idx = 0; idx < len; idx++) animations[idx].currentTime = t;
       },
       dispose() {
         for (let idx = 0; idx < animations.length; idx++) {
@@ -2758,15 +2759,7 @@ class LyricsPlusRenderer {
         for (let idx = 0; idx < styled.length; idx++) {
           const el = styled[idx];
           el.style.removeProperty("mask-image");
-          el.style.removeProperty("-webkit-mask-image");
           el.style.removeProperty("mask-size");
-          el.style.removeProperty("-webkit-mask-size");
-          el.style.removeProperty("mask-clip");
-          el.style.removeProperty("-webkit-mask-clip");
-          el.style.removeProperty("mask-repeat");
-          el.style.removeProperty("-webkit-mask-repeat");
-          el.style.removeProperty("mask-position");
-          el.style.removeProperty("-webkit-mask-position");
         }
         styled.length = 0;
         lineElement._maskAnimator = null;
@@ -2863,12 +2856,7 @@ class LyricsPlusRenderer {
           if (!hasHighlight) {
             classList.add("highlight");
             syllable._state = (_st & ~4) | 1;
-            if (syllable._isGap) {
-              const dur = syllable._durationMs || 1000;
-              syllable.style.animation = `fade-gap ${dur}ms var(--lyplus-fade-gap-timing-function, cubic-bezier(0.25, 0.1, 0.25, 1)) forwards`;
-            } else {
-              this._triggerGrowable(syllable);
-            }
+            if (!syllable._isGap) this._triggerGrowable(syllable);
           }
           if (hasFinished) {
             classList.remove("finished");
@@ -2885,9 +2873,6 @@ class LyricsPlusRenderer {
             }
             classList.add("finished");
             syllable._state |= 2;
-            if (syllable._isGap) {
-              syllable.style.animation = "";
-            }
           }
         } else {
           // currentTime < startTime
@@ -2901,12 +2886,9 @@ class LyricsPlusRenderer {
 
   _resetSyllable(syllable, noFade = false) {
     if (!syllable) return;
-    if (syllable._isGap) {
-      syllable.style.animation = "";
-    }
-    if (syllable._cleanupTimer) {
-      clearTimeout(syllable._cleanupTimer);
-      syllable._cleanupTimer = null;
+    if (syllable._cleanupPending) {
+      syllable._cleanupPending = false;
+      this._cleanupSet?.delete(syllable);
     }
 
     if (!(syllable._state & 2) && !noFade) {
@@ -2927,11 +2909,22 @@ class LyricsPlusRenderer {
       syllable.classList.remove("highlight", "finished", "pre-highlight", "cleanup");
       syllable._state = 0;
     } else {
-      syllable._cleanupTimer = setTimeout(() => {
-        syllable._cleanupTimer = null;
-        syllable.classList.remove("highlight", "finished", "pre-highlight", "cleanup");
-        syllable._state = 0;
-      }, 16);
+      if (!this._cleanupSet) this._cleanupSet = new Set();
+      syllable._cleanupPending = true;
+      this._cleanupSet.add(syllable);
+      if (!this._cleanupTimer) {
+        this._cleanupTimer = setTimeout(() => {
+          this._cleanupTimer = null;
+          const set = this._cleanupSet;
+          if (!set) return;
+          for (const syl of set) {
+            syl._cleanupPending = false;
+            syl.classList.remove("highlight", "finished", "pre-highlight", "cleanup");
+            syl._state = 0;
+          }
+          set.clear();
+        }, 16);
+      }
     }
   }
 
@@ -3096,7 +3089,9 @@ class LyricsPlusRenderer {
 
     const referenceIndex = (referenceLine === this.cachedLyricsLines[this._lastActiveIndex])
       ? this._lastActiveIndex
-      : this.cachedLyricsLines.indexOf(referenceLine);
+      : (referenceLine._idx !== undefined && this.cachedLyricsLines[referenceLine._idx] === referenceLine)
+        ? referenceLine._idx
+        : this.cachedLyricsLines.indexOf(referenceLine);
     if (referenceIndex === -1) return;
 
     const lookAhead = 20;
@@ -3105,11 +3100,24 @@ class LyricsPlusRenderer {
     let visMin = referenceIndex;
     let visMax = referenceIndex;
     if (this.visibleLineIds.size > 0) {
-      const visIds = this.visibleLineIds;
-      for (let vi = 0; vi < len; vi++) {
-        if (visIds.has(this.cachedLyricsLines[vi].id)) {
+      const byId = this._lineById;
+      let resolved = !!byId;
+      if (resolved) {
+        for (const id of this.visibleLineIds) {
+          const vi = byId.get(id)?._idx;
+          if (vi === undefined) { resolved = false; break; }
           if (vi < visMin) visMin = vi;
           if (vi > visMax) visMax = vi;
+        }
+      }
+      if (!resolved) {
+        visMin = visMax = referenceIndex;
+        const visIds = this.visibleLineIds;
+        for (let vi = 0; vi < len; vi++) {
+          if (visIds.has(this.cachedLyricsLines[vi].id)) {
+            if (vi < visMin) visMin = vi;
+            if (vi > visMax) visMax = vi;
+          }
         }
       }
     }
@@ -3190,7 +3198,9 @@ class LyricsPlusRenderer {
       this.cachedLyricsLines.length === 0
     )
       return;
-    const scrollLineIndex = this.cachedLyricsLines.indexOf(lineToScroll);
+    const scrollLineIndex = (lineToScroll._idx !== undefined && this.cachedLyricsLines[lineToScroll._idx] === lineToScroll)
+      ? lineToScroll._idx
+      : this.cachedLyricsLines.indexOf(lineToScroll);
     if (scrollLineIndex === -1) return;
 
     const positionClasses = [
@@ -3208,23 +3218,29 @@ class LyricsPlusRenderer {
     ];
 
     if (!this._positionClassedLines) this._positionClassedLines = [];
+    const prevClassed = this._positionClassedLines;
 
     // On a force-scroll (seek/click) the previous active line may be far outside
     // the tracked window, so fall back to a full sweep to guarantee cleanup.
     if (forceScroll) {
       this.lyricsContainer
         .querySelectorAll("." + positionClasses.join(", ."))
-        .forEach((el) => el.classList.remove(...positionClasses));
-      this._positionClassedLines.length = 0;
-    } else {
-      for (let _pi = 0; _pi < this._positionClassedLines.length; _pi++) {
-        this._positionClassedLines[_pi].classList.remove(...positionClasses);
-      }
-      this._positionClassedLines.length = 0;
+        .forEach((el) => { el.classList.remove(...positionClasses); el._posCls = null; });
+      prevClassed.length = 0;
     }
 
-    lineToScroll.classList.add("lyrics-activest");
-    this._positionClassedLines.push(lineToScroll);
+    const gen = (this._posGen = (this._posGen || 0) + 1);
+    const nextClassed = [];
+    const assign = (el, cls) => {
+      el._posGen = gen;
+      if (el._posCls !== cls) {
+        if (el._posCls) el.classList.remove(el._posCls);
+        el.classList.add(cls);
+        el._posCls = cls;
+      }
+      nextClassed.push(el);
+    };
+    assign(lineToScroll, "lyrics-activest");
     const elements = this.cachedLyricsLines;
     for (
       let i = Math.max(0, scrollLineIndex - 4);
@@ -3234,13 +3250,21 @@ class LyricsPlusRenderer {
       const position = i - scrollLineIndex;
       if (position === 0) continue;
       const element = elements[i];
-      if (position === -1) element.classList.add("post-active-line");
-      else if (position === 1) element.classList.add("next-active-line");
-      else if (position < 0)
-        element.classList.add(`prev-${Math.abs(position)}`);
-      else element.classList.add(`next-${position}`);
-      this._positionClassedLines.push(element);
+      assign(
+        element,
+        position === -1 ? "post-active-line"
+          : position === 1 ? "next-active-line"
+            : position < 0 ? `prev-${-position}` : `next-${position}`
+      );
     }
+    for (let _pi = 0; _pi < prevClassed.length; _pi++) {
+      const el = prevClassed[_pi];
+      if (el._posGen !== gen && el._posCls) {
+        el.classList.remove(el._posCls);
+        el._posCls = null;
+      }
+    }
+    this._positionClassedLines = nextClassed;
 
     this._scrollToActiveLine(lineToScroll, forceScroll, false, durationScroll);
   }
@@ -3298,11 +3322,13 @@ class LyricsPlusRenderer {
     this.visibilityObserver = new IntersectionObserver(
       (entries) => {
         let hasChanges = false;
-        entries.forEach((entry) => {
+        const hideOffscreen = !!(this.lyricsContainer && this.lyricsContainer.classList.contains("hide-offscreen"));
+        for (let ei = 0; ei < entries.length; ei++) {
+          const entry = entries[ei];
           const target = entry.target;
           const id = target.id;
 
-          this._visibilityChanges.push(target);
+          if (hideOffscreen) this._visibilityChanges.push(target);
 
           if (entry.isIntersecting) {
             if (!this.visibleLineIds.has(id)) {
@@ -3315,15 +3341,8 @@ class LyricsPlusRenderer {
               hasChanges = true;
             }
           }
-        });
-        if (hasChanges) {
-          if (
-            this.lyricsContainer &&
-            this.lyricsContainer.classList.contains("hide-offscreen")
-          ) {
-            this._batchUpdateViewportVisibility();
-          }
         }
+        if (hasChanges && hideOffscreen) this._batchUpdateViewportVisibility();
       },
       { root: container.parentElement, rootMargin: "200px 0px", threshold: 0.1 }
     );
@@ -4035,6 +4054,9 @@ class LyricsPlusRenderer {
     }
 
     // Timer Cleanup
+    if (this._cleanupTimer) clearTimeout(this._cleanupTimer);
+    this._cleanupTimer = null;
+    if (this._cleanupSet) this._cleanupSet.clear();
     if (this.endProgrammaticScrollTimer) clearTimeout(this.endProgrammaticScrollTimer);
     if (this.userScrollIdleTimer) clearTimeout(this.userScrollIdleTimer);
     if (this.userScrollRevertTimer) clearTimeout(this.userScrollRevertTimer);
@@ -4113,8 +4135,7 @@ class LyricsPlusRenderer {
       for (let i = 0; i < this.cachedSyllables.length; i++) {
         const syl = this.cachedSyllables[i];
         if (syl) {
-          if (syl._cleanupTimer) clearTimeout(syl._cleanupTimer);
-          syl._cleanupTimer = null;
+          syl._cleanupPending = false;
           syl._cachedCharSpans = null;
           syl._nextSyllableInWord = null;
           syl.style.animation = "";

@@ -349,6 +349,8 @@
     font-variant-ligatures: none;
     font-feature-settings: "liga" 0;
     transition: transform 0.7s ease;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
 }
 
 /* --- Syllable States (Finished, Highlight, etc.) --- */
@@ -532,6 +534,10 @@
 .lyrics-line.lyrics-gap:not(.active).lyrics-activest .lyrics-syllable {
     background-color: var(--lyplus-text-primary);
     opacity: 1;
+}
+
+.lyrics-line.lyrics-gap.active .lyrics-syllable.highlight {
+    animation: fade-gap var(--lyplus-gap-duration, 1000ms) var(--lyplus-fade-gap-timing-function, cubic-bezier(0.25, 0.1, 0.25, 1)) forwards;
 }
 
 .lyrics-line.lyrics-gap.active .lyrics-syllable.finished {
