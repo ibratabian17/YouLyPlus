@@ -33,8 +33,6 @@
     --lyplus-text-primary: var(--lyplus-lyrics-pallete);
     --lyplus-text-secondary: #ffffff55;
     --lyplus-mask-dim-alpha: 0.333;
-    --lyplus-wipe-mask-ltr: linear-gradient(90deg, #000 calc(50% - 0.375em), --lyplus-text-secondary calc(50% + 0.375em));
-    --lyplus-wipe-mask-rtl: linear-gradient(270deg, #000 calc(50% - 0.375em), --lyplus-text-secondary calc(50% + 0.375em));
     --lyplus-text-button: rgba(255, 255, 255, 0.87);
 
     --lyplus-blur-amount: 0.07em;
@@ -131,10 +129,6 @@
 .lyrics-line:not(.scroll-animate),
 .lyrics-plus-metadata:not(.scroll-animate) {
     animation: none;
-}
-
-.lyrics-plus-metadata {
-    padding: 0 var(--lyplus-padding-line);
 }
 
 .line-by-line-mode .lyrics-line:not(.lyrics-gap) .main-vocal-container {
@@ -299,7 +293,6 @@
     max-height: 4em;
     opacity: 1;
     transition: max-height .6s, opacity .6s, padding .6s;
-    will-change: max-height, opacity, padding;
 }
 
 .lyrics-line.active .background-vocal {
@@ -486,7 +479,6 @@
             0, 1, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1);
-    transition: color 0.5s ease, background-color 0.5s ease, transform 0.7s ease;
 }
 
 .lyrics-line.active .lyrics-syllable.highlight.finished span.char {
@@ -508,7 +500,6 @@
     padding: var(--lyplus-padding-gap);
     opacity: 1;
     transition: padding .3s, height .3s, opacity .2s .3s, transform .3s;
-    will-change: height, opacity, padding;
 }
 
 .lyrics-line.lyrics-gap .main-vocal-container {
@@ -570,6 +561,7 @@
     display: block;
     position: relative;
     box-sizing: border-box;
+    padding: 0 var(--lyplus-padding-line);
     font-weight: normal;
     transform: translateY(var(--lyrics-scroll-offset, 0px)) translateZ(1px);
     transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1) var(--lyrics-line-delay, 0ms), filter 0.3s ease;

@@ -13,6 +13,12 @@ class LyricsPlusRenderer {
   static _SEGMENTER = typeof Intl !== "undefined" && typeof Intl.Segmenter === "function" ? new Intl.Segmenter() : null;
   static _fontSizeCache = new Map();
   static _MASK_LEAD_TRIM = 1;
+  static _POSITION_CLASSES = [
+    "lyrics-activest", "post-active-line", "next-active-line",
+    "prev-1", "prev-2", "prev-3", "prev-4",
+    "next-1", "next-2", "next-3", "next-4",
+  ];
+  static _POSITION_SELECTOR = "." + LyricsPlusRenderer._POSITION_CLASSES.join(", .");
 
   /**
    * Helper function to segment text into graphemes efficiently.
@@ -70,6 +76,8 @@ class LyricsPlusRenderer {
   }
 
   static _getSpringEasing(peakTimeMs, zeta = 0.78, settleTailMs = 400, mass = 1) {
+    peakTimeMs = Math.round(peakTimeMs / 10) * 10;
+    settleTailMs = Math.round(settleTailMs / 10) * 10;
     const key = `${peakTimeMs}:${zeta}:${settleTailMs}:${mass}`;
     const cached = LyricsPlusRenderer._SPRING_EASING_CACHE.get(key);
     if (cached) return cached;
@@ -100,7 +108,9 @@ class LyricsPlusRenderer {
     points.push(1);
     const easing = `linear(${points.map((v) => v.toFixed(4)).join(",")})`;
     const result = { easing, duration: Math.round((peakTimeS + settleTailS) * 1000) };
-    LyricsPlusRenderer._SPRING_EASING_CACHE.set(key, result);
+    const springCache = LyricsPlusRenderer._SPRING_EASING_CACHE;
+    if (springCache.size >= 64) springCache.delete(springCache.keys().next().value);
+    springCache.set(key, result);
     return result;
   }
 
@@ -152,7 +162,7 @@ class LyricsPlusRenderer {
     this._toastElement = null;
     this._toastTimeout = null;
     this.buttonsWrapper = null;
-    this._boundLyricClickHandler = this._onLyricClick.bind(this);
+    this._boundContainerClickHandler = this._onContainerClick.bind(this);
 
     this.isProgrammaticScrolling = false;
     this.endProgrammaticScrollTimer = null;
@@ -182,23 +192,29 @@ class LyricsPlusRenderer {
   }
 
   async _requestWakeLock() {
-    if ('wakeLock' in navigator) {
-      try {
-        this.wakeLock = await navigator.wakeLock.request('screen');
-      } catch (err) {
-        console.warn(`LYPLUS: Wakelock error: ${err.name}, ${err.message}`);
-      }
+    // Guard: IntersectionObserver can fire repeatedly; never stack locks.
+    if (!('wakeLock' in navigator) || this.wakeLock || this._wakeLockPending) return;
+    this._wakeLockPending = true;
+    try {
+      const lock = await navigator.wakeLock.request('screen');
+      this.wakeLock = lock;
+      lock.addEventListener('release', () => {
+        if (this.wakeLock === lock) this.wakeLock = null;
+      });
+    } catch (err) {
+      console.warn(`LYPLUS: Wakelock error: ${err.name}, ${err.message}`);
+    } finally {
+      this._wakeLockPending = false;
     }
   }
 
   _releaseWakeLock() {
-    if (this.wakeLock !== null) {
-      this.wakeLock.release().then(() => {
-        this.wakeLock = null;
-      }).catch(err => {
-        console.warn(`LYPLUS: Wakelock release error: ${err.name}, ${err.message}`);
-      });
-    }
+    const lock = this.wakeLock;
+    if (!lock) return;
+    this.wakeLock = null;
+    lock.release().catch(err => {
+      console.warn(`LYPLUS: Wakelock release error: ${err.name}, ${err.message}`);
+    });
   }
 
   _setupContainerObserver() {
@@ -347,6 +363,7 @@ class LyricsPlusRenderer {
       }
     }
     if (this.lyricsContainer) {
+      this._attachClickDelegate();
       this._attachScrollListeners();
       this._setupContainerObserver();
     }
@@ -546,15 +563,31 @@ class LyricsPlusRenderer {
   }
 
   /**
-   * An internal handler for click events on lyric lines.
-   * Seeks the video to the line's start time.
-   * @param {Event} e - The click event.
+   * One delegated listener on the container replaces a listener per line.
    */
-  _onLyricClick(e) {
-    const time = parseFloat(e.currentTarget.dataset.startTime);
+  _attachClickDelegate() {
+    const c = this.lyricsContainer;
+    if (!c || c._lyplusClickBound) return;
+    c.addEventListener("click", this._boundContainerClickHandler);
+    c._lyplusClickBound = true;
+  }
+
+  _onContainerClick(e) {
+    const line = e.target && e.target.closest ? e.target.closest(".lyrics-line") : null;
+    if (line && this.lyricsContainer && this.lyricsContainer.contains(line)) {
+      this._onLyricClick(line);
+    }
+  }
+
+  /**
+   * Seeks the player to the clicked line's start time.
+   * @param {HTMLElement} lineEl - The clicked .lyrics-line element.
+   */
+  _onLyricClick(lineEl) {
+    const time = parseFloat(lineEl.dataset.startTime);
     const offsetSec = (this.userOffsetMs || 0) / 1000;
     this._seekPlayerTo(time + offsetSec - 0.05);
-    this._scrollToActiveLine(e.currentTarget, true);
+    this._scrollToActiveLine(lineEl, true);
   }
 
   /**
@@ -606,11 +639,6 @@ class LyricsPlusRenderer {
         ? singerClassMap[line.element.singer] || "singer-left"
         : "singer-left";
       currentLine.classList.add(singerClass);
-
-      if (!currentLine._hasSharedListener) {
-        currentLine.addEventListener("click", this._boundLyricClickHandler);
-        currentLine._hasSharedListener = true;
-      }
 
       const mainContainer = document.createElement("p");
       mainContainer.classList.add("main-vocal-container");
@@ -834,10 +862,6 @@ class LyricsPlusRenderer {
           }
         });
 
-        const lastVisible = [...syllableElements].reverse().find(hasText);
-        pendingSyllable = lastVisible || (syllableElements.length > 0 ? syllableElements[syllableElements.length - 1] : null);
-        pendingSyllableFont = referenceFont;
-
         const MoveEarlier = currentSettings.bkgOverlap;
         let backgroundInnerWrap = backgroundContainer?.querySelector(".background-vocal-wrap");
         const targetContainer = isBgWord
@@ -1046,11 +1070,6 @@ class LyricsPlusRenderer {
         lineEl.classList.add("rtl-text");
       }
 
-      if (!lineEl._hasSharedListener) {
-        lineEl.addEventListener("click", this._boundLyricClickHandler);
-        lineEl._hasSharedListener = true;
-      }
-
       const mainContainer = document.createElement("div");
       mainContainer.className = "main-vocal-container";
       mainContainer.textContent = this._getDataText(line);
@@ -1250,6 +1269,50 @@ class LyricsPlusRenderer {
   }
 
   /**
+   * Builds the writers/source metadata block shared by all render paths.
+   * Uses textContent/DOM nodes only (no innerHTML interpolation).
+   * @param {object} lyrics
+   * @param {boolean} timed - attach start/end times so it takes part in sync.
+   */
+  _createMetadataContainer(lyrics, timed) {
+    const metadataContainer = document.createElement("div");
+    metadataContainer.className = "lyrics-plus-metadata";
+
+    if (timed) {
+      const lastEnd = lyrics.data[lyrics.data.length - 1]?.endTime;
+      if (lastEnd != 0) {
+        metadataContainer.dataset.startTime = (lastEnd || 0) + 0.8;
+        metadataContainer.dataset.endTime = (lastEnd || 0) + 99999999999999;
+      }
+    }
+
+    const writers = lyrics.metadata?.songWriters;
+    if (writers && writers.length > 0) {
+      const songWritersDiv = document.createElement("span");
+      songWritersDiv.className = "lyrics-song-writters";
+      const label = document.createElement("b");
+      label.textContent = t("writtenBy");
+      songWritersDiv.append(label, document.createTextNode(" " + writers.join(", ")));
+      metadataContainer.appendChild(songWritersDiv);
+    }
+    if (this._isValidLyricsSource(lyrics.metadata?.source)) {
+      const sourceDiv = document.createElement("span");
+      sourceDiv.className = "lyrics-source-provider";
+      sourceDiv.textContent = `${t("source")} ${lyrics.metadata.source}`;
+      metadataContainer.appendChild(sourceDiv);
+    }
+    return metadataContainer;
+  }
+
+  _createTrailingSpacers() {
+    const emptyDiv = document.createElement("div");
+    emptyDiv.className = "lyrics-plus-empty";
+    const emptyFixedDiv = document.createElement("div");
+    emptyFixedDiv.className = "lyrics-plus-empty-fixed";
+    return [emptyDiv, emptyFixedDiv];
+  }
+
+  /**
    * Applies palette-related CSS classes and custom properties to the container
    * based on the current settings. Called from both displayLyrics and updateDisplayMode.
    * @param {HTMLElement} container - The lyrics container element.
@@ -1432,13 +1495,16 @@ class LyricsPlusRenderer {
         }
       }
 
-      const hasLeft = lineSideAssignments.includes("singer-left");
-      const hasRight = lineSideAssignments.includes("singer-right");
-      const leftCount = lineSideAssignments.filter((s) => s === "singer-left").length;
-      const totalSideLines = lineSideAssignments.filter((s) => s === "singer-left" || s === "singer-right").length;
+      let leftCount = 0, rightSideCount = 0;
+      for (let i = 0; i < lineSideAssignments.length; i++) {
+        const side = lineSideAssignments[i];
+        if (side === "singer-left") leftCount++;
+        else if (side === "singer-right") rightSideCount++;
+      }
+      const totalSideLines = leftCount + rightSideCount;
       const leftRatio = totalSideLines > 0 ? (leftCount / totalSideLines) * 100 : 0;
 
-      isDualSide = hasLeft && hasRight && leftRatio <= 90;
+      isDualSide = leftCount > 0 && rightSideCount > 0 && leftRatio <= 90;
     }
 
     if (isDualSide) container.classList.add("dual-side-lyrics");
@@ -1450,10 +1516,6 @@ class LyricsPlusRenderer {
       gapLine._isGap = true;
       gapLine.dataset.startTime = gapStart;
       gapLine.dataset.endTime = gapEnd;
-      if (!gapLine._hasSharedListener) {
-        gapLine.addEventListener("click", this._boundLyricClickHandler);
-        gapLine._hasSharedListener = true;
-      }
       if (classesToInherit) {
         if (classesToInherit.includes("rtl-text"))
           gapLine.classList.add("rtl-text");
@@ -1462,10 +1524,6 @@ class LyricsPlusRenderer {
         if (classesToInherit.includes("singer-right"))
           gapLine.classList.add("singer-right");
       }
-      const existingMainContainer = gapLine.querySelector(
-        ".main-vocal-container"
-      );
-      if (existingMainContainer) existingMainContainer.remove();
       const mainContainer = document.createElement("div");
       mainContainer.className = "main-vocal-container";
       const lyricsWord = document.createElement("div");
@@ -1574,80 +1632,22 @@ class LyricsPlusRenderer {
     );
     this._retimingActiveTimings(originalLines);
 
-    const metadataContainer = document.createElement("div");
-    metadataContainer.className = "lyrics-plus-metadata";
-    if (lyrics.data[lyrics.data.length - 1]?.endTime != 0) {
-      metadataContainer.dataset.startTime =
-        (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 0.8;
-      metadataContainer.dataset.endTime =
-        (lyrics.data[lyrics.data.length - 1]?.endTime || 0) + 99999999999999;
-    }
+    container.appendChild(this._createMetadataContainer(lyrics, true));
+    container.append(...this._createTrailingSpacers());
 
-    if (lyrics.metadata.songWriters && lyrics.metadata.songWriters.length > 0) {
-      const songWritersDiv = document.createElement("span");
-      songWritersDiv.className = "lyrics-song-writters";
-      songWritersDiv.textContent = "";
-      const writtenByLabel = document.createElement("b");
-      writtenByLabel.textContent = t("writtenBy");
-      const writersText = document.createTextNode(
-        " " + lyrics.metadata.songWriters.join(", ")
-      );
-      songWritersDiv.appendChild(writtenByLabel);
-      songWritersDiv.appendChild(writersText);
-
-      metadataContainer.appendChild(songWritersDiv);
-    }
-    if (this._isValidLyricsSource(lyrics.metadata?.source)) {
-      const sourceDiv = document.createElement("span");
-      sourceDiv.className = "lyrics-source-provider";
-      sourceDiv.innerText = `${t("source")} ${lyrics.metadata.source}`;
-      metadataContainer.appendChild(sourceDiv);
-    }
-    container.appendChild(metadataContainer);
-
-    const emptyDiv = document.createElement("div");
-    emptyDiv.className = "lyrics-plus-empty";
-    container.appendChild(emptyDiv);
-
-    // This fixed div prevents the resize observer from firing due to the main empty div changing size.
-    const emptyFixedDiv = document.createElement("div");
-    emptyFixedDiv.className = "lyrics-plus-empty-fixed";
-    container.appendChild(emptyFixedDiv);
-
-    this.cachedLyricsLines = Array.from(
-      container.querySelectorAll(
-        ".lyrics-line, .lyrics-plus-metadata"
-      )
-    )
-      .map((line) => {
-        if (line) {
-          line._startTimeMs = parseFloat(line.dataset.startTime) * 1000;
-          line._endTimeMs = parseFloat(line.dataset.endTime) * 1000;
-        }
-        return line;
-      })
-      .filter(Boolean);
+    // Single pass: timings, ids and the id->element map. (Syllable timings are
+    // already stamped on the elements when they are created.)
+    const lineEls = container.querySelectorAll(".lyrics-line, .lyrics-plus-metadata");
+    this.cachedLyricsLines = Array.from(lineEls);
     this._lineById = new Map();
-    for (let _i = 0; _i < this.cachedLyricsLines.length; _i++) {
-      const _l = this.cachedLyricsLines[_i];
-      if (!_l.id) _l.id = `line-${_i}`;
-      this._lineById.set(_l.id, _l);
+    for (let i = 0; i < this.cachedLyricsLines.length; i++) {
+      const l = this.cachedLyricsLines[i];
+      l._startTimeMs = parseFloat(l.dataset.startTime) * 1000;
+      l._endTimeMs = parseFloat(l.dataset.endTime) * 1000;
+      if (!l.id) l.id = `line-${i}`;
+      this._lineById.set(l.id, l);
     }
-
-    this.cachedSyllables = Array.from(
-      container.getElementsByClassName("lyrics-syllable")
-    )
-      .map((syllable) => {
-        if (syllable) {
-          syllable._startTimeMs = parseFloat(syllable.dataset.startTime);
-          syllable._durationMs = parseFloat(syllable.dataset.duration);
-          syllable._endTimeMs = syllable._startTimeMs + syllable._durationMs;
-          const wordDuration = parseFloat(syllable.dataset.wordDuration);
-          syllable._wordDurationMs = isNaN(wordDuration) ? null : wordDuration;
-        }
-        return syllable;
-      })
-      .filter(Boolean);
+    this.cachedSyllables = Array.from(container.getElementsByClassName("lyrics-syllable"));
 
     this._ensureElementIds();
     this._initMaskResizeObserver();
@@ -1737,7 +1737,7 @@ class LyricsPlusRenderer {
         if (response?.success && Array.isArray(response.availableProviders)) {
           this.setAvailableProviders(response.availableProviders);
         }
-      }).catch(() => { });
+      }).catch(() => {});
     }
 
     this.setTranslationLoading(false);
@@ -1779,35 +1779,13 @@ class LyricsPlusRenderer {
       container.innerHTML = "";
       const fragment = document.createDocumentFragment();
 
-      const metadataContainer = document.createElement("div");
-      metadataContainer.className = "lyrics-plus-metadata";
-
-      if (lyrics.metadata?.songWriters?.length > 0) {
-        const songWritersDiv = document.createElement("span");
-        songWritersDiv.className = "lyrics-song-writters";
-        songWritersDiv.innerHTML = `<b>${t("writtenBy")}</b> ${lyrics.metadata.songWriters.join(", ")}`;
-        metadataContainer.appendChild(songWritersDiv);
-      }
-
-      if (this._isValidLyricsSource(lyrics.metadata?.source)) {
-        const sourceDiv = document.createElement("span");
-        sourceDiv.className = "lyrics-source-provider";
-        sourceDiv.innerText = `${t("source")} ${lyrics.metadata.source}`;
-        metadataContainer.appendChild(sourceDiv);
-      }
-
-      fragment.appendChild(metadataContainer);
+      fragment.appendChild(this._createMetadataContainer(lyrics, false));
 
       this._renderPlainLyrics(lyrics, fragment);
 
-      const emptyDiv = document.createElement("div");
-      emptyDiv.className = "lyrics-plus-empty";
-      fragment.appendChild(emptyDiv);
-
+      const [emptyDiv, emptyFixedDiv] = this._createTrailingSpacers();
+      fragment.append(emptyDiv);
       container.appendChild(fragment);
-
-      const emptyFixedDiv = document.createElement("div");
-      emptyFixedDiv.className = "lyrics-plus-empty-fixed";
       container.appendChild(emptyFixedDiv);
 
       this.cachedLyricsLines = [];
@@ -2310,23 +2288,24 @@ class LyricsPlusRenderer {
     const leftPercent = 50 - halfFadePercent;
     const rightPercent = 50 + halfFadePercent;
 
-
-    const bright = "var(--lyplus-text-primary, #fff)";
-    const dark = "var(--lyplus-text-secondary, rgba(255, 255, 255, 0.333))";
-
     if (isBackground) {
+      const bright = "var(--lyplus-text-primary, #fff)";
+      const dark = "var(--lyplus-text-secondary, rgba(255, 255, 255, 0.333))";
       return [
         `linear-gradient(${dir}, ${bright} ${leftPercent.toFixed(3)}%, ${dark} ${rightPercent.toFixed(3)}%)`,
         totalAspect,
       ];
     }
 
+    const bright = "rgb(0 0 0 / 1)";
+    const dark = "rgb(0 0 0 / var(--lyplus-mask-dim-alpha, 0.35))";
+
     return [
       `linear-gradient(${dir}, ${bright} ${leftPercent.toFixed(3)}%, ${dark} ${rightPercent.toFixed(3)}%)`,
       totalAspect,
     ];
   }
-
+  
   static _buildMaskFrames(words, targetIndex, fadeWidth, lineStartTime, totalFadeDuration, rtl = false, widthBefore, isBackground = false) {
     const targetWord = words[targetIndex];
     if (widthBefore === undefined) {
@@ -3163,11 +3142,16 @@ class LyricsPlusRenderer {
         line.classList.remove('scroll-animate');
         line.style.removeProperty('--scroll-delta');
         line.style.removeProperty('--lyrics-line-delay');
-        line.style.removeProperty('--scroll-duration');
-        line.style.removeProperty('--scroll-easing');
       }
       animatingLines.length = 0;
     }
+
+    // Duration/easing are identical for every line: set once on the container
+    // (custom properties inherit) instead of 2 style writes per animated line.
+    const containerStyle = this.lyricsContainer.style;
+    containerStyle.setProperty('--scroll-duration', `${scrollDuration}ms`);
+    if (easing) containerStyle.setProperty('--scroll-easing', easing);
+    else containerStyle.removeProperty('--scroll-easing');
 
     const targetTop = Math.max(0, -newTranslateY);
     const prevOffset = -parent.scrollTop || this.currentScrollOffset || 0;
@@ -3232,12 +3216,6 @@ class LyricsPlusRenderer {
     const applyLine = (line, delay) => {
       line.style.setProperty('--scroll-delta', `${delta}px`);
       line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-      line.style.setProperty('--scroll-duration', `${scrollDuration}ms`);
-      if (easing) {
-        line.style.setProperty('--scroll-easing', easing);
-      } else {
-        line.style.removeProperty('--scroll-easing');
-      }
       line.classList.add('scroll-animate');
       animatingLines.push(line);
       const lineDuration = scrollDuration + delay;
@@ -3282,8 +3260,6 @@ class LyricsPlusRenderer {
         line.classList.remove('scroll-animate');
         line.style.removeProperty('--scroll-delta');
         line.style.removeProperty('--lyrics-line-delay');
-        line.style.removeProperty('--scroll-duration');
-        line.style.removeProperty('--scroll-easing');
       }
       animatingLines.length = 0;
       this._scrollAnimationTimeout = null;
@@ -3305,26 +3281,14 @@ class LyricsPlusRenderer {
       : this.cachedLyricsLines.indexOf(lineToScroll);
     if (scrollLineIndex === -1) return;
 
-    const positionClasses = [
-      "lyrics-activest",
-      "post-active-line",
-      "next-active-line",
-      "prev-1",
-      "prev-2",
-      "prev-3",
-      "prev-4",
-      "next-1",
-      "next-2",
-      "next-3",
-      "next-4",
-    ];
+    const positionClasses = LyricsPlusRenderer._POSITION_CLASSES;
 
     if (!this._positionClassedLines) this._positionClassedLines = [];
     const prevClassed = this._positionClassedLines;
 
     if (forceScroll) {
       this.lyricsContainer
-        .querySelectorAll("." + positionClasses.join(", ."))
+        .querySelectorAll(LyricsPlusRenderer._POSITION_SELECTOR)
         .forEach((el) => { el.classList.remove(...positionClasses); el._posCls = null; });
       prevClassed.length = 0;
     }
@@ -3667,6 +3631,53 @@ class LyricsPlusRenderer {
     this._renderOptionsMenuMain();
   }
 
+  /**
+   * Shared by the main options menu and the source picker.
+   * @returns {{providerKeys: string[], activeProvider: string, providerDisplayNames: object}}
+   */
+  _getProviderContext() {
+    const providerOrderStr = this.currentSettings?.lyricsProviderOrder || 'binilyrics,kpoe,unison,lrclib';
+    const providerKeys = providerOrderStr.split(',').map(s => s.trim()).filter(Boolean);
+
+    if (this.currentSettings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
+      providerKeys.push('customKpoe');
+    }
+
+    const activeProvider = (
+      this._userSelectedProvider ||
+      this.currentLyrics?.provider ||
+      this.currentLyrics?.metadata?.provider ||
+      this._detectProviderFromSource(this.currentLyrics?.metadata?.source) ||
+      'kpoe'
+    ).toLowerCase();
+
+    const info = this.lastKnownSongInfo;
+    if ((info?.isVideo || info?.subtitle || activeProvider === 'subtitles') && !providerKeys.includes('subtitles')) {
+      providerKeys.push('subtitles');
+    }
+    if (activeProvider === 'local' && !providerKeys.includes('local')) {
+      providerKeys.push('local');
+    }
+    if ((info?.videoId || activeProvider === 'ytmusic') && !providerKeys.includes('ytmusic')) {
+      providerKeys.push('ytmusic');
+    }
+
+    const ytMusicDisplay = (activeProvider === 'ytmusic' ? this.currentLyrics?.metadata?.source : null)
+      || info?.ytMusicLyrics?.provider
+      || 'YouTube Music';
+    const providerDisplayNames = {
+      'binilyrics': 'BiniLyrics',
+      'kpoe': 'Lyrics+',
+      'customKpoe': 'Custom Lyrics+',
+      'unison': 'Unison',
+      'lrclib': 'LRCLib',
+      'ytmusic': ytMusicDisplay,
+      'local': 'Local Lyrics',
+      'subtitles': 'YouTube Subtitles'
+    };
+    return { providerKeys, activeProvider, providerDisplayNames };
+  }
+
   _renderOptionsMenuMain() {
     if (!this.optionsDropdown) return;
     this.optionsDropdown.innerHTML = "";
@@ -3690,35 +3701,7 @@ class LyricsPlusRenderer {
     });
     this.optionsDropdown.appendChild(offsetOpt);
 
-    const providerOrderStr = this.currentSettings?.lyricsProviderOrder || 'binilyrics,kpoe,unison,lrclib';
-    const providerKeys = providerOrderStr.split(',').map(s => s.trim()).filter(Boolean);
-
-    if (this.currentSettings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
-      providerKeys.push('customKpoe');
-    }
-
-    const activeProvider = (
-      this._userSelectedProvider ||
-      this.currentLyrics?.provider ||
-      this.currentLyrics?.metadata?.provider ||
-      this._detectProviderFromSource(this.currentLyrics?.metadata?.source) ||
-      'kpoe'
-    ).toLowerCase();
-
-    // Include subtitles if video / captions available or active
-    if ((this.lastKnownSongInfo?.isVideo || this.lastKnownSongInfo?.subtitle || activeProvider === 'subtitles') && !providerKeys.includes('subtitles')) {
-      providerKeys.push('subtitles');
-    }
-
-    // Include local if local lyrics active
-    if (activeProvider === 'local' && !providerKeys.includes('local')) {
-      providerKeys.push('local');
-    }
-
-    // Include ytmusic if videoId is present or ytmusic is active
-    if ((this.lastKnownSongInfo?.videoId || activeProvider === 'ytmusic') && !providerKeys.includes('ytmusic')) {
-      providerKeys.push('ytmusic');
-    }
+    const { providerKeys, activeProvider, providerDisplayNames } = this._getProviderContext();
 
     let availableList = [];
     if (this.availableProviders && this.availableProviders.size > 0) {
@@ -3730,20 +3713,6 @@ class LyricsPlusRenderer {
     if (availableList.length > 1) {
       const sourceOpt = document.createElement("div");
       sourceOpt.className = "dropdown-option";
-      const isYtMusicActive = (activeProvider === 'ytmusic');
-      const ytMusicDisplay = (isYtMusicActive ? this.currentLyrics?.metadata?.source : null)
-        || this.lastKnownSongInfo?.ytMusicLyrics?.provider
-        || 'YouTube Music';
-      const providerDisplayNames = {
-        'binilyrics': 'BiniLyrics',
-        'kpoe': 'Lyrics+',
-        'customKpoe': 'Custom Lyrics+',
-        'unison': 'Unison',
-        'lrclib': 'LRCLib',
-        'ytmusic': ytMusicDisplay,
-        'local': 'Local Lyrics',
-        'subtitles': 'YouTube Subtitles'
-      };
       const activeProviderName = providerDisplayNames[activeProvider] || (activeProvider.charAt(0).toUpperCase() + activeProvider.slice(1));
       sourceOpt.innerHTML = `
         <span class="dropdown-item-label">${t("changeLyricsSource") || "Change Lyrics Source"}</span>
@@ -3920,52 +3889,9 @@ class LyricsPlusRenderer {
     sep.className = "dropdown-separator";
     this.optionsDropdown.appendChild(sep);
 
-    const providerOrderStr = this.currentSettings?.lyricsProviderOrder || 'binilyrics,kpoe,unison,lrclib';
-    const providerKeys = providerOrderStr.split(',').map(s => s.trim()).filter(Boolean);
+    const { providerKeys, activeProvider, providerDisplayNames } = this._getProviderContext();
 
-    if (this.currentSettings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
-      providerKeys.push('customKpoe');
-    }
-
-    const activeProvider = (
-      this._userSelectedProvider ||
-      this.currentLyrics?.provider ||
-      this.currentLyrics?.metadata?.provider ||
-      this._detectProviderFromSource(this.currentLyrics?.metadata?.source) ||
-      'kpoe'
-    ).toLowerCase();
-
-    // Include subtitles if video / captions available or active
-    if ((this.lastKnownSongInfo?.isVideo || this.lastKnownSongInfo?.subtitle || activeProvider === 'subtitles') && !providerKeys.includes('subtitles')) {
-      providerKeys.push('subtitles');
-    }
-
-    // Include local if local lyrics active
-    if (activeProvider === 'local' && !providerKeys.includes('local')) {
-      providerKeys.push('local');
-    }
-
-    // Include ytmusic if videoId is present or ytmusic is active
-    if ((this.lastKnownSongInfo?.videoId || activeProvider === 'ytmusic') && !providerKeys.includes('ytmusic')) {
-      providerKeys.push('ytmusic');
-    }
-
-    const isYtMusicActive = (activeProvider === 'ytmusic');
-    const ytMusicDisplay = (isYtMusicActive ? this.currentLyrics?.metadata?.source : null)
-      || this.lastKnownSongInfo?.ytMusicLyrics?.provider
-      || 'YouTube Music';
-    const providerDisplayNames = {
-      'binilyrics': 'BiniLyrics',
-      'kpoe': 'Lyrics+',
-      'customKpoe': 'Custom Lyrics+',
-      'unison': 'Unison',
-      'lrclib': 'LRCLib',
-      'ytmusic': ytMusicDisplay,
-      'local': 'Local Lyrics',
-      'subtitles': 'YouTube Subtitles'
-    };
-
-    // Filter providers: hide any provider that is not found on the list of available providers
+    // Filter providers: hide any provider    // Filter providers: hide any provider that is not found on the list of available providers
     const visibleProviders = providerKeys.filter((providerId) => {
       const pLower = providerId.toLowerCase();
       if (this._notFoundProviders?.has(pLower)) return false;
@@ -4156,6 +4082,10 @@ class LyricsPlusRenderer {
       this.resizeObserver = null;
     }
 
+    if (this._boundDocumentClickHandler) {
+      document.removeEventListener("click", this._boundDocumentClickHandler);
+      this._boundDocumentClickHandler = null;
+    }
     this._removeButton("translationButton");
     this._removeButton("reloadButton");
     if (this.dropdownMenu) {
@@ -4189,10 +4119,8 @@ class LyricsPlusRenderer {
       for (let i = 0; i < this.cachedLyricsLines.length; i++) {
         const line = this.cachedLyricsLines[i];
         if (line) {
-          line.removeEventListener("click", this._boundLyricClickHandler);
           line._cachedSyllableElements = null;
           line._cachedCharSpans = null;
-          line._hasSharedListener = false;
         }
       }
     }
@@ -4215,6 +4143,8 @@ class LyricsPlusRenderer {
       container.className = "lyrics-plus-integrated lyrics-plus-message blur-inactive-enabled";
 
       container.style.removeProperty("--lyrics-scroll-offset");
+      container.style.removeProperty("--scroll-duration");
+      container.style.removeProperty("--scroll-easing");
       container.style.removeProperty("--lyplus-override-pallete");
       container.style.removeProperty("--lyplus-song-pallete");
     }
