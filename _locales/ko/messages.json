@@ -59,6 +59,10 @@
     "message": "단어 단위 하이라이트",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "성능",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "데이터 관리",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "전체 화면 모드에서 진행 상태 표시줄, 출시일, 제목, 아티스트를 포함한 곡 세부 정보를 표시합니다.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "곡 정보 탐색 바 비활성화",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "전체화면 곡 정보 화면에서 진행 바를 숨깁니다.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "SponsorBlock API 사용",
@@ -471,6 +483,54 @@
     "message": "발음 가이드 (로마자 표기) 서비스",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "음역 대상 문자",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "발음 가이드를 위해 가사를 이 문자로 변환합니다 (예: 영어를 일본어 가타카나로 변환). 비라틴 문자는 Gemini 또는 OpenRouter가 필요합니다.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google 번역은 라틴 문자(로마자) 음역만 지원합니다. 다른 문자를 활성화하려면 음역 제공자로 Gemini 또는 OpenRouter를 선택하세요.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "라틴 문자 (로마자 / 발음 기호)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "일본어 (가타카나)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "한국어 (한글)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "키릴 문자 (러시아어)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "데바나가리 (힌디어)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "아랍 문자",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "히브리 문자",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "그리스 문자",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "태국 문자",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "발음 가이드 제공자",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "번역 대상 언어",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "2자리 언어 코드를 입력하세요 (예: 한국어는 'ko', 영어는 'en').",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "자동",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "고급 프롬프트 설정 (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "오디오 비트에 맞춰 다이내믹 배경 레이어가 박동하도록 합니다. 다른 비주얼라이저를 사용 중이라면 비활성화를 권장합니다.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "부드러운 스크롤",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "스크롤 애니메이션 속도를 늦추고 가사 텍스트 크기 조절 애니메이션을 비활성화합니다.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "비디오 전체 화면에서 곡 색상 팔레트 사용",
@@ -797,6 +865,80 @@
     "message": "발음",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "로컬 / 오프라인",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "오프라인 일본어 사전 (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "정확한 일본어 발음을 위한 형태소 분석 사전 (~17 MB). 브라우저에 로컬로 저장됩니다.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "다운로드",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "삭제",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "설치됨 (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "설치되지 않음 (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "다운로드 중 (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "일본어 Kuromoji 사전 (~17 MB)을 다운로드하시겠습니까? 오프라인 일본어 발음을 위해 브라우저에 로컬로 저장됩니다.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "오프라인 일본어 Kuromoji 사전을 삭제하시겠습니까?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "오프라인 아랍어 발음 구별 부호 모델 (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "아랍어 가사의 타슈킬과 정확한 모음을 복원하기 위한 신경망 모델 (~74.4 MB). 브라우저에 로컬로 저장됩니다.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "아랍어 CaTT 발음 구별 부호 모델 (~74.4 MB)을 다운로드하시겠습니까? 오프라인 아랍어 발음을 위해 브라우저에 로컬로 저장됩니다.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "오프라인 아랍어 CaTT 모델을 삭제하시겠습니까?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "Google 번역",
     "description": "Translation provider option"
@@ -868,14 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (Apple Music DB)"
-  },
-  "labelDefaultProvider": {
-    "message": "기본 가사 제공자",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "선호하는 가사 소스를 선택하세요.",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "인터페이스",
@@ -989,54 +1123,6 @@
     "message": "캐시 정보를 사용할 수 없습니다.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "음역 대상 문자",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "발음 가이드를 위해 가사를 이 문자로 변환합니다 (예: 영어를 일본어 가타카나로 변환). 비라틴 문자는 Gemini 또는 OpenRouter가 필요합니다.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google 번역은 라틴 문자(로마자) 음역만 지원합니다. 다른 문자를 활성화하려면 음역 제공자로 Gemini 또는 OpenRouter를 선택하세요.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "라틴 문자 (로마자 / 발음 기호)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "일본어 (가타카나)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "한국어 (한글)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "키릴 문자 (러시아어)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "데바나가리 (힌디어)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "아랍 문자",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "히브리 문자",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "그리스 문자",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "태국 문자",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "제공자 선택...",
     "description": "Select a Provider on settings menu"
@@ -1048,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "모든 제공자가 추가되었습니다",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "성능",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "부드러운 스크롤",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "스크롤 애니메이션 속도를 늦추고 가사 텍스트 크기 조절 애니메이션을 비활성화합니다.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "자동",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL은 공식적으로 33개 언어를 지원합니다. 지원되지 않는 언어가 선택되면 자동으로 Google 번역으로 대체됩니다.",

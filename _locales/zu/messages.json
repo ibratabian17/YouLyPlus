@@ -59,6 +59,10 @@
     "message": "Ukugqanyiswa kwezwi nezwi",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "Ukusebenza",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "Ukuphathwa Yedatha",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "Ibonisa imininingwane yenkondlo kuhlanganise nebha yokuthuthuka, usuku lokukhishwa, isihloko nomculi kwimodi yesikrini esigcwele.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "Khubaza Ibha Yenqubekelaphambili Yolwazi Lwengoma",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "Fihla ibha yenqubekelaphambili kusibonisi solwazi lwengoma sesikrini esigcwele.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "Sebenzisa i-SponsorBlock API",
@@ -471,6 +483,54 @@
     "message": "Insizakalo Yezinhlamvu Zesi-Latin",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "Umbhalo Oqondiwe Wokuhumusha Ngomsindo",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Guqula amagama engoma abe kulo mbhalo ukuze uthole imihlahlandlela yokuphimisa (isb. IsiNgisi siye kusi-Japanese Katakana). Okuqondiwe okungewona owesi-Latin kudinga i-Gemini noma i-OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "I-Google Translate isekela kuphela ukuhumusha ngomsindo kwesi-Latin (romaji). Khetha i-Gemini noma i-OpenRouter njengomhlinzeki wokuhumusha ngomsindo ukuze unike amandla eminye imibhalo.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Isi-Latin (Romaji / Ifonetiki)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Isi-Japanese (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Isi-Korean (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Isi-Cyrillic (Isi-Russian)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Isi-Devanagari (Isi-Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Isi-Arabic",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Isi-Hebrew",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Isi-Greek",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Isi-Thai",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "Umhlinzeki Wezinhlamvu Zesi-Latin",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "Ulimi Oluhlosiwe",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "Faka ikhodi yolimi enezinhlamvu ezi-2 (isib. 'zu' kwisi-Zulu).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "Ngokuzenzakalelayo",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "Izilungiselelo Zemiyalo Ethuthukisiwe (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "Kwenza izingqimba zengemuva le-dynamic zishaye ngokuvumelana nesigqi somsindo. Kufanele icishwe uma usebenzisa i-Better Lyrics Shaders.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "Ukuskrola Okuthule",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Ukuskrola kancane futhi uvale ukushintsha usayizi wombhalo kumagama engoma.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "Sebenzisa iphalethi yengoma kumagama omculo wesikrini esigcwele",
@@ -797,6 +865,80 @@
     "message": "Izinhlamvu Zesi-Latin",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "Okwasekhaya / Okungaxhunyiwe ku-inthanethi",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "Isichazamazwi Se-Japanese Esingaxhunyiwe ku-inthanethi (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "Isichazamazwi sokuhlaziya ukwakheka kwamagama (~17 MB) sokuphimisela kahle isi-Japanese. Silondolozwe kusiphequluli sakho.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "Landa",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "Susa",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "Kufakiwe (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "Akufakiwe (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "Iyalanda (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "Landa isichazamazwi se-Japanese se-Kuromoji (~17 MB)? Sizolondolozwa kusiphequluli sakho ukuze uphimise isi-Japanese ungaxhunyiwe ku-inthanethi.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "Uqinisekile ukuthi ufuna ukususa isichazamazwi se-Japanese se-Kuromoji esingaxhunyiwe ku-inthanethi?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "Imodeli Yokufaka Izimpawu Zesi-Arabic Engaxhunyiwe ku-inthanethi (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "Imodeli ye-neural (~74.4 MB) yokubuyisela i-Tashkeel nonkamisa abanembile emazwini ezingoma zesi-Arabic. Ilondolozwe kusiphequluli sakho.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "Landa imodeli yokufaka izimpawu zesi-Arabic ye-CaTT (~74.4 MB)? Izolondolozwa kusiphequluli sakho ukuze uphimise isi-Arabic ungaxhunyiwe ku-inthanethi.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "Uqinisekile ukuthi ufuna ukususa imodeli yesi-Arabic ye-CaTT engaxhunyiwe ku-inthanethi?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "Google Translate",
     "description": "Translation provider option"
@@ -868,22 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "I-BiniLyrics (Apple Music DB)"
-  },
-  "msgCacheClearedFailed": {
-    "message": "Kuhluleke ukusula i-cache.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelDefaultProvider": {
-    "message": "Umhlinzeki wamagama omculo ozenzakalelayo",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "Khetha umthombo wamagama omculo owuthandayo.",
-    "description": "Description for provider dropdown"
-  },
-  "confirmClearLocalLyrics": {
-    "message": "Ingabe uyafuna ukusula wonke amagama omculo wendawo?",
-    "description": "Confirm dialog for clearing all local lyrics"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -997,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "Umbhalo Oqondiwe Wokuhumusha Ngomsindo",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "Guqula amagama engoma abe kulo mbhalo ukuze uthole imihlahlandlela yokuphimisa (isb. IsiNgisi siye kusi-Japanese Katakana). Okuqondiwe okungewona owesi-Latin kudinga i-Gemini noma i-OpenRouter.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "I-Google Translate isekela kuphela ukuhumusha ngomsindo kwesi-Latin (romaji). Khetha i-Gemini noma i-OpenRouter njengomhlinzeki wokuhumusha ngomsindo ukuze unike amandla eminye imibhalo.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "Isi-Latin (Romaji / Ifonetiki)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "Isi-Japanese (Katakana)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "Isi-Korean (Hangul)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "Isi-Cyrillic (Isi-Russian)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "Isi-Devanagari (Isi-Hindi)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "Isi-Arabic",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "Isi-Hebrew",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "Isi-Greek",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "Isi-Thai",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "Khetha umhlinzeki...",
     "description": "Select a Provider on settings menu"
@@ -1056,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "Bonke abahlinzeki bengeziwe",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "Ukusebenza",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "Ukuskrola Okuthule",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "Ukuskrola kancane futhi uvale ukushintsha usayizi wombhalo kumagama engoma.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "Ngokuzenzakalelayo",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "I-DeepL isekela ngokusemthethweni izilimi ezingu-33. Uma kucelwa ulimi olungasekelwe, ukuhumusha kuzobuyela ngokuzenzakalelayo ku-Google Translate.",

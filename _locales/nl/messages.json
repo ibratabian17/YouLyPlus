@@ -59,6 +59,10 @@
     "message": "Woord-voor-woord accentuering",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "Prestaties",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "Gegevensbeheer",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "Toont nummerdetails in volledig scherm-modus, inclusief voortgangsbalk, releasedatum, titel en artiest.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "Zoekbalk voor nummerinfo uitschakelen",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "Verberg de voortgangsbalk in het informatiescherm voor nummers op volledig scherm.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "Gebruik SponsorBlock API",
@@ -471,6 +483,54 @@
     "message": "Romanisatiesubservice (voor niet-Latijnse schriften)",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "Doelschrift voor transliteratie",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Zet songteksten om naar dit schrift voor uitspraakbegeleiding (bijv. Engels naar Japans Katakana). Voor niet-Latijnse doelen is Gemini of OpenRouter vereist.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate ondersteunt alleen Latijnse (romaji) transliteratie. Selecteer Gemini of OpenRouter als transliteratieprovider om andere schriften in te schakelen.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latijn (Romaji / Fonetisch)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japans (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Koreaans (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Cyrillisch (Russisch)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arabisch",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Hebreeuws",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Grieks",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Thais",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "Romanisatieprovider",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "Doeltaal",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "Voer de 2-letterige taalcode in (bijv: 'nl' voor Nederlands).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "Automatisch",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "Geavanceerde Prompt Instellingen (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "Laat dynamische achtergrondlagen pulseren met het ritme van de audio. Moet uitgeschakeld worden als u Better Lyrics Shaders gebruikt.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "Ontspannen scrollen",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Langzamere scrollanimatie en uitschakelen van tekstformaatanimatie voor de songteksten.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "Gebruik songpalet voor teksten op volledig scherm",
@@ -797,6 +865,80 @@
     "message": "Romanisatie",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "Lokaal / Offline",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "Offline Japans woordenboek (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "Morfologisch analysewoordenboek (~17 MB) voor nauwkeurige Japanse uitspraak. Lokaal opgeslagen in de browser.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "Downloaden",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "Verwijderen",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "Geïnstalleerd (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "Niet geïnstalleerd (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "Downloaden (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "Het Japanse Kuromoji-woordenboek (~17 MB) downloaden? Het wordt lokaal in uw browser opgeslagen voor offline Japanse uitspraak.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "Weet u zeker dat u het offline Japanse Kuromoji-woordenboek wilt verwijderen?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "Offline Arabisch diakritisch model (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "Neuraal diakritiseringsmodel (~74.4 MB) voor het herstellen van Tashkeel en nauwkeurige klinkers in Arabische songteksten. Lokaal opgeslagen in de browser.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "Het Arabische CaTT-diakritiseringsmodel (~74.4 MB) downloaden? Het wordt lokaal in uw browser opgeslagen voor offline Arabische uitspraak.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "Weet u zeker dat u het offline Arabische CaTT-model wilt verwijderen?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "Google Translate",
     "description": "Translation provider option"
@@ -868,18 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (Apple Music DB)"
-  },
-  "msgCacheClearedFailed": {
-    "message": "Wissen van cache mislukt.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelDefaultProvider": {
-    "message": "Standaard songtekstprovider",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "Kies uw favoriete songtekstbron.",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -993,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "Doelschrift voor transliteratie",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "Zet songteksten om naar dit schrift voor uitspraakbegeleiding (bijv. Engels naar Japans Katakana). Voor niet-Latijnse doelen is Gemini of OpenRouter vereist.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google Translate ondersteunt alleen Latijnse (romaji) transliteratie. Selecteer Gemini of OpenRouter als transliteratieprovider om andere schriften in te schakelen.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "Latijn (Romaji / Fonetisch)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "Japans (Katakana)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "Koreaans (Hangul)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "Cyrillisch (Russisch)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "Devanagari (Hindi)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "Arabisch",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "Hebreeuws",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "Grieks",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "Thais",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "Selecteer provider...",
     "description": "Select a Provider on settings menu"
@@ -1052,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "Alle providers toegevoegd",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "Prestaties",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "Ontspannen scrollen",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "Langzamere scrollanimatie en uitschakelen van tekstformaatanimatie voor de songteksten.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "Automatisch",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL ondersteunt officieel 33 talen. Als een niet-ondersteunde taal wordt gevraagd, valt de vertaling automatisch terug op Google Translate.",

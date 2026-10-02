@@ -59,6 +59,10 @@
     "message": "வார்த்தைக்கு வார்த்தை சிறப்பம்சமாக்கல்",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "செயல்திறன்",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "தரவு மேலாண்மை",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "முன்னேற்றப் பட்டி, வெளியீட்டுத் தேதி, தலைப்பு மற்றும் கலைஞர் உள்ளிட்ட பாடல் விவரங்களை முழுத் திரை முறையில் காட்டுகிறது.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "பாடல் தகவல் சீக்பாரை முடக்கு",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "முழுத்திரை பாடல் தகவல் காட்சியிலிருந்து முன்னேற்றப் பட்டையை மறைக்கவும்.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "SponsorBlock API ஐப் பயன்படுத்தவும்",
@@ -471,6 +483,54 @@
     "message": "ரோமானைசேஷன் (லத்தீன் அல்லாத எழுத்துக்களுக்கு) சேவை",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "எழுத்துப்பெயர்ப்பு இலக்கு எழுத்துமுறை",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "உச்சரிப்பு வழிகாட்டிகளுக்காக பாடல் வரிகளை இந்த எழுத்துமுறைக்கு மாற்றவும் (எ.கா., ஆங்கிலத்திலிருந்து ஜப்பானிய கடகானா). லத்தீன் அல்லாத இலக்குகளுக்கு Gemini அல்லது OpenRouter தேவை.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate லத்தீன் (ரோமாஜி) எழுத்துப்பெயர்ப்பை மட்டுமே ஆதரிக்கிறது. பிற எழுத்துமுறைகளை இயக்க எழுத்துப்பெயர்ப்பு வழங்குநராக Gemini அல்லது OpenRouter ஐத் தேர்ந்தெடுக்கவும்.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "லத்தீன் (ரோமாஜி / ஒலிப்பு)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "ஜப்பானிய (கடகானா)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "கொரிய (ஹங்குல்)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "சிரிலிக் (ரஷ்ய)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "தேவநாகரி (இந்தி)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "அரபு",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "ஹீப்ரு",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "கிரேக்கம்",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "தாய்",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "ரோமானைசேஷன் வழங்குநர்",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "இலக்கு மொழி",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "2-எழுத்து மொழி குறியீட்டை உள்ளிடவும் (உதாரணமாக: தமிழிற்கு 'ta').",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "தானியங்கி",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "மேம்பட்ட ப்ராம்ட் அமைப்புகள் (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "டைனமிக் பின்னணி அடுக்குகளை ஆடியோவின் தாளத்திற்கு ஏற்ப துடிக்க வைக்கிறது. Better Lyrics Shaders ஐப் பயன்படுத்தினால் முடக்கப்பட வேண்டும்.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "மெதுவான உருளல்",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "மெதுவான உருளல் அசைவூட்டம் மற்றும் பாடல் வரிகளுக்கான உரை மறுஅளவிடல் அசைவூட்டத்தை முடக்கவும்.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "முழுத் திரை உரைகளுக்கு பாடல் தட்டுகளைப் பயன்படுத்தவும்",
@@ -797,6 +865,80 @@
     "message": "ரோமானைசேஷன்",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "உள்ளூர் / ஆஃப்லைன்",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "ஆஃப்லைன் ஜப்பானிய அகராதி (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "துல்லியமான ஜப்பானிய உச்சரிப்புக்கான உருவவியல் பகுப்பாய்வி அகராதி (~17 MB). உலாவியில் உள்ளூரில் சேமிக்கப்படுகிறது.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "பதிவிறக்கு",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "நீக்கு",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "நிறுவப்பட்டது (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "நிறுவப்படவில்லை (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "பதிவிறக்குகிறது (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "ஜப்பானிய Kuromoji அகராதியை (~17 MB) பதிவிறக்கவா? ஆஃப்லைன் ஜப்பானிய உச்சரிப்புக்காக இது உங்கள் உலாவியில் உள்ளூரில் சேமிக்கப்படும்.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "ஆஃப்லைன் ஜப்பானிய Kuromoji அகராதியை நிச்சயமாக நீக்க விரும்புகிறீர்களா?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "ஆஃப்லைன் அரபு டயாக்ரிடைசர் மாதிரி (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "அரபு பாடல் வரிகளில் தஷ்கீல் மற்றும் துல்லியமான உயிரெழுத்துக்களை மீட்டெடுப்பதற்கான நியூரல் டயாக்ரிடைசர் மாதிரி (~74.4 MB). உலாவியில் உள்ளூரில் சேமிக்கப்படுகிறது.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "அரபு CaTT டயாக்ரிடைசர் மாதிரியை (~74.4 MB) பதிவிறக்கவா? ஆஃப்லைன் அரபு உச்சரிப்புக்காக இது உங்கள் உலாவியில் உள்ளூரில் சேமிக்கப்படும்.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "ஆஃப்லைன் அரபு CaTT மாதிரியை நிச்சயமாக நீக்க விரும்புகிறீர்களா?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "கூகுள் மொழிபெயர்ப்பு",
     "description": "Translation provider option"
@@ -868,22 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (Apple Music DB)"
-  },
-  "msgCacheClearedFailed": {
-    "message": "தேக்ககத்தை அழிப்பதில் தோல்வி.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelDefaultProvider": {
-    "message": "இயல்புநிலை பாடல் வரிகள் வழங்குநர்",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "உங்களுக்கு பிடித்த பாடல் வரிகள் ஆதாரத்தைத் தேர்ந்தெடுக்கவும்.",
-    "description": "Description for provider dropdown"
-  },
-  "confirmClearLocalLyrics": {
-    "message": "அனைத்து உள்ளூர் வரிகளையும் நீக்க விரும்புகிறீர்களா?",
-    "description": "Confirm dialog for clearing all local lyrics"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -997,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "எழுத்துப்பெயர்ப்பு இலக்கு எழுத்துமுறை",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "உச்சரிப்பு வழிகாட்டிகளுக்காக பாடல் வரிகளை இந்த எழுத்துமுறைக்கு மாற்றவும் (எ.கா., ஆங்கிலத்திலிருந்து ஜப்பானிய கடகானா). லத்தீன் அல்லாத இலக்குகளுக்கு Gemini அல்லது OpenRouter தேவை.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google Translate லத்தீன் (ரோமாஜி) எழுத்துப்பெயர்ப்பை மட்டுமே ஆதரிக்கிறது. பிற எழுத்துமுறைகளை இயக்க எழுத்துப்பெயர்ப்பு வழங்குநராக Gemini அல்லது OpenRouter ஐத் தேர்ந்தெடுக்கவும்.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "லத்தீன் (ரோமாஜி / ஒலிப்பு)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "ஜப்பானிய (கடகானா)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "கொரிய (ஹங்குல்)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "சிரிலிக் (ரஷ்ய)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "தேவநாகரி (இந்தி)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "அரபு",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "ஹீப்ரு",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "கிரேக்கம்",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "தாய்",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "வழங்குநரைத் தேர்ந்தெடுக்கவும்...",
     "description": "Select a Provider on settings menu"
@@ -1056,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "அனைத்து வழங்குநர்களும் சேர்க்கப்பட்டனர்",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "செயல்திறன்",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "மெதுவான உருளல்",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "மெதுவான உருளல் அசைவூட்டம் மற்றும் பாடல் வரிகளுக்கான உரை மறுஅளவிடல் அசைவூட்டத்தை முடக்கவும்.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "தானியங்கி",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL அதிகாரப்பூர்வமாக 33 மொழிகளை ஆதரிக்கிறது. ஆதரிக்கப்படாத மொழி கோரப்பட்டால், மொழிபெயர்ப்பு தானாகவே Google மொழிபெயர்ப்பிற்கு மாறும்.",

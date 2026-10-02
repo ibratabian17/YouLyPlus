@@ -59,6 +59,10 @@
     "message": "逐字高亮",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "性能",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "数据管理",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "在全屏模式下显示曲目详情，包括进度条、发行日期、标题和艺术家。",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "禁用歌曲信息进度条",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "从全屏歌曲信息显示中隐藏进度条。",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "使用 SponsorBlock API",
@@ -471,6 +483,54 @@
     "message": "注音/拼音服务（针对非拉丁脚本）",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "音译目标文字",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "将歌词转换为此文字以提供发音指南（例如：英文转日文片假名）。非拉丁字符需要 Gemini 或 OpenRouter。",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google 翻译仅支持拉丁字母（罗马字）音译。选择 Gemini 或 OpenRouter 作为音译提供商以启用其他文字。",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "拉丁字母（罗马字 / 拼音）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "日文（片假名）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "韩文（谚文）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "西里尔字母（俄语）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "天城文（印地语）",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "阿拉伯文",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "希伯来文",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "希腊文",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "泰文",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "注音/拼音提供商",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "目标语言",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "请输入 2 位语言代码（例如：简体中文为 'zh-CN'，英文为 'en'）。",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "自动",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "高级提示词设置 (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "使动态背景层随音频节拍脉冲。如果您使用 Better Lyrics Shaders 或其他可视化工具，请禁用此设置。",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "平缓滚动",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "更慢的滚动动画，并禁用歌词的文字缩放动画。",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "在视频全屏模式下使用曲目调色板颜色",
@@ -797,6 +865,80 @@
     "message": "注音",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "本地 / 离线",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "离线日语词典 (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "用于准确日语注音与发音的形态分析词典 (~17 MB)。保存在浏览器本地。",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "下载",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "删除",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "已安装 (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "未安装 (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "正在下载 (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "是否下载日语 Kuromoji 词典 (~17 MB)？它将保存在浏览器本地以用于离线日语注音与发音。",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "确定要删除离线日语 Kuromoji 词典吗？",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "离线阿拉伯语变音符号模型 (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "用于恢复阿拉伯语歌词中 Tashkeel 与准确元音的神经变音符号模型 (~74.4 MB)。保存在浏览器本地。",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "是否下载阿拉伯语 CaTT 变音符号模型 (~74.4 MB)？它将保存在浏览器本地以用于离线阿拉伯语发音。",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "确定要删除离线阿拉伯语 CaTT 模型吗？",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "Google 翻译",
     "description": "Translation provider option"
@@ -868,14 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (Apple Music DB)"
-  },
-  "labelDefaultProvider": {
-    "message": "默认歌词提供商",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "选择您首选的歌词来源。",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "界面",
@@ -989,54 +1123,6 @@
     "message": "缓存信息不可用。",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "音译目标文字",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "将歌词转换为此文字以提供发音指南（例如：英文转日文片假名）。非拉丁字符需要 Gemini 或 OpenRouter。",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google 翻译仅支持拉丁字母（罗马字）音译。选择 Gemini 或 OpenRouter 作为音译提供商以启用其他文字。",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "拉丁字母（罗马字 / 拼音）",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "日文（片假名）",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "韩文（谚文）",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "西里尔字母（俄语）",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "天城文（印地语）",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "阿拉伯文",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "希伯来文",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "希腊文",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "泰文",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "选择提供商...",
     "description": "Select a Provider on settings menu"
@@ -1048,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "已添加所有提供商",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "性能",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "平缓滚动",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "更慢的滚动动画，并禁用歌词的文字缩放动画。",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "自动",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL 官方支持 33 种语言。如果请求不受支持的语言，翻译将自动回退到 Google 翻译。",

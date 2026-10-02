@@ -59,6 +59,10 @@
     "message": "Uangaziaji wa Neno kwa Neno",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "Utendaji",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "Usimamizi wa Data",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "Huonyesha maelezo ya wimbo ikiwa ni pamoja na bar ya maendeleo, tarehe ya kutolewa, kichwa na msanii katika hali ya skrini nzima.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "Zima upau wa maendeleo ya maelezo ya wimbo",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "Ficha upau wa maendeleo kutoka kwenye onyesho la skrini nzima la maelezo ya wimbo.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "Tumia API ya SponsorBlock",
@@ -471,6 +483,54 @@
     "message": "Huduma ya Uandishi wa Kilatini",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "Maandishi Lengwa ya Unukuzi",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Badilisha maneno ya wimbo kuwa maandishi haya kwa miongozo ya matamshi (k.m., Kiingereza hadi Kikatakana cha Kijapani). Malengo yasiyo ya Kilatini yanahitaji Gemini au OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate inasaidia unukuzi wa Kilatini (romaji) pekee. Chagua Gemini au OpenRouter kama Mtoa Huduma wa Unukuzi ili kuwezesha maandishi mengine.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Kilatini (Romaji / Fonetiki)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Kijapani (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Kikorea (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Kisirili (Kirusi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Kidevanagari (Kihindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Kiarabu",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Kiebrania",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Kigiriki",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Kithai",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "Mtoa huduma wa Uandishi wa Kilatini",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "Lugha Lengwa",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "Weka nambari ya lugha yenye herufi 2 (k.m. 'sw' kwa Kiswahili).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "Kiotomatiki",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "Mipangilio ya Maagizo ya Hali ya Juu (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "Hufanya tabaka za mandhari ya dynamic kuitikia midundo ya sauti. Inapaswa kuzimwa ikiwa unatumia Better Lyrics Shaders.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "Usogezaji wa Utulivu",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Uhuishaji wa polepole wa kusogeza na kulemaza uhuishaji wa kubadilisha ukubwa wa maandishi ya nyimbo.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "Tumia palette ya wimbo kwa mashairi ya skrini nzima",
@@ -797,6 +865,80 @@
     "message": "Uandishi wa Kilatini",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "Ndani / Nje ya mtandao",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "Kamusi ya Kijapani ya Nje ya Mtandao (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "Kamusi ya kichanganuzi cha kimofolojia (~17 MB) kwa matamshi sahihi ya Kijapani. Imehifadhiwa kwenye kivinjari.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "Pakua",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "Futa",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "Imesakinishwa (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "Haijasakinishwa (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "Inapakua (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "Pakua kamusi ya Kijapani ya Kuromoji (~17 MB)? Itahifadhiwa kwenye kivinjari chako kwa matamshi ya Kijapani nje ya mtandao.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "Je, una uhakika unataka kufuta kamusi ya Kijapani ya Kuromoji ya nje ya mtandao?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "Mfano wa Uwekaji Alama wa Kiarabu Nje ya Mtandao (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "Mfano wa mfumo wa neva (~74.4 MB) wa kurejesha Tashkeel na irabu sahihi katika maneno ya nyimbo za Kiarabu. Umehifadhiwa kwenye kivinjari.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "Pakua mfano wa uwekaji alama wa Kiarabu wa CaTT (~74.4 MB)? Utahifadhiwa kwenye kivinjari chako kwa matamshi ya Kiarabu nje ya mtandao.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "Je, una uhakika unataka kufuta mfano wa Kiarabu wa CaTT wa nje ya mtandao?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "Google Translate",
     "description": "Translation provider option"
@@ -868,22 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (Apple Music DB)"
-  },
-  "msgCacheClearedFailed": {
-    "message": "Imeshindwa kufuta cache.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelDefaultProvider": {
-    "message": "Mtoa huduma chaguo-msingi wa mashairi",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "Chagua chanzo chako cha mashairi unachokipenda.",
-    "description": "Description for provider dropdown"
-  },
-  "confirmClearLocalLyrics": {
-    "message": "Je, unataka kufuta mashairi yote ya ndani?",
-    "description": "Confirm dialog for clearing all local lyrics"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -997,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "Maandishi Lengwa ya Unukuzi",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "Badilisha maneno ya wimbo kuwa maandishi haya kwa miongozo ya matamshi (k.m., Kiingereza hadi Kikatakana cha Kijapani). Malengo yasiyo ya Kilatini yanahitaji Gemini au OpenRouter.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google Translate inasaidia unukuzi wa Kilatini (romaji) pekee. Chagua Gemini au OpenRouter kama Mtoa Huduma wa Unukuzi ili kuwezesha maandishi mengine.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "Kilatini (Romaji / Fonetiki)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "Kijapani (Katakana)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "Kikorea (Hangul)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "Kisirili (Kirusi)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "Kidevanagari (Kihindi)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "Kiarabu",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "Kiebrania",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "Kigiriki",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "Kithai",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "Chagua mtoa huduma...",
     "description": "Select a Provider on settings menu"
@@ -1056,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "Watoa huduma wote wameongezwa",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "Utendaji",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "Usogezaji wa Utulivu",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "Uhuishaji wa polepole wa kusogeza na kulemaza uhuishaji wa kubadilisha ukubwa wa maandishi ya nyimbo.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "Kiotomatiki",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL inasaidia lugha 33 rasmi. Ikiwa lugha isiyotumika itaombwa, tafsiri itarudi kiotomatiki kwa Google Translate.",

@@ -59,6 +59,10 @@
     "message": "ไฮไลต์แบบคำต่อคำ",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "ประสิทธิภาพ",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "การจัดการข้อมูล",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "แสดงรายละเอียดเพลงในโหมดเต็มหน้าจอ รวมถึงแถบความคืบหน้า วันที่วางจำหน่าย ชื่อเพลง และศิลปิน",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "ปิดใช้งานแถบเลื่อนข้อมูลเพลง",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "ซ่อนแถบแสดงความคืบหน้าจากการแสดงข้อมูลเพลงแบบเต็มหน้าจอ",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "ใช้ SponsorBlock API",
@@ -471,6 +483,54 @@
     "message": "บริการเขียนคำอ่าน (สำหรับตัวอักษรที่ไม่ใช่ภาษาละติน)",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "อักษรเป้าหมายการทับศัพท์",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "แปลงเนื้อเพลงเป็นอักษรนี้เพื่อเป็นแนวทางการออกเสียง (เช่น อังกฤษเป็นคาตาคานะญี่ปุ่น) เป้าหมายที่ไม่ใช่ละตินต้องใช้ Gemini หรือ OpenRouter",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google แปลภาษารองรับเฉพาะการทับศัพท์ภาษาละติน (โรมาจิ) ให้เลือก Gemini หรือ OpenRouter เป็นผู้ให้บริการถอดเสียงเพื่อเปิดใช้อักษรอื่น",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "ละติน (โรมาจิ / สัทศาสตร์)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "ญี่ปุ่น (คาตาคานะ)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "เกาหลี (ฮันกึล)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "ซีริลลิก (รัสเซีย)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "เทวนาครี (ฮินดี)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "อาหรับ",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "ฮีบรู",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "กรีก",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "ไทย",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "ผู้ให้บริการเขียนคำอ่าน",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "ภาษาเป้าหมาย",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "โปรดป้อนรหัสภาษา 2 ตัวอักษร (เช่น 'th' สำหรับภาษาไทย, 'en' สำหรับภาษาอังกฤษ)",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "อัตโนมัติ",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "การตั้งค่า Prompt ขั้นสูง (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "ทำให้ชั้นพื้นหลังไดนามิกเต้นตามจังหวะเสียง หากคุณใช้ Better Lyrics Shaders หรือ Visualizer อื่นๆ คุณควรปิดการตั้งค่านี้",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "การเลื่อนอย่างผ่อนคลาย",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "ภาพเคลื่อนไหวการเลื่อนที่ช้าลงและปิดภาพเคลื่อนไหวการปรับขนาดข้อความสำหรับเนื้อเพลง",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "ใช้จานสีเพลงสำหรับสีเนื้อเพลงในโหมดวิดีโอเต็มหน้าจอ",
@@ -797,6 +865,80 @@
     "message": "การออกเสียง",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "ในเครื่อง / ออฟไลน์",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "พจนานุกรมภาษาญี่ปุ่นออฟไลน์ (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "พจนานุกรมวิเคราะห์โครงสร้างคำ (~17 MB) เพื่อการออกเสียงภาษาญี่ปุ่นที่แม่นยำ จัดเก็บไว้ในเบราว์เซอร์",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "ดาวน์โหลด",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "ลบ",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "ติดตั้งแล้ว (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "ยังไม่ได้ติดตั้ง (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "กำลังดาวน์โหลด (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "ดาวน์โหลดพจนานุกรมภาษาญี่ปุ่น Kuromoji (~17 MB) หรือไม่? พจนานุกรมจะถูกเก็บไว้ในเบราว์เซอร์ของคุณสำหรับการออกเสียงภาษาญี่ปุ่นแบบออฟไลน์",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "คุณแน่ใจหรือไม่ว่าต้องการลบพจนานุกรมภาษาญี่ปุ่น Kuromoji แบบออฟไลน์?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "โมเดลเครื่องหมายกำกับเสียงภาษาอาหรับออฟไลน์ (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "โมเดลโครงข่ายประสาทสำหรับการใส่เครื่องหมายกำกับเสียง (~74.4 MB) เพื่อคืนค่า Tashkeel และสระที่ถูกต้องในเนื้อเพลงภาษาอาหรับ จัดเก็บไว้ในเบราว์เซอร์",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "ดาวน์โหลดโมเดลภาษาอาหรับ CaTT (~74.4 MB) หรือไม่? โมเดลจะถูกเก็บไว้ในเบราว์เซอร์สำหรับการออกเสียงภาษาอาหรับแบบออฟไลน์",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "คุณแน่ใจหรือไม่ว่าต้องการลบโมเดลภาษาอาหรับ CaTT แบบออฟไลน์?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "Google แปลภาษา",
     "description": "Translation provider option"
@@ -868,14 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (Apple Music DB)"
-  },
-  "labelDefaultProvider": {
-    "message": "ผู้ให้บริการเนื้อเพลงเริ่มต้น",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "เลือกแหล่งเนื้อเพลงที่คุณต้องการ",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -989,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "อักษรเป้าหมายการทับศัพท์",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "แปลงเนื้อเพลงเป็นอักษรนี้เพื่อเป็นแนวทางการออกเสียง (เช่น อังกฤษเป็นคาตาคานะญี่ปุ่น) เป้าหมายที่ไม่ใช่ละตินต้องใช้ Gemini หรือ OpenRouter",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google แปลภาษารองรับเฉพาะการทับศัพท์ภาษาละติน (โรมาจิ) ให้เลือก Gemini หรือ OpenRouter เป็นผู้ให้บริการถอดเสียงเพื่อเปิดใช้อักษรอื่น",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "ละติน (โรมาจิ / สัทศาสตร์)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "ญี่ปุ่น (คาตาคานะ)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "เกาหลี (ฮันกึล)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "ซีริลลิก (รัสเซีย)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "เทวนาครี (ฮินดี)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "อาหรับ",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "ฮีบรู",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "กรีก",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "ไทย",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "เลือกผู้ให้บริการ...",
     "description": "Select a Provider on settings menu"
@@ -1048,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "เพิ่มผู้ให้บริการทั้งหมดแล้ว",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "ประสิทธิภาพ",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "การเลื่อนอย่างผ่อนคลาย",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "ภาพเคลื่อนไหวการเลื่อนที่ช้าลงและปิดภาพเคลื่อนไหวการปรับขนาดข้อความสำหรับเนื้อเพลง",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "อัตโนมัติ",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL รองรับ 33 ภาษาอย่างเป็นทางการ หากเลือกภาษาที่ไม่รองรับ ระบบจะสลับไปใช้ Google Translate โดยอัตโนมัติ",

@@ -59,6 +59,10 @@
     "message": "تمبيز كلمة بكلمة",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "الأداء",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "إدارة البيانات",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "يعرض تفاصيل الأغنية في وضع ملء الشاشة، بما في ذلك شريط التقدم وتاريخ الإصدار والعنوان والفنان.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "تعطيل شريط تقدم معلومات الأغنية",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "إخفاء شريط التقدم من شاشة معلومات الأغنية في وضع ملء الشاشة.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "استخدام واجهة برمجة تطبيقات SponsorBlock",
@@ -471,6 +483,54 @@
     "message": "خدمة الرومنة (للكتابات غير اللاتينية)",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "نظام كتابة النقل الصوتي المستهدف",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "تحويل كلمات الأغاني إلى هذا النظام للمساعدة في النطق (مثل الإنجليزية إلى الكاتاكانا اليابانية). تتطلب الأنظمة غير اللاتينية استخدام Gemini أو OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "يدعم Google Translate النقل الصوتي اللاتيني (روماجي) فقط. اختر Gemini أو OpenRouter كمزود للنقل الصوتي لتمكين الأنظمة الأخرى.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "لاتيني (روماجي / صوتي)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "ياباني (كاتاكانا)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "كوري (هانغول)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "سيريلي (روسي)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "ديفاناغاري (هندي)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "عربي",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "عبري",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "يوناني",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "تايلاندي",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "مزود الرومنة",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "اللغة المستهدفة",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "أدخل رمز اللغة المكون من حرفين (مثال: 'ar' للعربية).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "تلقائي",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "إعدادات الأوامر المتقدمة (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "يجعل طبقات الخلفية الديناميكية تنبض مع إيقاع الصوت. يجب تعطيله إذا كنت تستخدم Better Lyrics Shaders.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "تمرير هادئ",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "حركة تمرير أبطأ وتعطيل تحريك تغيير حجم النص لكلمات الأغاني.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "استخدام لوحة ألوان الأغنية للنصوص في وضع ملء الشاشة",
@@ -797,6 +865,80 @@
     "message": "الرومنة",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "محلي / دون اتصال",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "قاموس ياباني دون اتصال (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "قاموس التحليل الصرفي (~17 ميغابايت) لنطق ياباني دقيق. يتم تخزينه محلياً في المتصفح.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "تنزيل",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "حذف",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "مثبت (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "غير مثبت (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "جارٍ التنزيل (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "هل تريد تنزيل قاموس Kuromoji الياباني (~17 ميغابايت)؟ سيتم تخزينه محلياً في متصفحك للنطق الياباني دون اتصال.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "هل أنت متأكد من رغبتك في حذف قاموس Kuromoji الياباني غير المتصل؟",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "نموذج تشكيل العربية دون اتصال (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "نموذج تشكيل عصبي (~74.4 ميغابايت) لاستعادة التشكيل والحركات الدقيقة في كلمات الأغاني العربية. يتم تخزينه محلياً في المتصفح.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "هل تريد تنزيل نموذج التشكيل العربي CaTT (~74.4 ميغابايت)؟ سيتم تخزينه محلياً في متصفحك لنطق العربية دون اتصال.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "هل أنت متأكد من رغبتك في حذف نموذج CaTT العربي غير المتصل؟",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "ترجمة Google",
     "description": "Translation provider option"
@@ -868,14 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (قاعدة بيانات Apple Music)"
-  },
-  "labelDefaultProvider": {
-    "message": "مزود كلمات الأغاني الافتراضي",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "اختر مصدر كلمات الأغاني المفضل لديك.",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -989,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "نظام كتابة النقل الصوتي المستهدف",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "تحويل كلمات الأغاني إلى هذا النظام للمساعدة في النطق (مثل الإنجليزية إلى الكاتاكانا اليابانية). تتطلب الأنظمة غير اللاتينية استخدام Gemini أو OpenRouter.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "يدعم Google Translate النقل الصوتي اللاتيني (روماجي) فقط. اختر Gemini أو OpenRouter كمزود للنقل الصوتي لتمكين الأنظمة الأخرى.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "لاتيني (روماجي / صوتي)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "ياباني (كاتاكانا)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "كوري (هانغول)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "سيريلي (روسي)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "ديفاناغاري (هندي)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "عربي",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "عبري",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "يوناني",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "تايلاندي",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "اختر المزود...",
     "description": "Select a Provider on settings menu"
@@ -1048,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "تمت إضافة جميع المزودين",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "الأداء",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "تمرير هادئ",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "حركة تمرير أبطأ وتعطيل تحريك تغيير حجم النص لكلمات الأغاني.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "تلقائي",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "يدعم DeepL رسمياً 33 لغة. إذا تم طلب لغة غير مدعومة، فسيتم الرجوع تلقائياً إلى ترجمة Google.",

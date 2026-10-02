@@ -59,6 +59,10 @@
     "message": "هایلایت کلمه به کلمه",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "عملکرد",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "مدیریت داده‌ها",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "جزئیات آهنگ را در حالت تمام صفحه، شامل نوار پیشرفت، تاریخ انتشار، عنوان و هنرمند نشان می‌دهد.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "غیرفعال‌سازی نوار پیشرفت اطلاعات آهنگ",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "مخفی کردن نوار پیشرفت از نمایش تمام‌صفحه اطلاعات آهنگ.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "استفاده از SponsorBlock API",
@@ -471,6 +483,54 @@
     "message": "سرویس رومی‌سازی (برای خط‌های غیرلاتین)",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "خط مقصد نویسه‌گردانی",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "تبدیل متن آهنگ به این خط برای راهنمای تلفظ (مانند تبدیل انگلیسی به کاتاکانای ژاپنی). خطوط غیر لاتین به Gemini یا OpenRouter نیاز دارند.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "گوگل ترنسلیت فقط از نویسه‌گردانی لاتین (روماجی) پشتیبانی می‌کند. برای فعال‌سازی سایر خطوط، Gemini یا OpenRouter را به عنوان ارائه‌دهنده نویسه‌گردانی انتخاب کنید.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "لاتین (روماجی / آوانگاری)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "ژاپنی (کاتاکانا)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "کره‌ای (هانگول)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "سیریلیک (روسی)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "دواناگاری (هندی)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "عربی",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "عبری",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "یونانی",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "تایلندی",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "ارائه‌دهنده رومی‌سازی",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "زبان مقصد",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "کد زبان ۲ حرفی را وارد کنید (مثلاً: 'fa' برای فارسی).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "خودکار",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "تنظیمات پیشرفته Prompt (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "باعث می‌شود لایه‌های پس‌زمینه پویا با ریتم صدا به تپش درآیند. در صورت استفاده از Better Lyrics Shaders باید غیرفعال شود.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "پیمایش آرام",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "انیمیشن پیمایش کندتر و غیرفعال کردن انیمیشن تغییر اندازه متن ترانه.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "استفاده از پالت رنگ آهنگ برای متن در حالت تمام صفحه",
@@ -797,6 +865,80 @@
     "message": "رومی‌سازی",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "محلی / آفلاین",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "دیکشنری ژاپنی آفلاین (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "دیکشنری تحلیل صرفی (~17 مگابایت) برای تلفظ دقیق ژاپنی. ذخیره‌شده به صورت محلی در مرورگر.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "دانلود",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "حذف",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "نصب‌شده (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "نصب‌نشده (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "در حال دانلود (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "دیکشنری ژاپنی Kuromoji (~17 مگابایت) دانلود شود؟ این فایل برای تلفظ آفلاین ژاپنی در مرورگر شما ذخیره می‌شود.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "آیا از حذف دیکشنری ژاپنی Kuromoji آفلاین مطمئن هستید؟",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "مدل اعراب‌گذاری عربی آفلاین (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "مدل عصبی اعراب‌گذاری (~74.4 مگابایت) برای بازیابی تشکیل و حروف صدادار دقیق در متن آهنگ‌های عربی. ذخیره‌شده در مرورگر.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "مدل اعراب‌گذاری عربی CaTT (~74.4 مگابایت) دانلود شود؟ برای تلفظ آفلاین عربی در مرورگر شما ذخیره خواهد شد.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "آیا از حذف مدل آفلاین عربی CaTT مطمئن هستید؟",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "گوگل ترنسلیت",
     "description": "Translation provider option"
@@ -868,14 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (پایگاه داده اپل موزیک)"
-  },
-  "labelDefaultProvider": {
-    "message": "ارائه‌دهنده پیش‌فرض متن آهنگ",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "منبع متن آهنگ مورد علاقه خود را انتخاب کنید.",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -989,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "خط مقصد نویسه‌گردانی",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "تبدیل متن آهنگ به این خط برای راهنمای تلفظ (مانند تبدیل انگلیسی به کاتاکانای ژاپنی). خطوط غیر لاتین به Gemini یا OpenRouter نیاز دارند.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "گوگل ترنسلیت فقط از نویسه‌گردانی لاتین (روماجی) پشتیبانی می‌کند. برای فعال‌سازی سایر خطوط، Gemini یا OpenRouter را به عنوان ارائه‌دهنده نویسه‌گردانی انتخاب کنید.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "لاتین (روماجی / آوانگاری)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "ژاپنی (کاتاکانا)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "کره‌ای (هانگول)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "سیریلیک (روسی)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "دواناگاری (هندی)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "عربی",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "عبری",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "یونانی",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "تایلندی",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "انتخاب ارائه‌دهنده...",
     "description": "Select a Provider on settings menu"
@@ -1048,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "همه ارائه‌دهنده‌ها اضافه شدند",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "عملکرد",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "پیمایش آرام",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "انیمیشن پیمایش کندتر و غیرفعال کردن انیمیشن تغییر اندازه متن ترانه.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "خودکار",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "دیپ‌ال رسماً از ۳۳ زبان پشتیبانی می‌کند. در صورت درخواست زبانی که پشتیبانی نمی‌شود، ترجمه به‌طور خودکار به مترجم گوگل بازمی‌گردد.",

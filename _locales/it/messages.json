@@ -59,6 +59,10 @@
     "message": "Evidenziazione parola per parola",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "Prestazioni",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "Gestione dati",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "Mostra i dettagli del brano in modalità a tutto schermo, inclusi barra di avanzamento, data di rilascio, titolo e artista.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "Disattiva barra di avanzamento info brano",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "Nascondi la barra di avanzamento dalla schermata a schermo intero delle informazioni sul brano.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "Usa API SponsorBlock",
@@ -471,6 +483,54 @@
     "message": "Servizio di romanizzazione (per scritture non latine)",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "Scrittura di destinazione per la traslitterazione",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Converte il testo in questo sistema di scrittura come guida alla pronuncia (es. dall'inglese al katakana giapponese). Le scritture non latine richiedono Gemini o OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate supporta solo la traslitterazione in caratteri latini (romaji). Seleziona Gemini o OpenRouter come provider di traslitterazione per abilitare altre scritture.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latino (Romaji / Fonetico)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Giapponese (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Coreano (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Cirillico (Russo)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arabo",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Ebraico",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Greco",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Tailandese",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "Fornitore romanizzazione",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "Lingua di destinazione",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "Inserisci il codice lingua a 2 lettere (es: 'it' per italiano, 'en' per inglese).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "Automatico",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "Impostazioni Prompt avanzate (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "Fa pulsare gli strati dello sfondo dinamico a ritmo di musica. Disabilita se usi Better Lyrics Shaders.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "Scorrimento rilassato",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Animazione di scorrimento più lenta e disattivazione dell'animazione di ridimensionamento del testo per i testi.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "Usa palette brano per il colore dei testi a tutto schermo",
@@ -797,6 +865,80 @@
     "message": "Romanizzazione",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "Locale / Offline",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "Dizionario giapponese offline (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "Dizionario di analisi morfologica (~17 MB) per una pronuncia giapponese accurata. Memorizzato localmente nel browser.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "Scarica",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "Elimina",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "Installato (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "Non installato (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "Download in corso (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "Scaricare il dizionario giapponese Kuromoji (~17 MB)? Verrà salvato localmente nel browser per la pronuncia giapponese offline.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "Sei sicuro di voler eliminare il dizionario giapponese Kuromoji offline?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "Modello di diacritizzazione araba offline (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "Modello neurale di diacritizzazione (~74.4 MB) per ripristinare Tashkeel e vocali accurate nei testi arabi. Memorizzato localmente nel browser.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "Scaricare il modello di diacritizzazione araba CaTT (~74.4 MB)? Verrà salvato localmente nel browser per la pronuncia araba offline.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "Sei sicuro di voler eliminare il modello arabo CaTT offline?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "Google Traduttore",
     "description": "Translation provider option"
@@ -868,14 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (Database Apple Music)"
-  },
-  "labelDefaultProvider": {
-    "message": "Fornitore testi predefinito",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "Seleziona la tua fonte preferita per i testi.",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -989,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "Scrittura di destinazione per la traslitterazione",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "Converte il testo in questo sistema di scrittura come guida alla pronuncia (es. dall'inglese al katakana giapponese). Le scritture non latine richiedono Gemini o OpenRouter.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google Translate supporta solo la traslitterazione in caratteri latini (romaji). Seleziona Gemini o OpenRouter come provider di traslitterazione per abilitare altre scritture.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "Latino (Romaji / Fonetico)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "Giapponese (Katakana)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "Coreano (Hangul)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "Cirillico (Russo)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "Devanagari (Hindi)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "Arabo",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "Ebraico",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "Greco",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "Tailandese",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "Seleziona provider...",
     "description": "Select a Provider on settings menu"
@@ -1048,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "Tutti i provider aggiunti",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "Prestazioni",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "Scorrimento rilassato",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "Animazione di scorrimento più lenta e disattivazione dell'animazione di ridimensionamento del testo per i testi.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "Automatico",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL supporta ufficialmente 33 lingue. Se viene richiesta una lingua non supportata, la traduzione ricorrerà automaticamente a Google Traduttore.",

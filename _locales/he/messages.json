@@ -59,6 +59,10 @@
     "message": "הדגשת מילה אחר מילה",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "ביצועים",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "ניהול נתונים",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "מציג פרטי שיר במצב מסך מלא, כולל סרגל התקדמות, תאריך יציאה, כותרת ואמן.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "השבתת פס התקדמות בפרטי השיר",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "הסתרת פס ההתקדמות מתצוגת פרטי השיר במסך מלא.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "השתמש ב-SponsorBlock API",
@@ -471,6 +483,54 @@
     "message": "שירות רומניזציה (לקריאת טקסט שאינו לטיני)",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "כתב יעד לתעתיק",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "המרת מילות השיר לכתב זה כמדריך הגייה (למשל, מאנגלית לקטאקאנה יפנית). יעדים שאינם לטיניים דורשים את Gemini או OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate תומך בתעתיק לטיני (רומאג'י) בלבד. בחר ב-Gemini או ב-OpenRouter כספק תעתיק כדי לאפשר כתבים אחרים.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "לטינית (רומאג'י / פונטי)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "יפנית (קטאקאנה)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "קוריאנית (הנגול)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "קירילית (רוסית)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "דוונאגארי (הינדי)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "ערבית",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "עברית",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "יוונית",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "תאילנדית",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "ספק רומניזציה",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "שפת יעד",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "הזן את קוד השפה בן 2 האותיות (למשל: 'he' לעברית).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "אוטומטי",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "הגדרות הנחיות מתקדמות (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "גורם לשכבות רקע דינמיות לפעום עם קצב השמע. יש להשבית אם משתמשים ב-Better Lyrics Shaders.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "גלילה נינוחה",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "אנימציית גלילה איטית יותר וביטול אנימציית שינוי גודל הטקסט של המילים.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "השתמש בפלטת שירים למילים במסך מלא",
@@ -797,6 +865,80 @@
     "message": "רומניזציה",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "מקומי / לא מקוון",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "מילון יפני לא מקוון (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "מילון ניתוח מורפולוגי (~17 MB) להגייה יפנית מדויקת. מאוחסן מקומית בדפדפן.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "הורדה",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "מחיקה",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "מותקן (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "לא מותקן (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "מוריד (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "להוריד את מילון Kuromoji ליפנית (~17 MB)? הוא יישמר מקומית בדפדפן שלך להגייה יפנית במצב לא מקוון.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "האם אתה בטוח שברצונך למחוק את מילון Kuromoji ליפנית הלא מקוון?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "מודל ניקוד לערבית לא מקוון (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "מודל ניקוד נוירוני (~74.4 MB) לשחזור תשכיל ותנועות מדויקות במילות שירים בערבית. מאוחסן מקומית בדפדפן.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "להוריד את מודל הניקוד לערבית CaTT (~74.4 MB)? הוא יישמר מקומית בדפדפן שלך להגייה ערבית במצב לא מקוון.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "האם אתה בטוח שברצונך למחוק את מודל הניקוד לערבית CaTT הלא מקוון?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "Google Translate",
     "description": "Translation provider option"
@@ -868,14 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (מסד נתונים של Apple Music)"
-  },
-  "labelDefaultProvider": {
-    "message": "ספק מילים כברירת מחדל",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "בחר את מקור המילים המועדף עליך.",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -989,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "כתב יעד לתעתיק",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "המרת מילות השיר לכתב זה כמדריך הגייה (למשל, מאנגלית לקטאקאנה יפנית). יעדים שאינם לטיניים דורשים את Gemini או OpenRouter.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google Translate תומך בתעתיק לטיני (רומאג'י) בלבד. בחר ב-Gemini או ב-OpenRouter כספק תעתיק כדי לאפשר כתבים אחרים.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "לטינית (רומאג'י / פונטי)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "יפנית (קטאקאנה)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "קוריאנית (הנגול)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "קירילית (רוסית)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "דוונאגארי (הינדי)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "ערבית",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "עברית",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "יוונית",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "תאילנדית",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "בחר ספק...",
     "description": "Select a Provider on settings menu"
@@ -1048,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "כל הספקים נוספו",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "ביצועים",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "גלילה נינוחה",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "אנימציית גלילה איטית יותר וביטול אנימציית שינוי גודל הטקסט של המילים.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "אוטומטי",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "‏DeepL תומך רשמית ב-33 שפות. אם נבחרה שפה שאינה נתמכת, התרגום יועבר אוטומטית ל-Google Translate.",

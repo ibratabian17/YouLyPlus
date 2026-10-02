@@ -59,6 +59,10 @@
     "message": "Kelime Kelime Vurgulama",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "Performans",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "Veri Yönetimi",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "Tam ekran modunda ilerleme çubuğu, çıkış tarihi, başlık ve sanatçı dahil şarkı ayrıntılarını gösterir.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "Şarkı Bilgisi İlerleme Çubuğunu Devre Dışı Bırak",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "Tam ekran şarkı bilgisi ekranındaki ilerleme çubuğunu gizleyin.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "SponsorBlock API'sini Kullan",
@@ -471,6 +483,54 @@
     "message": "Romanizasyon (Okunuş) Servisi",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "Transliterasyon Hedef Alfabesi",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Şarkı sözlerini telaffuz kılavuzu için bu alfabeye dönüştürün (örn. İngilizceden Japonca Katakana'ya). Latin dışı hedefler Gemini veya OpenRouter gerektirir.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Çeviri yalnızca Latin (romaji) transliterasyonunu destekler. Diğer alfabeleri etkinleştirmek için Transliterasyon Sağlayıcısı olarak Gemini veya OpenRouter'ı seçin.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latin (Romaji / Fonetik)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japonca (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Korece (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Kiril (Rusça)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hintçe)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arapça",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "İbranice",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Yunanca",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Tayca",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "Romanizasyon Sağlayıcı",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "Hedef Dil",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "2 harfli dil kodunu girin (örn: Türkçe için 'tr').",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "Otomatik",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "Gelişmiş Komut Ayarları (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "Dinamik arka plan katmanlarının ses ritmiyle nabız gibi atmasını sağlar. Better Lyrics Shaders kullanılıyorsa devre dışı bırakılmalıdır.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "Rahat Kaydırma",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Daha yavaş kaydırma animasyonu ve şarkı sözleri için metin yeniden boyutlandırma animasyonunu devre dışı bırakma.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "Tam Ekran Metinler İçin Şarkı Paletini Kullan",
@@ -797,6 +865,80 @@
     "message": "Romanizasyon",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "Yerel / Çevrimdışı",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "Çevrimdışı Japonca Sözlük (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "Doğru Japonca telaffuz için morfolojik analiz sözlüğü (~17 MB). Tarayıcıda yerel olarak saklanır.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "İndir",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "Sil",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "Yüklendi (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "Yüklenmedi (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "İndiriliyor (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "Japonca Kuromoji sözlüğü (~17 MB) indirilsin mi? Çevrimdışı Japonca telaffuz için tarayıcınızda yerel olarak saklanacaktır.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "Çevrimdışı Japonca Kuromoji sözlüğünü silmek istediğinizden emin misiniz?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "Çevrimdışı Arapça Harekeli Model (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "Arapça şarkı sözlerinde Harekeleri (Teşkil) ve doğru ünlüleri geri yüklemek için yapay sinir ağı harekeleme modeli (~74.4 MB). Tarayıcıda yerel olarak saklanır.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "Arapça CaTT harekeleme modeli (~74.4 MB) indirilsin mi? Çevrimdışı Arapça telaffuz için tarayıcınızda yerel olarak saklanacaktır.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "Çevrimdışı Arapça CaTT modelini silmek istediğinizden emin misiniz?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "Google Çeviri",
     "description": "Translation provider option"
@@ -868,14 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (Apple Music DB)"
-  },
-  "labelDefaultProvider": {
-    "message": "Varsayılan Şarkı Sözü Sağlayıcı",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "Tercih ettiğiniz şarkı sözü kaynağını seçin.",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -989,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "Transliterasyon Hedef Alfabesi",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "Şarkı sözlerini telaffuz kılavuzu için bu alfabeye dönüştürün (örn. İngilizceden Japonca Katakana'ya). Latin dışı hedefler Gemini veya OpenRouter gerektirir.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google Çeviri yalnızca Latin (romaji) transliterasyonunu destekler. Diğer alfabeleri etkinleştirmek için Transliterasyon Sağlayıcısı olarak Gemini veya OpenRouter'ı seçin.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "Latin (Romaji / Fonetik)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "Japonca (Katakana)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "Korece (Hangul)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "Kiril (Rusça)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "Devanagari (Hintçe)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "Arapça",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "İbranice",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "Yunanca",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "Tayca",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "Sağlayıcı seçin...",
     "description": "Select a Provider on settings menu"
@@ -1048,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "Tüm sağlayıcılar eklendi",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "Performans",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "Rahat Kaydırma",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "Daha yavaş kaydırma animasyonu ve şarkı sözleri için metin yeniden boyutlandırma animasyonunu devre dışı bırakma.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "Otomatik",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL resmi olarak 33 dili destekler. Desteklenmeyen bir dil istendiğinde çeviri otomatik olarak Google Çeviri'ye geçer.",

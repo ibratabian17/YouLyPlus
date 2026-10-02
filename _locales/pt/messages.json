@@ -59,6 +59,10 @@
     "message": "Destaque palavra por palavra",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "Desempenho",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "Gerenciamento de dados",
     "description": "Section title in popup Advanced tab"
@@ -479,6 +483,54 @@
     "message": "Serviço de romanização (para escritas não latinas)",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "Alfabeto de destino para transliteração",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Converte as letras para este alfabeto para guias de pronúncia (ex.: inglês para katakana japonês). Destinos não latinos requerem Gemini ou OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "O Google Tradutor suporta apenas transliteração latina (romaji). Selecione Gemini ou OpenRouter como provedor para ativar outros alfabetos.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latino (Romaji / Fonético)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japonês (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Coreano (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Cirílico (Russo)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Árabe",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Hebraico",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Grego",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Tailandês",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "Provedor de romanização",
     "description": "Dropdown label"
@@ -511,9 +563,9 @@
     "message": "Idioma de destino",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "Insira o código do idioma de 2 letras (ex: 'pt' para português, 'en' para inglês).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "Automático",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "Configurações avançadas de prompt (Gemini / OpenRouter)",
@@ -630,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "Faz com que as camadas do fundo dinâmico pulsem com o ritmo do áudio. Se estiver usando Better Lyrics Shaders ou outro visualizador, você deve desativar isso.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "Rolagem relaxada",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Animação de rolagem mais lenta e desativação da animação de redimensionamento do texto das letras.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "Usar paleta da música para a cor das letras no modo vídeo em tela cheia",
@@ -951,14 +1011,6 @@
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (Apple Music DB)"
   },
-  "labelDefaultProvider": {
-    "message": "Provedor de letras padrão",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "Selecione sua fonte de letras preferida.",
-    "description": "Description for provider dropdown"
-  },
   "navCatInterface": {
     "message": "Interface",
     "description": "Navigation category for interface settings"
@@ -1071,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "Alfabeto de destino para transliteração",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "Converte as letras para este alfabeto para guias de pronúncia (ex.: inglês para katakana japonês). Destinos não latinos requerem Gemini ou OpenRouter.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "O Google Tradutor suporta apenas transliteração latina (romaji). Selecione Gemini ou OpenRouter como provedor para ativar outros alfabetos.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "Latino (Romaji / Fonético)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "Japonês (Katakana)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "Coreano (Hangul)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "Cirílico (Russo)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "Devanagari (Hindi)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "Árabe",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "Hebraico",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "Grego",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "Tailandês",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "Selecionar provedor...",
     "description": "Select a Provider on settings menu"
@@ -1130,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "Todos os provedores adicionados",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "Desempenho",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "Rolagem relaxada",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "Animação de rolagem mais lenta e desativação da animação de redimensionamento do texto das letras.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "Automático",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "O DeepL suporta oficialmente 33 idiomas. Se um idioma não suportado for solicitado, a tradução recorrerá automaticamente ao Google Tradutor.",

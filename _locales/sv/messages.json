@@ -59,6 +59,10 @@
     "message": "Ord-för-ord-markering",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "Prestanda",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "Datahantering",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "Visar låtdetaljer i helskärmsläge, inklusive förloppsindikator, lanseringsdatum, titel och artist.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "Inaktivera förloppsindikator för låtinformation",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "Dölj förloppsindikatorn från helskärmsvisningen av låtinformation.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "Använd SponsorBlock API",
@@ -471,6 +483,54 @@
     "message": "Romaniseringstjänst (för icke-latinska skrifter)",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "Målskrift för translitterering",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Konvertera sångtexter till detta skriftsystem för uttalsguider (t.ex. engelska till japansk katakana). Icke-latinska mål kräver Gemini eller OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate stöder endast latinsk (romaji) translitterering. Välj Gemini eller OpenRouter som translittereringsleverantör för att aktivera andra skriftsystem.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Latinsk (Romaji / Fonetisk)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Japanska (Katakana)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Koreanska (Hangul)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Kyrilliska (Ryska)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Devanagari (Hindi)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Arabiska",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Hebreiska",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Grekiska",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Thailändska",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "Romaniseringsleverantör",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "Målspråk",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "Ange den 2-bokstaviga språkkoden (t.ex: 'sv' för svenska).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "Automatiskt",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "Avancerade promptinställningar (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "Gör att dynamiska bakgrundslager pulserar i takt med ljudet. Bör inaktiveras om du använder Better Lyrics Shaders.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "Avslappnad rullning",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Långsammare rullningsanimering och inaktivera animering för textstorleksändring för sångtexter.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "Använd låtpalett för texter i helskärm",
@@ -797,6 +865,80 @@
     "message": "Romanisering",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "Lokal / Offline",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "Offline japansk ordbok (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "Morfologisk analysordbok (~17 MB) för korrekt japanskt uttal. Lagras lokalt i webbläsaren.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "Ladda ner",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "Ta bort",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "Installerad (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "Inte installerad (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "Laddar ner (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "Vill du ladda ner den japanska Kuromoji-ordboken (~17 MB)? Den lagras lokalt i din webbläsare för offline japanskt uttal.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "Är du säker på att du vill ta bort den offline japanska Kuromoji-ordboken?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "Offline arabisk diakritiseringsmodell (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "Neural diakritiseringsmodell (~74.4 MB) för att återställa Tashkeel och korrekta vokaler i arabiska låttexter. Lagras lokalt i webbläsaren.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "Vill du ladda ner den arabiska CaTT-diakritiseringsmodellen (~74.4 MB)? Den lagras lokalt i din webbläsare för offline arabiskt uttal.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "Är du säker på att du vill ta bort den offline arabiska CaTT-modellen?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "Google Översätt",
     "description": "Translation provider option"
@@ -868,18 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (Apple Music DB)"
-  },
-  "msgCacheClearedFailed": {
-    "message": "Det gick inte att rensa cachen.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelDefaultProvider": {
-    "message": "Standard sångtextleverantör",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "Välj din föredragna låttextkälla.",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -993,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "Målskrift för translitterering",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "Konvertera sångtexter till detta skriftsystem för uttalsguider (t.ex. engelska till japansk katakana). Icke-latinska mål kräver Gemini eller OpenRouter.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google Translate stöder endast latinsk (romaji) translitterering. Välj Gemini eller OpenRouter som translittereringsleverantör för att aktivera andra skriftsystem.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "Latinsk (Romaji / Fonetisk)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "Japanska (Katakana)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "Koreanska (Hangul)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "Kyrilliska (Ryska)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "Devanagari (Hindi)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "Arabiska",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "Hebreiska",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "Grekiska",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "Thailändska",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "Välj leverantör...",
     "description": "Select a Provider on settings menu"
@@ -1052,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "Alla leverantörer tillagda",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "Prestanda",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "Avslappnad rullning",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "Långsammare rullningsanimering och inaktivera animering för textstorleksändring för sångtexter.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "Automatiskt",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL stöder officiellt 33 språk. Om ett språk som inte stöds begärs återgår översättningen automatiskt till Google Translate.",

@@ -59,6 +59,10 @@
     "message": "Підсвічування окремих слів",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "Продуктивність",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "Керування даними",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "Відображати інформацію про пісню у повноекранному режимі, зокрема індикатор прогресу, рік випуску, назву та виконавця.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "Вимкнути смугу прогресу в інфо про трек",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "Приховати смугу прогресу на повноекранному дисплеї інформації про трек.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "Використовувати SponsorBlock API",
@@ -471,6 +483,54 @@
     "message": "Сервіс романізації (для нелатинських алфавітів)",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "Цільова писемність транслітерації",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "Перетворювати тексти пісень на цю писемність для допомоги у вимові (наприклад, з англійської на японську катакану). Нелатинські писемності потребують Gemini або OpenRouter.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Перекладач підтримує лише латинську транслітерацію (ромаджі). Виберіть Gemini або OpenRouter постачальником транслітерації, щоб увімкнути інші писемності.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "Латиниця (Ромаджі / Фонетична)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "Японська (Катакана)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "Корейська (Хангиль)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "Кирилиця (Російська)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "Деванагарі (Гінді)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "Арабська",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "Іврит",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "Грецька",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "Тайська",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "Постачальник романізації",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "Цільова мова",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "Введіть дволітерний код мови (наприклад, «en» для англійської, «ko» для корейської).",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "Автоматично",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "Розширені вказівки (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "Змушує шари динамічного тла пульсувати в такт аудіо. Якщо ви використовуєте Better Lyrics Shaders або інший візуалізатор, вам слід вимкнути цей параметр.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "Спокійне прокручування",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "Повільніша анімація прокручування та вимкнення анімації зміни розміру тексту для слів пісні.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "Використовувати палітру пісні для тексту в повноекранному режимі",
@@ -796,6 +864,80 @@
   "optionPronunciation": {
     "message": "Транскрипція",
     "description": "Option in larger text mode dropdown"
+  },
+  "optionOfflineRomanizer": {
+    "message": "Локально / Офлайн",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "Офлайн-словник японської мови (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "Словник морфологічного аналізатора (~17 МБ) для точної японської вимови. Зберігається локально в браузері.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "Завантажити",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "Видалити",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "Встановлено (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "Не встановлено (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "Завантаження (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "Завантажити японський словник Kuromoji (~17 МБ)? Він буде збережений локально у вашому браузері для офлайн-вимови японської мови.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "Ви впевнені, що хочете видалити офлайн-словник японської мови Kuromoji?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "Офлайн-модель поголоски арабської мови (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "Нейромережева модель поголоски (~74.4 МБ) для відновлення ташкілю та точних голосних в арабських текстах пісень. Зберігається локально в браузері.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "Завантажити модель поголоски арабської мови CaTT (~74.4 МБ)? Вона буде збережена локально у вашому браузері для офлайн-вимови арабської мови.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "Ви впевнені, що хочете видалити офлайн-модель арабської мови CaTT?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
   },
   "optionGoogleTranslate": {
     "message": "Google Перекладач",
@@ -981,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "Цільова писемність транслітерації",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "Перетворювати тексти пісень на цю писемність для допомоги у вимові (наприклад, з англійської на японську катакану). Нелатинські писемності потребують Gemini або OpenRouter.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google Перекладач підтримує лише латинську транслітерацію (ромаджі). Виберіть Gemini або OpenRouter постачальником транслітерації, щоб увімкнути інші писемності.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "Латиниця (Ромаджі / Фонетична)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "Японська (Катакана)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "Корейська (Хангиль)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "Кирилиця (Російська)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "Деванагарі (Гінді)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "Арабська",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "Іврит",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "Грецька",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "Тайська",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "Оберіть постачальника...",
     "description": "Select a Provider on settings menu"
@@ -1040,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "Усіх постачальників додано",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "Продуктивність",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "Спокійне прокручування",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "Повільніша анімація прокручування та вимкнення анімації зміни розміру тексту для слів пісні.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "Автоматично",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL офіційно підтримує 33 мови. Якщо запитано непідтримувану мову, переклад автоматично переключиться на Google Translate.",

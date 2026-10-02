@@ -59,6 +59,10 @@
     "message": "ওয়ার্ড-বাই-ওয়ার্ড হাইলাইটিং",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "পারফরম্যান্স",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "ডেটা ম্যানেজমেন্ট",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "ফুলস্ক্রিন মোডে গানের বিবরণ দেখায়, যার মধ্যে প্রগ্রেস বার, প্রকাশের তারিখ, শিরোনাম এবং শিল্পী অন্তর্ভুক্ত থাকে।",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "গানের তথ্যের সিকবার নিষ্ক্রিয় করুন",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "ফুলস্ক্রিন গানের তথ্য প্রদর্শন থেকে অগ্রগতি বার লুকান।",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "SponsorBlock API ব্যবহার করুন",
@@ -471,6 +483,54 @@
     "message": "রোমানাইজেশন (অ-ল্যাটিন লিপির জন্য) পরিষেবা",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "লিপ্যন্তর লক্ষ্য লিপি",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "উচ্চারণ নির্দেশিকার জন্য লিরিক্স এই লিপিতে রূপান্তর করুন (যেমন ইংরেজি থেকে জাপানি কাতাকানা)। অ-ল্যাটিন লিপির জন্য Gemini বা OpenRouter প্রয়োজন।",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate শুধুমাত্র ল্যাটিন (রোমাজি) লিপ্যন্তর সমর্থন করে। অন্যান্য লিপি সক্ষম করতে লিপ্যন্তর সরবরাহকারী হিসেবে Gemini বা OpenRouter নির্বাচন করুন।",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "ল্যাটিন (রোমাজি / ফোনেটিক)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "জাপানি (কাতাকানা)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "কোরিয়ান (হাঙ্গুল)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "সিরিলিক (রাশিয়ান)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "দেবনাগরী (হিন্দি)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "আরবি",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "হিব্রু",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "গ্রীক",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "থাই",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "রোমানাইজেশন প্রদানকারী",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "লক্ষ্য ভাষা",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "২-অক্ষরের ভাষা কোড লিখুন (যেমন: বাংলার জন্য 'bn')।",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "স্বয়ংক্রিয়",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "উন্নত প্রম্পট সেটিংস (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "অডিওর তালের সাথে ডায়নামিক ব্যাকগ্রাউন্ড লেয়ারগুলিকে স্পন্দিত করতে দেয়। Better Lyrics Shaders ব্যবহার করলে অবশ্যই অক্ষম করতে হবে।",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "রিল্যাক্স স্ক্রোলিং",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "ধীরগতির স্ক্রোল অ্যানিমেশন এবং লিরিক্সের জন্য টেক্সট রিসাইজিং অ্যানিমেশন নিষ্ক্রিয় করুন।",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "ফুলস্ক্রিন টেক্সটের জন্য গান প্যালেট ব্যবহার করুন",
@@ -797,6 +865,80 @@
     "message": "রোমানাইজেশন",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "স্থানীয় / অফলাইন",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "অফলাইন জাপানি অভিধান (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "সঠিক জাপানি উচ্চারণের জন্য মরফোলজিক্যাল অ্যানালাইজার অভিধান (~17 MB)। ব্রাউজারে স্থানীয়ভাবে সংরক্ষিত।",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "ডাউনলোড",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "মুছুন",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "ইনস্টল করা হয়েছে (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "ইনস্টল করা নেই (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "ডাউনলোড হচ্ছে (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "জাপানি Kuromoji অভিধান (~17 MB) ডাউনলোড করবেন? এটি অফলাইন জাপানি উচ্চারণের জন্য আপনার ব্রাউজারে স্থানীয়ভাবে সংরক্ষিত হবে।",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "আপনি কি নিশ্চিত যে আপনি অফলাইন জাপানি Kuromoji অভিধানটি মুছে ফেলতে চান?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "অফলাইন আরবি ডায়াক্রিটাইজার মডেল (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "আরবি গীতিতে তাশকিল ও সঠিক স্বরবর্ণ পুনরুদ্ধারের জন্য নিউরাল ডায়াক্রিটাইজার মডেল (~74.4 MB)। ব্রাউজারে স্থানীয়ভাবে সংরক্ষিত।",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "আরবি CaTT ডায়াক্রিটাইজার মডেল (~74.4 MB) ডাউনলোড করবেন? এটি অফলাইন আরবি উচ্চারণের জন্য আপনার ব্রাউজারে স্থানীয়ভাবে সংরক্ষিত হবে।",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "আপনি কি নিশ্চিত যে আপনি অফলাইন আরবি CaTT মডেলটি মুছে ফেলতে চান?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "Google অনুবাদ",
     "description": "Translation provider option"
@@ -868,18 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "বিনিলাইরিক্স (অ্যাপল মিউজিক ডিবি)"
-  },
-  "msgCacheClearedFailed": {
-    "message": "ক্যাশ পরিষ্কার করতে ব্যর্থ।",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelDefaultProvider": {
-    "message": "ডিফল্ট লিরিক্স প্রদানকারী",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "আপনার পছন্দের লিরিক্স সোর্স চয়ন করুন।",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -993,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "লিপ্যন্তর লক্ষ্য লিপি",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "উচ্চারণ নির্দেশিকার জন্য লিরিক্স এই লিপিতে রূপান্তর করুন (যেমন ইংরেজি থেকে জাপানি কাতাকানা)। অ-ল্যাটিন লিপির জন্য Gemini বা OpenRouter প্রয়োজন।",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google Translate শুধুমাত্র ল্যাটিন (রোমাজি) লিপ্যন্তর সমর্থন করে। অন্যান্য লিপি সক্ষম করতে লিপ্যন্তর সরবরাহকারী হিসেবে Gemini বা OpenRouter নির্বাচন করুন।",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "ল্যাটিন (রোমাজি / ফোনেটিক)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "জাপানি (কাতাকানা)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "কোরিয়ান (হাঙ্গুল)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "সিরিলিক (রাশিয়ান)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "দেবনাগরী (হিন্দি)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "আরবি",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "হিব্রু",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "গ্রীক",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "থাই",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "সরবরাহকারী নির্বাচন করুন...",
     "description": "Select a Provider on settings menu"
@@ -1052,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "সব সরবরাহকারী যোগ করা হয়েছে",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "পারফরম্যান্স",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "রিল্যাক্স স্ক্রোলিং",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "ধীরগতির স্ক্রোল অ্যানিমেশন এবং লিরিক্সের জন্য টেক্সট রিসাইজিং অ্যানিমেশন নিষ্ক্রিয় করুন।",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "স্বয়ংক্রিয়",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL আনুষ্ঠানিকভাবে ৩৩টি ভাষা সমর্থন করে। অসমর্থিত কোনো ভাষা নির্বাচন করা হলে অনুবাদ স্বয়ংক্রিয়ভাবে Google অনুবাদে ফিরে যাবে।",

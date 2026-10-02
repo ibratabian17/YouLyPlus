@@ -59,6 +59,10 @@
     "message": "వర్డ్-బై-వర్డ్ హైలైటింగ్",
     "description": "Label for word-by-word highlighting toggle"
   },
+  "sectionPerformance": {
+    "message": "పనితీరు",
+    "description": "Section title in popup Advanced tab"
+  },
   "sectionDataManagement": {
     "message": "డేటా నిర్వహణ",
     "description": "Section title in popup Advanced tab"
@@ -188,6 +192,14 @@
   "descFullscreenSongInfo": {
     "message": "ప్రోగ్రెస్ బార్, విడుదల తేదీ, శీర్షిక మరియు కళాకారుడితో సహా పాట వివరాలను ఫుల్ స్క్రీన్ మోడ్‌లో ప్రదర్శిస్తుంది.",
     "description": "Description for fullscreen song info"
+  },
+  "settingDisableSongInfoSeekbar": {
+    "message": "పాట సమాచార సీక్‌బార్‌ని నిలిపివేయి",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "పూర్తి స్క్రీన్ పాట సమాచార ప్రదర్శన నుండి ప్రోగ్రెస్ బార్‌ను దాచండి.",
+    "description": "Description for disabling seekbar in fullscreen song info"
   },
   "settingUseSponsorBlock": {
     "message": "SponsorBlock API ని ఉపయోగించు",
@@ -471,6 +483,54 @@
     "message": "రోమనైజేషన్ (లాటిన్యేతర లిపిల కోసం) సేవ",
     "description": "Category title"
   },
+  "labelTransliterationTarget": {
+    "message": "లిప్యంతరీకరణ లక్ష్య లిపి",
+    "description": "Dropdown label"
+  },
+  "descTransliterationTarget": {
+    "message": "ఉచ్చారణ మార్గదర్శకాల కోసం సాహిత్యాన్ని ఈ లిపిలోకి మార్చండి (ఉదా. ఆంగ్లం నుండి జపనీస్ కటకానా). లాటిన్ కాని లక్ష్యాలకు Gemini లేదా OpenRouter అవసరం.",
+    "description": "Description for transliteration target script"
+  },
+  "noteTransliterationTargetDisabled": {
+    "message": "Google Translate లాటిన్ (రోమాజీ) లిప్యంతరీకరణను మాత్రమే మద్దతు ఇస్తుంది. ఇతర లిపులను ప్రారంభించడానికి లిప్యంతరీకరణ ప్రదాతగా Gemini లేదా OpenRouter ని ఎంచుకోండి.",
+    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
+  },
+  "optionLatin": {
+    "message": "లాటిన్ (రోమాజీ / ఫొనెటిక్)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionJapanese": {
+    "message": "జపనీస్ (కటకానా)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionKorean": {
+    "message": "కొరియన్ (హంగూల్)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionCyrillic": {
+    "message": "సిరిల్లిక్ (రష్యన్)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionDevanagari": {
+    "message": "దేవనాగరి (హిందీ)",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionArabic": {
+    "message": "అరబిక్",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionHebrew": {
+    "message": "హీబ్రూ",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionGreek": {
+    "message": "గ్రీక్",
+    "description": "Option in transliteration target script dropdown"
+  },
+  "optionThai": {
+    "message": "థాయ్",
+    "description": "Option in transliteration target script dropdown"
+  },
   "labelRomanizationProvider": {
     "message": "రోమనైజేషన్ ప్రదాత",
     "description": "Dropdown label"
@@ -503,9 +563,9 @@
     "message": "లక్ష్య భాష",
     "description": "Dropdown label"
   },
-  "helperCustomTranslateTarget": {
-    "message": "2-అక్షరాల భాషా కోడ్‌ను నమోదు చేయండి (ఉదా: తెలుగుకు 'te').",
-    "description": "Helper text"
+  "optionTargetLangAuto": {
+    "message": "స్వయంచాలక",
+    "description": "Option in target language dropdown"
   },
   "categoryAdvancedPrompting": {
     "message": "అధునాతన ప్రాంప్ట్ సెట్టింగ్‌లు (Gemini / OpenRouter)",
@@ -622,6 +682,14 @@
   "descAudioBeatSync": {
     "message": "డైనమిక్ బ్యాక్‌గ్రౌండ్ లేయర్లను ఆడియో లయకు అనుగుణంగా స్పందించేలా చేస్తుంది. Better Lyrics Shaders ఉపయోగిస్తే నిలిపివేయాలి.",
     "description": "Description"
+  },
+  "settingRelaxScroll": {
+    "message": "రిలాక్స్ స్క్రోలింగ్",
+    "description": "Label for relax scrolling toggle"
+  },
+  "descRelaxScroll": {
+    "message": "నెమ్మదిగా స్క్రోలింగ్ యానిమేషన్ & సాహిత్యం కోసం టెక్స్ట్ రీసైజింగ్ యానిమేషన్‌ను నిలిపివేయండి.",
+    "description": "Description for relax scrolling toggle"
   },
   "settingSongPaletteFullscreen": {
     "message": "ఫుల్ స్క్రీన్ లిరిక్స్ కోసం సాంగ్ ప్యాలెట్‌ని ఉపయోగించు",
@@ -797,6 +865,80 @@
     "message": "రోమనైజేషన్",
     "description": "Option in larger text mode dropdown"
   },
+  "optionOfflineRomanizer": {
+    "message": "స్థానిక / ఆఫ్‌లైన్",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "ఆఫ్‌లైన్ జపనీస్ నిఘంటువు (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "ఖచ్చితమైన జపనీస్ ఉచ్ఛారణ కోసం మార్ఫాలాజికల్ ఎనలైజర్ నిఘంటువు (~17 MB). బ్రౌజర్‌లో స్థానికంగా నిల్వ చేయబడుతుంది.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "డౌన్‌లోడ్",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "తొలగించు",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "ఇన్‌స్టాల్ చేయబడింది (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "ఇన్‌స్టాల్ చేయబడలేదు (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "డౌన్‌లోడ్ అవుతోంది (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "జపనీస్ Kuromoji నిఘంటువు (~17 MB)ని డౌన్‌లోడ్ చేయాలా? ఆఫ్‌లైన్ జపనీస్ ఉచ్ఛారణ కోసం ఇది మీ బ్రౌజర్‌లో స్థానికంగా నిల్వ చేయబడుతుంది.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "మీరు ఖచ్చితంగా ఆఫ్‌లైన్ జపనీస్ Kuromoji నిఘంటువును తొలగించాలనుకుంటున్నారా?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "ఆఫ్‌లైన్ అరబిక్ డయాక్రిటైజర్ మోడల్ (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "అరబిక్ లిరిక్స్‌లో తష్కీల్ మరియు ఖచ్చితమైన అచ్చులను పునరుద్ధరించడానికి న్యూరల్ డయాక్రిటైజర్ మోడల్ (~74.4 MB). బ్రౌజర్‌లో స్థానికంగా నిల్వ చేయబడుతుంది.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "అరబిక్ CaTT డయాక్రిటైజర్ మోడల్ (~74.4 MB)ని డౌన్‌లోడ్ చేయాలా? ఆఫ్‌లైన్ అరబిక్ ఉచ్ఛారణ కోసం ఇది మీ బ్రౌజర్‌లో స్థానికంగా నిల్వ చేయబడుతుంది.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "మీరు ఖచ్చితంగా ఆఫ్‌లైన్ అరబిక్ CaTT మోడల్‌ను తొలగించాలనుకుంటున్నారా?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
+  },
   "optionGoogleTranslate": {
     "message": "గూగుల్ ట్రాన్స్‌లేట్",
     "description": "Translation provider option"
@@ -868,18 +1010,6 @@
   "sourceNameBiniLyrics": {
     "description": "BiniLyrics provider name",
     "message": "BiniLyrics (Apple Music DB)"
-  },
-  "msgCacheClearedFailed": {
-    "message": "కాష్‌ని క్లియర్ చేయడంలో విఫలమైంది.",
-    "description": "Snackbar error message when cache clear fails"
-  },
-  "labelDefaultProvider": {
-    "message": "డిఫాల్ట్ లిరిక్స్ ప్రదాత",
-    "description": "Label for default provider dropdown"
-  },
-  "descDefaultProvider": {
-    "message": "మీకు నచ్చిన లిరిక్స్ మూలాధారాన్ని ఎంచుకోండి.",
-    "description": "Description for provider dropdown"
   },
   "navCatInterface": {
     "message": "Interface",
@@ -993,54 +1123,6 @@
     "message": "Cache info unavailable.",
     "description": "Message when cache info is unavailable"
   },
-  "labelTransliterationTarget": {
-    "message": "లిప్యంతరీకరణ లక్ష్య లిపి",
-    "description": "Dropdown label"
-  },
-  "descTransliterationTarget": {
-    "message": "ఉచ్చారణ మార్గదర్శకాల కోసం సాహిత్యాన్ని ఈ లిపిలోకి మార్చండి (ఉదా. ఆంగ్లం నుండి జపనీస్ కటకానా). లాటిన్ కాని లక్ష్యాలకు Gemini లేదా OpenRouter అవసరం.",
-    "description": "Description for transliteration target script"
-  },
-  "noteTransliterationTargetDisabled": {
-    "message": "Google Translate లాటిన్ (రోమాజీ) లిప్యంతరీకరణను మాత్రమే మద్దతు ఇస్తుంది. ఇతర లిపులను ప్రారంభించడానికి లిప్యంతరీకరణ ప్రదాతగా Gemini లేదా OpenRouter ని ఎంచుకోండి.",
-    "description": "Note shown when the transliteration target script is disabled under non-AI providers"
-  },
-  "optionLatin": {
-    "message": "లాటిన్ (రోమాజీ / ఫొనెటిక్)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionJapanese": {
-    "message": "జపనీస్ (కటకానా)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionKorean": {
-    "message": "కొరియన్ (హంగూల్)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionCyrillic": {
-    "message": "సిరిల్లిక్ (రష్యన్)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionDevanagari": {
-    "message": "దేవనాగరి (హిందీ)",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionArabic": {
-    "message": "అరబిక్",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionHebrew": {
-    "message": "హీబ్రూ",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionGreek": {
-    "message": "గ్రీక్",
-    "description": "Option in transliteration target script dropdown"
-  },
-  "optionThai": {
-    "message": "థాయ్",
-    "description": "Option in transliteration target script dropdown"
-  },
   "placeholderSelectProvider": {
     "message": "ప్రదాతను ఎంచుకోండి...",
     "description": "Select a Provider on settings menu"
@@ -1052,22 +1134,6 @@
   "msgAllProvidersAdded": {
     "message": "అన్ని ప్రదాతలు జోడించబడ్డాయి",
     "description": "User added All providers on settings menu"
-  },
-  "sectionPerformance": {
-    "message": "పనితీరు",
-    "description": "Section title in popup Advanced tab"
-  },
-  "settingRelaxScroll": {
-    "message": "రిలాక్స్ స్క్రోలింగ్",
-    "description": "Label for relax scrolling toggle"
-  },
-  "descRelaxScroll": {
-    "message": "నెమ్మదిగా స్క్రోలింగ్ యానిమేషన్ & సాహిత్యం కోసం టెక్స్ట్ రీసైజింగ్ యానిమేషన్‌ను నిలిపివేయండి.",
-    "description": "Description for relax scrolling toggle"
-  },
-  "optionTargetLangAuto": {
-    "message": "స్వయంచాలక",
-    "description": "Option in target language dropdown"
   },
   "noteDeepLSupportedLangs": {
     "message": "DeepL అధికారికంగా 33 భాషలకు మద్దతు ఇస్తుంది. మద్దతు లేని భాష అభ్యర్థించబడితే, అనువాదం స్వయంచాలకంగా Google అనువాదానికి మారుతుంది.",
