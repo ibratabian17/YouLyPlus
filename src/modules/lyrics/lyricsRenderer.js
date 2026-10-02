@@ -196,7 +196,7 @@ class LyricsPlusRenderer {
       this.wakeLock.release().then(() => {
         this.wakeLock = null;
       }).catch(err => {
-         console.warn(`LYPLUS: Wakelock release error: ${err.name}, ${err.message}`);
+        console.warn(`LYPLUS: Wakelock release error: ${err.name}, ${err.message}`);
       });
     }
   }
@@ -1737,7 +1737,7 @@ class LyricsPlusRenderer {
         if (response?.success && Array.isArray(response.availableProviders)) {
           this.setAvailableProviders(response.availableProviders);
         }
-      }).catch(() => {});
+      }).catch(() => { });
     }
 
     this.setTranslationLoading(false);
@@ -2310,24 +2310,23 @@ class LyricsPlusRenderer {
     const leftPercent = 50 - halfFadePercent;
     const rightPercent = 50 + halfFadePercent;
 
+
+    const bright = "var(--lyplus-text-primary, #fff)";
+    const dark = "var(--lyplus-text-secondary, rgba(255, 255, 255, 0.333))";
+
     if (isBackground) {
-      const bright = "var(--lyplus-text-primary, #fff)";
-      const dark = "var(--lyplus-text-secondary, rgba(255, 255, 255, 0.333))";
       return [
         `linear-gradient(${dir}, ${bright} ${leftPercent.toFixed(3)}%, ${dark} ${rightPercent.toFixed(3)}%)`,
         totalAspect,
       ];
     }
 
-    const bright = "rgb(0 0 0 / 1)";
-    const dark = "rgb(0 0 0 / var(--lyplus-mask-dim-alpha, 0.35))";
-
     return [
       `linear-gradient(${dir}, ${bright} ${leftPercent.toFixed(3)}%, ${dark} ${rightPercent.toFixed(3)}%)`,
       totalAspect,
     ];
   }
-  
+
   static _buildMaskFrames(words, targetIndex, fadeWidth, lineStartTime, totalFadeDuration, rtl = false, widthBefore, isBackground = false) {
     const targetWord = words[targetIndex];
     if (widthBefore === undefined) {
@@ -2774,7 +2773,7 @@ class LyricsPlusRenderer {
     let frames = cache.get(key);
     if (frames) return frames;
 
-    const SPREAD_EM = 0.05; 
+    const SPREAD_EM = 0.05;
     const LIFT_EM = 0.035;
     const { response, hold, emphasis, longFalloff, spanDuration } =
       LyricsPlusRenderer._getEmphasisParams(duration, count);
@@ -2787,7 +2786,7 @@ class LyricsPlusRenderer {
       const envelope = frame === 60
         ? 0
         : LyricsPlusRenderer._springProgress(time, response) *
-          (1 - LyricsPlusRenderer._springProgress(time - hold, response));
+        (1 - LyricsPlusRenderer._springProgress(time - hold, response));
       const x = side * SPREAD_EM * emphasis * longFalloff * envelope;
       const y = -0.05 * rise - LIFT_EM * emphasis * longFalloff * envelope;
       return {

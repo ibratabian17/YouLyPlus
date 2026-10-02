@@ -597,7 +597,7 @@ Lyrics+ without any visual bug*/
     body:has(#ThemeSong-MainContainer #DynamicLight) #lyrics-plus-container,
     body:has(#ThemeSong-MainContainer #StaticLight) #lyrics-plus-container {
         --lyplus-lyrics-pallete: var(--ts-palette-darkmuted-hex, #111) !important;
-        --lyplus-text-secondary: #1116;
+        --lyplus-text-secondary: color-mix(in srgb, var(--ts-palette-darkmuted-hex, #111) 33.3%, transparent);
         --lyplus-text-tertiary: #ffffff7a;
         --lyplus-text-inactive: #ffffff31;
     }
