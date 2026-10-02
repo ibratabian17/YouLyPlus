@@ -928,11 +928,11 @@
     "description": "Setting title for downloadable offline Arabic CaTT model"
   },
   "descOfflineArabicDict": {
-    "message": "โมเดลโครงข่ายประสาทสำหรับการใส่เครื่องหมายกำกับเสียง (~74.4 MB) เพื่อคืนค่า Tashkeel และสระที่ถูกต้องในเนื้อเพลงภาษาอาหรับ จัดเก็บไว้ในเบราว์เซอร์",
+    "message": "โมเดลโครงข่ายประสาทสำหรับการใส่เครื่องหมายกำกับเสียง (~74.3 MB) เพื่อคืนค่า Tashkeel และสระที่ถูกต้องในเนื้อเพลงภาษาอาหรับ จัดเก็บไว้ในเบราว์เซอร์",
     "description": "Setting description for downloadable offline Arabic CaTT model"
   },
   "confirmDownloadArabicDict": {
-    "message": "ดาวน์โหลดโมเดลภาษาอาหรับ CaTT (~74.4 MB) หรือไม่? โมเดลจะถูกเก็บไว้ในเบราว์เซอร์สำหรับการออกเสียงภาษาอาหรับแบบออฟไลน์",
+    "message": "ดาวน์โหลดโมเดลภาษาอาหรับ CaTT (~74.3 MB) หรือไม่? โมเดลจะถูกเก็บไว้ในเบราว์เซอร์สำหรับการออกเสียงภาษาอาหรับแบบออฟไลน์",
     "description": "Confirmation prompt before downloading Arabic CaTT model"
   },
   "confirmDeleteArabicDict": {

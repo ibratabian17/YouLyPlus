@@ -928,11 +928,11 @@
     "description": "Setting title for downloadable offline Arabic CaTT model"
   },
   "descOfflineArabicDict": {
-    "message": "مدل عصبی اعراب‌گذاری (~74.4 مگابایت) برای بازیابی تشکیل و حروف صدادار دقیق در متن آهنگ‌های عربی. ذخیره‌شده در مرورگر.",
+    "message": "مدل عصبی اعراب‌گذاری (~74.3 مگابایت) برای بازیابی تشکیل و حروف صدادار دقیق در متن آهنگ‌های عربی. ذخیره‌شده در مرورگر.",
     "description": "Setting description for downloadable offline Arabic CaTT model"
   },
   "confirmDownloadArabicDict": {
-    "message": "مدل اعراب‌گذاری عربی CaTT (~74.4 مگابایت) دانلود شود؟ برای تلفظ آفلاین عربی در مرورگر شما ذخیره خواهد شد.",
+    "message": "مدل اعراب‌گذاری عربی CaTT (~74.3 مگابایت) دانلود شود؟ برای تلفظ آفلاین عربی در مرورگر شما ذخیره خواهد شد.",
     "description": "Confirmation prompt before downloading Arabic CaTT model"
   },
   "confirmDeleteArabicDict": {

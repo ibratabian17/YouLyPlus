@@ -928,11 +928,11 @@
     "description": "Setting title for downloadable offline Arabic CaTT model"
   },
   "descOfflineArabicDict": {
-    "message": "అరబిక్ లిరిక్స్‌లో తష్కీల్ మరియు ఖచ్చితమైన అచ్చులను పునరుద్ధరించడానికి న్యూరల్ డయాక్రిటైజర్ మోడల్ (~74.4 MB). బ్రౌజర్‌లో స్థానికంగా నిల్వ చేయబడుతుంది.",
+    "message": "అరబిక్ లిరిక్స్‌లో తష్కీల్ మరియు ఖచ్చితమైన అచ్చులను పునరుద్ధరించడానికి న్యూరల్ డయాక్రిటైజర్ మోడల్ (~74.3 MB). బ్రౌజర్‌లో స్థానికంగా నిల్వ చేయబడుతుంది.",
     "description": "Setting description for downloadable offline Arabic CaTT model"
   },
   "confirmDownloadArabicDict": {
-    "message": "అరబిక్ CaTT డయాక్రిటైజర్ మోడల్ (~74.4 MB)ని డౌన్‌లోడ్ చేయాలా? ఆఫ్‌లైన్ అరబిక్ ఉచ్ఛారణ కోసం ఇది మీ బ్రౌజర్‌లో స్థానికంగా నిల్వ చేయబడుతుంది.",
+    "message": "అరబిక్ CaTT డయాక్రిటైజర్ మోడల్ (~74.3 MB)ని డౌన్‌లోడ్ చేయాలా? ఆఫ్‌లైన్ అరబిక్ ఉచ్ఛారణ కోసం ఇది మీ బ్రౌజర్‌లో స్థానికంగా నిల్వ చేయబడుతుంది.",
     "description": "Confirmation prompt before downloading Arabic CaTT model"
   },
   "confirmDeleteArabicDict": {

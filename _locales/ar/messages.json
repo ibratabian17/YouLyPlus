@@ -928,11 +928,11 @@
     "description": "Setting title for downloadable offline Arabic CaTT model"
   },
   "descOfflineArabicDict": {
-    "message": "نموذج تشكيل عصبي (~74.4 ميغابايت) لاستعادة التشكيل والحركات الدقيقة في كلمات الأغاني العربية. يتم تخزينه محلياً في المتصفح.",
+    "message": "نموذج تشكيل عصبي (~74.3 ميغابايت) لاستعادة التشكيل والحركات الدقيقة في كلمات الأغاني العربية. يتم تخزينه محلياً في المتصفح.",
     "description": "Setting description for downloadable offline Arabic CaTT model"
   },
   "confirmDownloadArabicDict": {
-    "message": "هل تريد تنزيل نموذج التشكيل العربي CaTT (~74.4 ميغابايت)؟ سيتم تخزينه محلياً في متصفحك لنطق العربية دون اتصال.",
+    "message": "هل تريد تنزيل نموذج التشكيل العربي CaTT (~74.3 ميغابايت)؟ سيتم تخزينه محلياً في متصفحك لنطق العربية دون اتصال.",
     "description": "Confirmation prompt before downloading Arabic CaTT model"
   },
   "confirmDeleteArabicDict": {

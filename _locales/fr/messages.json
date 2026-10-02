@@ -928,11 +928,11 @@
     "description": "Setting title for downloadable offline Arabic CaTT model"
   },
   "descOfflineArabicDict": {
-    "message": "Modèle neuronal de diacritisation (~74.4 Mo) pour restaurer le Tashkeel et les voyelles précises des paroles en arabe. Stocké localement dans le navigateur.",
+    "message": "Modèle neuronal de diacritisation (~74.3 Mo) pour restaurer le Tashkeel et les voyelles précises des paroles en arabe. Stocké localement dans le navigateur.",
     "description": "Setting description for downloadable offline Arabic CaTT model"
   },
   "confirmDownloadArabicDict": {
-    "message": "Télécharger le modèle de diacritisation arabe CaTT (~74.4 Mo) ? Il sera stocké localement dans votre navigateur pour la prononciation arabe hors ligne.",
+    "message": "Télécharger le modèle de diacritisation arabe CaTT (~74.3 Mo) ? Il sera stocké localement dans votre navigateur pour la prononciation arabe hors ligne.",
     "description": "Confirmation prompt before downloading Arabic CaTT model"
   },
   "confirmDeleteArabicDict": {

@@ -928,11 +928,11 @@
     "description": "Setting title for downloadable offline Arabic CaTT model"
   },
   "descOfflineArabicDict": {
-    "message": "Model neural diakritik (~74.4 MB) untuk mengembalikan Tashkeel dan vokal akurat lirik Arab. Disimpan secara lokal di peramban.",
+    "message": "Model neural diakritik (~74.3 MB) untuk mengembalikan Tashkeel dan vokal akurat lirik Arab. Disimpan secara lokal di peramban.",
     "description": "Setting description for downloadable offline Arabic CaTT model"
   },
   "confirmDownloadArabicDict": {
-    "message": "Unduh model diakritisasi Arab CaTT (~74.4 MB)? Model akan disimpan secara lokal di peramban untuk pelafalan lirik Arab offline.",
+    "message": "Unduh model diakritisasi Arab CaTT (~74.3 MB)? Model akan disimpan secara lokal di peramban untuk pelafalan lirik Arab offline.",
     "description": "Confirmation prompt before downloading Arabic CaTT model"
   },
   "confirmDeleteArabicDict": {

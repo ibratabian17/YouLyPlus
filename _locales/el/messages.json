@@ -928,11 +928,11 @@
     "description": "Setting title for downloadable offline Arabic CaTT model"
   },
   "descOfflineArabicDict": {
-    "message": "Μοντέλο νευρωνικού διακριτικού σχολιασμού (~74.4 MB) για την επαναφορά του Tashkeel και ακριβών φωνηέντων σε αραβικούς στίχους. Αποθηκεύεται τοπικά στο πρόγραμμα περιήγησης.",
+    "message": "Μοντέλο νευρωνικού διακριτικού σχολιασμού (~74.3 MB) για την επαναφορά του Tashkeel και ακριβών φωνηέντων σε αραβικούς στίχους. Αποθηκεύεται τοπικά στο πρόγραμμα περιήγησης.",
     "description": "Setting description for downloadable offline Arabic CaTT model"
   },
   "confirmDownloadArabicDict": {
-    "message": "Λήψη του μοντέλου διακριτικών αραβικών CaTT (~74.4 MB); Θα αποθηκευτεί τοπικά στο πρόγραμμα περιήγησής σας για αραβική προφορά εκτός σύνδεσης.",
+    "message": "Λήψη του μοντέλου διακριτικών αραβικών CaTT (~74.3 MB); Θα αποθηκευτεί τοπικά στο πρόγραμμα περιήγησής σας για αραβική προφορά εκτός σύνδεσης.",
     "description": "Confirmation prompt before downloading Arabic CaTT model"
   },
   "confirmDeleteArabicDict": {

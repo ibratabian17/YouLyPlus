@@ -928,11 +928,11 @@
     "description": "Setting title for downloadable offline Arabic CaTT model"
   },
   "descOfflineArabicDict": {
-    "message": "আরবি গীতিতে তাশকিল ও সঠিক স্বরবর্ণ পুনরুদ্ধারের জন্য নিউরাল ডায়াক্রিটাইজার মডেল (~74.4 MB)। ব্রাউজারে স্থানীয়ভাবে সংরক্ষিত।",
+    "message": "আরবি গীতিতে তাশকিল ও সঠিক স্বরবর্ণ পুনরুদ্ধারের জন্য নিউরাল ডায়াক্রিটাইজার মডেল (~74.3 MB)। ব্রাউজারে স্থানীয়ভাবে সংরক্ষিত।",
     "description": "Setting description for downloadable offline Arabic CaTT model"
   },
   "confirmDownloadArabicDict": {
-    "message": "আরবি CaTT ডায়াক্রিটাইজার মডেল (~74.4 MB) ডাউনলোড করবেন? এটি অফলাইন আরবি উচ্চারণের জন্য আপনার ব্রাউজারে স্থানীয়ভাবে সংরক্ষিত হবে।",
+    "message": "আরবি CaTT ডায়াক্রিটাইজার মডেল (~74.3 MB) ডাউনলোড করবেন? এটি অফলাইন আরবি উচ্চারণের জন্য আপনার ব্রাউজারে স্থানীয়ভাবে সংরক্ষিত হবে।",
     "description": "Confirmation prompt before downloading Arabic CaTT model"
   },
   "confirmDeleteArabicDict": {

@@ -997,7 +997,8 @@ async function updateJapaneseDictStatus() {
     try {
         const status = await getDictionaryStatus('japanese');
         if (status && status.installed) {
-            statusBadge.textContent = msg('dictStatusInstalled', '17 MB') || 'Installed (~17 MB)';
+            const size = status.sizeMB ? `${status.sizeMB} MB` : '17 MB';
+            statusBadge.textContent = msg('dictStatusInstalled', size) || `Installed (~${size})`;
             statusBadge.style.color = 'var(--md3-sys-color-primary, #625b71)';
             downloadBtn.style.display = 'none';
             if (deleteBtn) deleteBtn.style.display = 'inline-flex';
@@ -1078,12 +1079,13 @@ async function updateArabicDictStatus() {
     try {
         const status = await getDictionaryStatus('arabic');
         if (status && status.installed) {
-            statusBadge.textContent = msg('dictStatusInstalled', '74.4 MB') || 'Installed (~74.4 MB)';
+            const size = status.sizeMB ? `${status.sizeMB} MB` : '74.3 MB';
+            statusBadge.textContent = msg('dictStatusInstalled', size) || `Installed (~${size})`;
             statusBadge.style.color = 'var(--md3-sys-color-primary, #625b71)';
             downloadBtn.style.display = 'none';
             if (deleteBtn) deleteBtn.style.display = 'inline-flex';
         } else {
-            statusBadge.textContent = msg('dictStatusNotInstalled', '74.4 MB') || 'Not Installed (~74.4 MB)';
+            statusBadge.textContent = msg('dictStatusNotInstalled', '74.3 MB') || 'Not Installed (~74.3 MB)';
             statusBadge.style.color = 'inherit';
             downloadBtn.style.display = 'inline-flex';
             downloadBtn.disabled = false;
@@ -1097,7 +1099,7 @@ async function updateArabicDictStatus() {
 
 async function handleDownloadArabicDict() {
     const confirmMsg = msg('confirmDownloadArabicDict')
-        || 'Download the Arabic CaTT diacritizer model (~74.4 MB)? It will be stored locally in your browser for offline Arabic pronunciation.';
+        || 'Download the Arabic CaTT diacritizer model (~74.3 MB)? It will be stored locally in your browser for offline Arabic pronunciation.';
 
     if (!window.confirm(confirmMsg)) return;
 
@@ -1106,7 +1108,7 @@ async function handleDownloadArabicDict() {
     const downloadBtnText = document.getElementById('btn-download-arabic-dict-text');
 
     if (downloadBtn) downloadBtn.disabled = true;
-    if (statusBadge) statusBadge.textContent = msg('dictStatusDownloading', '74.4 MB') || 'Downloading (~74.4 MB)...';
+    if (statusBadge) statusBadge.textContent = msg('dictStatusDownloading', '74.3 MB') || 'Downloading (~74.3 MB)...';
     if (downloadBtnText) downloadBtnText.textContent = '...';
 
     try {

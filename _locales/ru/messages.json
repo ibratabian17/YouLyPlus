@@ -928,11 +928,11 @@
     "description": "Setting title for downloadable offline Arabic CaTT model"
   },
   "descOfflineArabicDict": {
-    "message": "Нейросетевая модель огласовки (~74.4 МБ) для восстановления ташкиля и точных гласных в текстах арабских песен. Хранится локально в браузере.",
+    "message": "Нейросетевая модель огласовки (~74.3 МБ) для восстановления ташкиля и точных гласных в текстах арабских песен. Хранится локально в браузере.",
     "description": "Setting description for downloadable offline Arabic CaTT model"
   },
   "confirmDownloadArabicDict": {
-    "message": "Скачать модель огласовки арабского языка CaTT (~74.4 МБ)? Она сохранится локально в вашем браузере для офлайн-произношения арабского языка.",
+    "message": "Скачать модель огласовки арабского языка CaTT (~74.3 МБ)? Она сохранится локально в вашем браузере для офлайн-произношения арабского языка.",
     "description": "Confirmation prompt before downloading Arabic CaTT model"
   },
   "confirmDeleteArabicDict": {

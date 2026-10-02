@@ -97,7 +97,7 @@ class DictionaryService {
     try {
       const meta = await dictionaryDB.get('catt_meta');
       if (meta && meta.installed) {
-        return { installed: true, timestamp: meta.timestamp, sizeMB: meta.sizeMB || '74.4' };
+        return { installed: true, timestamp: meta.timestamp, sizeMB: meta.sizeMB || '74.3' };
       }
       return { installed: false };
     } catch (e) {

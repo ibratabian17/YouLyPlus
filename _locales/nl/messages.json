@@ -928,11 +928,11 @@
     "description": "Setting title for downloadable offline Arabic CaTT model"
   },
   "descOfflineArabicDict": {
-    "message": "Neuraal diakritiseringsmodel (~74.4 MB) voor het herstellen van Tashkeel en nauwkeurige klinkers in Arabische songteksten. Lokaal opgeslagen in de browser.",
+    "message": "Neuraal diakritiseringsmodel (~74.3 MB) voor het herstellen van Tashkeel en nauwkeurige klinkers in Arabische songteksten. Lokaal opgeslagen in de browser.",
     "description": "Setting description for downloadable offline Arabic CaTT model"
   },
   "confirmDownloadArabicDict": {
-    "message": "Het Arabische CaTT-diakritiseringsmodel (~74.4 MB) downloaden? Het wordt lokaal in uw browser opgeslagen voor offline Arabische uitspraak.",
+    "message": "Het Arabische CaTT-diakritiseringsmodel (~74.3 MB) downloaden? Het wordt lokaal in uw browser opgeslagen voor offline Arabische uitspraak.",
     "description": "Confirmation prompt before downloading Arabic CaTT model"
   },
   "confirmDeleteArabicDict": {
