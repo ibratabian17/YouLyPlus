@@ -506,6 +506,7 @@ h2.card-title.no-border {
     cursor: grab;
     color: var(--md-sys-color-on-surface);
     position: relative;
+    overflow: hidden;
     user-select: none;
 }
 
