@@ -20,6 +20,10 @@ class StateManager {
     return this.lyricsCache.has(key);
   }
 
+  deleteCached(key) {
+    this.lyricsCache.delete(key);
+  }
+
   getOngoingFetch(key) {
     return this.ongoingFetches.get(key);
   }

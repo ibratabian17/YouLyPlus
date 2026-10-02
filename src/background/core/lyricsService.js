@@ -106,6 +106,18 @@ export class LyricsService {
     }
 
     if (songInfo.lyricsJSON && songInfo.lyricsJSON.lyrics.length > 0) {
+      try {
+        const parsedApple = DataParser.parseKPoeFormat(songInfo.lyricsJSON);
+        if (parsedApple && !Utilities.isEmptyLyrics(parsedApple)) {
+          parsedApple.provider = 'kpoe';
+          if (!parsedApple.metadata) parsedApple.metadata = {};
+          parsedApple.metadata.provider = 'kpoe';
+          this.cacheProviderLyrics(cacheKey, 'kpoe', parsedApple);
+        }
+      } catch (e) {
+        console.error('Error caching Apple Music lyrics:', e);
+      }
+
       const settings = await SettingsManager.get({ appleMusicTTMLBypass: false });
       const lyricsJsonType = songInfo.lyricsJSON.type.toUpperCase();
 
@@ -115,7 +127,14 @@ export class LyricsService {
       };
 
       if (!settings.appleMusicTTMLBypass || lyricsJsonType === "WORD") {
+        if (!forceReload && state.hasCached(cacheKey)) {
+          const cached = state.getCached(cacheKey);
+          if (cached && !Utilities.isEmptyLyrics(cached.lyrics)) {
+            return cached;
+          }
+        }
         console.log('Using embedded lyrics (platform specific)');
+        state.setCached(cacheKey, embeddedResult);
         return embeddedResult;
       }
 
@@ -449,46 +468,59 @@ export class LyricsService {
 
   static async getProviderLyrics(songInfo, provider) {
     const cacheKey = this.createCacheKey(songInfo);
-    const cachedLyrics = this.getProviderLyricsFromCache(cacheKey, provider);
-    if (cachedLyrics && !Utilities.isEmptyLyrics(cachedLyrics)) {
-      return { lyrics: cachedLyrics, version: Date.now(), fromCache: true };
-    }
+    let lyrics = this.getProviderLyricsFromCache(cacheKey, provider);
+    let fromCache = true;
 
-    const ongoingSongMap = this.ongoingProviderFetches.get(cacheKey);
-    if (ongoingSongMap && ongoingSongMap.has(provider)) {
-      try {
-        const ongoingLyrics = await ongoingSongMap.get(provider);
-        if (ongoingLyrics && !Utilities.isEmptyLyrics(ongoingLyrics)) {
-          return { lyrics: ongoingLyrics, version: Date.now(), fromCache: true };
+    if (!lyrics || Utilities.isEmptyLyrics(lyrics)) {
+      fromCache = false;
+      const ongoingSongMap = this.ongoingProviderFetches.get(cacheKey);
+      if (ongoingSongMap && ongoingSongMap.has(provider)) {
+        try {
+          const ongoingLyrics = await ongoingSongMap.get(provider);
+          if (ongoingLyrics && !Utilities.isEmptyLyrics(ongoingLyrics)) {
+            lyrics = ongoingLyrics;
+            fromCache = true;
+          }
+        } catch (err) {
+          // Fallback to fetch below
         }
-      } catch (err) {
-        // Fallback to fetch below
       }
     }
 
-    const settings = await SettingsManager.getLyricsSettings();
-    const fetchOptions = settings.cacheStrategy === 'none' ? { cache: 'no-store' } : {};
-    let lyrics = null;
+    if (!lyrics || Utilities.isEmptyLyrics(lyrics)) {
+      const settings = await SettingsManager.getLyricsSettings();
+      const fetchOptions = settings.cacheStrategy === 'none' ? { cache: 'no-store' } : {};
 
-    if (provider === 'subtitles') {
-      lyrics = await YouTubeService.fetchSubtitles(songInfo);
-    } else if (provider === 'ytmusic' || provider === PROVIDERS.YTMUSIC) {
-      if (songInfo.ytMusicLyrics) {
-        lyrics = DataParser.parseYTMusicFormat(songInfo.ytMusicLyrics, songInfo);
+      if (provider === 'subtitles') {
+        lyrics = await YouTubeService.fetchSubtitles(songInfo);
+      } else if (provider === 'ytmusic' || provider === PROVIDERS.YTMUSIC) {
+        if (songInfo.ytMusicLyrics) {
+          lyrics = DataParser.parseYTMusicFormat(songInfo.ytMusicLyrics, songInfo);
+        }
+      } else {
+        lyrics = await this.fetchFromProvider(provider, songInfo, settings, fetchOptions, false, null);
       }
-    } else {
-      lyrics = await this.fetchFromProvider(provider, songInfo, settings, fetchOptions, false, null);
+
+      if (lyrics && !Utilities.isEmptyLyrics(lyrics)) {
+        if (provider === PROVIDERS.UNISON && songInfo.isVideo) {
+          lyrics.ignoreSponsorblock = true;
+        }
+        if (!lyrics.metadata) lyrics.metadata = {};
+        lyrics.metadata.provider = provider;
+        lyrics.provider = provider;
+        this.cacheProviderLyrics(cacheKey, provider, lyrics);
+      }
     }
 
     if (lyrics && !Utilities.isEmptyLyrics(lyrics)) {
-      if (provider === PROVIDERS.UNISON && songInfo.isVideo) {
-        lyrics.ignoreSponsorblock = true;
+      const version = Date.now();
+      const result = { lyrics, version, fromCache };
+      state.setCached(cacheKey, { lyrics, version });
+      const settings = await SettingsManager.getLyricsSettings();
+      if (settings.cacheStrategy !== 'none') {
+        await lyricsDB.set({ key: cacheKey, lyrics, version, timestamp: Date.now(), duration: songInfo.duration });
       }
-      if (!lyrics.metadata) lyrics.metadata = {};
-      lyrics.metadata.provider = provider;
-      lyrics.provider = provider;
-      this.cacheProviderLyrics(cacheKey, provider, lyrics);
-      return { lyrics, version: Date.now(), fromCache: false };
+      return result;
     }
 
     return null;
@@ -532,6 +564,11 @@ export class LyricsService {
     if (source === PROVIDERS.UNISON && songInfo.isVideo) {
       lyrics.ignoreSponsorblock = true;
     }
+
+    if (!lyrics.metadata) lyrics.metadata = {};
+    lyrics.metadata.provider = source;
+    lyrics.provider = source;
+    this.cacheProviderLyrics(cacheKey, source, lyrics);
 
     const version = Date.now();
     const result = { lyrics, version };

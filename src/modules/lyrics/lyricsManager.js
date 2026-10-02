@@ -5,6 +5,7 @@
 const audioCtx = new AudioContext();
 
 let currentFetchMediaId = null;
+let fetchSessionCounter = 0;
 let currentDisplayMode = 'none';     // User's intended display mode ('none', 'translate', 'romanize', 'both')
 let lastProcessedDisplayMode = 'none'; // The mode that was actually rendered
 
@@ -401,7 +402,9 @@ function getProviderDisplayName(provider, lyrics) {
 async function switchLyricsProvider(providerId) {
   if (!lastKnownSongInfo) return false;
   const currentSong = lastKnownSongInfo;
-  const fetchId = currentFetchMediaId;
+  const baseId = currentSong.videoId || currentSong.appleId || currentSong.songId || `${currentSong.title}-${currentSong.artist}`;
+  const fetchId = `${baseId}__${++fetchSessionCounter}`;
+  currentFetchMediaId = fetchId;
   const providerName = getProviderDisplayName(providerId);
 
   try {
@@ -567,7 +570,8 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
   }, DEBOUNCE_TIME_MS);
   lastRequestedSongKey = songKey;
 
-  const fetchId = currentSong.videoId || currentSong.appleId || currentSong.songId || songKey;
+  const baseId = currentSong.videoId || currentSong.appleId || currentSong.songId || songKey;
+  const fetchId = `${baseId}__${++fetchSessionCounter}`;
   currentFetchMediaId = fetchId;
 
   try {
@@ -599,8 +603,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     currentDisplayMode = 'none';
     lastProcessedDisplayMode = 'none';
 
-    const songMediaId = currentSong?.videoId || currentSong?.songId;
-    if (currentFetchMediaId === songMediaId) {
+    if (currentFetchMediaId === fetchId) {
       if (LyricsPlusAPI.displaySongError) LyricsPlusAPI.displaySongError();
     }
   }

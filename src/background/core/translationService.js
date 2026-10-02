@@ -73,8 +73,10 @@ export class TranslationService {
     // Check memory
     if (state.hasCached(key)) {
       const cached = state.getCached(key);
-      if (cached.originalVersion === originalVersion) {
+      if (cached && cached.originalVersion === originalVersion) {
         return cached.translatedLyrics;
+      } else {
+        state.deleteCached(key);
       }
     }
 
