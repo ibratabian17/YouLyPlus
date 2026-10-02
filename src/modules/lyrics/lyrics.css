@@ -1189,6 +1189,7 @@ canvas#lyplus-webgl-canvas {
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 0.2em rgb(255 255 255 / var(--char-glow-max, 0));
     animation: char-glow var(--char-glow-duration) linear var(--char-glow-delay) both;
+    z-index: -1;
 }
 
 @keyframes char-glow {
