@@ -80,40 +80,167 @@ export class BiniLyricsService {
 
     // 1. Check exact ISRC match if available
     if (songInfo.isrc) {
-      const isrcMatch = results.find(r => r.isrc && r.isrc.toUpperCase() === songInfo.isrc.toUpperCase());
+      const targetIsrc = songInfo.isrc.trim().toUpperCase();
+      const isrcMatch = results.find(r => r.isrc && r.isrc.trim().toUpperCase() === targetIsrc);
       if (isrcMatch) return isrcMatch;
     }
 
-    // 2. Normalize helper
-    const normalize = str => (str || '').toLowerCase().replace(/[^\w\s]/gi, '').trim();
-    const cleanTitle = str => normalize(str).replace(/\b(official video|official music video|remix|feat|ft)\b/gi, '').trim();
+    // 2. Normalization & cleaning helpers
+    const normalize = str => {
+      if (!str) return '';
+      return str
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
 
-    const targetTitle = cleanTitle(songInfo.title);
+    const cleanBaseTitle = str => {
+      if (!str) return '';
+      let s = str.toLowerCase();
+      // Remove bracketed/parenthesized tags like (feat. ...), [feat. ...], (with ...), [prod. ...], (remastered)
+      s = s.replace(/[\(\[](?:feat\.?|ft\.?|with|prod\.?|bonus track|remaster(?:ed)?)[^\)\]]*[\)\]]/gi, '');
+      // Remove trailing/inline feat/ft phrases
+      s = s.replace(/\b(?:feat\.?|ft\.?|with)\s+.*$/gi, '');
+      // Remove video / audio tags like (Official Video), [Official Music Video], etc.
+      s = s.replace(/[\(\[](?:official|music video|video|audio|lyrics?|visualizer|album version|explicit)[^\)\]]*[\)\]]/gi, '');
+      return normalize(s);
+    };
+
+    const extractArtists = str => {
+      if (!str) return [];
+      return str
+        .split(/[,&/]|(?:\b(?:feat\.?|ft\.?|with|x)\b)/i)
+        .map(a => normalize(a))
+        .filter(Boolean);
+    };
+
+    const MODIFIER_KEYWORDS = [
+      'slowed', 'reverb', 'remix', 'mixed', 'dj mix', 'mashup',
+      'cover', 'tribute', 'karaoke', 'instrumental', 'acoustic',
+      'sped up', 'speed up', 'live', 'edit', 'versión', 'version',
+      'bpm', 'guitar', 'piano', 'lofi', 'lo-fi', 'nightcore',
+      'club mix', 'extended mix', 'radio edit'
+    ];
+
+    const targetFullTitle = normalize(songInfo.title);
+    const targetBaseTitle = cleanBaseTitle(songInfo.title);
     const targetArtist = normalize(songInfo.artist);
+    const targetAlbum = normalize(songInfo.album);
+
+    const targetModifiers = MODIFIER_KEYWORDS.filter(kw =>
+      (songInfo.title && songInfo.title.toLowerCase().includes(kw)) ||
+      (songInfo.album && songInfo.album.toLowerCase().includes(kw))
+    );
 
     let bestItem = null;
-    let maxScore = -1;
+    let maxScore = -Infinity;
 
     for (const item of results) {
-      const itemTitle = cleanTitle(item.track_name);
+      const itemFullTitle = normalize(item.track_name);
+      const itemBaseTitle = cleanBaseTitle(item.track_name);
       const itemArtist = normalize(item.artist_name);
+      const itemAlbum = normalize(item.album_name);
 
       let score = 0;
 
-      if (targetTitle && itemTitle && (itemTitle.includes(targetTitle) || targetTitle.includes(itemTitle))) {
-        score += 10;
-        if (itemTitle === targetTitle) score += 5;
+      // Title matching
+      if (targetFullTitle && itemFullTitle && targetFullTitle === itemFullTitle) {
+        score += 50; // Exact full title match
+      } else if (targetBaseTitle && itemBaseTitle) {
+        if (targetBaseTitle === itemBaseTitle) {
+          score += 35; // Exact base title match
+        } else if (itemBaseTitle.includes(targetBaseTitle) || targetBaseTitle.includes(itemBaseTitle)) {
+          score += 15; // Partial title match
+        } else {
+          score -= 40; // Title mismatch
+        }
       }
 
-      if (targetArtist && itemArtist && (itemArtist.includes(targetArtist) || targetArtist.includes(itemArtist))) {
-        score += 10;
-        if (itemArtist === targetArtist) score += 5;
+      // Artist matching
+      if (targetArtist && itemArtist) {
+        if (targetArtist === itemArtist) {
+          score += 30; // Exact artist match
+        } else if (itemArtist.includes(targetArtist) || targetArtist.includes(itemArtist)) {
+          score += 15;
+        } else {
+          const targetArtists = extractArtists(songInfo.artist);
+          const itemArtists = extractArtists(item.artist_name);
+          const hasOverlap = targetArtists.some(ta => itemArtists.some(ia => ia === ta || ia.includes(ta) || ta.includes(ia)));
+          if (hasOverlap) {
+            score += 10;
+          } else {
+            score -= 50; // Completely different artist (e.g. cover artist)
+          }
+        }
       }
 
+      // Album matching
+      if (targetAlbum && itemAlbum) {
+        if (targetAlbum === itemAlbum) {
+          score += 35; // Exact album match
+        } else if (itemAlbum.includes(targetAlbum) || targetAlbum.includes(itemAlbum)) {
+          score += 20; // Partial album match
+        }
+
+        const targetIsSingle = targetAlbum.includes('single');
+        const itemIsSingle = itemAlbum.includes('single');
+        if (!targetIsSingle && itemIsSingle) {
+          score -= 15; // Penalize single version when playing full album track
+        } else if (targetIsSingle && itemIsSingle) {
+          score += 10;
+        }
+      }
+
+      // Duration matching
       if (songInfo.duration > 0 && item.duration > 0) {
         const diff = Math.abs(item.duration - songInfo.duration);
-        if (diff <= 3) score += 5;
-        else if (diff <= 8) score += 2;
+        if (diff === 0) {
+          score += 25;
+        } else if (diff <= 1) {
+          score += 20;
+        } else if (diff <= 2) {
+          score += 15;
+        } else if (diff <= 4) {
+          score += 8;
+        } else if (diff <= 8) {
+          score += 2;
+        } else if (diff > 30) {
+          score -= 60;
+        } else if (diff > 15) {
+          score -= 30;
+        }
+      }
+
+      // Timing type quality bonus (TTML word-synced vs line-synced vs unsynced)
+      if (item.timing_type === 'word') {
+        score += 15;
+      } else if (item.timing_type === 'line') {
+        score += 8;
+      } else {
+        score -= 10;
+      }
+
+      // Modifier / remix penalty
+      const itemModifiers = MODIFIER_KEYWORDS.filter(kw =>
+        (item.track_name && item.track_name.toLowerCase().includes(kw)) ||
+        (item.album_name && item.album_name.toLowerCase().includes(kw))
+      );
+      for (const kw of itemModifiers) {
+        if (!targetModifiers.includes(kw)) {
+          score -= 30; // Mismatched modifier (remix, slowed, reverb, DJ mix, etc.)
+        }
+      }
+
+      // Songwriter bonus check for featured artists
+      if (Array.isArray(songInfo.songWriters) && songInfo.songWriters.length > 0) {
+        const featArtists = extractArtists(item.track_name);
+        for (const fa of featArtists) {
+          if (songInfo.songWriters.some(sw => normalize(sw).includes(fa) || fa.includes(normalize(sw)))) {
+            score += 10;
+            break;
+          }
+        }
       }
 
       if (score > maxScore) {
