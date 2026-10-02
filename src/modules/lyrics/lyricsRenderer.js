@@ -2758,13 +2758,12 @@ class LyricsPlusRenderer {
   static _getEmphasisParams(duration, count) {
     const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
     const delay = Math.min((duration / count) * 0.4, 0.4);
-    const hold = Math.min((2 * duration) / count, 1.5);
+    const hold = (2 * duration) / count;
     const response = Math.min(3, duration);
     const emphasis = clamp(duration - 1, 0, 1);
-    const longFalloff = 1 - 0.5 * clamp((duration - 2) / 3, 0, 1);
     const glow = 0.45 * clamp((duration - 1) / 0.5, 0, 1);
     const spanDuration = hold + response * 2;
-    return { delay, hold, response, emphasis, longFalloff, glow, spanDuration };
+    return { delay, hold, response, emphasis, glow, spanDuration };
   }
 
   static _getEmphasisFrames(duration, count, index) {
@@ -2775,7 +2774,7 @@ class LyricsPlusRenderer {
 
     const SPREAD_EM = 0.05;
     const LIFT_EM = 0.035;
-    const { response, hold, emphasis, longFalloff, spanDuration } =
+    const { response, hold, emphasis, spanDuration } =
       LyricsPlusRenderer._getEmphasisParams(duration, count);
     const half = Math.max(1, (count - 1) / 2);
     const side = (index - (count - 1) / 2) / half; // -1 .. 1
@@ -2787,8 +2786,8 @@ class LyricsPlusRenderer {
         ? 0
         : LyricsPlusRenderer._springProgress(time, response) *
         (1 - LyricsPlusRenderer._springProgress(time - hold, response));
-      const x = side * SPREAD_EM * emphasis * longFalloff * envelope;
-      const y = -0.05 * rise - LIFT_EM * emphasis * longFalloff * envelope;
+      const x = side * SPREAD_EM * emphasis * envelope;
+      const y = -0.05 * rise - LIFT_EM * emphasis * envelope;
       return {
         offset: frame / 60,
         transform: `translate3d(${x.toFixed(4)}em, ${y.toFixed(4)}em, 1px) scale(${(1 + 0.1 * emphasis * envelope).toFixed(4)})`,
