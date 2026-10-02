@@ -1138,5 +1138,9 @@
   "noteDeepLSupportedLangs": {
     "message": "DeepL офіційно підтримує 33 мови. Якщо запитано непідтримувану мову, переклад автоматично переключиться на Google Translate.",
     "description": "Note shown under target language when DeepL is active"
+  },
+  "categoryGeminiSettings": {
+    "message": "Налаштування Gemini AI",
+    "description": "Category title"
   }
 }

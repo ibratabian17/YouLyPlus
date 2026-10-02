@@ -1138,5 +1138,9 @@
   "noteDeepLSupportedLangs": {
     "message": "DeepL 官方支持 33 种语言。如果请求不受支持的语言，翻译将自动回退到 Google 翻译。",
     "description": "Note shown under target language when DeepL is active"
+  },
+  "categoryGeminiSettings": {
+    "message": "Gemini AI 设置",
+    "description": "Category title"
   }
 }

@@ -1138,5 +1138,9 @@
   "noteDeepLSupportedLangs": {
     "message": "Το DeepL υποστηρίζει επίσημα 33 γλώσσες. Εάν ζητηθεί μη υποστηριζόμενη γλώσσα, η μετάφραση θα μεταβεί αυτόματα στο Google Translate.",
     "description": "Note shown under target language when DeepL is active"
+  },
+  "categoryGeminiSettings": {
+    "message": "Ρυθμίσεις Gemini AI",
+    "description": "Category title"
   }
 }

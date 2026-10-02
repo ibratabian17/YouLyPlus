@@ -1138,5 +1138,9 @@
   "noteDeepLSupportedLangs": {
     "message": "DeepL resmi mendukung 33 bahasa. Jika bahasa yang tidak didukung dipilih, terjemahan akan otomatis dialihkan ke Google Translate.",
     "description": "Note shown under target language when DeepL is active"
+  },
+  "categoryGeminiSettings": {
+    "message": "Pengaturan Gemini AI",
+    "description": "Category title"
   }
 }

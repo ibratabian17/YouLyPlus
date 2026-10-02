@@ -1138,5 +1138,9 @@
   "noteDeepLSupportedLangs": {
     "message": "DeepL আনুষ্ঠানিকভাবে ৩৩টি ভাষা সমর্থন করে। অসমর্থিত কোনো ভাষা নির্বাচন করা হলে অনুবাদ স্বয়ংক্রিয়ভাবে Google অনুবাদে ফিরে যাবে।",
     "description": "Note shown under target language when DeepL is active"
+  },
+  "categoryGeminiSettings": {
+    "message": "Gemini AI সেটিংস",
+    "description": "Category title"
   }
 }

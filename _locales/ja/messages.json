@@ -1138,5 +1138,9 @@
   "noteDeepLSupportedLangs": {
     "message": "DeepLは33言語を公式サポートしています。非対応の言語が選択された場合、自動的にGoogle翻訳へフォールバックします。",
     "description": "Note shown under target language when DeepL is active"
+  },
+  "categoryGeminiSettings": {
+    "message": "Gemini AI 設定",
+    "description": "Category title"
   }
 }

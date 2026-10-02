@@ -802,6 +802,7 @@ document.getElementById('override-gemini-romanize-prompt').addEventListener('cha
 });
 
 document.getElementById('romanization-provider').addEventListener('change', () => {
+    toggleGeminiSettingsVisibility();
     toggleRomanizationModelVisibility();
     toggleOpenRouterSettingsVisibility();
     toggleOfflineDictionaryVisibility();
@@ -855,12 +856,15 @@ function toggleCustomKpoeUrlVisibility() {
 }
 
 function toggleGeminiSettingsVisibility() {
-    const isGemini = document.getElementById('translation-provider').value === 'gemini';
-    toggleElementVisibility('gemini-api-key-group', isGemini);
-    toggleElementVisibility('gemini-model-group', isGemini);
+    const isTranslationGemini = document.getElementById('translation-provider').value === 'gemini';
+    const isRomanizationGemini = document.getElementById('romanization-provider').value === 'gemini';
+    const isGemini = isTranslationGemini || isRomanizationGemini;
+
+    toggleElementVisibility('gemini-settings-category', isGemini);
+    toggleElementVisibility('gemini-model-group', isTranslationGemini);
 
     // Prompt overrides are shared with OpenRouter
-    const isGeminiOrOpenRouter = isGemini || document.getElementById('translation-provider').value === 'openrouter';
+    const isGeminiOrOpenRouter = isTranslationGemini || document.getElementById('translation-provider').value === 'openrouter';
     toggleElementVisibility('override-gemini-prompt-group', isGeminiOrOpenRouter);
 
     // Romanization prompt override is shared
