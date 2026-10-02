@@ -116,40 +116,41 @@ function updateTextWithMarquee(container, text) {
         wrapper.classList.remove('animate');
     }
 
-    requestAnimationFrame(() => {
-        const containerWidth = container.clientWidth;
-        const contentWidth = content.scrollWidth;
+    const computedStyle = window.getComputedStyle(container);
+    const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
+    const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
+    const availableWidth = container.clientWidth - paddingLeft - paddingRight;
+    const contentWidth = Math.ceil(content.getBoundingClientRect().width || content.scrollWidth);
 
-        if (contentWidth > containerWidth && containerWidth > 0) {
-            const gap = 60;
-            let duplicate = wrapper.querySelector('.marquee-duplicate');
-            if (!duplicate) {
-                duplicate = content.cloneNode(true);
-                duplicate.className = 'marquee-content marquee-duplicate';
-                wrapper.appendChild(duplicate);
-            } else {
-                duplicate.textContent = text;
-            }
-
-            const scrollDistance = contentWidth + gap;
-            const speed = 30; // 30px per second for smooth, readable scrolling
-            const scrollDuration = scrollDistance / speed;
-            // 20% pause in CSS keyframe (0% to 20%), so movement takes 80% of totalDuration
-            const totalDuration = scrollDuration / 0.8;
-
-            wrapper.style.setProperty('--marquee-distance', `${scrollDistance}px`);
-            wrapper.style.setProperty('--total-duration', `${totalDuration.toFixed(2)}s`);
-            wrapper.style.setProperty('--gap', `${gap}px`);
-
-            container.classList.add('marquee-active');
-            wrapper.classList.add('animate');
+    if (contentWidth > availableWidth && availableWidth > 0) {
+        const gap = 60;
+        let duplicate = wrapper.querySelector('.marquee-duplicate');
+        if (!duplicate) {
+            duplicate = content.cloneNode(true);
+            duplicate.className = 'marquee-content marquee-duplicate';
+            wrapper.appendChild(duplicate);
         } else {
-            const duplicate = wrapper.querySelector('.marquee-duplicate');
-            if (duplicate) duplicate.remove();
-            container.classList.remove('marquee-active');
-            wrapper.classList.remove('animate');
+            duplicate.textContent = text;
         }
-    });
+
+        const scrollDistance = contentWidth + gap;
+        const speed = 30; // 30px per second for smooth, readable scrolling
+        const scrollDuration = scrollDistance / speed;
+        // 20% pause in CSS keyframe (0% to 20%), so movement takes 80% of totalDuration
+        const totalDuration = scrollDuration / 0.8;
+
+        wrapper.style.setProperty('--marquee-distance', `${scrollDistance}px`);
+        wrapper.style.setProperty('--total-duration', `${totalDuration.toFixed(2)}s`);
+        wrapper.style.setProperty('--gap', `${gap}px`);
+
+        container.classList.add('marquee-active');
+        wrapper.classList.add('animate');
+    } else {
+        const duplicate = wrapper.querySelector('.marquee-duplicate');
+        if (duplicate) duplicate.remove();
+        container.classList.remove('marquee-active');
+        wrapper.classList.remove('animate');
+    }
 }
 
 let marqueeResizeTimeout;
