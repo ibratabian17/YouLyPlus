@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "הגדרות Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "מטמון מילים",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "מטמון תרגומים",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "נקה מטמון מילים",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "נקה מטמון תרגומים",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB בשימוש ($COUNT$ שירים במטמון)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB בשימוש ($COUNT$ תרגומים במטמון)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB בשימוש ($COUNT$ פריטים במטמון)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "מטמון תעתיק פונטי",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "סה״כ שימוש במטמון",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "נקה מטמון תעתיק פונטי",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "נקה את כל המטמון",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB בשימוש ($COUNT$ תעתיקים במטמון)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

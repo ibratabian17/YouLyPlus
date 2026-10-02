@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Gemini AI அமைப்புகள்",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "பாடல் வரிகள் தேக்கம் (Cache)",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "மொழிபெயர்ப்பு தேக்கம்",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "வரிகள் தேக்கத்தை அழிக்கவும்",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "மொழிபெயர்ப்பு தேக்கத்தை அழிக்கவும்",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB பயன்படுத்தப்பட்டது ($COUNT$ பாடல்கள் சேமிக்கப்பட்டுள்ளன)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB பயன்படுத்தப்பட்டது ($COUNT$ மொழிபெயர்ப்புகள் சேமிக்கப்பட்டுள்ளன)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB பயன்படுத்தப்பட்டது ($COUNT$ உருப்படிகள் சேமிக்கப்பட்டுள்ளன)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "எழுத்துப்பெயர்ப்பு தேக்கம்",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "மொத்த தேக்கப் பயன்பாடு",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "எழுத்துப்பெயர்ப்பு தேக்கத்தை அழிக்கவும்",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "அனைத்து தேக்கங்களையும் அழிக்கவும்",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB பயன்படுத்தப்பட்டது ($COUNT$ எழுத்துப்பெயர்ப்புகள் சேமிக்கப்பட்டுள்ளன)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

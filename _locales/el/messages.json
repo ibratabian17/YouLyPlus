@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Ρυθμίσεις Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Προσωρινή μνήμη στίχων",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Προσωρινή μνήμη μετάφρασης",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Εκκαθάριση μνήμης στίχων",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Εκκαθάριση μνήμης μετάφρασης",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB σε χρήση ($COUNT$ τραγούδια αποθηκευμένα)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB σε χρήση ($COUNT$ μεταφράσεις αποθηκευμένες)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB σε χρήση ($COUNT$ στοιχεία αποθηκευμένα)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Προσωρινή μνήμη μεταγραφής",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Συνολική χρήση προσωρινής μνήμης",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Εκκαθάριση μνήμης μεταγραφής",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Εκκαθάριση όλης της μνήμης",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB σε χρήση ($COUNT$ μεταγραφές αποθηκευμένες)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

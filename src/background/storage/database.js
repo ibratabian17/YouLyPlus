@@ -99,6 +99,57 @@ class DatabaseManager {
     store.clear();
   }
 
+  async deleteWhere(predicate) {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.config.store], "readwrite");
+      const store = transaction.objectStore(this.config.store);
+      const request = store.openCursor();
+      let deletedCount = 0;
+
+      request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          if (predicate(cursor.value, cursor.key)) {
+            cursor.delete();
+            deletedCount++;
+          }
+          cursor.continue();
+        } else {
+          db.close();
+          resolve(deletedCount);
+        }
+      };
+
+      request.onerror = () => {
+        db.close();
+        reject(request.error);
+      };
+    });
+  }
+
+  async getBreakdown() {
+    const records = await this.getAll();
+    let transBytes = 0, transCount = 0;
+    let romBytes = 0, romCount = 0;
+
+    for (const record of records) {
+      const bytes = new TextEncoder().encode(JSON.stringify(record)).length;
+      if (record.key && record.key.includes(' - romanize - ')) {
+        romBytes += bytes;
+        romCount++;
+      } else {
+        transBytes += bytes;
+        transCount++;
+      }
+    }
+
+    return {
+      translations: { sizeKB: transBytes / 1024, count: transCount },
+      romanizations: { sizeKB: romBytes / 1024, count: romCount }
+    };
+  }
+
   async estimateSize() {
     const db = await this.open();
     return new Promise((resolve, reject) => {

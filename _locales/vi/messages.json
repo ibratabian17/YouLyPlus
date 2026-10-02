@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Cài đặt Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Bộ nhớ đệm lời bài hát",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Bộ nhớ đệm bản dịch",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Xóa bộ nhớ đệm lời bài hát",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Xóa bộ nhớ đệm bản dịch",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "Đã dùng $SIZE$ MB (đã lưu $COUNT$ bài hát)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "Đã dùng $SIZE$ MB (đã lưu $COUNT$ bản dịch)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "Đã dùng $SIZE$ MB (đã lưu $COUNT$ mục)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Bộ nhớ đệm chuyển tự (Romanization)",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Tổng dung lượng bộ nhớ đệm",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Xóa bộ nhớ đệm chuyển tự",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Xóa toàn bộ bộ nhớ đệm",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "Đã dùng $SIZE$ MB (đã lưu $COUNT$ bản chuyển tự)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

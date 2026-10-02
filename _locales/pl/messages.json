@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Ustawienia Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Pamięć podręczna tekstów",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Pamięć podręczna tłumaczeń",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Wyczyść pamięć podręczną tekstów",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Wyczyść pamięć podręczną tłumaczeń",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB używane ($COUNT$ utworów w pamięci)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB używane ($COUNT$ tłumaczeń w pamięci)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB używane ($COUNT$ elementów w pamięci)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Pamięć podręczna transliteracji",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Całkowite użycie pamięci podręcznej",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Wyczyść pamięć podręczną transliteracji",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Wyczyść całą pamięć podręczną",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB używane ($COUNT$ transliteracji w pamięci)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

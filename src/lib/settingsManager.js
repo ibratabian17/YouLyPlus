@@ -165,28 +165,65 @@ export function updateCacheSize() {
             pBrowser.runtime.sendMessage({ type: 'GET_CACHED_SIZE' }, (response) => {
                 if (pBrowser.runtime.lastError) {
                     console.error("YouLy+: Error getting cache size:", pBrowser.runtime.lastError.message);
+                    const errMsg = getI18nMsg('msgErrorLoadingCache') || 'Error loading cache size.';
                     const cacheSizeEl = document.getElementById('cache-size');
-                    if (cacheSizeEl) cacheSizeEl.textContent = getI18nMsg('msgErrorLoadingCache') || 'Error loading cache size.';
+                    if (cacheSizeEl) cacheSizeEl.textContent = errMsg;
+                    const lyricsCacheEl = document.getElementById('lyrics-cache-size');
+                    if (lyricsCacheEl) lyricsCacheEl.textContent = errMsg;
+                    const transCacheEl = document.getElementById('translation-cache-size');
+                    if (transCacheEl) transCacheEl.textContent = errMsg;
                     resolve({ success: false, error: pBrowser.runtime.lastError.message });
                     return;
                 }
                 if (response && response.success) {
-                    const sizeMB = (response.sizeKB / 1024).toFixed(2);
+                    const sizeMB = response.sizeMB || (response.sizeKB / 1024).toFixed(2);
+                    const lyricsSizeMB = response.lyrics ? response.lyrics.sizeMB : (response.sizeKB / 1024).toFixed(2);
+                    const lyricsCount = response.lyrics ? response.lyrics.count : response.cacheCount;
+                    const transSizeMB = response.translations ? response.translations.sizeMB : '0.00';
+                    const transCount = response.translations ? response.translations.count : 0;
+
+                    const lyricsCacheEl = document.getElementById('lyrics-cache-size');
+                    if (lyricsCacheEl) {
+                        const formattedLyrics = getI18nMsg('labelLyricsCacheFormat', [lyricsSizeMB, String(lyricsCount)]) || getI18nMsg('labelCacheUsageFormat', [lyricsSizeMB, String(lyricsCount)]);
+                        lyricsCacheEl.textContent = formattedLyrics || `${lyricsSizeMB} MB used (${lyricsCount} songs cached)`;
+                    }
+
+                    const transCacheEl = document.getElementById('translation-cache-size');
+                    if (transCacheEl) {
+                        const formattedTrans = getI18nMsg('labelTranslationCacheFormat', [transSizeMB, String(transCount)]);
+                        transCacheEl.textContent = formattedTrans || `${transSizeMB} MB used (${transCount} items cached)`;
+                    }
+
+                    const romSizeMB = response.romanizations ? response.romanizations.sizeMB : '0.00';
+                    const romCount = response.romanizations ? response.romanizations.count : 0;
+                    const romCacheEl = document.getElementById('romanization-cache-size');
+                    if (romCacheEl) {
+                        const formattedRom = getI18nMsg('labelRomanizationCacheFormat', [romSizeMB, String(romCount)]);
+                        romCacheEl.textContent = formattedRom || `${romSizeMB} MB used (${romCount} items cached)`;
+                    }
+
                     const cacheSizeEl = document.getElementById('cache-size');
                     if (cacheSizeEl) {
-                        const formatted = getI18nMsg('labelCacheUsageFormat', [sizeMB, String(response.cacheCount)]);
-                        cacheSizeEl.textContent = formatted || `${sizeMB} MB used (${response.cacheCount} songs cached)`;
+                        const formatted = getI18nMsg('labelTotalCacheFormat', [sizeMB, String(response.cacheCount)]) || getI18nMsg('labelCacheUsageFormat', [sizeMB, String(response.cacheCount)]);
+                        cacheSizeEl.textContent = formatted || `${sizeMB} MB used (${response.cacheCount} items cached)`;
                     }
                     const popupSizeEl = document.querySelector('.cache-size-value');
                     const popupCountEl = document.querySelector('.cache-count-value');
                     if (popupSizeEl) popupSizeEl.textContent = `${sizeMB} MB`;
                     if (popupCountEl) popupCountEl.textContent = response.cacheCount.toString();
-                    resolve({ success: true, sizeMB, sizeKB: response.sizeKB, cacheCount: response.cacheCount });
+                    resolve({ success: true, sizeMB, sizeKB: response.sizeKB, cacheCount: response.cacheCount, lyrics: response.lyrics, translations: response.translations, romanizations: response.romanizations });
                 } else {
                     const err = response ? response.error : "No response";
                     console.error("YouLy+: Error getting cache size from response:", err);
+                    const errMsg = getI18nMsg('msgErrorLoadingCache') || 'Could not retrieve cache size.';
                     const cacheSizeEl = document.getElementById('cache-size');
-                    if (cacheSizeEl) cacheSizeEl.textContent = getI18nMsg('msgErrorLoadingCache') || 'Could not retrieve cache size.';
+                    if (cacheSizeEl) cacheSizeEl.textContent = errMsg;
+                    const lyricsCacheEl = document.getElementById('lyrics-cache-size');
+                    if (lyricsCacheEl) lyricsCacheEl.textContent = errMsg;
+                    const transCacheEl = document.getElementById('translation-cache-size');
+                    if (transCacheEl) transCacheEl.textContent = errMsg;
+                    const romCacheEl = document.getElementById('romanization-cache-size');
+                    if (romCacheEl) romCacheEl.textContent = errMsg;
                     const popupSizeEl = document.querySelector('.cache-size-value');
                     const popupCountEl = document.querySelector('.cache-count-value');
                     if (popupSizeEl) popupSizeEl.textContent = 'N/A';
@@ -196,8 +233,15 @@ export function updateCacheSize() {
             });
         } else {
             console.warn("YouLy+: pBrowser.runtime.sendMessage is not available. Skipping cache size update.");
+            const unavailMsg = getI18nMsg('msgCacheUnavailable') || 'Cache info unavailable.';
             const cacheSizeEl = document.getElementById('cache-size');
-            if (cacheSizeEl) cacheSizeEl.textContent = getI18nMsg('msgCacheUnavailable') || 'Cache info unavailable.';
+            if (cacheSizeEl) cacheSizeEl.textContent = unavailMsg;
+            const lyricsCacheEl = document.getElementById('lyrics-cache-size');
+            if (lyricsCacheEl) lyricsCacheEl.textContent = unavailMsg;
+            const transCacheEl = document.getElementById('translation-cache-size');
+            if (transCacheEl) transCacheEl.textContent = unavailMsg;
+            const romCacheEl = document.getElementById('romanization-cache-size');
+            if (romCacheEl) romCacheEl.textContent = unavailMsg;
             const popupSizeEl = document.querySelector('.cache-size-value');
             const popupCountEl = document.querySelector('.cache-count-value');
             if (popupSizeEl) popupSizeEl.textContent = 'N/A';
@@ -207,10 +251,10 @@ export function updateCacheSize() {
     });
 }
 
-export function clearCache() {
+export function clearCache(target = 'all') {
     return new Promise((resolve) => {
         if (pBrowser && pBrowser.runtime && typeof pBrowser.runtime.sendMessage === 'function') {
-            pBrowser.runtime.sendMessage({ type: 'RESET_CACHE' }, (response) => {
+            pBrowser.runtime.sendMessage({ type: 'RESET_CACHE', target }, (response) => {
                 if (pBrowser.runtime.lastError) {
                     console.error("YouLy+: Error resetting cache:", pBrowser.runtime.lastError.message);
                     resolve({ success: false, error: pBrowser.runtime.lastError.message });

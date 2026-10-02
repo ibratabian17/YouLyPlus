@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Gemini AI-instellings",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Lirieke-kas",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Vertaalkas",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Vee lirieke-kas uit",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Vee vertaalkas uit",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB gebruik ($COUNT$ lirieke gekas)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB gebruik ($COUNT$ vertalings gekas)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB gebruik ($COUNT$ items gekas)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Transliterasie-kas",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Totale kasgebruik",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Vee transliterasie-kas uit",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Vee alle kas uit",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB gebruik ($COUNT$ transliterasies gekas)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

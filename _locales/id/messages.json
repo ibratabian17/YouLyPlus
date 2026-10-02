@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Pengaturan Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Cache Lirik",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Cache Terjemahan",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Hapus Cache Lirik",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Hapus Cache Terjemahan",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB terpakai ($COUNT$ lagu tersimpan)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB terpakai ($COUNT$ terjemahan tersimpan)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB terpakai ($COUNT$ item tersimpan)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Cache Transliterasi",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Total Penggunaan Cache",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Hapus Cache Transliterasi",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Hapus Semua Cache",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB terpakai ($COUNT$ transliterasi tersimpan)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

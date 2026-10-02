@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Gemini AI Inställningar",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Låttext-cache",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Översättnings-cache",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Rensa låttext-cache",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Rensa översättnings-cache",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB används ($COUNT$ låtar sparade)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB används ($COUNT$ översättningar sparade)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB används ($COUNT$ objekt sparade)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Translittererings-cache",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Total cache-användning",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Rensa translittererings-cache",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Rensa all cache",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB används ($COUNT$ translittereringar sparade)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

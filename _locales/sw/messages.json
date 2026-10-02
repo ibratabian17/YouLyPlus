@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Mipangilio ya Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Akiba ya Maneno ya Nyimbo",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Akiba ya Tafsiri",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Futa Akiba ya Maneno ya Nyimbo",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Futa Akiba ya Tafsiri",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "MB $SIZE$ zimetumika (nyimbo $COUNT$ zimehifadhiwa)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "MB $SIZE$ zimetumika (tafsiri $COUNT$ zimehifadhiwa)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "MB $SIZE$ zimetumika (vipengee $COUNT$ vimehifadhiwa)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Akiba ya Unukuzi wa Herufi",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Jumla ya Matumizi ya Akiba",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Futa Akiba ya Unukuzi",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Futa Akiba Yote",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "MB $SIZE$ zimetumika (unukuzi $COUNT$ umehifadhiwa)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "إعدادات Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "ذاكرة الكلمات المؤقتة",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "ذاكرة الترجمة المؤقتة",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "مسح ذاكرة الكلمات",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "مسح ذاكرة الترجمة",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "تم استخدام $SIZE$ ميغابايت ($COUNT$ أغنية مخزنة)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "تم استخدام $SIZE$ ميغابايت ($COUNT$ ترجمة مخزنة)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "تم استخدام $SIZE$ ميغابايت ($COUNT$ عنصر مخزن)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "ذاكرة النقل الصوتي المؤقتة",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "إجمالي استخدام الذاكرة المؤقتة",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "مسح ذاكرة النقل الصوتي",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "مسح كل الذاكرة المؤقتة",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "تم استخدام $SIZE$ ميغابايت ($COUNT$ نقل صوتي مخزن)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

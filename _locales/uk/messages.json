@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Налаштування Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Кеш текстів пісень",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Кеш перекладів",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Очистити кеш текстів",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Очистити кеш перекладів",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "Використано $SIZE$ МБ ($COUNT$ пісень у кеші)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "Використано $SIZE$ МБ ($COUNT$ перекладів у кеші)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "Використано $SIZE$ МБ ($COUNT$ елементів у кеші)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Кеш транслітерації",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Загальне використання кешу",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Очистити кеш транслітерації",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Очистити весь кеш",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "Використано $SIZE$ МБ ($COUNT$ транслітерацій у кеші)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

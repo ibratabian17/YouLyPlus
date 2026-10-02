@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Ajustes de Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Caché de letras",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Caché de traducción",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Borrar caché de letras",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Borrar caché de traducción",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB usado ($COUNT$ canciones en caché)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB usado ($COUNT$ traducciones en caché)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB usado ($COUNT$ elementos en caché)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Caché de transliteración",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Uso total de la caché",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Borrar caché de transliteración",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Borrar toda la caché",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB usado ($COUNT$ transliteraciones en caché)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

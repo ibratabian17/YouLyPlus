@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Gemini AI 설정",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "가사 캐시",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "번역 캐시",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "가사 캐시 삭제",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "번역 캐시 삭제",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB 사용됨 ($COUNT$개 곡 캐시됨)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB 사용됨 ($COUNT$개 번역 캐시됨)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB 사용됨 ($COUNT$개 항목 캐시됨)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "음역 캐시",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "총 캐시 사용량",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "음역 캐시 삭제",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "모든 캐시 삭제",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB 사용됨 ($COUNT$개 음역 캐시됨)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

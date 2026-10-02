@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "การตั้งค่า Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "แคชเนื้อเพลง",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "แคชการแปล",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "ล้างแคชเนื้อเพลง",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "ล้างแคชการแปล",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "ใช้ไป $SIZE$ MB (แคชเนื้อเพลง $COUNT$ เพลง)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "ใช้ไป $SIZE$ MB (แคชการแปล $COUNT$ รายการ)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "ใช้ไป $SIZE$ MB (แคชทั้งหมด $COUNT$ รายการ)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "แคชการถอดเสียง (Romanization)",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "การใช้แคชทั้งหมด",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "ล้างแคชการถอดเสียง",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "ล้างแคชทั้งหมด",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "ใช้ไป $SIZE$ MB (แคชการถอดเสียง $COUNT$ รายการ)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

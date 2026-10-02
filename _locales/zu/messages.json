@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Izilungiselelo ze-Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Inqolobane Yamazwi Engoma",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Inqolobane Yokuhumusha",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Sula Inqolobane Yamazwi",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Sula Inqolobane Yokuhumusha",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "Kusetshenziswe i-$SIZE$ MB ($COUNT$ izingoma ezigciniwe)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "Kusetshenziswe i-$SIZE$ MB ($COUNT$ izinguqulo ezigciniwe)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "Kusetshenziswe i-$SIZE$ MB ($COUNT$ izinto ezigciniwe)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Inqolobane Yokuguqula Amagama",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Ukusetshenziswa Kwenqolobane Ephelele",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Sula Inqolobane Yokuguqula Amagama",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Sula Yonke Inqolobane",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "Kusetshenziswe i-$SIZE$ MB ($COUNT$ ukuguqulwa kwegama okugciniwe)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

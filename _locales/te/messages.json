@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Gemini AI సెట్టింగ్‌లు",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "లిరిక్స్ కాష్",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "అనువాద కాష్",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "లిరిక్స్ కాష్‌ను క్లియర్ చేయండి",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "అనువాద కాష్‌ను క్లియర్ చేయండి",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB ఉపయోగించబడింది ($COUNT$ పాటలు కాష్ చేయబడ్డాయి)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB ఉపయోగించబడింది ($COUNT$ అనువాదాలు కాష్ చేయబడ్డాయి)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB ఉపయోగించబడింది ($COUNT$ అంశాలు కాష్ చేయబడ్డాయి)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "లిప్యంతరీకరణ కాష్",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "మొత్తం కాష్ వినియోగం",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "లిప్యంతరీకరణ కాష్‌ను క్లియర్ చేయండి",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "అన్ని కాష్‌లను క్లియర్ చేయండి",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB ఉపయోగించబడింది ($COUNT$ లిప్యంతరీకరణలు కాష్ చేయబడ్డాయి)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

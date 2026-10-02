@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Gemini AI Ayarları",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Şarkı Sözü Önbelleği",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Çeviri Önbelleği",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Şarkı Sözü Önbelleğini Temizle",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Çeviri Önbelleğini Temizle",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB kullanılıyor ($COUNT$ şarkı önbellekte)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB kullanılıyor ($COUNT$ çeviri önbellekte)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB kullanılıyor ($COUNT$ öge önbellekte)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Transliterasyon Önbelleği",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Toplam Önbellek Kullanımı",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Transliterasyon Önbelleğini Temizle",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Tüm Önbelleği Temizle",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB kullanılıyor ($COUNT$ transliterasyon önbellekte)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

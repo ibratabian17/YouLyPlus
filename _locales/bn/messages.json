@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Gemini AI সেটিংস",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "লিরিক্স ক্যাশে",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "অনুবাদ ক্যাশে",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "লিরিক্স ক্যাশে মুছুন",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "অনুবাদ ক্যাশে মুছুন",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB ব্যবহৃত ($COUNT$ টি গান ক্যাশ করা হয়েছে)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB ব্যবহৃত ($COUNT$ টি অনুবাদ ক্যাশ করা হয়েছে)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB ব্যবহৃত ($COUNT$ টি আইটেম ক্যাশ করা হয়েছে)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "লিপ্যন্তর ক্যাশে",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "মোট ক্যাশে ব্যবহার",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "লিপ্যন্তর ক্যাশে মুছুন",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "সব ক্যাশে মুছুন",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB ব্যবহৃত ($COUNT$ টি লিপ্যন্তর ক্যাশ করা হয়েছে)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

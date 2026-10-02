@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Paramètres Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Cache des paroles",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Cache des traductions",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Vider le cache des paroles",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Vider le cache des traductions",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ Mo utilisés ($COUNT$ morceaux en cache)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ Mo utilisés ($COUNT$ traductions en cache)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ Mo utilisés ($COUNT$ éléments en cache)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Cache des translittérations",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Utilisation totale du cache",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Vider le cache des translittérations",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Vider tout le cache",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ Mo utilisés ($COUNT$ translittérations en cache)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

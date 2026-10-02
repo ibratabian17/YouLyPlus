@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Настройки Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "Кэш текстов песен",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "Кэш переводов",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "Очистить кэш текстов",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "Очистить кэш переводов",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "Использовано $SIZE$ МБ ($COUNT$ песен в кэше)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "Использовано $SIZE$ МБ ($COUNT$ переводов в кэше)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "Использовано $SIZE$ МБ ($COUNT$ элементов в кэше)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "Кэш транслитерации",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "Общий объем кэша",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "Очистить кэш транслитерации",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "Очистить весь кэш",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "Использовано $SIZE$ МБ ($COUNT$ транслитераций в кэше)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

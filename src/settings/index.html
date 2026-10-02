@@ -1200,8 +1200,53 @@
                         </div>
                         <div class="setting-item">
                             <div class="setting-info">
-                                <span class="setting-title" data-i18n="labelCurrentCacheUsage">Current Cache Usage</span>
-                                <span id="cache-size" class="setting-description">0.00 MB used (0 songs cached)</span>
+                                <span class="setting-title" data-i18n="labelLyricsCache">Lyrics Cache</span>
+                                <span id="lyrics-cache-size" class="setting-description">0.00 MB used (0 songs cached)</span>
+                            </div>
+                            <div class="setting-control">
+                                <button id="clear-lyrics-cache" class="m3-button outlined error">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path
+                                            d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6L5 5H2v2h12z" />
+                                    </svg>
+                                    <span data-i18n="buttonClearLyricsCache">Clear Lyrics Cache</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="labelTranslationCache">Translation Cache</span>
+                                <span id="translation-cache-size" class="setting-description">0.00 MB used (0 translations cached)</span>
+                            </div>
+                            <div class="setting-control">
+                                <button id="clear-translation-cache" class="m3-button outlined error">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path
+                                            d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6L5 5H2v2h12z" />
+                                    </svg>
+                                    <span data-i18n="buttonClearTranslationCache">Clear Translation Cache</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="labelRomanizationCache">Transliteration Cache</span>
+                                <span id="romanization-cache-size" class="setting-description">0.00 MB used (0 transliterations cached)</span>
+                            </div>
+                            <div class="setting-control">
+                                <button id="clear-romanization-cache" class="m3-button outlined error">
+                                    <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path
+                                            d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6L5 5H2v2h12z" />
+                                    </svg>
+                                    <span data-i18n="buttonClearRomanizationCache">Clear Transliteration Cache</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-title" data-i18n="labelTotalCacheUsage">Total Cache Usage</span>
+                                <span id="cache-size" class="setting-description">0.00 MB used (0 items cached)</span>
                             </div>
                             <div class="setting-control">
                                 <button id="clear-cache" class="m3-button outlined error">
@@ -1209,7 +1254,7 @@
                                         <path
                                             d="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6L5 5H2v2h12z" />
                                     </svg>
-                                    <span data-i18n="buttonClearCache">Clear Cache</span>
+                                    <span data-i18n="buttonClearAllCache">Clear All Cache</span>
                                 </button>
                             </div>
                         </div>

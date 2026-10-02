@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "تنظیمات Gemini AI",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "حافظه پنهان متن آهنگ",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "حافظه پنهان ترجمه",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "پاک کردن حافظه متن آهنگ",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "پاک کردن حافظه ترجمه",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ مگابایت استفاده شده ($COUNT$ آهنگ ذخیره شده)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ مگابایت استفاده شده ($COUNT$ ترجمه ذخیره شده)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ مگابایت استفاده شده ($COUNT$ مورد ذخیره شده)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "حافظه پنهان آوانگاری",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "کل حافظه پنهان استفاده شده",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "پاک کردن حافظه آوانگاری",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "پاک کردن تمام حافظه پنهان",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ مگابایت استفاده شده ($COUNT$ آوانگاری ذخیره شده)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

@@ -1142,5 +1142,85 @@
   "categoryGeminiSettings": {
     "message": "Gemini AI सेटिंग्स",
     "description": "Category title"
+  },
+  "labelLyricsCache": {
+    "message": "बोल (Lyrics) कैश",
+    "description": "Cache setting label or button"
+  },
+  "labelTranslationCache": {
+    "message": "अनुवाद कैश",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearLyricsCache": {
+    "message": "बोल कैश साफ़ करें",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearTranslationCache": {
+    "message": "अनुवाद कैश साफ़ करें",
+    "description": "Cache setting label or button"
+  },
+  "labelLyricsCacheFormat": {
+    "message": "$SIZE$ MB उपयोग में ($COUNT$ गाने कैश्ड)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTranslationCacheFormat": {
+    "message": "$SIZE$ MB उपयोग में ($COUNT$ अनुवाद कैश्ड)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelTotalCacheFormat": {
+    "message": "$SIZE$ MB उपयोग में ($COUNT$ आइटम कैश्ड)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "labelRomanizationCache": {
+    "message": "लिप्यंतरण कैश",
+    "description": "Cache setting label or button"
+  },
+  "labelTotalCacheUsage": {
+    "message": "कुल कैश उपयोग",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearRomanizationCache": {
+    "message": "लिप्यंतरण कैश साफ़ करें",
+    "description": "Cache setting label or button"
+  },
+  "buttonClearAllCache": {
+    "message": "सभी कैश साफ़ करें",
+    "description": "Cache setting label or button"
+  },
+  "labelRomanizationCacheFormat": {
+    "message": "$SIZE$ MB उपयोग में ($COUNT$ लिप्यंतरण कैश्ड)",
+    "description": "Cache size format",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
   }
 }

@@ -281,7 +281,10 @@ document.querySelectorAll('.navigation-drawer .nav-item').forEach(item => {
     });
 });
 
-document.getElementById('clear-cache').addEventListener('click', clearCache);
+document.getElementById('clear-lyrics-cache')?.addEventListener('click', () => clearCache('lyrics'));
+document.getElementById('clear-translation-cache')?.addEventListener('click', () => clearCache('translations'));
+document.getElementById('clear-romanization-cache')?.addEventListener('click', () => clearCache('romanization'));
+document.getElementById('clear-cache')?.addEventListener('click', () => clearCache('all'));
 
 setupSettingsMessageListener(updateUI);
 

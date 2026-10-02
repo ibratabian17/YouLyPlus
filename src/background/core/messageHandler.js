@@ -20,7 +20,7 @@ export class MessageHandler {
 
     const handlers = {
       [MESSAGE_TYPES.FETCH_LYRICS]: () => this.fetchLyrics(message, sendResponse),
-      [MESSAGE_TYPES.RESET_CACHE]: () => this.resetCache(sendResponse),
+      [MESSAGE_TYPES.RESET_CACHE]: () => this.resetCache(message, sendResponse),
       [MESSAGE_TYPES.GET_CACHED_SIZE]: () => this.getCacheSize(sendResponse),
       [MESSAGE_TYPES.TRANSLATE_LYRICS]: () => this.translateLyrics(message, sendResponse),
       [MESSAGE_TYPES.FETCH_SPONSOR_SEGMENTS]: () => this.fetchSponsorSegments(message, sendResponse),
@@ -105,13 +105,25 @@ export class MessageHandler {
     }
   }
 
-  static async resetCache(sendResponse) {
+  static async resetCache(message, sendResponse) {
     try {
-      state.clear();
-      await Promise.all([
-        lyricsDB.clear(),
-        translationsDB.clear()
-      ]);
+      const target = message?.target || 'all';
+      if (target === 'lyrics') {
+        state.clear('lyrics');
+        await lyricsDB.clear();
+      } else if (target === 'translations') {
+        state.clear('translations');
+        await translationsDB.deleteWhere(record => record.key && !record.key.includes(' - romanize - '));
+      } else if (target === 'romanization' || target === 'transliteration') {
+        state.clear('romanization');
+        await translationsDB.deleteWhere(record => record.key && record.key.includes(' - romanize - '));
+      } else {
+        state.clear('all');
+        await Promise.all([
+          lyricsDB.clear(),
+          translationsDB.clear()
+        ]);
+      }
       sendResponse({ success: true, message: "Cache reset successfully" });
     } catch (error) {
       console.error("Cache reset error:", error);
@@ -121,15 +133,40 @@ export class MessageHandler {
 
   static async getCacheSize(sendResponse) {
     try {
-      const [lyricsStats, translationsStats] = await Promise.all([
+      const [lyricsStats, translationsBreakdown, totalTransStats] = await Promise.all([
         lyricsDB.estimateSize(),
+        translationsDB.getBreakdown(),
         translationsDB.estimateSize()
       ]);
 
+      const lyricsSizeMB = (lyricsStats.sizeKB / 1024).toFixed(2);
+      const transSizeMB = (translationsBreakdown.translations.sizeKB / 1024).toFixed(2);
+      const romSizeMB = (translationsBreakdown.romanizations.sizeKB / 1024).toFixed(2);
+
+      const totalSizeKB = lyricsStats.sizeKB + totalTransStats.sizeKB;
+      const totalSizeMB = (totalSizeKB / 1024).toFixed(2);
+      const totalCount = lyricsStats.count + totalTransStats.count;
+
       sendResponse({
         success: true,
-        sizeKB: lyricsStats.sizeKB + translationsStats.sizeKB,
-        cacheCount: lyricsStats.count + translationsStats.count
+        lyrics: {
+          sizeKB: lyricsStats.sizeKB,
+          sizeMB: lyricsSizeMB,
+          count: lyricsStats.count
+        },
+        translations: {
+          sizeKB: translationsBreakdown.translations.sizeKB,
+          sizeMB: transSizeMB,
+          count: translationsBreakdown.translations.count
+        },
+        romanizations: {
+          sizeKB: translationsBreakdown.romanizations.sizeKB,
+          sizeMB: romSizeMB,
+          count: translationsBreakdown.romanizations.count
+        },
+        sizeKB: totalSizeKB,
+        sizeMB: totalSizeMB,
+        cacheCount: totalCount
       });
     } catch (error) {
       console.error("Get cache size error:", error);
