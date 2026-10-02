@@ -997,16 +997,16 @@ async function updateJapaneseDictStatus() {
     try {
         const status = await getDictionaryStatus('japanese');
         if (status && status.installed) {
-            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusInstalled', 'Installed (~17 MB)') : 'Installed (~17 MB)');
+            statusBadge.textContent = msg('dictStatusInstalled', '17 MB') || 'Installed (~17 MB)';
             statusBadge.style.color = 'var(--md3-sys-color-primary, #625b71)';
             downloadBtn.style.display = 'none';
             if (deleteBtn) deleteBtn.style.display = 'inline-flex';
         } else {
-            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusNotInstalled', 'Not Installed (~17 MB)') : 'Not Installed (~17 MB)');
+            statusBadge.textContent = msg('dictStatusNotInstalled', '17 MB') || 'Not Installed (~17 MB)';
             statusBadge.style.color = 'inherit';
             downloadBtn.style.display = 'inline-flex';
             downloadBtn.disabled = false;
-            if (downloadBtnText) downloadBtnText.textContent = (typeof i18n === 'function' ? i18n('btnDownloadDict', 'Download') : 'Download');
+            if (downloadBtnText) downloadBtnText.textContent = msg('btnDownloadDict') || 'Download';
             if (deleteBtn) deleteBtn.style.display = 'none';
         }
     } catch (e) {
@@ -1015,9 +1015,8 @@ async function updateJapaneseDictStatus() {
 }
 
 async function handleDownloadJapaneseDict() {
-    const confirmMsg = typeof i18n === 'function'
-        ? i18n('confirmDownloadJapaneseDict', 'Download the Japanese Kuromoji dictionary (~17 MB)? It will be stored locally in your browser for offline Japanese pronunciation.')
-        : 'Download the Japanese Kuromoji dictionary (~17 MB)? It will be stored locally in your browser for offline Japanese pronunciation.';
+    const confirmMsg = msg('confirmDownloadJapaneseDict')
+        || 'Download the Japanese Kuromoji dictionary (~17 MB)? It will be stored locally in your browser for offline Japanese pronunciation.';
 
     if (!window.confirm(confirmMsg)) return;
 
@@ -1026,7 +1025,7 @@ async function handleDownloadJapaneseDict() {
     const downloadBtnText = document.getElementById('btn-download-japanese-dict-text');
 
     if (downloadBtn) downloadBtn.disabled = true;
-    if (statusBadge) statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusDownloading', 'Downloading (~17 MB)...') : 'Downloading (~17 MB)...');
+    if (statusBadge) statusBadge.textContent = msg('dictStatusDownloading', '17 MB') || 'Downloading (~17 MB)...';
     if (downloadBtnText) downloadBtnText.textContent = '...';
 
     try {
@@ -1036,15 +1035,14 @@ async function handleDownloadJapaneseDict() {
         console.error('Download error:', err);
         if (statusBadge) statusBadge.textContent = 'Download failed';
         if (downloadBtn) downloadBtn.disabled = false;
-        if (downloadBtnText) downloadBtnText.textContent = (typeof i18n === 'function' ? i18n('btnDownloadDict', 'Download') : 'Download');
+        if (downloadBtnText) downloadBtnText.textContent = msg('btnDownloadDict') || 'Download';
         alert('Failed to download dictionary: ' + (err?.message || err));
     }
 }
 
 async function handleDeleteJapaneseDict() {
-    const confirmMsg = typeof i18n === 'function'
-        ? i18n('confirmDeleteJapaneseDict', 'Are you sure you want to delete the offline Japanese Kuromoji dictionary?')
-        : 'Are you sure you want to delete the offline Japanese Kuromoji dictionary?';
+    const confirmMsg = msg('confirmDeleteJapaneseDict')
+        || 'Are you sure you want to delete the offline Japanese Kuromoji dictionary?';
 
     if (!window.confirm(confirmMsg)) return;
 
@@ -1080,16 +1078,16 @@ async function updateArabicDictStatus() {
     try {
         const status = await getDictionaryStatus('arabic');
         if (status && status.installed) {
-            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusInstalled', 'Installed (~74.4 MB)') : 'Installed (~74.4 MB)');
+            statusBadge.textContent = msg('dictStatusInstalled', '74.4 MB') || 'Installed (~74.4 MB)';
             statusBadge.style.color = 'var(--md3-sys-color-primary, #625b71)';
             downloadBtn.style.display = 'none';
             if (deleteBtn) deleteBtn.style.display = 'inline-flex';
         } else {
-            statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusNotInstalled', 'Not Installed (~74.4 MB)') : 'Not Installed (~74.4 MB)');
+            statusBadge.textContent = msg('dictStatusNotInstalled', '74.4 MB') || 'Not Installed (~74.4 MB)';
             statusBadge.style.color = 'inherit';
             downloadBtn.style.display = 'inline-flex';
             downloadBtn.disabled = false;
-            if (downloadBtnText) downloadBtnText.textContent = (typeof i18n === 'function' ? i18n('btnDownloadDict', 'Download') : 'Download');
+            if (downloadBtnText) downloadBtnText.textContent = msg('btnDownloadDict') || 'Download';
             if (deleteBtn) deleteBtn.style.display = 'none';
         }
     } catch (e) {
@@ -1098,9 +1096,8 @@ async function updateArabicDictStatus() {
 }
 
 async function handleDownloadArabicDict() {
-    const confirmMsg = typeof i18n === 'function'
-        ? i18n('confirmDownloadArabicDict', 'Download the Arabic CaTT diacritizer model (~74.4 MB)? It will be stored locally in your browser for offline Arabic pronunciation.')
-        : 'Download the Arabic CaTT diacritizer model (~74.4 MB)? It will be stored locally in your browser for offline Arabic pronunciation.';
+    const confirmMsg = msg('confirmDownloadArabicDict')
+        || 'Download the Arabic CaTT diacritizer model (~74.4 MB)? It will be stored locally in your browser for offline Arabic pronunciation.';
 
     if (!window.confirm(confirmMsg)) return;
 
@@ -1109,7 +1106,7 @@ async function handleDownloadArabicDict() {
     const downloadBtnText = document.getElementById('btn-download-arabic-dict-text');
 
     if (downloadBtn) downloadBtn.disabled = true;
-    if (statusBadge) statusBadge.textContent = (typeof i18n === 'function' ? i18n('dictStatusDownloading', 'Downloading (~74.4 MB)...') : 'Downloading (~74.4 MB)...');
+    if (statusBadge) statusBadge.textContent = msg('dictStatusDownloading', '74.4 MB') || 'Downloading (~74.4 MB)...';
     if (downloadBtnText) downloadBtnText.textContent = '...';
 
     try {
@@ -1119,15 +1116,14 @@ async function handleDownloadArabicDict() {
         console.error('Download error:', err);
         if (statusBadge) statusBadge.textContent = 'Download failed';
         if (downloadBtn) downloadBtn.disabled = false;
-        if (downloadBtnText) downloadBtnText.textContent = (typeof i18n === 'function' ? i18n('btnDownloadDict', 'Download') : 'Download');
+        if (downloadBtnText) downloadBtnText.textContent = msg('btnDownloadDict') || 'Download';
         alert('Failed to download model: ' + (err?.message || err));
     }
 }
 
 async function handleDeleteArabicDict() {
-    const confirmMsg = typeof i18n === 'function'
-        ? i18n('confirmDeleteArabicDict', 'Are you sure you want to delete the offline Arabic CaTT model?')
-        : 'Are you sure you want to delete the offline Arabic CaTT model?';
+    const confirmMsg = msg('confirmDeleteArabicDict')
+        || 'Are you sure you want to delete the offline Arabic CaTT model?';
 
     if (!window.confirm(confirmMsg)) return;
 

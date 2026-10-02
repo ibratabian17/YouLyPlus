@@ -189,6 +189,14 @@
     "message": "Exibe detalhes da música no modo tela cheia, incluindo barra de progresso, data de lançamento, título e artista.",
     "description": "Description for fullscreen song info"
   },
+  "settingDisableSongInfoSeekbar": {
+    "message": "Ocultar barra de progresso nas informações da música",
+    "description": "Label for disabling seekbar in fullscreen song info"
+  },
+  "descDisableSongInfoSeekbar": {
+    "message": "Oculta a barra de progresso das informações da música em tela cheia.",
+    "description": "Description for disabling seekbar in fullscreen song info"
+  },
   "settingUseSponsorBlock": {
     "message": "Usar API do SponsorBlock",
     "description": "Label for SponsorBlock toggle in settings"
@@ -796,6 +804,80 @@
   "optionPronunciation": {
     "message": "Romanização",
     "description": "Option in larger text mode dropdown"
+  },
+  "optionOfflineRomanizer": {
+    "message": "Local / Offline",
+    "description": "Transliteration provider option for local offline romanization"
+  },
+  "labelOfflineJapaneseDict": {
+    "message": "Dicionário japonês offline (Kuromoji)",
+    "description": "Setting title for downloadable offline Japanese dictionary"
+  },
+  "descOfflineJapaneseDict": {
+    "message": "Dicionário de análise morfológica (~17 MB) para uma pronúncia correta do japonês. Armazenado localmente no navegador.",
+    "description": "Setting description for downloadable offline Japanese dictionary"
+  },
+  "btnDownloadDict": {
+    "message": "Baixar",
+    "description": "Download button text"
+  },
+  "btnDeleteDict": {
+    "message": "Excluir",
+    "description": "Delete button text"
+  },
+  "dictStatusInstalled": {
+    "message": "Instalado (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusNotInstalled": {
+    "message": "Não instalado (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "dictStatusDownloading": {
+    "message": "Baixando (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
+  },
+  "confirmDownloadJapaneseDict": {
+    "message": "Baixar o dicionário japonês Kuromoji (~17 MB)? Ele será armazenado localmente no seu navegador para a pronúncia japonesa offline.",
+    "description": "Confirmation prompt before downloading Japanese dictionary"
+  },
+  "confirmDeleteJapaneseDict": {
+    "message": "Tem certeza de que deseja excluir o dicionário japonês Kuromoji offline?",
+    "description": "Confirmation prompt before deleting Japanese dictionary"
+  },
+  "labelOfflineArabicDict": {
+    "message": "Modelo diacritizador árabe offline (CaTT)",
+    "description": "Setting title for downloadable offline Arabic CaTT model"
+  },
+  "descOfflineArabicDict": {
+    "message": "Modelo neural de diacritização (~74.4 MB) para restaurar o Tashkeel e as vogais corretas nas letras em árabe. Armazenado localmente no navegador.",
+    "description": "Setting description for downloadable offline Arabic CaTT model"
+  },
+  "confirmDownloadArabicDict": {
+    "message": "Baixar o modelo diacritizador árabe CaTT (~74.4 MB)? Ele será armazenado localmente no seu navegador para a pronúncia árabe offline.",
+    "description": "Confirmation prompt before downloading Arabic CaTT model"
+  },
+  "confirmDeleteArabicDict": {
+    "message": "Tem certeza de que deseja excluir o modelo árabe CaTT offline?",
+    "description": "Confirmation prompt before deleting Arabic CaTT model"
   },
   "optionGoogleTranslate": {
     "message": "Google Tradutor",

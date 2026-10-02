@@ -826,16 +826,34 @@
     "description": "Delete button text"
   },
   "dictStatusInstalled": {
-    "message": "Terpasang (~17 MB)",
-    "description": "Status when dictionary is installed"
+    "message": "Terpasang (~$SIZE$)",
+    "description": "Status when dictionary is installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
   },
   "dictStatusNotInstalled": {
-    "message": "Belum Terpasang (~17 MB)",
-    "description": "Status when dictionary is not installed"
+    "message": "Belum Terpasang (~$SIZE$)",
+    "description": "Status when dictionary is not installed",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
   },
   "dictStatusDownloading": {
-    "message": "Mengunduh (~17 MB)...",
-    "description": "Status when dictionary is downloading"
+    "message": "Mengunduh (~$SIZE$)...",
+    "description": "Status when dictionary is downloading",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "17 MB"
+      }
+    }
   },
   "confirmDownloadJapaneseDict": {
     "message": "Unduh kamus Kuromoji bahasa Jepang (~17 MB)? Kamus akan disimpan secara lokal di peramban untuk pelafalan lirik offline.",
