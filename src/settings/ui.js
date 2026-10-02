@@ -824,10 +824,14 @@ function toggleYTSongInfoSeekbarVisibility() {
     toggleElementVisibility('ytsonginfo-disableseekbar-group', isYTSongInfo);
 }
 
-function toggleElementVisibility(elementId, isVisible) {
+function toggleElementVisibility(elementId, isVisible, displayType = null) {
     const element = document.getElementById(elementId);
     if (element) {
-        element.style.display = isVisible ? 'flex' : 'none';
+        if (isVisible) {
+            element.style.display = displayType || (element.classList.contains('settings-category') ? 'block' : 'flex');
+        } else {
+            element.style.display = 'none';
+        }
         updateGroupItemRounding();
     }
 }
