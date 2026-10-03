@@ -9,6 +9,25 @@ const BINILYRICS_BASE_URL = 'https://lyrics-api.binimum.org';
 
 export class BiniLyricsService {
   static async fetch(songInfo, fetchOptions = {}) {
+    let lyrics = await this.fetchFromAPI(songInfo, fetchOptions);
+    if (lyrics) return lyrics;
+
+    if (songInfo.isVideo) {
+      const cleanTitle = (songInfo.title || '')
+        .replace('(Official Video)', '')
+        .replace('(Official Music Video)', '')
+        .trim();
+
+      if (cleanTitle !== songInfo.title || songInfo.duration > 0) {
+        lyrics = await this.fetchFromAPI({ ...songInfo, duration: 0, title: cleanTitle }, fetchOptions);
+        if (lyrics) return lyrics;
+      }
+    }
+
+    return null;
+  }
+
+  static async fetchFromAPI(songInfo, fetchOptions = {}) {
     const query = `${songInfo.title || ''} ${songInfo.artist || ''}`.trim();
     if (!query) return null;
 
