@@ -296,12 +296,15 @@ function fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId) {
  * Returns retimed lyrics array on success, or null if subtitles are unavailable/cannot be aligned.
  */
 async function applySubtitleRetiming(lyrics, currentSong, fetchId) {
+  const isSubtitles =
+    lyrics.provider === 'subtitles' ||
+    lyrics.metadata?.provider === 'subtitles' ||
+    lyrics.metadata?.source === 'YouTube Captions';
+
   const shouldApply =
     currentSong.isVideo &&
     currentSong.videoId &&
-    !lyrics.ignoreSponsorblock &&
-    !lyrics.metadata.ignoreSponsorblock &&
-    lyrics.metadata?.source !== "YouTube Captions" &&
+    !isSubtitles &&
     typeof retimeLyricsWithSubtitles === "function";
 
   if (!shouldApply) return null;
