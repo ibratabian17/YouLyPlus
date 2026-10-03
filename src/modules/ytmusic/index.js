@@ -5,7 +5,7 @@ if (typeof LYPLUS_setBgConfig === 'function') {
         dynamicPlayerSelectors: ['#layout'],
         blurContainerParentSelector: '#layout',
         mutationObserverRootSelector: '#layout',
-        artworkSelector: '.image.ytmusic-player-bar'
+        artworkSelector: '.image.ytmusic-player-bar, img.ytmusicTrackInfoThumbnail, .ytmusicTrackInfoThumbnail'
     });
 }
 
@@ -265,15 +265,17 @@ window.addEventListener('message', (event) => {
         if (currentSettings.YTSongInfo) {
             const songInfo = event.data.songInfo
             currentSongDuration = songInfo.duration
-            const yttitleElement = document.querySelector('.title.style-scope.ytmusic-player-bar');
-            const ytbyline = document.querySelector('.byline.style-scope.ytmusic-player-bar');
+            const yttitleElement = document.querySelector('.title.style-scope.ytmusic-player-bar, .ytmusicTrackInfoTitle');
+            const ytbyline = document.querySelector('.byline.style-scope.ytmusic-player-bar, .ytmusicTrackInfoByline');
 
             let titleText = songInfo.title;
-            let artistText = songInfo.artist + ' • ' + songInfo.album;
+            let artistText = songInfo.album ? `${songInfo.artist} • ${songInfo.album}` : songInfo.artist;
 
             if (yttitleElement && yttitleElement.textContent.trim() != "") {
-                titleText = yttitleElement.textContent;
-                artistText = ytbyline.textContent;
+                titleText = yttitleElement.textContent.trim();
+                if (ytbyline && ytbyline.textContent.trim() != "") {
+                    artistText = ytbyline.textContent.trim();
+                }
             }
 
             updateTextWithMarquee(titleElementElem, titleText);

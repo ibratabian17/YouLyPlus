@@ -27,7 +27,13 @@
 
     function setupMutationObserver() {
         const metadataContainer = document.querySelector('ytmusic-player-bar .content-info-wrapper')
-            || document.querySelector('ytmusic-player-bar .left-controls');
+            || document.querySelector('ytmusic-player-bar .left-controls')
+            || document.querySelector('ytmusic-miniplayer .ytmusicTrackInfoContentInfoWrapper')
+            || document.querySelector('ytmusic-miniplayer ytmusic-track-info')
+            || document.querySelector('ytmusic-miniplayer .ytMusicMiniPlayerLeftSection')
+            || document.querySelector('[slot="player-bar"] .ytmusicTrackInfoContentInfoWrapper')
+            || document.querySelector('[slot="player-bar"] .content-info-wrapper')
+            || document.querySelector('[slot="player-bar"]');
 
         if (metadataContainer) {
             const observer = new MutationObserver(handleMutations);
@@ -96,11 +102,11 @@
     }
 
     function getMetadataFromDOM() {
-        const bar = document.querySelector('ytmusic-player-bar');
+        const bar = document.querySelector('ytmusic-player-bar, ytmusic-miniplayer, [slot="player-bar"]');
         if (!bar) return null;
 
-        const titleEl = bar.querySelector('.title');
-        const bylineEl = bar.querySelector('.subtitle');
+        const titleEl = bar.querySelector('.ytmusicTrackInfoTitle') || bar.querySelector('.title');
+        const bylineEl = bar.querySelector('.ytmusicTrackInfoByline') || bar.querySelector('.subtitle') || bar.querySelector('.byline');
 
         if (!titleEl || !bylineEl) return null;
 
@@ -111,18 +117,28 @@
         let artistNames = [];
         let albumName = "";
 
-        allLinks.forEach(link => {
+        allLinks.forEach((link, idx) => {
             const href = link.getAttribute('href');
-            if (!href) return;
+            const text = link.textContent.trim();
+            if (!text) return;
 
-            const isArtist = href.includes('channel/') ||
-                href.includes('browse/UC') ||
-                href.includes('artist_detail');
+            if (href) {
+                const isArtist = href.includes('channel/') ||
+                    href.includes('browse/UC') ||
+                    href.includes('artist_detail');
 
-            if (isArtist) {
-                artistNames.push(link.textContent.trim());
+                if (isArtist) {
+                    artistNames.push(text);
+                } else {
+                    if (!albumName) albumName = text;
+                }
             } else {
-                if (!albumName) albumName = link.textContent.trim();
+                // For new miniplayer buttons or links without href
+                if (idx === 0) {
+                    artistNames.push(text);
+                } else if (!albumName && !text.toLowerCase().includes('view') && !text.toLowerCase().includes('like')) {
+                    albumName = text;
+                }
             }
         });
 

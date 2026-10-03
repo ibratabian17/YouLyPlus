@@ -184,6 +184,8 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response {
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-player-page#player-page,
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #player-bar-background,
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-player-bar,
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-miniplayer,
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] [slot="player-bar"],
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] #nav-bar-divider.ytmusic-app-layout {
     background: transparent !important;
 }
@@ -224,7 +226,9 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response {
     background-color: #22222227;
 }
 
-#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-player-bar {
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-player-bar,
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-miniplayer,
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] [slot="player-bar"] {
     backdrop-filter: blur(20px);
 }
 
