@@ -348,12 +348,18 @@ async function applySubtitleRetiming(lyrics, currentSong, fetchId) {
  * or null if the song changed mid-request.
  */
 async function applySponsorBlock(lyrics, currentSong, fetchId) {
+  const isSubtitles =
+    lyrics.provider === 'subtitles' ||
+    lyrics.metadata?.provider === 'subtitles' ||
+    lyrics.metadata?.source === 'YouTube Captions';
+
   const shouldApply =
     currentSong.isVideo &&
     currentSong.videoId &&
     currentSettings.useSponsorBlock &&
     !lyrics.ignoreSponsorblock &&
-    !lyrics.metadata.ignoreSponsorblock;
+    !lyrics.metadata?.ignoreSponsorblock &&
+    !isSubtitles;
 
   if (!shouldApply) return lyrics.data;
 

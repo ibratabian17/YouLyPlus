@@ -41,6 +41,7 @@ export const PROVIDERS = {
   BINILYRICS: 'binilyrics',
   LRCLIB: 'lrclib',
   YTMUSIC: 'ytmusic',
+  SUBTITLES: 'subtitles',
   LOCAL: 'local',
   GEMINI: 'gemini',
   GOOGLE: 'google',

@@ -171,6 +171,9 @@ export class LyricsService {
         result.lyrics.provider = prov;
         if (!result.lyrics.metadata) result.lyrics.metadata = {};
         result.lyrics.metadata.provider = prov;
+        if ((prov === PROVIDERS.UNISON && songInfo.isVideo) || prov === PROVIDERS.SUBTITLES || prov === 'subtitles') {
+          result.lyrics.ignoreSponsorblock = true;
+        }
         this.cacheProviderLyrics(cacheKey, prov, result.lyrics);
       }
     }
@@ -309,7 +312,7 @@ export class LyricsService {
       }
 
       const winningProvider = finalLyrics?.provider || this.detectProvider(finalLyrics);
-      if (winningProvider === PROVIDERS.UNISON && songInfo.isVideo) {
+      if ((winningProvider === PROVIDERS.UNISON && songInfo.isVideo) || winningProvider === PROVIDERS.SUBTITLES || winningProvider === 'subtitles') {
         finalLyrics.ignoreSponsorblock = true;
       }
 
@@ -418,6 +421,7 @@ export class LyricsService {
     if (source.includes('unison')) return PROVIDERS.UNISON;
     if (source.includes('lrclib')) return PROVIDERS.LRCLIB;
     if (source.includes('local')) return PROVIDERS.LOCAL;
+    if (source.includes('subtitles') || source.includes('captions')) return PROVIDERS.SUBTITLES;
     if (source.includes('lyricfind') || source.includes('youtube music') || source.includes('ytmusic')) return PROVIDERS.YTMUSIC;
     if (source.includes('apple') || source.includes('spotify') || source.includes('musixmatch') || source.includes('qq') || source.includes('kpoe') || source.includes('lyrics+')) return PROVIDERS.KPOE;
     return PROVIDERS.KPOE;
@@ -502,7 +506,7 @@ export class LyricsService {
       }
 
       if (lyrics && !Utilities.isEmptyLyrics(lyrics)) {
-        if (provider === PROVIDERS.UNISON && songInfo.isVideo) {
+        if ((provider === PROVIDERS.UNISON && songInfo.isVideo) || provider === PROVIDERS.SUBTITLES || provider === 'subtitles') {
           lyrics.ignoreSponsorblock = true;
         }
         if (!lyrics.metadata) lyrics.metadata = {};
@@ -561,7 +565,7 @@ export class LyricsService {
       throw new Error(`No lyrics found from source: ${source}`);
     }
 
-    if (source === PROVIDERS.UNISON && songInfo.isVideo) {
+    if ((source === PROVIDERS.UNISON && songInfo.isVideo) || source === PROVIDERS.SUBTITLES || source === 'subtitles') {
       lyrics.ignoreSponsorblock = true;
     }
 
@@ -584,6 +588,22 @@ export class LyricsService {
     if (!songInfo || !songInfo.title) return 0;
     const artist = songInfo.artist || '';
     const album = (songInfo.album || '').trim();
+    const duration = songInfo.duration || '';
+
+    const cacheKey = this.createCacheKey(songInfo);
+    const cacheRecord = await offsetsDB.get(cacheKey);
+    if (cacheRecord && typeof cacheRecord.offsetMs === 'number') {
+      return cacheRecord.offsetMs;
+    }
+
+    if (duration) {
+      const durationKey = `${songInfo.title} - ${artist} - ${duration}`;
+      const durationRecord = await offsetsDB.get(durationKey);
+      if (durationRecord && typeof durationRecord.offsetMs === 'number') {
+        return durationRecord.offsetMs;
+      }
+    }
+
     if (album) {
       const albumKey = `${songInfo.title} - ${artist} - ${album}`;
       const record = await offsetsDB.get(albumKey);
@@ -591,6 +611,7 @@ export class LyricsService {
         return record.offsetMs;
       }
     }
+
     const legacyKey = `${songInfo.title} - ${artist}`;
     const record = await offsetsDB.get(legacyKey);
     return record?.offsetMs || 0;
@@ -600,16 +621,20 @@ export class LyricsService {
     if (!songInfo || !songInfo.title) return;
     const artist = songInfo.artist || '';
     const album = (songInfo.album || '').trim();
-    const key = album
-      ? `${songInfo.title} - ${artist} - ${album}`
-      : `${songInfo.title} - ${artist}`;
+    const duration = songInfo.duration || '';
+    const key = this.createCacheKey(songInfo);
+
     if (offsetMs === 0) {
       await offsetsDB.delete(key);
-      if (album) {
-        await offsetsDB.delete(`${songInfo.title} - ${artist}`);
+      if (duration) {
+        await offsetsDB.delete(`${songInfo.title} - ${artist} - ${duration}`);
       }
+      if (album) {
+        await offsetsDB.delete(`${songInfo.title} - ${artist} - ${album}`);
+      }
+      await offsetsDB.delete(`${songInfo.title} - ${artist}`);
     } else {
-      await offsetsDB.set({ key, offsetMs, updatedAt: Date.now() });
+      await offsetsDB.set({ key, offsetMs, duration: songInfo.duration || null, updatedAt: Date.now() });
     }
   }
 

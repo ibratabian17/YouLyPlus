@@ -73,9 +73,11 @@ export class YouTubeService {
         metadata: {
           ...songInfo,
           source: "YouTube Captions",
-          provider: "subtitles"
+          provider: "subtitles",
+          ignoreSponsorblock: true
         },
-        provider: "subtitles"
+        provider: "subtitles",
+        ignoreSponsorblock: true
       };
     } catch (error) {
       console.error("YouTube subtitles error:", error);

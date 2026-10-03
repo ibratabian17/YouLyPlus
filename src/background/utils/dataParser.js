@@ -212,8 +212,10 @@ export class DataParser {
       data: parsedLines,
       metadata: {
         ...songInfo,
-        source: "YouTube Captions"
-      }
+        source: "YouTube Captions",
+        ignoreSponsorblock: true
+      },
+      ignoreSponsorblock: true
     };
   }
 
