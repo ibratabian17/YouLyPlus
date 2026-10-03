@@ -173,16 +173,13 @@ function tokenizeLyrics(lines) {
           let firstWordIdx = 0;
 
           mainWords.forEach((w, wordIdx) => {
-            const wStartMs = typeof w.startTime === 'number'
-              ? (w.startTime > 1000 ? Math.round(w.startTime) : Math.round(w.startTime * 1000))
-              : (typeof w.time === 'number' ? (w.time > 1000 ? Math.round(w.time) : Math.round(w.time * 1000)) : entryTimeMs);
+            const wStartMs = typeof w.time === 'number'
+              ? Math.round(w.time)
+              : (typeof w.startTime === 'number' ? Math.round(w.startTime > 1000 ? w.startTime : w.startTime * 1000) : entryTimeMs);
 
-            const wDurMs = typeof w.duration === 'number'
-              ? (w.duration > 1000 ? Math.round(w.duration) : (w.duration < 10 ? Math.round(w.duration * 1000) : Math.round(w.duration)))
-              : 300;
-
+            const wDurMs = typeof w.duration === 'number' ? Math.round(w.duration) : 300;
             const wEndMs = typeof w.endTime === 'number'
-              ? (w.endTime > 1000 ? Math.round(w.endTime) : Math.round(w.endTime * 1000))
+              ? Math.round(w.endTime > 1000 ? w.endTime : w.endTime * 1000)
               : wStartMs + wDurMs;
 
             if (currentWord.length === 0) {
@@ -224,16 +221,13 @@ function tokenizeLyrics(lines) {
             const norm = normalizeWord(w.text || '');
             if (norm.length > 0) {
               const isFirst = tokens.length === lineStartTokenCount;
-              const wStartMs = typeof w.startTime === 'number'
-                ? (w.startTime > 1000 ? Math.round(w.startTime) : Math.round(w.startTime * 1000))
-                : (typeof w.time === 'number' ? (w.time > 1000 ? Math.round(w.time) : Math.round(w.time * 1000)) : entryTimeMs);
+              const wStartMs = typeof w.time === 'number'
+                ? Math.round(w.time)
+                : (typeof w.startTime === 'number' ? Math.round(w.startTime > 1000 ? w.startTime : w.startTime * 1000) : entryTimeMs);
 
-              const wDurMs = typeof w.duration === 'number'
-                ? (w.duration > 1000 ? Math.round(w.duration) : (w.duration < 10 ? Math.round(w.duration * 1000) : Math.round(w.duration)))
-                : 300;
-
+              const wDurMs = typeof w.duration === 'number' ? Math.round(w.duration) : 300;
               const wEndMs = typeof w.endTime === 'number'
-                ? (w.endTime > 1000 ? Math.round(w.endTime) : Math.round(w.endTime * 1000))
+                ? Math.round(w.endTime > 1000 ? w.endTime : w.endTime * 1000)
                 : wStartMs + wDurMs;
 
               tokens.push({
