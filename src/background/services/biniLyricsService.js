@@ -76,7 +76,9 @@ export class BiniLyricsService {
   }
 
   static findBestMatch(songInfo, results) {
-    if (!results || results.length === 0) return null;
+    if (!results || !Array.isArray(results) || results.length === 0) return null;
+
+    const targetDuration = Number(songInfo.duration);
 
     // 1. Check exact ISRC match if available
     if (songInfo.isrc) {
@@ -137,6 +139,13 @@ export class BiniLyricsService {
     let maxScore = -Infinity;
 
     for (const item of results) {
+      const itemDuration = Number(item.duration);
+      if (targetDuration > 0 && itemDuration > 0) {
+        if (Math.abs(itemDuration - targetDuration) > 2) {
+          continue;
+        }
+      }
+
       const itemFullTitle = normalize(item.track_name);
       const itemBaseTitle = cleanBaseTitle(item.track_name);
       const itemArtist = normalize(item.artist_name);
@@ -193,22 +202,14 @@ export class BiniLyricsService {
       }
 
       // Duration matching
-      if (songInfo.duration > 0 && item.duration > 0) {
-        const diff = Math.abs(item.duration - songInfo.duration);
+      if (targetDuration > 0 && itemDuration > 0) {
+        const diff = Math.abs(itemDuration - targetDuration);
         if (diff === 0) {
           score += 25;
         } else if (diff <= 1) {
           score += 20;
         } else if (diff <= 2) {
           score += 15;
-        } else if (diff <= 4) {
-          score += 8;
-        } else if (diff <= 8) {
-          score += 2;
-        } else if (diff > 30) {
-          score -= 60;
-        } else if (diff > 15) {
-          score -= 30;
         }
       }
 
@@ -232,23 +233,16 @@ export class BiniLyricsService {
         }
       }
 
-      // Songwriter bonus check for featured artists
-      if (Array.isArray(songInfo.songWriters) && songInfo.songWriters.length > 0) {
-        const featArtists = extractArtists(item.track_name);
-        for (const fa of featArtists) {
-          if (songInfo.songWriters.some(sw => normalize(sw).includes(fa) || fa.includes(normalize(sw)))) {
-            score += 10;
-            break;
-          }
-        }
-      }
-
       if (score > maxScore) {
         maxScore = score;
         bestItem = item;
       }
     }
 
-    return bestItem || results[0];
+    if (bestItem && maxScore > 0) {
+      return bestItem;
+    }
+
+    return null;
   }
 }
