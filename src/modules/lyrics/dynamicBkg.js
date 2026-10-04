@@ -57,7 +57,6 @@ let blurTextureA = null;
 // Constants
 const BLUR_DOWNSAMPLE = 1;
 const BLUR_DOWNSAMPLE_LIGHTWEIGHT = 2;
-const BLUR_RADIUS = 7;
 const TARGET_FPS = 40;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
 const ARTWORK_TRANSITION_SPEED = 0.02;
@@ -766,7 +765,7 @@ function LYPLUS_requestProcessNewArtwork(url) {
     if (!glProgram && !LYPLUS_setupBlurEffect()) return;
     if (artworkCheckTimeoutId) { clearTimeout(artworkCheckTimeoutId); artworkCheckTimeoutId = null; }
 
-    let target = NO_ARTWORK_IDENTIFIER;
+    let target;
     const isString = typeof url === 'string';
     const isBase = isString && _isBaseUrl(url);
     const isEmpty = !url || (isString && (url.trim() === "" || url === "null" || url === "undefined"));
@@ -1005,7 +1004,7 @@ function animateWebGLBackground(timestamp) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, blurFramebuffer);
     gl.viewport(0, 0, blurDimensions.width, blurDimensions.height);
     gl.uniform1i(u_blurH_image, 0);
-    // blurRadius * 0.3 = 7 * 0.3 = 2.1
+    // blur step = 2.1 texels (radius 7 * 0.3)
     gl.uniform2f(u_blurH_step, 2.1 / canvasDimensions.width, 0.0);
     gl.bindTexture(gl.TEXTURE_2D, renderTexture);
     gl.drawArrays(gl.TRIANGLES, 0, 6);

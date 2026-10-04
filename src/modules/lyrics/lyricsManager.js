@@ -10,7 +10,6 @@ let currentDisplayMode = 'none';     // User's intended display mode ('none', 't
 let lastProcessedDisplayMode = 'none'; // The mode that was actually rendered
 
 let lastKnownSongInfo = null;
-let lastFetchedLyrics = null;
 let lastBaseLyrics = null;
 let lastTranslationResponse = null;
 let lastRomanizationResponse = null;
@@ -42,7 +41,6 @@ const ROMANIZATION_SETTING_KEYS = [
   'customGeminiRomanizePrompt'
 ];
 const RESTART_REQUIRED_KEYS = ['isEnabled', 'YTSongInfo', 'YTSongInfoDisableSeekbar', 'dynamicPlayer'];
-const LYRICS_SOURCE_KEYS = ['lyricsProvider', 'lyricsSourceOrder', 'customKpoeUrl', 'appleMusicTTMLBypass'];
 
 
 /* =================================================================
@@ -123,7 +121,6 @@ function determineFinalDisplayMode(intendedMode, hasTranslation, hasRomanization
  */
 function normalizeLyricsType(type) {
   if (type === "None" || type === "Line") return type;
-  if ((type || '').toLowerCase() === "None") return "None";
   return "Word";
 }
 
@@ -183,7 +180,7 @@ function resolveEffectiveMode(isNewSong) {
  * Fetches the base lyrics for the current song, using the cache when appropriate.
  * Returns null if the song changed mid-request or if the fetch failed.
  */
-async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId, requestedSource = null) {
+async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId) {
   const isSameSong =
     lastBaseLyrics &&
     lastKnownSongInfo &&
@@ -223,19 +220,6 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId, req
     LyricsPlusAPI.setAvailableProviders(response.availableProviders);
   }
   return lastBaseLyrics;
-}
-
-/**
- * Returns a cached response as a resolved promise, or sends a new message to fetch it.
- * Caches the result in `cacheRef` on success.
- */
-function getCachedOrFetch(cachedResponse, messagePayload, fetchId, onSuccess) {
-  if (cachedResponse) return Promise.resolve(cachedResponse);
-
-  return pBrowser.runtime.sendMessage(messagePayload).then(response => {
-    if (currentFetchMediaId === fetchId && response?.success) onSuccess(response);
-    return response;
-  });
 }
 
 let lastSponsorSegments = null;
@@ -524,7 +508,6 @@ function renderPreliminaryBaseLyrics(baseLyrics, currentSong) {
  */
 function renderFinalLyrics(lyrics, currentSong, displayMode) {
   lyrics.type = normalizeLyricsType(lyrics.type);
-  lastFetchedLyrics = lyrics;
 
   if (LyricsPlusAPI.displayLyrics) {
     callDisplayLyricsAPI(lyrics, currentSong, displayMode);

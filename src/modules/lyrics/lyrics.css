@@ -12,28 +12,18 @@
     --lyplus-border-radius-base: 0.6em;
     --lyplus-gap-dot-size: 0.4em;
     --lyplus-gap-dot-margin: 0.1em;
-    --lyplus-button-size: 36px;
-    --lyplus-button-gap: 10px;
-    --lyplus-button-border-radius: 20%;
-    --lyplus-dropdown-min-width: 140px;
-    --lyplus-dropdown-padding: 4px 0;
-    --lyplus-dropdown-border-radius: 4px;
-    --lyplus-dropdown-option-padding: 8px 12px;
 
     --lyplus-font-size-base: 25px;
-    --lyplus-font-size-base-grow: 24;
     --lyplus-font-size-subtext: 0.6em;
     --lyplus-font-size-line: 1em;
     --lyplus-font-size-metadata: .6em;
     --lyplus-font-size-provider: .5em;
     --lyplus-font-size-status: 24px;
     --lyplus-font-size-button: 18px;
-    --lyplus-font-size-dropdown-option: 13px;
 
     --lyplus-text-primary: var(--lyplus-lyrics-pallete);
     --lyplus-text-secondary: #ffffff55;
     --lyplus-mask-dim-alpha: 0.333;
-    --lyplus-text-button: rgba(255, 255, 255, 0.87);
 
     --lyplus-blur-amount: 0.07em;
     --lyplus-blur-amount-near: 0.035em;
@@ -73,18 +63,6 @@
     --lyrics-scroll-padding-top: 25%;
     scrollbar-width: none;
     will-change: scroll-position;
-}
-
-/* Disable transitions during touch-scrolling for 1:1 feedback */
-#lyrics-plus-container.touch-scrolling .lyrics-line,
-#lyrics-plus-container.touch-scrolling .lyrics-plus-metadata {
-    transition: none !important;
-}
-
-/* Apply smooth gliding transition for mouse-wheel scrolling */
-#lyrics-plus-container.wheel-scrolling .lyrics-line,
-#lyrics-plus-container.wheel-scrolling .lyrics-plus-metadata {
-    transition: transform 0.3s ease-out !important;
 }
 
 /* --- Selection Styles --- */
@@ -295,14 +273,8 @@
     transition: max-height .6s, opacity .6s, padding .6s;
 }
 
-.lyrics-line.active .background-vocal {
-    opacity: 1;
-}
-
 #lyrics-plus-container.user-scrolling .lyrics-line,
-#lyrics-plus-container.user-scrolling .lyrics-plus-metadata,
-#lyrics-plus-container.touch-scrolling .lyrics-line,
-#lyrics-plus-container.touch-scrolling .lyrics-plus-metadata {
+#lyrics-plus-container.user-scrolling .lyrics-plus-metadata {
     --lyrics-line-delay: 0ms !important;
     transition-delay: 0ms !important;
 }
@@ -1076,28 +1048,6 @@ span.lyrics-source-provider {
     --webgl-post-process-tick: 0;
 }
 
-.lyplus-blur-background {
-    position: absolute;
-    top: -20px;
-    left: -20px;
-    right: -20px;
-    bottom: -20px;
-    background-size: cover;
-    background-position: center;
-    filter: blur(10px) brightness(0.4);
-    transform: scale(1.1);
-}
-
-.lyplus-gradient-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 1;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.8) 100%);
-}
-
 .lyplus-blur-container::after {
     content: '';
     position: absolute;
@@ -1117,11 +1067,6 @@ canvas#lyplus-webgl-canvas {
     min-height: 100vh;
     aspect-ratio: 1 / 1;
     transform: translate(-50%, -50%);
-}
-
-:root {
-    --max-scale: 1.12;
-    --shadow-intensity: 0.6;
 }
 
 @keyframes gap-loop {

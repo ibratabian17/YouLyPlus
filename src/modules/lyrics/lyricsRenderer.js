@@ -164,8 +164,6 @@ class LyricsPlusRenderer {
     this.buttonsWrapper = null;
     this._boundContainerClickHandler = this._onContainerClick.bind(this);
 
-    this.isProgrammaticScrolling = false;
-    this.endProgrammaticScrollTimer = null;
     this.scrollEventHandlerAttached = false;
     this.currentScrollOffset = 0;
     this.userScrollIdleTimer = null;
@@ -1999,7 +1997,7 @@ class LyricsPlusRenderer {
   updateCurrentTick(currentTime) {
     currentTime = currentTime * 1000;
     const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
-    this._updateLyricsHighlight((currentTime - (this.offsetLatency * 1000) - (this.userOffsetMs || 0)), isForceScroll, this.currentSettings || {});
+    this._updateLyricsHighlight((currentTime - (this.offsetLatency * 1000) - (this.userOffsetMs || 0)), isForceScroll);
     this.lastTime = currentTime;
   }
 
@@ -2007,12 +2005,10 @@ class LyricsPlusRenderer {
    * Updates the highlighted lyrics and syllables based on the current time.
    * @param {number} currentTime - The current video time in milliseconds.
    * @param {boolean} isForceScroll - Whether to force a scroll update.
-   * @param {object} currentSettings - The current user settings.
    */
   _updateLyricsHighlight(
     currentTime,
-    isForceScroll = false,
-    currentSettings = {}
+    isForceScroll = false
   ) {
     if (!this.cachedLyricsLines || this.cachedLyricsLines.length === 0) {
       return;
@@ -3470,14 +3466,8 @@ class LyricsPlusRenderer {
     }
 
     this.lyricsContainer.classList.remove("not-focused", "user-scrolling");
-    this.isProgrammaticScrolling = true;
     this.isUserControllingScroll = false;
-    clearTimeout(this.endProgrammaticScrollTimer);
     clearTimeout(this.userScrollIdleTimer);
-    this.endProgrammaticScrollTimer = setTimeout(() => {
-      this.isProgrammaticScrolling = false;
-      this.endProgrammaticScrollTimer = null;
-    }, 250);
 
     if (isResize) {
       this.currentScrollOffset = targetTranslateY;
@@ -3819,7 +3809,7 @@ class LyricsPlusRenderer {
 
     const { providerKeys, activeProvider, providerDisplayNames } = this._getProviderContext();
 
-    let availableList = [];
+    let availableList;
     if (this.availableProviders && this.availableProviders.size > 0) {
       availableList = Array.from(this.availableProviders).filter(p => !this._notFoundProviders?.has(p.toLowerCase()));
     } else {
@@ -4069,7 +4059,7 @@ class LyricsPlusRenderer {
       this._debouncedSaveOffset(this.lastKnownSongInfo, this.userOffsetMs);
     }
     const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 - this.userOffsetMs;
-    this._updateLyricsHighlight(currentTime, false, this.currentSettings || {});
+    this._updateLyricsHighlight(currentTime, false);
   }
 
   _updateOffsetDisplay() {
@@ -4175,12 +4165,10 @@ class LyricsPlusRenderer {
     if (this._cleanupTimer) clearTimeout(this._cleanupTimer);
     this._cleanupTimer = null;
     if (this._cleanupSet) this._cleanupSet.clear();
-    if (this.endProgrammaticScrollTimer) clearTimeout(this.endProgrammaticScrollTimer);
     if (this.userScrollIdleTimer) clearTimeout(this.userScrollIdleTimer);
     if (this._scrollUnlockTimeout) clearTimeout(this._scrollUnlockTimeout);
     if (this._scrollAnimationTimeout) clearTimeout(this._scrollAnimationTimeout);
 
-    this.endProgrammaticScrollTimer = null;
     this.userScrollIdleTimer = null;
     this._scrollUnlockTimeout = null;
     this._scrollAnimationTimeout = null;
@@ -4291,7 +4279,6 @@ class LyricsPlusRenderer {
     this._containerDisplayCache = undefined;
 
     this.currentScrollOffset = 0;
-    this.isProgrammaticScrolling = false;
     this.isUserControllingScroll = false;
 
     this.currentDisplayMode = undefined;
