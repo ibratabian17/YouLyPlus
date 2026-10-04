@@ -16,6 +16,18 @@ body {
     gap: 16px;
     min-height: 460px;
     box-sizing: border-box;
+    animation: springPopupIn 380ms var(--spring-physics) both;
+}
+
+@keyframes springPopupIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 h1 {
@@ -81,10 +93,10 @@ h1 {
     gap: 8px;
     position: relative;
     overflow: hidden;
-    transition: color 250ms var(--animation-easing-standard),
-        border-radius 250ms var(--animation-easing-standard),
-        background-color 250ms var(--animation-easing-standard),
-        padding 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: color 250ms ease,
+        border-radius 250ms ease,
+        background-color 250ms ease,
+        padding 400ms var(--spring-bouncy);
 }
 
 .tab:first-child:not(.active) {
@@ -101,7 +113,7 @@ h1 {
     inset: 0;
     background-color: var(--md-sys-color-primary);
     opacity: 0;
-    transition: opacity var(--animation-duration-short) var(--animation-easing-standard);
+    transition: opacity var(--animation-duration-short) ease;
     pointer-events: none;
     border-radius: inherit;
 }
@@ -135,17 +147,17 @@ main {
     display: none;
     flex-direction: column;
     gap: 8px;
-    animation: fadeIn 250ms var(--animation-easing-standard);
 }
 
 .tab-content.active {
     display: flex;
+    animation: tabFadeIn 180ms var(--spring-smooth);
 }
 
-@keyframes fadeIn {
+@keyframes tabFadeIn {
     from {
         opacity: 0;
-        transform: translateY(6px);
+        transform: translateY(4px);
     }
     to {
         opacity: 1;
@@ -247,6 +259,7 @@ main {
     pointer-events: none;
     width: 1.25rem;
     height: 1.25rem;
+    transition: transform 300ms var(--spring-smooth);
 }
 
 .setting-item.full-width {

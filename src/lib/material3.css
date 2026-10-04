@@ -70,12 +70,18 @@
     --border-radius-extra-large: 16px;
     --border-radius-full: 28px;
 
-    --animation-duration-short: 150ms;
-    --animation-duration-medium: 250ms;
+    --animation-duration-short: 180ms;
+    --animation-duration-medium: 300ms;
     --animation-duration: 250ms;
-    --animation-easing: cubic-bezier(0.4, 0.0, 0.2, 1);
-    --animation-easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
-    --animation-easing-emphasized: cubic-bezier(0.2, 0.0, 0.0, 1.0);
+    --animation-easing: cubic-bezier(0.16, 1, 0.3, 1);
+    --animation-easing-standard: cubic-bezier(0.16, 1, 0.3, 1);
+    --animation-easing-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Real spring physics: damped harmonic oscillator linear() curves */
+    --spring-physics: linear(0, 0.006, 0.025 2.8%, 0.101 6.1%, 0.539 18.9%, 0.721 25.3%, 0.849 31.6%, 0.937 38.3%, 0.968 41.8%, 0.991 45.7%, 1.006 50.1%, 1.015 55%, 1.017 60.7%, 1.002 82.5%, 1);
+    --spring-bouncy: linear(0, 0.035, 0.127, 0.254, 0.398, 0.546, 0.686, 0.811, 0.916, 1.0, 1.062, 1.104, 1.128, 1.137, 1.134, 1.123, 1.107, 1.088, 1.067, 1.048, 1.03, 1.015, 1.003, 0.993, 0.987, 0.983, 0.981, 0.981, 0.983, 0.985, 1);
+    --spring-snappy: linear(0, 0.13, 0.376, 0.61, 0.787, 0.903, 0.969, 1.001, 1.013, 1.015, 1.012, 1.008, 1.005, 1.003, 1.001, 1);
+    --spring-smooth: cubic-bezier(0.16, 1, 0.3, 1);
 
     /* State layer opacities */
     --state-layer-hover: 0.08;
@@ -220,14 +226,19 @@ body {
     cursor: pointer;
     text-decoration: none;
     text-align: center;
-    transition: background-color var(--animation-duration-short) var(--animation-easing-standard),
-        box-shadow var(--animation-duration-short) var(--animation-easing-standard),
-        border-color var(--animation-duration-short) var(--animation-easing-standard),
-        color var(--animation-duration-short) var(--animation-easing-standard);
+    transition: background-color var(--animation-duration-short) ease,
+        box-shadow var(--animation-duration-short) ease,
+        border-color var(--animation-duration-short) ease,
+        color var(--animation-duration-short) ease,
+        transform 150ms var(--spring-smooth);
     position: relative;
     overflow: hidden;
     min-height: 40px;
     -webkit-tap-highlight-color: transparent;
+}
+
+.m3-button:active:not(:disabled) {
+    transform: scale(0.97);
 }
 
 .m3-button::before {
@@ -430,8 +441,8 @@ label.m3-switch .label {
     border: 2px solid var(--md-sys-color-outline);
     border-radius: var(--border-radius-full);
     box-sizing: border-box;
-    transition: background-color 250ms cubic-bezier(0.2, 0, 0, 1),
-                border-color 250ms cubic-bezier(0.2, 0, 0, 1);
+    transition: background-color 250ms ease,
+                border-color 250ms ease;
 }
 
 .m3-switch .handle,
@@ -448,8 +459,8 @@ label.m3-switch .label {
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    transition: transform 250ms cubic-bezier(0.2, 0, 0, 1),
-                background-color 200ms cubic-bezier(0.2, 0, 0, 1);
+    transition: transform 300ms var(--spring-snappy),
+                background-color 200ms ease;
 }
 
 .m3-switch .handle::before,
@@ -462,7 +473,7 @@ label.m3-switch .label {
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E") no-repeat center / contain;
     border: none;
     border-radius: 0;
-    transition: transform 200ms cubic-bezier(0.2, 0, 0, 1),
+    transition: transform 220ms var(--spring-smooth),
                 opacity 150ms ease;
     flex-shrink: 0;
 }
@@ -653,7 +664,7 @@ div.m3-select.open {
     height: 20px;
     color: var(--md-sys-color-on-surface-variant);
     fill: currentColor;
-    transition: transform var(--animation-duration) var(--animation-easing-standard);
+    transition: transform 300ms var(--spring-smooth);
     flex-shrink: 0;
     pointer-events: none;
 }
@@ -678,16 +689,16 @@ div.m3-select.open {
     max-height: 260px;
     overflow-y: auto;
     opacity: 0;
-    transform: scaleY(0.95) translateY(-4px);
+    transform: scale(0.96) translateY(-4px);
     transform-origin: top right;
     pointer-events: none;
-    transition: opacity var(--animation-duration-short) var(--animation-easing-standard),
-        transform var(--animation-duration-short) var(--animation-easing-standard);
+    transition: opacity 180ms ease,
+        transform 280ms var(--spring-smooth);
 }
 
 .m3-select.open .m3-select-menu {
     opacity: 1;
-    transform: scaleY(1) translateY(0);
+    transform: scale(1) translateY(0);
     pointer-events: auto;
 }
 
@@ -701,8 +712,8 @@ div.m3-select.open {
     border-radius: var(--border-radius-medium);
     font-size: 0.9rem;
     color: var(--md-sys-color-on-surface);
-    transition: background-color var(--animation-duration-short) var(--animation-easing-standard),
-                color var(--animation-duration-short) var(--animation-easing-standard);
+    transition: background-color var(--animation-duration-short) ease,
+                color var(--animation-duration-short) ease;
 }
 
 .m3-select-option:hover {
@@ -781,8 +792,8 @@ input[type="file"]::file-selector-button:hover {
     border-radius: var(--border-radius-small);
     box-shadow: var(--md-sys-elevation-level-3);
     font-size: 0.875rem;
-    transition: transform var(--animation-duration-medium) var(--animation-easing-standard),
-        opacity var(--animation-duration-medium) var(--animation-easing-standard);
+    transition: transform 380ms var(--spring-physics),
+        opacity 250ms ease;
     opacity: 0;
     z-index: 1000;
     display: flex;

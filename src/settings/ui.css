@@ -51,7 +51,7 @@ body {
     box-sizing: border-box;
     overflow-y: auto;
     position: relative;
-    transition: transform var(--animation-duration-medium) var(--animation-easing-emphasized);
+    transition: transform 350ms var(--spring-smooth);
     z-index: 100;
     scrollbar-width: thin;
     scrollbar-color: color-mix(in srgb, var(--md-sys-color-outline) calc(var(--sidebar-scroll-alpha, 0) * 100%), transparent) transparent;
@@ -126,9 +126,8 @@ body {
     border-radius: var(--border-radius-extra-large);
     text-decoration: none;
     color: var(--md-sys-color-on-surface-variant);
-    transition: background-color var(--animation-duration-short) var(--animation-easing-standard),
-                color var(--animation-duration-short) var(--animation-easing-standard),
-                transform var(--animation-duration-short) var(--animation-easing-standard);
+    transition: background-color var(--animation-duration-short) ease,
+                color var(--animation-duration-short) ease;
     position: relative;
     overflow: hidden;
     user-select: none;
@@ -227,18 +226,18 @@ body {
 
 .settings-card {
     display: none;
-    animation: fadeIn 350ms var(--animation-easing-standard);
     width: 100%;
 }
 
 .settings-card.active {
     display: block;
+    animation: cardFadeIn 180ms var(--spring-smooth);
 }
 
-@keyframes fadeIn {
+@keyframes cardFadeIn {
     from {
         opacity: 0;
-        transform: translateY(12px);
+        transform: translateY(6px);
     }
     to {
         opacity: 1;
@@ -290,6 +289,7 @@ h2.card-title.no-border {
     border-radius: var(--border-radius-smallest);
     position: relative;
     box-sizing: border-box;
+    transition: background-color 150ms ease;
 }
 
 .settings-group > .setting-item:first-child {
@@ -470,9 +470,20 @@ h2.card-title.no-border {
     border-radius: var(--border-radius-large);
     font-weight: 500;
     font-size: 0.9rem;
-    animation: fadeIn 350ms;
+    animation: notificationSlideIn 250ms var(--spring-smooth);
     margin-bottom: 28px;
     gap: 16px;
+}
+
+@keyframes notificationSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .reload-notification .m3-button {
@@ -508,12 +519,16 @@ h2.card-title.no-border {
     position: relative;
     overflow: hidden;
     user-select: none;
+    transition: transform 250ms var(--spring-smooth),
+                background-color 200ms ease,
+                box-shadow 250ms var(--spring-smooth);
 }
 
 .draggable-source-item.dragging {
-    opacity: 0.75;
+    opacity: 0.85;
     background-color: var(--md-sys-color-secondary-container);
-    transform: scale(1.01);
+    transform: scale(1.025);
+    box-shadow: var(--md-sys-elevation-level-2);
 }
 
 .draggable-source-item .drag-handle {
@@ -699,14 +714,18 @@ div#local-lyrics-list .draggable-source-item:only-of-type {
     justify-content: center;
     cursor: pointer;
     box-shadow: var(--md-sys-elevation-level-3);
-    transition: transform var(--animation-duration-short) var(--animation-easing-standard),
-                box-shadow var(--animation-duration-short) var(--animation-easing-standard);
+    transition: transform 250ms var(--spring-smooth),
+                box-shadow 250ms var(--spring-smooth);
     z-index: 1000;
 }
 
 .fab:hover {
-    transform: scale(1.05);
+    transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.fab:active {
+    transform: translateY(0);
 }
 
 .fab .icon-svg {
@@ -733,6 +752,7 @@ div#local-lyrics-list .draggable-source-item:only-of-type {
     inset: 0;
     background-color: var(--md-sys-color-scrim);
     opacity: 0.4;
+    transition: opacity 250ms ease;
 }
 
 .modal-content {
@@ -743,7 +763,7 @@ div#local-lyrics-list .draggable-source-item:only-of-type {
     width: 90%;
     max-width: 480px;
     position: relative;
-    animation: slideInModal 0.3s var(--animation-easing-emphasized);
+    animation: springModalIn 450ms var(--spring-physics) both;
     max-height: 90vh;
     overflow-y: auto;
     display: flex;
@@ -775,14 +795,14 @@ div#local-lyrics-list .draggable-source-item:only-of-type {
     to { opacity: 1; }
 }
 
-@keyframes slideInModal {
+@keyframes springModalIn {
     from {
-        transform: translateY(30px) scale(0.96);
         opacity: 0;
+        transform: translateY(20px) scale(0.96);
     }
     to {
-        transform: translateY(0) scale(1);
         opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
