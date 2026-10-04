@@ -183,6 +183,8 @@ class LyricsPlusRenderer {
     this._positionClassedLines = [];
     this._animatingLines = [];
     this._visibilityChanges = [];
+    this._springConfigCache = null;
+    this._elevationConfigCache = null;
 
     this.wakeLock = null;
 
@@ -313,6 +315,8 @@ class LyricsPlusRenderer {
 
     this._scrollPaddingTopCache = undefined;
     this._containerDisplayCache = undefined;
+    this._springConfigCache = null;
+    this._elevationConfigCache = null;
     this._positionClassedLines = [];
 
     if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
@@ -391,6 +395,7 @@ class LyricsPlusRenderer {
     originalLyricsSection.appendChild(container);
     this.lyricsContainer = container;
     this._invalidateSpringConfig();
+    this._invalidateElevationConfig();
     return container;
   }
 
@@ -2766,9 +2771,9 @@ class LyricsPlusRenderer {
     return { delay, hold, response, emphasis, glow, spanDuration };
   }
 
-  static _getEmphasisFrames(duration, count, index) {
+  static _getEmphasisFrames(duration, count, index, elevationNum = -0.05, elevationUnit = "em") {
     const cache = (LyricsPlusRenderer._emphasisFrameCache ||= new Map());
-    const key = `${duration}:${count}:${index}`;
+    const key = `${duration}:${count}:${index}:${elevationNum}:${elevationUnit}`;
     let frames = cache.get(key);
     if (frames) return frames;
 
@@ -2787,10 +2792,10 @@ class LyricsPlusRenderer {
         : LyricsPlusRenderer._springProgress(time, response) *
         (1 - LyricsPlusRenderer._springProgress(time - hold, response));
       const x = side * SPREAD_EM * emphasis * envelope;
-      const y = -0.05 * rise - LIFT_EM * emphasis * envelope;
+      const y = elevationNum * rise - LIFT_EM * emphasis * envelope;
       return {
         offset: frame / 60,
-        transform: `translate3d(${x.toFixed(4)}em, ${y.toFixed(4)}em, 1px) scale(${(1 + 0.1 * emphasis * envelope).toFixed(4)})`,
+        transform: `translate3d(${x.toFixed(4)}em, ${y.toFixed(4)}${elevationUnit}, 1px) scale(${(1 + 0.1 * emphasis * envelope).toFixed(4)})`,
       };
     });
     if (cache.size >= 256) cache.delete(cache.keys().next().value);
@@ -2804,11 +2809,12 @@ class LyricsPlusRenderer {
     const duration = Math.max(0.001, durationMs / 1000);
     const count = chars.length;
     const { delay, glow, spanDuration } = LyricsPlusRenderer._getEmphasisParams(duration, count);
+    const { num: elevationNum, unit: elevationUnit } = this._getElevationConfig();
 
     for (let i = 0; i < count; i++) {
       const span = chars[i];
       const startDelay = (i + 1) * delay * 1000;
-      span._emphasisFrames = LyricsPlusRenderer._getEmphasisFrames(duration, count, i);
+      span._emphasisFrames = LyricsPlusRenderer._getEmphasisFrames(duration, count, i, elevationNum, elevationUnit);
       span._emphasisTiming = {
         duration: spanDuration * 1000,
         delay: startDelay,
@@ -2817,6 +2823,8 @@ class LyricsPlusRenderer {
       };
       span._emphasisEnd = spanDuration * 1000 + startDelay;
       span._emphasisStartDelay = startDelay;
+      span._emphasisElevationNum = elevationNum;
+      span._emphasisElevationUnit = elevationUnit;
       span._emphasisGlow = glow > 0;
       span._emphasisResponse = LyricsPlusRenderer._getEmphasisParams(duration, count).response;
       if (glow > 0) {
@@ -2929,6 +2937,9 @@ class LyricsPlusRenderer {
 
     const response = span._emphasisResponse || 1;
     const delay = span._emphasisStartDelay || 0;
+    const elevationNum = span._emphasisElevationNum ?? -0.05;
+    const elevationUnit = span._emphasisElevationUnit || "em";
+    const fallAmount = -elevationNum;
     const fallMs = Math.min(500, remaining);
     const N = 30;
     const frames = [];
@@ -2939,7 +2950,7 @@ class LyricsPlusRenderer {
       const rise = i === N ? 1 : LyricsPlusRenderer._springProgress(t, response);
       const r = Math.min(1, ms / fallMs);
       const ramp = r * r * (3 - 2 * r);
-      frames.push({ offset: f, translate: `0 ${(0.05 * rise * ramp).toFixed(4)}em` });
+      frames.push({ offset: f, translate: `0 ${(fallAmount * rise * ramp).toFixed(4)}${elevationUnit}` });
     }
     span._emphasisFall = span.animate(frames, {
       duration: remaining,
@@ -3187,6 +3198,30 @@ class LyricsPlusRenderer {
 
   _invalidateSpringConfig() {
     this._springConfigCache = null;
+  }
+
+  _resolveElevationConfig() {
+    const style = this.lyricsContainer ? getComputedStyle(this.lyricsContainer) : null;
+    const raw = style ? style.getPropertyValue('--lyplus-lyrics-elevation').trim() : '';
+    const fallbackVal = -0.05;
+    const fallbackUnit = 'em';
+    if (!raw) {
+      return { num: fallbackVal, unit: fallbackUnit };
+    }
+    const num = parseFloat(raw);
+    const unitMatch = raw.match(/[a-z%]+$/i);
+    return {
+      num: Number.isFinite(num) ? num : fallbackVal,
+      unit: unitMatch ? unitMatch[0] : fallbackUnit,
+    };
+  }
+
+  _getElevationConfig() {
+    return this._elevationConfigCache || (this._elevationConfigCache = this._resolveElevationConfig());
+  }
+
+  _invalidateElevationConfig() {
+    this._elevationConfigCache = null;
   }
 
   /**
@@ -4209,6 +4244,7 @@ class LyricsPlusRenderer {
     this._saveOffsetTimeout = null;
     this._toastTimeout = null;
     this._invalidateSpringConfig();
+    this._invalidateElevationConfig();
     this.userOffsetMs = 0;
     this.currentLyrics = null;
     this.currentLyricsType = null;

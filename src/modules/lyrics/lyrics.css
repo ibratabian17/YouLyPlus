@@ -30,6 +30,8 @@
 
     --lyplus-fade-gap-timing-function: ease-out;
 
+    --lyplus-lyrics-elevation: -0.05em;
+
     --lyplus-spring-scroll: true;
     --lyplus-spring-zeta: 0.78;
     --lyplus-spring-settle-ratio: 1.5;
@@ -373,7 +375,7 @@
 
 #lyrics-plus-container:not(.lightweight-mode) .lyrics-line.active:not(.lyrics-gap) .lyrics-word:not(.growable) .lyrics-syllable.highlight,
 #lyrics-plus-container:not(.lightweight-mode) .lyrics-word.growable .lyrics-syllable.cleanup span.char {
-    transform: translateY(-0.05em) translateZ(1px);
+    transform: translateY(var(--lyplus-lyrics-elevation)) translateZ(1px);
 }
 
 #lyrics-plus-container.use-background-wipe .lyrics-syllable.cleanup span.char,
