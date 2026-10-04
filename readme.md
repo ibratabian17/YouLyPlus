@@ -89,15 +89,16 @@ Play any song, and the lyrics panel will automatically be enhanced by YouLy+.
 ### Core Features
 
 -   **Word-by-word, syllable-synced lyrics**: YouLy+ features real-time, accurately synced lyrics with word-by-word highlighting.
--   **Apple Music engine overhaul**: Replaces the resource-heavy native UI. YouLy+ solves the `setTimeout` drift issues and layout bugs while significantly lowering CPU usage. It also expands the lyric sources—if AM lacks synced lyrics, YouLy+ finds them elsewhere!
+-   **Apple Music engine overhaul**: Replaces the resource-heavy native Apple Music Web UI. YouLy+ replace their murdered animation with Apple native-like animation with optimization. It also expands the lyric sources—if AM lacks synced lyrics, YouLy+ finds them elsewhere!
 -   **Multi-platform fallback**: Automatically searches multiple platforms to find lyrics for almost every song.
 -   **Fits seamlessly**: Replaces default lyrics panels out of the box with designs that fit in to whichever platform you use.
 
 ### Translation & Romanization
 
 -   **Instant Translation**: YouLy+ utilises label-provided translations but also supports **Google Translate**, **DeepL**, and **Gemini/OpenRouter** (BYO API key) translations.
--   **Romanization**: For different writing systems, YouLy+ can provide romanisations from the label or via Google Translate.
+-   **Romanization**: For different writing systems, YouLy+ can provide romanizations from your own device without external API locally! or you can use Google Translate or Openrouter or Gemini AI (BYO API key) for better romanization. (Local Romanize for Japanese and Arabic may need to download dictionary/model on the Settings Menu)
 -   **Full Gemini AI Control**: For advanced users, connect your own Gemini AI account to customize translation instructions and AI settings.
+-   **Transliteration**: You speak on non latin language but want to read lyrics in your own script? YouLy+ can help you. For example, you can transliterate lyrics from latin alphabet to hangul, arabic or many other scripts. (AI Required)
 
 ### Appearance & Customization
 
@@ -106,9 +107,9 @@ Play any song, and the lyrics panel will automatically be enhanced by YouLy+.
 
 ### Performance
 
--   **Optimized Renderer**: YouLy+ is designed and tested to run smoothly on older hardware without noticeable lag.
--   **Lightweight Mode**: The renderer hits 60FPS out of the box on a M1 MBA. **Lightweight Mode** can be used to hit 60FPS even worse machines without much change in the experience - beating all competitors.
--   **SponsorBlock Integration:** Automatically adapts lyrics timeline to follow non-music segments like intros, outros, and sponsors on music videos (YouTube Music).
+-   **Optimized Renderer**: YouLy+ is designed and tested to run smoothly on older hardware without noticeable lag. on MBA M1, it stable at 60FPS with all heavy effects enabled.
+-   **Lightweight Mode**: While 15 years old PC can run it on heavy effect enabled (AMD FX6300), more potato pc can enable lightweight mode to run it at 60FPS with less effects.
+-   **Smart Music Video Adaption:** Automatically adapts lyrics timeline to follow non-music segments like intros, outros, and sponsors on music videos with SponsorBlock/Subtitle Alignment. (Feature currently exclusive to YouTube Music)
 
 ## Performance Reference
 
@@ -119,7 +120,7 @@ The benchmark machine used to develop this project is older hardware (AMD FX-630
 - **768p (1366x768):** Stable 60 FPS on **NVIDIA GT 620** (1GB) or equivalent integrated graphics.
 - **1080p (1920x1080):** GTX 650 / GT 1030 or above recommended for a locked 60 FPS.
 
-- Tested on a M1 MacBook Air (base specs, 1680x1050 Retina display), YouLy+ stays stable at 60FPS with little decrease in battery life.
+- Tested on a M1 MacBook Air (base specs, 2560x1600 (1440x900 DPI) Retina display), YouLy+ stays stable at 60FPS with little decrease in battery life.
 
 ## Self-Hosting & Open Source
 
@@ -131,6 +132,7 @@ YouLy+ is proudly open-source.
  
 YouLy+ integrates with several third-party lyrics providers. By using this extension, you agree to the respective Terms of Service of these platforms:
  
+* **[lrc.red](https://lrc.red):** Apple Music word-synced lyrics database.
 * **[Unison](https://github.com/better-lyrics/unison):** As our alternate word-sync API lyrics using data from the Better-Lyrics community.
 * **[LRCLIB](https://github.com/tranxuanthang/lrclib):** A massive, crowdsourced database API that used as a primary fallback for synchronized lyrics.
 * **Lyrics+ Backend:** Our internal engine that prioritizes official metadata from Apple Music, QQ Music, and Musixmatch to ensure professional-grade accuracy. while it has our own community-driven source too!
