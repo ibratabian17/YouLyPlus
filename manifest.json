@@ -22,7 +22,7 @@
     "https://lyrics-storage.binimum.org/*",
     "https://cdn.jsdelivr.net/*",
     "https://github.com/*",
-    "https://*.githubusercontent.com/*",
+    "https://*.githubusercontent.com/*"
   ],
   "action": {
     "default_popup": "src/popup/ui.html",
