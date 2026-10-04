@@ -2324,6 +2324,7 @@ class LyricsPlusRenderer {
       lastPos: initialPos,
       timeOffset: 0,
       lastTime: 0,
+      lastTimeMs: lineStartTime,
       frames: [],
     };
 
@@ -2377,13 +2378,12 @@ class LyricsPlusRenderer {
 
     for (let j = 0; j < words.length; j++) {
       const otherWord = words[j];
-      const rawStart = (otherWord.startTime - lineStartTime) / totalFadeDuration;
-      const rawEnd = (otherWord.endTime - lineStartTime) / totalFadeDuration;
-      const wordStartOffset = Math.min(1, Math.max(cursor.lastTime, rawStart));
-      const wordEndOffset = Math.min(1, Math.max(wordStartOffset, rawEnd));
+      const effectiveStart = Math.max(cursor.lastTimeMs, otherWord.startTime);
+      const effectiveEnd = Math.max(effectiveStart, otherWord.endTime);
 
-      if (wordStartOffset > cursor.lastTime) {
-        cursor.timeOffset = wordStartOffset;
+      const startOffset = Math.min(1, Math.max(cursor.lastTime, (effectiveStart - lineStartTime) / totalFadeDuration));
+      if (startOffset > cursor.lastTime) {
+        cursor.timeOffset = startOffset;
         pushClampedKeyframe();
       }
 
@@ -2395,9 +2395,37 @@ class LyricsPlusRenderer {
         movePx += fadeWidth * 0.5;
       }
 
-      cursor.timeOffset = wordEndOffset;
-      cursor.curPos += movePx;
-      pushClampedKeyframe();
+      const nextWord = words[j + 1];
+      const nextStartTime = nextWord !== undefined ? nextWord.startTime : Infinity;
+      const dur = effectiveEnd - effectiveStart;
+
+      if (dur > 0 && nextStartTime < effectiveEnd) {
+        const cutTime = Math.max(effectiveStart, nextStartTime);
+        const fraction = (cutTime - effectiveStart) / dur;
+        const cutOffset = Math.min(1, Math.max(startOffset, (cutTime - lineStartTime) / totalFadeDuration));
+
+        if (fraction > 0 && cutOffset > startOffset) {
+          cursor.timeOffset = cutOffset;
+          cursor.curPos += movePx * fraction;
+          pushClampedKeyframe();
+        }
+
+        cursor.timeOffset = cutOffset;
+        cursor.curPos += movePx * (1 - fraction);
+        pushClampedKeyframe();
+
+        cursor.lastTimeMs = cutTime;
+      } else {
+        const endOffset = dur > 0
+          ? Math.min(1, Math.max(startOffset, (effectiveEnd - lineStartTime) / totalFadeDuration))
+          : startOffset;
+
+        cursor.timeOffset = endOffset;
+        cursor.curPos += movePx;
+        pushClampedKeyframe();
+
+        cursor.lastTimeMs = effectiveEnd;
+      }
     }
 
     if (cursor.lastTime < 1) {
