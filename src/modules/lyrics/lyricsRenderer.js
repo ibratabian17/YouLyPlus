@@ -2822,6 +2822,7 @@ class LyricsPlusRenderer {
       span._emphasisEnd = spanDuration * 1000 + startDelay;
       span._emphasisStartDelay = startDelay;
       span._emphasisGlow = glow > 0;
+      span._emphasisResponse = LyricsPlusRenderer._getEmphasisParams(duration, count).response;
       if (glow > 0) {
         span.setAttribute("data-glyph", span.textContent || "");
         span.style.setProperty("--char-glow-max", `${glow}`);
@@ -2837,6 +2838,10 @@ class LyricsPlusRenderer {
       if (span._emphasis) {
         span._emphasis.animation.cancel();
         span._emphasis = null;
+      }
+      if (span._emphasisFall) {
+        span._emphasisFall.cancel();
+        span._emphasisFall = null;
       }
       span.classList.remove("emphasis-active");
       span.removeAttribute("data-glow");
@@ -2859,10 +2864,14 @@ class LyricsPlusRenderer {
     const elapsed = currentTime - startMs;
     if (elapsed < 0) return;
 
+    // A fresh run supersedes any deferred cleanup from a previous deactivation.
+    syllable._emphasisCleanupToken = null;
+
     for (let i = 0; i < chars.length; i++) {
       const span = chars[i];
       if (!span._emphasisFrames) continue;
       if (span._emphasis) span._emphasis.animation.cancel();
+      if (span._emphasisFall) { span._emphasisFall.cancel(); span._emphasisFall = null; }
 
       if (span._emphasisGlow) {
         span.style.setProperty("--char-glow-delay", `${span._emphasisStartDelay - elapsed}ms`);
@@ -2873,6 +2882,97 @@ class LyricsPlusRenderer {
       const animation = span.animate(span._emphasisFrames, span._emphasisTiming);
       animation.currentTime = Math.min(elapsed, span._emphasisEnd);
       span._emphasis = { animation, end: span._emphasisEnd, startMs, glowEpoch: elapsed };
+    }
+  }
+
+  // True while at least one char's emphasis animation hasn't reached its end.
+  _isEmphasisRunning(chars) {
+    if (!chars) return false;
+    for (let i = 0; i < chars.length; i++) {
+      const e = chars[i]._emphasis;
+      if (!e) continue;
+      const t = Number(e.animation.currentTime);
+      if (e.animation.playState !== "finished" && t < e.end) return true;
+    }
+    return false;
+  }
+
+  // The line was deactivated mid-animation: leave the WAAPI emphasis + CSS glow
+  // untouched and only run the normal highlight -> non-highlight cleanup once
+  // every char animation has finished.
+  _deferEmphasisCleanup(syllable, chars) {
+    const token = {};
+    syllable._emphasisCleanupToken = token;
+    const pending = [];
+    for (let i = 0; i < chars.length; i++) {
+      const a = chars[i]._emphasis?.animation;
+      if (a && a.playState !== "finished") {
+        pending.push(a.finished);
+        this._startEmphasisFall(chars[i]);
+      }
+    }
+    Promise.allSettled(pending).then(() => {
+      if (syllable._emphasisCleanupToken !== token) return; // restarted / force-cleared
+      syllable._emphasisCleanupToken = null;
+      this._finishDeferredEmphasis(syllable, chars);
+    });
+  }
+
+  // Layers an independent `translate` animation on top of the running emphasis
+  // transform so the lasting -0.05em "rise" is cancelled out. The char still
+  // finishes its spread/scale envelope, but ends at 0 (not -0.05em) because the
+  // line is no longer active. Uses the same spring as the base animation so the
+  // two stay in sync even if the rise hasn't completed yet.
+  _startEmphasisFall(span) {
+    const e = span._emphasis;
+    if (!e) return;
+    if (span._emphasisFall) span._emphasisFall.cancel();
+    const cur = Number(e.animation.currentTime);
+    const remaining = e.end - cur;
+    if (!(remaining > 0)) return;
+
+    const response = span._emphasisResponse || 1;
+    const delay = span._emphasisStartDelay || 0;
+    const fallMs = Math.min(500, remaining);
+    const N = 30;
+    const frames = [];
+    for (let i = 0; i <= N; i++) {
+      const f = i / N;
+      const ms = remaining * f;
+      const t = (cur + ms - delay) / 1000;
+      const rise = i === N ? 1 : LyricsPlusRenderer._springProgress(t, response);
+      const r = Math.min(1, ms / fallMs);
+      const ramp = r * r * (3 - 2 * r);
+      frames.push({ offset: f, translate: `0 ${(0.05 * rise * ramp).toFixed(4)}em` });
+    }
+    span._emphasisFall = span.animate(frames, {
+      duration: remaining,
+      easing: "linear",
+      fill: "forwards",
+    });
+  }
+
+  _finishDeferredEmphasis(syllable, chars) {
+    // Net offset is already 0 here, so just drop the finished layers.
+    this._clearEmphasis(chars);
+  }
+
+  _scheduleSyllableCleanup(syllable) {
+    if (!this._cleanupSet) this._cleanupSet = new Set();
+    syllable._cleanupPending = true;
+    this._cleanupSet.add(syllable);
+    if (!this._cleanupTimer) {
+      this._cleanupTimer = setTimeout(() => {
+        this._cleanupTimer = null;
+        const set = this._cleanupSet;
+        if (!set) return;
+        for (const syl of set) {
+          syl._cleanupPending = false;
+          syl.classList.remove("highlight", "finished", "pre-highlight", "cleanup");
+          syl._state = 0;
+        }
+        set.clear();
+      }, 16);
     }
   }
 
@@ -2987,7 +3087,7 @@ class LyricsPlusRenderer {
     }
   }
 
-  _resetSyllable(syllable, noFade = false) {
+  _resetSyllable(syllable, noFade = false, deferEmphasis = false) {
     if (!syllable) return;
     if (syllable._cleanupPending) {
       syllable._cleanupPending = false;
@@ -3002,7 +3102,13 @@ class LyricsPlusRenderer {
 
     if (syllable._isGrowable) {
       if (syllable._syllableIdx === 0) {
-        this._clearEmphasis(syllable.parentElement?.parentElement?._cachedChars);
+        const chars = syllable.parentElement?.parentElement?._cachedChars;
+        if (deferEmphasis && !noFade && this._isEmphasisRunning(chars)) {
+          this._deferEmphasisCleanup(syllable, chars);
+        } else {
+          syllable._emphasisCleanupToken = null;
+          this._clearEmphasis(chars);
+        }
       }
     } else {
       const charSpans = syllable._cachedCharSpans || syllable.querySelectorAll("span.char");
@@ -3015,22 +3121,7 @@ class LyricsPlusRenderer {
       syllable.classList.remove("highlight", "finished", "pre-highlight", "cleanup");
       syllable._state = 0;
     } else {
-      if (!this._cleanupSet) this._cleanupSet = new Set();
-      syllable._cleanupPending = true;
-      this._cleanupSet.add(syllable);
-      if (!this._cleanupTimer) {
-        this._cleanupTimer = setTimeout(() => {
-          this._cleanupTimer = null;
-          const set = this._cleanupSet;
-          if (!set) return;
-          for (const syl of set) {
-            syl._cleanupPending = false;
-            syl.classList.remove("highlight", "finished", "pre-highlight", "cleanup");
-            syl._state = 0;
-          }
-          set.clear();
-        }, 16);
-      }
+      this._scheduleSyllableCleanup(syllable);
     }
   }
 
@@ -3047,7 +3138,7 @@ class LyricsPlusRenderer {
 
     const syllablesLength = syllables.length;
     for (let i = 0; i < syllablesLength; i++) {
-      this._resetSyllable(syllables[i], noFade);
+      this._resetSyllable(syllables[i], noFade, true);
     }
   }
 

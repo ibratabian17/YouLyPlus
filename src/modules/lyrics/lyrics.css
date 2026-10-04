@@ -1168,6 +1168,7 @@ canvas#lyplus-webgl-canvas {
 /* Emphasis glow: painted once on a pseudo-element, only opacity is animated. */
 .lyrics-line .lyrics-syllable span.char.emphasis-active {
     position: relative;
+    transform-origin: 50% 80%;
 }
 
 .lyrics-syllable span.char.emphasis-active[data-glow]::after {
