@@ -2324,38 +2324,40 @@ class LyricsPlusRenderer {
       lastPos: initialPos,
       timeOffset: 0,
       lastTime: 0,
-      lastTimeStamp: 0,
       frames: [],
     };
 
     const pushClampedKeyframe = () => {
+      const time = Math.min(1, Math.max(cursor.lastTime, cursor.timeOffset));
       const moveOffset = cursor.curPos - cursor.lastPos;
-      const time = Math.min(1, Math.max(0, cursor.timeOffset));
       const duration = time - cursor.lastTime;
-      const msPerPixel = moveOffset !== 0 ? Math.abs(duration / moveOffset) : 0;
 
-      if (cursor.curPos > minOffset && cursor.lastPos < minOffset) {
-        const staticTime = Math.abs(cursor.lastPos - minOffset) * msPerPixel;
-        const clamped = Math.min(Math.max(cursor.lastPos, minOffset), 0);
-        const xPos = (rtl ? minOffset - clamped : clamped).toFixed(2);
-        const pos = `${xPos}px 0`;
-        cursor.frames.push(
-          isBackground
-            ? { offset: cursor.lastTime + staticTime, backgroundPosition: pos }
-            : { offset: cursor.lastTime + staticTime, maskPosition: pos }
-        );
-      }
+      if (duration > 0 && moveOffset !== 0) {
+        const msPerPixel = Math.abs(duration / moveOffset);
 
-      if (cursor.curPos > 0 && cursor.lastPos < 0) {
-        const staticTime = Math.abs(cursor.lastPos) * msPerPixel;
-        const clamped = Math.min(Math.max(cursor.curPos, minOffset), 0);
-        const xPos = (rtl ? minOffset - clamped : clamped).toFixed(2);
-        const pos = `${xPos}px 0`;
-        cursor.frames.push(
-          isBackground
-            ? { offset: cursor.lastTime + staticTime, backgroundPosition: pos }
-            : { offset: cursor.lastTime + staticTime, maskPosition: pos }
-        );
+        if (cursor.curPos > minOffset && cursor.lastPos < minOffset) {
+          const staticTime = Math.min(duration, Math.max(0, Math.abs(cursor.lastPos - minOffset) * msPerPixel));
+          const clamped = minOffset;
+          const xPos = (rtl ? minOffset - clamped : clamped).toFixed(2);
+          const pos = `${xPos}px 0`;
+          cursor.frames.push(
+            isBackground
+              ? { offset: Math.min(1, Math.max(cursor.lastTime, cursor.lastTime + staticTime)), backgroundPosition: pos }
+              : { offset: Math.min(1, Math.max(cursor.lastTime, cursor.lastTime + staticTime)), maskPosition: pos }
+          );
+        }
+
+        if (cursor.curPos > 0 && cursor.lastPos < 0) {
+          const staticTime = Math.min(duration, Math.max(0, Math.abs(cursor.lastPos) * msPerPixel));
+          const clamped = 0;
+          const xPos = (rtl ? minOffset - clamped : clamped).toFixed(2);
+          const pos = `${xPos}px 0`;
+          cursor.frames.push(
+            isBackground
+              ? { offset: Math.min(1, Math.max(cursor.lastTime, cursor.lastTime + staticTime)), backgroundPosition: pos }
+              : { offset: Math.min(1, Math.max(cursor.lastTime, cursor.lastTime + staticTime)), maskPosition: pos }
+          );
+        }
       }
 
       const clamped = Math.min(Math.max(cursor.curPos, minOffset), 0);
@@ -2375,16 +2377,16 @@ class LyricsPlusRenderer {
 
     for (let j = 0; j < words.length; j++) {
       const otherWord = words[j];
+      const rawStart = (otherWord.startTime - lineStartTime) / totalFadeDuration;
+      const rawEnd = (otherWord.endTime - lineStartTime) / totalFadeDuration;
+      const wordStartOffset = Math.min(1, Math.max(cursor.lastTime, rawStart));
+      const wordEndOffset = Math.min(1, Math.max(wordStartOffset, rawEnd));
 
-      const curTimeStamp = otherWord.startTime - lineStartTime;
-      const staticDuration = curTimeStamp - cursor.lastTimeStamp;
-      if (staticDuration > 0) {
-        cursor.timeOffset += staticDuration / totalFadeDuration;
+      if (wordStartOffset > cursor.lastTime) {
+        cursor.timeOffset = wordStartOffset;
         pushClampedKeyframe();
       }
-      cursor.lastTimeStamp = curTimeStamp;
 
-      const fadeDuration = Math.max(0, otherWord.endTime - otherWord.startTime);
       let movePx = otherWord.width + (otherWord.gapAfter || 0);
       if (j === 0) {
         movePx += fadeWidth * 1.5 - leadTrim;
@@ -2393,17 +2395,12 @@ class LyricsPlusRenderer {
         movePx += fadeWidth * 0.5;
       }
 
-      cursor.timeOffset += fadeDuration / totalFadeDuration;
+      cursor.timeOffset = wordEndOffset;
       cursor.curPos += movePx;
-      if (fadeDuration > 0) {
-        pushClampedKeyframe();
-      }
-      cursor.lastTimeStamp += fadeDuration;
+      pushClampedKeyframe();
     }
 
-    const wordEndStamp = cursor.lastTimeStamp;
-    const tailDuration = totalFadeDuration - wordEndStamp;
-    if (tailDuration > 0) {
+    if (cursor.lastTime < 1) {
       cursor.timeOffset = 1;
       pushClampedKeyframe();
     }
@@ -2591,7 +2588,7 @@ class LyricsPlusRenderer {
           const cWipeStart = charSpan._wipeStart !== undefined ? charSpan._wipeStart : parseFloat(charSpan.dataset.wipeStart) || (c / chars.length);
           const cWipeDur = charSpan._wipeDuration !== undefined ? charSpan._wipeDuration : parseFloat(charSpan.dataset.wipeDuration) || (1 / chars.length);
           const cStart = start + cWipeStart * dur;
-          const cDur = Math.max(1, cWipeDur * dur);
+          const cDur = Math.max(0, cWipeDur * dur);
 
           wordList.push({
             word: cText,
