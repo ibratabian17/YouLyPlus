@@ -449,10 +449,8 @@
 
 .lyrics-line.active .lyrics-syllable span.char {
     transform-origin: 50% 80%;
-    transform: matrix3d(1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1);
+    transform: translate3d(0, 0, 1px) scale(1.0001);
+    will-change: transform;
 }
 
 .lyrics-line.active .lyrics-syllable.highlight.finished span.char {
