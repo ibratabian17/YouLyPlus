@@ -108,16 +108,7 @@ ytmusic-app-layout[is-mweb-modernization-enabled] #side-panel #tab-renderer #lyp
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 0.29em, black 50%, transparent 100%);
 }
 
-ytmusic-app-layout[is-mweb-modernization-enabled] canvas#lyplus-webgl-canvas {
-
-    transform: translate(-50%, -50%) scale(2.2);
-}
-
 /* Modern mobile layout font size */
-ytmusic-app-layout[is-mweb-modernization-enabled] canvas#lyplus-webgl-canvas {
-
-    transform: translate(-50%, -50%) scale(1.8, 2.15);
-}
 
 ytmusic-app-layout[is-mweb-modernization-enabled] #lyrics-plus-container {
     --lyplus-font-size-base: 38px;

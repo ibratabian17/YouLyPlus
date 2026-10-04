@@ -25,6 +25,13 @@ let a_blurVPost_tex = -1;
 let u_main_artworkTexture = null;
 let u_main_transitionProgress = null;
 let u_main_layerTransform = null; // [rotation, scale, offsetX, offsetY]
+let u_main_aspect = null;
+let u_main_renderHeight = null;
+let _viewportAspect = 1.0;
+const _layerSizeFactor = [1, 1, 1];
+let _activeLightweight = null;
+let _needsRedraw = false;
+let _viewportObserver = null;
 
 // Uniform locations - Blur Horizontal
 let u_blurH_image = null;
@@ -55,8 +62,14 @@ let renderTexture = null;
 let blurTextureA = null;
 
 // Constants
-const BLUR_DOWNSAMPLE = 1;
-const BLUR_DOWNSAMPLE_LIGHTWEIGHT = 2;
+const MIN_ASPECT = 0.4;
+const MAX_ASPECT = 3.5;
+const CANVAS_SIZE = 256;
+const RENDER_SIZE = 128;
+const RENDER_SIZE_LIGHTWEIGHT = 64;
+const ARTWORK_TEX_SIZE = 128;
+const BLUR_SIGMA_UV = 0.08;
+const BLUR_KERNEL_SIGMAS = 3.0;
 const TARGET_FPS = 40;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
 const ARTWORK_TRANSITION_SPEED = 0.02;
@@ -84,10 +97,10 @@ function LYPLUS_setBgConfig(config) {
 
 // Layer Config
 const ROTATION_POWER = 0.8;
-const ROTATION_SPEEDS = [-0.10, 0.18, 0.32];
+const ROTATION_SPEEDS = [-0.10, 0.10, 0.25];
 const INITIAL_ROTATIONS = [0.3, -2.1, 2.4];
 const LAYER_SCALES = [1.4, 1.26, 1.26];
-const PERIMETER_SPEEDS = [0.09, 0.012, 0.02];
+const PERIMETER_SPEEDS = [0.09, 0.006, 0.01];
 const PERIMETER_DIRECTION = [-1, 1, 1];
 const LAYER_BASE_POSITIONS = [0, 0, 0.75, -0.75, -0.75, 0.75];
 
@@ -251,8 +264,12 @@ const vertexShaderSource = `
     // [rotation(rad), scale, offsetX, offsetY]
     uniform vec4 u_layerTransform; 
     
+    uniform float u_aspect;
+    uniform float u_renderHeight;
+    
     varying vec2 v_texCoord;
     varying vec2 v_uv;
+    varying float v_edgePx;
     
     void main() {
         gl_Position = vec4(a_position, 0.0, 1.0);
@@ -260,10 +277,9 @@ const vertexShaderSource = `
         
         float rotation = u_layerTransform.x;
         float scale = u_layerTransform.y;
-        vec2 offset = u_layerTransform.zw;
+        vec2 offset = u_layerTransform.zw * vec2(u_aspect, 1.0);
         
-        vec2 centered = a_position * 0.5;
-        centered.y = -centered.y; 
+        vec2 centered = vec2(a_position.x * 0.5 * u_aspect, -a_position.y * 0.5);
         centered -= offset;
         
         float s = sin(-rotation);
@@ -272,6 +288,7 @@ const vertexShaderSource = `
         
         centered /= scale;
         v_uv = centered + 0.5;
+        v_edgePx = scale * u_renderHeight;
     }
 `;
 
@@ -292,20 +309,58 @@ const fragmentShaderSource = `
     #endif
     
     varying vec2 v_uv;
+    varying float v_edgePx;
     uniform sampler2D u_artworkTexture;
     uniform float u_transitionProgress;
     
     void main() {
-        if (v_uv.x < 0.0 || v_uv.x > 1.0 || v_uv.y < 0.0 || v_uv.y > 1.0) {
-            discard;
-        }
+        vec2 e = min(v_uv, 1.0 - v_uv);
+        float aa = clamp(min(e.x, e.y) * v_edgePx + 0.5, 0.0, 1.0);
+        if (aa <= 0.0) discard;
         vec4 color = texture2D(u_artworkTexture, v_uv);
-        gl_FragColor = vec4(color.rgb, color.a * u_transitionProgress);
+        gl_FragColor = vec4(color.rgb, color.a * u_transitionProgress * aa);
     }
 `;
 
-// Pass 2: Horizontal Gaussian Blur (Precomputed weights, no transcendental calls in shader)
-const blurHFragmentShaderSource = `
+// Dua tap bertetangga digabung jadi satu fetch bilinear (hasil identik, fetch ~setengah).
+function _buildGaussianKernel(sigma, radiusSigmas) {
+    const radius = Math.max(1, Math.ceil(sigma * radiusSigmas));
+    const g = new Array(radius + 1);
+    let sum = 0;
+    for (let k = 0; k <= radius; k++) {
+        g[k] = Math.exp(-(k * k) / (2 * sigma * sigma));
+        sum += k === 0 ? g[k] : 2 * g[k];
+    }
+    for (let k = 0; k <= radius; k++) g[k] /= sum;
+
+    const taps = [];
+    for (let k = 1; k <= radius; k += 2) {
+        if (k + 1 <= radius) {
+            const w = g[k] + g[k + 1];
+            taps.push({ offset: (k * g[k] + (k + 1) * g[k + 1]) / w, weight: w });
+        } else {
+            taps.push({ offset: k, weight: g[k] });
+        }
+    }
+    return { center: g[0], taps };
+}
+
+function _glslFloat(v) {
+    return v.toFixed(8);
+}
+
+function _blurTapsGLSL(kernel) {
+    let src = `    vec3 c = texture2D(u_image, v_texCoord).rgb * ${_glslFloat(kernel.center)};\n`;
+    for (let i = 0; i < kernel.taps.length; i++) {
+        const t = kernel.taps[i];
+        src += `    c += (texture2D(u_image, v_texCoord + u_step * ${_glslFloat(t.offset)}).rgb` +
+               ` + texture2D(u_image, v_texCoord - u_step * ${_glslFloat(t.offset)}).rgb) * ${_glslFloat(t.weight)};\n`;
+    }
+    return src;
+}
+
+function buildBlurHFragmentShaderSource(kernel) {
+    return `
     #ifdef GL_ES
     precision mediump float;
     #endif
@@ -314,32 +369,23 @@ const blurHFragmentShaderSource = `
     uniform sampler2D u_image;
     uniform vec2 u_step;
 
-    #define TAP(i, w) color += (texture2D(u_image, v_texCoord + u_step * i) + texture2D(u_image, v_texCoord - u_step * i)) * w;
-
     void main() {
-        vec4 color = texture2D(u_image, v_texCoord);
-        TAP(1.0,  0.99384664)
-        TAP(2.0,  0.97561821)
-        TAP(3.0,  0.94595947)
-        TAP(4.0,  0.90600021)
-        TAP(5.0,  0.85700465)
-        TAP(6.0,  0.80073740)
-        TAP(7.0,  0.73899471)
-        TAP(8.0,  0.67364818)
-        TAP(9.0,  0.60653066)
-        TAP(10.0, 0.53939589)
-        TAP(11.0, 0.47382299)
-        TAP(12.0, 0.41111229)
-        TAP(13.0, 0.35232760)
-        TAP(14.0, 0.29824286)
-        gl_FragColor = vec4(color.rgb * 0.049636453, 1.0);
+${_blurTapsGLSL(kernel)}
+        gl_FragColor = vec4(c, 1.0);
     }
 `;
+}
 
-// Pass 3: Vertical Gaussian Blur + Dither Noise + Post-Process directly to Screen
-const blurVPostFragmentShaderSource = `
+function buildBlurVPostFragmentShaderSource(kernel) {
+    return `
     #ifdef GL_ES
     precision mediump float;
+    #endif
+
+    #ifdef GL_FRAGMENT_PRECISION_HIGH
+    #define HP highp
+    #else
+    #define HP mediump
     #endif
 
     varying vec2 v_texCoord;
@@ -351,7 +397,7 @@ const blurVPostFragmentShaderSource = `
     uniform float u_hueRotate;
     uniform float u_opacity;
 
-    float interleavedGradientNoise(vec2 uv) {
+    float interleavedGradientNoise(HP vec2 uv) {
         return fract(52.9829189 * fract(dot(uv, vec2(0.06711056, 0.00583715))));
     }
 
@@ -391,30 +437,8 @@ const blurVPostFragmentShaderSource = `
         );
     }
 
-    #define TAP(i, w) color += (texture2D(u_image, v_texCoord + u_step * i) + texture2D(u_image, v_texCoord - u_step * i)) * w;
-
     void main() {
-        vec4 color = texture2D(u_image, v_texCoord);
-        TAP(1.0,  0.99384664)
-        TAP(2.0,  0.97561821)
-        TAP(3.0,  0.94595947)
-        TAP(4.0,  0.90600021)
-        TAP(5.0,  0.85700465)
-        TAP(6.0,  0.80073740)
-        TAP(7.0,  0.73899471)
-        TAP(8.0,  0.67364818)
-        TAP(9.0,  0.60653066)
-        TAP(10.0, 0.53939589)
-        TAP(11.0, 0.47382299)
-        TAP(12.0, 0.41111229)
-        TAP(13.0, 0.35232760)
-        TAP(14.0, 0.29824286)
-
-        vec3 c = color.rgb * 0.049636453;
-        
-        float noise = interleavedGradientNoise(gl_FragCoord.xy);
-        c += (noise - 0.5) / 255.0;
-
+${_blurTapsGLSL(kernel)}
         c *= u_brightness;
         float luma = dot(c, vec3(0.2126, 0.7152, 0.0722));
         c = mix(vec3(luma), c, u_saturate);
@@ -424,10 +448,16 @@ const blurVPostFragmentShaderSource = `
             hsl.x = fract(hsl.x + u_hueRotate / 6.28318530718);
             c = hsl2rgb(hsl);
         }
+
+        HP vec2 fc = gl_FragCoord.xy;
+        float n = interleavedGradientNoise(fc) + interleavedGradientNoise(fc + vec2(5.588238, 5.588238)) - 1.0;
+        c += n / 255.0;
+
         c = clamp(c, 0.0, 1.0);
         gl_FragColor = vec4(c, u_opacity);
     }
 `;
+}
 
 function _parsePostProcess(str, out) {
     out.brightness = 1.0;
@@ -475,6 +505,7 @@ function handleContextLost(event) {
     glProgram = null;
     blurHProgram = null;
     blurVPostProgram = null;
+    _activeLightweight = null;
 }
 
 function handleContextRestored() {
@@ -560,6 +591,10 @@ function LYPLUS_setupBlurEffect() {
 
     if (!gl) return null;
 
+    blurHProgram = null; blurVPostProgram = null;
+    blurHVAO = null; blurVPostVAO = null;
+    _activeLightweight = null;
+
     if (bgObserver) bgObserver.disconnect();
     bgObserver = new MutationObserver((mutations) => {
         let isDetached = false;
@@ -591,16 +626,11 @@ function LYPLUS_setupBlurEffect() {
 
     // Shader Compilation
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const quadVertexShader = createShader(gl, gl.VERTEX_SHADER, quadVertexShaderSource);
     const mainFragShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-    const blurHFragShader = createShader(gl, gl.FRAGMENT_SHADER, blurHFragmentShaderSource);
-    const blurVPostFragShader = createShader(gl, gl.FRAGMENT_SHADER, blurVPostFragmentShaderSource);
+    if (!vertexShader || !mainFragShader) return null;
 
-    if (!vertexShader || !quadVertexShader || !mainFragShader || !blurHFragShader || !blurVPostFragShader) return null;
-
-    glProgram        = createProgram(gl, vertexShader, mainFragShader);
-    blurHProgram     = createProgram(gl, quadVertexShader, blurHFragShader);
-    blurVPostProgram = createProgram(gl, quadVertexShader, blurVPostFragShader);
+    glProgram = createProgram(gl, vertexShader, mainFragShader);
+    if (!glProgram) return null;
 
     // Locations - Main
     a_main_pos = gl.getAttribLocation(glProgram, 'a_position');
@@ -608,23 +638,8 @@ function LYPLUS_setupBlurEffect() {
     u_main_artworkTexture = gl.getUniformLocation(glProgram, 'u_artworkTexture');
     u_main_transitionProgress = gl.getUniformLocation(glProgram, 'u_transitionProgress');
     u_main_layerTransform = gl.getUniformLocation(glProgram, 'u_layerTransform');
-
-    // Locations - Blur H
-    a_blurH_pos = gl.getAttribLocation(blurHProgram, 'a_position');
-    a_blurH_tex = gl.getAttribLocation(blurHProgram, 'a_texCoord');
-    u_blurH_image = gl.getUniformLocation(blurHProgram, 'u_image');
-    u_blurH_step = gl.getUniformLocation(blurHProgram, 'u_step');
-
-    // Locations - Blur V + Post-process
-    a_blurVPost_pos = gl.getAttribLocation(blurVPostProgram, 'a_position');
-    a_blurVPost_tex = gl.getAttribLocation(blurVPostProgram, 'a_texCoord');
-    u_blurVPost_image      = gl.getUniformLocation(blurVPostProgram, 'u_image');
-    u_blurVPost_step       = gl.getUniformLocation(blurVPostProgram, 'u_step');
-    u_blurVPost_brightness = gl.getUniformLocation(blurVPostProgram, 'u_brightness');
-    u_blurVPost_saturate   = gl.getUniformLocation(blurVPostProgram, 'u_saturate');
-    u_blurVPost_contrast   = gl.getUniformLocation(blurVPostProgram, 'u_contrast');
-    u_blurVPost_hueRotate  = gl.getUniformLocation(blurVPostProgram, 'u_hueRotate');
-    u_blurVPost_opacity    = gl.getUniformLocation(blurVPostProgram, 'u_opacity');
+    u_main_aspect = gl.getUniformLocation(glProgram, 'u_aspect');
+    u_main_renderHeight = gl.getUniformLocation(glProgram, 'u_renderHeight');
 
     // Interleaved Quad Buffer [x, y, u, v]
     quadBuffer = gl.createBuffer();
@@ -648,26 +663,6 @@ function LYPLUS_setupBlurEffect() {
         gl.vertexAttribPointer(a_main_pos, 2, gl.FLOAT, false, 16, 0);
         gl.enableVertexAttribArray(a_main_tex);
         gl.vertexAttribPointer(a_main_tex, 2, gl.FLOAT, false, 16, 8);
-        vaoExt.bindVertexArrayOES(null);
-
-        // Blur H VAO
-        blurHVAO = vaoExt.createVertexArrayOES();
-        vaoExt.bindVertexArrayOES(blurHVAO);
-        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
-        gl.enableVertexAttribArray(a_blurH_pos);
-        gl.vertexAttribPointer(a_blurH_pos, 2, gl.FLOAT, false, 16, 0);
-        gl.enableVertexAttribArray(a_blurH_tex);
-        gl.vertexAttribPointer(a_blurH_tex, 2, gl.FLOAT, false, 16, 8);
-        vaoExt.bindVertexArrayOES(null);
-
-        // Blur V + Post VAO
-        blurVPostVAO = vaoExt.createVertexArrayOES();
-        vaoExt.bindVertexArrayOES(blurVPostVAO);
-        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
-        gl.enableVertexAttribArray(a_blurVPost_pos);
-        gl.vertexAttribPointer(a_blurVPost_pos, 2, gl.FLOAT, false, 16, 0);
-        gl.enableVertexAttribArray(a_blurVPost_tex);
-        gl.vertexAttribPointer(a_blurVPost_tex, 2, gl.FLOAT, false, 16, 8);
         vaoExt.bindVertexArrayOES(null);
     }
 
@@ -705,8 +700,14 @@ function LYPLUS_setupBlurEffect() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     handleResize();
+    if (!blurHProgram || !blurVPostProgram) return null;
     window.removeEventListener('resize', handleResize);
     window.addEventListener('resize', handleResize, { passive: true });
+    if (_viewportObserver) _viewportObserver.disconnect();
+    if (typeof ResizeObserver !== 'undefined') {
+        _viewportObserver = new ResizeObserver(() => handleResize());
+        _viewportObserver.observe(webglCanvas);
+    }
 
     startTime = performance.now() / 1000;
 
@@ -725,24 +726,141 @@ function LYPLUS_setupBlurEffect() {
     return blurContainerElem;
 }
 
+function _isLightweightMode() {
+    return typeof currentSettings !== 'undefined' && !!currentSettings.lightweight;
+}
+
+let _kernelBaseSize = 0;
+function _rebuildBlurPrograms(renderSize) {
+    const kernel = _buildGaussianKernel(BLUR_SIGMA_UV * renderSize, BLUR_KERNEL_SIGMAS);
+
+    const quadVS = createShader(gl, gl.VERTEX_SHADER, quadVertexShaderSource);
+    const hFS = createShader(gl, gl.FRAGMENT_SHADER, buildBlurHFragmentShaderSource(kernel));
+    const vFS = createShader(gl, gl.FRAGMENT_SHADER, buildBlurVPostFragmentShaderSource(kernel));
+    if (!quadVS || !hFS || !vFS) return false;
+
+    const newH = createProgram(gl, quadVS, hFS);
+    const newV = createProgram(gl, quadVS, vFS);
+    gl.deleteShader(quadVS); gl.deleteShader(hFS); gl.deleteShader(vFS);
+    if (!newH || !newV) return false;
+
+    if (blurHProgram) gl.deleteProgram(blurHProgram);
+    if (blurVPostProgram) gl.deleteProgram(blurVPostProgram);
+    blurHProgram = newH;
+    blurVPostProgram = newV;
+    _kernelBaseSize = renderSize;
+
+    // Locations - Blur H
+    a_blurH_pos = gl.getAttribLocation(blurHProgram, 'a_position');
+    a_blurH_tex = gl.getAttribLocation(blurHProgram, 'a_texCoord');
+    u_blurH_image = gl.getUniformLocation(blurHProgram, 'u_image');
+    u_blurH_step = gl.getUniformLocation(blurHProgram, 'u_step');
+
+    // Locations - Blur V + Post-process
+    a_blurVPost_pos = gl.getAttribLocation(blurVPostProgram, 'a_position');
+    a_blurVPost_tex = gl.getAttribLocation(blurVPostProgram, 'a_texCoord');
+    u_blurVPost_image      = gl.getUniformLocation(blurVPostProgram, 'u_image');
+    u_blurVPost_step       = gl.getUniformLocation(blurVPostProgram, 'u_step');
+    u_blurVPost_brightness = gl.getUniformLocation(blurVPostProgram, 'u_brightness');
+    u_blurVPost_saturate   = gl.getUniformLocation(blurVPostProgram, 'u_saturate');
+    u_blurVPost_contrast   = gl.getUniformLocation(blurVPostProgram, 'u_contrast');
+    u_blurVPost_hueRotate  = gl.getUniformLocation(blurVPostProgram, 'u_hueRotate');
+    u_blurVPost_opacity    = gl.getUniformLocation(blurVPostProgram, 'u_opacity');
+
+    if (vaoExt) {
+        if (blurHVAO) vaoExt.deleteVertexArrayOES(blurHVAO);
+        if (blurVPostVAO) vaoExt.deleteVertexArrayOES(blurVPostVAO);
+
+        blurHVAO = vaoExt.createVertexArrayOES();
+        vaoExt.bindVertexArrayOES(blurHVAO);
+        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+        gl.enableVertexAttribArray(a_blurH_pos);
+        gl.vertexAttribPointer(a_blurH_pos, 2, gl.FLOAT, false, 16, 0);
+        gl.enableVertexAttribArray(a_blurH_tex);
+        gl.vertexAttribPointer(a_blurH_tex, 2, gl.FLOAT, false, 16, 8);
+
+        blurVPostVAO = vaoExt.createVertexArrayOES();
+        vaoExt.bindVertexArrayOES(blurVPostVAO);
+        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+        gl.enableVertexAttribArray(a_blurVPost_pos);
+        gl.vertexAttribPointer(a_blurVPost_pos, 2, gl.FLOAT, false, 16, 0);
+        gl.enableVertexAttribArray(a_blurVPost_tex);
+        gl.vertexAttribPointer(a_blurVPost_tex, 2, gl.FLOAT, false, 16, 8);
+        vaoExt.bindVertexArrayOES(null);
+    }
+
+    gl.useProgram(blurHProgram);
+    gl.uniform1i(u_blurH_image, 0);
+    gl.useProgram(blurVPostProgram);
+    gl.uniform1i(u_blurVPost_image, 0);
+    return true;
+}
+
+function _applyViewportUniforms() {
+    gl.useProgram(blurHProgram);
+    gl.uniform2f(u_blurH_step, 1.0 / blurDimensions.width, 0.0);
+    gl.useProgram(blurVPostProgram);
+    gl.uniform2f(u_blurVPost_step, 0.0, 1.0 / blurDimensions.height);
+    gl.useProgram(glProgram);
+    _layerSizeFactor[0] = Math.sqrt(_viewportAspect * _viewportAspect + 1) * Math.SQRT1_2;
+    _layerSizeFactor[1] = _layerSizeFactor[2] = Math.sqrt(_viewportAspect);
+    gl.uniform1f(u_main_aspect, _viewportAspect);
+    gl.uniform1f(u_main_renderHeight, blurDimensions.height);
+}
+
+function _getViewportAspect() {
+    let w = 0, h = 0;
+    if (webglCanvas) { w = webglCanvas.clientWidth; h = webglCanvas.clientHeight; }
+    if (!(w > 0 && h > 0) && blurContainerElem) { w = blurContainerElem.clientWidth; h = blurContainerElem.clientHeight; }
+    if (!(w > 0 && h > 0)) { w = window.innerWidth; h = window.innerHeight; }
+    if (!(w > 0 && h > 0)) return 1.0;
+    return Math.min(MAX_ASPECT, Math.max(MIN_ASPECT, w / h));
+}
+
 function handleResize() {
     if (!gl || !webglCanvas) return;
-    const w = 256; const h = 256;
-    if (w === canvasDimensions.width && h === canvasDimensions.height) return;
+    const lightweight = _isLightweightMode();
+    const base = lightweight ? RENDER_SIZE_LIGHTWEIGHT : RENDER_SIZE;
+    const aspect = _getViewportAspect();
+    const rt = Math.sqrt(aspect);
 
-    canvasDimensions.width = w;
-    canvasDimensions.height = h;
-    webglCanvas.width = w;
-    webglCanvas.height = h;
-    const downsample = (typeof currentSettings !== 'undefined' && currentSettings.lightweight) ? BLUR_DOWNSAMPLE_LIGHTWEIGHT : BLUR_DOWNSAMPLE;
-    blurDimensions.width = Math.max(1, Math.floor(w / downsample));
-    blurDimensions.height = Math.max(1, Math.floor(h / downsample));
+    const rw = Math.max(8, Math.round(base * rt));
+    const rh = Math.max(8, Math.round(base / rt));
+    const cw = Math.max(8, Math.round(CANVAS_SIZE * rt));
+    const ch = Math.max(8, Math.round(CANVAS_SIZE / rt));
 
-    // Resize textures
-    gl.bindTexture(gl.TEXTURE_2D, renderTexture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, blurDimensions.width, blurDimensions.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    const sizeChanged = rw !== blurDimensions.width || rh !== blurDimensions.height ||
+                        cw !== canvasDimensions.width || ch !== canvasDimensions.height;
+    if (!sizeChanged && lightweight === _activeLightweight) return;
+
+    if (cw !== canvasDimensions.width || ch !== canvasDimensions.height) {
+        canvasDimensions.width = cw;
+        canvasDimensions.height = ch;
+        webglCanvas.width = cw;
+        webglCanvas.height = ch;
+    }
+    if (rw !== blurDimensions.width || rh !== blurDimensions.height) {
+        blurDimensions.width = rw;
+        blurDimensions.height = rh;
+        gl.bindTexture(gl.TEXTURE_2D, renderTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, rw, rh, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, rw, rh, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    }
+
+    if (!blurHProgram || !blurVPostProgram || _kernelBaseSize !== base) {
+        if (!_rebuildBlurPrograms(base)) {
+            console.error('LYPLUS: failed to build blur programs');
+            return;
+        }
+    }
+    _viewportAspect = aspect;
+    _applyViewportUniforms();
+    _activeLightweight = lightweight;
+
+    // resize canvas mengosongkan drawing buffer
+    _needsRedraw = true;
+    if (!globalAnimationId) globalAnimationId = requestAnimationFrame(animateWebGLBackground);
 }
 
 function createDefaultTexture() {
@@ -752,6 +870,51 @@ function createDefaultTexture() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     return texture;
+}
+
+function _createArtworkTexture(img) {
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+    const temps = [];
+    try {
+        const size = ARTWORK_TEX_SIZE;
+        let src = img;
+        let cw = img.naturalWidth || img.width;
+        let ch = img.naturalHeight || img.height;
+        while (cw > size * 2 || ch > size * 2) {
+            const nw = Math.max(size, Math.ceil(cw / 2));
+            const nh = Math.max(size, Math.ceil(ch / 2));
+            const c = document.createElement('canvas');
+            c.width = nw; c.height = nh;
+            const cx = c.getContext('2d');
+            cx.imageSmoothingEnabled = true;
+            cx.imageSmoothingQuality = 'high';
+            cx.drawImage(src, 0, 0, nw, nh);
+            temps.push(c);
+            src = c; cw = nw; ch = nh;
+        }
+        const out = document.createElement('canvas');
+        out.width = size; out.height = size;
+        const ox = out.getContext('2d');
+        ox.imageSmoothingEnabled = true;
+        ox.imageSmoothingQuality = 'high';
+        ox.drawImage(src, 0, 0, size, size);
+        temps.push(out);
+
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, out);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    } catch (e) {
+        console.warn('LYPLUS: artwork prefilter failed, uploading directly', e);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+    for (let i = 0; i < temps.length; i++) { temps[i].width = 0; temps[i].height = 0; }
+    return tex;
 }
 
 function _isBaseUrl(url) {
@@ -832,14 +995,7 @@ function processNextArtworkFromQueue() {
     img.crossOrigin = "anonymous";
     img.onload = () => {
         let pal = (typeof ColorTunes !== 'undefined') ? ColorTunes.getSongPalette(img) : currentTargetMasterArtworkPalette;
-        const tex = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        finalize(tex, pal);
+        finalize(_createArtworkTexture(img), pal);
     };
 
     const pBrowser = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
@@ -903,13 +1059,14 @@ function animateWebGLBackground(timestamp) {
 
     processAudioPulse();
     const pulse = LYPLUS_audioState?.beatPulse ?? 0;
-    const isLightweight = typeof currentSettings !== 'undefined' && currentSettings.lightweight;
+    const isLightweight = _isLightweightMode();
 
     const shouldRender =
         typeof currentSettings === 'undefined' ||
         !currentSettings.lightweight ||
         isTransitioning ||
         needsAnimation ||
+        _needsRedraw ||
         (currentSettings.audioBeatSync && pulse > 0.001);
 
     if (!shouldRender) {
@@ -924,7 +1081,7 @@ function animateWebGLBackground(timestamp) {
     if (isLightweight) {
         for (let i = 0; i < 3; i++) {
             _cachedLayerRots[i] = 0.0;
-            _cachedLayerScales[i] = LAYER_SCALES[i];
+            _cachedLayerScales[i] = LAYER_SCALES[i] * _layerSizeFactor[i];
             _cachedLayerPosX[i] = 0.0;
             _cachedLayerPosY[i] = 0.0;
         }
@@ -957,15 +1114,18 @@ function animateWebGLBackground(timestamp) {
             const py = Math.abs(by) * Math.sin(angle);
 
             _cachedLayerRots[i] = rot;
-            _cachedLayerScales[i] = LAYER_SCALES[i] + smoothBS * BEAT_SCALE_BOOST[i];
+            _cachedLayerScales[i] = (LAYER_SCALES[i] + smoothBS * BEAT_SCALE_BOOST[i]) * _layerSizeFactor[i];
             _cachedLayerPosX[i] = px;
             _cachedLayerPosY[i] = py;
         }
     }
 
+    if (isLightweight !== _activeLightweight) handleResize();
+    if (!blurHProgram || !blurVPostProgram) { globalAnimationId = requestAnimationFrame(animateWebGLBackground); return; }
+
     // --- PASS 1: Render layered artwork quads to renderFramebuffer ---
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
-    gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
+    gl.viewport(0, 0, blurDimensions.width, blurDimensions.height);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     gl.useProgram(glProgram);
@@ -1003,9 +1163,6 @@ function animateWebGLBackground(timestamp) {
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, blurFramebuffer);
     gl.viewport(0, 0, blurDimensions.width, blurDimensions.height);
-    gl.uniform1i(u_blurH_image, 0);
-    // blur step = 2.1 texels (radius 7 * 0.3)
-    gl.uniform2f(u_blurH_step, 2.1 / canvasDimensions.width, 0.0);
     gl.bindTexture(gl.TEXTURE_2D, renderTexture);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
@@ -1027,8 +1184,6 @@ function animateWebGLBackground(timestamp) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
     gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
-    gl.uniform1i(u_blurVPost_image, 0);
-    gl.uniform2f(u_blurVPost_step, 0.0, 2.1 / blurDimensions.height);
     gl.uniform1f(u_blurVPost_brightness, _postParams.brightness);
     gl.uniform1f(u_blurVPost_saturate,   _postParams.saturate);
     gl.uniform1f(u_blurVPost_contrast,   _postParams.contrast);
@@ -1037,6 +1192,8 @@ function animateWebGLBackground(timestamp) {
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     if (vaoExt) vaoExt.bindVertexArrayOES(null);
+
+    _needsRedraw = false;
 
     // Schedule next frame
     globalAnimationId = requestAnimationFrame(animateWebGLBackground);
