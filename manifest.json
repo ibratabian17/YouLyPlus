@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YouLy+",
   "default_locale": "en",
-  "version": "4.5.0",
+  "version": "5.0.0",
   "description": "__MSG_extensionDescription__",
   "permissions": [
     "storage",
@@ -23,7 +23,6 @@
     "https://cdn.jsdelivr.net/*",
     "https://github.com/*",
     "https://*.githubusercontent.com/*",
-    "https://cdnjs.cloudflare.com/*"
   ],
   "action": {
     "default_popup": "src/popup/ui.html",
