@@ -141,7 +141,8 @@ function convertWordLyricsToLine(lyrics) {
     data: lyrics.data.map(line => ({ ...line, syllabus: [] })),
     metadata: lyrics.metadata,
     ignoreSponsorblock: lyrics.ignoreSponsorblock,
-    provider: lyrics.provider
+    provider: lyrics.provider,
+    byVideoId: lyrics.byVideoId
   };
 }
 
@@ -299,12 +300,29 @@ async function applySubtitleRetiming(lyrics, currentSong, fetchId) {
   const isSubtitles =
     lyrics.provider === 'subtitles' ||
     lyrics.metadata?.provider === 'subtitles' ||
-    lyrics.metadata?.source === 'YouTube Captions';
+    lyrics.metadata?.source === 'YouTube Captions' ||
+    lyrics.metadata?.source === 'YouTube Subtitles' ||
+    lyrics.metadata?.source === 'subtitles';
+
+  const isUnison =
+    lyrics.provider === 'unison' ||
+    lyrics.metadata?.provider === 'unison' ||
+    lyrics.metadata?.source?.toLowerCase() === 'unison';
+
+  const isUnisonVideoId =
+    isUnison &&
+    (lyrics.byVideoId === true ||
+     lyrics.metadata?.byVideoId === true ||
+     (lyrics.byVideoId === undefined &&
+      lyrics.metadata?.byVideoId === undefined &&
+      currentSong.isVideo &&
+      (lyrics.ignoreSponsorblock || lyrics.metadata?.ignoreSponsorblock)));
 
   const shouldApply =
     currentSong.isVideo &&
     currentSong.videoId &&
     !isSubtitles &&
+    !isUnisonVideoId &&
     typeof retimeLyricsWithSubtitles === "function";
 
   if (!shouldApply) return null;

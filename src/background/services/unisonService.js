@@ -35,7 +35,13 @@ export class UnisonService {
 
   static async fetchByVideoId(videoId, fetchOptions) {
     const url = `${UNISON_BASE_URL}/lyrics?v=${encodeURIComponent(videoId)}`;
-    return this.fetchAndParse(url, fetchOptions);
+    const result = await this.fetchAndParse(url, fetchOptions);
+    if (result) {
+      result.byVideoId = true;
+      if (!result.metadata) result.metadata = {};
+      result.metadata.byVideoId = true;
+    }
+    return result;
   }
 
   static async fetchByMetadata(songInfo, fetchOptions) {
@@ -48,7 +54,13 @@ export class UnisonService {
     if (songInfo.duration > 0) params.append('duration', songInfo.duration);
 
     const url = `${UNISON_BASE_URL}/lyrics?${params}`;
-    return this.fetchAndParse(url, fetchOptions);
+    const result = await this.fetchAndParse(url, fetchOptions);
+    if (result) {
+      result.byVideoId = false;
+      if (!result.metadata) result.metadata = {};
+      result.metadata.byVideoId = false;
+    }
+    return result;
   }
 
   static async fetchAndParse(url, fetchOptions) {
