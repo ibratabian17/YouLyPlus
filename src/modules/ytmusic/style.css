@@ -537,12 +537,6 @@ div#lyrics-song-progressbar {
         transform-origin: center !important;
     }
 
-
-    ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-line.lyrics-activest) .background-vocal-container,
-    ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-plus-metadata.lyrics-activest) .background-vocal-container {
-        transition-delay: 250ms;
-    }
-
     ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-line.lyrics-activest),
     ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-plus-metadata.lyrics-activest) {
         opacity: 0;

@@ -872,6 +872,7 @@ class LyricsPlusRenderer {
           (() => {
             backgroundContainer = document.createElement("p");
             backgroundContainer.className = "background-vocal-container";
+            currentLine.classList.add("has-bg-vocal");
 
             backgroundInnerWrap = document.createElement("span");
             backgroundInnerWrap.className = "background-vocal-wrap";
@@ -2151,6 +2152,13 @@ class LyricsPlusRenderer {
     }
 
     if (hasChanged) {
+      // Lines whose background vocal opens/closes in this tick (flat [line, expanding, ...]).
+      const bgToggled = this._bgToggled || (this._bgToggled = []);
+      bgToggled.length = 0;
+      // Where the scroll anchor sits before the layout changes (see _animateBgVocalReflow).
+      const anchorBefore = this.currentPrimaryActiveLine;
+      this._bgAnchorTop = anchorBefore ? anchorBefore.getBoundingClientRect().top : null;
+
       for (const oldId of this.activeLineIds) {
         let stillActive = false;
         for (let j = 0; j < tempActiveCount; j++) {
@@ -2165,6 +2173,7 @@ class LyricsPlusRenderer {
           if (line) {
             line.classList.remove("active");
             this._resetSyllables(line);
+            if (this._getBgVocalWrap(line)) bgToggled.push(line, false);
           }
           this.activeLineIds.delete(oldId);
         }
@@ -2175,19 +2184,28 @@ class LyricsPlusRenderer {
         if (!this.activeLineIds.has(line.id)) {
           line.classList.add("active");
           this.activeLineIds.add(line.id);
+          if (this._getBgVocalWrap(line)) bgToggled.push(line, true);
         }
       }
     }
 
+    let scrolledThisTick = false;
     if (
       lineToScroll &&
       (lineToScroll !== this.currentPrimaryActiveLine || isForceScroll)
     ) {
       if (!this.isUserControllingScroll || isForceScroll) {
+        scrolledThisTick = true;
         this._updatePositionClassesAndScroll(lineToScroll, isForceScroll, scrollLookAheadMs);
         this.lastPrimaryActiveLine = this.currentPrimaryActiveLine;
         this.currentPrimaryActiveLine = lineToScroll;
       }
+    }
+
+    // After the scroll call: it publishes --scroll-duration/--scroll-easing and the
+    // per-line stagger delays that the background vocal reflow follows.
+    if (this._bgToggled && this._bgToggled.length) {
+      this._animateBgVocalReflow(this._bgToggled, !scrolledThisTick && !this.isUserControllingScroll);
     }
 
     const mostRecentActiveLine =
@@ -2204,6 +2222,146 @@ class LyricsPlusRenderer {
     }
 
     this._updateSyllables(currentTime, this._tempActiveLines);
+  }
+
+  /** Cached `.background-vocal-wrap` of a line (null when the line has none). */
+  _getBgVocalWrap(line) {
+    let wrap = line._bgWrap;
+    if (wrap === undefined || (wrap !== null && !wrap.isConnected)) {
+      wrap = line.querySelector(".background-vocal-wrap");
+      line._bgWrap = wrap;
+      // Never toggled back to content-visibility:auto, see .has-bg-vocal in lyrics.css.
+      if (wrap) line.classList.add("has-bg-vocal");
+    }
+    return wrap;
+  }
+
+  /**
+   * Fractional layout height of an element inside .lyrics-line-container.
+   * offsetHeight is rounded to whole pixels and getBoundingClientRect() includes
+   * the container's scale (0.93 when inactive), so undo the scale.
+   */
+  _measureBgHeight(wrap) {
+    const rect = wrap.getBoundingClientRect();
+    const box = wrap.closest(".lyrics-line-container");
+    const ow = box ? box.offsetWidth : 0;
+    const scale = ow > 0 ? box.getBoundingClientRect().width / ow : 1;
+    const h = rect.height / (scale > 0.1 ? scale : 1);
+    return h > 0 ? h : wrap.offsetHeight;
+  }
+
+  /**
+   * FLIP for background vocals.
+   *
+   * @param {Array} toggled Flat list [line, expanding, line, expanding, ...]
+   * @param {boolean} reanchor Keep the primary line pinned (no scroll call this tick)
+   */
+  _animateBgVocalReflow(toggled, reanchor = false) {
+    const lines = this.cachedLyricsLines;
+    const anchorTopBefore = this._bgAnchorTop;
+    this._bgAnchorTop = null;
+    if (!lines || lines.length === 0 || typeof Element.prototype.animate !== "function") {
+      toggled.length = 0;
+      return;
+    }
+
+    const indexOf = (line) => (line._idx !== undefined && lines[line._idx] === line)
+      ? line._idx
+      : lines.indexOf(line);
+
+    const events = [];
+    for (let i = 0; i < toggled.length; i += 2) {
+      const line = toggled[i];
+      const wrap = this._getBgVocalWrap(line);
+      if (!wrap) continue;
+      const h = this._measureBgHeight(wrap);
+      if (h < 0.5) continue;
+      const idx = indexOf(line);
+      if (idx < 0) continue;
+      const expanding = toggled[i + 1];
+      events.push({ line, wrap, idx, expanding, delta: expanding ? h : -h });
+    }
+    toggled.length = 0;
+    if (events.length === 0) return;
+    events.sort((a, b) => a.idx - b.idx);
+
+    // Keep the anchor line where the scroll put it.
+    const containerEl = this.lyricsContainer;
+    const scroller = containerEl ? containerEl.parentElement : null;
+    const anchor = reanchor ? this.currentPrimaryActiveLine : null;
+    let applied = 0; // scrollTop change actually applied
+    let anchorIdx = -1;
+    if (anchor && scroller && anchorTopBefore !== null) {
+      anchorIdx = indexOf(anchor);
+      const moved = anchor.getBoundingClientRect().top - anchorTopBefore;
+      if (anchorIdx >= 0 && Math.abs(moved) >= 0.5) {
+        const before = scroller.scrollTop;
+        scroller.scrollTo({ top: before + moved, behavior: "instant" });
+        applied = scroller.scrollTop - before;
+        this.currentScrollOffset = -scroller.scrollTop;
+        const st = this._scrollAnimationState;
+        if (st && st.pendingUpdate !== null) st.pendingUpdate -= applied;
+      }
+    }
+
+    // Same clock as the scroll animation (see _animateScroll).
+    const cStyle = containerEl ? containerEl.style : null;
+    const ms = (cStyle && parseFloat(cStyle.getPropertyValue("--scroll-duration"))) || 400;
+    const easing = (cStyle && cStyle.getPropertyValue("--scroll-easing").trim()) ||
+      "cubic-bezier(.41, 0, .12, .99)";
+    const userScrolling = !!(containerEl && containerEl.classList.contains("user-scrolling"));
+    const elapsed = performance.now() - (this._scrollAnimT0 || -1e9);
+    const lineDelay = (line) => {
+      if (userScrolling || !line.classList.contains("scroll-animate")) return 0;
+      const d = parseFloat(line.style.getPropertyValue("--lyrics-line-delay")) || 0;
+      return Math.max(0, d - elapsed); // part of the stagger may already be over
+    };
+
+    // Only animate what can be seen (+ a small margin).
+    let visMin = Infinity;
+    let visMax = -1;
+    const ids = this.visibleLineIds;
+    const byId = this._lineById;
+    if (ids && ids.size > 0 && byId) {
+      for (const id of ids) {
+        const v = byId.get(id)?._idx;
+        if (v === undefined) continue;
+        if (v < visMin) visMin = v;
+        if (v > visMax) visMax = v;
+      }
+    }
+    const lastEvent = events[events.length - 1].idx;
+    const last = Math.min(lines.length, Math.max(visMax, lastEvent, anchorIdx) + 8);
+    const first = visMin === Infinity ? 0 : Math.max(0, visMin - 2);
+
+    let ei = 0;
+    let above = 0;
+    for (let i = first; i < last; i++) {
+      while (ei < events.length && events[ei].idx < i) above += events[ei++].delta;
+      const line = lines[i];
+      LyricsPlusRenderer._flipTranslateY(line, applied - above, ms, easing, lineDelay(line));
+    }
+
+    for (let e = 0; e < events.length; e++) {
+      const ev = events[e];
+
+      // Everything after the background vocal inside its own line
+      // (main vocal when it sits on top, translation / romanization).
+      const ownDelay = lineDelay(ev.line);
+      const bgContainer = ev.wrap.parentElement;
+      for (let el = bgContainer && bgContainer.nextElementSibling; el; el = el.nextElementSibling) {
+        LyricsPlusRenderer._flipTranslateY(el, -ev.delta, ms, easing, ownDelay);
+      }
+    }
+  }
+
+  static _flipTranslateY(el, px, ms, easing, delay = 0) {
+    if (!el || Math.abs(px) < 0.5) return;
+    const anim = el.animate(
+      [{ transform: `translateY(${px.toFixed(2)}px)` }, { transform: "translateY(0px)" }],
+      { duration: ms, delay, easing, fill: "backwards", composite: "add" }
+    );
+    anim.onfinish = () => anim.cancel();
   }
 
   _getLineIndexAtTime(timeMs, startHintIndex = 0) {
@@ -3389,6 +3547,7 @@ class LyricsPlusRenderer {
     }
 
     state.isAnimating = true;
+    this._scrollAnimT0 = performance.now();
     const BASE_DURATION = 400;
 
     this._scrollUnlockTimeout = setTimeout(() => {

@@ -165,12 +165,6 @@ article[data-testid="lyrics-fullscreen-modal"] .lyrics__lyrics,
     border-top: 0.5px solid var(--labelDivider);
 }
 
-
-#lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-line.lyrics-activest) .background-vocal-container,
-#lyrics-plus-container:not(.not-focused) .lyrics-line:has(~ .lyrics-plus-metadata.lyrics-activest) .background-vocal-container {
-    transition-delay: 250ms;
-}
-
 #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-line.lyrics-activest),
 #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-plus-metadata.lyrics-activest) {
     opacity: 0;

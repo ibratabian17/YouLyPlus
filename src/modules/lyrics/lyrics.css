@@ -65,6 +65,8 @@
     --lyrics-scroll-padding-top: 25%;
     scrollbar-width: none;
     will-change: scroll-position;
+    /* layout jumps are compensated manually (FLIP), don't let the browser do it twice */
+    overflow-anchor: none;
 }
 
 /* --- Selection Styles --- */
@@ -255,7 +257,15 @@
     overflow: visible;
     opacity: 0;
     font-size: var(--lyplus-font-size-subtext);
-    transition: max-height .3s, opacity .6s, padding .6s;
+    transition: opacity calc(var(--scroll-duration, 400ms) * 0.4) ease-in;
+}
+
+.lyrics-line:not(.active) .background-vocal-container {
+    pointer-events: none;
+}
+
+.lyrics-line.has-bg-vocal {
+    content-visibility: visible;
 }
 
 .lyrics-line .background-vocal-container.onTop .background-vocal-wrap {
@@ -270,9 +280,9 @@
 }
 
 .lyrics-line.active .background-vocal-container {
-    max-height: 4em;
+    max-height: none;
     opacity: 1;
-    transition: max-height .6s, opacity .6s, padding .6s;
+    transition: opacity var(--scroll-duration, 400ms) var(--scroll-easing, cubic-bezier(.41, 0, .12, .99));
 }
 
 #lyrics-plus-container.user-scrolling .lyrics-line,
