@@ -163,6 +163,26 @@ These scripts will generate optimized packages for different browsers within the
 
 Contributions are very appreciated! Please feel free to fork this repository and submit a pull request. For significant changes or new features, it's recommended to open an issue first to discuss your ideas.
 
+### Contributors
+
+Thanks to everyone who has contributed code, translations, bug reports and ideas to YouLy+!
+
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/mfadamo"><img src="https://github.com/mfadamo.png?size=100" width="80" alt="mfadamo"><br>mfadamo</a></td>
+    <td align="center"><a href="https://github.com/imannig"><img src="https://github.com/imannig.png?size=100" width="80" alt="imannig"><br>imannig</a></td>
+    <td align="center"><a href="https://github.com/MeDustyy"><img src="https://github.com/MeDustyy.png?size=100" width="80" alt="MeDustyy"><br>MeDustyy</a></td>
+    <td align="center"><a href="https://github.com/binimum"><img src="https://github.com/binimum.png?size=100" width="80" alt="binimum"><br>binimum</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/oRevived"><img src="https://github.com/oRevived.png?size=100" width="80" alt="oRevived"><br>oRevived</a></td>
+    <td align="center"><a href="https://github.com/Dipak-Chauhan"><img src="https://github.com/Dipak-Chauhan.png?size=100" width="80" alt="Dipak-Chauhan"><br>Dipak-Chauhan</a></td>
+    <td align="center"><a href="https://github.com/DeVFirmino"><img src="https://github.com/DeVFirmino.png?size=100" width="80" alt="DeVFirmino"><br>DeVFirmino</a></td>
+  </tr>
+</table>
+
+And also big thanks for @boidushya for optimization helps. @pascal-00, @binimum and @mgytr for keeping the infrastructure alive!
+
 This project is a dedicated effort covering both the client extension and the server backend. If YouLy+ enhances your music experience, please consider supporting its continued development:
 
 -   [**Support on Ko-fi**](https://ko-fi.com/ibratabian17)
