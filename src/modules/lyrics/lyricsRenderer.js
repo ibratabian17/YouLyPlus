@@ -462,7 +462,7 @@ class LyricsPlusRenderer {
         this.isUserControllingScroll = false;
         this.lyricsContainer?.classList.remove("user-scrolling", 'not-focused');
 
-        this._closeHiddenGaps();
+        this._closeHiddenGaps(false);
         if (this.currentPrimaryActiveLine) {
           this._scrollToActiveLine(this.currentPrimaryActiveLine, true);
         }
@@ -1517,6 +1517,8 @@ class LyricsPlusRenderer {
 
     if (isDualSide) container.classList.add("dual-side-lyrics");
 
+    const gapEndLead = 0.8;
+
     const createGapLine = (gapStart, gapEnd, classesToInherit = null) => {
       const gapDuration = gapEnd - gapStart;
       const gapLine = document.createElement("div");
@@ -1607,7 +1609,7 @@ class LyricsPlusRenderer {
           ["rtl-text", "singer-left", "singer-right"].includes(c)
         );
         container.insertBefore(
-          createGapLine(0, firstStartTime - 0.66, classesToInherit),
+          createGapLine(0, firstStartTime - gapEndLead, classesToInherit),
           firstLine
         );
       }
@@ -1627,7 +1629,7 @@ class LyricsPlusRenderer {
           gapLinesToInsert.push({
             gapLine: createGapLine(
               parseFloat(line.dataset.endTime) + 0.31,
-              parseFloat(nextLine.dataset.startTime) - 0.66,
+              parseFloat(nextLine.dataset.startTime) - gapEndLead,
               classesToInherit
             ),
             nextLine,
@@ -1673,6 +1675,7 @@ class LyricsPlusRenderer {
       this.currentPrimaryActiveLine = activeLine;
       this.lastPrimaryActiveLine = activeLine;
       this._lastActiveIndex = activeIndex;
+      this._setGapOpen(activeLine, true);
       this._updatePositionClassesAndScroll(activeLine, true, 0);
     }
 
@@ -3689,7 +3692,7 @@ class LyricsPlusRenderer {
   _scheduleHiddenGapCloses() {
     if (!this._openGaps) return;
     for (const g of this._openGaps) {
-      if (g.classList.contains("active") || g === this.currentPrimaryActiveLine) continue;
+      if (g.classList.contains("active")) continue;
       this._scheduleGapClose(g);
     }
   }
@@ -3735,11 +3738,12 @@ class LyricsPlusRenderer {
 
   _closeGapAfterHide(line) {
     if (!line.isConnected || !line.classList.contains("gap-open")) return;
-    if (line === this.currentPrimaryActiveLine || line.classList.contains("active")) return;
+    if (line.classList.contains("active")) return;
     if (this.isUserControllingScroll) {
       this._closeGapUnanimated(line);
       return;
     }
+    if (line === this.currentPrimaryActiveLine) return;
     const idx = this._lineIndex(line);
     const shift = this._setGapOpen(line, false);
     if (!shift || idx < 0) return;
@@ -3764,9 +3768,9 @@ class LyricsPlusRenderer {
       }
     }
     if (visMax < 0) return;
-    const stagger = this.isUserControllingScroll ? 0 : 40;
     const last = Math.min(lines.length, visMax + 2);
     for (const g of shifts) {
+      const stagger = this.isUserControllingScroll || g.shift > 0 ? 0 : 40;
       let n = 0;
       for (let i = Math.max(g.idx + 1, visMin - 1); i < last; i++) {
         const line = lines[i];
