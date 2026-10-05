@@ -122,6 +122,7 @@ class LyricsPlusRenderer {
   constructor(uiConfig) {
     this.lyricsAnimationFrameId = null;
     this.currentPrimaryActiveLine = null;
+    this._resetGapState();
     this.lastPrimaryActiveLine = null;
     this.currentFullscreenFocusedLine = null;
     this.lastTime = 0;
@@ -401,7 +402,8 @@ class LyricsPlusRenderer {
 
   _attachScrollListeners() {
     const scrollContainer = this.lyricsContainer?.parentElement;
-    if (!scrollContainer || this.scrollEventHandlerAttached) return;
+    if (!scrollContainer) return;
+    if (this.scrollEventHandlerAttached) return;
 
     scrollContainer.addEventListener('wheel', this._boundUserInteractionHandler, { passive: true });
     scrollContainer.addEventListener('keydown', this._boundUserInteractionHandler, { passive: true });
@@ -460,6 +462,7 @@ class LyricsPlusRenderer {
         this.isUserControllingScroll = false;
         this.lyricsContainer?.classList.remove("user-scrolling", 'not-focused');
 
+        this._closeHiddenGaps();
         if (this.currentPrimaryActiveLine) {
           this._scrollToActiveLine(this.currentPrimaryActiveLine, true);
         }
@@ -1659,6 +1662,7 @@ class LyricsPlusRenderer {
     this.activeLineIds.clear();
     this.visibleLineIds.clear();
     this.currentPrimaryActiveLine = null;
+    this._resetGapState();
 
     if (this.cachedLyricsLines.length > 0) {
       const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 - (this.userOffsetMs || 0);
@@ -2197,10 +2201,19 @@ class LyricsPlusRenderer {
     ) {
       if (!this.isUserControllingScroll || isForceScroll) {
         scrolledThisTick = true;
+        const gapShifts = this._syncGapLayout(lineToScroll, isForceScroll, this._tempActiveLines, tempActiveCount);
+        this._pendingGapShifts = isForceScroll ? null : gapShifts;
         this._updatePositionClassesAndScroll(lineToScroll, isForceScroll, scrollLookAheadMs);
+        this._pendingGapShifts = null;
         this.lastPrimaryActiveLine = this.currentPrimaryActiveLine;
         this.currentPrimaryActiveLine = lineToScroll;
+      } else if (hasChanged) {
+        this._openActiveGapsNow(this._tempActiveLines, tempActiveCount);
+        this._scheduleHiddenGapCloses();
       }
+    } else if (hasChanged) {
+      this._openActiveGapsNow(this._tempActiveLines, tempActiveCount);
+      if (this.isUserControllingScroll) this._scheduleHiddenGapCloses();
     }
 
     // After the scroll call: it publishes --scroll-duration/--scroll-easing and the
@@ -3411,7 +3424,8 @@ class LyricsPlusRenderer {
 
     const state = this._scrollAnimationState;
 
-    if (state.isAnimating && !forceScroll) {
+    const hasGapShifts = !!(this._pendingGapShifts && this._pendingGapShifts.length);
+    if (state.isAnimating && !forceScroll && !hasGapShifts) {
       state.pendingUpdate = newTranslateY;
       return;
     }
@@ -3465,7 +3479,6 @@ class LyricsPlusRenderer {
     const targetTop = Math.max(0, -newTranslateY);
     const prevOffset = -parent.scrollTop || this.currentScrollOffset || 0;
     const delta = prevOffset - newTranslateY;
-    const scrollingDown = delta >= 0;
     this.currentScrollOffset = newTranslateY;
 
     if (forceScroll) {
@@ -3522,8 +3535,24 @@ class LyricsPlusRenderer {
 
     let maxAnimationDuration = 0;
 
-    const applyLine = (line, delay) => {
-      line.style.setProperty('--scroll-delta', `${delta}px`);
+    const gapShifts = this._pendingGapShifts;
+    const gapShiftAt = (i) => {
+      if (!gapShifts) return 0;
+      let sh = 0;
+      for (let g = 0; g < gapShifts.length; g++) if (i > gapShifts[g].idx) sh += gapShifts[g].shift;
+      return sh;
+    };
+
+    let totalShift = 0;
+    if (gapShifts) for (let g = 0; g < gapShifts.length; g++) totalShift += gapShifts[g].shift;
+    const newIndex = this._lastActiveIndex;
+    let scrollingDown;
+    if (newIndex > referenceIndex) scrollingDown = true;
+    else if (newIndex < referenceIndex) scrollingDown = false;
+    else scrollingDown = (delta - totalShift) >= 0;
+
+    const applyLine = (line, delay, i) => {
+      line.style.setProperty('--scroll-delta', `${delta - gapShiftAt(i)}px`);
       line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
       line.classList.add('scroll-animate');
       animatingLines.push(line);
@@ -3537,7 +3566,7 @@ class LyricsPlusRenderer {
         const line = this.cachedLyricsLines[i];
         let delay = i >= referenceIndex ? delayCounter * delayIncrement : 0;
         if (i >= referenceIndex && !line._isGap) delayCounter++;
-        applyLine(line, delay);
+        applyLine(line, delay, i);
       }
     } else {
       let delayCounter = 0;
@@ -3546,7 +3575,7 @@ class LyricsPlusRenderer {
         let delay = i <= referenceIndex ? delayCounter * delayIncrement : 0;
         if (i <= referenceIndex && !line._isGap) delayCounter++;
         if (isRelaxMode) delay = delay / 2;
-        applyLine(line, delay);
+        applyLine(line, delay, i);
       }
     }
 
@@ -3558,8 +3587,12 @@ class LyricsPlusRenderer {
       state.isAnimating = false;
 
       if (state.pendingUpdate !== null) {
-        const pendingValue = state.pendingUpdate;
+        let pendingValue = state.pendingUpdate;
         state.pendingUpdate = null;
+        const primary = this.currentPrimaryActiveLine;
+        if (primary && primary.isConnected && !this.isUserControllingScroll) {
+          pendingValue = this._getScrollPaddingTop() - primary.offsetTop;
+        }
         this._animateScroll(pendingValue, false);
       }
     }, BASE_DURATION);
@@ -3578,6 +3611,201 @@ class LyricsPlusRenderer {
     parent.scrollTo({ top: targetTop, behavior: 'instant' });
   }
 
+
+  _resetGapState() {
+    if (this._gapCloseTimers) for (const t of this._gapCloseTimers.values()) clearTimeout(t);
+    this._gapCloseTimers = new Map();
+    this._openGaps = new Set();
+    this._pendingGapShifts = null;
+  }
+
+  /**
+   * Opens/closes the layout box of a gap line (instantly, class 'gap-open'). ye
+   * @returns {number} signed change of its height (+h opened, -h closed, 0 when nothing changed)
+   */
+  _setGapOpen(line, open) {
+    if (!line || !line._isGap || line.classList.contains("gap-open") === open) return 0;
+    if (!this._openGaps) this._resetGapState();
+    const inFlow = () => line.offsetParent !== null && getComputedStyle(line).position !== "absolute";
+    if (open) {
+      line.classList.add("gap-open");
+      this._openGaps.add(line);
+      return inFlow() ? line.offsetHeight : 0;
+    }
+    const h = inFlow() ? line.offsetHeight : 0;
+    line.classList.remove("gap-open");
+    this._openGaps.delete(line);
+    return -h;
+  }
+
+  _lineIndex(line) {
+    const lines = this.cachedLyricsLines;
+    if (!lines) return -1;
+    return (line._idx !== undefined && lines[line._idx] === line) ? line._idx : lines.indexOf(line);
+  }
+
+  _syncGapLayout(newPrimary, force, activeLines, activeCount) {
+    if (!this.cachedLyricsLines) return null;
+    if (!this._openGaps) this._resetGapState();
+    let out = null;
+    const add = (line, shift) => {
+      if (!shift) return;
+      const idx = this._lineIndex(line);
+      if (idx < 0) return;
+      (out || (out = [])).push({ idx, shift });
+    };
+
+    const needOpen = (l) => {
+      this._cancelGapClose(l);
+      add(l, this._setGapOpen(l, true));
+    };
+    if (newPrimary && newPrimary._isGap) needOpen(newPrimary);
+    for (let i = 0; i < activeCount; i++) {
+      const l = activeLines[i];
+      if (l && l._isGap && l !== newPrimary) needOpen(l);
+    }
+
+    if (this._openGaps.size > 0) {
+      for (const g of Array.from(this._openGaps)) {
+        if (g === newPrimary || g.classList.contains("active")) continue;
+        if (!g.isConnected) { this._openGaps.delete(g); continue; }
+        if (force) this._scheduleGapClose(g);
+        else add(g, this._setGapOpen(g, false));
+      }
+    }
+    return out;
+  }
+
+  /** Active gap but no scroll tick this frame (user is scrolling): open it without a scroll. */
+  _openActiveGapsNow(activeLines, activeCount) {
+    for (let i = 0; i < activeCount; i++) {
+      const l = activeLines[i];
+      if (!l || !l._isGap) continue;
+      this._cancelGapClose(l);
+      if (!l.classList.contains("gap-open")) this._openGapUnanimated(l);
+    }
+  }
+
+  _scheduleHiddenGapCloses() {
+    if (!this._openGaps) return;
+    for (const g of this._openGaps) {
+      if (g.classList.contains("active") || g === this.currentPrimaryActiveLine) continue;
+      this._scheduleGapClose(g);
+    }
+  }
+
+  _openGapUnanimated(line) {
+    const h = this._setGapOpen(line, true);
+    if (h < 0.5) return;
+    const idx = this._lineIndex(line);
+    if (idx < 0) return;
+    let rest = h;
+    const scroller = this.lyricsContainer && this.lyricsContainer.parentElement;
+    // Gap above what the user is looking at: scroll by its height so nothing moves.
+    if (scroller && line.offsetTop <= scroller.scrollTop) {
+      const before = scroller.scrollTop;
+      scroller.scrollTo({ top: before + h, behavior: "instant" });
+      const applied = scroller.scrollTop - before;
+      this.currentScrollOffset = -scroller.scrollTop;
+      const st = this._scrollAnimationState;
+      if (st && st.pendingUpdate !== null) st.pendingUpdate -= applied;
+      rest = h - applied;
+    }
+    if (Math.abs(rest) >= 0.5) this._flipGapShifts([{ idx, shift: rest }]);
+  }
+
+  _cancelGapClose(line) {
+    const t = this._gapCloseTimers && this._gapCloseTimers.get(line);
+    if (t) {
+      clearTimeout(t);
+      this._gapCloseTimers.delete(line);
+    }
+  }
+
+  /** Apple-style: let the dots play their hide animation, then fix the layout. */
+  _scheduleGapClose(line) {
+    if (!this._gapCloseTimers) this._resetGapState();
+    if (this._gapCloseTimers.has(line)) return;
+    const HIDE_MS = 850;
+    this._gapCloseTimers.set(line, setTimeout(() => {
+      this._gapCloseTimers.delete(line);
+      this._closeGapAfterHide(line);
+    }, HIDE_MS));
+  }
+
+  _closeGapAfterHide(line) {
+    if (!line.isConnected || !line.classList.contains("gap-open")) return;
+    if (line === this.currentPrimaryActiveLine || line.classList.contains("active")) return;
+    if (this.isUserControllingScroll) {
+      this._closeGapUnanimated(line);
+      return;
+    }
+    const idx = this._lineIndex(line);
+    const shift = this._setGapOpen(line, false);
+    if (!shift || idx < 0) return;
+    const primary = this.currentPrimaryActiveLine;
+    if (!primary) return;
+    this._pendingGapShifts = [{ idx, shift }];
+    this._scrollToActiveLine(primary, false, false, 300);
+    this._pendingGapShifts = null;
+  }
+
+  _flipGapShifts(shifts) {
+    const lines = this.cachedLyricsLines;
+    if (!shifts || !lines || typeof Element.prototype.animate !== "function") return;
+    let visMin = Infinity;
+    let visMax = -1;
+    if (this.visibleLineIds.size > 0 && this._lineById) {
+      for (const id of this.visibleLineIds) {
+        const v = this._lineById.get(id)?._idx;
+        if (v === undefined) continue;
+        if (v < visMin) visMin = v;
+        if (v > visMax) visMax = v;
+      }
+    }
+    if (visMax < 0) return;
+    const stagger = this.isUserControllingScroll ? 0 : 40;
+    const last = Math.min(lines.length, visMax + 2);
+    for (const g of shifts) {
+      let n = 0;
+      for (let i = Math.max(g.idx + 1, visMin - 1); i < last; i++) {
+        const line = lines[i];
+        LyricsPlusRenderer._flipTranslateY(line, -g.shift, 350, "cubic-bezier(.41, 0, .12, .99)", n * stagger);
+        if (!line._isGap) n++;
+      }
+    }
+  }
+
+  _closeGapUnanimated(line) {
+    const idx = this._lineIndex(line);
+    const scroller = this.lyricsContainer && this.lyricsContainer.parentElement;
+    const topBefore = line.offsetTop;
+    const above = scroller ? topBefore <= scroller.scrollTop : false;
+    const shift = this._setGapOpen(line, false);
+    if (!shift || idx < 0) return;
+    let rest = shift;
+    if (scroller && above) {
+      const before = scroller.scrollTop;
+      scroller.scrollTo({ top: before + shift, behavior: "instant" });
+      const applied = scroller.scrollTop - before;
+      this.currentScrollOffset = -scroller.scrollTop;
+      const st = this._scrollAnimationState;
+      if (st && st.pendingUpdate !== null) st.pendingUpdate -= applied;
+      rest = shift - applied;
+    }
+    if (Math.abs(rest) >= 0.5) this._flipGapShifts([{ idx, shift: rest }]);
+  }
+
+  _closeHiddenGaps(skipPrimary = true) {
+    if (!this._openGaps || this._openGaps.size === 0) return;
+    for (const g of Array.from(this._openGaps)) {
+      if (!g.isConnected) { this._openGaps.delete(g); continue; }
+      if (g.classList.contains("active")) continue;
+      if (skipPrimary && g === this.currentPrimaryActiveLine) continue;
+      this._cancelGapClose(g);
+      this._closeGapUnanimated(g);
+    }
+  }
 
   _updatePositionClassesAndScroll(lineToScroll, forceScroll = false, durationScroll = 300) {
     if (
@@ -3658,6 +3886,7 @@ class LyricsPlusRenderer {
 
     if (
       !forceScroll &&
+      !(this._pendingGapShifts && this._pendingGapShifts.length) &&
       Math.abs(scrollContainer.scrollTop - targetScrollTop) < 1
     ) {
       return;
@@ -4465,6 +4694,7 @@ class LyricsPlusRenderer {
     }
 
     this.currentPrimaryActiveLine = null;
+    this._resetGapState();
     this.lastPrimaryActiveLine = null;
     this.currentFullscreenFocusedLine = null;
     this.lastTime = 0;
