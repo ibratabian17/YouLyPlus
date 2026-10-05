@@ -877,6 +877,7 @@ class LyricsPlusRenderer {
             backgroundInnerWrap = document.createElement("span");
             backgroundInnerWrap.className = "background-vocal-wrap";
             backgroundContainer.appendChild(backgroundInnerWrap);
+            this._observeBgWrap(backgroundInnerWrap);
 
             if (MoveEarlier) {
               const firstMainSyllable = mainContainer.querySelector(".lyrics-syllable");
@@ -2157,7 +2158,7 @@ class LyricsPlusRenderer {
       bgToggled.length = 0;
       // Where the scroll anchor sits before the layout changes (see _animateBgVocalReflow).
       const anchorBefore = this.currentPrimaryActiveLine;
-      this._bgAnchorTop = anchorBefore ? anchorBefore.getBoundingClientRect().top : null;
+      this._bgAnchorTop = anchorBefore ? 0 : null;
 
       for (const oldId of this.activeLineIds) {
         let stillActive = false;
@@ -2236,18 +2237,20 @@ class LyricsPlusRenderer {
     return wrap;
   }
 
-  /**
-   * Fractional layout height of an element inside .lyrics-line-container.
-   * offsetHeight is rounded to whole pixels and getBoundingClientRect() includes
-   * the container's scale (0.93 when inactive), so undo the scale.
-   */
+  _observeBgWrap(wrap) {
+    if (typeof ResizeObserver === "undefined") return;
+    if (!this._bgResizeObserver) {
+      this._bgResizeObserver = new ResizeObserver((entries) => {
+        for (const e of entries) {
+          e.target._bgH = e.borderBoxSize?.[0]?.blockSize ?? e.contentRect.height;
+        }
+      });
+    }
+    this._bgResizeObserver.observe(wrap);
+  }
+
   _measureBgHeight(wrap) {
-    const rect = wrap.getBoundingClientRect();
-    const box = wrap.closest(".lyrics-line-container");
-    const ow = box ? box.offsetWidth : 0;
-    const scale = ow > 0 ? box.getBoundingClientRect().width / ow : 1;
-    const h = rect.height / (scale > 0.1 ? scale : 1);
-    return h > 0 ? h : wrap.offsetHeight;
+    return wrap._bgH > 0.5 ? wrap._bgH : wrap.offsetHeight;
   }
 
   /**
@@ -2293,7 +2296,8 @@ class LyricsPlusRenderer {
     let anchorIdx = -1;
     if (anchor && scroller && anchorTopBefore !== null) {
       anchorIdx = indexOf(anchor);
-      const moved = anchor.getBoundingClientRect().top - anchorTopBefore;
+      let moved = 0;
+      for (let e = 0; e < events.length && events[e].idx < anchorIdx; e++) moved += events[e].delta;
       if (anchorIdx >= 0 && Math.abs(moved) >= 0.5) {
         const before = scroller.scrollTop;
         scroller.scrollTo({ top: before + moved, behavior: "instant" });
@@ -2331,8 +2335,8 @@ class LyricsPlusRenderer {
       }
     }
     const lastEvent = events[events.length - 1].idx;
-    const last = Math.min(lines.length, Math.max(visMax, lastEvent, anchorIdx) + 8);
-    const first = visMin === Infinity ? 0 : Math.max(0, visMin - 2);
+    const last = Math.min(lines.length, Math.max(visMax, lastEvent, anchorIdx) + 2);
+    const first = visMin === Infinity ? 0 : Math.max(0, visMin - 1);
 
     let ei = 0;
     let above = 0;
@@ -4370,6 +4374,10 @@ class LyricsPlusRenderer {
     if (this._maskResizeObserver) {
       this._maskResizeObserver.disconnect();
       this._maskResizeObserver = null;
+    }
+    if (this._bgResizeObserver) {
+      this._bgResizeObserver.disconnect();
+      this._bgResizeObserver = null;
     }
     if (this.visibilityObserver) {
       this.visibilityObserver.disconnect();
