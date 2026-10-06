@@ -7,7 +7,7 @@ export const pBrowser = typeof browser !== 'undefined'
     : (typeof chrome !== 'undefined' ? chrome : null);
 
 export const defaultSettings = {
-    lyricsProviderOrder: 'binilyrics,kpoe,unison,lrclib',
+    lyricsProviderOrder: 'kpoe,binilyrics,unison,lrclib',
     lyricsSourceOrder: 'apple,lyricsplus,qq,musixmatch,musixmatch-word',
     wordByWord: true,
     lightweight: false,

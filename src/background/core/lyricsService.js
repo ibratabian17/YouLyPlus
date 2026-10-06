@@ -389,7 +389,7 @@ export class LyricsService {
   }
 
   static getProviderOrder(settings, songInfo = null, preferUnisonVideo = false) {
-    const defaultOrder = ['kpoe', 'unison', 'binilyrics', 'lrclib'];
+    const defaultOrder = ['kpoe', 'binilyrics', 'unison', 'lrclib'];
 
     let providersList = (settings.lyricsProviderOrder || '').split(',').map(p => p.trim()).filter(Boolean);
     if (!providersList.length) providersList = defaultOrder;

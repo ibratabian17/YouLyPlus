@@ -4173,7 +4173,7 @@ class LyricsPlusRenderer {
    * @returns {{providerKeys: string[], activeProvider: string, providerDisplayNames: object}}
    */
   _getProviderContext() {
-    const providerOrderStr = this.currentSettings?.lyricsProviderOrder || 'binilyrics,kpoe,unison,lrclib';
+    const providerOrderStr = this.currentSettings?.lyricsProviderOrder || 'kpoe,binilyrics,unison,lrclib';
     const providerKeys = providerOrderStr.split(',').map(s => s.trim()).filter(Boolean);
 
     if (this.currentSettings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
