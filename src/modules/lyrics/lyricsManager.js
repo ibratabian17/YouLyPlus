@@ -398,7 +398,8 @@ async function applySponsorBlock(lyrics, currentSong, fetchId) {
 
 function getProviderDisplayName(provider, lyrics) {
   const map = {
-    'binilyrics': 'BiniLyrics',
+    'lrcred': 'lrc.red',
+    'binilyrics': 'lrc.red',
     'kpoe': 'Lyrics+',
     'customKpoe': 'Custom Lyrics+',
     'unison': 'Unison',

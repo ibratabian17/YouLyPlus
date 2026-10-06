@@ -14,7 +14,7 @@ export class SettingsManager {
 
   static async getLyricsSettings() {
     return this.get({
-      'lyricsProviderOrder': 'kpoe,binilyrics,unison,lrclib',
+      'lyricsProviderOrder': 'kpoe,lrcred,unison,lrclib',
       'lyricsSourceOrder': 'apple,lyricsplus,qq,musixmatch,musixmatch-word',
       'customKpoeUrl': '',
       'cacheStrategy': 'aggressive',

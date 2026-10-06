@@ -1007,9 +1007,9 @@
     "message": "Unison (BetterLyrics)",
     "description": "Unison provider name"
   },
-  "sourceNameBiniLyrics": {
-    "description": "BiniLyrics provider name",
-    "message": "BiniLyrics (baza danych Apple Music)"
+  "sourceNameLrcred": {
+    "message": "lrc.red",
+    "description": "lrc.red provider name"
   },
   "navCatInterface": {
     "message": "Interface",

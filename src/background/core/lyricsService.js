@@ -11,7 +11,7 @@ import { Utilities } from '../utils/utilities.js';
 import { KPoeService } from '../services/kpoeService.js';
 import { LRCLibService } from '../services/lrclibService.js';
 import { UnisonService } from '../services/unisonService.js';
-import { BiniLyricsService } from '../services/biniLyricsService.js';
+import { LrcredService } from '../services/lrcredService.js';
 import { YouTubeService } from '../services/youtubeService.js';
 import { parseAppleTTML } from '../../lib/parser.js';
 
@@ -389,13 +389,19 @@ export class LyricsService {
   }
 
   static getProviderOrder(settings, songInfo = null, preferUnisonVideo = false) {
-    const defaultOrder = ['kpoe', 'binilyrics', 'unison', 'lrclib'];
+    const defaultOrder = ['kpoe', 'lrcred', 'unison', 'lrclib'];
 
-    let providersList = (settings.lyricsProviderOrder || '').split(',').map(p => p.trim()).filter(Boolean);
+    let providersList = (settings.lyricsProviderOrder || '')
+      .split(',')
+      .map(p => {
+        const trimmed = p.trim();
+        return trimmed === 'binilyrics' ? 'lrcred' : trimmed;
+      })
+      .filter(Boolean);
     if (!providersList.length) providersList = defaultOrder;
 
     let validProviders = providersList.filter(p => [
-      PROVIDERS.KPOE, PROVIDERS.CUSTOM_KPOE, PROVIDERS.UNISON, PROVIDERS.BINILYRICS, PROVIDERS.LRCLIB
+      PROVIDERS.KPOE, PROVIDERS.CUSTOM_KPOE, PROVIDERS.UNISON, PROVIDERS.LRCRED, PROVIDERS.LRCLIB
     ].includes(p));
 
     if (!settings.customKpoeUrl) {
@@ -417,7 +423,7 @@ export class LyricsService {
     if (lyrics?.provider) return lyrics.provider;
     if (lyrics?.metadata?.provider) return lyrics.metadata.provider;
     const source = (lyrics?.metadata?.source || '').toLowerCase();
-    if (source.includes('bini')) return PROVIDERS.BINILYRICS;
+    if (source.includes('lrcred') || source.includes('lrc-red') || source.includes('lrc.red') || source.includes('bini')) return PROVIDERS.LRCRED;
     if (source.includes('unison')) return PROVIDERS.UNISON;
     if (source.includes('lrclib')) return PROVIDERS.LRCLIB;
     if (source.includes('local')) return PROVIDERS.LOCAL;
@@ -444,8 +450,9 @@ export class LyricsService {
         lyrics = await UnisonService.fetch(songInfo, opts);
         break;
 
-      case PROVIDERS.BINILYRICS:
-        lyrics = await BiniLyricsService.fetch(songInfo, opts);
+      case PROVIDERS.LRCRED:
+      case 'binilyrics':
+        lyrics = await LrcredService.fetch(songInfo, opts);
         break;
 
       case PROVIDERS.LRCLIB:
@@ -545,8 +552,8 @@ export class LyricsService {
       lyrics = await LRCLibService.fetch(songInfo, fetchOptions);
     } else if (source === PROVIDERS.UNISON) {
       lyrics = await UnisonService.fetch(songInfo, fetchOptions);
-    } else if (source === PROVIDERS.BINILYRICS) {
-      lyrics = await BiniLyricsService.fetch(songInfo, fetchOptions);
+    } else if (source === PROVIDERS.LRCRED || source === 'lrcred' || source === 'binilyrics') {
+      lyrics = await LrcredService.fetch(songInfo, fetchOptions);
     } else if (source === 'subtitles') {
       lyrics = await YouTubeService.fetchSubtitles(songInfo);
     } else if (source === 'ytmusic' || source === PROVIDERS.YTMUSIC) {

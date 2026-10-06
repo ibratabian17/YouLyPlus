@@ -1,13 +1,13 @@
 // ==================================================================================================
-// EXTERNAL SERVICE - BINILYRICS (lyrics-api.binimum.org)
+// EXTERNAL SERVICE - LRCRED (lrc.red)
 // ==================================================================================================
 
 import { DataParser } from '../utils/dataParser.js';
 import { parseAppleTTML } from '../../lib/parser.js';
 
-const BINILYRICS_BASE_URL = 'https://lyrics-api.binimum.org';
+const LRCRED_BASE_URL = 'https://lrc.red/api/v1';
 
-export class BiniLyricsService {
+export class LrcredService {
   static async fetch(songInfo, fetchOptions = {}) {
     let lyrics = await this.fetchFromAPI(songInfo, fetchOptions);
     if (lyrics) return lyrics;
@@ -31,7 +31,7 @@ export class BiniLyricsService {
     const query = `${songInfo.title || ''} ${songInfo.artist || ''}`.trim();
     if (!query) return null;
 
-    const url = `${BINILYRICS_BASE_URL}/getLyrics?q=${encodeURIComponent(query)}`;
+    const url = `${LRCRED_BASE_URL}?q=${encodeURIComponent(query)}`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -80,13 +80,13 @@ export class BiniLyricsService {
         title: match.track_name || songInfo.title,
         artist: match.artist_name || songInfo.artist,
         album: match.album_name || songInfo.album,
-        source: 'Apple (via BiniLyrics)'
+        source: 'lrc.red'
       };
 
       return DataParser.parseKPoeFormat(kpoeData);
     } catch (error) {
       if (error.name !== 'AbortError') {
-        console.error('BiniLyrics error:', error);
+        console.error('lrc.red error:', error);
       }
       return null;
     } finally {

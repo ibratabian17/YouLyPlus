@@ -4173,8 +4173,11 @@ class LyricsPlusRenderer {
    * @returns {{providerKeys: string[], activeProvider: string, providerDisplayNames: object}}
    */
   _getProviderContext() {
-    const providerOrderStr = this.currentSettings?.lyricsProviderOrder || 'kpoe,binilyrics,unison,lrclib';
-    const providerKeys = providerOrderStr.split(',').map(s => s.trim()).filter(Boolean);
+    const providerOrderStr = this.currentSettings?.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib';
+    const providerKeys = providerOrderStr.split(',').map(s => {
+      const trimmed = s.trim();
+      return trimmed === 'binilyrics' ? 'lrcred' : trimmed;
+    }).filter(Boolean);
 
     if (this.currentSettings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
       providerKeys.push('customKpoe');
@@ -4203,7 +4206,8 @@ class LyricsPlusRenderer {
       || info?.ytMusicLyrics?.provider
       || 'YouTube Music';
     const providerDisplayNames = {
-      'binilyrics': 'BiniLyrics',
+      'lrcred': 'lrc.red',
+      'binilyrics': 'lrc.red',
       'kpoe': 'Lyrics+',
       'customKpoe': 'Custom Lyrics+',
       'unison': 'Unison',
@@ -4347,7 +4351,7 @@ class LyricsPlusRenderer {
 
     const knownSources = [
       "lyricsplus", "lyrics+", "apple", "apple music", "qq", "musixmatch", "musixmatch-word",
-      "unison", "lrclib", "binilyrics", "subtitles", "youtube captions", "youtube subtitles",
+      "unison", "lrclib", "lrcred", "binilyrics", "subtitles", "youtube captions", "youtube subtitles",
       "local", "local lyrics", "spotify", "kpoe", "customkpoe", "lyricfind"
     ];
     const configuredSources = (this.currentSettings?.lyricsSourceOrder || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
@@ -4395,7 +4399,7 @@ class LyricsPlusRenderer {
   _detectProviderFromSource(source) {
     if (!source) return '';
     const s = source.toLowerCase();
-    if (s.includes('bini')) return 'binilyrics';
+    if (s.includes('lrcred') || s.includes('lrc-red') || s.includes('lrc.red') || s.includes('bini')) return 'lrcred';
     if (s.includes('unison')) return 'unison';
     if (s.includes('lrclib')) return 'lrclib';
     if (s.includes('local')) return 'local';

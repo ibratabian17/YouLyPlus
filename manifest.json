@@ -18,6 +18,7 @@
     "https://translate.googleapis.com/*",
     "https://generativelanguage.googleapis.com/*",
     "https://openrouter.ai/api/*",
+    "https://lrc.red/*",
     "https://lyrics-api.binimum.org/*",
     "https://lyrics-storage.binimum.org/*",
     "https://cdn.jsdelivr.net/*",
