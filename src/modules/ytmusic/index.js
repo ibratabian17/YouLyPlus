@@ -87,6 +87,69 @@ function injectPlatformCSS() {
     document.head.appendChild(linkElement);
 }
 
+const MARQUEE_GAP = 60;
+const MARQUEE_SPEED = 30; // 30px per second for smooth, readable scrolling
+const marqueePending = new Set();
+const marqueeLastWidth = new WeakMap();
+let marqueeFlushQueued = false;
+
+function queueMarqueeMeasure(container) {
+    marqueePending.add(container);
+    if (marqueeFlushQueued) return;
+    marqueeFlushQueued = true;
+    requestAnimationFrame(flushMarquee);
+}
+
+function flushMarquee() {
+    marqueeFlushQueued = false;
+    const jobs = [];
+
+    for (const container of marqueePending) {
+        const wrapper = container.querySelector('.marquee-wrapper');
+        const content = container.querySelector('.marquee-content');
+        if (!wrapper || !content) continue;
+
+        const cs = getComputedStyle(container);
+        const available =
+            container.clientWidth -
+            (parseFloat(cs.paddingLeft) || 0) -
+            (parseFloat(cs.paddingRight) || 0);
+        const contentWidth = Math.ceil(content.getBoundingClientRect().width || content.scrollWidth);
+        jobs.push({ container, wrapper, content, available, contentWidth });
+    }
+    marqueePending.clear();
+
+    for (const { container, wrapper, content, available, contentWidth } of jobs) {
+        const text = container.dataset.currentText || '';
+        let duplicate = wrapper.querySelector('.marquee-duplicate');
+
+        if (contentWidth > available && available > 0) {
+            if (!duplicate) {
+                duplicate = content.cloneNode(true);
+                duplicate.className = 'marquee-content marquee-duplicate';
+                wrapper.appendChild(duplicate);
+            } else if (duplicate.textContent !== text) {
+                duplicate.textContent = text;
+            }
+
+            const scrollDistance = contentWidth + MARQUEE_GAP;
+            // 20% pause in CSS keyframe (0% to 20%), so movement takes 80% of totalDuration
+            const totalDuration = scrollDistance / MARQUEE_SPEED / 0.8;
+
+            wrapper.style.setProperty('--marquee-distance', `${scrollDistance}px`);
+            wrapper.style.setProperty('--total-duration', `${totalDuration.toFixed(2)}s`);
+            wrapper.style.setProperty('--gap', `${MARQUEE_GAP}px`);
+
+            container.classList.add('marquee-active');
+            wrapper.classList.add('animate');
+        } else {
+            duplicate?.remove();
+            container.classList.remove('marquee-active');
+            wrapper.classList.remove('animate');
+        }
+    }
+}
+
 function updateTextWithMarquee(container, text) {
     if (text !== undefined) {
         container.dataset.currentText = text;
@@ -98,7 +161,7 @@ function updateTextWithMarquee(container, text) {
     let content = container.querySelector('.marquee-content');
 
     if (!wrapper || !content) {
-        container.innerHTML = '';
+        container.textContent = '';
         wrapper = document.createElement('div');
         wrapper.className = 'marquee-wrapper';
 
@@ -110,60 +173,96 @@ function updateTextWithMarquee(container, text) {
         container.appendChild(wrapper);
     } else if (content.textContent !== text) {
         content.textContent = text;
-        const duplicate = wrapper.querySelector('.marquee-duplicate');
-        if (duplicate) duplicate.remove();
+        wrapper.querySelector('.marquee-duplicate')?.remove();
         container.classList.remove('marquee-active');
         wrapper.classList.remove('animate');
+    } else if (text === undefined) {
+        return;
     }
 
-    const computedStyle = window.getComputedStyle(container);
-    const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
-    const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
-    const availableWidth = container.clientWidth - paddingLeft - paddingRight;
-    const contentWidth = Math.ceil(content.getBoundingClientRect().width || content.scrollWidth);
-
-    if (contentWidth > availableWidth && availableWidth > 0) {
-        const gap = 60;
-        let duplicate = wrapper.querySelector('.marquee-duplicate');
-        if (!duplicate) {
-            duplicate = content.cloneNode(true);
-            duplicate.className = 'marquee-content marquee-duplicate';
-            wrapper.appendChild(duplicate);
-        } else {
-            duplicate.textContent = text;
-        }
-
-        const scrollDistance = contentWidth + gap;
-        const speed = 30; // 30px per second for smooth, readable scrolling
-        const scrollDuration = scrollDistance / speed;
-        // 20% pause in CSS keyframe (0% to 20%), so movement takes 80% of totalDuration
-        const totalDuration = scrollDuration / 0.8;
-
-        wrapper.style.setProperty('--marquee-distance', `${scrollDistance}px`);
-        wrapper.style.setProperty('--total-duration', `${totalDuration.toFixed(2)}s`);
-        wrapper.style.setProperty('--gap', `${gap}px`);
-
-        container.classList.add('marquee-active');
-        wrapper.classList.add('animate');
-    } else {
-        const duplicate = wrapper.querySelector('.marquee-duplicate');
-        if (duplicate) duplicate.remove();
-        container.classList.remove('marquee-active');
-        wrapper.classList.remove('animate');
-    }
+    queueMarqueeMeasure(container);
 }
 
-let marqueeResizeTimeout;
-const marqueeResizeObserver = new ResizeObserver(entries => {
-    clearTimeout(marqueeResizeTimeout);
-    marqueeResizeTimeout = setTimeout(() => {
-        for (let entry of entries) {
-            if (entry.target.dataset.currentText) {
-                updateTextWithMarquee(entry.target);
-            }
-        }
-    }, 100);
+const marqueeResizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+        const width = Math.round(entry.contentRect.width);
+        if (marqueeLastWidth.get(entry.target) === width) continue;
+        marqueeLastWidth.set(entry.target, width);
+        if (entry.target.dataset.currentText) queueMarqueeMeasure(entry.target);
+    }
 });
+
+let videoPlaying = true;
+let barVisible = true;
+let barRunning = null;
+
+function syncProgressBar() {
+    if (!progressBar) return;
+    const shouldRun = videoPlaying && barVisible && !document.hidden;
+    if (shouldRun === barRunning) return;
+    barRunning = shouldRun;
+    if (shouldRun) progressBar.play();
+    else progressBar.pause();
+}
+
+document.addEventListener('visibilitychange', syncProgressBar, { passive: true });
+
+function injectSongInfo() {
+    const player = document.querySelector('ytmusic-player');
+    if (!player || player.querySelector(':scope > .lyrics-song-container')) return;
+
+    const songInfoContainerElem = document.createElement('div');
+    songInfoContainerElem.className = 'lyrics-song-container';
+
+    //title
+    titleElementElem.id = 'lyrics-song-title';
+    titleElementElem.className = 'marquee-container';
+    updateTextWithMarquee(titleElementElem, 'Placeholder');
+
+    artistElementElem.id = 'lyrics-song-artist';
+    artistElementElem.className = 'marquee-container';
+    updateTextWithMarquee(artistElementElem, 'Placeholder');
+
+    songInfoContainerElem.append(titleElementElem, artistElementElem);
+
+    if (!currentSettings.YTSongInfoDisableSeekbar) {
+        const progressBarElem = document.createElement('div');
+        progressBarElem.id = 'lyrics-song-progressbar';
+        progressBarElem.classList.add('progress-container');
+        songInfoContainerElem.appendChild(progressBarElem);
+        progressBar = new WavyProgressBar(progressBarElem);
+
+        progressBarElem.addEventListener('seek', (e) => {
+            if (typeof e.detail?.progress === 'number' && currentSongDuration > 0) {
+                window.postMessage({
+                    type: 'LYPLUS_SEEK_TO',
+                    time: e.detail.progress * currentSongDuration
+                }, '*');
+            }
+        });
+
+        new IntersectionObserver((entries) => {
+            barVisible = entries[entries.length - 1].isIntersecting;
+            syncProgressBar();
+        }).observe(progressBarElem);
+
+        const ytPlayer = document.querySelector('video');
+        if (ytPlayer) {
+            videoPlaying = !ytPlayer.paused;
+            const opts = { passive: true };
+            ytPlayer.addEventListener('play', () => { videoPlaying = true; syncProgressBar(); }, opts);
+            ytPlayer.addEventListener('pause', () => { videoPlaying = false; syncProgressBar(); }, opts);
+            ytPlayer.addEventListener('ended', () => { videoPlaying = false; syncProgressBar(); }, opts);
+        }
+        syncProgressBar();
+    }
+
+    player.appendChild(songInfoContainerElem);
+
+    // Observe for layout changes
+    marqueeResizeObserver.observe(titleElementElem);
+    marqueeResizeObserver.observe(artistElementElem);
+}
 
 // Function to inject the DOM script
 function injectDOMScript() {
@@ -180,193 +279,144 @@ function injectDOMScript() {
 
     patchTabRenderer();
 
-
     //patch ui
-    if (currentSettings.YTSongInfo) {
-        const player = document.querySelector('ytmusic-player');
-        const songInfoContainerElem = document.createElement('div');
-        songInfoContainerElem.className = 'lyrics-song-container';
-
-        //title
-        titleElementElem.id = 'lyrics-song-title';
-        titleElementElem.className = 'marquee-container';
-        updateTextWithMarquee(titleElementElem, "Placeholder");
-
-        artistElementElem.id = 'lyrics-song-artist';
-        artistElementElem.className = 'marquee-container';
-        updateTextWithMarquee(artistElementElem, "Placeholder");
-
-        songInfoContainerElem.appendChild(titleElementElem);
-        songInfoContainerElem.appendChild(artistElementElem);
-
-        if (!currentSettings.YTSongInfoDisableSeekbar) {
-            const progressBarElem = document.createElement('div');
-            progressBarElem.id = 'lyrics-song-progressbar';
-            progressBarElem.classList.add('progress-container');
-            songInfoContainerElem.appendChild(progressBarElem);
-            progressBar = new WavyProgressBar(progressBarElem);
-
-            progressBarElem.addEventListener('seek', (e) => {
-                if (typeof e.detail?.progress === 'number' && currentSongDuration > 0) {
-                    const seekTime = e.detail.progress * currentSongDuration;
-                    window.postMessage({ type: 'LYPLUS_SEEK_TO', time: seekTime }, '*');
-                }
-            });
-
-            const ytPlayer = document.querySelector('video');
-            if (ytPlayer) {
-                if (!ytPlayer.paused) {
-                    progressBar.play();
-                } else {
-                    progressBar.pause();
-                }
-                ytPlayer.addEventListener('play', () => {
-                    progressBar?.play();
-                });
-                ytPlayer.addEventListener('pause', () => {
-                    progressBar?.pause();
-                });
-                ytPlayer.addEventListener('ended', () => {
-                    progressBar?.pause();
-                });
-            } else {
-                progressBar.play();
-            }
-        }
-
-        player.appendChild(songInfoContainerElem);
-
-        // Observe for layout changes
-        marqueeResizeObserver.observe(titleElementElem);
-        marqueeResizeObserver.observe(artistElementElem);
-    }
+    if (currentSettings.YTSongInfo) injectSongInfo();
 }
 
+let ytTitleEl = null;
+let ytBylineEl = null;
+const TITLE_SEL = '.title.style-scope.ytmusic-player-bar, .ytmusicTrackInfoTitle';
+const BYLINE_SEL = '.byline.style-scope.ytmusic-player-bar, .ytmusicTrackInfoByline';
+
 window.addEventListener('message', (event) => {
-    if (event.source !== window || !event.data) {
-        return;
-    }
+    const data = event.data;
+    if (event.source !== window || !data) return;
 
-    if (event.data.type === 'LYPLUS_TIME_UPDATE' && typeof event.data.currentTime === 'number') {
-        LyricsPlusAPI.updateCurrentTick(event.data.currentTime)
+    if (data.type === 'LYPLUS_TIME_UPDATE' && typeof data.currentTime === 'number') {
+        LyricsPlusAPI.updateCurrentTick(data.currentTime);
 
-        if (currentSettings.YTSongInfo && progressBar) {
+        if (progressBar && barVisible && !document.hidden && currentSettings.YTSongInfo) {
             const now = performance.now();
             if (now - lastUpdateTimestamp >= THROTTLE_MS) {
                 lastUpdateTimestamp = now;
-
-                const cur = event.data.currentTime;
-                progressBar.update(cur / currentSongDuration);
+                progressBar.update(data.currentTime / currentSongDuration);
             }
         }
+        return;
     }
 
-    if (event.data.type === 'LYPLUS_SONG_CHANGED' && event.data.songInfo.duration) {
-        if (currentSettings.YTSongInfo) {
-            const songInfo = event.data.songInfo
-            currentSongDuration = songInfo.duration
-            const yttitleElement = document.querySelector('.title.style-scope.ytmusic-player-bar, .ytmusicTrackInfoTitle');
-            const ytbyline = document.querySelector('.byline.style-scope.ytmusic-player-bar, .ytmusicTrackInfoByline');
+    if (data.type === 'LYPLUS_SONG_CHANGED' && data.songInfo?.duration) {
+        if (!currentSettings.YTSongInfo) return;
 
-            let titleText = songInfo.title;
-            let artistText = songInfo.album ? `${songInfo.artist} • ${songInfo.album}` : songInfo.artist;
+        const songInfo = data.songInfo;
+        currentSongDuration = songInfo.duration;
 
-            if (yttitleElement && yttitleElement.textContent.trim() != "") {
-                titleText = yttitleElement.textContent.trim();
-                if (ytbyline && ytbyline.textContent.trim() != "") {
-                    artistText = ytbyline.textContent.trim();
-                }
-            }
+        if (!ytTitleEl?.isConnected) ytTitleEl = document.querySelector(TITLE_SEL);
+        if (!ytBylineEl?.isConnected) ytBylineEl = document.querySelector(BYLINE_SEL);
 
-            updateTextWithMarquee(titleElementElem, titleText);
-            updateTextWithMarquee(artistElementElem, artistText);
+        let titleText = songInfo.title;
+        let artistText = songInfo.album ? `${songInfo.artist} • ${songInfo.album}` : songInfo.artist;
 
+        const ytTitle = ytTitleEl?.textContent.trim();
+        if (ytTitle) {
+            titleText = ytTitle;
+            const ytByline = ytBylineEl?.textContent.trim();
+            if (ytByline) artistText = ytByline;
         }
+
+        updateTextWithMarquee(titleElementElem, titleText);
+        updateTextWithMarquee(artistElementElem, artistText);
     }
 });
 
 // --- Fullscreen Cursor Auto-Hide ---
-let cursorIdleTimeout = null;
 const CURSOR_IDLE_DELAY = 2000;
+const FULLSCREEN_SELECTOR = [
+    'ytmusic-app-layout[player-fullscreened]',
+    'ytmusic-app-layout[player-ui-state="FULLSCREEN"]',
+    'ytmusic-player-page[player-fullscreened]',
+    '#layout[player-ui-state="FULLSCREEN"]'
+].join(',');
 
-function isYTMusicFullscreen() {
+let isFullscreen = false;
+let cursorHidden = false;
+let idleTimer = 0;
+let lastActivity = 0;
+let activityAbort = null;
+let fsCheckQueued = false;
+
+function computeFullscreen() {
     return !!(
         document.fullscreenElement ||
         document.webkitFullscreenElement ||
-        document.querySelector('ytmusic-app-layout[player-fullscreened]') ||
-        document.querySelector('ytmusic-app-layout[player-ui-state="FULLSCREEN"]') ||
-        document.querySelector('ytmusic-player-page[player-fullscreened]') ||
-        document.querySelector('#layout[player-ui-state="FULLSCREEN"]')
+        document.querySelector(FULLSCREEN_SELECTOR)
     );
 }
 
-function showCursor() {
-    if (document.documentElement.classList.contains('lyplus-hide-cursor')) {
-        document.documentElement.classList.remove('lyplus-hide-cursor');
-    }
-    if (document.body && document.body.classList.contains('lyplus-hide-cursor')) {
-        document.body.classList.remove('lyplus-hide-cursor');
-    }
+function setCursorHidden(hidden) {
+    if (cursorHidden === hidden) return;
+    cursorHidden = hidden;
+    document.documentElement.classList.toggle('lyplus-hide-cursor', hidden);
+    document.body?.classList.toggle('lyplus-hide-cursor', hidden);
 }
 
-function hideCursor() {
-    if (isYTMusicFullscreen()) {
-        document.documentElement.classList.add('lyplus-hide-cursor');
-        if (document.body) {
-            document.body.classList.add('lyplus-hide-cursor');
-        }
+function checkIdle() {
+    idleTimer = 0;
+    const remaining = CURSOR_IDLE_DELAY - (performance.now() - lastActivity);
+    if (remaining > 16) {
+        idleTimer = setTimeout(checkIdle, remaining);
+        return;
     }
+    if (isFullscreen) setCursorHidden(true);
 }
 
-function resetCursorIdleTimer() {
-    showCursor();
-    if (cursorIdleTimeout) {
-        clearTimeout(cursorIdleTimeout);
-        cursorIdleTimeout = null;
-    }
-
-    if (isYTMusicFullscreen()) {
-        cursorIdleTimeout = setTimeout(hideCursor, CURSOR_IDLE_DELAY);
-    }
+function onActivity() {
+    lastActivity = performance.now();
+    if (cursorHidden) setCursorHidden(false);
+    if (!idleTimer) idleTimer = setTimeout(checkIdle, CURSOR_IDLE_DELAY);
 }
 
-function handleFullscreenStateChange() {
-    if (isYTMusicFullscreen()) {
-        resetCursorIdleTimer();
+function applyFullscreenState() {
+    fsCheckQueued = false;
+    const next = computeFullscreen();
+    if (next === isFullscreen) return;
+    isFullscreen = next;
+
+    if (next) {
+        activityAbort = new AbortController();
+        const opts = { passive: true, signal: activityAbort.signal };
+        window.addEventListener('pointermove', onActivity, opts);
+        window.addEventListener('pointerdown', onActivity, opts);
+        window.addEventListener('keydown', onActivity, opts);
+        window.addEventListener('wheel', onActivity, opts);
+        window.addEventListener('blur', () => setCursorHidden(false), opts);
+        onActivity();
     } else {
-        if (cursorIdleTimeout) {
-            clearTimeout(cursorIdleTimeout);
-            cursorIdleTimeout = null;
-        }
-        showCursor();
+        activityAbort?.abort();
+        activityAbort = null;
+        clearTimeout(idleTimer);
+        idleTimer = 0;
+        setCursorHidden(false);
     }
+}
+
+function queueFullscreenCheck() {
+    if (fsCheckQueued) return;
+    fsCheckQueued = true;
+    requestAnimationFrame(applyFullscreenState);
 }
 
 function initFullscreenCursorManager() {
-    const activityEvents = ['mousemove', 'pointermove', 'mousedown', 'keydown', 'wheel', 'touchstart'];
-    activityEvents.forEach((eventType) => {
-        window.addEventListener(eventType, () => {
-            if (isYTMusicFullscreen()) {
-                resetCursorIdleTimer();
-            } else {
-                showCursor();
-            }
-        }, { passive: true });
-    });
+    document.addEventListener('fullscreenchange', queueFullscreenCheck, { passive: true });
+    document.addEventListener('webkitfullscreenchange', queueFullscreenCheck, { passive: true });
 
-    window.addEventListener('blur', showCursor);
-    document.addEventListener('fullscreenchange', handleFullscreenStateChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenStateChange);
-
-    const observer = new MutationObserver(() => {
-        handleFullscreenStateChange();
-    });
-
-    observer.observe(document.documentElement, {
+    new MutationObserver(queueFullscreenCheck).observe(document.documentElement, {
         attributes: true,
         subtree: true,
         attributeFilter: ['player-fullscreened', 'player-ui-state']
     });
+
+    applyFullscreenState();
 }
 
 initFullscreenCursorManager();

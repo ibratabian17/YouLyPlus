@@ -1,16 +1,8 @@
-(async function () {
-  async function waitForDOMReady() {
-    if (document.readyState === 'complete' || document.readyState === 'interactive') return;
-    await new Promise((resolve) => document.addEventListener('DOMContentLoaded', resolve, { once: true }));
-  }
+(function () {
+  'use strict';
 
-  await waitForDOMReady();
-
-  let middleTabObserver = null;
-  let tabContainerObserver = null;
-  let sidePanelObserver = null;
-  let currentMiddleTab = null;
-  let isUpdating = false;
+  if (window.__lyplusForceTab) return;
+  window.__lyplusForceTab = true;
 
   const SELECTORS = {
     TAB_CONTAINER: 'ytmusic-player-page .tab-header-container, #tabs-content, tp-yt-paper-tabs',
@@ -22,197 +14,196 @@
     APP_LAYOUT: 'ytmusic-app-layout'
   };
 
-  function forceActivateMiddleTab(tab) {
-    if (!tab || isUpdating) return;
+  const RELEVANT_TAGS = new Set(['tp-yt-paper-tabs', 'tp-yt-paper-tab']);
 
-    const needsUpdate = 
+  const state = {
+    container: null,
+    tabs: [],
+    middleTab: null,
+    sidePanel: null
+  };
+
+  let rootObserver = null;
+  let containerObserver = null;
+  let middleTabObserver = null;
+  let sidePanelObserver = null;
+
+  let syncQueued = false;
+  let activateQueued = false;
+
+  const ac = new AbortController();
+  const boundContainers = new WeakSet();
+
+  const raf = (fn) => requestAnimationFrame(fn);
+
+  function needsActivation(tab) {
+    return (
       tab.hasAttribute('disabled') ||
-      tab.getAttribute('aria-selected') !== 'true' ||
-      tab.getAttribute('tabindex') !== '0' ||
-      !tab.classList.contains('iron-selected') ||
-      tab.style.pointerEvents !== 'auto';
+      tab.getAttribute('aria-disabled') === 'true' ||
+      tab.style.pointerEvents !== 'auto'
+    );
+  }
 
-    if (!needsUpdate) return;
-
-    isUpdating = true;
-    if (middleTabObserver) middleTabObserver.disconnect();
-
-    requestAnimationFrame(() => {
+  function queueActivate() {
+    if (activateQueued) return;
+    activateQueued = true;
+    raf(() => {
+      activateQueued = false;
+      const tab = state.middleTab;
+      if (!tab || !tab.isConnected || !needsActivation(tab)) return;
       tab.removeAttribute('disabled');
       tab.setAttribute('aria-disabled', 'false');
-      tab.setAttribute('tabindex', '0');
-      tab.setAttribute('aria-selected', 'true');
-      tab.classList.add('iron-selected');
       tab.style.pointerEvents = 'auto';
-      
-      setTimeout(() => { 
-        isUpdating = false;
-        if (middleTabObserver && currentMiddleTab === tab) {
-            middleTabObserver.observe(tab, { 
-                attributes: true, 
-                attributeFilter: ['class', 'aria-selected', 'disabled'] 
-            });
-        }
-      }, 50);
     });
   }
 
   function handleTabInteraction(clickedIndex, middleIndex) {
     const lyricsElement = document.querySelector(SELECTORS.LYRICS);
-    const sidePanel = document.querySelector(SELECTORS.SIDE_PANEL);
-
     if (!lyricsElement) return;
 
-    const shouldShow = clickedIndex === middleIndex;
-    
-    if (shouldShow) {
-        lyricsElement.style.display = 'block';
-        
-        if (sidePanel) {
-            if (getComputedStyle(sidePanel).display === 'none') {
-                sidePanel.style.display = 'flex';
-            }
-            if (sidePanel.hasAttribute('inert')) sidePanel.removeAttribute('inert');
-            if (sidePanel.hasAttribute('hidden')) sidePanel.removeAttribute('hidden');
-        }
+    if (clickedIndex !== middleIndex) {
+      lyricsElement.style.display = 'none';
+      return;
+    }
 
-        const scrollContainer = document.querySelector(SELECTORS.SCROLL_CONTAINER);
-        if (scrollContainer) scrollContainer.scrollTop = 0;
-        
-        const videoElement = document.querySelector(SELECTORS.VIDEO);
-        if (videoElement && typeof window.scrollActiveLine === 'function') {
-            try { window.scrollActiveLine(videoElement.currentTime, true); } catch (e) {}
-        }
-    } else {
-        lyricsElement.style.display = 'none';
+    lyricsElement.style.display = 'block';
+
+    const sidePanel = state.sidePanel || document.querySelector(SELECTORS.SIDE_PANEL);
+    if (sidePanel) {
+      if (getComputedStyle(sidePanel).display === 'none') sidePanel.style.display = 'flex';
+      sidePanel.removeAttribute('inert');
+      sidePanel.removeAttribute('hidden');
+    }
+
+    const scrollContainer = document.querySelector(SELECTORS.SCROLL_CONTAINER);
+    if (scrollContainer) scrollContainer.scrollTop = 0;
+
+    const video = document.querySelector(SELECTORS.VIDEO);
+    if (video && typeof window.scrollActiveLine === 'function') {
+      try { window.scrollActiveLine(video.currentTime, true); } catch (_) {}
     }
   }
 
-  function attachTouchLogic(tab, index, middleIndex) {
-    if (tab.dataset.forceTabEnhanced === 'true') return;
+  function bindContainer(container) {
+    if (boundContainers.has(container)) return;
+    boundContainers.add(container);
 
-    const MOVE_THRESHOLD = 10;
-    let startX = 0, startY = 0;
-
-    tab.addEventListener('touchstart', (e) => {
-      const t = e.touches[0];
-      startX = t.clientX;
-      startY = t.clientY;
-    }, { passive: true });
-
-    tab.addEventListener('touchend', (e) => {
-      const t = e.changedTouches[0];
-      if (Math.abs(t.clientX - startX) < MOVE_THRESHOLD &&
-          Math.abs(t.clientY - startY) < MOVE_THRESHOLD) {
-        handleTabInteraction(index, middleIndex);
-      }
-    }, { passive: true });
-
-    tab.addEventListener('click', () => {
-      handleTabInteraction(index, middleIndex);
-    }, { passive: true });
-
-    tab.dataset.forceTabEnhanced = 'true';
+    container.addEventListener('click', (e) => {
+      const tab = e.target.closest?.(SELECTORS.TAB);
+      if (!tab) return;
+      const index = state.tabs.indexOf(tab);
+      if (index === -1) return;
+      handleTabInteraction(index, Math.floor(state.tabs.length / 3));
+    }, { capture: true, passive: true, signal: ac.signal });
   }
 
-  function processTabs(container) {
-    const tabs = Array.from(container.querySelectorAll(SELECTORS.TAB));
-    if (tabs.length < 3) return;
+  function findContainer() {
+    if (state.container && state.container.isConnected) return state.container;
+    state.container = document.querySelector(SELECTORS.TAB_CONTAINER);
+    return state.container;
+  }
 
-    const middleIndex = Math.floor(tabs.length / 3);
-    const middleTab = tabs[middleIndex];
+  function sync() {
+    syncQueued = false;
 
-    forceActivateMiddleTab(middleTab);
+    const container = findContainer();
+    if (!container) return;
 
-    if (currentMiddleTab !== middleTab) {
-      if (middleTabObserver) middleTabObserver.disconnect();
-      
-      currentMiddleTab = middleTab;
-      middleTabObserver = new MutationObserver(() => {
-         if (!isUpdating) forceActivateMiddleTab(middleTab);
-      });
-      
-      middleTabObserver.observe(middleTab, { 
-        attributes: true, 
-        attributeFilter: ['class', 'aria-selected', 'disabled'] 
+    const list = container.querySelectorAll(SELECTORS.TAB);
+    if (list.length < 3) return;
+
+    state.tabs = Array.from(list);
+    const middleTab = state.tabs[Math.floor(state.tabs.length / 3)];
+
+    if (middleTab !== state.middleTab) {
+      middleTabObserver?.disconnect();
+      state.middleTab = middleTab;
+      middleTabObserver = new MutationObserver(queueActivate);
+      middleTabObserver.observe(middleTab, {
+        attributes: true,
+        attributeFilter: ['disabled', 'aria-disabled']
       });
     }
+    queueActivate();
 
-    tabs.forEach((tab, index) => {
-      attachTouchLogic(tab, index, middleIndex);
-    });
+    bindContainer(container);
+
+    if (containerObserver?.__target !== container) {
+      containerObserver?.disconnect();
+      containerObserver = new MutationObserver(queueSync);
+      containerObserver.__target = container;
+      containerObserver.observe(container, { childList: true, subtree: true });
+    }
+
+    initSidePanelObserver();
+  }
+
+  function queueSync() {
+    if (syncQueued) return;
+    syncQueued = true;
+    raf(sync);
   }
 
   function initSidePanelObserver() {
     const sidePanel = document.querySelector(SELECTORS.SIDE_PANEL);
-    if (!sidePanel) return;
-    
-    if (sidePanelObserver) sidePanelObserver.disconnect();
+    if (!sidePanel || sidePanel === state.sidePanel) return;
+
+    sidePanelObserver?.disconnect();
+    state.sidePanel = sidePanel;
 
     const ensureActive = () => {
-      const lyricsElement = document.querySelector(SELECTORS.LYRICS);
-      if (lyricsElement && lyricsElement.style.display === 'block') {
-          if (sidePanel.hasAttribute('inert')) sidePanel.removeAttribute('inert');
-          if (sidePanel.hasAttribute('hidden')) sidePanel.removeAttribute('hidden');
-          if (getComputedStyle(sidePanel).display === 'none') sidePanel.style.display = 'flex';
-      }
+      const lyrics = document.querySelector(SELECTORS.LYRICS);
+      if (!lyrics || lyrics.style.display !== 'block') return;
+      sidePanel.removeAttribute('inert');
+      sidePanel.removeAttribute('hidden');
+      if (getComputedStyle(sidePanel).display === 'none') sidePanel.style.display = 'flex';
     };
-    
+
     ensureActive();
 
-    sidePanelObserver = new MutationObserver((mutations) => {
-        if (mutations.some(m => m.type === 'attributes')) ensureActive();
-    });
-    
-    sidePanelObserver.observe(sidePanel, { 
-        attributes: true, 
-        attributeFilter: ['inert', 'hidden', 'style'] 
+    sidePanelObserver = new MutationObserver(ensureActive);
+    sidePanelObserver.observe(sidePanel, {
+      attributes: true,
+      attributeFilter: ['inert', 'hidden', 'style']
     });
   }
 
-  const mainObserver = new MutationObserver((mutations) => {
-    let shouldUpdate = false;
-    for (const m of mutations) {
-        if (m.target && (
-            m.target.id === 'tabs-content' || 
-            m.target.classList?.contains('tab-header-container') ||
-            m.target.tagName === 'TP-YT-PAPER-TABS'
-        )) {
-            shouldUpdate = true;
-            break;
+  function onRootMutations(mutations) {
+    for (let i = 0; i < mutations.length; i++) {
+      const added = mutations[i].addedNodes;
+      for (let j = 0; j < added.length; j++) {
+        const n = added[j];
+        if (n.nodeType !== 1) continue;
+        const name = n.localName;
+        if (name.indexOf('-') !== -1 || RELEVANT_TAGS.has(name)) {
+          queueSync();
+          return;
         }
-        if (m.addedNodes.length > 0) {
-            shouldUpdate = true;
-            break;
-        }
-    }
-
-    if (!shouldUpdate) return;
-
-    const tabContainer = document.querySelector(SELECTORS.TAB_CONTAINER);
-
-    if (tabContainer) {
-      processTabs(tabContainer);
-
-      if (!tabContainerObserver) {
-        tabContainerObserver = new MutationObserver(() => {
-          processTabs(tabContainer);
-        });
-        tabContainerObserver.observe(tabContainer, { childList: true, subtree: false });
       }
     }
+  }
 
-    initSidePanelObserver();
-  });
+  function start() {
+    const root = document.querySelector(SELECTORS.APP_LAYOUT) || document.body;
+    rootObserver = new MutationObserver(onRootMutations);
+    rootObserver.observe(root, { childList: true, subtree: true });
 
-  const appRoot = document.querySelector(SELECTORS.APP_LAYOUT) || document.body;
-  mainObserver.observe(appRoot, { childList: true, subtree: true });
+    document.addEventListener('yt-navigate-finish', queueSync, { passive: true, signal: ac.signal });
 
-  window.addEventListener('beforeunload', () => {
-    mainObserver.disconnect();
-    if (tabContainerObserver) tabContainerObserver.disconnect();
-    if (middleTabObserver) middleTabObserver.disconnect();
-    if (sidePanelObserver) sidePanelObserver.disconnect();
+    queueSync();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
+
+  window.addEventListener('pagehide', () => {
+    ac.abort();
+    rootObserver?.disconnect();
+    containerObserver?.disconnect();
+    middleTabObserver?.disconnect();
+    sidePanelObserver?.disconnect();
   }, { once: true });
-
 })();
