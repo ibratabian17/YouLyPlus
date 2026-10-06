@@ -4351,7 +4351,7 @@ class LyricsPlusRenderer {
 
     const knownSources = [
       "lyricsplus", "lyrics+", "apple", "apple music", "qq", "musixmatch", "musixmatch-word",
-      "unison", "lrclib", "lrcred", "binilyrics", "subtitles", "youtube captions", "youtube subtitles",
+      "unison", "lrclib", "lrcred", "lrc.red", "lrc-red", "binilyrics", "subtitles", "youtube captions", "youtube subtitles",
       "local", "local lyrics", "spotify", "kpoe", "customkpoe", "lyricfind"
     ];
     const configuredSources = (this.currentSettings?.lyricsSourceOrder || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);

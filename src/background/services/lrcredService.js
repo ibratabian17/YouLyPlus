@@ -80,10 +80,17 @@ export class LrcredService {
         title: match.track_name || songInfo.title,
         artist: match.artist_name || songInfo.artist,
         album: match.album_name || songInfo.album,
-        source: 'lrc.red'
+        source: 'lrc.red',
+        provider: 'lrcred'
       };
 
-      return DataParser.parseKPoeFormat(kpoeData);
+      const parsed = DataParser.parseKPoeFormat(kpoeData);
+      if (parsed) {
+        parsed.provider = 'lrcred';
+        if (!parsed.metadata) parsed.metadata = {};
+        parsed.metadata.provider = 'lrcred';
+      }
+      return parsed;
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('lrc.red error:', error);
