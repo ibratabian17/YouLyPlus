@@ -182,7 +182,8 @@ class LyricsPlusRenderer {
     this._userSelectedProvider = null;
     this.availableProviders = new Set();
     this._notFoundProviders = new Set();
-    this._saveOffsetTimeout = null;
+    this.saveLyricsOffsetFn = null;
+    this.getProviderContextFn = null;
     this._toastElement = null;
     this._toastTimeout = null;
     this.buttonsWrapper = null;
@@ -1405,7 +1406,7 @@ class LyricsPlusRenderer {
       songWritersDiv.append(label, document.createTextNode(" " + writers.join(", ")));
       metadataContainer.appendChild(songWritersDiv);
     }
-    if (this._isValidLyricsSource(lyrics.metadata?.source)) {
+    if (isValidLyricsSource(lyrics.metadata?.source, this.currentSettings, lyrics)) {
       const sourceDiv = document.createElement("span");
       sourceDiv.className = "lyrics-source-provider";
       sourceDiv.textContent = `${t("source")} ${lyrics.metadata.source}`;
@@ -1799,6 +1800,30 @@ class LyricsPlusRenderer {
    * @param {Function} fetchAndDisplayLyricsFn - The function to fetch and display lyrics.
    * @param {Function} setCurrentDisplayModeAndRefetchFn - The function to set display mode and refetch.
    */
+  setUserOffset(offsetMs) {
+    if (typeof offsetMs === "number") {
+      this.userOffsetMs = Math.round(offsetMs / 10) * 10;
+      this._updateOffsetDisplay();
+    }
+  }
+
+  /**
+   * Main entry point to display lyrics.
+   * Renders the UI and starts synchronization.
+   *
+   * @param {object} lyrics - The lyrics data object (type, data, metadata).
+   * @param {object} songInfo - Information about the currently playing song.
+   * @param {string} displayMode - The current display mode ('none', 'translate', 'romanize').
+   * @param {object} currentSettings - The current user settings.
+   * @param {Function} fetchAndDisplayLyricsFn - The function to fetch and display lyrics.
+   * @param {Function} setCurrentDisplayModeAndRefetchFn - The function to set display mode and refetch.
+   * @param {string} largerTextMode - Which text to enlarge.
+   * @param {number} offsetLatency - Audio context output latency.
+   * @param {Function} switchLyricsProviderFn - Function to switch lyrics provider.
+   * @param {Function} saveLyricsOffsetFn - Function to persist lyrics offset.
+   * @param {Function} getProviderContextFn - Function to resolve provider options context.
+   * @param {number} userOffsetMs - Initial user offset in milliseconds.
+   */
   displayLyrics(
     lyrics,
     songInfo,
@@ -1808,7 +1833,10 @@ class LyricsPlusRenderer {
     setCurrentDisplayModeAndRefetchFn,
     largerTextMode = "lyrics",
     offsetLatency = 0,
-    switchLyricsProviderFn = null
+    switchLyricsProviderFn = null,
+    saveLyricsOffsetFn = null,
+    getProviderContextFn = null,
+    userOffsetMs = 0
   ) {
     if (this.lastKnownSongInfo && songInfo && (this.lastKnownSongInfo.title !== songInfo.title || this.lastKnownSongInfo.artist !== songInfo.artist || this.lastKnownSongInfo.album !== songInfo.album)) {
       this._userSelectedProvider = null;
@@ -1832,26 +1860,11 @@ class LyricsPlusRenderer {
     if (switchLyricsProviderFn) {
       this.switchLyricsProviderFn = switchLyricsProviderFn;
     }
-
-    if (songInfo && typeof pBrowser !== "undefined" && pBrowser.runtime?.sendMessage) {
-      pBrowser.runtime.sendMessage({
-        type: 'GET_LYRICS_OFFSET',
-        songInfo
-      }).then(response => {
-        if (response && typeof response.offsetMs === 'number') {
-          this.userOffsetMs = response.offsetMs;
-          this._updateOffsetDisplay();
-        }
-      }).catch(err => console.warn('Failed to load lyrics offset:', err));
-
-      pBrowser.runtime.sendMessage({
-        type: 'GET_AVAILABLE_PROVIDERS',
-        songInfo
-      }).then(response => {
-        if (response?.success && Array.isArray(response.availableProviders)) {
-          this.setAvailableProviders(response.availableProviders);
-        }
-      }).catch(() => {});
+    this.saveLyricsOffsetFn = saveLyricsOffsetFn;
+    this.getProviderContextFn = getProviderContextFn;
+    if (typeof userOffsetMs === "number") {
+      this.userOffsetMs = userOffsetMs;
+      this._updateOffsetDisplay();
     }
 
     this.setTranslationLoading(false);
@@ -4350,57 +4363,6 @@ class LyricsPlusRenderer {
     this._renderOptionsMenuMain();
   }
 
-  /**
-   * Shared by the main options menu and the source picker.
-   * @returns {{providerKeys: string[], activeProvider: string, providerDisplayNames: object}}
-   */
-  _getProviderContext() {
-    const providerOrderStr = this.currentSettings?.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib';
-    const providerKeys = providerOrderStr.split(',').map(s => {
-      const trimmed = s.trim();
-      return trimmed === 'binilyrics' ? 'lrcred' : trimmed;
-    }).filter(Boolean);
-
-    if (this.currentSettings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
-      providerKeys.push('customKpoe');
-    }
-
-    const activeProvider = (
-      this._userSelectedProvider ||
-      this.currentLyrics?.provider ||
-      this.currentLyrics?.metadata?.provider ||
-      this._detectProviderFromSource(this.currentLyrics?.metadata?.source) ||
-      'kpoe'
-    ).toLowerCase();
-
-    const info = this.lastKnownSongInfo;
-    if ((info?.isVideo || info?.subtitle || activeProvider === 'subtitles') && !providerKeys.includes('subtitles')) {
-      providerKeys.push('subtitles');
-    }
-    if (activeProvider === 'local' && !providerKeys.includes('local')) {
-      providerKeys.push('local');
-    }
-    if ((info?.videoId || activeProvider === 'ytmusic') && !providerKeys.includes('ytmusic')) {
-      providerKeys.push('ytmusic');
-    }
-
-    const ytMusicDisplay = (activeProvider === 'ytmusic' ? this.currentLyrics?.metadata?.source : null)
-      || info?.ytMusicLyrics?.provider
-      || 'YouTube Music';
-    const providerDisplayNames = {
-      'lrcred': 'lrc.red',
-      'binilyrics': 'lrc.red',
-      'kpoe': 'Lyrics+',
-      'customKpoe': 'Custom Lyrics+',
-      'unison': 'Unison',
-      'lrclib': 'LRCLib',
-      'ytmusic': ytMusicDisplay,
-      'local': 'Local Lyrics',
-      'subtitles': 'YouTube Subtitles'
-    };
-    return { providerKeys, activeProvider, providerDisplayNames };
-  }
-
   _renderOptionsMenuMain() {
     if (!this.optionsDropdown) return;
     this.optionsDropdown.innerHTML = "";
@@ -4424,19 +4386,24 @@ class LyricsPlusRenderer {
     });
     this.optionsDropdown.appendChild(offsetOpt);
 
-    const { providerKeys, activeProvider, providerDisplayNames } = this._getProviderContext();
+    const { providerKeys, activeProvider, providerDisplayNames } = (this.getProviderContextFn || getLyricsProviderContext)(
+      this.lastKnownSongInfo,
+      this.currentLyrics,
+      this.currentSettings,
+      this._userSelectedProvider
+    );
 
     let availableList;
     if (this.availableProviders && this.availableProviders.size > 0) {
       availableList = Array.from(this.availableProviders).filter(p => !this._notFoundProviders?.has(p.toLowerCase()));
     } else {
-      availableList = providerKeys.filter(p => !this._notFoundProviders?.has(p.toLowerCase()));
+      availableList = (providerKeys || []).filter(p => !this._notFoundProviders?.has(p.toLowerCase()));
     }
 
     if (availableList.length > 1) {
       const sourceOpt = document.createElement("div");
       sourceOpt.className = "dropdown-option";
-      const activeProviderName = providerDisplayNames[activeProvider] || (activeProvider.charAt(0).toUpperCase() + activeProvider.slice(1));
+      const activeProviderName = providerDisplayNames[activeProvider] || (activeProvider ? activeProvider.charAt(0).toUpperCase() + activeProvider.slice(1) : "");
       sourceOpt.innerHTML = `
         <span class="dropdown-item-label">${t("changeLyricsSource") || "Change Lyrics Source"}</span>
         <div class="dropdown-item-right">
@@ -4526,29 +4493,6 @@ class LyricsPlusRenderer {
     this.optionsDropdown.appendChild(panel);
   }
 
-  _isValidLyricsSource(source) {
-    if (!source || typeof source !== "string") return false;
-    const s = source.trim().toLowerCase();
-    if (!s || s === "unknown" || s === "undefined" || s === "null" || s === "none" || s === "youtube music" || s === "ytmusic") return false;
-
-    const knownSources = [
-      "lyricsplus", "lyrics+", "apple", "apple music", "qq", "musixmatch", "musixmatch-word",
-      "unison", "lrclib", "lrcred", "lrc.red", "lrc-red", "binilyrics", "subtitles", "youtube captions", "youtube subtitles",
-      "local", "local lyrics", "spotify", "kpoe", "customkpoe", "lyricfind"
-    ];
-    const configuredSources = (this.currentSettings?.lyricsSourceOrder || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
-    const configuredProviders = (this.currentSettings?.lyricsProviderOrder || "").toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
-    const allValid = new Set([...knownSources, ...configuredSources, ...configuredProviders]);
-
-    if (Array.from(allValid).some(known => s.includes(known) || known.includes(s))) return true;
-
-    if (this.currentLyrics?.provider === 'ytmusic' || this.currentLyrics?.metadata?.provider === 'ytmusic') {
-      return true;
-    }
-
-    return false;
-  }
-
   setAvailableProviders(providers) {
     if (!this.availableProviders) this.availableProviders = new Set();
     if (Array.isArray(providers)) {
@@ -4562,7 +4506,7 @@ class LyricsPlusRenderer {
       this._userSelectedProvider ||
       this.currentLyrics?.provider ||
       this.currentLyrics?.metadata?.provider ||
-      this._detectProviderFromSource(this.currentLyrics?.metadata?.source)
+      detectLyricsProviderFromSource(this.currentLyrics?.metadata?.source)
     );
     if (activeProvider) {
       this.availableProviders.add(activeProvider.toLowerCase());
@@ -4576,20 +4520,6 @@ class LyricsPlusRenderer {
         this._renderOptionsMenuMain();
       }
     }
-  }
-
-  _detectProviderFromSource(source) {
-    if (!source) return '';
-    const s = source.toLowerCase();
-    if (s.includes('lrcred') || s.includes('lrc-red') || s.includes('lrc.red') || s.includes('bini')) return 'lrcred';
-    if (s.includes('unison')) return 'unison';
-    if (s.includes('lrclib')) return 'lrclib';
-    if (s.includes('local')) return 'local';
-    if (s.includes('subtitles') || s.includes('captions')) return 'subtitles';
-    if (s.includes('lyricfind')) return 'ytmusic';
-    if (s.includes('youtube music') || s.includes('ytmusic')) return 'ytmusic';
-    if (s.includes('apple') || s.includes('spotify') || s.includes('musixmatch') || s.includes('qq') || s.includes('kpoe') || s.includes('lyrics+')) return 'kpoe';
-    return '';
   }
 
   _renderOptionsMenuSources() {
@@ -4612,10 +4542,15 @@ class LyricsPlusRenderer {
     sep.className = "dropdown-separator";
     this.optionsDropdown.appendChild(sep);
 
-    const { providerKeys, activeProvider, providerDisplayNames } = this._getProviderContext();
+    const { providerKeys, activeProvider, providerDisplayNames } = (this.getProviderContextFn || getLyricsProviderContext)(
+      this.lastKnownSongInfo,
+      this.currentLyrics,
+      this.currentSettings,
+      this._userSelectedProvider
+    );
 
-    // Filter providers: hide any provider    // Filter providers: hide any provider that is not found on the list of available providers
-    const visibleProviders = providerKeys.filter((providerId) => {
+    // Filter providers: hide any provider that is not found on the list of available providers
+    const visibleProviders = (providerKeys || []).filter((providerId) => {
       const pLower = providerId.toLowerCase();
       if (this._notFoundProviders?.has(pLower)) return false;
       if (this.availableProviders && this.availableProviders.size > 0) {
@@ -4673,7 +4608,7 @@ class LyricsPlusRenderer {
     this.userOffsetMs = Math.round(newOffsetMs / 10) * 10;
     this._updateOffsetDisplay();
     if (this.lastKnownSongInfo) {
-      this._debouncedSaveOffset(this.lastKnownSongInfo, this.userOffsetMs);
+      (this.saveLyricsOffsetFn || saveLyricsOffset)(this.lastKnownSongInfo, this.userOffsetMs);
     }
     const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 - this.userOffsetMs;
     this._updateLyricsHighlight(currentTime, false);
@@ -4694,19 +4629,6 @@ class LyricsPlusRenderer {
       const ms = this.userOffsetMs || 0;
       previewEl.textContent = `${ms > 0 ? '+' : ''}${ms}ms`;
     }
-  }
-
-  _debouncedSaveOffset(songInfo, offsetMs) {
-    clearTimeout(this._saveOffsetTimeout);
-    this._saveOffsetTimeout = setTimeout(() => {
-      if (typeof pBrowser !== "undefined" && pBrowser.runtime?.sendMessage) {
-        pBrowser.runtime.sendMessage({
-          type: 'SAVE_LYRICS_OFFSET',
-          songInfo,
-          offsetMs
-        }).catch(err => console.warn('Failed to save offset:', err));
-      }
-    }, 400);
   }
 
   showToast(message, duration = 3000) {
@@ -4826,9 +4748,7 @@ class LyricsPlusRenderer {
       this._toastElement.remove();
       this._toastElement = null;
     }
-    if (this._saveOffsetTimeout) clearTimeout(this._saveOffsetTimeout);
     if (this._toastTimeout) clearTimeout(this._toastTimeout);
-    this._saveOffsetTimeout = null;
     this._toastTimeout = null;
     this._invalidateSpringConfig();
     this._invalidateElevationConfig();
@@ -4837,6 +4757,8 @@ class LyricsPlusRenderer {
     this.currentLyricsType = null;
     this._userSelectedProvider = null;
     this.switchLyricsProviderFn = null;
+    this.saveLyricsOffsetFn = null;
+    this.getProviderContextFn = null;
     if (this.availableProviders) this.availableProviders.clear();
     if (this._notFoundProviders) this._notFoundProviders.clear();
 

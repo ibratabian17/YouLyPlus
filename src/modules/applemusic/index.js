@@ -66,6 +66,7 @@ const LyricsPlusAPI = {
     updateCurrentTick: (...args) => lyricsRendererInstance?.updateCurrentTick(...args),
     setTranslationLoading: (...args) => lyricsRendererInstance?.setTranslationLoading(...args),
     showToast: (...args) => lyricsRendererInstance?.showToast(...args),
+    setUserOffset: (...args) => lyricsRendererInstance?.setUserOffset(...args),
     setAvailableProviders: (...args) => lyricsRendererInstance?.setAvailableProviders(...args)
 };
 

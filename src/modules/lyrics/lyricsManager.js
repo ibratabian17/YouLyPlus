@@ -14,6 +14,12 @@ let lastBaseLyrics = null;
 let lastTranslationResponse = null;
 let lastRomanizationResponse = null;
 
+let userOffsetMs = 0;
+let saveOffsetTimeout = null;
+let userSelectedProvider = null;
+const availableProviders = new Set();
+const notFoundProviders = new Set();
+
 // Debouncing to prevent rapid-fire requests
 let lyricsFetchDebounceTimer = null;
 let lastRequestedSongKey = null;
@@ -216,8 +222,8 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId) {
   }
 
   lastBaseLyrics = response.lyrics;
-  if (response.availableProviders && LyricsPlusAPI.setAvailableProviders) {
-    LyricsPlusAPI.setAvailableProviders(response.availableProviders);
+  if (response.availableProviders) {
+    setAvailableProviders(response.availableProviders);
   }
   return lastBaseLyrics;
 }
@@ -393,8 +399,162 @@ async function applySponsorBlock(lyrics, currentSong, fetchId) {
 
 
 /* =================================================================
-   RENDERING HELPERS
+   PROVIDER, SOURCE & OFFSET HELPERS (NON-RENDERING)
    ================================================================= */
+
+function detectLyricsProviderFromSource(source) {
+  if (!source) return '';
+  const s = source.toLowerCase();
+  if (s.includes('lrcred') || s.includes('lrc-red') || s.includes('lrc.red') || s.includes('bini')) return 'lrcred';
+  if (s.includes('unison')) return 'unison';
+  if (s.includes('lrclib')) return 'lrclib';
+  if (s.includes('local')) return 'local';
+  if (s.includes('subtitles') || s.includes('captions')) return 'subtitles';
+  if (s.includes('lyricfind')) return 'ytmusic';
+  if (s.includes('youtube music') || s.includes('ytmusic')) return 'ytmusic';
+  if (s.includes('apple') || s.includes('spotify') || s.includes('musixmatch') || s.includes('qq') || s.includes('kpoe') || s.includes('lyrics+')) return 'kpoe';
+  return '';
+}
+
+function isValidLyricsSource(source, settings = currentSettings, lyrics = lastBaseLyrics) {
+  if (!source || typeof source !== 'string') return false;
+  const s = source.trim().toLowerCase();
+  if (!s || s === 'unknown' || s === 'undefined' || s === 'null' || s === 'none' || s === 'youtube music' || s === 'ytmusic') return false;
+
+  const knownSources = [
+    'lyricsplus', 'lyrics+', 'apple', 'apple music', 'qq', 'musixmatch', 'musixmatch-word',
+    'unison', 'lrclib', 'lrcred', 'lrc.red', 'lrc-red', 'binilyrics', 'subtitles', 'youtube captions', 'youtube subtitles',
+    'local', 'local lyrics', 'spotify', 'kpoe', 'customkpoe', 'lyricfind'
+  ];
+  const configuredSources = (settings?.lyricsSourceOrder || '').toLowerCase().split(',').map(x => x.trim()).filter(Boolean);
+  const configuredProviders = (settings?.lyricsProviderOrder || '').toLowerCase().split(',').map(x => x.trim()).filter(Boolean);
+  const allValid = new Set([...knownSources, ...configuredSources, ...configuredProviders]);
+
+  if (Array.from(allValid).some(known => s.includes(known) || known.includes(s))) return true;
+
+  if (lyrics?.provider === 'ytmusic' || lyrics?.metadata?.provider === 'ytmusic') {
+    return true;
+  }
+
+  return false;
+}
+
+function getLyricsProviderContext(songInfo = lastKnownSongInfo, lyrics = lastBaseLyrics, settings = currentSettings, selectedProvider = userSelectedProvider) {
+  const providerOrderStr = settings?.lyricsProviderOrder || 'kpoe,lrcred,unison,lrclib';
+  const providerKeys = providerOrderStr.split(',').map(s => {
+    const trimmed = s.trim();
+    return trimmed === 'binilyrics' ? 'lrcred' : trimmed;
+  }).filter(Boolean);
+
+  if (settings?.customKpoeUrl && !providerKeys.includes('customKpoe')) {
+    providerKeys.push('customKpoe');
+  }
+
+  const activeProvider = (
+    selectedProvider ||
+    lyrics?.provider ||
+    lyrics?.metadata?.provider ||
+    detectLyricsProviderFromSource(lyrics?.metadata?.source) ||
+    'kpoe'
+  ).toLowerCase();
+
+  const info = songInfo || lastKnownSongInfo;
+  if ((info?.isVideo || info?.subtitle || activeProvider === 'subtitles') && !providerKeys.includes('subtitles')) {
+    providerKeys.push('subtitles');
+  }
+  if (activeProvider === 'local' && !providerKeys.includes('local')) {
+    providerKeys.push('local');
+  }
+  if ((info?.videoId || activeProvider === 'ytmusic') && !providerKeys.includes('ytmusic')) {
+    providerKeys.push('ytmusic');
+  }
+
+  const ytMusicDisplay = (activeProvider === 'ytmusic' ? lyrics?.metadata?.source : null)
+    || info?.ytMusicLyrics?.provider
+    || 'YouTube Music';
+  const providerDisplayNames = {
+    'lrcred': 'lrc.red',
+    'binilyrics': 'lrc.red',
+    'kpoe': 'Lyrics+',
+    'customKpoe': 'Custom Lyrics+',
+    'unison': 'Unison',
+    'lrclib': 'LRCLib',
+    'ytmusic': ytMusicDisplay,
+    'local': 'Local Lyrics',
+    'subtitles': 'YouTube Subtitles'
+  };
+  return { providerKeys, activeProvider, providerDisplayNames };
+}
+
+function saveLyricsOffset(songInfo, offsetMs) {
+  userOffsetMs = offsetMs;
+  clearTimeout(saveOffsetTimeout);
+  saveOffsetTimeout = setTimeout(() => {
+    if (typeof pBrowser !== 'undefined' && pBrowser.runtime?.sendMessage) {
+      pBrowser.runtime.sendMessage({
+        type: 'SAVE_LYRICS_OFFSET',
+        songInfo,
+        offsetMs
+      }).catch(err => console.warn('Failed to save offset:', err));
+    }
+  }, 400);
+}
+
+async function loadLyricsOffset(songInfo) {
+  if (!songInfo || typeof pBrowser === 'undefined' || !pBrowser.runtime?.sendMessage) return 0;
+  try {
+    const response = await pBrowser.runtime.sendMessage({
+      type: 'GET_LYRICS_OFFSET',
+      songInfo
+    });
+    if (response && typeof response.offsetMs === 'number') {
+      userOffsetMs = response.offsetMs;
+      if (LyricsPlusAPI.setUserOffset) {
+        LyricsPlusAPI.setUserOffset(response.offsetMs);
+      }
+      return response.offsetMs;
+    }
+  } catch (err) {
+    console.warn('Failed to load lyrics offset:', err);
+  }
+  return 0;
+}
+
+async function loadAvailableProviders(songInfo) {
+  if (!songInfo || typeof pBrowser === 'undefined' || !pBrowser.runtime?.sendMessage) return;
+  try {
+    const response = await pBrowser.runtime.sendMessage({
+      type: 'GET_AVAILABLE_PROVIDERS',
+      songInfo
+    });
+    if (response?.success && Array.isArray(response.availableProviders)) {
+      setAvailableProviders(response.availableProviders);
+    }
+  } catch (err) {}
+}
+
+function setAvailableProviders(providers) {
+  if (Array.isArray(providers)) {
+    providers.forEach(p => {
+      if (p && !notFoundProviders.has(p.toLowerCase())) {
+        availableProviders.add(p.toLowerCase());
+      }
+    });
+  }
+  const activeProvider = (
+    userSelectedProvider ||
+    lastBaseLyrics?.provider ||
+    lastBaseLyrics?.metadata?.provider ||
+    detectLyricsProviderFromSource(lastBaseLyrics?.metadata?.source)
+  );
+  if (activeProvider) {
+    availableProviders.add(activeProvider.toLowerCase());
+  }
+
+  if (LyricsPlusAPI.setAvailableProviders) {
+    LyricsPlusAPI.setAvailableProviders(Array.from(availableProviders));
+  }
+}
 
 function getProviderDisplayName(provider, lyrics) {
   const map = {
@@ -417,7 +577,7 @@ async function switchLyricsProvider(providerId) {
   const baseId = currentSong.videoId || currentSong.appleId || currentSong.songId || `${currentSong.title}-${currentSong.artist}`;
   const fetchId = `${baseId}__${++fetchSessionCounter}`;
   currentFetchMediaId = fetchId;
-  const providerName = getProviderDisplayName(providerId);
+  const providerName = getProviderDisplayName(providerId, lastBaseLyrics);
 
   try {
     const response = await pBrowser.runtime.sendMessage({
@@ -432,8 +592,12 @@ async function switchLyricsProvider(providerId) {
     }
 
     if (response?.success && response.lyrics) {
-      if (response.availableProviders && LyricsPlusAPI.setAvailableProviders) {
-        LyricsPlusAPI.setAvailableProviders(response.availableProviders);
+      userSelectedProvider = providerId;
+      availableProviders.add(providerId.toLowerCase());
+      if (response.availableProviders) {
+        setAvailableProviders(response.availableProviders);
+      } else if (LyricsPlusAPI.setAvailableProviders) {
+        LyricsPlusAPI.setAvailableProviders(Array.from(availableProviders));
       }
 
       // Clear previous translation and romanization responses as lyrics lines/timing differ
@@ -457,6 +621,8 @@ async function switchLyricsProvider(providerId) {
       }
       return true;
     } else {
+      notFoundProviders.add(providerId.toLowerCase());
+      availableProviders.delete(providerId.toLowerCase());
       if (LyricsPlusAPI.showToast) {
         const notFoundMsg = (typeof t === 'function' && t("sourceNotFound")) || `No lyrics found from ${providerName}`;
         LyricsPlusAPI.showToast(notFoundMsg);
@@ -485,7 +651,10 @@ function callDisplayLyricsAPI(lyrics, currentSong, displayMode) {
     setCurrentDisplayModeAndRender,
     currentSettings.largerTextMode,
     audioCtx.outputLatency || 0,
-    switchLyricsProvider
+    switchLyricsProvider,
+    saveLyricsOffset,
+    getLyricsProviderContext,
+    userOffsetMs
   );
 }
 
@@ -588,6 +757,21 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
   try {
     const effectiveMode = resolveEffectiveMode(isNewSong);
     currentDisplayMode = effectiveMode;
+
+    const isDifferentSong =
+      !lastKnownSongInfo ||
+      lastKnownSongInfo.title !== currentSong.title ||
+      lastKnownSongInfo.artist !== currentSong.artist ||
+      lastKnownSongInfo.album !== currentSong.album;
+
+    if (isNewSong || isDifferentSong) {
+      userSelectedProvider = null;
+      availableProviders.clear();
+      notFoundProviders.clear();
+      userOffsetMs = 0;
+      loadLyricsOffset(currentSong);
+      loadAvailableProviders(currentSong);
+    }
 
     const baseLyrics = await fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId);
     if (!baseLyrics) return;
