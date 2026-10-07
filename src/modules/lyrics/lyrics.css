@@ -91,7 +91,7 @@
     transform: translateZ(1px);
     transition: opacity 0.3s ease, transform 0.4s cubic-bezier(.41, 0, .12, .99) var(--lyrics-line-delay, 0ms), filter 0.3s ease;
     content-visibility: auto;
-    contain-intrinsic-size: auto;
+    contain-intrinsic-size: auto 3.5em;
     text-rendering: optimizeLegibility;
     white-space: pre-wrap;
     overflow-wrap: break-word;
