@@ -5,9 +5,12 @@ class LyricsPlusRenderer {
    */
   static _RTL_RE = /[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF\u08A0-\u08FF\uFB50-\uFDCF\uFDF0-\uFDFF\uFE70-\uFEFF]/;
   static _CJK_RE = /[\u4E00-\u9FFF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/;
+  static _NEED_SPLIT_RE = /[\u4E00-\u9FFF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF]/;
   static _LATIN_RE = /^[\p{Script=Latin}\p{N}\p{P}\p{S}\s]*$/u;
   static _BIDI_CHECK_RE = /[\p{Script=Latin}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Cyrillic}]/u;
   static _LETTER_OR_NUM_RE = /[\p{L}\p{N}]/u;
+  static _NEED_SPLIT_CHAR_RE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
+  static _NEED_SPLIT_ONLY_RE = /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\u30FC\p{P}\p{S}\s]+$/u;
   static _TRAILING_PUNCT_RE = /^[!?.,;:~…‥。、！？]/;
   static _FONT_SIZE_RE = /(\d+(?:\.\d+)?)px/;
   static _SEGMENTER = typeof Intl !== "undefined" && typeof Intl.Segmenter === "function" ? new Intl.Segmenter() : null;
@@ -43,6 +46,24 @@ class LyricsPlusRenderer {
       for (const ch of text) add(ch);
     }
     return merged;
+  }
+
+  static _isNeedSplitOnly(text) {
+    return !!text &&
+      LyricsPlusRenderer._NEED_SPLIT_CHAR_RE.test(text) &&
+      LyricsPlusRenderer._NEED_SPLIT_ONLY_RE.test(text);
+  }
+
+  static _segmentNeedSplit(text) {
+    const out = [];
+    const seg = LyricsPlusRenderer._SEGMENTER;
+    const add = (ch) => {
+      if (out.length && /^\s+$/.test(ch)) out[out.length - 1] += ch;
+      else out.push(ch);
+    };
+    if (seg) for (const x of seg.segment(text)) add(x.segment);
+    else for (const ch of text) add(ch);
+    return out;
   }
 
   /**
@@ -290,6 +311,68 @@ class LyricsPlusRenderer {
     return debounced;
   }
 
+  _splitNeedSplitSyllable(s) {
+    const text = s && s.text;
+    if (!text || !LyricsPlusRenderer._isNeedSplitOnly(text)) return null;
+    if (!Number.isFinite(s.time) || !Number.isFinite(s.duration)) return null;
+
+    let parts = LyricsPlusRenderer._segmentNeedSplit(text);
+    if (s.isBackground) {
+      const merged = [];
+      let pendingOpen = "";
+      for (const part of parts) {
+        if (/^\(\s*$/.test(part)) { pendingOpen += part; continue; }
+        if (/^\)\s*$/.test(part) && merged.length) { merged[merged.length - 1] += part; continue; }
+        merged.push(pendingOpen + part);
+        pendingOpen = "";
+      }
+      if (pendingOpen) merged.length ? (merged[merged.length - 1] += pendingOpen) : merged.push(pendingOpen);
+      parts = merged;
+    }
+    const n = parts.length;
+    if (n < 2) return null;
+
+    const font = "400 16px sans-serif";
+    let widths = parts.map((t) => Math.max(0, this._getTextWidth(t.replace(/[()]/g, "").trim(), font)));
+    let total = widths.reduce((a, b) => a + b, 0);
+    if (!(total > 0)) { widths = parts.map(() => 1); total = n; }
+
+    const end = s.time + s.duration;
+    const pieces = [];
+    let cum = 0;
+    for (let i = 0; i < n; i++) {
+      const start = i === 0 ? s.time : Math.round(s.time + (s.duration * cum) / total);
+      cum += widths[i];
+      const stop = i === n - 1 ? end : Math.round(s.time + (s.duration * cum) / total);
+      const piece = Object.assign({}, s, {
+        text: parts[i],
+        time: start,
+        duration: Math.max(0, stop - start),
+        romanizedText: undefined,
+        _origSyl: s,
+      });
+      if ("isLineEnding" in s) piece.isLineEnding = i === n - 1 ? s.isLineEnding : false;
+      pieces.push(piece);
+    }
+    return pieces;
+  }
+
+  _splitNeedSplitSyllables(syllabus) {
+    if (!syllabus || !syllabus.length) return syllabus;
+    let changed = false;
+    const out = [];
+    for (const s of syllabus) {
+      const pieces = this._splitNeedSplitSyllable(s);
+      if (pieces) {
+        changed = true;
+        for (const piece of pieces) out.push(piece);
+      } else {
+        out.push(s);
+      }
+    }
+    return changed ? out : syllabus;
+  }
+
   _getDataText(normal, isOriginal = true) {
     if (!normal) return "";
 
@@ -332,6 +415,15 @@ class LyricsPlusRenderer {
    */
   _isRTL(text) {
     return LyricsPlusRenderer._RTL_RE.test(text);
+  }
+
+  /**
+   * A helper method to determine if a text string contains characters from scripts without spaces.
+   * @param {string} text - The text to check.
+   * @returns {boolean} - True if the text contains non-spaced script characters.
+   */
+  _isNeedSplit(text) {
+    return LyricsPlusRenderer._NEED_SPLIT_RE.test(text);
   }
 
   /**
@@ -656,6 +748,8 @@ class LyricsPlusRenderer {
       let pendingSyllable = null;
       let pendingSyllableFont = null;
 
+      const renderSyllabus = this._splitNeedSplitSyllables(line.syllabus);
+
       const isLineBiDi = line.text &&
         this._isRTL(line.text) &&
         LyricsPlusRenderer._BIDI_CHECK_RE.test(line.text);
@@ -801,9 +895,22 @@ class LyricsPlusRenderer {
         const characterData = [];
         const syllableElements = [];
 
+        let prevOrig = null;
+        let wrap = null;
+        let sylParent = null; 
         wordBuffer.forEach((s, idx) => {
-          const wrap = document.createElement("span");
-          wrap.className = "lyrics-syllable-wrap";
+          if (!(s._origSyl && s._origSyl === prevOrig)) {
+            wrap = document.createElement("span");
+            wrap.className = "lyrics-syllable-wrap";
+            wordSpan.appendChild(wrap);
+            sylParent = wrap;
+            if (s._origSyl) {
+              sylParent = document.createElement("span");
+              sylParent.className = "lyrics-syllable-letters";
+              wrap.appendChild(sylParent);
+            }
+          }
+          prevOrig = s._origSyl || null;
 
           const sylSpan = createSyllableElement(s, totalDuration, idx, s.isBackground || false);
 
@@ -830,9 +937,8 @@ class LyricsPlusRenderer {
             sylSpan._wipeRatio = 1;
           }
 
-          wrap.appendChild(sylSpan);
+          sylParent.appendChild(sylSpan);
           syllableElements.push(sylSpan);
-          wordSpan.appendChild(wrap);
         });
         for (let _si = 0; _si < syllableElements.length; _si++) {
           syllableElements[_si]._isGrowable = shouldEmphasize;
@@ -932,10 +1038,10 @@ class LyricsPlusRenderer {
         const logicalWordGroups = [];
         let currentGroupBuffer = [];
 
-        line.syllabus.forEach((s, idx) => {
+        renderSyllabus.forEach((s, idx) => {
           currentGroupBuffer.push(s);
           const syllableText = this._getDataText(s);
-          const nextSyllable = line.syllabus[idx + 1];
+          const nextSyllable = renderSyllabus[idx + 1];
 
           const endsWithDelimiter =
             s.isLineEnding ||
@@ -984,7 +1090,12 @@ class LyricsPlusRenderer {
             groupDuration >= 1000;
 
           if (isGroupGrowable) {
-            renderWordSpan(group, true, isLastGroupInContainer);
+            const origGroup = [];
+            for (const p of group) {
+              const o = p._origSyl || p;
+              if (origGroup[origGroup.length - 1] !== o) origGroup.push(o);
+            }
+            renderWordSpan(origGroup, true, isLastGroupInContainer);
           } else {
             let visualWordBuffer = [];
             group.forEach((s, idxInGroup) => {
@@ -2679,7 +2790,11 @@ class LyricsPlusRenderer {
   }
 
   _getInterWordSpaceWidth(syl, cs) {
-    const wrap = syl.parentElement;
+    let wrap = syl.parentElement;
+    if (wrap && wrap.classList.contains("lyrics-syllable-letters")) {
+      if (syl.nextElementSibling) return 0;
+      wrap = wrap.parentElement;
+    }
     if (!wrap || !wrap.classList.contains("lyrics-syllable-wrap") || wrap.nextSibling) return 0;
     const wordEl = wrap.parentElement;
     const next = wordEl && wordEl.nextSibling;
