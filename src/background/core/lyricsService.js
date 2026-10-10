@@ -119,7 +119,7 @@ export class LyricsService {
       }
 
       const settings = await SettingsManager.get({ appleMusicTTMLBypass: false });
-      const lyricsJsonType = songInfo.lyricsJSON.type.toUpperCase();
+      const lyricsJsonType = (songInfo.lyricsJSON.type || '').toUpperCase();
 
       const embeddedResult = {
         lyrics: DataParser.parseKPoeFormat(songInfo.lyricsJSON),
@@ -189,7 +189,8 @@ export class LyricsService {
     }
 
     if (embeddedFallback) {
-      if (!result || (result.type && result.type.toUpperCase() !== "WORD")) {
+      const resType = (result?.lyrics?.type || result?.type || '').toUpperCase();
+      if (!result || resType !== "WORD") {
         console.log('Fetched lyrics not WORD synced. Reverting to embedded Apple Music lyrics.');
         return embeddedFallback;
       }
@@ -345,24 +346,39 @@ export class LyricsService {
       const results = new Array(promises.length).fill(undefined);
       const pending = new Set(promises.map((_, i) => i));
       let won = false;
+      let graceTimer = null;
 
       const tryResolve = () => {
         if (won) return;
 
         const bestIdx = results.findIndex(
-          (r, i) => !pending.has(i) && this.scoreLyrics(r) === 3
+          (r, i) => !pending.has(i) && this.scoreLyrics(r) >= 3200
         );
 
         if (bestIdx !== -1) {
           const blockedByEarlier = [...pending].some(i => i < bestIdx);
           if (!blockedByEarlier) {
             won = true;
+            if (graceTimer) clearTimeout(graceTimer);
             return resolve(results[bestIdx]);
           }
         }
 
+        const hasWordSync = results.some((r, i) => !pending.has(i) && this.scoreLyrics(r) >= 3000);
+        if (hasWordSync && !graceTimer && pending.size > 0) {
+          graceTimer = setTimeout(() => {
+            if (won) return;
+            won = true;
+            const best = results.reduce((b, r) =>
+              this.scoreLyrics(r) > this.scoreLyrics(b) ? r : b
+              , null);
+            resolve(best);
+          }, 400);
+        }
+
         if (pending.size === 0) {
           won = true;
+          if (graceTimer) clearTimeout(graceTimer);
           const best = results.reduce((b, r) =>
             this.scoreLyrics(r) > this.scoreLyrics(b) ? r : b
             , null);
@@ -382,10 +398,65 @@ export class LyricsService {
 
   static scoreLyrics(lyrics) {
     if (Utilities.isEmptyLyrics(lyrics)) return 0;
+
     const type = (lyrics.type || '').toUpperCase();
-    if (type === 'WORD') return 3;
-    if (type === 'LINE') return 2;
-    return 1;
+    const lines = lyrics.data || lyrics.lyrics || [];
+    const hasSyllables = Array.isArray(lines) && lines.some(
+      l => Array.isArray(l.syllabus) && l.syllabus.length > 0
+    );
+
+    let baseScore = 1000;
+    if (type === 'WORD' || hasSyllables) {
+      baseScore = 3000;
+    } else if (type === 'LINE') {
+      baseScore = 2000;
+    }
+
+    let richScore = 0;
+    const metadata = lyrics.metadata || {};
+
+    const hasAgents = metadata.agents && typeof metadata.agents === 'object' && Object.keys(metadata.agents).length > 0;
+    const hasLineSingers = Array.isArray(lines) && lines.some(l => l.element?.singer && l.element.singer.trim() !== '');
+    if (hasAgents) {
+      const agentCount = Object.keys(metadata.agents).length;
+      richScore += 100 + Math.min(agentCount, 5) * 10;
+    } else if (hasLineSingers) {
+      richScore += 60;
+    }
+
+    const hasSongPartsMeta = Array.isArray(metadata.songParts) && metadata.songParts.length > 0 && metadata.songParts.some(p => p && p.name && p.name.trim() !== '');
+    const hasLineSongParts = Array.isArray(lines) && lines.some(l => (l.element?.songPartIndex != null && l.element.songPartIndex >= 0) || (l.element?.songPart && l.element.songPart.trim() !== ''));
+    if (hasSongPartsMeta) {
+      richScore += 80;
+    } else if (hasLineSongParts) {
+      richScore += 40;
+    }
+
+    const hasBackgroundVocals = Array.isArray(lines) && lines.some(l =>
+      (Array.isArray(l.syllabus) && l.syllabus.some(s => s.isBackground)) ||
+      l.element?.isBackground === true
+    );
+    if (hasBackgroundVocals) {
+      richScore += 40;
+    }
+
+    const hasTransliterations = (metadata.transliterations && typeof metadata.transliterations === 'object' && Object.keys(metadata.transliterations).length > 0) ||
+      (Array.isArray(lines) && lines.some(l => l.transliteration || l.romanizedText || (Array.isArray(l.syllabus) && l.syllabus.some(s => s.romanizedText))));
+    if (hasTransliterations) {
+      richScore += 30;
+    }
+
+    const hasTranslations = (metadata.translations && typeof metadata.translations === 'object' && Object.keys(metadata.translations).length > 0) ||
+      (Array.isArray(lines) && lines.some(l => l.translation));
+    if (hasTranslations) {
+      richScore += 20;
+    }
+
+    if (Array.isArray(metadata.songWriters) && metadata.songWriters.length > 0) {
+      richScore += 10;
+    }
+
+    return baseScore + richScore;
   }
 
   static getProviderOrder(settings, songInfo = null, preferUnisonVideo = false) {

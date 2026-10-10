@@ -72,6 +72,14 @@ const BLUR_SIGMA_UV = 0.08;
 const BLUR_KERNEL_SIGMAS = 3.0;
 const TARGET_FPS = 40;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
+const THROTTLED_FPS = 20;
+const THROTTLED_FRAME_INTERVAL = 1000 / THROTTLED_FPS;
+let _bgThrottleUntil = 0;
+
+function LYPLUS_throttleBackground(ms) {
+    const until = performance.now() + ms;
+    if (until > _bgThrottleUntil) _bgThrottleUntil = until;
+}
 const ARTWORK_TRANSITION_SPEED = 0.02;
 const TWO_PI = Math.PI * 2;
 
@@ -1041,13 +1049,17 @@ function _renderLayerQuads(tex, progress) {
 function animateWebGLBackground(timestamp) {
     if (!gl) { globalAnimationId = null; return; }
 
+    // Never throttle an artwork crossfade (its progress advances per drawn frame).
+    const interval = (timestamp < _bgThrottleUntil && artworkTransitionProgress >= 1.0)
+        ? THROTTLED_FRAME_INTERVAL
+        : FRAME_INTERVAL;
     const elapsed = timestamp - lastDrawTime;
-    if (elapsed < FRAME_INTERVAL) {
+    if (elapsed < interval) {
         globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         return;
     }
     const elapsedSec = Math.min(elapsed / 1000.0, 0.1);
-    lastDrawTime = timestamp - (elapsed % FRAME_INTERVAL);
+    lastDrawTime = timestamp - (elapsed % interval);
 
     const currentTime = lastDrawTime / 1000 - startTime;
 
@@ -1140,6 +1152,7 @@ function animateWebGLBackground(timestamp) {
         gl.vertexAttribPointer(a_main_tex, 2, gl.FLOAT, false, 16, 8);
     }
 
+    gl.enable(gl.BLEND); 
     gl.activeTexture(gl.TEXTURE0);
     gl.uniform1i(u_main_artworkTexture, 0);
 
@@ -1149,6 +1162,7 @@ function animateWebGLBackground(timestamp) {
     _renderLayerQuads(currentArtworkTexture, artworkTransitionProgress);
 
     // --- PASS 2: Horizontal Gaussian Blur (renderTexture -> blurTextureA) ---
+    gl.disable(gl.BLEND); 
     gl.useProgram(blurHProgram);
 
     if (vaoExt) {
@@ -1181,6 +1195,7 @@ function animateWebGLBackground(timestamp) {
         gl.vertexAttribPointer(a_blurVPost_tex, 2, gl.FLOAT, false, 16, 8);
     }
 
+    gl.enable(gl.BLEND); 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
     gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
