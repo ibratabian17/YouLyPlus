@@ -2,6 +2,18 @@
    LYRICS PLUS - BASE CONTAINER & LAYOUT
    ========================================================================== */
 
+@property --scroll-delta {
+    syntax: '<length>';
+    inherits: false;
+    initial-value: 0px;
+}
+
+@property --lyrics-line-delay {
+    syntax: '<time>';
+    inherits: false;
+    initial-value: 0ms;
+}
+
 /* --- Base Variables & Palette --- */
 #lyrics-plus-container {
     --lyplus-lyrics-pallete: #ffffff;
@@ -95,7 +107,6 @@
     text-rendering: optimizeLegibility;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    mix-blend-mode: lighten;
 }
 
 .lyrics-line.scroll-animate,
@@ -105,7 +116,6 @@
     animation-timing-function: var(--scroll-easing, cubic-bezier(.41, 0, .12, .99));
     animation-fill-mode: both;
     animation-delay: var(--lyrics-line-delay, 0ms);
-    will-change: transform;
 }
 
 .lyrics-line:not(.scroll-animate),

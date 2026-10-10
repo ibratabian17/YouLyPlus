@@ -3699,7 +3699,6 @@ class LyricsPlusRenderer {
         : this.cachedLyricsLines.indexOf(referenceLine);
     if (referenceIndex === -1) return;
 
-    const lookAhead = 20;
     const len = this.cachedLyricsLines.length;
 
     let visMin = referenceIndex;
@@ -3728,7 +3727,14 @@ class LyricsPlusRenderer {
     }
 
     const start = Math.min(visMin, referenceIndex);
-    const end = Math.min(len, Math.max(visMax, referenceIndex) + lookAhead);
+
+    const SCROLL_TAIL_MARGIN_PX = 200;
+    const SCROLL_TAIL_MIN_LINES = 3;
+    const linesArr = this.cachedLyricsLines;
+    const reachBottom = targetTop + parent.clientHeight + Math.abs(delta) + SCROLL_TAIL_MARGIN_PX;
+    let end = Math.min(len, Math.max(visMax, referenceIndex) + 1);
+    while (end < len && linesArr[end].offsetTop < reachBottom) end++;
+    end = Math.min(len, end + SCROLL_TAIL_MIN_LINES);
 
     let maxAnimationDuration = 0;
 
