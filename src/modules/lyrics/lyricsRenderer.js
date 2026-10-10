@@ -16,6 +16,7 @@ class LyricsPlusRenderer {
   static _SEGMENTER = typeof Intl !== "undefined" && typeof Intl.Segmenter === "function" ? new Intl.Segmenter() : null;
   static _fontSizeCache = new Map();
   static _MASK_LEAD_TRIM = 1;
+  static _NATIVE_SCROLL_DISTANCE_RATIO = 2;
   static _POSITION_CLASSES = [
     "lyrics-activest", "post-active-line", "next-active-line",
     "prev-1", "prev-2", "prev-3", "prev-4",
@@ -3685,7 +3686,9 @@ class LyricsPlusRenderer {
     const delta = prevOffset - newTranslateY;
     this.currentScrollOffset = newTranslateY;
 
-    if (forceScroll) {
+    const isFarJump = Math.abs(delta) > parent.clientHeight * LyricsPlusRenderer._NATIVE_SCROLL_DISTANCE_RATIO;
+
+    if (forceScroll || isFarJump) {
       cancelPrev();
       parent.scrollTo({ top: targetTop, behavior: 'smooth' });
       state.isAnimating = false;
