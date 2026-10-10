@@ -2,12 +2,6 @@
    LYRICS PLUS - BASE CONTAINER & LAYOUT
    ========================================================================== */
 
-@property --scroll-delta {
-    syntax: '<length>';
-    inherits: false;
-    initial-value: 0px;
-}
-
 @property --lyrics-line-delay {
     syntax: '<time>';
     inherits: false;
@@ -107,15 +101,6 @@
     text-rendering: optimizeLegibility;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-}
-
-.lyrics-line.scroll-animate,
-.lyrics-plus-metadata.scroll-animate {
-    animation-name: lyrics-scroll;
-    animation-duration: var(--scroll-duration, 400ms);
-    animation-timing-function: var(--scroll-easing, cubic-bezier(.41, 0, .12, .99));
-    animation-fill-mode: both;
-    animation-delay: var(--lyrics-line-delay, 0ms);
 }
 
 .lyrics-line:not(.scroll-animate),
@@ -1110,15 +1095,6 @@ canvas#lyplus-webgl-canvas {
     }
     to {
         transform: scale(0.9);
-    }
-}
-
-@keyframes lyrics-scroll {
-    from {
-        transform: translateY(var(--scroll-delta)) translateZ(1px);
-    }
-    to {
-        transform: translateY(0) translateZ(1px);
     }
 }
 

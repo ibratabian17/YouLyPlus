@@ -2461,9 +2461,8 @@ class LyricsPlusRenderer {
     const userScrolling = !!(containerEl && containerEl.classList.contains("user-scrolling"));
     const elapsed = performance.now() - (this._scrollAnimT0 || -1e9);
     const lineDelay = (line) => {
-      if (userScrolling || !line.classList.contains("scroll-animate")) return 0;
-      const d = parseFloat(line.style.getPropertyValue("--lyrics-line-delay")) || 0;
-      return Math.max(0, d - elapsed); // part of the stagger may already be over
+      if (userScrolling || !line._scrollAnim) return 0;
+      return Math.max(0, (line._scrollDelay || 0) - elapsed); // part of the stagger may already be over
     };
 
     // Only animate what can be seen (+ a small margin).
@@ -3656,22 +3655,30 @@ class LyricsPlusRenderer {
     const delayIncrement = duration * (isRelaxMode ? 0.05 : 0.1);
 
     const animatingLines = this._animatingLines;
-    if (animatingLines.length > 0) {
+    const cancelPrev = () => {
       for (let i = 0; i < animatingLines.length; i++) {
         const line = animatingLines[i];
-        line.classList.remove('scroll-animate');
-        line.style.removeProperty('--scroll-delta');
-        line.style.removeProperty('--lyrics-line-delay');
+        const a = line._scrollAnim;
+        if (a) { a.cancel(); line._scrollAnim = null; }
+        line._scrollDelay = 0;
       }
       animatingLines.length = 0;
-    }
+    };
 
     // Duration/easing are identical for every line: set once on the container
     // (custom properties inherit) instead of 2 style writes per animated line.
     const containerStyle = this.lyricsContainer.style;
-    containerStyle.setProperty('--scroll-duration', `${scrollDuration}ms`);
-    if (easing) containerStyle.setProperty('--scroll-easing', easing);
-    else containerStyle.removeProperty('--scroll-easing');
+    const durStr = `${scrollDuration}ms`;
+    if (containerStyle.getPropertyValue('--scroll-duration') !== durStr) {
+      containerStyle.setProperty('--scroll-duration', durStr);
+    }
+    if (easing) {
+      if (containerStyle.getPropertyValue('--scroll-easing') !== easing) {
+        containerStyle.setProperty('--scroll-easing', easing);
+      }
+    } else if (containerStyle.getPropertyValue('--scroll-easing')) {
+      containerStyle.removeProperty('--scroll-easing');
+    }
 
     const targetTop = Math.max(0, -newTranslateY);
     const prevOffset = -parent.scrollTop || this.currentScrollOffset || 0;
@@ -3679,6 +3686,7 @@ class LyricsPlusRenderer {
     this.currentScrollOffset = newTranslateY;
 
     if (forceScroll) {
+      cancelPrev();
       parent.scrollTo({ top: targetTop, behavior: 'smooth' });
       state.isAnimating = false;
       state.pendingUpdate = null;
@@ -3690,14 +3698,14 @@ class LyricsPlusRenderer {
       this.lastPrimaryActiveLine ||
       this.cachedLyricsLines[0];
 
-    if (!referenceLine) return;
+    if (!referenceLine) { cancelPrev(); return; }
 
     const referenceIndex = (referenceLine === this.cachedLyricsLines[this._lastActiveIndex])
       ? this._lastActiveIndex
       : (referenceLine._idx !== undefined && this.cachedLyricsLines[referenceLine._idx] === referenceLine)
         ? referenceLine._idx
         : this.cachedLyricsLines.indexOf(referenceLine);
-    if (referenceIndex === -1) return;
+    if (referenceIndex === -1) { cancelPrev(); return; }
 
     const len = this.cachedLyricsLines.length;
 
@@ -3754,14 +3762,48 @@ class LyricsPlusRenderer {
     else if (newIndex < referenceIndex) scrollingDown = false;
     else scrollingDown = (delta - totalShift) >= 0;
 
+    const canAnimate = typeof Element.prototype.animate === 'function';
+    const waapiEasing = easing || 'cubic-bezier(.41, 0, .12, .99)';
+    const FINAL_TRANSFORM = 'translateY(0px) translateZ(1px)';
+
     const applyLine = (line, delay, i) => {
-      line.style.setProperty('--scroll-delta', `${delta - gapShiftAt(i)}px`);
-      line.style.setProperty('--lyrics-line-delay', `${delay}ms`);
-      line.classList.add('scroll-animate');
-      animatingLines.push(line);
       const lineDuration = scrollDuration + delay;
       if (lineDuration > maxAnimationDuration) maxAnimationDuration = lineDuration;
+      if (!canAnimate) return;
+      const d = delta - gapShiftAt(i);
+      if (!(Math.abs(d) >= 0.5)) return;
+      const anim = line.animate(
+        [{ transform: `translateY(${d.toFixed(2)}px) translateZ(1px)` }, { transform: FINAL_TRANSFORM }],
+        { duration: scrollDuration, delay, easing: waapiEasing, fill: 'backwards' }
+      );
+      line._scrollAnim = anim;
+      line._scrollDelay = delay;
+      anim.onfinish = () => {
+        if (line._scrollAnim === anim) { line._scrollAnim = null; line._scrollDelay = 0; }
+      };
+      animatingLines.push(line);
     };
+
+    state.isAnimating = true;
+    const BASE_DURATION = 400;
+
+    this._scrollUnlockTimeout = setTimeout(() => {
+      state.isAnimating = false;
+
+      if (state.pendingUpdate !== null) {
+        let pendingValue = state.pendingUpdate;
+        state.pendingUpdate = null;
+        const primary = this.currentPrimaryActiveLine;
+        if (primary && primary.isConnected && !this.isUserControllingScroll) {
+          pendingValue = this._getScrollPaddingTop() - primary.offsetTop;
+        }
+        this._animateScroll(pendingValue, false);
+      }
+    }, BASE_DURATION);
+
+    parent.scrollTo({ top: targetTop, behavior: 'instant' });
+    cancelPrev();
+    this._scrollAnimT0 = performance.now();
 
     if (scrollingDown) {
       let delayCounter = 0;
@@ -3782,37 +3824,7 @@ class LyricsPlusRenderer {
       }
     }
 
-    state.isAnimating = true;
-    this._scrollAnimT0 = performance.now();
-    const BASE_DURATION = 400;
-
-    this._scrollUnlockTimeout = setTimeout(() => {
-      state.isAnimating = false;
-
-      if (state.pendingUpdate !== null) {
-        let pendingValue = state.pendingUpdate;
-        state.pendingUpdate = null;
-        const primary = this.currentPrimaryActiveLine;
-        if (primary && primary.isConnected && !this.isUserControllingScroll) {
-          pendingValue = this._getScrollPaddingTop() - primary.offsetTop;
-        }
-        this._animateScroll(pendingValue, false);
-      }
-    }, BASE_DURATION);
-
-    this._scrollAnimationTimeout = setTimeout(() => {
-      for (let i = 0; i < animatingLines.length; i++) {
-        const line = animatingLines[i];
-        line.classList.remove('scroll-animate');
-        line.style.removeProperty('--scroll-delta');
-        line.style.removeProperty('--lyrics-line-delay');
-      }
-      animatingLines.length = 0;
-      this._scrollAnimationTimeout = null;
-    }, maxAnimationDuration + 50);
-
-    parent.scrollTo({ top: targetTop, behavior: 'instant' });
-  }
+    }
 
 
   _resetGapState() {
@@ -4826,6 +4838,9 @@ class LyricsPlusRenderer {
     this._clearTextWidthCache();
     this._lineById = null;
     this._positionClassedLines = [];
+    if (this._animatingLines) {
+      for (const l of this._animatingLines) { if (l._scrollAnim) l._scrollAnim.cancel(); l._scrollAnim = null; }
+    }
     this._animatingLines = [];
     this._scrollPaddingTopCache = undefined;
     this._containerDisplayCache = undefined;
