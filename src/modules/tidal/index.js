@@ -11,6 +11,23 @@ let lyricsRendererInstance = null;
 let pendingSongInfo = null;
 let pendingCheckCount = 0;
 
+function isTidalLyricsVisible() {
+    const lyricsPanel = document.querySelector('[data-test="now-playing-lyrics"]');
+    if (lyricsPanel) {
+        if (typeof lyricsPanel.checkVisibility === 'function') return lyricsPanel.checkVisibility();
+        return (lyricsPanel.offsetWidth > 0 || lyricsPanel.offsetHeight > 0);
+    }
+    const lyricsTab = document.querySelector('#lyrics-plus-tab[aria-selected="true"]');
+    if (lyricsTab) return true;
+    const nativeBtn = document.querySelector('[data-test="toggle-lyrics"]');
+    if (nativeBtn && nativeBtn.getAttribute('aria-pressed') === 'true') return true;
+    const container = document.getElementById('lyrics-plus-container');
+    if (container && typeof container.checkVisibility === 'function') {
+        return container.checkVisibility();
+    }
+    return false;
+}
+
 const LyricsPlusAPI = {
     displayLyrics: (...args) => lyricsRendererInstance?.displayLyrics(...args),
     displaySongNotFound: () => lyricsRendererInstance?.displaySongNotFound(),
@@ -20,7 +37,8 @@ const LyricsPlusAPI = {
     setTranslationLoading: (...args) => lyricsRendererInstance?.setTranslationLoading(...args),
     showToast: (...args) => lyricsRendererInstance?.showToast(...args),
     setUserOffset: (...args) => lyricsRendererInstance?.setUserOffset(...args),
-    setAvailableProviders: (...args) => lyricsRendererInstance?.setAvailableProviders(...args)
+    setAvailableProviders: (...args) => lyricsRendererInstance?.setAvailableProviders(...args),
+    isLyricsVisible: isTidalLyricsVisible
 };
 
 function injectPlatformCSS() {
@@ -153,6 +171,8 @@ function ensureLyricsPatchContainer(root) {
 
     const lyricsPanel = root.querySelector('[data-test="now-playing-lyrics"]');
     if (!lyricsPanel) return;
+
+    window.dispatchEvent(new CustomEvent('LYPLUS_VISIBILITY_CHANGED', { detail: { isVisible: true } }));
 
     hideTidalLyricsIn(root);
 

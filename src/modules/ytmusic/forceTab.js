@@ -58,15 +58,16 @@
   }
 
   function handleTabInteraction(clickedIndex, middleIndex) {
+    const isVisible = clickedIndex === middleIndex;
     const lyricsElement = document.querySelector(SELECTORS.LYRICS);
-    if (!lyricsElement) return;
 
-    if (clickedIndex !== middleIndex) {
-      lyricsElement.style.display = 'none';
-      return;
+    if (lyricsElement) {
+      lyricsElement.style.display = isVisible ? 'block' : 'none';
     }
 
-    lyricsElement.style.display = 'block';
+    window.dispatchEvent(new CustomEvent('LYPLUS_VISIBILITY_CHANGED', { detail: { isVisible } }));
+
+    if (!isVisible) return;
 
     const sidePanel = state.sidePanel || document.querySelector(SELECTORS.SIDE_PANEL);
     if (sidePanel) {
@@ -136,6 +137,14 @@
     }
 
     initSidePanelObserver();
+
+    const isMiddleSelected = middleTab && (
+      middleTab.classList.contains('iron-selected') ||
+      middleTab.getAttribute('aria-selected') === 'true'
+    );
+    if (isMiddleSelected) {
+      window.dispatchEvent(new CustomEvent('LYPLUS_VISIBILITY_CHANGED', { detail: { isVisible: true } }));
+    }
   }
 
   function queueSync() {

@@ -11,6 +11,40 @@ if (typeof LYPLUS_setBgConfig === 'function') {
 
 // This script is the bridge between the generic renderer and the YouTube Music UI
 
+function isYTMusicLyricsVisible() {
+    if (computeFullscreen()) {
+        return true;
+    }
+
+    const appLayout = document.querySelector('ytmusic-app-layout');
+    const playerUiState = appLayout?.getAttribute('player-ui-state');
+    if (playerUiState && playerUiState !== 'PLAYER_PAGE_OPEN') {
+        return false;
+    }
+
+    const lyricsContainer = document.getElementById('lyrics-plus-container');
+    if (lyricsContainer && lyricsContainer.style.display === 'none') {
+        return false;
+    }
+
+    const tabs = Array.from(document.querySelectorAll('ytmusic-player-page tp-yt-paper-tab, #tabs-content tp-yt-paper-tab'));
+    if (tabs.length >= 3) {
+        const middleTab = tabs[Math.floor(tabs.length / 3)];
+        const isSelected = middleTab && (
+            middleTab.classList.contains('iron-selected') ||
+            middleTab.getAttribute('aria-selected') === 'true'
+        );
+        if (!isSelected) return false;
+    }
+
+    const target = lyricsContainer || document.getElementById('lyplus-patch-container');
+    if (target && typeof target.checkVisibility === 'function') {
+        return target.checkVisibility();
+    }
+
+    return true;
+}
+
 // 1. Platform-specific implementations
 const uiConfig = {
     player: 'video',
@@ -24,6 +58,7 @@ const uiConfig = {
     ],
     buttonParent: 'ytmusic-app-layout',
     disableNativeTick: true,
+    isLyricsVisible: isYTMusicLyricsVisible,
     seekTo: (time) => {
         window.postMessage({ type: 'LYPLUS_SEEK_TO', time: time }, '*');
     }
@@ -71,7 +106,8 @@ const LyricsPlusAPI = {
     setTranslationLoading: (...args) => lyricsRendererInstance.setTranslationLoading(...args),
     showToast: (...args) => lyricsRendererInstance?.showToast(...args),
     setUserOffset: (...args) => lyricsRendererInstance?.setUserOffset(...args),
-    setAvailableProviders: (...args) => lyricsRendererInstance?.setAvailableProviders(...args)
+    setAvailableProviders: (...args) => lyricsRendererInstance?.setAvailableProviders(...args),
+    isLyricsVisible: isYTMusicLyricsVisible
 };
 
 function injectPlatformCSS() {
@@ -404,7 +440,12 @@ function applyFullscreenState() {
 function queueFullscreenCheck() {
     if (fsCheckQueued) return;
     fsCheckQueued = true;
-    requestAnimationFrame(applyFullscreenState);
+    requestAnimationFrame(() => {
+        applyFullscreenState();
+        if (isYTMusicLyricsVisible()) {
+            window.dispatchEvent(new CustomEvent('LYPLUS_VISIBILITY_CHANGED', { detail: { isVisible: true } }));
+        }
+    });
 }
 
 function initFullscreenCursorManager() {
