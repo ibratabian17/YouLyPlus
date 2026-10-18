@@ -346,36 +346,94 @@ export class LyricsService {
       const results = new Array(promises.length).fill(undefined);
       const pending = new Set(promises.map((_, i) => i));
       let won = false;
+      let graceTimer = null;
+
+      const clearGraceTimer = () => {
+        if (graceTimer) {
+          clearTimeout(graceTimer);
+          graceTimer = null;
+        }
+      };
+
+      const getBestCandidate = () => {
+        let bestIdx = -1;
+        let bestScore = -1;
+
+        for (let i = 0; i < results.length; i++) {
+          if (pending.has(i)) continue;
+          const r = results[i];
+          if (!r || Utilities.isEmptyLyrics(r)) continue;
+          const score = this.scoreLyrics(r);
+          if (score > bestScore) {
+            bestScore = score;
+            bestIdx = i;
+          }
+        }
+
+        return bestIdx !== -1 ? { idx: bestIdx, score: bestScore, lyrics: results[bestIdx] } : null;
+      };
+
+      const resolveWinner = (winner) => {
+        if (won) return;
+        won = true;
+        clearGraceTimer();
+        resolve(winner);
+      };
 
       const tryResolve = () => {
         if (won) return;
 
-        const bestIdx = results.findIndex(
-          (r, i) => !pending.has(i) && this.scoreLyrics(r) >= 3000
-        );
-
-        if (bestIdx !== -1) {
-          const blockedByEarlier = [...pending].some(i => i < bestIdx);
-          if (!blockedByEarlier) {
-            won = true;
-            return resolve(results[bestIdx]);
-          }
-        }
+        const best = getBestCandidate();
 
         if (pending.size === 0) {
-          won = true;
-          const best = results.reduce((b, r) => {
-            if (!b) return r;
-            if (!r) return b;
-            return this.scoreLyrics(r) > this.scoreLyrics(b) ? r : b;
-          }, null);
-          resolve(best);
+          return resolveWinner(best?.lyrics || null);
+        }
+
+        if (!best) return;
+
+        const WORD_PROVIDERS = new Set([
+          PROVIDERS.KPOE,
+          PROVIDERS.CUSTOM_KPOE,
+          PROVIDERS.UNISON,
+          PROVIDERS.LRCRED,
+          'binilyrics'
+        ]);
+
+        const pendingWordIndices = [...pending].filter(i => WORD_PROVIDERS.has(providers[i]));
+
+        if (best.score >= 3000) {
+          if (pendingWordIndices.length === 0) {
+            return resolveWinner(best.lyrics);
+          }
+
+          const blockedByEarlier = pendingWordIndices.some(i => i < best.idx);
+          if (best.score >= 3150 && !blockedByEarlier) {
+            return resolveWinner(best.lyrics);
+          }
+
+          if (!graceTimer) {
+            graceTimer = setTimeout(() => {
+              if (!won) {
+                const finalBest = getBestCandidate();
+                resolveWinner(finalBest?.lyrics || null);
+              }
+            }, 2000);
+          }
+        } else if (best.score >= 2000 && pendingWordIndices.length === 0) {
+          const blockedByEarlier = [...pending].some(i => i < best.idx);
+          if (!blockedByEarlier) {
+            return resolveWinner(best.lyrics);
+          }
         }
       };
 
       promises.forEach((p, i) => {
         Promise.resolve(p).then(result => {
           results[i] = result;
+          pending.delete(i);
+          tryResolve();
+        }).catch(() => {
+          results[i] = null;
           pending.delete(i);
           tryResolve();
         });
