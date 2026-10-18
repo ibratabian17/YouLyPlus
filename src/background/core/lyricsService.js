@@ -346,42 +346,29 @@ export class LyricsService {
       const results = new Array(promises.length).fill(undefined);
       const pending = new Set(promises.map((_, i) => i));
       let won = false;
-      let graceTimer = null;
 
       const tryResolve = () => {
         if (won) return;
 
         const bestIdx = results.findIndex(
-          (r, i) => !pending.has(i) && this.scoreLyrics(r) >= 3200
+          (r, i) => !pending.has(i) && this.scoreLyrics(r) >= 3000
         );
 
         if (bestIdx !== -1) {
           const blockedByEarlier = [...pending].some(i => i < bestIdx);
           if (!blockedByEarlier) {
             won = true;
-            if (graceTimer) clearTimeout(graceTimer);
             return resolve(results[bestIdx]);
           }
         }
 
-        const hasWordSync = results.some((r, i) => !pending.has(i) && this.scoreLyrics(r) >= 3000);
-        if (hasWordSync && !graceTimer && pending.size > 0) {
-          graceTimer = setTimeout(() => {
-            if (won) return;
-            won = true;
-            const best = results.reduce((b, r) =>
-              this.scoreLyrics(r) > this.scoreLyrics(b) ? r : b
-              , null);
-            resolve(best);
-          }, 400);
-        }
-
         if (pending.size === 0) {
           won = true;
-          if (graceTimer) clearTimeout(graceTimer);
-          const best = results.reduce((b, r) =>
-            this.scoreLyrics(r) > this.scoreLyrics(b) ? r : b
-            , null);
+          const best = results.reduce((b, r) => {
+            if (!b) return r;
+            if (!r) return b;
+            return this.scoreLyrics(r) > this.scoreLyrics(b) ? r : b;
+          }, null);
           resolve(best);
         }
       };
