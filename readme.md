@@ -89,7 +89,7 @@ Play any song, and the lyrics panel will automatically be enhanced by YouLy+.
 ### Core Features
 
 -   **Word-by-word, syllable-synced lyrics**: YouLy+ features real-time, accurately synced lyrics with word-by-word highlighting.
--   **Apple Music engine overhaul**: Replaces the resource-heavy native Apple Music Web UI. YouLy+ replace their murdered animation with Apple native-like animation with optimization. It also expands the lyric sources—if AM lacks synced lyrics, YouLy+ finds them elsewhere!
+-   **Apple Music engine overhaul**: Replaces the resource-heavy native Apple Music Web UI. YouLy+ replace their murdered animation with Apple Music Android-like animation with optimization. It also expands the lyric sources—if AM lacks synced lyrics, YouLy+ finds them elsewhere!
 -   **Multi-platform fallback**: Automatically searches multiple platforms to find lyrics for almost every song.
 -   **Fits seamlessly**: Replaces default lyrics panels out of the box with designs that fit in to whichever platform you use.
 

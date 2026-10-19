@@ -251,8 +251,23 @@
     max-height: 0;
     overflow: visible;
     opacity: 0;
+    --lyplus-bg-slide-y: -1.1em;
+    transform: translateY(var(--lyplus-bg-slide-y)) scale(0.9);
+    transform-origin: 0% 50%;
     font-size: var(--lyplus-font-size-subtext);
-    transition: opacity calc(var(--scroll-duration, 400ms) * 0.4) ease-in;
+    transition:
+        opacity calc(var(--scroll-duration, 400ms) * 0.35) ease-out,
+        transform var(--scroll-duration, 400ms) var(--scroll-easing, cubic-bezier(.41, 0, .12, .99));
+}
+
+.lyrics-line .background-vocal-container.onTop {
+    --lyplus-bg-slide-y: 1.1em;
+}
+
+.lyrics-line.singer-right:not(.rtl-text) .background-vocal-container,
+.lyrics-line.rtl-text:not(.singer-right) .background-vocal-container,
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.rtl-text.singer-right .background-vocal-container {
+    transform-origin: 100% 50%;
 }
 
 .lyrics-line:not(.active) .background-vocal-container {
@@ -277,7 +292,10 @@
 .lyrics-line.active .background-vocal-container {
     max-height: none;
     opacity: 1;
-    transition: opacity var(--scroll-duration, 400ms) var(--scroll-easing, cubic-bezier(.41, 0, .12, .99));
+    transform: translateY(0) scale(1);
+    transition:
+        opacity calc(var(--scroll-duration, 400ms) * 0.5) ease-out calc(var(--scroll-duration, 400ms) * 0.1),
+        transform var(--scroll-duration, 400ms) var(--scroll-easing, cubic-bezier(.41, 0, .12, .99));
 }
 
 #lyrics-plus-container.user-scrolling .lyrics-line,
