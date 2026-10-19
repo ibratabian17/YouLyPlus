@@ -49,6 +49,22 @@ class LyricsPlusRenderer {
     return merged;
   }
 
+  /**
+   * Helper function to count graphemes including punctuation marks.
+   * Unlike _segmentGraphemes, this does not merge trailing punctuation.
+   * @param {string} text - The input text string.
+   * @returns {number} - Number of graphemes.
+   */
+  static _countGraphemes(text) {
+    if (!text) return 0;
+    if (LyricsPlusRenderer._SEGMENTER) {
+      let count = 0;
+      for (const _ of LyricsPlusRenderer._SEGMENTER.segment(text)) count++;
+      return count;
+    }
+    return Array.from(text).length;
+  }
+
   static _isNeedSplitOnly(text) {
     return !!text &&
       LyricsPlusRenderer._NEED_SPLIT_CHAR_RE.test(text) &&
@@ -1093,11 +1109,13 @@ class LyricsPlusRenderer {
             : groupIdx === lastMainGroupIdx;
 
 
+          const trimmedGroupText = groupText.trim();
           const isGroupGrowable =
             !isBg &&
             !currentSettings.lightweight &&
             !this._isRTL(groupText) &&
-            LyricsPlusRenderer._segmentGraphemes(groupText.trim()).length <= 7 &&
+            trimmedGroupText.length > 0 &&
+            LyricsPlusRenderer._countGraphemes(trimmedGroupText) <= 7 &&
             groupDuration >= 1000;
 
           if (isGroupGrowable) {
