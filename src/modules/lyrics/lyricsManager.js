@@ -738,53 +738,7 @@ async function updateAndRenderCombinedLyrics(currentSong, fetchId) {
    CORE LOGIC: FETCHING AND PROCESSING
    ================================================================= */
 
-let pendingSongFetch = null;
-let latestSongInfo = null;
-
-function isLyricsVisible() {
-  if (typeof LyricsPlusAPI !== 'undefined' && typeof LyricsPlusAPI.isLyricsVisible === 'function') {
-    try {
-      return LyricsPlusAPI.isLyricsVisible();
-    } catch (e) {
-      console.warn('LyricsPlus: Error checking LyricsPlusAPI.isLyricsVisible:', e);
-    }
-  }
-
-  const container = document.getElementById('lyrics-plus-container') || document.querySelector('#lyplus-patch-container');
-  if (container) {
-    if (container.style.display === 'none') return false;
-    if (typeof container.checkVisibility === 'function') {
-      return container.checkVisibility();
-    }
-    return (container.offsetWidth > 0 || container.offsetHeight > 0 || container.getClientRects().length > 0);
-  }
-
-  return true;
-}
-
-function checkAndTriggerPendingFetch() {
-  if (!isLyricsVisible()) return;
-
-  const songToFetch = pendingSongFetch?.currentSong || (!lastBaseLyrics ? latestSongInfo : null);
-  if (songToFetch) {
-    const isNew = pendingSongFetch ? pendingSongFetch.isNewSong : true;
-    const force = pendingSongFetch ? pendingSongFetch.forceReload : false;
-    pendingSongFetch = null;
-    lastRequestedSongKey = null;
-    fetchAndDisplayLyrics(songToFetch, isNew, force);
-  }
-}
-
 async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload = false) {
-  latestSongInfo = currentSong;
-
-  if (!isLyricsVisible()) {
-    console.log("LyricsPlus: Lyrics view is hidden. Postponing fetch for:", currentSong.title);
-    pendingSongFetch = { currentSong, isNewSong, forceReload };
-    return;
-  }
-  pendingSongFetch = null;
-
   const songKey = `${currentSong.title}-${currentSong.artist}-${currentSong.album}`;
 
   if (!shouldFetchLyrics(songKey, forceReload)) return;
@@ -892,39 +846,3 @@ window.addEventListener('YOUPLUS_SETTINGS_UPDATED', ({ detail }) => {
     fetchAndDisplayLyrics(lastKnownSongInfo, false, false);
   }
 });
-
-
-/* =================================================================
-   VISIBILITY CHANGE LISTENERS
-   ================================================================= */
-
-window.addEventListener('LYPLUS_VISIBILITY_CHANGED', (e) => {
-  const isVisible = e.detail?.isVisible ?? isLyricsVisible();
-  if (isVisible) {
-    checkAndTriggerPendingFetch();
-  }
-});
-
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && isLyricsVisible()) {
-    checkAndTriggerPendingFetch();
-  }
-});
-
-document.addEventListener('fullscreenchange', () => {
-  if (isLyricsVisible()) {
-    checkAndTriggerPendingFetch();
-  }
-});
-
-document.addEventListener('webkitfullscreenchange', () => {
-  if (isLyricsVisible()) {
-    checkAndTriggerPendingFetch();
-  }
-});
-
-document.addEventListener('click', (e) => {
-  if (e.target.closest?.('tp-yt-paper-tab, [data-testid="lyrics-button"], .toggle-button--lyrics, [data-test="toggle-lyrics"], #lyrics-plus-tab, button')) {
-    setTimeout(checkAndTriggerPendingFetch, 60);
-  }
-}, { capture: true, passive: true });

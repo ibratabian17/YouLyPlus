@@ -7,16 +7,6 @@ let injectionInterval = null;
 let cachedAudioElement = null;
 let songChangeTimeout = null;
 
-function isAppleMusicLyricsVisible() {
-    const modal = document.querySelector('article[data-testid="lyrics-fullscreen-modal"]');
-    if (!modal) return false;
-    if (modal.classList.contains('is-lyrics-off')) return false;
-    if (typeof modal.checkVisibility === 'function') {
-        return modal.checkVisibility();
-    }
-    return (modal.offsetWidth > 0 || modal.offsetHeight > 0);
-}
-
 // --- UI Configuration ---
 const uiConfig = {
     player: '#apple-music-player',
@@ -28,7 +18,6 @@ const uiConfig = {
     ],
     buttonParent: '[data-testid="lyrics-fullscreen-modal"]',
     disableNativeTick: true,
-    isLyricsVisible: isAppleMusicLyricsVisible,
     seekTo: (time) => {
         window.postMessage({ type: 'LYPLUS_SEEK_TO', time: time }, '*');
     }
@@ -78,8 +67,7 @@ const LyricsPlusAPI = {
     setTranslationLoading: (...args) => lyricsRendererInstance?.setTranslationLoading(...args),
     showToast: (...args) => lyricsRendererInstance?.showToast(...args),
     setUserOffset: (...args) => lyricsRendererInstance?.setUserOffset(...args),
-    setAvailableProviders: (...args) => lyricsRendererInstance?.setAvailableProviders(...args),
-    isLyricsVisible: isAppleMusicLyricsVisible
+    setAvailableProviders: (...args) => lyricsRendererInstance?.setAvailableProviders(...args)
 };
 
 // --- Injection ---
@@ -88,7 +76,6 @@ function tryInject() {
     const lyricsArticle = document.querySelector('article[data-testid="lyrics-fullscreen-modal"]');
 
     if (lyricsArticle) {
-        window.dispatchEvent(new CustomEvent('LYPLUS_VISIBILITY_CHANGED', { detail: { isVisible: true } }));
         let patchWrapper = document.getElementById('lyplus-patch-container');
 
         if (!patchWrapper) {
