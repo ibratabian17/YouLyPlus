@@ -23,6 +23,10 @@ class LyricsPlusRenderer {
     "next-1", "next-2", "next-3", "next-4",
   ];
   static _POSITION_SELECTOR = "." + LyricsPlusRenderer._POSITION_CLASSES.join(", .");
+  static _isFirefox = typeof navigator !== "undefined" && (
+    /firefox|fxios/i.test(navigator.userAgent) ||
+    (typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("-moz-appearance", "none"))
+  );
 
   /**
    * Helper function to segment text into graphemes efficiently.
@@ -477,6 +481,9 @@ class LyricsPlusRenderer {
       }
     }
     if (this.lyricsContainer) {
+      if (LyricsPlusRenderer._isFirefox) {
+        this.lyricsContainer.classList.add("is-firefox");
+      }
       this._attachClickDelegate();
       this._attachScrollListeners();
       this._setupContainerObserver();
@@ -504,6 +511,9 @@ class LyricsPlusRenderer {
     const container = document.createElement("div");
     container.id = "lyrics-plus-container";
     container.className = "lyrics-plus-integrated blur-inactive-enabled";
+    if (LyricsPlusRenderer._isFirefox) {
+      container.classList.add("is-firefox");
+    }
     originalLyricsSection.appendChild(container);
     this.lyricsContainer = container;
     this._invalidateSpringConfig();
@@ -3162,8 +3172,9 @@ class LyricsPlusRenderer {
   }
 
   static _getEmphasisFrames(duration, count, index, elevationNum = -0.05, elevationUnit = "em") {
+    const isFirefox = LyricsPlusRenderer._isFirefox;
     const cache = (LyricsPlusRenderer._emphasisFrameCache ||= new Map());
-    const key = `${duration}:${count}:${index}:${elevationNum}:${elevationUnit}`;
+    const key = `${duration}:${count}:${index}:${elevationNum}:${elevationUnit}:${isFirefox ? 1 : 0}`;
     let frames = cache.get(key);
     if (frames) return frames;
 
@@ -3173,6 +3184,7 @@ class LyricsPlusRenderer {
       LyricsPlusRenderer._getEmphasisParams(duration, count);
     const half = Math.max(1, (count - 1) / 2);
     const side = (index - (count - 1) / 2) / half; // -1 .. 1
+    const extraRotate = isFirefox ? " rotate(0.0001deg)" : "";
 
     frames = Array.from({ length: 61 }, (_, frame) => {
       const time = (spanDuration * frame) / 60;
@@ -3185,7 +3197,7 @@ class LyricsPlusRenderer {
       const y = elevationNum * rise - LIFT_EM * emphasis * envelope;
       return {
         offset: frame / 60,
-        transform: `translate3d(${x.toFixed(4)}em, ${y.toFixed(4)}${elevationUnit}, 1px) scale(${(1 + 0.1 * emphasis * envelope).toFixed(4)})`,
+        transform: `translate3d(${x.toFixed(4)}em, ${y.toFixed(4)}${elevationUnit}, 1px) scale(${(1 + 0.1 * emphasis * envelope).toFixed(4)})${extraRotate}`,
       };
     });
     if (cache.size >= 256) cache.delete(cache.keys().next().value);

@@ -401,6 +401,24 @@
     transform: translateY(var(--lyplus-lyrics-elevation)) translateZ(1px);
 }
 
+@supports (-moz-appearance: none) {
+    .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable {
+        transform: translateY(0.001%) translateZ(1px) rotate(0.0001deg);
+    }
+    #lyrics-plus-container:not(.lightweight-mode) .lyrics-line.active:not(.lyrics-gap) .lyrics-word:not(.growable) .lyrics-syllable.highlight,
+    #lyrics-plus-container:not(.lightweight-mode) .lyrics-word.growable .lyrics-syllable.cleanup span.char {
+        transform: translateY(var(--lyplus-lyrics-elevation)) translateZ(1px) rotate(0.0001deg);
+    }
+}
+
+#lyrics-plus-container.is-firefox .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable {
+    transform: translateY(0.001%) translateZ(1px) rotate(0.0001deg);
+}
+#lyrics-plus-container.is-firefox:not(.lightweight-mode) .lyrics-line.active:not(.lyrics-gap) .lyrics-word:not(.growable) .lyrics-syllable.highlight,
+#lyrics-plus-container.is-firefox:not(.lightweight-mode) .lyrics-word.growable .lyrics-syllable.cleanup span.char {
+    transform: translateY(var(--lyplus-lyrics-elevation)) translateZ(1px) rotate(0.0001deg);
+}
+
 #lyrics-plus-container.use-background-wipe .lyrics-syllable.cleanup span.char,
 #lyrics-plus-container.use-background-wipe .lyrics-line.active:not(.lyrics-gap) span.char {
     transition: none !important;
