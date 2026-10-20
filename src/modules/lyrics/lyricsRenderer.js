@@ -1106,7 +1106,7 @@ class LyricsPlusRenderer {
             !isBg &&
             !currentSettings.lightweight &&
             !this._isRTL(groupText) &&
-            !this._isCJK(groupText) &&
+            !this._segmentNeedSplit(groupText) &&
             trimmedGroupText.length > 0 &&
             LyricsPlusRenderer._countGraphemes(trimmedGroupText) <= 7 &&
             groupDuration >= 1000;

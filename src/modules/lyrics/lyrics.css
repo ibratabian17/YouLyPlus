@@ -108,15 +108,21 @@
     animation: none;
 }
 
-.line-by-line-mode .lyrics-line:not(.lyrics-gap) .main-vocal-container {
+.line-by-line-mode .lyrics-line:not(.lyrics-gap) .main-vocal-container,
+.line-by-line-mode .lyrics-line:not(.lyrics-gap) .lyrics-romanization-container {
     color: var(--lyplus-text-secondary);
-    transition: transform 0.7s ease, color 0.7s;
+    transition: transform 0.7s ease, color 0.7s, opacity 0.7s;
 }
 
-.line-by-line-mode .lyrics-line:not(.lyrics-gap).active .main-vocal-container {
+.line-by-line-mode .lyrics-line:not(.lyrics-gap):not(.active) .lyrics-romanization-container {
+    opacity: 0.6;
+}
+
+.line-by-line-mode .lyrics-line:not(.lyrics-gap).active .main-vocal-container,
+.line-by-line-mode .lyrics-line:not(.lyrics-gap).active .lyrics-romanization-container {
     opacity: 1;
     color: var(--lyplus-text-primary);
-    transition: transform 0.5s ease, color 0.18s;
+    transition: transform 0.5s ease, color 0.18s, opacity 0.18s;
 }
 
 /* --- Line States & Modifiers --- */
