@@ -1165,6 +1165,10 @@ class LyricsPlusRenderer {
       fragment.appendChild(currentLine);
 
       this._renderTranslationContainer(currentLineContainer, line, displayMode);
+
+      if (backgroundContainer && !backgroundContainer.classList.contains("onTop")) {
+        currentLineContainer.appendChild(backgroundContainer);
+      }
     });
   }
 
