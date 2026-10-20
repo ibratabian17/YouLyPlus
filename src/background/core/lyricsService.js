@@ -94,6 +94,7 @@ export class LyricsService {
       return this.fetchSpecificSource(songInfo, requestedSource, forceReload);
     }
 
+    const cacheKey = this.createCacheKey(songInfo);
     let embeddedFallback = null;
 
     // Parse Apple Music TTML if provided
@@ -142,7 +143,6 @@ export class LyricsService {
       embeddedFallback = embeddedResult;
     }
 
-    const cacheKey = this.createCacheKey(songInfo);
     let result = null;
 
     if (songInfo.ytMusicLyrics) {
@@ -657,6 +657,7 @@ export class LyricsService {
     const settings = await SettingsManager.getLyricsSettings();
     const fetchOptions = { cache: 'no-store' };
     const kpoeSources = ['apple', 'lyricsplus', 'qq', 'musixmatch', 'musixmatch-word'];
+    const cacheKey = this.createCacheKey(songInfo);
 
     let lyrics = null;
     if (kpoeSources.includes(source)) {
@@ -673,7 +674,7 @@ export class LyricsService {
     } else if (source === 'subtitles') {
       lyrics = await YouTubeService.fetchSubtitles(songInfo);
     } else if (source === 'ytmusic' || source === PROVIDERS.YTMUSIC) {
-      const cached = this.getProviderLyricsFromCache(this.createCacheKey(songInfo), 'ytmusic');
+      const cached = this.getProviderLyricsFromCache(cacheKey, 'ytmusic');
       if (cached && !Utilities.isEmptyLyrics(cached)) {
         lyrics = cached;
       } else if (songInfo.ytMusicLyrics) {
@@ -699,7 +700,6 @@ export class LyricsService {
 
     const version = Date.now();
     const result = { lyrics, version };
-    const cacheKey = this.createCacheKey(songInfo);
     state.setCached(cacheKey, result);
     if (settings.cacheStrategy !== 'none') {
       await lyricsDB.set({ key: cacheKey, lyrics, version, timestamp: Date.now(), duration: songInfo.duration });
