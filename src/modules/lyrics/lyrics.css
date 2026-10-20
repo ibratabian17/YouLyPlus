@@ -251,7 +251,7 @@
     max-height: 0;
     overflow: visible;
     opacity: 0;
-    --lyplus-bg-slide-y: -1.1em;
+    --lyplus-bg-slide-y: -1.4em;
     transform: translateY(var(--lyplus-bg-slide-y)) scale(0.9);
     transform-origin: 0% 50%;
     font-size: var(--lyplus-font-size-subtext);
@@ -261,7 +261,7 @@
 }
 
 .lyrics-line .background-vocal-container.onTop {
-    --lyplus-bg-slide-y: 1.1em;
+    --lyplus-bg-slide-y: 1.4em;
 }
 
 .lyrics-line.singer-right:not(.rtl-text) .background-vocal-container,
@@ -280,12 +280,12 @@
 
 .lyrics-line .background-vocal-container.onTop .background-vocal-wrap {
     padding-top: 0.0em;
-    padding-bottom: 0.26em;
+    padding-bottom: 0.6em;
 }
 
 .lyrics-line .background-vocal-container .background-vocal-wrap {
     display: block;
-    padding-top: 0.26em;
+    padding-top: 0.6em;
     padding-bottom: 0.0em;
 }
 
