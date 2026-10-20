@@ -381,6 +381,14 @@ class LyricsPlusRenderer {
     return pieces;
   }
 
+  _isNeedSplitOnly(text) {
+    return LyricsPlusRenderer._isNeedSplitOnly(text);
+  }
+
+  _segmentNeedSplit(text) {
+    return LyricsPlusRenderer._segmentNeedSplit(text);
+  }
+
   _splitNeedSplitSyllables(syllabus) {
     if (!syllabus || !syllabus.length) return syllabus;
     let changed = false;
@@ -1106,7 +1114,7 @@ class LyricsPlusRenderer {
             !isBg &&
             !currentSettings.lightweight &&
             !this._isRTL(groupText) &&
-            !this._segmentNeedSplit(groupText) &&
+            !LyricsPlusRenderer._isNeedSplitOnly(groupText) &&
             trimmedGroupText.length > 0 &&
             LyricsPlusRenderer._countGraphemes(trimmedGroupText) <= 7 &&
             groupDuration >= 1000;
