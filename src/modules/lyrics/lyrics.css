@@ -1042,6 +1042,25 @@ span.lyrics-source-provider {
     text-align: end;
 }
 
+/* --- Translation alignment for dual-direction / dual-side mode --- */
+
+/* mixed-direction + dual-side: singer-right text is explicitly
+   right-aligned, so translte (LTR or RTL) musst be right-alignd. */
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics
+    .lyrics-line.singer-right
+    .lyrics-translation-container {
+    text-align: right;
+}
+
+/* mixed-direction + dual-side: singer-left text is left-aligned,
+   so translation (LTR or RTL) must be left-aligned. */
+/* people gonna say this ai shit generated comment ahh moment */
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics
+    .lyrics-line.singer-left
+    .lyrics-translation-container {
+    text-align: left;
+}
+
 /* --- Romanization alignment for dual-direction / dual-side mode ---  */
 
 /* mixed-direction + dual-side: RTL singer-right text is explicitly
