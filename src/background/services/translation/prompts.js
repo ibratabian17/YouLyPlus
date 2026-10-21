@@ -79,10 +79,32 @@ Before romanizing, look at the artist and target language, AND check whether the
 - **Distinctive Levantine vocabulary/particles to romanize as heard, not as Fusha would spell them**: "هسه"/"هلق" (now) -> hassa, "شو" (what) -> shu, "هون" (here) -> hon, "معاه"/"هو" -> huwwe, "بكيف" -> bkeef, "محدا" (no one) -> Ma hada, "دايماً" -> dayman.
 - **"و" (and) as a clitic prefix** -> "we" (e.g., "وأنا" -> We ana, "ولو" -> We law) — matches the general Levantine/Egyptian convention of "we" for the conjunction, not "wa".
 
-**SCENARIO C: Modern Standard Arabic (Fusha)**
-- **Jeem (ج)** -> **j**
-- **Qaf (ق)** -> **q**
-- Strict academic/standard transliteration.
+**SCENARIO C: Modern Standard Arabic (Fusha) / Literary Lyrics (Indonesian-audience romanization)**
+(Signal — choose this scenario when ANY of these appear: tanween (ـً ـٍ ـٌ), literary/poetic vocabulary, MSA grammar, no dialect markers like شو/هلق/دلوقتي. **If the text has NO dialect words at all (no Egyptian/Levantine/Gulf vocabulary or spelling, e.g. تصنع, المستحيل, بالتحدي) it is Fusha: use Scenario C even without tanween or harakat.** This scenario OVERRIDES the Egyptian default in Section 3. Fusha here means the LANGUAGE (nahwu, case endings, vocabulary), NOT a strict kitab-spelling style: romanize how the line is recited/sung. Do NOT use academic marks or macrons.)
+- **Jeem (ج)** -> **j**; **Qaf (ق)** -> **q**
+- **Dhal (ذ)** -> **dz** (e.g., "مذكرات" -> mudzakirotin)
+- **Fathah -> o** in the "-aat" ending: "ـرات"/"ـات" -> **-rot / -ot**; with tanween -> **mudzakirotin**
+- **Doubled long vowels ARE allowed and preferred for clearly long vowels**: ا -> **aa**, ي -> **ii**, و -> **uu** (e.g., "جيل" -> jiil, "منها" -> minhaa, "ارتوى" -> irtawaa, "الحياة" -> hayaah as part of "il-hayaah"). Short vowels stay single.
+- **Ta marbuta (ة)** -> **-ah** (e.g., "الحياة" -> il-hayaah)
+- **Case endings**: keep -un / -in / -an when present or sung (e.g., "جيلٌ" -> jiilun, "مذكراتٍ" -> mudzakirotin). Do not invent them if absent.
+- **Conjunction و** -> **wa**, attached to its word with no hyphen (e.g., "ومذكرات" -> wamudzakirotin)
+- **Prepositions**: "في" -> **fi**, "من" -> **min**, "على" -> **'ala**, "إلى" -> **ila**
+- **Definite article after another word**: the alif of "ال" is read with the vowel of the preceding syllable, written **il-** as its own hyphenated unit on the noun; the preceding word is NOT merged into it:
+  * Moon letters (kept): "في الحياة" -> **fi il-hayaah**, "في الفصل" -> **fi il-fashli**, "من القمر" -> **min il-qamar**, "على الأرض" -> **'ala il-ard**
+  * Sun letters (ASSIMILATED): the l is replaced by the sun letter, doubled: "في الشمس" -> **fi ish-shams**, "في الناس" -> **fi in-naas**, "من الرحمن" -> **min ir-rahmaan**, "على الدار" -> **'ala id-daar**
+  * Be consistent within one song: always "il-" for moon letters and "i" + assimilated letter for sun letters, for every particle.
+  * At the start of a line or breath-group (no preceding word) the same forms apply: "il-qamar", "ish-shams".
+- **The article ALWAYS starts with "i" in this scenario, never "a"/"e"**: write **il-** (moon) or **i + assimilated sun letter** (is-, ish-, in-, ir-, id-, it-, iz-, etc.). NEVER "al-", "el-", "as-", "ash-", "ar-" after another word. Example: "كماء السلسبيل" -> **kamaa'i is-salsabiil** (NOT "kamaa'i as-salsabiil").
+- **Prefix + article inside ONE word (بـ / لـ + ال)**: the article is still treated the same way — alif dropped, moon letter keeps "l", sun letter assimilates — and the prefix keeps its short vowel "bi"/"li". The result is ONE hyphenated word:
+  * Sun letter: "بالتحدي" -> **bit-tahaddii**, "بالشمس" -> bish-shams, "للناس" -> lin-naas, "بالرحمة" -> bir-rahmah
+  * Moon letter: "بالحياة" -> **bil-hayaah**, "للقمر" -> lil-qamar, "بالفصل" -> bil-fashli
+  * Decide moon vs sun by the FIRST letter after ال: ت is a SUN letter, so "بالتحدي" is "bit-", NEVER "bil-tahaddi".
+  * Words ending in long ي keep it doubled: "التحدي" -> tahaddii, "المستحيل" -> mustahiil.
+- **Every long vowel is doubled, including word-final ones and the pronoun suffix "ـنا"**: "آمالنا" -> **aamaalunaa** (NOT "aamaluna"), "منها" -> minhaa, "كماء" -> kamaa'i, "نهرا" -> nahran. Check EVERY ا/و/ي in the word; do not drop a long vowel.
+- **Verbs with connecting alif (Form VII/VIII/X)**: write them as a single word, NOT as an article: ارتوى -> **irtawaa**, استمع -> istama'a, انطلق -> intalaqa.
+- **Worked example 3**: "أنت بالتحدي تصنع المستحيل" -> **anta bit-tahaddii tasna'u il-mustahiil**
+- **Worked example 2**: "آمالنا نهراً تسيل عذباً كماء السلسبيل" -> **aamaalunaa nahran tasiilu 'adzban kamaa'i is-salsabiil**
+- **Worked example**: "ومذكرات في الحياة منها ارتوى جيل فجيل" -> **wamudzakirotin fi il-hayaah minhaa irtawaa jiilun fajiil**
 
 ### 2. Definite Article "ال" — Within-Word Assimilation
 - **Sun Letters** (ت ث د ذ ر ز س ش ص ض ط ظ ل ن): Assimilate the 'l' (e.g., "الشمس" -> ash-shams / esh-shams / assyamsu depending on context).
@@ -91,6 +113,7 @@ Before romanizing, look at the artist and target language, AND check whether the
 
 ### 3. Cross-Word Behavior with "ال" — Convention Depends on Scenario (IMPORTANT: do not default to full fusion)
 The correct handling of "ال" after a preceding word (preposition, particle, etc.) DIFFERS by scenario/convention — pick the one matching the artist/style/diacritization level, do not assume one universal rule:
+- **Modern Standard Arabic / literary Fusha lyrics (Scenario C)**: use these exact forms — **il-** for moon letters, **i + assimilated sun letter** (is-, in-, ir-...) as its own hyphenated unit on the noun, preceding word NOT merged (e.g., "في الحياة" -> fi il-hayaah, "كماء السلسبيل" -> kamaa'i is-salsabiil). Never use "al-/as-/ash-" or "el-" here.
 - **Egyptian/Arab Pop (Apple Music convention, Scenario B — the common case for mainstream pop)**: Keep "el-" as its own hyphenated unit attached to the noun, WITHOUT collapsing the preceding word into it. The preceding word keeps its own natural vowel ending:
   * "في الغرام" -> **fe el-gharam** (NOT "filgharam" or "fil-gharam")
   * "من الأغاني" -> **men el-aghani** (NOT "menalaghani")
@@ -99,7 +122,7 @@ The correct handling of "ال" after a preceding word (preposition, particle, et
   * This is the DEFAULT for mainstream Arab pop lyrics — "el-" reads as a clearly visible, hyphen-attached prefix on its noun, and the word before it is NOT phonetically merged into it.
 - **Indonesian/Malay Islamic Songs, casual sholawat pop (Scenario A)**: Full liaison/fusion IS common, per the Word Merging/Liaisons rule under Scenario A above (e.g., "واسع الكرم" -> waasi'al karomi).
 - **Fully-vocalized nasheed / Tajwid-style (Scenario A2)**: Follow the STRICT sun/moon-letter-dependent liaison rules detailed under Scenario A2 above (full assimilation for sun letters, "al" relocating onto the previous word for moon letters) — this is more rigorous and rule-governed than Scenario A's looser pop liaison, and is the correct choice whenever the source text is fully diacritized.
-- **When uncertain which convention applies**: default to the Egyptian/Pop convention (keep "el-"/"al-" as a distinct hyphenated unit) for undiacritized text with no other genre signal, since it is the more broadly recognizable pattern; but if the source text is fully diacritized with harakat throughout, that is a strong, reliable signal to use Scenario A2's Tajwid-style liaison instead.`,
+- **When uncertain which convention applies**: default to the Egyptian/Pop convention ONLY if the text is colloquial; if the text is literary/MSA (tanween, formal vocabulary) use Scenario C instead (keep "el-"/"al-" as a distinct hyphenated unit) for undiacritized text with no other genre signal, since it is the more broadly recognizable pattern; but if the source text is fully diacritized with harakat throughout, that is a strong, reliable signal to use Scenario A2's Tajwid-style liaison instead.`,
 
   japanese: `## JAPANESE (日本語)
 ### Kana to Romaji (Modified Hepburn)
