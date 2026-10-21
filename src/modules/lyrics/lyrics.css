@@ -349,6 +349,22 @@
     mask-repeat: no-repeat;
 }
 
+
+.lyrics-line .lyrics-syllable.rtl-text,
+.lyrics-line .lyrics-syllable.rtl-text span.char,
+.lyrics-line.rtl-text .lyrics-syllable,
+.lyrics-line.rtl-text .lyrics-syllable span.char {
+    font-variant-ligatures: normal;
+    font-feature-settings: normal;
+    letter-spacing: 0;
+    word-spacing: normal;
+}
+
+.lyrics-line .lyrics-syllable.rtl-text {
+    unicode-bidi: isolate;
+}
+
+
 /* --- Syllable States (Finished, Highlight, etc.) --- */
 .lyrics-line .lyrics-syllable.finished {
     color: var(--lyplus-text-primary);

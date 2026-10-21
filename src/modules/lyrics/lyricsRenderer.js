@@ -11,6 +11,8 @@ class LyricsPlusRenderer {
   static _LETTER_OR_NUM_RE = /[\p{L}\p{N}]/u;
   static _NEED_SPLIT_CHAR_RE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
   static _NEED_SPLIT_ONLY_RE = /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\u30FC\p{P}\p{S}\s]+$/u;
+  static _JOIN_TAIL_RE = /[\p{Script=Arabic}\p{M}]$/u;
+  static _JOIN_HEAD_RE = /^[\p{Script=Arabic}\p{M}]/u;
   static _TRAILING_PUNCT_RE = /^[!?.,;:~…‥。、！？]/;
   static _FONT_SIZE_RE = /(\d+(?:\.\d+)?)px/;
   static _SEGMENTER = typeof Intl !== "undefined" && typeof Intl.Segmenter === "function" ? new Intl.Segmenter() : null;
@@ -67,6 +69,59 @@ class LyricsPlusRenderer {
       return count;
     }
     return Array.from(text).length;
+  }
+
+  _mergeJoiningSyllables(syllabus, getText) {
+    if (!syllabus || syllabus.length < 2) return syllabus;
+    const TAIL = LyricsPlusRenderer._JOIN_TAIL_RE;
+    const HEAD = LyricsPlusRenderer._JOIN_HEAD_RE;
+    const groups = [];
+    let cur = [syllabus[0]];
+    for (let i = 1; i < syllabus.length; i++) {
+      const prev = syllabus[i - 1];
+      const s = syllabus[i];
+      const pt = getText(prev) || "";
+      const st = getText(s) || "";
+      const joins =
+        pt && st &&
+        !!prev.isBackground === !!s.isBackground &&
+        !prev.isLineEnding &&
+        Number.isFinite(prev.time) && Number.isFinite(s.time) &&
+        TAIL.test(pt) && HEAD.test(st);
+      if (joins) cur.push(s);
+      else { groups.push(cur); cur = [s]; }
+    }
+    groups.push(cur);
+    if (groups.length === syllabus.length) return syllabus;
+
+    return groups.map((g) => {
+      if (g.length === 1) return g[0];
+      const first = g[0];
+      const last = g[g.length - 1];
+      let end = first.time + first.duration;
+      for (const p of g) end = Math.max(end, p.time + p.duration);
+      const hasRoman = g.some((p) => p.romanizedText);
+      const merged = Object.assign({}, first, {
+        text: g.map((p) => p.text || "").join(""),
+        romanizedText: hasRoman
+          ? g.map((p) => p.romanizedText || p.text || "").join("")
+          : first.romanizedText,
+        time: first.time,
+        duration: Math.max(0, end - first.time),
+        _parts: g,
+      });
+      if ("isLineEnding" in last) merged.isLineEnding = last.isLineEnding;
+      return merged;
+    });
+  }
+
+  _buildSegments(s, isOriginal, stripParens) {
+    if (!s || !s._parts) return null;
+    return s._parts.map((p) => {
+      let t = this._getDataText(p, isOriginal) || "";
+      if (stripParens) t = t.replace(/[()]/g, "");
+      return { text: t, time: p.time, duration: p.duration };
+    });
   }
 
   static _isNeedSplitOnly(text) {
@@ -785,7 +840,9 @@ class LyricsPlusRenderer {
       let pendingSyllable = null;
       let pendingSyllableFont = null;
 
-      const renderSyllabus = this._splitNeedSplitSyllables(line.syllabus);
+      const renderSyllabus = this._splitNeedSplitSyllables(
+        this._mergeJoiningSyllables(line.syllabus, (s) => this._getDataText(s, true))
+      );
 
       const isLineBiDi = line.text &&
         this._isRTL(line.text) &&
@@ -831,6 +888,8 @@ class LyricsPlusRenderer {
         if (this._isRTL(this._getDataText(s, true))) {
           sylSpan.classList.add("rtl-text");
         }
+
+        if (s._parts) sylSpan._segments = this._buildSegments(s, true, !!isBg);
 
         return sylSpan;
       };
@@ -1328,7 +1387,11 @@ class LyricsPlusRenderer {
             const cont = document.createElement("div");
             cont.classList.add("lyrics-romanization-container");
 
-            lineData.syllabus.forEach(s => {
+            const mergedSyllabus = this._mergeJoiningSyllables(
+              lineData.syllabus,
+              (s) => this._getDataText(s, false)
+            );
+            mergedSyllabus.forEach(s => {
               const txt = this._getDataText(s, false);
               if (!txt) return;
               if (txt.trim() === this._getDataText(s, true).trim()) return;
@@ -1345,6 +1408,7 @@ class LyricsPlusRenderer {
               span._durationMs = s.duration;
               span._endTimeMs = s.time + s.duration;
               span._isFirstInContainer = true;
+              if (s._parts) span._segments = this._buildSegments(s, false, false);
 
               cont.appendChild(span);
             });
@@ -2674,8 +2738,32 @@ class LyricsPlusRenderer {
     return [frames[lo].offset, frames[hi].offset];
   }
 
+  static _flattenSegments(words) {
+    let any = false;
+    for (let i = 0; i < words.length; i++) {
+      if (words[i].segments) { any = true; break; }
+    }
+    if (!any) return words;
+    const pieces = [];
+    for (const w of words) {
+      const segs = w.segments;
+      if (!segs) { pieces.push(w); continue; }
+      for (let k = 0; k < segs.length; k++) {
+        pieces.push({
+          startTime: segs[k].startTime,
+          endTime: segs[k].endTime,
+          width: w.width * segs[k].frac,
+          padding: w.padding,
+          gapAfter: k === segs.length - 1 ? (w.gapAfter || 0) : 0,
+        });
+      }
+    }
+    return pieces;
+  }
+
   static _buildMaskFrames(words, targetIndex, fadeWidth, lineStartTime, totalFadeDuration, rtl = false, widthBefore, isBackground = false) {
     const targetWord = words[targetIndex];
+    const pieces = LyricsPlusRenderer._flattenSegments(words);
     if (widthBefore === undefined) {
       widthBefore = 0;
       for (let k = 0; k < targetIndex; k++) widthBefore += words[k].width + (words[k].gapAfter || 0);
@@ -2744,8 +2832,8 @@ class LyricsPlusRenderer {
 
     pushClampedKeyframe();
 
-    for (let j = 0; j < words.length; j++) {
-      const otherWord = words[j];
+    for (let j = 0; j < pieces.length; j++) {
+      const otherWord = pieces[j];
       const effectiveStart = Math.max(cursor.lastTimeMs, otherWord.startTime);
       const effectiveEnd = Math.max(effectiveStart, otherWord.endTime);
 
@@ -2759,11 +2847,11 @@ class LyricsPlusRenderer {
       if (j === 0) {
         movePx += fadeWidth * 1.5 - leadTrim;
       }
-      if (j === words.length - 1) {
+      if (j === pieces.length - 1) {
         movePx += fadeWidth * 0.5;
       }
 
-      const nextWord = words[j + 1];
+      const nextWord = pieces[j + 1];
       const nextStartTime = nextWord !== undefined ? nextWord.startTime : Infinity;
       const dur = effectiveEnd - effectiveStart;
 
@@ -3045,6 +3133,28 @@ class LyricsPlusRenderer {
           });
         }
       } else {
+        let segments = null;
+        const segSrc = syl._segments;
+        if (segSrc && segSrc.length > 1) {
+          const font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+          const full = this._getTextWidth(text.trim(), font);
+          if (full > 0) {
+            segments = [];
+            let acc = "";
+            let prevW = 0;
+            for (let k = 0; k < segSrc.length; k++) {
+              acc += segSrc[k].text;
+              const w = k === segSrc.length - 1 ? full : Math.min(full, this._getTextWidth(acc.trim(), font));
+              segments.push({
+                startTime: segSrc[k].time,
+                endTime: segSrc[k].time + segSrc[k].duration,
+                frac: Math.max(0, w - prevW) / full,
+              });
+              prevW = Math.max(prevW, w);
+            }
+          }
+        }
+
         wordList.push({
           word: text,
           startTime: start,
@@ -3054,6 +3164,7 @@ class LyricsPlusRenderer {
           height,
           padding: padLeft,
           gapAfter,
+          segments,
           rtl: LyricsPlusRenderer._resolveWipeRtl(text, cs.direction),
         });
       }
