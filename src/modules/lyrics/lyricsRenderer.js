@@ -19,6 +19,10 @@ class LyricsPlusRenderer {
   static _fontSizeCache = new Map();
   static _MASK_LEAD_TRIM = 1;
   static _NATIVE_SCROLL_DISTANCE_RATIO = 2;
+  static _SCROLL_LEAD_GAP_MIN = 200;
+  static _SCROLL_LEAD_GAP_MAX = 750;
+  static _SCROLL_LEAD_MIN = 480;
+  static _SCROLL_LEAD_MAX = 750;
   static _POSITION_CLASSES = [
     "lyrics-activest", "post-active-line", "next-active-line",
     "prev-1", "prev-2", "prev-3", "prev-4",
@@ -2263,7 +2267,8 @@ class LyricsPlusRenderer {
       return;
     }
 
-    let scrollLookAheadMs = 350;
+    let scrollLookAheadMs = LyricsPlusRenderer._SCROLL_LEAD_MIN;
+    let scrollDurationMs = 350;
     const currentAudioIndex = this._getLineIndexAtTime(currentTime, this._lastActiveIndex);
 
     if (currentAudioIndex !== -1 && currentAudioIndex + 1 < this.cachedLyricsLines.length) {
@@ -2273,7 +2278,11 @@ class LyricsPlusRenderer {
         ? currentLine._actualEndTimeMs
         : currentLine._endTimeMs;
       const gap = nextLine._startTimeMs - rawEndTime;
-      scrollLookAheadMs = Math.min(500, Math.max(350, gap));
+      scrollDurationMs = Math.min(500, Math.max(350, gap));
+      const R = LyricsPlusRenderer;
+      const g = Math.min(R._SCROLL_LEAD_GAP_MAX, Math.max(R._SCROLL_LEAD_GAP_MIN, gap));
+      const t = (g - R._SCROLL_LEAD_GAP_MIN) / (R._SCROLL_LEAD_GAP_MAX - R._SCROLL_LEAD_GAP_MIN);
+      scrollLookAheadMs = R._SCROLL_LEAD_MIN + t * (R._SCROLL_LEAD_MAX - R._SCROLL_LEAD_MIN);
     }
 
     const highlightLookAheadMs = 190;
@@ -2441,7 +2450,7 @@ class LyricsPlusRenderer {
         scrolledThisTick = true;
         const gapShifts = this._syncGapLayout(lineToScroll, isForceScroll, this._tempActiveLines, tempActiveCount);
         this._pendingGapShifts = isForceScroll ? null : gapShifts;
-        this._updatePositionClassesAndScroll(lineToScroll, isForceScroll, scrollLookAheadMs);
+        this._updatePositionClassesAndScroll(lineToScroll, isForceScroll, scrollDurationMs);
         this._pendingGapShifts = null;
         this.lastPrimaryActiveLine = this.currentPrimaryActiveLine;
         this.currentPrimaryActiveLine = lineToScroll;
