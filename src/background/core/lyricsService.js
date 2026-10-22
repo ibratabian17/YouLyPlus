@@ -107,8 +107,9 @@ export class LyricsService {
     }
 
     if (songInfo.lyricsJSON && songInfo.lyricsJSON.lyrics.length > 0) {
+      let parsedApple = null;
       try {
-        const parsedApple = DataParser.parseKPoeFormat(songInfo.lyricsJSON);
+        parsedApple = DataParser.parseKPoeFormat(songInfo.lyricsJSON);
         if (parsedApple && !Utilities.isEmptyLyrics(parsedApple)) {
           parsedApple.provider = 'kpoe';
           if (!parsedApple.metadata) parsedApple.metadata = {};
@@ -123,7 +124,7 @@ export class LyricsService {
       const lyricsJsonType = (songInfo.lyricsJSON.type || '').toUpperCase();
 
       const embeddedResult = {
-        lyrics: DataParser.parseKPoeFormat(songInfo.lyricsJSON),
+        lyrics: parsedApple || DataParser.parseKPoeFormat(songInfo.lyricsJSON),
         version: Date.now()
       };
 
@@ -179,21 +180,57 @@ export class LyricsService {
     }
 
     if (!result) {
-      if (state.hasOngoingFetch(cacheKey)) {
-        result = await state.getOngoingFetch(cacheKey);
-      } else {
-        const fetchPromise = this.fetchNewLyrics(songInfo, cacheKey, forceReload);
-        state.setOngoingFetch(cacheKey, fetchPromise);
-        result = await fetchPromise;
+      try {
+        if (state.hasOngoingFetch(cacheKey)) {
+          result = await state.getOngoingFetch(cacheKey);
+        } else {
+          const fetchPromise = this.fetchNewLyrics(songInfo, cacheKey, forceReload);
+          state.setOngoingFetch(cacheKey, fetchPromise);
+          result = await fetchPromise;
+        }
+      } catch (error) {
+        if (!embeddedFallback) {
+          throw error;
+        }
+        console.log('External lyrics fetch failed or none found. Evaluating fallback to embedded Apple Music lyrics:', error?.message);
+        result = null;
       }
     }
 
     if (embeddedFallback) {
-      const resType = (result?.lyrics?.type || result?.type || '').toUpperCase();
-      if (!result || resType !== "WORD") {
-        console.log('Fetched lyrics not WORD synced. Reverting to embedded Apple Music lyrics.');
+      const extLyrics = result?.lyrics || result;
+      const extType = (extLyrics?.type || '').toUpperCase();
+      const hasExtLyrics = extLyrics && !Utilities.isEmptyLyrics(extLyrics);
+
+      if (!hasExtLyrics) {
+        console.log('No external lyrics found. Reverting to embedded Apple Music lyrics.');
+        state.setCached(cacheKey, embeddedFallback);
         return embeddedFallback;
       }
+
+      if (extType === "WORD") {
+        console.log('External lyrics are WORD synced. Using external lyrics.');
+        return result;
+      }
+
+      if (extType === "LINE") {
+        const extScore = this.scoreLyrics(extLyrics);
+        const embeddedScore = this.scoreLyrics(embeddedFallback.lyrics);
+        console.log(`Comparing LINE synced lyrics richness - External score: ${extScore}, Apple Music score: ${embeddedScore}`);
+
+        if (extScore > embeddedScore) {
+          console.log('External LINE synced lyrics are richer than Apple Music. Using external lyrics.');
+          return result;
+        } else {
+          console.log('Apple Music LINE synced lyrics are equal or richer. Reverting to embedded Apple Music lyrics.');
+          state.setCached(cacheKey, embeddedFallback);
+          return embeddedFallback;
+        }
+      }
+
+      console.log(`External lyrics type is ${extType || 'unsynced'}. Reverting to embedded Apple Music line-synced lyrics.`);
+      state.setCached(cacheKey, embeddedFallback);
+      return embeddedFallback;
     }
 
     return result;
