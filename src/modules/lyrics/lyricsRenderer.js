@@ -23,6 +23,8 @@ class LyricsPlusRenderer {
   static _SCROLL_LEAD_GAP_MAX = 750;
   static _SCROLL_LEAD_MIN = 480;
   static _SCROLL_LEAD_MAX = 750;
+  static _SPRING_GAP_MIN_MS = 0;
+  static _SPRING_GAP_MAX_MS = 2500;
   static _SPRING_ZETA_TIGHT_GAP = 0.85;
   static _SPRING_ZETA_WIDE_GAP = 0.73;
   static _POSITION_CLASSES = [
@@ -2361,8 +2363,11 @@ class LyricsPlusRenderer {
         const iRound = Math.round(R._SCROLL_LEAD_MIN + t * (R._SCROLL_LEAD_MAX - R._SCROLL_LEAD_MIN));
         this._suggestedLineOffsetMs = -iRound;
         this._appleScrollDurationMs = iRound;
-        const nextIsGapLine = !!(nextLine && nextLine._isGap);
-        this._scrollGapT = nextIsGapLine ? 1 : t;
+        const noLineFollows = !nextLine || nextLine._isGap;
+        const gapRange = R._SPRING_GAP_MAX_MS - R._SPRING_GAP_MIN_MS;
+        this._scrollGapT = noLineFollows
+          ? 1
+          : Math.min(1, Math.max(0, (gap - R._SPRING_GAP_MIN_MS) / gapRange));
       } else {
         this._suggestedLineOffsetMs = -500;
         this._appleScrollDurationMs = 750;
