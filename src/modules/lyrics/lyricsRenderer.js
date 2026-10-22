@@ -2323,9 +2323,12 @@ class LyricsPlusRenderer {
           ? currentActiveIndices[currentActiveIndices.length - 1]
           : -1;
         const lastPrevLine = lastPrevIdx >= 0 ? lines[lastPrevIdx] : null;
+        const nextAfterPrev = (lastPrevIdx >= 0 && lastPrevIdx + 1 < linesLen) ? lines[lastPrevIdx + 1] : null;
+        const hasNextLyricLine = !!(nextAfterPrev && nextAfterPrev.classList.contains("lyrics-line"));
         const exitedGapLine = !!(lastPrevLine && lastPrevLine._isGap && predictiveTime >= lastPrevLine._endTimeMs);
+        const exitedLastLyricLine = !!(lastPrevLine && !hasNextLyricLine && predictiveTime >= lastPrevLine._endTimeMs);
 
-        if (!exitedGapLine) {
+        if (!exitedGapLine && !exitedLastLyricLine) {
           if (!isForceScroll && currentActiveIndices.length > 0) {
             for (let k = 0; k < currentActiveIndices.length; k++) {
               const idx = currentActiveIndices[k];
@@ -2336,7 +2339,14 @@ class LyricsPlusRenderer {
             }
           } else if (searchIdx >= 0 && searchIdx < linesLen) {
             const candidate = lines[searchIdx];
-            if (candidate && !candidate._isGap && candidate.classList.contains("lyrics-line")) {
+            const nextAfterSearch = (searchIdx + 1 < linesLen) ? lines[searchIdx + 1] : null;
+            const searchHasNextLyricLine = !!(nextAfterSearch && nextAfterSearch.classList.contains("lyrics-line"));
+            if (
+              candidate &&
+              !candidate._isGap &&
+              candidate.classList.contains("lyrics-line") &&
+              (searchHasNextLyricLine || predictiveTime < candidate._endTimeMs)
+            ) {
               rawActiveIndices.push(searchIdx);
             }
           }
@@ -2363,7 +2373,7 @@ class LyricsPlusRenderer {
         const iRound = Math.round(R._SCROLL_LEAD_MIN + t * (R._SCROLL_LEAD_MAX - R._SCROLL_LEAD_MIN));
         this._suggestedLineOffsetMs = -iRound;
         this._appleScrollDurationMs = iRound;
-        const noLineFollows = !nextLine || nextLine._isGap;
+        const noLineFollows = !nextLine || nextLine._isGap || !nextLine.classList.contains("lyrics-line");
         const gapRange = R._SPRING_GAP_MAX_MS - R._SPRING_GAP_MIN_MS;
         this._scrollGapT = noLineFollows
           ? 1
