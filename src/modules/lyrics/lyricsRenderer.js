@@ -23,8 +23,8 @@ class LyricsPlusRenderer {
   static _SCROLL_LEAD_GAP_MAX = 750;
   static _SCROLL_LEAD_MIN = 480;
   static _SCROLL_LEAD_MAX = 750;
-  static _SPRING_ZETA_TIGHT_GAP = 0.90;
-  static _SPRING_ZETA_WIDE_GAP = 0.60;
+  static _SPRING_ZETA_TIGHT_GAP = 0.85;
+  static _SPRING_ZETA_WIDE_GAP = 0.73;
   static _POSITION_CLASSES = [
     "lyrics-activest", "post-active-line", "next-active-line",
     "prev-1", "prev-2", "prev-3", "prev-4",

@@ -40,8 +40,8 @@
 
     --lyplus-spring-scroll: true;
     --lyplus-spring-dynamic: true;
-    --lyplus-spring-zeta-tight-gap: 0.90; 
-    --lyplus-spring-zeta-wide-gap: 0.60;  
+    --lyplus-spring-zeta-tight-gap: 0.85;
+    --lyplus-spring-zeta-wide-gap: 0.73;
     --lyplus-spring-zeta: 0.78;
     --lyplus-spring-settle-ratio: 1.5;
     --lyplus-spring-zeta-relax: 0.8;
