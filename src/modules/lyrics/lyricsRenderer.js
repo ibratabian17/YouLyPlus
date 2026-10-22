@@ -2210,6 +2210,8 @@ class LyricsPlusRenderer {
 
     const scrollLookAheadMs = -this._suggestedLineOffsetMs;
     const predictiveTime = currentTime + scrollLookAheadMs;
+    const overlapLookAheadMs = 100;
+    const overlapTime = currentTime + overlapLookAheadMs;
 
     // 1. Collect raw active lines at predictiveTime (Apple SongInfoTimeProcessor: begin <= pos < end)
     const hint = isForceScroll ? 0 : this._lastActiveIndex;
@@ -2219,14 +2221,30 @@ class LyricsPlusRenderer {
     rawActiveIndices.length = 0;
 
     let scanStart = Math.max(0, (searchIdx !== -1 ? searchIdx : this._lastActiveIndex) - 2);
-    while (scanStart > 0 && lines[scanStart - 1]._endTimeMs > predictiveTime) {
+    while (scanStart > 0 && lines[scanStart - 1]._endTimeMs > overlapTime) {
       scanStart--;
     }
+    let maxActiveEndMs = -Infinity;
     for (let i = scanStart; i < linesLen; i++) {
       const line = lines[i];
       if (line._startTimeMs > predictiveTime) break;
-      if (predictiveTime >= line._startTimeMs && predictiveTime < line._endTimeMs) {
+      const isOverlappingNext = rawActiveIndices.length > 0 && line._startTimeMs < maxActiveEndMs;
+      const startCheckTime = (isOverlappingNext && !this.activeLineIds.has(line.id))
+        ? overlapTime
+        : predictiveTime;
+      const nextLine = i + 1 < linesLen ? lines[i + 1] : null;
+      const overlapsNextLine = !!(
+        nextLine &&
+        !nextLine._isGap &&
+        !line._isGap &&
+        nextLine._startTimeMs < line._endTimeMs
+      );
+      const endCheckTime = overlapsNextLine ? overlapTime : predictiveTime;
+      if (startCheckTime >= line._startTimeMs && endCheckTime < line._endTimeMs) {
         rawActiveIndices.push(i);
+        if (line._endTimeMs > maxActiveEndMs) {
+          maxActiveEndMs = line._endTimeMs;
+        }
       }
     }
 
@@ -2278,7 +2296,7 @@ class LyricsPlusRenderer {
         const isConsecutive = (lastIdx - prevIdx === 1);
         const prevLine = lines[prevIdx];
         const lastLine = lines[lastIdx];
-        const prevHasNoActiveMainWords = !this._hasActiveMainVocals(prevLine, predictiveTime);
+        const prevHasNoActiveMainWords = !this._hasActiveMainVocals(prevLine, currentTime);
         const prevHasBg = !!this._getBgVocalWrap(prevLine);
         const lastHasBg = !!this._getBgVocalWrap(lastLine);
 
@@ -2324,7 +2342,11 @@ class LyricsPlusRenderer {
       const lastActiveLine = lines[lastActiveIdx];
       if (isWordByWord && lastActiveLine && !lastActiveLine._isGap && lastActiveLine.classList.contains("lyrics-line")) {
         const nextLine = lastActiveIdx + 1 < linesLen ? lines[lastActiveIdx + 1] : null;
-        const rawEnd = lastActiveLine._endTimeMs;
+        let rawEnd = lastActiveLine._endTimeMs;
+        for (let k = 0; k < rawActiveIndices.length; k++) {
+          const endMs = lines[rawActiveIndices[k]]._endTimeMs;
+          if (endMs > rawEnd) rawEnd = endMs;
+        }
         const gap = (nextLine && !nextLine._isGap && nextLine.classList.contains("lyrics-line"))
           ? (nextLine._startTimeMs - rawEnd)
           : -1;
@@ -2341,7 +2363,6 @@ class LyricsPlusRenderer {
     }
 
     const scrollDurationMs = Math.min(500, Math.max(350, Math.round((this._appleScrollDurationMs || 500) * 0.65)));
-
 
     let isNonEmptySubsetOfCurrent = false;
     if (
