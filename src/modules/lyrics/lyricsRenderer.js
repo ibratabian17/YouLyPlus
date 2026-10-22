@@ -2322,36 +2322,26 @@ class LyricsPlusRenderer {
 
     if (rawActiveIndices.length === 0) {
       const firstLineStartTime = lines[0]._startTimeMs;
-      if (predictiveTime >= firstLineStartTime) {
-        const lastPrevIdx = currentActiveIndices.length > 0
-          ? currentActiveIndices[currentActiveIndices.length - 1]
-          : -1;
+      if (predictiveTime >= firstLineStartTime && !isSeek && currentActiveIndices.length > 0) {
+        const lastPrevIdx = currentActiveIndices[currentActiveIndices.length - 1];
         const lastPrevLine = lastPrevIdx >= 0 ? lines[lastPrevIdx] : null;
         const nextAfterPrev = (lastPrevIdx >= 0 && lastPrevIdx + 1 < linesLen) ? lines[lastPrevIdx + 1] : null;
         const hasNextLyricLine = !!(nextAfterPrev && nextAfterPrev.classList.contains("lyrics-line"));
         const exitedGapLine = !!(lastPrevLine && lastPrevLine._isGap && predictiveTime >= lastPrevLine._endTimeMs);
         const exitedLastLyricLine = !!(lastPrevLine && !hasNextLyricLine && predictiveTime >= lastPrevLine._endTimeMs);
+        let maxPrevEndMs = lastPrevLine ? lastPrevLine._endTimeMs : -Infinity;
+        for (let k = 0; k < currentActiveIndices.length; k++) {
+          const l = lines[currentActiveIndices[k]];
+          if (l && l._endTimeMs > maxPrevEndMs) maxPrevEndMs = l._endTimeMs;
+        }
+        const inactiveAfter = (predictiveTime - maxPrevEndMs) >= 1000 + (this._suggestedLineOffsetMs * -1);
 
-        if (!exitedGapLine && !exitedLastLyricLine) {
-          if (!isSeek && currentActiveIndices.length > 0) {
-            for (let k = 0; k < currentActiveIndices.length; k++) {
-              const idx = currentActiveIndices[k];
-              const l = lines[idx];
-              if (l && !l._isGap) {
-                rawActiveIndices.push(idx);
-              }
-            }
-          } else if (searchIdx >= 0 && searchIdx < linesLen) {
-            const candidate = lines[searchIdx];
-            const nextAfterSearch = (searchIdx + 1 < linesLen) ? lines[searchIdx + 1] : null;
-            const searchHasNextLyricLine = !!(nextAfterSearch && nextAfterSearch.classList.contains("lyrics-line"));
-            if (
-              candidate &&
-              !candidate._isGap &&
-              candidate.classList.contains("lyrics-line") &&
-              (searchHasNextLyricLine || predictiveTime < candidate._endTimeMs)
-            ) {
-              rawActiveIndices.push(searchIdx);
+        if (!exitedGapLine && !exitedLastLyricLine && !inactiveAfter) {
+          for (let k = 0; k < currentActiveIndices.length; k++) {
+            const idx = currentActiveIndices[k];
+            const l = lines[idx];
+            if (l && !l._isGap) {
+              rawActiveIndices.push(idx);
             }
           }
         }
@@ -2464,6 +2454,10 @@ class LyricsPlusRenderer {
         this._lastActiveIndex = 0;
         this._lastActiveGroupEndIndex = 0;
         lineToScroll = lines[0];
+      } else if (isSeek && searchIdx >= 0 && searchIdx < linesLen) {
+        this._lastActiveIndex = searchIdx;
+        this._lastActiveGroupEndIndex = searchIdx;
+        lineToScroll = lines[searchIdx];
       } else {
         lineToScroll = this.currentPrimaryActiveLine || lines[this._lastActiveIndex] || lines[0];
       }
