@@ -241,6 +241,7 @@ class LyricsPlusRenderer {
     this._suggestedLineOffsetMs = -500;
     this._appleScrollDurationMs = 750;
     this._scrollGapT = null;
+    this._lastHighlightTime = undefined;
     this._activeLineIndices = [];
     this._prevActiveLineIndices = [];
     this._lastActiveGroupEndIndex = 0;
@@ -2209,7 +2210,10 @@ class LyricsPlusRenderer {
     }
 
     const linesLen = lines.length;
-    if (isForceScroll || this._suggestedLineOffsetMs === undefined) {
+    const isBackwardSeek = this._lastHighlightTime !== undefined && (this._lastHighlightTime - currentTime) > 80;
+    this._lastHighlightTime = currentTime;
+    const isSeek = isForceScroll || isBackwardSeek;
+    if (isSeek || this._suggestedLineOffsetMs === undefined) {
       this._suggestedLineOffsetMs = -500;
       this._appleScrollDurationMs = 750;
     }
@@ -2222,7 +2226,7 @@ class LyricsPlusRenderer {
     const overlapTime = currentTime + overlapLookAheadMs;
 
     // 1. Collect raw active lines at predictiveTime (Apple SongInfoTimeProcessor: begin <= pos < end)
-    const hint = isForceScroll ? 0 : this._lastActiveIndex;
+    const hint = isSeek ? 0 : this._lastActiveIndex;
     const searchIdx = this._getLineIndexAtTime(predictiveTime, hint);
 
     const rawActiveIndices = this._activeIndices;
@@ -2259,7 +2263,7 @@ class LyricsPlusRenderer {
     const currentActiveIndices = this._activeLineIndices || (this._activeLineIndices = []);
     const prevActiveIndices = this._prevActiveLineIndices || (this._prevActiveLineIndices = []);
 
-    if (!isForceScroll && rawActiveIndices.length === 0 && currentActiveIndices.length > 0) {
+    if (!isSeek && rawActiveIndices.length === 0 && currentActiveIndices.length > 0) {
       for (let k = 0; k < currentActiveIndices.length; k++) {
         const prevIdx = currentActiveIndices[k];
         const prevLine = lines[prevIdx];
@@ -2273,7 +2277,7 @@ class LyricsPlusRenderer {
       }
     }
 
-    if (!isForceScroll && rawActiveIndices.length > 0 && currentActiveIndices.length > 0) {
+    if (!isSeek && rawActiveIndices.length > 0 && currentActiveIndices.length > 0) {
       const minCurrentActive = currentActiveIndices[0];
       let writeIdx = 0;
       for (let i = 0; i < rawActiveIndices.length; i++) {
@@ -2329,7 +2333,7 @@ class LyricsPlusRenderer {
         const exitedLastLyricLine = !!(lastPrevLine && !hasNextLyricLine && predictiveTime >= lastPrevLine._endTimeMs);
 
         if (!exitedGapLine && !exitedLastLyricLine) {
-          if (!isForceScroll && currentActiveIndices.length > 0) {
+          if (!isSeek && currentActiveIndices.length > 0) {
             for (let k = 0; k < currentActiveIndices.length; k++) {
               const idx = currentActiveIndices[k];
               const l = lines[idx];
@@ -2389,7 +2393,7 @@ class LyricsPlusRenderer {
 
     let isNonEmptySubsetOfCurrent = false;
     if (
-      !isForceScroll &&
+      !isSeek &&
       rawActiveIndices.length > 0 &&
       rawActiveIndices.length <= currentActiveIndices.length
     ) {
@@ -3172,6 +3176,7 @@ class LyricsPlusRenderer {
       }
     }
     const totalFadeDuration = Math.max(1, lineEndTime - lineStartTime);
+    lineElement._maskTotalFadeDuration = totalFadeDuration;
 
     const containers = [];
     const tracks = new Map();
@@ -3741,7 +3746,8 @@ class LyricsPlusRenderer {
         : parseFloat(parentLine.dataset.startTime) * 1000;
       const relativeTime = currentTime - lineStartTime;
       const isGapLine = parentLine._isGap || parentLine.classList.contains("lyrics-gap");
-      if (parentLine._maskFinished && relativeTime < (parentLine._endTimeMs - lineStartTime)) {
+      const fadeDur = parentLine._maskTotalFadeDuration || (parentLine._endTimeMs - lineStartTime);
+      if (parentLine._maskFinished && relativeTime < fadeDur) {
         parentLine._maskFinished = false;
       }
       const animator = (isGapLine || parentLine._maskFinished)
@@ -3786,7 +3792,12 @@ class LyricsPlusRenderer {
             syllable._state &= ~2;
           }
           if (hasHighlight && syllable._isGrowable && syllable._syllableIdx === 0) {
-            this._syncEmphasis(syllable.parentElement?.parentElement, currentTime);
+            const wordEl = syllable.parentElement?.parentElement;
+            if (wordEl?._cachedChars?.[0]?._emphasis) {
+              this._syncEmphasis(wordEl, currentTime);
+            } else {
+              this._triggerGrowable(syllable, currentTime);
+            }
           }
         } else if (currentTime > endTime) {
           if (!hasFinished) {
@@ -3800,6 +3811,8 @@ class LyricsPlusRenderer {
             classList.add("finished");
             syllable._state |= 2;
           }
+        } else if (hasHighlight || hasFinished) {
+          this._resetSyllable(syllable, true);
         }
       }
     }
