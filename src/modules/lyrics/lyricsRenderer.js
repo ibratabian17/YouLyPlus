@@ -2208,9 +2208,11 @@ class LyricsPlusRenderer {
       this._appleScrollDurationMs = 750;
     }
 
+    const isWordByWord = !!(this.lyricsContainer && this.lyricsContainer.classList.contains("word-by-word-mode"));
     const scrollLookAheadMs = -this._suggestedLineOffsetMs;
     const predictiveTime = currentTime + scrollLookAheadMs;
-    const overlapLookAheadMs = 100;
+    const activationStartDelayMs = isWordByWord ? 150 : 250;
+    const overlapLookAheadMs = Math.max(250, scrollLookAheadMs - activationStartDelayMs);
     const overlapTime = currentTime + overlapLookAheadMs;
 
     // 1. Collect raw active lines at predictiveTime (Apple SongInfoTimeProcessor: begin <= pos < end)
@@ -2336,7 +2338,6 @@ class LyricsPlusRenderer {
       }
     }
 
-    const isWordByWord = !!(this.lyricsContainer && this.lyricsContainer.classList.contains("word-by-word-mode"));
     if (rawActiveIndices.length > 0) {
       const lastActiveIdx = rawActiveIndices[rawActiveIndices.length - 1];
       const lastActiveLine = lines[lastActiveIdx];
