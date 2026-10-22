@@ -1643,7 +1643,7 @@ class LyricsPlusRenderer {
 
     if (isDualSide) container.classList.add("dual-side-lyrics");
 
-    const gapEndLead = 0.8;
+    const gapEndLead = 0.5;
 
     const createGapLine = (gapStart, gapEnd, classesToInherit = null) => {
       const gapDuration = gapEnd - gapStart;
