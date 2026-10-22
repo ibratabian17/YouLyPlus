@@ -23,6 +23,8 @@ class LyricsPlusRenderer {
   static _SCROLL_LEAD_GAP_MAX = 750;
   static _SCROLL_LEAD_MIN = 480;
   static _SCROLL_LEAD_MAX = 750;
+  static _SPRING_ZETA_TIGHT_GAP = 0.90;
+  static _SPRING_ZETA_WIDE_GAP = 0.60;
   static _POSITION_CLASSES = [
     "lyrics-activest", "post-active-line", "next-active-line",
     "prev-1", "prev-2", "prev-3", "prev-4",
@@ -236,6 +238,7 @@ class LyricsPlusRenderer {
     this.activeLineIds = new Set();
     this._suggestedLineOffsetMs = -500;
     this._appleScrollDurationMs = 750;
+    this._scrollGapT = null;
     this._activeLineIndices = [];
     this._prevActiveLineIndices = [];
     this._lastActiveGroupEndIndex = 0;
@@ -1785,6 +1788,7 @@ class LyricsPlusRenderer {
     this.currentPrimaryActiveLine = null;
     this._suggestedLineOffsetMs = -500;
     this._appleScrollDurationMs = 750;
+    this._scrollGapT = null;
     if (this._activeLineIndices) this._activeLineIndices.length = 0;
     if (this._prevActiveLineIndices) this._prevActiveLineIndices.length = 0;
     this._lastActiveGroupEndIndex = 0;
@@ -2357,9 +2361,12 @@ class LyricsPlusRenderer {
         const iRound = Math.round(R._SCROLL_LEAD_MIN + t * (R._SCROLL_LEAD_MAX - R._SCROLL_LEAD_MIN));
         this._suggestedLineOffsetMs = -iRound;
         this._appleScrollDurationMs = iRound;
+        const nextIsGapLine = !!(nextLine && nextLine._isGap);
+        this._scrollGapT = nextIsGapLine ? 1 : t;
       } else {
         this._suggestedLineOffsetMs = -500;
         this._appleScrollDurationMs = 750;
+        this._scrollGapT = null;
       }
     }
 
@@ -3927,6 +3934,9 @@ class LyricsPlusRenderer {
       zeta: readNum('--lyplus-spring-zeta', 0.78),
       settleRatio: readNum('--lyplus-spring-settle-ratio', 1.5),
       zetaRelax: readNum('--lyplus-spring-zeta-relax', 0.8),
+      dynamicZeta: style.getPropertyValue('--lyplus-spring-dynamic').trim() !== 'false',
+      zetaTight: readNum('--lyplus-spring-zeta-tight-gap', LyricsPlusRenderer._SPRING_ZETA_TIGHT_GAP),
+      zetaWide: readNum('--lyplus-spring-zeta-wide-gap', LyricsPlusRenderer._SPRING_ZETA_WIDE_GAP),
       settleRatioRelax: readNum('--lyplus-spring-settle-ratio-relax', 1.5)
     };
   }
@@ -4006,7 +4016,13 @@ class LyricsPlusRenderer {
 
     const cfg = this._springConfigCache || (this._springConfigCache = this._resolveSpringConfig());
     const springEnabled = cfg.enabled;
-    const zeta = isRelaxMode ? cfg.zetaRelax : cfg.zeta;
+    let zeta = isRelaxMode ? cfg.zetaRelax : cfg.zeta;
+    const gapT = this._scrollGapT;
+    if (cfg.dynamicZeta && gapT !== null && gapT !== undefined && !forceScroll) {
+      zeta = cfg.zetaTight + (cfg.zetaWide - cfg.zetaTight) * gapT;
+      if (isRelaxMode) zeta = Math.min(0.95, zeta + 0.05);
+    }
+    zeta = Math.round(Math.min(0.97, Math.max(0.3, zeta)) * 50) / 50;
     const settleTail = duration * (isRelaxMode ? cfg.settleRatioRelax : cfg.settleRatio);
 
     let easing, scrollDuration;
@@ -5205,6 +5221,7 @@ class LyricsPlusRenderer {
     this.activeLineIds.clear();
     this._suggestedLineOffsetMs = -500;
     this._appleScrollDurationMs = 750;
+    this._scrollGapT = null;
     if (this._activeLineIndices) this._activeLineIndices.length = 0;
     if (this._prevActiveLineIndices) this._prevActiveLineIndices.length = 0;
     this._lastActiveGroupEndIndex = 0;
