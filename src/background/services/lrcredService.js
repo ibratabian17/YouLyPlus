@@ -4,7 +4,7 @@
 
 import { DataParser } from '../utils/dataParser.js';
 import { parseAppleTTML } from '../../lib/parser.js';
-import { USER_AGENT } from '../constants.js';
+import { CLIENT_ID } from '../constants.js';
 
 const LRCRED_BASE_URL = 'https://lrc.red/api/v1';
 
@@ -39,7 +39,7 @@ export class LrcredService {
     const baseHeaders = fetchOptions.headers || {};
     const headers = {
       ...(baseHeaders instanceof Headers ? Object.fromEntries(baseHeaders.entries()) : baseHeaders),
-      'User-Agent': USER_AGENT
+      'X-Client-Id': CLIENT_ID
     };
 
     const options = {

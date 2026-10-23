@@ -3,7 +3,7 @@
 // ==================================================================================================
 
 import { DataParser } from '../utils/dataParser.js';
-import { USER_AGENT } from '../constants.js';
+import { CLIENT_ID } from '../constants.js';
 
 const UNISON_BASE_URL = 'https://unison.boidu.dev';
 
@@ -70,7 +70,7 @@ export class UnisonService {
     const baseHeaders = fetchOptions.headers || {};
     const headers = {
       ...(baseHeaders instanceof Headers ? Object.fromEntries(baseHeaders.entries()) : baseHeaders),
-      'User-Agent': USER_AGENT
+      'X-Client-Id': CLIENT_ID
     };
 
     try {

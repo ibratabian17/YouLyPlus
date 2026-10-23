@@ -2,7 +2,7 @@
 // EXTERNAL SERVICE - KPOE
 // ==================================================================================================
 
-import { CONFIG, USER_AGENT } from '../constants.js';
+import { CONFIG, CLIENT_ID } from '../constants.js';
 import { DataParser } from '../utils/dataParser.js';
 
 export class KPoeService {
@@ -64,7 +64,7 @@ export class KPoeService {
     const baseHeaders = fetchOptions.headers || {};
     const headers = {
       ...(baseHeaders instanceof Headers ? Object.fromEntries(baseHeaders.entries()) : baseHeaders),
-      'User-Agent': USER_AGENT
+      'X-Client-Id': CLIENT_ID
     };
 
     try {
