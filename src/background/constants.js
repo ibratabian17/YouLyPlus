@@ -2,6 +2,18 @@
 // CONSTANTS
 // ==================================================================================================
 
+export const getBuildVersion = () => {
+  try {
+    const api = typeof chrome !== 'undefined' ? chrome : (typeof browser !== 'undefined' ? browser : null);
+    return api?.runtime?.getManifest?.()?.version_name || api?.runtime?.getManifest?.()?.version || '5.0.0';
+  } catch (e) {
+    return '5.0.0';
+  }
+};
+
+export const getUserAgent = () => `YouLyPlus (${getBuildVersion()})`;
+export const USER_AGENT = getUserAgent();
+
 export const CONFIG = {
   DB: {
     CACHE: { name: "LyricsCacheDB", version: 2, store: "lyrics" },
