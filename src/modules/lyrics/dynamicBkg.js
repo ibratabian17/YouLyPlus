@@ -43,9 +43,20 @@ let u_blurVPost_saturate = null;
 let u_blurVPost_contrast = null;
 let u_blurVPost_hueRotate = null;
 let u_blurVPost_opacity = null;
+let u_blurVPost_blackScrim = null;
+let u_blurVPost_whiteScrim = null;
 
 // Cached post-process values
-const _postParams = { brightness: 0.7, saturate: 3.0, contrast: 0.95, hueRotate: 0.0, opacity: 1.0 };
+// so, Apple Music draws two scrim leyers over the saturated artwork before blur happened
+const _postParams = {
+    brightness: 1.0,
+    saturate: 2.5,
+    contrast: 1.0,
+    hueRotate: 0.0,
+    opacity: 1.0,
+    blackScrim: 0.5,
+    whiteScrim: 13.0 / 255.0
+};
 let _postParamsDirty = true;
 let _appliedPostUniformsDirty = true;
 
@@ -460,6 +471,8 @@ function buildBlurVPostFragmentShaderSource(kernel) {
     uniform float u_contrast;
     uniform float u_hueRotate;
     uniform float u_opacity;
+    uniform float u_blackScrim;
+    uniform float u_whiteScrim;
 
     float interleavedGradientNoise(HP vec2 uv) {
         return fract(52.9829189 * fract(dot(uv, vec2(0.06711056, 0.00583715))));
@@ -492,9 +505,11 @@ function buildBlurVPostFragmentShaderSource(kernel) {
 
     void main() {
 ${_blurTapsGLSL(kernel)}
-        c *= u_brightness;
         float luma = dot(c, vec3(0.2126, 0.7152, 0.0722));
-        c = mix(vec3(luma), c, u_saturate);
+        c = clamp(mix(vec3(luma), c, u_saturate), 0.0, 1.0);
+        c = mix(c, vec3(0.0), u_blackScrim);
+        c = mix(c, vec3(1.0), u_whiteScrim);
+        c *= u_brightness;
         c = (c - 0.5) * u_contrast + 0.5;
         if (abs(u_hueRotate) > 0.0001) {
             vec3 hsl = rgb2hsl(clamp(c, 0.0, 1.0));
@@ -520,6 +535,8 @@ function _parsePostProcess(str, out) {
     out.contrast = 1.0;
     out.hueRotate = 0.0;
     out.opacity = 1.0;
+    out.blackScrim = 0.5;
+    out.whiteScrim = 13.0 / 255.0;
     if (!str || !str.trim()) return out;
     POST_PROCESS_REGEX.lastIndex = 0;
     let m;
@@ -528,11 +545,14 @@ function _parsePostProcess(str, out) {
         const raw = m[2].trim();
         const num = parseFloat(raw);
         if (!isNaN(num)) {
-            if      (fn === 'brightness') out.brightness = num;
-            else if (fn === 'saturate')   out.saturate   = num;
-            else if (fn === 'contrast')   out.contrast   = num;
-            else if (fn === 'opacity')    out.opacity    = num;
-            else if (fn === 'hue-rotate') out.hueRotate  = raw.endsWith('rad') ? num : num * DEG_TO_RAD;
+            const val = raw.endsWith('%') ? num * 0.01 : num;
+            if      (fn === 'brightness')  out.brightness = val;
+            else if (fn === 'saturate')    out.saturate   = val;
+            else if (fn === 'contrast')    out.contrast   = val;
+            else if (fn === 'opacity')     out.opacity    = val;
+            else if (fn === 'black-scrim') out.blackScrim = val;
+            else if (fn === 'white-scrim') out.whiteScrim = val;
+            else if (fn === 'hue-rotate')  out.hueRotate  = raw.endsWith('rad') ? num : num * DEG_TO_RAD;
         }
     }
     return out;
@@ -808,6 +828,8 @@ function _rebuildBlurPrograms(renderSize) {
     u_blurVPost_contrast   = gl.getUniformLocation(blurVPostProgram, 'u_contrast');
     u_blurVPost_hueRotate  = gl.getUniformLocation(blurVPostProgram, 'u_hueRotate');
     u_blurVPost_opacity    = gl.getUniformLocation(blurVPostProgram, 'u_opacity');
+    u_blurVPost_blackScrim = gl.getUniformLocation(blurVPostProgram, 'u_blackScrim');
+    u_blurVPost_whiteScrim = gl.getUniformLocation(blurVPostProgram, 'u_whiteScrim');
 
     if (vaoExt) {
         if (blurHVAO) vaoExt.deleteVertexArrayOES(blurHVAO);
@@ -1203,6 +1225,8 @@ function animateWebGLBackground(timestamp) {
         gl.uniform1f(u_blurVPost_contrast,   _postParams.contrast);
         gl.uniform1f(u_blurVPost_hueRotate,  _postParams.hueRotate);
         gl.uniform1f(u_blurVPost_opacity,    _postParams.opacity);
+        gl.uniform1f(u_blurVPost_blackScrim, _postParams.blackScrim);
+        gl.uniform1f(u_blurVPost_whiteScrim, _postParams.whiteScrim);
         _appliedPostUniformsDirty = false;
     }
 

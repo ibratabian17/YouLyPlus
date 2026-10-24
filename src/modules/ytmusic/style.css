@@ -209,12 +209,12 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response {
 }
 
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container {
-    --webgl-post-process: brightness(0.5) saturate(3) contrast(0.95);
+    --webgl-post-process: saturate(2.5) black-scrim(0.5) white-scrim(0.051) brightness(0.85) contrast(1);
     --webgl-post-process-tick: 1;
 }
 
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container::after {
-    background-color: #22222227;
+    background-color: transparent;
 }
 
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] ytmusic-player-bar,
