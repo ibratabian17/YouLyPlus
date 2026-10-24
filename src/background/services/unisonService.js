@@ -3,7 +3,6 @@
 // ==================================================================================================
 
 import { DataParser } from '../utils/dataParser.js';
-import { USER_AGENT } from '../constants.js';
 
 const UNISON_BASE_URL = 'https://unison.boidu.dev';
 
@@ -34,7 +33,7 @@ export class UnisonService {
     return null;
   }
 
-  static async fetchByVideoId(videoId, fetchOptions = {}) {
+  static async fetchByVideoId(videoId, fetchOptions) {
     const url = `${UNISON_BASE_URL}/lyrics?v=${encodeURIComponent(videoId)}`;
     const result = await this.fetchAndParse(url, fetchOptions);
     if (result) {
@@ -45,7 +44,7 @@ export class UnisonService {
     return result;
   }
 
-  static async fetchByMetadata(songInfo, fetchOptions = {}) {
+  static async fetchByMetadata(songInfo, fetchOptions) {
     const params = new URLSearchParams({
       song: songInfo.title,
       artist: songInfo.artist
@@ -64,20 +63,14 @@ export class UnisonService {
     return result;
   }
 
-  static async fetchAndParse(url, fetchOptions = {}) {
+  static async fetchAndParse(url, fetchOptions) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
-    const baseHeaders = fetchOptions.headers || {};
-    const headers = {
-      ...(baseHeaders instanceof Headers ? Object.fromEntries(baseHeaders.entries()) : baseHeaders),
-      'User-Agent': USER_AGENT
-    };
 
     try {
       const response = await fetch(url, {
         ...fetchOptions,
-        headers,
-        signal: fetchOptions.signal || controller.signal
+        signal: controller.signal
       });
       clearTimeout(timeoutId);
 

@@ -2,13 +2,13 @@
 // EXTERNAL SERVICE - KPOE
 // ==================================================================================================
 
-import { CONFIG, USER_AGENT } from '../constants.js';
+import { CONFIG } from '../constants.js';
 import { DataParser } from '../utils/dataParser.js';
 
 export class KPoeService {
   static lastWorkingServer = null;
 
-  static async fetch(songInfo, sourceOrder, forceReload, fetchOptions = {}) {
+  static async fetch(songInfo, sourceOrder, forceReload, fetchOptions) {
     const servers = this.getPrioritizedServers();
 
     for (const baseUrl of servers) {
@@ -36,7 +36,7 @@ export class KPoeService {
     return null;
   }
 
-  static async fetchCustom(songInfo, customUrl, sourceOrder, forceReload, fetchOptions = {}) {
+  static async fetchCustom(songInfo, customUrl, sourceOrder, forceReload, fetchOptions) {
     if (!customUrl) return null;
     let lyrics = await this.fetchFromAPI(customUrl, songInfo, sourceOrder, forceReload, fetchOptions);
     if (lyrics) return lyrics;
@@ -48,7 +48,7 @@ export class KPoeService {
     return null;
   }
 
-  static async fetchFromAPI(baseUrl, songInfo, sourceOrder, forceReload, fetchOptions = {}) {
+  static async fetchFromAPI(baseUrl, songInfo, sourceOrder, forceReload, fetchOptions) {
     const { title, artist, album, duration, isrc } = songInfo;
     const params = new URLSearchParams({ title, artist });
 
@@ -61,17 +61,11 @@ export class KPoeService {
     const url = `${baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`}v2/lyrics/get?${params}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
-    const baseHeaders = fetchOptions.headers || {};
-    const headers = {
-      ...(baseHeaders instanceof Headers ? Object.fromEntries(baseHeaders.entries()) : baseHeaders),
-      'User-Agent': USER_AGENT
-    };
 
     try {
       const response = await fetch(url, {
         ...(forceReload ? { cache: 'no-store' } : fetchOptions),
-        headers,
-        signal: fetchOptions.signal || controller.signal
+        signal: controller.signal
       });
       clearTimeout(timeoutId);
 

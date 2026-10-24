@@ -4,7 +4,6 @@
 
 import { DataParser } from '../utils/dataParser.js';
 import { parseAppleTTML } from '../../lib/parser.js';
-import { USER_AGENT } from '../constants.js';
 
 const LRCRED_BASE_URL = 'https://lrc.red/api/v1';
 
@@ -36,15 +35,8 @@ export class LrcredService {
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
-    const baseHeaders = fetchOptions.headers || {};
-    const headers = {
-      ...(baseHeaders instanceof Headers ? Object.fromEntries(baseHeaders.entries()) : baseHeaders),
-      'User-Agent': USER_AGENT
-    };
-
     const options = {
       ...fetchOptions,
-      headers,
       signal: fetchOptions.signal || controller.signal
     };
 
@@ -67,7 +59,6 @@ export class LrcredService {
       const lyricsTimeoutId = setTimeout(() => lyricsController.abort(), 8000);
       const lyricsOptions = {
         ...fetchOptions,
-        headers,
         signal: fetchOptions.signal || lyricsController.signal
       };
 
