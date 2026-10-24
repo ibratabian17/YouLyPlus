@@ -1122,6 +1122,17 @@ span.lyrics-source-provider {
     white-space: pre-wrap;
 }
 
+.lyrics-romanization-subrow {
+    display: block;
+    padding-top: 0.1em;
+    padding-bottom: 0.25em;
+    line-height: 1.3em;
+}
+
+.lyrics-romanization-subrow:last-child {
+    padding-bottom: 0;
+}
+
 /* ==========================================================================
    ENHANCED BACKGROUND & DYNAMIC PLAYER LAYOUT
    ========================================================================== */

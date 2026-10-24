@@ -504,6 +504,20 @@ class LyricsPlusRenderer {
     this._springConfigCache = null;
     this._elevationConfigCache = null;
 
+    const newW = container.clientWidth || 0;
+    if (newW > 0 && Math.abs((this._lastContainerWidth || 0) - newW) > 1) {
+      this._lastContainerWidth = newW;
+      if (this.visibleLineIds && this._lineById) {
+        for (const id of this.visibleLineIds) {
+          const line = this._lineById.get(id);
+          if (line && line._hasRtlRowRoman) {
+            this._layoutAllRtlVisualRowRomanizations(line);
+          }
+        }
+      }
+      this._invalidateMaskAnimators();
+    }
+
     if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
       this._scrollToActiveLine(this.currentPrimaryActiveLine, false, true);
     }
@@ -880,6 +894,7 @@ class LyricsPlusRenderer {
 
         const wordSpan = document.createElement("span");
         wordSpan.className = "lyrics-word";
+        wordSpan._wordSyllabus = wordBuffer;
 
         if (shouldAllowBreak(combinedText)) {
           wordSpan.classList.add("allow-break");
@@ -1270,6 +1285,120 @@ class LyricsPlusRenderer {
       container.classList.add("lyrics-both-modes");
   }
 
+  _layoutAllRtlVisualRowRomanizations(rootContainer = this.lyricsContainer) {
+    if (!rootContainer) return;
+    const containers = rootContainer.querySelectorAll(".has-rtl-row-roman");
+    if (!containers.length) return;
+
+    // 1. Unwrap any previous .lyrics-rtl-visual-row and remove old .lyrics-romanization-subrow
+    const toMeasure = [];
+    for (let i = 0; i < containers.length; i++) {
+      const vc = containers[i];
+      const words = vc._rtlWords;
+      if (!words || !words.length) continue;
+
+      const oldSubrows = vc.querySelectorAll(".lyrics-romanization-subrow");
+      for (let j = 0; j < oldSubrows.length; j++) {
+        oldSubrows[j].remove();
+      }
+
+      const oldVisualRows = vc.querySelectorAll(":scope > .lyrics-rtl-visual-row");
+      for (let j = 0; j < oldVisualRows.length; j++) {
+        const row = oldVisualRows[j];
+        while (row.firstChild) {
+          vc.insertBefore(row.firstChild, row);
+        }
+        row.remove();
+      }
+
+      toMeasure.push(vc);
+    }
+
+    if (!toMeasure.length) return;
+
+    // 2. Measure word vertical positions in a single pass to group by visual line
+    const rowGroupsByVc = new Map();
+    for (let i = 0; i < toMeasure.length; i++) {
+      const vc = toMeasure[i];
+      const words = vc._rtlWords;
+      const rows = [];
+      let currentRow = [];
+      let currentTop = null;
+
+      for (let w = 0; w < words.length; w++) {
+        const wordEl = words[w];
+        const top = wordEl.offsetTop;
+        if (currentTop === null || Math.abs(top - currentTop) <= 8) {
+          currentRow.push(wordEl);
+          if (currentTop === null) currentTop = top;
+        } else {
+          rows.push(currentRow);
+          currentRow = [wordEl];
+          currentTop = top;
+        }
+      }
+      if (currentRow.length > 0) rows.push(currentRow);
+      rowGroupsByVc.set(vc, rows);
+    }
+
+    // 3. Mutate DOM to insert .lyrics-romanization-subrow after each visual row
+    for (const [vc, rows] of rowGroupsByVc.entries()) {
+      for (let r = 0; r < rows.length; r++) {
+        const rowWords = rows[r];
+        const subrow = document.createElement("span");
+        subrow.className = "lyrics-romanization-container lyrics-romanization-subrow";
+
+        let hasSpans = false;
+        for (let w = 0; w < rowWords.length; w++) {
+          const wordEl = rowWords[w];
+          const spans = wordEl._romanSpans;
+          if (!spans || !spans.length) continue;
+
+          for (let sIdx = 0; sIdx < spans.length; sIdx++) {
+            const sp = spans[sIdx];
+            if (sp._baseText === undefined) sp._baseText = sp.textContent;
+            sp.textContent = sp._baseText;
+            subrow.appendChild(sp);
+            hasSpans = true;
+          }
+          // Ensure a trailing space between words if the last syllable in the word didn't end with whitespace
+          const lastSpan = spans[spans.length - 1];
+          if (lastSpan && !/\s$/.test(lastSpan.textContent) && w < rowWords.length - 1) {
+            lastSpan.textContent = lastSpan._baseText + " ";
+          }
+        }
+
+        if (hasSpans && subrow.textContent.trim()) {
+          if (this._isRTL(subrow.textContent)) {
+            subrow.classList.add("rtl-text");
+          }
+          const lastWord = rowWords[rowWords.length - 1];
+          // Insert subrow right after the last word (and its trailing whitespace node if any)
+          let insertAfter = lastWord;
+          if (insertAfter.parentElement && insertAfter.parentElement !== vc && insertAfter.parentElement.matches(".bidi-rtl, .bidi-ltr")) {
+            if (insertAfter === insertAfter.parentElement.lastElementChild) {
+              insertAfter = insertAfter.parentElement;
+            }
+          }
+          if (insertAfter.nextSibling && insertAfter.nextSibling.nodeType === 3) {
+            insertAfter = insertAfter.nextSibling;
+          }
+          if (insertAfter.parentNode) {
+            insertAfter.parentNode.insertBefore(subrow, insertAfter.nextSibling);
+          } else {
+            vc.appendChild(subrow);
+          }
+        }
+      }
+
+      const parentLine = vc.closest(".lyrics-line");
+      if (parentLine) {
+        parentLine._cachedSyllableElements = null;
+        parentLine._rtlRowMeasuredWidth = parentLine.clientWidth;
+      }
+    }
+  }
+
   /**
    * Renders the translation/romanization container for a given lyric line.
    * @param {HTMLElement} lineElement - The DOM element for the lyric line.
@@ -1301,38 +1430,71 @@ class LyricsPlusRenderer {
           });
 
           if (isRTL || translitIsRtl) {
-            const cont = document.createElement("div");
-            cont.classList.add("lyrics-romanization-container");
-
-            const mergedSyllabus = this._mergeJoiningSyllables(
-              lineData.syllabus,
-              (s) => this._getDataText(s, false)
+            const vocalContainers = Array.from(
+              lineElement.querySelectorAll(".main-vocal-container, .background-vocal-wrap")
             );
-            mergedSyllabus.forEach(s => {
-              const txt = this._getDataText(s, false);
-              if (!txt) return;
-              if (txt.trim() === this._getDataText(s, true).trim()) return;
+            for (let vcIdx = 0; vcIdx < vocalContainers.length; vcIdx++) {
+              const vc = vocalContainers[vcIdx];
+              const words = Array.from(vc.querySelectorAll(".lyrics-word"));
+              if (!words.length) continue;
 
-              const span = document.createElement("span");
-              span.className = "lyrics-syllable";
-              span.textContent = txt;
-              if (this._isRTL(txt)) span.classList.add("rtl-text");
+              const isBg = vc.classList.contains("background-vocal-wrap") || !!vc.closest(".background-vocal-container");
+              let hasAnyTranslit = false;
 
-              span.dataset.startTime = s.time;
-              span.dataset.duration = s.duration;
-              span.dataset.endTime = s.time + s.duration;
-              span._startTimeMs = s.time;
-              span._durationMs = s.duration;
-              span._endTimeMs = s.time + s.duration;
-              span._isFirstInContainer = true;
-              if (s._parts) span._segments = this._buildSegments(s, false, false);
+              for (let wIdx = 0; wIdx < words.length; wIdx++) {
+                const wordEl = words[wIdx];
+                const rawBuf = wordEl._wordSyllabus;
+                if (!rawBuf || !rawBuf.length) continue;
 
-              cont.appendChild(span);
-            });
+                const origSyls = [];
+                for (let k = 0; k < rawBuf.length; k++) {
+                  const o = rawBuf[k]._origSyl || rawBuf[k];
+                  if (origSyls[origSyls.length - 1] !== o) origSyls.push(o);
+                }
 
-            if (cont.textContent.trim()) {
-              if (this._isRTL(cont.textContent)) cont.classList.add("rtl-text");
-              lineElement.appendChild(cont);
+                const mergedRoman = this._mergeJoiningSyllables(
+                  origSyls,
+                  (s) => this._getDataText(s, false)
+                );
+
+                const wordRomanSpans = [];
+                for (let mIdx = 0; mIdx < mergedRoman.length; mIdx++) {
+                  const s = mergedRoman[mIdx];
+                  let txt = this._getDataText(s, false);
+                  if (!txt) continue;
+                  if (isBg) txt = txt.replace(/[()]/g, "");
+                  const origTxt = this._getDataText(s, true) || "";
+                  if (currentSettings.hidePhoneticDup && txt.trim() === origTxt.trim()) continue;
+
+                  const span = document.createElement("span");
+                  span.className = "lyrics-syllable";
+                  span.textContent = txt;
+                  if (this._isRTL(txt)) span.classList.add("rtl-text");
+
+                  span.dataset.startTime = s.time;
+                  span.dataset.duration = s.duration;
+                  span.dataset.endTime = s.time + s.duration;
+                  span._startTimeMs = s.time;
+                  span._durationMs = s.duration;
+                  span._endTimeMs = s.time + s.duration;
+                  span._isFirstInContainer = true;
+                  if (s._parts) span._segments = this._buildSegments(s, false, isBg);
+
+                  wordRomanSpans.push(span);
+                }
+
+                if (wordRomanSpans.length > 0) {
+                  wordEl._romanSpans = wordRomanSpans;
+                  hasAnyTranslit = true;
+                }
+              }
+
+              if (hasAnyTranslit) {
+                vc.classList.add("has-rtl-row-roman");
+                vc._rtlWords = words;
+                const parentLine = vc.closest(".lyrics-line");
+                if (parentLine) parentLine._hasRtlRowRoman = true;
+              }
             }
 
           } else {
@@ -1714,6 +1876,7 @@ class LyricsPlusRenderer {
     }
 
     container.appendChild(fragment);
+    this._lastContainerWidth = container.clientWidth || 0;
     const originalLines = Array.from(
       container.querySelectorAll(".lyrics-line:not(.lyrics-gap)")
     );
@@ -3056,6 +3219,13 @@ class LyricsPlusRenderer {
   _observeMaskLine(line) {
     const ro = this._maskResizeObserver;
     if (!ro || !line || line._isGap || line.classList.contains("lyrics-gap")) return;
+    if (
+      line._hasRtlRowRoman &&
+      line.clientWidth > 0 &&
+      Math.abs((line._rtlRowMeasuredWidth || 0) - line.clientWidth) > 1
+    ) {
+      this._layoutAllRtlVisualRowRomanizations(line);
+    }
     const set = this._maskObservedLines;
     if (set.has(line)) return;
     set.add(line);
@@ -3146,6 +3316,14 @@ class LyricsPlusRenderer {
   _getOrCreateLineMaskAnimator(lineElement) {
     if (lineElement._maskAnimator) return lineElement._maskAnimator;
     if (lineElement._isGap || lineElement.classList.contains("lyrics-gap")) return null;
+
+    if (
+      lineElement._hasRtlRowRoman &&
+      lineElement.clientWidth > 0 &&
+      Math.abs((lineElement._rtlRowMeasuredWidth || 0) - lineElement.clientWidth) > 1
+    ) {
+      this._layoutAllRtlVisualRowRomanizations(lineElement);
+    }
 
     let syllables = lineElement._cachedSyllableElements;
     if (!syllables) {
@@ -4551,6 +4729,13 @@ class LyricsPlusRenderer {
           if (hideOffscreen) this._visibilityChanges.push(target);
 
           if (entry.isIntersecting) {
+            if (
+              target._hasRtlRowRoman &&
+              target.clientWidth > 0 &&
+              Math.abs((target._rtlRowMeasuredWidth || 0) - target.clientWidth) > 1
+            ) {
+              this._layoutAllRtlVisualRowRomanizations(target);
+            }
             if (!this.visibleLineIds.has(id)) {
               this.visibleLineIds.add(id);
               hasChanges = true;
