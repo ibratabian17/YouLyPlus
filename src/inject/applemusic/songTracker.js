@@ -161,6 +161,7 @@
       playing = mkInstance.isPlaying;
       if (playing) startTimeUpdater();
       else stopTimeUpdater();
+      window.postMessage({ type: 'LYPLUS_PLAYBACK_STATE', isPlaying: playing }, '*');
     });
 
     if (mkInstance.nowPlayingItem) handleSongChange();
@@ -168,6 +169,7 @@
     if (mkInstance.isPlaying) {
       playing = true;
       startTimeUpdater();
+      window.postMessage({ type: 'LYPLUS_PLAYBACK_STATE', isPlaying: true }, '*');
     }
 
     setupSeekListener();

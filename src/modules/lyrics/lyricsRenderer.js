@@ -309,16 +309,98 @@ class LyricsPlusRenderer {
     this._rtlNeedsInitialLayout = false;
 
     this.wakeLock = null;
+    this._wakeLockPending = false;
+    this._isContainerIntersecting = false;
+    this._explicitPlaybackState = null;
+    this._lastTickTime = 0;
+    this._tickWatchdogTimer = null;
+    this._wakeLockListenersAttached = false;
+    this._setupWakeLockListeners();
 
     this._getContainer();
   }
 
+  _setupWakeLockListeners() {
+    if (this._wakeLockListenersAttached) return;
+    this._wakeLockListenersAttached = true;
+
+    this._boundWakeLockMediaHandler = (event) => {
+      if (event && event.target && (event.target.tagName === 'VIDEO' || event.target.tagName === 'AUDIO')) {
+        this._explicitPlaybackState = !event.target.paused && !event.target.ended;
+        this._updateWakeLock();
+      }
+    };
+
+    this._boundWakeLockVisibilityHandler = () => {
+      this._updateWakeLock();
+    };
+
+    document.addEventListener('play', this._boundWakeLockMediaHandler, true);
+    document.addEventListener('playing', this._boundWakeLockMediaHandler, true);
+    document.addEventListener('pause', this._boundWakeLockMediaHandler, true);
+    document.addEventListener('ended', this._boundWakeLockMediaHandler, true);
+    document.addEventListener('visibilitychange', this._boundWakeLockVisibilityHandler);
+  }
+
+  _isLyricsOpen() {
+    if (!this.lyricsContainer || !this.lyricsContainer.isConnected) {
+      return false;
+    }
+    if (typeof this._isContainerIntersecting === 'boolean') {
+      return this._isContainerIntersecting;
+    }
+    return this.lyricsContainer.offsetWidth > 0 || this.lyricsContainer.offsetHeight > 0;
+  }
+
+  _isSongPlaying() {
+    if (typeof this.uiConfig?.isPlaying === 'function') {
+      try {
+        return !!this.uiConfig.isPlaying();
+      } catch (e) { }
+    }
+    const player = this._getPlayerElement();
+    if (player && typeof player.paused === 'boolean') {
+      return !player.paused && !player.ended;
+    }
+    if (typeof this._explicitPlaybackState === 'boolean') {
+      return this._explicitPlaybackState;
+    }
+    if (this.uiConfig?.disableNativeTick && this._lastTickTime) {
+      return (Date.now() - this._lastTickTime) < 2000;
+    }
+    return false;
+  }
+
+  _shouldHoldWakeLock() {
+    return !document.hidden && this._isLyricsOpen() && this._isSongPlaying();
+  }
+
+  _updateWakeLock() {
+    if (this._shouldHoldWakeLock()) {
+      this._requestWakeLock();
+    } else {
+      this._releaseWakeLock();
+    }
+  }
+
+  setPlaybackState(isPlaying) {
+    this._explicitPlaybackState = !!isPlaying;
+    this._updateWakeLock();
+  }
+
   async _requestWakeLock() {
-    // Guard: IntersectionObserver can fire repeatedly; never stack locks.
+    // Guard: IntersectionObserver / media events can fire repeatedly; never stack locks.
     if (!('wakeLock' in navigator) || this.wakeLock || this._wakeLockPending) return;
+    if (!this._shouldHoldWakeLock()) return;
+
     this._wakeLockPending = true;
     try {
       const lock = await navigator.wakeLock.request('screen');
+      if (!this._shouldHoldWakeLock()) {
+        lock.release().catch(() => {});
+        if (this.wakeLock === lock) this.wakeLock = null;
+        return;
+      }
       this.wakeLock = lock;
       lock.addEventListener('release', () => {
         if (this.wakeLock === lock) this.wakeLock = null;
@@ -346,16 +428,15 @@ class LyricsPlusRenderer {
       this.containerObserver = new IntersectionObserver((entries) => {
         for (let i = 0; i < entries.length; i++) {
           const entry = entries[i];
+          this._isContainerIntersecting = entry.isIntersecting;
           if (entry.isIntersecting) {
             if (this._rtlNeedsInitialLayout && this._rtlVocalContainers && this._rtlVocalContainers.length > 0) {
               this._lastContainerWidth = this.lyricsContainer.clientWidth || 0;
               this._layoutAllRtlVisualRowRomanizations();
               this._invalidateMaskAnimators();
             }
-            this._requestWakeLock();
-          } else {
-            this._releaseWakeLock();
           }
+          this._updateWakeLock();
         }
       }, { threshold: 0.01 });
       this.containerObserver.observe(this.lyricsContainer);
@@ -2215,6 +2296,7 @@ class LyricsPlusRenderer {
       "relax-scroll",
       !!currentSettings.relaxScroll
     );
+    this._updateWakeLock();
   }
 
   /**
@@ -2268,9 +2350,11 @@ class LyricsPlusRenderer {
    * @private
    */
   _getPlayerElement() {
-    if (this._playerElement === undefined) {
+    if (!this._playerElement || !this._playerElement.isConnected) {
       this._playerElement =
-        document.querySelector(this.uiConfig.player) || null;
+        (this.uiConfig?.player ? document.querySelector(this.uiConfig.player) : null) ||
+        document.querySelector('video, audio') ||
+        null;
     }
     return this._playerElement;
   }
@@ -2388,7 +2472,11 @@ class LyricsPlusRenderer {
         const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 - (this.userOffsetMs || 0);
         if (currentTime !== this.lastTime || isPaused !== this._lastPlayerPaused) {
           const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
-          this._lastPlayerPaused = isPaused;
+          if (isPaused !== this._lastPlayerPaused) {
+            this._lastPlayerPaused = isPaused;
+            this._explicitPlaybackState = !isPaused;
+            this._updateWakeLock();
+          }
           this._updateLyricsHighlight(
             currentTime,
             isForceScroll,
@@ -2422,6 +2510,25 @@ class LyricsPlusRenderer {
     const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
     this._updateLyricsHighlight((currentTime - (this.offsetLatency * 1000) - (this.userOffsetMs || 0)), isForceScroll);
     this.lastTime = currentTime;
+    this._lastTickTime = Date.now();
+    this._explicitPlaybackState = true;
+    if (!this.wakeLock && !this._wakeLockPending && this._shouldHoldWakeLock()) {
+      this._requestWakeLock();
+    }
+    if (this.uiConfig?.disableNativeTick) {
+      clearTimeout(this._tickWatchdogTimer);
+      this._tickWatchdogTimer = setTimeout(() => {
+        const player = this._getPlayerElement();
+        if (player && player.paused) {
+          this._explicitPlaybackState = false;
+        } else if (!player && (Date.now() - this._lastTickTime >= 2000)) {
+          this._explicitPlaybackState = false;
+        }
+        if (this.wakeLock) {
+          this._updateWakeLock();
+        }
+      }, 2000);
+    }
   }
 
   /**
@@ -4861,6 +4968,7 @@ class LyricsPlusRenderer {
 
     this._startLyricsSync(this.currentSettings);
     this._createControlButtons();
+    this._updateWakeLock();
   }
 
   _createControlButtons() {
@@ -5375,6 +5483,9 @@ class LyricsPlusRenderer {
       this.containerObserver.disconnect();
       this.containerObserver = null;
     }
+    this._isContainerIntersecting = false;
+    clearTimeout(this._tickWatchdogTimer);
+    this._tickWatchdogTimer = null;
     this._releaseWakeLock();
 
     if (this._debouncedResizeHandler && this._debouncedResizeHandler.cancel) {
@@ -5524,6 +5635,7 @@ class LyricsPlusRenderer {
     this.setCurrentDisplayModeAndRefetchFn = null;
 
     this._playerElement = undefined;
+    this._explicitPlaybackState = null;
 
     this._lastActiveIndex = 0;
     this._tempActiveLines = [];

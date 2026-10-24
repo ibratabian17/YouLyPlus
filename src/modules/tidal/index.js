@@ -17,6 +17,8 @@ const LyricsPlusAPI = {
     displaySongError: () => lyricsRendererInstance?.displaySongError(),
     cleanupLyrics: () => lyricsRendererInstance?.cleanupLyrics(),
     updateDisplayMode: (...args) => lyricsRendererInstance?.updateDisplayMode(...args),
+    updateCurrentTick: (...args) => lyricsRendererInstance?.updateCurrentTick(...args),
+    setPlaybackState: (...args) => lyricsRendererInstance?.setPlaybackState(...args),
     setTranslationLoading: (...args) => lyricsRendererInstance?.setTranslationLoading(...args),
     showToast: (...args) => lyricsRendererInstance?.showToast(...args),
     setUserOffset: (...args) => lyricsRendererInstance?.setUserOffset(...args),
@@ -179,6 +181,10 @@ function ensureLyricsPatchContainer(root) {
             patchParent: '#lyplus-active-patch',
             selectors: ['#lyplus-active-patch'],
             buttonParent: '[data-lyplus-btn-parent]',
+            isPlaying: () => {
+                const v = document.querySelector('video#video-one') || document.querySelector('video, audio');
+                return v ? (!v.paused && !v.ended) : false;
+            },
         });
     }
 
@@ -332,6 +338,10 @@ function ensureLyricsTab() {
                     patchParent: '#lyplus-patch-container',
                     selectors: ['#lyplus-patch-container', '#lyrics-plus-panel'],
                     buttonParent: '#lyrics-plus-panel',
+                    isPlaying: () => {
+                        const v = document.querySelector('video#video-one') || document.querySelector('video, audio');
+                        return v ? (!v.paused && !v.ended) : false;
+                    },
                 });
             }
         } else {

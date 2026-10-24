@@ -18,6 +18,10 @@ const uiConfig = {
     ],
     buttonParent: '[data-testid="lyrics-fullscreen-modal"]',
     disableNativeTick: true,
+    isPlaying: () => {
+        const audio = document.querySelector('#apple-music-player') || document.querySelector('audio, video');
+        return audio ? (!audio.paused && !audio.ended) : false;
+    },
     seekTo: (time) => {
         window.postMessage({ type: 'LYPLUS_SEEK_TO', time: time }, '*');
     }
@@ -64,6 +68,7 @@ const LyricsPlusAPI = {
     cleanupLyrics: () => lyricsRendererInstance?.cleanupLyrics(),
     updateDisplayMode: (...args) => lyricsRendererInstance?.updateDisplayMode(...args),
     updateCurrentTick: (...args) => lyricsRendererInstance?.updateCurrentTick(...args),
+    setPlaybackState: (...args) => lyricsRendererInstance?.setPlaybackState(...args),
     setTranslationLoading: (...args) => lyricsRendererInstance?.setTranslationLoading(...args),
     showToast: (...args) => lyricsRendererInstance?.showToast(...args),
     setUserOffset: (...args) => lyricsRendererInstance?.setUserOffset(...args),
@@ -239,6 +244,10 @@ window.addEventListener('message', (event) => {
 
     if (event.data.type === 'LYPLUS_TIME_UPDATE' && typeof event.data.currentTime === 'number') {
         LyricsPlusAPI.updateCurrentTick(event.data.currentTime)
+    }
+
+    if (event.data.type === 'LYPLUS_PLAYBACK_STATE' && typeof event.data.isPlaying === 'boolean') {
+        LyricsPlusAPI.setPlaybackState(event.data.isPlaying);
     }
 
     if (event.data.type === 'LYPLUS_SONG_CHANGED') {

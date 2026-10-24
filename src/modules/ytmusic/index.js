@@ -24,6 +24,10 @@ const uiConfig = {
     ],
     buttonParent: 'ytmusic-app-layout',
     disableNativeTick: true,
+    isPlaying: () => {
+        const video = document.querySelector('video');
+        return video ? (!video.paused && !video.ended) : false;
+    },
     seekTo: (time) => {
         window.postMessage({ type: 'LYPLUS_SEEK_TO', time: time }, '*');
     }
@@ -68,6 +72,7 @@ const LyricsPlusAPI = {
     cleanupLyrics: () => lyricsRendererInstance.cleanupLyrics(),
     updateDisplayMode: (...args) => lyricsRendererInstance.updateDisplayMode(...args),
     updateCurrentTick: (...args) => lyricsRendererInstance.updateCurrentTick(...args),
+    setPlaybackState: (...args) => lyricsRendererInstance?.setPlaybackState(...args),
     setTranslationLoading: (...args) => lyricsRendererInstance.setTranslationLoading(...args),
     showToast: (...args) => lyricsRendererInstance?.showToast(...args),
     setUserOffset: (...args) => lyricsRendererInstance?.setUserOffset(...args),
