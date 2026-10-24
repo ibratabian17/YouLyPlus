@@ -235,8 +235,6 @@ class LyricsPlusRenderer {
 
     this.uiConfig = uiConfig;
     this.lyricsContainer = null;
-    this._rtlVocalContainers = [];
-    this._lastContainerWidth = 0;
     this.cachedLyricsLines = [];
     this.cachedSyllables = [];
     this.activeLineIds = new Set();
@@ -297,6 +295,9 @@ class LyricsPlusRenderer {
     this._lastActiveIndex = 0;
     this._tempActiveLines = [];
     this._activeIndices = [];
+    this._rtlVocalContainers = [];
+    this._lastContainerWidth = 0;
+    this._rtlNeedsInitialLayout = false;
     this._lineById = new Map();
     this._positionClassedLines = [];
     this._animatingLines = [];
@@ -305,6 +306,7 @@ class LyricsPlusRenderer {
     this._elevationConfigCache = null;
     this._rtlVocalContainers = [];
     this._lastContainerWidth = 0;
+    this._rtlNeedsInitialLayout = false;
 
     this.wakeLock = null;
 
@@ -345,6 +347,11 @@ class LyricsPlusRenderer {
         for (let i = 0; i < entries.length; i++) {
           const entry = entries[i];
           if (entry.isIntersecting) {
+            if (this._rtlNeedsInitialLayout && this._rtlVocalContainers && this._rtlVocalContainers.length > 0) {
+              this._lastContainerWidth = this.lyricsContainer.clientWidth || 0;
+              this._layoutAllRtlVisualRowRomanizations();
+              this._invalidateMaskAnimators();
+            }
             this._requestWakeLock();
           } else {
             this._releaseWakeLock();
@@ -509,7 +516,7 @@ class LyricsPlusRenderer {
     this._elevationConfigCache = null;
 
     const newW = container.clientWidth || 0;
-    if (newW > 0 && Math.abs((this._lastContainerWidth || 0) - newW) > 1) {
+    if (newW > 0 && (this._rtlNeedsInitialLayout || Math.abs((this._lastContainerWidth || 0) - newW) > 1)) {
       this._lastContainerWidth = newW;
       if (this._rtlVocalContainers && this._rtlVocalContainers.length > 0) {
         this._layoutAllRtlVisualRowRomanizations();
@@ -1284,117 +1291,172 @@ class LyricsPlusRenderer {
       container.classList.add("lyrics-both-modes");
   }
 
+  _populateRtlSubrow(subrow, words, startW, endW) {
+    subrow.textContent = "";
+    let hasSpans = false;
+    for (let w = startW; w < endW; w++) {
+      const spans = words[w]._romanSpans;
+      if (!spans) continue;
+      const sLen = spans.length;
+      for (let sIdx = 0; sIdx < sLen; sIdx++) {
+        const sp = spans[sIdx];
+        sp.textContent = sp._baseText;
+        subrow.appendChild(sp);
+        hasSpans = true;
+      }
+      if (sLen > 0) {
+        const lastSpan = spans[sLen - 1];
+        lastSpan.textContent = (w < endW - 1)
+          ? lastSpan._trimmedText + " "
+          : lastSpan._trimmedText;
+      }
+    }
+    subrow._hasSpans = hasSpans;
+    return hasSpans;
+  }
+
   _layoutAllRtlVisualRowRomanizations() {
     const containers = this._rtlVocalContainers;
-    if (!containers || containers.length === 0) return;
+    if (!containers || containers.length === 0 || !this.lyricsContainer) return;
 
     const len = containers.length;
+    const isMeasured = (this.lyricsContainer.clientWidth || 0) > 0;
+    this._rtlNeedsInitialLayout = !isMeasured;
 
-    for (let i = 0; i < len; i++) {
-      const vc = containers[i];
-      if (vc._rtlWords.length <= 1 && vc._rtlBreakSig !== undefined) continue;
-      const subrows = vc._rtlSubrows;
-      if (subrows) {
-        for (let j = 0, sLen = subrows.length; j < sLen; j++) {
-          subrows[j].remove();
-        }
-      }
-    }
-
-    const rowBreaksPerContainer = new Array(len);
-    for (let i = 0; i < len; i++) {
-      const vc = containers[i];
-      const words = vc._rtlWords;
-      const wLen = words.length;
-      if (wLen <= 1) {
-        rowBreaksPerContainer[i] = null;
-        continue;
-      }
-      let breaks = null;
-      let currentTop = words[0].offsetTop;
-      for (let w = 1; w < wLen; w++) {
-        const top = words[w].offsetTop;
-        if (Math.abs(top - currentTop) > 8) {
-          if (!breaks) breaks = [];
-          breaks.push(w);
-          currentTop = top;
-        }
-      }
-      rowBreaksPerContainer[i] = breaks;
-    }
+    let pendingCount = 0;
 
     for (let i = 0; i < len; i++) {
       const vc = containers[i];
       const words = vc._rtlWords;
-      const wLen = words.length;
+      const wLen = words ? words.length : 0;
       if (wLen === 0) continue;
+      if (wLen === 1 && vc._rtlInitialized) continue;
 
-      if (wLen <= 1 && vc._rtlBreakSig !== undefined) continue;
-
-      const breaks = rowBreaksPerContainer[i];
-      const sig = breaks ? breaks.join(",") : "";
-      const sameLayout = (vc._rtlBreakSig === sig);
-      vc._rtlBreakSig = sig;
+      const subrows = vc._rtlSubrows || (vc._rtlSubrows = []);
+      for (let j = 0, sLen = subrows.length; j < sLen; j++) {
+        subrows[j].remove();
+      }
+      subrows.length = 0;
 
       const pool = vc._rtlSubrowPool || (vc._rtlSubrowPool = []);
-      const activeSubrows = vc._rtlSubrows || (vc._rtlSubrows = []);
-      activeSubrows.length = 0;
+      let subrow0 = pool[0];
+      if (!subrow0) {
+        subrow0 = document.createElement("span");
+        subrow0.className = vc._translitIsRtl
+          ? "lyrics-romanization-container lyrics-romanization-subrow rtl-text"
+          : "lyrics-romanization-container lyrics-romanization-subrow";
+        subrow0.style.display = "block";
+        pool[0] = subrow0;
+      }
 
-      const numRows = breaks ? breaks.length + 1 : 1;
-      let rowStart = 0;
+      if (this._populateRtlSubrow(subrow0, words, 0, wLen)) {
+        const anchor = words[wLen - 1]._insertAnchor;
+        anchor.parentNode.insertBefore(subrow0, anchor.nextSibling);
+        subrows.push(subrow0);
+      }
 
-      for (let r = 0; r < numRows; r++) {
-        const rowEnd = (breaks && r < breaks.length) ? breaks[r] : wLen;
-        let subrow = pool[r];
-        if (!subrow) {
-          subrow = document.createElement("span");
-          subrow.className = vc._translitIsRtl
-            ? "lyrics-romanization-container lyrics-romanization-subrow rtl-text"
-            : "lyrics-romanization-container lyrics-romanization-subrow";
-          pool[r] = subrow;
+      vc._rtlInitialized = true;
+      vc._rowStart = 0;
+      vc._rowIdx = 0;
+      vc._nextBreak = -1;
+      vc._done = !isMeasured || wLen <= 1;
+      if (!vc._done) pendingCount++;
+      if (vc._parentLine) vc._parentLine._cachedSyllableElements = null;
+    }
+
+    while (pendingCount > 0) {
+      let splitCount = 0;
+
+      for (let i = 0; i < len; i++) {
+        const vc = containers[i];
+        if (!vc || vc._done) continue;
+
+        const words = vc._rtlWords;
+        const wLen = words.length;
+        const rowStart = vc._rowStart;
+        const baseWordTop = words[rowStart].offsetTop;
+
+        let baseRomanTop = null;
+        for (let w = rowStart; w < wLen; w++) {
+          const spans = words[w]._romanSpans;
+          if (spans && spans.length > 0) {
+            baseRomanTop = spans[0].offsetTop;
+            break;
+          }
         }
 
-        let hasSpans = false;
-        if (!sameLayout) {
-          subrow.textContent = "";
-          for (let w = rowStart; w < rowEnd; w++) {
+        let breakW = -1;
+        for (let w = rowStart + 1; w < wLen; w++) {
+          if (Math.abs(words[w].offsetTop - baseWordTop) > 2) {
+            breakW = w;
+            break;
+          }
+          if (baseRomanTop !== null) {
             const spans = words[w]._romanSpans;
-            if (!spans) continue;
-            const sLen = spans.length;
-            for (let sIdx = 0; sIdx < sLen; sIdx++) {
-              const sp = spans[sIdx];
-              if (sp._hasAddedSpace) {
-                sp.textContent = sp._baseText;
-                sp._hasAddedSpace = false;
-              }
-              subrow.appendChild(sp);
-              hasSpans = true;
-            }
-            if (w < rowEnd - 1 && sLen > 0) {
-              const lastSpan = spans[sLen - 1];
-              if (!lastSpan._endsWithSpace) {
-                lastSpan.textContent = lastSpan._baseText + " ";
-                lastSpan._hasAddedSpace = true;
+            if (spans && spans.length > 0) {
+              const lastSp = spans[spans.length - 1];
+              if (Math.abs(lastSp.offsetTop - baseRomanTop) > 2) {
+                breakW = w;
+                break;
               }
             }
           }
-          subrow._hasSpans = hasSpans;
+        }
+
+        if (breakW !== -1) {
+          vc._nextBreak = breakW;
+          splitCount++;
         } else {
-          hasSpans = !!subrow._hasSpans;
+          vc._done = true;
+          pendingCount--;
         }
-
-        if (hasSpans) {
-          const lastWord = words[rowEnd - 1];
-          const anchor = lastWord._insertAnchor;
-          anchor.parentNode.insertBefore(subrow, anchor.nextSibling);
-          activeSubrows.push(subrow);
-        }
-
-        rowStart = rowEnd;
       }
 
-      if (!sameLayout && vc._parentLine) {
-        vc._parentLine._cachedSyllableElements = null;
+      if (splitCount === 0) break;
+
+      for (let i = 0; i < len; i++) {
+        const vc = containers[i];
+        if (!vc || vc._nextBreak === -1) continue;
+
+        const words = vc._rtlWords;
+        const wLen = words.length;
+        const rowStart = vc._rowStart;
+        const breakW = vc._nextBreak;
+        const r = vc._rowIdx;
+        const pool = vc._rtlSubrowPool;
+        const subrows = vc._rtlSubrows;
+
+        const curSubrow = pool[r];
+        if (this._populateRtlSubrow(curSubrow, words, rowStart, breakW)) {
+          const prevAnchor = words[breakW - 1]._insertAnchor;
+          prevAnchor.parentNode.insertBefore(curSubrow, prevAnchor.nextSibling);
+        } else {
+          curSubrow.remove();
+        }
+
+        let nextSubrow = pool[r + 1];
+        if (!nextSubrow) {
+          nextSubrow = document.createElement("span");
+          nextSubrow.className = vc._translitIsRtl
+            ? "lyrics-romanization-container lyrics-romanization-subrow rtl-text"
+            : "lyrics-romanization-container lyrics-romanization-subrow";
+          nextSubrow.style.display = "block";
+          pool[r + 1] = nextSubrow;
+        }
+
+        if (this._populateRtlSubrow(nextSubrow, words, breakW, wLen)) {
+          const lastAnchor = words[wLen - 1]._insertAnchor;
+          lastAnchor.parentNode.insertBefore(nextSubrow, lastAnchor.nextSibling);
+          subrows.push(nextSubrow);
+        }
+
+        vc._rowStart = breakW;
+        vc._rowIdx = r + 1;
+        vc._nextBreak = -1;
+        if (wLen - breakW <= 1) {
+          vc._done = true;
+          pendingCount--;
+        }
       }
     }
   }
@@ -1481,7 +1543,7 @@ class LyricsPlusRenderer {
                   span.className = "lyrics-syllable";
                   span.textContent = txt;
                   span._baseText = txt;
-                  span._endsWithSpace = /\s$/.test(txt);
+                  span._trimmedText = txt.replace(/\s+$/, "");
                   if (this._isRTL(txt)) {
                     span.classList.add("rtl-text");
                     vcTranslitIsRtl = true;
@@ -1503,10 +1565,14 @@ class LyricsPlusRenderer {
               }
 
               if (hasAnyTranslit) {
+                vc.style.whiteSpace = "normal";
                 vc._rtlWords = words;
                 vc._translitIsRtl = vcTranslitIsRtl;
                 vc._parentLine = parentLine;
-                if (parentLine) parentLine.classList.add("has-rtl-row-roman");
+                if (parentLine) {
+                  parentLine.classList.add("has-rtl-row-roman");
+                  parentLine.style.contentVisibility = "visible";
+                }
                 this._rtlVocalContainers.push(vc);
               }
             }
@@ -4765,6 +4831,11 @@ class LyricsPlusRenderer {
     this.resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (entry.target !== container) continue;
+        if (this._rtlNeedsInitialLayout && container.clientWidth > 0) {
+          this._lastContainerWidth = container.clientWidth;
+          this._layoutAllRtlVisualRowRomanizations();
+          this._invalidateMaskAnimators();
+        }
         this._debouncedResizeHandler(container);
       }
     });
