@@ -11,12 +11,6 @@ export const getBuildVersion = () => {
   }
 };
 
-export const getClientId = () => `YouLyPlus (${getBuildVersion()})`;
-export const CLIENT_ID = getClientId();
-
-export const getLrclibClient = () => `YouLyPlus v${getBuildVersion()} (https://github.com/ibratabian17/YouLyPlus)`;
-export const LRCLIB_CLIENT = getLrclibClient();
-
 export const getUserAgent = () => `YouLyPlus (${getBuildVersion()})`;
 export const USER_AGENT = getUserAgent();
 

@@ -3,7 +3,6 @@
 // ==================================================================================================
 
 import { DataParser } from '../utils/dataParser.js';
-import { LRCLIB_CLIENT } from '../constants.js';
 
 export class LRCLibService {
   static async fetch(songInfo, fetchOptions = {}) {
@@ -35,17 +34,9 @@ export class LRCLibService {
     if (songInfo.duration > 0) params.append('duration', songInfo.duration);
 
     const url = `https://lrclib.net/api/get?${params}`;
-    const baseHeaders = fetchOptions.headers || {};
-    const headers = {
-      ...(baseHeaders instanceof Headers ? Object.fromEntries(baseHeaders.entries()) : baseHeaders),
-      'Lrclib-Client': LRCLIB_CLIENT
-    };
 
     try {
-      const response = await fetch(url, {
-        ...fetchOptions,
-        headers
-      });
+      const response = await fetch(url, fetchOptions);
       if (!response.ok) return null;
       
       const data = await response.json();
