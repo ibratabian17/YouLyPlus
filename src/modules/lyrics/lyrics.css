@@ -554,13 +554,14 @@
     transform: translateY(-25%) scale(0) translateZ(0);
 }
 
-.lyrics-line.lyrics-gap:not(.active) .main-vocal-container .lyrics-word {
+.lyrics-line.lyrics-gap .main-vocal-container .lyrics-word {
+    animation: gap-loop 4s ease infinite alternate;
     animation-play-state: paused;
+    will-change: transform;
 }
 
 .lyrics-line.lyrics-gap.active .main-vocal-container .lyrics-word {
-    animation: gap-loop 4s ease infinite alternate;
-    will-change: transform;
+    animation-play-state: running;
 }
 
 .lyrics-line.lyrics-gap .lyrics-syllable {
@@ -593,6 +594,7 @@
 
 .lyrics-line.lyrics-gap.active .lyrics-syllable.highlight::after,
 .lyrics-line.lyrics-gap.active .lyrics-syllable.finished::after,
+.lyrics-line.lyrics-gap.gap-open:not(.active) .lyrics-syllable::after,
 .lyrics-line.lyrics-gap:not(.active).post-active-line .lyrics-syllable::after,
 .lyrics-line.lyrics-gap:not(.active).lyrics-activest .lyrics-syllable::after {
     opacity: 1;
