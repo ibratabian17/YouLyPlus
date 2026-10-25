@@ -2703,33 +2703,37 @@ class LyricsPlusRenderer {
     }
 
     if (rawActiveIndices.length > 0) {
+      const R = LyricsPlusRenderer;
       const lastActiveIdx = rawActiveIndices[rawActiveIndices.length - 1];
       const lastActiveLine = lines[lastActiveIdx];
-      if (isWordByWord && lastActiveLine && !lastActiveLine._isGap && lastActiveLine.classList.contains("lyrics-line")) {
+      const isRealLine = (l) => !!(l && !l._isGap && l.classList.contains("lyrics-line"));
+
+      let rawEnd = lastActiveLine._endTimeMs;
+      for (let k = 0; k < rawActiveIndices.length; k++) {
+        const endMs = lines[rawActiveIndices[k]]._endTimeMs;
+        if (endMs > rawEnd) rawEnd = endMs;
+      }
+      let nextRealLine = null;
+      for (let k = lastActiveIdx + 1; k < linesLen; k++) {
+        if (isRealLine(lines[k])) { nextRealLine = lines[k]; break; }
+      }
+      const timeGap = nextRealLine ? (nextRealLine._startTimeMs - rawEnd) : -1;
+      const gapRange = R._SPRING_GAP_MAX_MS - R._SPRING_GAP_MIN_MS;
+      this._scrollGapT = nextRealLine
+        ? Math.min(1, Math.max(0, (timeGap - R._SPRING_GAP_MIN_MS) / gapRange))
+        : 1;
+
+      if (isWordByWord && isRealLine(lastActiveLine)) {
         const nextLine = lastActiveIdx + 1 < linesLen ? lines[lastActiveIdx + 1] : null;
-        let rawEnd = lastActiveLine._endTimeMs;
-        for (let k = 0; k < rawActiveIndices.length; k++) {
-          const endMs = lines[rawActiveIndices[k]]._endTimeMs;
-          if (endMs > rawEnd) rawEnd = endMs;
-        }
-        const gap = (nextLine && !nextLine._isGap && nextLine.classList.contains("lyrics-line"))
-          ? (nextLine._startTimeMs - rawEnd)
-          : -1;
-        const R = LyricsPlusRenderer;
-        const clampedGap = Math.min(R._SCROLL_LEAD_GAP_MAX, Math.max(R._SCROLL_LEAD_GAP_MIN, gap));
+        const leadGap = isRealLine(nextLine) ? (nextLine._startTimeMs - rawEnd) : -1;
+        const clampedGap = Math.min(R._SCROLL_LEAD_GAP_MAX, Math.max(R._SCROLL_LEAD_GAP_MIN, leadGap));
         const t = (clampedGap - R._SCROLL_LEAD_GAP_MIN) / (R._SCROLL_LEAD_GAP_MAX - R._SCROLL_LEAD_GAP_MIN);
         const iRound = Math.round(R._SCROLL_LEAD_MIN + t * (R._SCROLL_LEAD_MAX - R._SCROLL_LEAD_MIN));
         this._suggestedLineOffsetMs = -iRound;
         this._appleScrollDurationMs = iRound;
-        const noLineFollows = !nextLine || nextLine._isGap || !nextLine.classList.contains("lyrics-line");
-        const gapRange = R._SPRING_GAP_MAX_MS - R._SPRING_GAP_MIN_MS;
-        this._scrollGapT = noLineFollows
-          ? 1
-          : Math.min(1, Math.max(0, (gap - R._SPRING_GAP_MIN_MS) / gapRange));
       } else {
         this._suggestedLineOffsetMs = -500;
         this._appleScrollDurationMs = 750;
-        this._scrollGapT = null;
       }
     }
 
