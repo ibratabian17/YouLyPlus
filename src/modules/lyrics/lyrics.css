@@ -543,6 +543,24 @@
     transition: opacity .2s .3s, transform .3s;
 }
 
+.lyrics-line.lyrics-gap {
+    --lyplus-gap-dots-center: calc(1.5 * (var(--lyplus-gap-dot-size) + 2 * var(--lyplus-gap-dot-margin)));
+}
+
+.lyrics-line.lyrics-gap .main-vocal-container {
+    transform-origin: var(--lyplus-gap-dots-center) 50%;
+}
+
+.lyrics-line.lyrics-gap.singer-right:not(.rtl-text) .main-vocal-container,
+.lyrics-line.lyrics-gap.rtl-text:not(.singer-right) .main-vocal-container,
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.lyrics-gap.rtl-text.singer-right .main-vocal-container {
+    transform-origin: calc(100% - var(--lyplus-gap-dots-center)) 50%;
+}
+
+#lyrics-plus-container.mixed-direction-lyrics.dual-side-lyrics .lyrics-line.lyrics-gap.rtl-text.singer-left .main-vocal-container {
+    transform-origin: var(--lyplus-gap-dots-center) 50%;
+}
+
 .lyrics-line.lyrics-gap .main-vocal-container {
     position: relative;
     top: var(--lyplus-padding-gap); /* was the line's padding-top */
