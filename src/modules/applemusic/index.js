@@ -88,8 +88,6 @@ const LyricsPlusAPI = {
     setAvailableProviders: (...args) => lyricsRendererInstance?.setAvailableProviders(...args)
 };
 
-// --- Native Canvas Throttling (1x1px + No-Render) & YouLy+ Backdrop ---
-
 function resolveArtworkUrlFromDOM() {
     if (currentSongInfo?.artwork) return currentSongInfo.artwork;
 
@@ -126,23 +124,17 @@ function neutralizeAppleDefaultCanvas(root = document) {
 
         if (!canvas.hasAttribute('data-lyplus-throttled')) {
             canvas.setAttribute('data-lyplus-throttled', 'true');
-            canvas.style.setProperty('display', 'none', 'important');
-            canvas.style.setProperty('visibility', 'hidden', 'important');
             canvas.style.setProperty('width', '1px', 'important');
             canvas.style.setProperty('height', '1px', 'important');
+            canvas.style.setProperty('opacity', '0', 'important');
+            canvas.style.setProperty('visibility', 'hidden', 'important');
+            canvas.style.setProperty('pointer-events', 'none', 'important');
         }
     });
 
-    // Notify main world (songTracker.js) to lock width/height setters to 1x1 and stub draw calls
     window.postMessage({ type: 'LYPLUS_THROTTLE_APPLE_CANVAS' }, '*');
 }
 
-/**
- * Parks .lyplus-blur-container back onto document.body when the modal closes.
- * Since .lyplus-blur-container has `display: none` by default outside the modal,
- * its IntersectionObserver in dynamicBkg.js automatically cancels the WebGL
- * requestAnimationFrame loop while keeping the single WebGL context alive for reuse.
- */
 function parkYouLyBlurContainer() {
     if (backdropObserver) {
         backdropObserver.disconnect();

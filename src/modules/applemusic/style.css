@@ -6,11 +6,13 @@
 [data-testid="now-playing-backdrop"] > canvas:not(#lyplus-webgl-canvas),
 .dt-lyrics__platter > canvas:not(#lyplus-webgl-canvas),
 article[data-testid="lyrics-fullscreen-modal"] canvas:not(#lyplus-webgl-canvas) {
-    display: none !important;
-    visibility: hidden !important;
+    position: absolute !important;
     width: 1px !important;
     height: 1px !important;
+    max-width: 1px !important;
+    max-height: 1px !important;
     opacity: 0 !important;
+    visibility: hidden !important;
     pointer-events: none !important;
     contain: strict !important;
 }

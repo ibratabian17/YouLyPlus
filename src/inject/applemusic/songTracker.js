@@ -6,117 +6,201 @@
   let timeUpdateFrame = null;
   let playing = false;
 
-  // Instead of deleting the <canvas> node (which breaks Svelte's unmount lifecycle
-  // when pressing X and leaks RAM), keep the node in the DOM, lock its internal
-  // resolution to 1x1, and no-op all draw calls on its rendering context.
-  const throttledCanvases = new WeakSet();
+  const killedCanvases = new WeakSet();
+  const killedContexts = new WeakSet();
 
-  function isAppleBackdropCanvas(canvas) {
+  function isAppleLyricsCanvas(canvas) {
     if (!canvas || !(canvas instanceof HTMLCanvasElement)) return false;
     if (canvas.id === 'lyplus-webgl-canvas') return false;
-    return !!(
+    if (killedCanvases.has(canvas)) return true;
+    if (
       canvas.closest?.('[data-testid="now-playing-backdrop"]') ||
       canvas.closest?.('.dt-lyrics__platter') ||
       canvas.closest?.('article[data-testid="lyrics-fullscreen-modal"]')
-    );
-  }
-
-  function neutralizeCanvasContext(ctx) {
-    if (!ctx || ctx.__lyplusNeutralized) return ctx;
-    ctx.__lyplusNeutralized = true;
-    const noop = function () {};
-    const drawMethods = [
-      // idk wht draw did they use, so guessing them???
-      // WebGL / WebGL2
-      'drawArrays', 'drawElements', 'drawArraysInstanced', 'drawElementsInstanced',
-      'drawRangeElements', 'clear', 'texImage2D', 'texSubImage2D', 'texImage3D',
-      'texSubImage3D', 'copyTexImage2D', 'copyTexSubImage2D', 'blitFramebuffer',
-      'useProgram', 'bindFramebuffer', ' bindTexture', 'viewport', ' flush', 'finish',
-      // 2D Canvas
-      'drawImage', 'fillRect', 'clearRect', 'strokeRect', 'putImageData', 'fill', 'stroke'
-    ];
-    for (let i = 0; i < drawMethods.length; i++) {
-      const m = drawMethods[i].trim();
-      if (typeof ctx[m] === 'function') {
-        try { ctx[m] = noop; } catch (e) {}
-      }
+    ) {
+      killedCanvases.add(canvas);
+      return true;
     }
-    return ctx;
-  }
-
-  function throttleAppleCanvas(canvas) {
-    if (!canvas || canvas.id === 'lyplus-webgl-canvas') return;
-
-    if (!throttledCanvases.has(canvas)) {
-      throttledCanvases.add(canvas);
-      canvas.setAttribute('data-lyplus-throttled', 'true');
-
-      try {
-        const proto = HTMLCanvasElement.prototype;
-        const wDesc = Object.getOwnPropertyDescriptor(proto, 'width');
-        const hDesc = Object.getOwnPropertyDescriptor(proto, 'height');
-        if (wDesc?.set && hDesc?.set) {
-          wDesc.set.call(canvas, 1);
-          hDesc.set.call(canvas, 1);
-          Object.defineProperty(canvas, 'width', {
-            get: () => 1,
-            set: () => { try { wDesc.set.call(canvas, 1); } catch (e) {} },
-            configurable: true
-          });
-          Object.defineProperty(canvas, 'height', {
-            get: () => 1,
-            set: () => { try { hDesc.set.call(canvas, 1); } catch (e) {} },
-            configurable: true
-          });
-        } else {
-          canvas.width = 1;
-          canvas.height = 1;
-        }
-      } catch (e) {
-        canvas.width = 1;
-        canvas.height = 1;
-      }
-
-      try {
-        const existingCtx =
-          canvas.getContext('webgl2') ||
-          canvas.getContext('webgl') ||
-          canvas.getContext('experimental-webgl') ||
-          canvas.getContext('2d');
-        if (existingCtx) neutralizeCanvasContext(existingCtx);
-      } catch (e) {}
-    } else if (canvas.width !== 1 || canvas.height !== 1) {
-      try {
-        canvas.width = 1;
-        canvas.height = 1;
-      } catch (e) {}
-    }
+    return false;
   }
 
   try {
-    const origGetContext = HTMLCanvasElement.prototype.getContext;
-    if (origGetContext && !origGetContext.__lyplusPatched) {
-      const patchedGetContext = function (type, attrs) {
-        const ctx = origGetContext.call(this, type, attrs);
-        if (this && this.id !== 'lyplus-webgl-canvas' && isAppleBackdropCanvas(this)) {
-          throttleAppleCanvas(this);
-          neutralizeCanvasContext(ctx);
+    const origGetBCR = HTMLCanvasElement.prototype.getBoundingClientRect;
+    if (origGetBCR && !origGetBCR.__lyplusPatched) {
+      const patchedGetBCR = function () {
+        if (isAppleLyricsCanvas(this)) {
+          return new DOMRect(0, 0, 1, 1);
         }
-        return ctx;
+        return origGetBCR.apply(this, arguments);
       };
-      patchedGetContext.__lyplusPatched = true;
-      HTMLCanvasElement.prototype.getContext = patchedGetContext;
+      patchedGetBCR.__lyplusPatched = true;
+      HTMLCanvasElement.prototype.getBoundingClientRect = patchedGetBCR;
     }
   } catch (e) {}
 
-  window.addEventListener('message', (event) => {
-    if (!event.data || event.data.type !== 'LYPLUS_THROTTLE_APPLE_CANVAS') return;
-    document.querySelectorAll(
+  try {
+    if (!Object.getOwnPropertyDescriptor(Object.prototype, 'filters')) {
+      const SymFilters = Symbol('lyplus_filters');
+      Object.defineProperty(Object.prototype, 'filters', {
+        configurable: true,
+        enumerable: false,
+        get: function () {
+          return this[SymFilters];
+        },
+        set: function (val) {
+          if (
+            Array.isArray(val) &&
+            val.length === 7 &&
+            this &&
+            Array.isArray(this.children) &&
+            typeof this.renderAdvanced === 'function'
+          ) {
+            for (let i = 0; i < val.length; i++) {
+              try {
+                if (val[i]) val[i].enabled = false;
+              } catch (e) {}
+            }
+            this[SymFilters] = null;
+            this.visible = false;
+            this.renderable = false;
+            try {
+              if (this.parent) {
+                this.parent.visible = false;
+                this.parent.renderable = false;
+                this.parent.render = function () {};
+              }
+            } catch (e) {}
+            return;
+          }
+          this[SymFilters] = val;
+        }
+      });
+    }
+  } catch (e) {}
+
+  try {
+    const SymMaxFPS = Symbol('lyplus_maxFPS');
+    Object.defineProperty(Object.prototype, 'maxFPS', {
+      configurable: true,
+      enumerable: false,
+      get: function () {
+        return this[SymMaxFPS] ?? 0;
+      },
+      set: function (val) {
+        this[SymMaxFPS] = val;
+        if (
+          val === 15 &&
+          this &&
+          typeof this._tick === 'function' &&
+          typeof this.stop === 'function' &&
+          typeof this.add === 'function'
+        ) {
+          try {
+            this.autoStart = false;
+            this.stop();
+            if (this._requestId) {
+              cancelAnimationFrame(this._requestId);
+              this._requestId = null;
+            }
+            this.start = function () {};
+            this._requestIfNeeded = function () {};
+            this._startIfPossible = function () {};
+            this.add = function () { return this; };
+            this.addOnce = function () { return this; };
+            this.update = function () {};
+          } catch (e) {}
+        }
+      }
+    });
+  } catch (e) {}
+
+  function neutralizeAppleGLContext(gl) {
+    if (!gl || killedContexts.has(gl)) return;
+    const canvas = gl.canvas;
+    if (!isAppleLyricsCanvas(canvas)) return;
+
+    killedContexts.add(gl);
+
+    try {
+      if (canvas.width !== 1) canvas.width = 1;
+      if (canvas.height !== 1) canvas.height = 1;
+    } catch (e) {}
+
+    const noop = function () {};
+    const heavyMethods = [
+      'drawArrays',
+      'drawElements',
+      'drawArraysInstanced',
+      'drawElementsInstanced',
+      'drawRangeElements',
+      'clear',
+      'blitFramebuffer',
+      'texImage2D',
+      'texSubImage2D',
+      'texImage3D',
+      'texSubImage3D',
+      'renderbufferStorage',
+      'renderbufferStorageMultisample',
+      'flush',
+      'finish'
+    ];
+    for (let i = 0; i < heavyMethods.length; i++) {
+      const m = heavyMethods[i];
+      if (typeof gl[m] === 'function') {
+        try {
+          gl[m] = noop;
+        } catch (e) {}
+      }
+    }
+  }
+
+  function hookWebGLPrototype(Proto) {
+    if (!Proto || Proto.__lyplusHooked) return;
+    Proto.__lyplusHooked = true;
+
+    ['useProgram', 'bindFramebuffer', 'clear'].forEach((methodName) => {
+      const orig = Proto[methodName];
+      if (typeof orig !== 'function') return;
+      Proto[methodName] = function () {
+        if (this && this.canvas && this.canvas.id !== 'lyplus-webgl-canvas') {
+          if (killedContexts.has(this) || isAppleLyricsCanvas(this.canvas)) {
+            neutralizeAppleGLContext(this);
+            return;
+          }
+        }
+        return orig.apply(this, arguments);
+      };
+    });
+  }
+
+  try {
+    if (typeof WebGL2RenderingContext !== 'undefined') {
+      hookWebGLPrototype(WebGL2RenderingContext.prototype);
+    }
+    if (typeof WebGLRenderingContext !== 'undefined') {
+      hookWebGLPrototype(WebGLRenderingContext.prototype);
+    }
+  } catch (e) {}
+
+  function sweepAppleCanvases() {
+    const canvases = document.querySelectorAll(
       '[data-testid="now-playing-backdrop"] canvas:not(#lyplus-webgl-canvas), ' +
       '.dt-lyrics__platter canvas:not(#lyplus-webgl-canvas), ' +
       'article[data-testid="lyrics-fullscreen-modal"] canvas:not(#lyplus-webgl-canvas)'
-    ).forEach(throttleAppleCanvas);
+    );
+    canvases.forEach((canvas) => {
+      killedCanvases.add(canvas);
+      if (canvas.width !== 1) canvas.width = 1;
+      if (canvas.height !== 1) canvas.height = 1;
+    });
+  }
+
+  window.addEventListener('message', (event) => {
+    if (!event.data || event.data.type !== 'LYPLUS_THROTTLE_APPLE_CANVAS') return;
+    sweepAppleCanvases();
   });
+
+  sweepAppleCanvases();
 
   function getPreciseTime() {
     if (!mkInstance) return 0;
@@ -135,7 +219,6 @@
       // did they changed? for now ighore iwodbiqwabcjwsbcijwsk
     }
 
-    // Fallback: Use public API (updates approx every 250ms)
     return mkInstance.currentPlaybackTime || 0;
   }
 
@@ -215,7 +298,6 @@
       try {
         if (lyricsData?.data?.[0]) {
           const ttmlData = lyricsData.data[0].attributes.ttmlLocalizations || lyricsData.data[0].attributes.ttml;
-          // Send raw TTML data to background for parsing
           songInfo.appleMusicTTML = ttmlData;
         }
       } catch (e) { }
