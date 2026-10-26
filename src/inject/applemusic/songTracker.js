@@ -8,6 +8,92 @@
 
   const killedCanvases = new WeakSet();
   const killedContexts = new WeakSet();
+  const RO_BODY_CONFIG = {
+    attributes: true,
+    characterData: true,
+    childList: true,
+    subtree: true
+  };
+
+  function isLyricsModalElement(el) {
+    if (!el || !(el instanceof Element)) return false;
+    return !!(
+      el.id === 'lyplus-patch-container' ||
+      el.id === 'lyrics-plus-container' ||
+      el.classList?.contains('lyplus-blur-container') ||
+      el.closest?.('#lyplus-patch-container') ||
+      el.closest?.('#lyrics-plus-container') ||
+      el.closest?.('.lyplus-blur-container') ||
+      el.closest?.('article[data-testid="lyrics-fullscreen-modal"]')
+    );
+  }
+
+  try {
+    const origObserve = MutationObserver.prototype.observe;
+    if (origObserve && !origObserve.__lyplusPatched) {
+      const patchedObserve = function (target, options) {
+        if (
+          target === document.body &&
+          options &&
+          options.attributes === true &&
+          options.characterData === true &&
+          options.childList === true &&
+          options.subtree === true &&
+          typeof this.__lyplusWrappedCallback === 'function'
+        ) {
+          this.__lyplusIsPolyfillRO = true;
+        }
+        return origObserve.call(this, target, options);
+      };
+      patchedObserve.__lyplusPatched = true;
+      MutationObserver.prototype.observe = patchedObserve;
+
+      const OrigMutationObserver = window.MutationObserver;
+      const PatchedMutationObserver = function (callback) {
+        let moInstance = null;
+        const wrappedCallback = function (mutations, observer) {
+          if (moInstance && moInstance.__lyplusIsPolyfillRO) {
+            return;
+          }
+          return callback.call(this, mutations, observer);
+        };
+        moInstance = new OrigMutationObserver(wrappedCallback);
+        moInstance.__lyplusWrappedCallback = wrappedCallback;
+        return moInstance;
+      };
+      PatchedMutationObserver.prototype = OrigMutationObserver.prototype;
+      Object.setPrototypeOf(PatchedMutationObserver, OrigMutationObserver);
+      window.MutationObserver = PatchedMutationObserver;
+    }
+  } catch (e) {}
+
+  try {
+    const origAddEventListener = EventTarget.prototype.addEventListener;
+    if (origAddEventListener && !origAddEventListener.__lyplusPatched) {
+      const roNoisyEvents = new Set([
+        'transitionend',
+        'animationend',
+        'animationstart',
+        'animationiteration',
+        'mouseover',
+        'mouseout'
+      ]);
+      const patchedAddEventListener = function (type, listener, options) {
+        if (
+          (this === window || this === document) &&
+          options === true &&
+          roNoisyEvents.has(type) &&
+          typeof listener === 'function' &&
+          listener.toString().includes('.schedule()')
+        ) {
+          return;
+        }
+        return origAddEventListener.call(this, type, listener, options);
+      };
+      patchedAddEventListener.__lyplusPatched = true;
+      EventTarget.prototype.addEventListener = patchedAddEventListener;
+    }
+  } catch (e) {}
 
   function isAppleLyricsCanvas(canvas) {
     if (!canvas || !(canvas instanceof HTMLCanvasElement)) return false;
