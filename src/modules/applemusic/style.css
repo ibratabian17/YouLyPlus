@@ -2,6 +2,31 @@
     --lyrics-scroll-padding-top: 36%;
 }
 
+/* --- Override Apple Music Default Heavy Ass Canvas --- */
+[data-testid="now-playing-backdrop"] > canvas:not(#lyplus-webgl-canvas),
+.dt-lyrics__platter > canvas:not(#lyplus-webgl-canvas),
+article[data-testid="lyrics-fullscreen-modal"] canvas:not(#lyplus-webgl-canvas) {
+    display: none !important;
+    visibility: hidden !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    contain: strict !important;
+}
+
+article[data-testid="lyrics-fullscreen-modal"] .lyplus-blur-container,
+[data-testid="now-playing-backdrop"] .lyplus-blur-container {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 1 !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+}
+
 .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)),
 .lyrics__container.is-lyrics-off.svelte-1n2xfan.svelte-1n2xfan:has(#lyplus-patch-container:not(.lyrics-hidden)) {
     grid-template-columns: 32vw 40vw;

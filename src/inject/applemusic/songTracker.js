@@ -6,6 +6,118 @@
   let timeUpdateFrame = null;
   let playing = false;
 
+  // Instead of deleting the <canvas> node (which breaks Svelte's unmount lifecycle
+  // when pressing X and leaks RAM), keep the node in the DOM, lock its internal
+  // resolution to 1x1, and no-op all draw calls on its rendering context.
+  const throttledCanvases = new WeakSet();
+
+  function isAppleBackdropCanvas(canvas) {
+    if (!canvas || !(canvas instanceof HTMLCanvasElement)) return false;
+    if (canvas.id === 'lyplus-webgl-canvas') return false;
+    return !!(
+      canvas.closest?.('[data-testid="now-playing-backdrop"]') ||
+      canvas.closest?.('.dt-lyrics__platter') ||
+      canvas.closest?.('article[data-testid="lyrics-fullscreen-modal"]')
+    );
+  }
+
+  function neutralizeCanvasContext(ctx) {
+    if (!ctx || ctx.__lyplusNeutralized) return ctx;
+    ctx.__lyplusNeutralized = true;
+    const noop = function () {};
+    const drawMethods = [
+      // idk wht draw did they use, so guessing them???
+      // WebGL / WebGL2
+      'drawArrays', 'drawElements', 'drawArraysInstanced', 'drawElementsInstanced',
+      'drawRangeElements', 'clear', 'texImage2D', 'texSubImage2D', 'texImage3D',
+      'texSubImage3D', 'copyTexImage2D', 'copyTexSubImage2D', 'blitFramebuffer',
+      'useProgram', 'bindFramebuffer', ' bindTexture', 'viewport', ' flush', 'finish',
+      // 2D Canvas
+      'drawImage', 'fillRect', 'clearRect', 'strokeRect', 'putImageData', 'fill', 'stroke'
+    ];
+    for (let i = 0; i < drawMethods.length; i++) {
+      const m = drawMethods[i].trim();
+      if (typeof ctx[m] === 'function') {
+        try { ctx[m] = noop; } catch (e) {}
+      }
+    }
+    return ctx;
+  }
+
+  function throttleAppleCanvas(canvas) {
+    if (!canvas || canvas.id === 'lyplus-webgl-canvas') return;
+
+    if (!throttledCanvases.has(canvas)) {
+      throttledCanvases.add(canvas);
+      canvas.setAttribute('data-lyplus-throttled', 'true');
+
+      try {
+        const proto = HTMLCanvasElement.prototype;
+        const wDesc = Object.getOwnPropertyDescriptor(proto, 'width');
+        const hDesc = Object.getOwnPropertyDescriptor(proto, 'height');
+        if (wDesc?.set && hDesc?.set) {
+          wDesc.set.call(canvas, 1);
+          hDesc.set.call(canvas, 1);
+          Object.defineProperty(canvas, 'width', {
+            get: () => 1,
+            set: () => { try { wDesc.set.call(canvas, 1); } catch (e) {} },
+            configurable: true
+          });
+          Object.defineProperty(canvas, 'height', {
+            get: () => 1,
+            set: () => { try { hDesc.set.call(canvas, 1); } catch (e) {} },
+            configurable: true
+          });
+        } else {
+          canvas.width = 1;
+          canvas.height = 1;
+        }
+      } catch (e) {
+        canvas.width = 1;
+        canvas.height = 1;
+      }
+
+      try {
+        const existingCtx =
+          canvas.getContext('webgl2') ||
+          canvas.getContext('webgl') ||
+          canvas.getContext('experimental-webgl') ||
+          canvas.getContext('2d');
+        if (existingCtx) neutralizeCanvasContext(existingCtx);
+      } catch (e) {}
+    } else if (canvas.width !== 1 || canvas.height !== 1) {
+      try {
+        canvas.width = 1;
+        canvas.height = 1;
+      } catch (e) {}
+    }
+  }
+
+  try {
+    const origGetContext = HTMLCanvasElement.prototype.getContext;
+    if (origGetContext && !origGetContext.__lyplusPatched) {
+      const patchedGetContext = function (type, attrs) {
+        const ctx = origGetContext.call(this, type, attrs);
+        if (this && this.id !== 'lyplus-webgl-canvas' && isAppleBackdropCanvas(this)) {
+          throttleAppleCanvas(this);
+          neutralizeCanvasContext(ctx);
+        }
+        return ctx;
+      };
+      patchedGetContext.__lyplusPatched = true;
+      HTMLCanvasElement.prototype.getContext = patchedGetContext;
+    }
+  } catch (e) {}
+
+  window.addEventListener('message', (event) => {
+    if (!event.data || event.data.type !== 'LYPLUS_THROTTLE_APPLE_CANVAS') return;
+    document.querySelectorAll(
+      '[data-testid="now-playing-backdrop"] canvas:not(#lyplus-webgl-canvas), ' +
+      '.dt-lyrics__platter canvas:not(#lyplus-webgl-canvas), ' +
+      'article[data-testid="lyrics-fullscreen-modal"] canvas:not(#lyplus-webgl-canvas)'
+    ).forEach(throttleAppleCanvas);
+  });
+
   function getPreciseTime() {
     if (!mkInstance) return 0;
 
@@ -112,6 +224,11 @@
     window.postMessage({
       type: 'LYPLUS_SONG_CHANGED',
       songInfo
+    }, '*');
+
+    window.postMessage({
+      type: 'LYPLUS_updateFullScreenAnimatedBg',
+      artworkUrl
     }, '*');
   }
 

@@ -1,7 +1,20 @@
 // src/modules/applemusic/index.js
 
+if (typeof LYPLUS_setBgConfig === 'function') {
+    LYPLUS_setBgConfig({
+        dynamicPlayerSelectors: [
+            'article[data-testid="lyrics-fullscreen-modal"]'
+        ],
+        blurContainerParentSelector: 'body',
+        mutationObserverRootSelector: 'body',
+        artworkSelector: '.lyrics__artwork-container picture img, .lyrics__artwork-container picture source'
+    });
+}
+
 let lyricsRendererInstance = null;
 let portalObserver = null;
+let backdropObserver = null;
+let observedBackdropEl = null;
 let currentSongInfo = {};
 let injectionInterval = null;
 let cachedAudioElement = null;
@@ -75,12 +88,178 @@ const LyricsPlusAPI = {
     setAvailableProviders: (...args) => lyricsRendererInstance?.setAvailableProviders(...args)
 };
 
+// --- Native Canvas Throttling (1x1px + No-Render) & YouLy+ Backdrop ---
+
+function resolveArtworkUrlFromDOM() {
+    if (currentSongInfo?.artwork) return currentSongInfo.artwork;
+
+    const sourceEl = document.querySelector(
+        'article[data-testid="lyrics-fullscreen-modal"] .lyrics__artwork-container picture source[srcset], ' +
+        'article[data-testid="lyrics-fullscreen-modal"] .lyrics__artwork-radiosity picture source[srcset]'
+    );
+    if (sourceEl) {
+        const srcset = sourceEl.getAttribute('srcset') || '';
+        const candidates = srcset.split(',').map(s => s.trim().split(/\s+/)[0]).filter(Boolean);
+        if (candidates.length > 0) {
+            return candidates[candidates.length - 1];
+        }
+    }
+
+    const imgEl = document.querySelector('article[data-testid="lyrics-fullscreen-modal"] .lyrics__artwork-container img');
+    if (imgEl && imgEl.src && !imgEl.src.endsWith('/1x1.gif')) {
+        return imgEl.src;
+    }
+
+    return null;
+}
+
+function neutralizeAppleDefaultCanvas(root = document) {
+    const nativeCanvases = root.querySelectorAll(
+        '[data-testid="now-playing-backdrop"] canvas:not(#lyplus-webgl-canvas), ' +
+        '.dt-lyrics__platter canvas:not(#lyplus-webgl-canvas), ' +
+        'article[data-testid="lyrics-fullscreen-modal"] canvas:not(#lyplus-webgl-canvas)'
+    );
+
+    nativeCanvases.forEach((canvas) => {
+        if (canvas.width !== 1) canvas.width = 1;
+        if (canvas.height !== 1) canvas.height = 1;
+
+        if (!canvas.hasAttribute('data-lyplus-throttled')) {
+            canvas.setAttribute('data-lyplus-throttled', 'true');
+            canvas.style.setProperty('display', 'none', 'important');
+            canvas.style.setProperty('visibility', 'hidden', 'important');
+            canvas.style.setProperty('width', '1px', 'important');
+            canvas.style.setProperty('height', '1px', 'important');
+        }
+    });
+
+    // Notify main world (songTracker.js) to lock width/height setters to 1x1 and stub draw calls
+    window.postMessage({ type: 'LYPLUS_THROTTLE_APPLE_CANVAS' }, '*');
+}
+
+/**
+ * Parks .lyplus-blur-container back onto document.body when the modal closes.
+ * Since .lyplus-blur-container has `display: none` by default outside the modal,
+ * its IntersectionObserver in dynamicBkg.js automatically cancels the WebGL
+ * requestAnimationFrame loop while keeping the single WebGL context alive for reuse.
+ */
+function parkYouLyBlurContainer() {
+    if (backdropObserver) {
+        backdropObserver.disconnect();
+        backdropObserver = null;
+    }
+    observedBackdropEl = null;
+
+    const blurContainer = document.querySelector('.lyplus-blur-container');
+    if (blurContainer && blurContainer.parentElement !== document.body && document.body) {
+        document.body.prepend(blurContainer);
+    }
+}
+
+function overrideAppleCanvasWithYouLy() {
+    const lyricsArticle = document.querySelector('article[data-testid="lyrics-fullscreen-modal"]');
+    if (!lyricsArticle || !lyricsArticle.isConnected) return;
+
+    neutralizeAppleDefaultCanvas(lyricsArticle);
+
+    const backdrop = lyricsArticle.querySelector('[data-testid="now-playing-backdrop"], .dt-lyrics__platter') || lyricsArticle;
+
+    if (observedBackdropEl !== lyricsArticle) {
+        if (backdropObserver) backdropObserver.disconnect();
+        observedBackdropEl = lyricsArticle;
+
+        backdropObserver = new MutationObserver((mutations) => {
+            if (!lyricsArticle.isConnected) {
+                parkYouLyBlurContainer();
+                return;
+            }
+
+            let needsThrottle = false;
+            for (const mutation of mutations) {
+                if (mutation.type === 'attributes') {
+                    const target = mutation.target;
+                    if (
+                        target.tagName === 'CANVAS' &&
+                        target.id !== 'lyplus-webgl-canvas' &&
+                        (target.width !== 1 || target.height !== 1)
+                    ) {
+                        needsThrottle = true;
+                    }
+                } else if (mutation.type === 'childList') {
+                    for (const node of mutation.addedNodes) {
+                        if (node.nodeType !== 1) continue;
+                        if (
+                            (node.tagName === 'CANVAS' && node.id !== 'lyplus-webgl-canvas') ||
+                            node.querySelector?.('canvas:not(#lyplus-webgl-canvas)')
+                        ) {
+                            needsThrottle = true;
+                        }
+                    }
+                }
+            }
+
+            if (needsThrottle) {
+                neutralizeAppleDefaultCanvas(lyricsArticle);
+            }
+
+            if (backdrop.isConnected && !backdrop.querySelector('.lyplus-blur-container')) {
+                mountYouLyBlurContainer(backdrop);
+            }
+        });
+
+        backdropObserver.observe(lyricsArticle, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['width', 'height']
+        });
+
+        const closeBtn = lyricsArticle.querySelector('[data-testid="lyrics-fullscreen-modal-close-button"]');
+        if (closeBtn && !closeBtn.hasAttribute('data-lyplus-close-hooked')) {
+            closeBtn.setAttribute('data-lyplus-close-hooked', 'true');
+            closeBtn.addEventListener('click', () => {
+                parkYouLyBlurContainer();
+            }, { passive: true });
+        }
+    }
+
+    mountYouLyBlurContainer(backdrop);
+}
+
+function mountYouLyBlurContainer(backdrop) {
+    if (!backdrop || !backdrop.isConnected) return;
+
+    if (typeof LYPLUS_setupBlurEffect === 'function') {
+        let blurContainer = document.querySelector('.lyplus-blur-container');
+        if (!blurContainer || !document.getElementById('lyplus-webgl-canvas')) {
+            blurContainer = LYPLUS_setupBlurEffect();
+        }
+        if (blurContainer && !backdrop.contains(blurContainer)) {
+            backdrop.prepend(blurContainer);
+        }
+    }
+
+    const artworkUrl = resolveArtworkUrlFromDOM();
+    if (artworkUrl) {
+        if (typeof LYPLUS_requestProcessNewArtwork === 'function') {
+            LYPLUS_requestProcessNewArtwork(artworkUrl);
+        } else {
+            window.postMessage({
+                type: 'LYPLUS_updateFullScreenAnimatedBg',
+                artworkUrl
+            }, '*');
+        }
+    }
+}
+
 // --- Injection ---
 
 function tryInject() {
     const lyricsArticle = document.querySelector('article[data-testid="lyrics-fullscreen-modal"]');
 
-    if (lyricsArticle) {
+    if (lyricsArticle && lyricsArticle.isConnected) {
+        overrideAppleCanvasWithYouLy();
+
         let patchWrapper = document.getElementById('lyplus-patch-container');
 
         if (!patchWrapper) {
@@ -123,6 +302,8 @@ function tryInject() {
             injectShowHideButton();
             disableNativeLyrics();
         }
+    } else {
+        parkYouLyBlurContainer();
     }
 }
 
@@ -135,6 +316,7 @@ function startInjectionWatcher() {
         if (modalExists) {
             tryInject();
         } else {
+            parkYouLyBlurContainer();
             if (lyricsRendererInstance && document.getElementById('lyrics-plus-container')) {
                 lyricsRendererInstance.cleanupLyrics();
             }
@@ -200,13 +382,39 @@ function disableNativeLyrics() {
 // --- Setup ---
 
 function setupObservers() {
-    const portal = document.querySelector('.portal');
+    const portal = document.querySelector('.portal') || document.body;
     if (portal) {
         portalObserver = new MutationObserver((mutations) => {
+            let modalAdded = false;
+            let modalRemoved = false;
+
             for (const mutation of mutations) {
-                if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                    tryInject();
+                if (mutation.type !== 'childList') continue;
+
+                for (const node of mutation.addedNodes) {
+                    if (node.nodeType === 1) {
+                        modalAdded = true;
+                    }
                 }
+                for (const node of mutation.removedNodes) {
+                    if (node.nodeType === 1) {
+                        if (
+                            node.matches?.('[data-testid="modal"], article[data-testid="lyrics-fullscreen-modal"]') ||
+                            node.querySelector?.('article[data-testid="lyrics-fullscreen-modal"]')
+                        ) {
+                            modalRemoved = true;
+                        }
+                    }
+                }
+            }
+
+            if (modalRemoved && !document.querySelector('article[data-testid="lyrics-fullscreen-modal"]')) {
+                parkYouLyBlurContainer();
+                if (lyricsRendererInstance && document.getElementById('lyrics-plus-container')) {
+                    lyricsRendererInstance.cleanupLyrics();
+                }
+            } else if (modalAdded) {
+                tryInject();
             }
         });
         portalObserver.observe(portal, { childList: true, subtree: true });
@@ -243,7 +451,7 @@ window.addEventListener('message', (event) => {
     }
 
     if (event.data.type === 'LYPLUS_TIME_UPDATE' && typeof event.data.currentTime === 'number') {
-        LyricsPlusAPI.updateCurrentTick(event.data.currentTime)
+        LyricsPlusAPI.updateCurrentTick(event.data.currentTime);
     }
 
     if (event.data.type === 'LYPLUS_PLAYBACK_STATE' && typeof event.data.isPlaying === 'boolean') {
@@ -252,5 +460,18 @@ window.addEventListener('message', (event) => {
 
     if (event.data.type === 'LYPLUS_SONG_CHANGED') {
         currentSongInfo = event.data.songInfo;
+        if (document.querySelector('article[data-testid="lyrics-fullscreen-modal"]')) {
+            const artworkUrl = currentSongInfo?.artwork || resolveArtworkUrlFromDOM();
+            if (artworkUrl) {
+                if (typeof LYPLUS_requestProcessNewArtwork === 'function') {
+                    LYPLUS_requestProcessNewArtwork(artworkUrl);
+                } else {
+                    window.postMessage({
+                        type: 'LYPLUS_updateFullScreenAnimatedBg',
+                        artworkUrl
+                    }, '*');
+                }
+            }
+        }
     }
 });
