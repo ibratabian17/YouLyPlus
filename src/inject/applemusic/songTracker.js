@@ -8,12 +8,6 @@
 
   const killedCanvases = new WeakSet();
   const killedContexts = new WeakSet();
-  const RO_BODY_CONFIG = {
-    attributes: true,
-    characterData: true,
-    childList: true,
-    subtree: true
-  };
 
   function isLyricsModalElement(el) {
     if (!el || !(el instanceof Element)) return false;
@@ -23,8 +17,7 @@
       el.classList?.contains('lyplus-blur-container') ||
       el.closest?.('#lyplus-patch-container') ||
       el.closest?.('#lyrics-plus-container') ||
-      el.closest?.('.lyplus-blur-container') ||
-      el.closest?.('article[data-testid="lyrics-fullscreen-modal"]')
+      el.closest?.('.lyplus-blur-container')
     );
   }
 
@@ -42,6 +35,7 @@
           typeof this.__lyplusWrappedCallback === 'function'
         ) {
           this.__lyplusIsPolyfillRO = true;
+          return;
         }
         return origObserve.call(this, target, options);
       };
@@ -54,6 +48,16 @@
         const wrappedCallback = function (mutations, observer) {
           if (moInstance && moInstance.__lyplusIsPolyfillRO) {
             return;
+          }
+          if (Array.isArray(mutations) && mutations.length > 0) {
+            let allInternal = true;
+            for (let i = 0; i < mutations.length; i++) {
+              if (!isLyricsModalElement(mutations[i].target)) {
+                allInternal = false;
+                break;
+              }
+            }
+            if (allInternal) return;
           }
           return callback.call(this, mutations, observer);
         };
@@ -75,18 +79,31 @@
         'animationend',
         'animationstart',
         'animationiteration',
+        'keyup',
+        'keydown',
+        'mouseup',
+        'mousedown',
         'mouseover',
-        'mouseout'
+        'mouseout',
+        'blur',
+        'focus'
       ]);
       const patchedAddEventListener = function (type, listener, options) {
         if (
           (this === window || this === document) &&
           options === true &&
           roNoisyEvents.has(type) &&
-          typeof listener === 'function' &&
-          listener.toString().includes('.schedule()')
+          typeof listener === 'function'
         ) {
-          return;
+          const fnStr = listener.toString();
+          if (fnStr.includes('.schedule()')) {
+            return;
+          }
+          const wrappedCapture = function (ev) {
+            if (ev && isLyricsModalElement(ev.target)) return;
+            return listener.apply(this, arguments);
+          };
+          return origAddEventListener.call(this, type, wrappedCapture, options);
         }
         return origAddEventListener.call(this, type, listener, options);
       };
