@@ -4271,6 +4271,11 @@ class LyricsPlusRenderer {
     }
   }
 
+  _clampScrollTop(scroller, top) {
+    const max = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+    return Math.min(max, Math.max(0, top));
+  }
+
   _getScrollPaddingTop() {
     if (this._scrollPaddingTopCache !== undefined) return this._scrollPaddingTopCache;
 
@@ -4440,8 +4445,9 @@ class LyricsPlusRenderer {
       containerStyle.removeProperty('--scroll-easing');
     }
 
-    const targetTop = Math.max(0, -newTranslateY);
-    const prevOffset = -parent.scrollTop || this.currentScrollOffset || 0;
+    const targetTop = this._clampScrollTop(parent, -newTranslateY);
+    newTranslateY = -targetTop;
+    const prevOffset = -parent.scrollTop;
     const delta = prevOffset - newTranslateY;
     this.currentScrollOffset = newTranslateY;
 
@@ -4866,8 +4872,8 @@ class LyricsPlusRenderer {
     if (!scrollContainer) return;
 
     const paddingTop = this._getScrollPaddingTop();
-    const targetTranslateY = paddingTop - activeLine.offsetTop;
-    const targetScrollTop = -targetTranslateY;
+    const targetScrollTop = this._clampScrollTop(scrollContainer, activeLine.offsetTop - paddingTop);
+    const targetTranslateY = -targetScrollTop;
 
     if (
       !forceScroll &&
