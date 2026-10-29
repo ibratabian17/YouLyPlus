@@ -1,9 +1,9 @@
 if (typeof LYPLUS_setBgConfig === 'function') {
     LYPLUS_setBgConfig({
         dynamicPlayerSelectors: ['#wimp'],
-        blurContainerParentSelector: '#wimp [data-test="new-now-playing"]',
+        blurContainerParentSelector: '#wimp [data-test="new-now-playing"]:has(header, [class*="_content_"]), #wimp [data-test="new-now-playing"]:not([class*="_fullscreen_"] *)',
         mutationObserverRootSelector: '#wimp',
-        artworkSelector: '[data-test="current-media-imagery"] img'
+        artworkSelector: '[data-test="now-playing-artwork"], [data-test="current-media-imagery"] img'
     });
 }
 
@@ -66,15 +66,41 @@ function isNewUI() {
 // NEW UI (2024+)
 //
 // Tidal has TWO structurally identical now-playing panels:
-//   1. Sidebar  — [data-test="new-now-playing"]
-//   2. Fullscreen — #nowPlaying
-// Both have their own [data-test="toggle-lyrics"] and
-// [data-test="now-playing-lyrics"]. All helpers are scoped to
-// a `root` element so both instances work independently.
+//   1. Fullscreen — section[class*="_fullscreen_"] [data-test="new-now-playing"]#nowPlaying
+//   2. Non-fullscreen — section[class*="_nowPlayingContainer_"][data-test="new-now-playing"]#nowPlaying
+// Both share data-test="new-now-playing" and id="nowPlaying", and
+// only the currently active panel renders <header> / _content_.
 // ============================================================
 
 function getNowPlayingRoot(btn) {
     return btn.closest('#nowPlaying, [data-test="new-now-playing"]');
+}
+
+function getActiveNowPlayingRoot() {
+    return document.querySelector(
+        '#wimp [data-test="new-now-playing"]:has(header, [class*="_content_"]), #wimp [data-test="new-now-playing"]:not([class*="_fullscreen_"] *)'
+    );
+}
+
+function syncBlurContainerToRoot(root) {
+    const targetRoot = (root && root.querySelector?.('header, [class*="_content_"]'))
+        ? root
+        : getActiveNowPlayingRoot();
+    if (!targetRoot) return;
+
+    if (typeof currentSettings !== 'undefined' && currentSettings.dynamicPlayer) {
+        document.getElementById('wimp')?.classList.add('dynamic-player');
+    }
+
+    const blurContainer = document.querySelector('.lyplus-blur-container');
+    if (blurContainer) {
+        if (blurContainer.parentElement !== targetRoot) {
+            targetRoot.prepend(blurContainer);
+            if (typeof handleResize === 'function') handleResize();
+        }
+    } else {
+        window.postMessage({ type: 'LYPLUS_reattachBg' }, '*');
+    }
 }
 
 function hideTidalLyricsIn(root) {
@@ -153,6 +179,8 @@ function syncCustomButtonState(nativeLyricsBtn, buttonsContainer) {
 function ensureLyricsPatchContainer(root) {
     if (!root) return;
 
+    syncBlurContainerToRoot(root);
+
     const lyricsPanel = root.querySelector('[data-test="now-playing-lyrics"]');
     if (!lyricsPanel) return;
 
@@ -216,6 +244,8 @@ function setupNowPlayingInstance(nativeLyricsBtn) {
 
     const root = getNowPlayingRoot(nativeLyricsBtn) || buttonsContainer.parentElement;
 
+    syncBlurContainerToRoot(root);
+
     nativeLyricsBtn.style.display = 'none';
     ensureCustomButton(nativeLyricsBtn, buttonsContainer);
     syncCustomButtonState(nativeLyricsBtn, buttonsContainer);
@@ -243,6 +273,7 @@ function setupNowPlayingInstance(nativeLyricsBtn) {
 
 function ensureLyricsNewUI() {
     document.querySelectorAll('[data-test="toggle-lyrics"]').forEach(setupNowPlayingInstance);
+    syncBlurContainerToRoot();
 }
 
 
@@ -438,6 +469,7 @@ function ensureLyricsUI() {
 
 const uiObserver = new MutationObserver((mutations) => {
     let shouldCheckUI = false;
+    let shouldSyncBg = false;
     const panelRoots = new Set();
 
     mutations.forEach(mutation => {
@@ -454,6 +486,14 @@ const uiObserver = new MutationObserver((mutations) => {
                 shouldCheckUI = true;
             }
 
+            if (
+                node.matches?.('[data-test="new-now-playing"], header, [class*="_content_"]') ||
+                node.querySelector?.('[data-test="new-now-playing"], [data-test="now-playing-artwork"]') ||
+                node.closest?.('[data-test="new-now-playing"]')
+            ) {
+                shouldSyncBg = true;
+            }
+
             const lyricsPanelNode = node.matches?.('[data-test="now-playing-lyrics"]')
                 ? node
                 : node.querySelector?.('[data-test="now-playing-lyrics"]');
@@ -467,6 +507,7 @@ const uiObserver = new MutationObserver((mutations) => {
     });
 
     if (shouldCheckUI) setTimeout(ensureLyricsUI, 50);
+    if (shouldSyncBg) setTimeout(() => syncBlurContainerToRoot(), 50);
     panelRoots.forEach(root => setTimeout(() => ensureLyricsPatchContainer(root), 50));
 });
 
@@ -496,6 +537,8 @@ window.addEventListener('message', (event) => {
     if (event.source !== window || !event.data) return;
     if (event.data.type === 'LYPLUS_SONG_CHANGED') {
         LYPLUS_currentSong = event.data.songInfo;
+
+        syncBlurContainerToRoot();
 
         document.querySelectorAll('[data-test="toggle-lyrics"][aria-pressed="true"]').forEach(btn => {
             const root = getNowPlayingRoot(btn) || btn.parentElement?.parentElement;

@@ -58,6 +58,7 @@ function loadSettings(callback) {
     storageLocalGet(defaultSettings).then((items) => {
         currentSettings = items;
         console.log(currentSettings);
+        applyDynamicPlayerClass();
         injectCustomCSS(currentSettings.customCSS);
         if (callback) callback();
     });
@@ -94,9 +95,14 @@ if (pBrowser && pBrowser.storage) {
 
 function applyDynamicPlayerClass() {
     const layoutElement = document.getElementById('layout');
-    if (!layoutElement) return;
-
-    layoutElement.classList.toggle('dynamic-player', currentSettings.dynamicPlayer);
+    if (layoutElement) {
+        layoutElement.classList.toggle('dynamic-player', currentSettings.dynamicPlayer);
+    }
+    if (typeof LYPLUS_bgConfig !== 'undefined' && Array.isArray(LYPLUS_bgConfig.dynamicPlayerSelectors)) {
+        for (let i = 0; i < LYPLUS_bgConfig.dynamicPlayerSelectors.length; i++) {
+            document.querySelector(LYPLUS_bgConfig.dynamicPlayerSelectors[i])?.classList.toggle('dynamic-player', !!currentSettings.dynamicPlayer);
+        }
+    }
 }
 function injectCustomCSS(customCSS) {
     let styleTag = document.getElementById('lyrics-plus-custom-css');
