@@ -84,6 +84,7 @@
         "src/modules/lyrics/lyricsManager.js",
         "src/modules/lyrics/lyricsRenderer.js",
         "src/modules/lyrics/dynamicBkg.js",
+        "src/modules/applemusic/appleUIOptimizer.js",
         "src/modules/applemusic/index.js",
         "src/content.js"
       ]
