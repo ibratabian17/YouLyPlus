@@ -90,6 +90,7 @@ Play any song, and the lyrics panel will automatically be enhanced by YouLy+.
 
 -   **Word-by-word, syllable-synced lyrics**: YouLy+ features real-time, accurately synced lyrics with word-by-word highlighting.
 -   **Apple Music engine overhaul**: Replaces the resource-heavy native Apple Music Web UI. YouLy+ replace their murdered animation with Apple Music Android-like animation with optimization. It also expands the lyric sources—if AM lacks synced lyrics, YouLy+ finds them elsewhere!
+-   **Optimize Apple Music**: This code inject any Apple Music Web function that using inefficient way with the new web browser native feature/other optimization implementation
 -   **Multi-platform fallback**: Automatically searches multiple platforms to find lyrics for almost every song.
 -   **Fits seamlessly**: Replaces default lyrics panels out of the box with designs that fit in to whichever platform you use.
 
@@ -121,6 +122,10 @@ The benchmark machine used to develop this project is older hardware (AMD FX-630
 - **1080p (1920x1080):** GTX 650 / GT 1030 or above recommended for a locked 60 FPS.
 
 - Tested on a M1 MacBook Air (base specs, 2560x1600 (1440x900 DPI) Retina display), YouLy+ stays stable at 60FPS with little decrease in battery life.
+
+## Why it's not 1:1 Apple Music-like lyrics?
+
+- 'Cuz I don't want it tho, while this project literally larping apple music, I don't really dig apple music's UI. I want to make this renderer have it's own uniqueness. Tho it doesn't mean I will not take inspiration from apple music, for example, on YTMusic/Tidal, YouLy+ uses their own font. When line got finished, YouLy+ intentionally deactivate the line after 1s no activity (gap or smth)
 
 ## Self-Hosting & Open Source
 
