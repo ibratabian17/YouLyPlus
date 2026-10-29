@@ -675,13 +675,13 @@ function LYPLUS_setupBlurEffect() {
 
     if (bgObserver) bgObserver.disconnect();
     bgObserver = new MutationObserver(() => {
-        if (blurContainerElem) {
+        if (blurContainerElem && !blurContainerElem.isConnected) {
             checkBg();
         }
     });
 
     const parent = document.querySelector(LYPLUS_bgConfig.mutationObserverRootSelector) || document.body;
-    bgObserver.observe(parent, { childList: true, subtree: true });
+    bgObserver.observe(parent, { childList: true, subtree: parent === document.body });
 
     // Enable VAO extension
     vaoExt = gl.getExtension('OES_vertex_array_object');
@@ -1250,12 +1250,10 @@ function checkBg() {
         bgCheckRetryTimeout = null;
     }
 
-    const targetParent = document.querySelector(LYPLUS_bgConfig.blurContainerParentSelector);
-    if (!blurContainerElem.isConnected || (targetParent && blurContainerElem.parentElement !== targetParent)) {
-        const parent = targetParent || document.body;
+    if (!blurContainerElem.isConnected) {
+        const parent = document.querySelector(LYPLUS_bgConfig.blurContainerParentSelector) || document.body;
         if (parent) {
             parent.prepend(blurContainerElem);
-            handleResize();
             if (!globalAnimationId) globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         } else {
             bgCheckRetryTimeout = setTimeout(checkBg, 100);
