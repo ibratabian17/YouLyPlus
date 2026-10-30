@@ -25,6 +25,9 @@ let lyricsFetchDebounceTimer = null;
 let lastRequestedSongKey = null;
 const DEBOUNCE_TIME_MS = 200;
 
+// Microtask coalescing for concurrent translation + romanization completions
+let pendingCombinedRenderFetchId = null;
+
 // Settings keys that affect which cached responses to invalidate
 const TRANSLATION_SETTING_KEYS = [
   'translationProvider',
@@ -48,56 +51,96 @@ const ROMANIZATION_SETTING_KEYS = [
 ];
 const RESTART_REQUIRED_KEYS = ['isEnabled', 'YTSongInfo', 'YTSongInfoDisableSeekbar', 'dynamicPlayer'];
 
+const TRANSLATION_SETTING_SET = new Set(TRANSLATION_SETTING_KEYS);
+const ROMANIZATION_SETTING_SET = new Set(ROMANIZATION_SETTING_KEYS);
+const NON_RENDERING_KEY_SET = new Set([
+  ...TRANSLATION_SETTING_KEYS,
+  ...ROMANIZATION_SETTING_KEYS,
+  ...RESTART_REQUIRED_KEYS
+]);
+
+const KNOWN_LYRICS_SOURCES = [
+  'lyricsplus', 'lyrics+', 'apple', 'apple music', 'qq', 'musixmatch', 'musixmatch-word',
+  'unison', 'lrclib', 'lrcred', 'lrc.red', 'lrc-red', 'binilyrics', 'subtitles', 'youtube captions', 'youtube subtitles',
+  'local', 'local lyrics', 'spotify', 'kpoe', 'customkpoe', 'lyricfind'
+];
+let _cachedSourceKey = null;
+let _cachedValidSources = null;
+
 
 /* =================================================================
    HELPER FUNCTIONS - DATA PROCESSING
    ================================================================= */
 
 /**
- * Merges translation and romanization data into a deep copy of the base lyrics object.
+ * Shallow-clones a lyrics object and its line array without expensive JSON serialization.
+ * @param {object} baseLyrics - The original lyrics object.
+ * @returns {object} A shallow copy with cloned line entries.
+ */
+function cloneLyricsShallow(baseLyrics) {
+  return {
+    ...baseLyrics,
+    data: Array.isArray(baseLyrics.data)
+      ? baseLyrics.data.map(line => ({ ...line }))
+      : []
+  };
+}
+
+/**
+ * Merges translation and romanization data into a copy of the base lyrics object.
  * @param {object}      baseLyrics     - The original lyrics object.
  * @param {object|null} translation    - The translation lyrics object.
  * @param {object|null} romanization   - The romanization lyrics object.
  * @returns {object} The merged lyrics object.
  */
 function combineLyricsData(baseLyrics, translation, romanization) {
-  const combined = JSON.parse(JSON.stringify(baseLyrics)); // Deep copy
-
   const translationData  = translation?.data;
   const romanizationData = romanization?.data;
 
-  combined.data = combined.data.map((line, index) => {
-    const translatedLine  = translationData?.[index];
-    const romanizedLine   = romanizationData?.[index];
-    let mergedLine = { ...line };
+  if (!translationData && !romanizationData) {
+    return cloneLyricsShallow(baseLyrics);
+  }
 
-    if (translatedLine?.translatedText) {
-      mergedLine.translatedText = translatedLine.translatedText;
-    }
+  const isWordLyrics = baseLyrics.type === "Word";
 
-    if (romanizedLine) {
-      const hasWordSyncedRomanization =
-        baseLyrics.type === "Word" &&
-        romanizedLine.chunk?.length > 0 &&
-        mergedLine.syllabus?.length > 0;
+  return {
+    ...baseLyrics,
+    data: baseLyrics.data.map((line, index) => {
+      const translatedLine = translationData?.[index];
+      const romanizedLine  = romanizationData?.[index];
 
-      if (hasWordSyncedRomanization) {
-        mergedLine.syllabus = mergedLine.syllabus.map((syllable, sylIndex) => {
-          const romanizedSyllable = romanizedLine.chunk[sylIndex];
-          return {
-            ...syllable,
-            romanizedText: romanizedSyllable?.text || syllable.text
-          };
-        });
-      } else if (romanizedLine.text) {
-        mergedLine.romanizedText = romanizedLine.text;
+      if (!translatedLine && !romanizedLine) {
+        return { ...line };
       }
-    }
 
-    return mergedLine;
-  });
+      const mergedLine = { ...line };
 
-  return combined;
+      if (translatedLine?.translatedText) {
+        mergedLine.translatedText = translatedLine.translatedText;
+      }
+
+      if (romanizedLine) {
+        const hasWordSyncedRomanization =
+          isWordLyrics &&
+          romanizedLine.chunk?.length > 0 &&
+          mergedLine.syllabus?.length > 0;
+
+        if (hasWordSyncedRomanization) {
+          mergedLine.syllabus = mergedLine.syllabus.map((syllable, sylIndex) => {
+            const romanizedSyllable = romanizedLine.chunk[sylIndex];
+            return {
+              ...syllable,
+              romanizedText: romanizedSyllable?.text || syllable.text
+            };
+          });
+        } else if (romanizedLine.text) {
+          mergedLine.romanizedText = romanizedLine.text;
+        }
+      }
+
+      return mergedLine;
+    })
+  };
 }
 
 /**
@@ -234,8 +277,25 @@ let lastSubtitleData = null;
 let lastSubtitleVideoId = null;
 
 /**
+ * Schedules a microtask-coalesced call to updateAndRenderCombinedLyrics so that
+ * when both translation and romanization settle in the same tick, the DOM is only rebuilt once.
+ */
+function scheduleCombinedLyricsRender(currentSong, fetchId) {
+  if (pendingCombinedRenderFetchId === fetchId) return;
+  pendingCombinedRenderFetchId = fetchId;
+  queueMicrotask(() => {
+    if (pendingCombinedRenderFetchId === fetchId) {
+      pendingCombinedRenderFetchId = null;
+    }
+    if (currentFetchMediaId === fetchId) {
+      updateAndRenderCombinedLyrics(currentSong, fetchId);
+    }
+  });
+}
+
+/**
  * Initiates translation and romanization fetches independently without blocking each other.
- * Each fetch updates the UI as soon as its data is ready.
+ * Coalesces near-simultaneous responses into a single render pass.
  */
 function fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId) {
   const needsTranslation = effectiveMode === 'translate' || effectiveMode === 'both';
@@ -250,13 +310,13 @@ function fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId) {
     }).then(response => {
       if (currentFetchMediaId === fetchId) {
         lastTranslationResponse = response || { success: false };
-        updateAndRenderCombinedLyrics(currentSong, fetchId);
+        scheduleCombinedLyricsRender(currentSong, fetchId);
       }
     }).catch(error => {
       console.warn("Translation request error:", error);
       if (currentFetchMediaId === fetchId) {
         lastTranslationResponse = { success: false, error: error.message };
-        updateAndRenderCombinedLyrics(currentSong, fetchId);
+        scheduleCombinedLyricsRender(currentSong, fetchId);
       }
     });
   }
@@ -270,16 +330,64 @@ function fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId) {
     }).then(response => {
       if (currentFetchMediaId === fetchId) {
         lastRomanizationResponse = response || { success: false };
-        updateAndRenderCombinedLyrics(currentSong, fetchId);
+        scheduleCombinedLyricsRender(currentSong, fetchId);
       }
     }).catch(error => {
       console.warn("Romanization request error:", error);
       if (currentFetchMediaId === fetchId) {
         lastRomanizationResponse = { success: false, error: error.message };
-        updateAndRenderCombinedLyrics(currentSong, fetchId);
+        scheduleCombinedLyricsRender(currentSong, fetchId);
       }
     });
   }
+}
+
+/**
+ * Checks whether applySubtitleRetiming or applySponsorBlock will need an async IPC call,
+ * so we only do a preliminary base render when an async wait will actually occur.
+ */
+function needsAsyncTimingFetch(lyrics, currentSong) {
+  if (!currentSong?.isVideo || !currentSong?.videoId || !lyrics) return false;
+
+  const isSubtitles =
+    lyrics.provider === 'subtitles' ||
+    lyrics.metadata?.provider === 'subtitles' ||
+    lyrics.metadata?.source === 'YouTube Captions' ||
+    lyrics.metadata?.source === 'YouTube Subtitles' ||
+    lyrics.metadata?.source === 'subtitles';
+
+  if (isSubtitles) return false;
+
+  const isUnison =
+    lyrics.provider === 'unison' ||
+    lyrics.metadata?.provider === 'unison' ||
+    lyrics.metadata?.source?.toLowerCase() === 'unison';
+
+  const isUnisonVideoId =
+    isUnison &&
+    (lyrics.byVideoId === true ||
+     lyrics.metadata?.byVideoId === true ||
+     (lyrics.byVideoId === undefined &&
+      lyrics.metadata?.byVideoId === undefined &&
+      currentSong.isVideo &&
+      (lyrics.ignoreSponsorblock || lyrics.metadata?.ignoreSponsorblock)));
+
+  if (!isUnisonVideoId && typeof retimeLyricsWithSubtitles === "function") {
+    if (!(lastSubtitleVideoId === currentSong.videoId && lastSubtitleData !== null)) {
+      return true;
+    }
+  }
+
+  const shouldApplySponsorBlock =
+    currentSettings.useSponsorBlock &&
+    !lyrics.ignoreSponsorblock &&
+    !lyrics.metadata?.ignoreSponsorblock;
+
+  if (shouldApplySponsorBlock && !(lastSponsorVideoId === currentSong.videoId && lastSponsorSegments !== null)) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -421,16 +529,21 @@ function isValidLyricsSource(source, settings = currentSettings, lyrics = lastBa
   const s = source.trim().toLowerCase();
   if (!s || s === 'unknown' || s === 'undefined' || s === 'null' || s === 'none' || s === 'youtube music' || s === 'ytmusic') return false;
 
-  const knownSources = [
-    'lyricsplus', 'lyrics+', 'apple', 'apple music', 'qq', 'musixmatch', 'musixmatch-word',
-    'unison', 'lrclib', 'lrcred', 'lrc.red', 'lrc-red', 'binilyrics', 'subtitles', 'youtube captions', 'youtube subtitles',
-    'local', 'local lyrics', 'spotify', 'kpoe', 'customkpoe', 'lyricfind'
-  ];
-  const configuredSources = (settings?.lyricsSourceOrder || '').toLowerCase().split(',').map(x => x.trim()).filter(Boolean);
-  const configuredProviders = (settings?.lyricsProviderOrder || '').toLowerCase().split(',').map(x => x.trim()).filter(Boolean);
-  const allValid = new Set([...knownSources, ...configuredSources, ...configuredProviders]);
+  const sourceOrder = settings?.lyricsSourceOrder || '';
+  const providerOrder = settings?.lyricsProviderOrder || '';
+  const cacheKey = `${sourceOrder}|${providerOrder}`;
 
-  if (Array.from(allValid).some(known => s.includes(known) || known.includes(s))) return true;
+  if (_cachedSourceKey !== cacheKey || !_cachedValidSources) {
+    const configuredSources = sourceOrder.toLowerCase().split(',').map(x => x.trim()).filter(Boolean);
+    const configuredProviders = providerOrder.toLowerCase().split(',').map(x => x.trim()).filter(Boolean);
+    _cachedValidSources = Array.from(new Set([...KNOWN_LYRICS_SOURCES, ...configuredSources, ...configuredProviders]));
+    _cachedSourceKey = cacheKey;
+  }
+
+  for (let i = 0; i < _cachedValidSources.length; i++) {
+    const known = _cachedValidSources[i];
+    if (s.includes(known) || known.includes(s)) return true;
+  }
 
   if (lyrics?.provider === 'ytmusic' || lyrics?.metadata?.provider === 'ytmusic') {
     return true;
@@ -659,11 +772,11 @@ function callDisplayLyricsAPI(lyrics, currentSong, displayMode) {
 }
 
 /**
- * Renders the base lyrics immediately as a placeholder while additional data loads.
- * Shown only for new songs to avoid an empty state during async fetches.
+ * Renders the base lyrics immediately as a placeholder while additional async timing data loads.
+ * Uses shallow cloning instead of JSON.parse(JSON.stringify).
  */
 function renderPreliminaryBaseLyrics(baseLyrics, currentSong) {
-  let lyrics = JSON.parse(JSON.stringify(baseLyrics));
+  let lyrics = cloneLyricsShallow(baseLyrics);
 
   if (lyrics.type === "Word" && !currentSettings.wordByWord) {
     lyrics = convertWordLyricsToLine(lyrics);
@@ -690,11 +803,11 @@ function renderFinalLyrics(lyrics, currentSong, displayMode) {
  * Renders the lyrics with whatever translation and romanization data is currently available.
  * Manages loading indicator state based on whether any required request is still pending.
  */
-async function updateAndRenderCombinedLyrics(currentSong, fetchId) {
+async function updateAndRenderCombinedLyrics(currentSong, fetchId, renderedPreliminary = false) {
   if (currentFetchMediaId !== fetchId || !lastBaseLyrics) return;
 
-  const hasTranslation = lastTranslationResponse?.success && lastTranslationResponse.translatedLyrics;
-  const hasRomanization = lastRomanizationResponse?.success && lastRomanizationResponse.translatedLyrics;
+  const hasTranslation = !!(lastTranslationResponse?.success && lastTranslationResponse.translatedLyrics);
+  const hasRomanization = !!(lastRomanizationResponse?.success && lastRomanizationResponse.translatedLyrics);
 
   let lyrics = combineLyricsData(
     lastBaseLyrics,
@@ -708,6 +821,7 @@ async function updateAndRenderCombinedLyrics(currentSong, fetchId) {
     lyrics = convertWordLyricsToLine(lyrics);
   }
 
+  const originalDataRef = lyrics.data;
   let adjustedData = await applySubtitleRetiming(lyrics, currentSong, fetchId);
   if (currentFetchMediaId !== fetchId) return; // Song changed mid-fetch
 
@@ -716,9 +830,13 @@ async function updateAndRenderCombinedLyrics(currentSong, fetchId) {
     if (adjustedData === null) return; // Song changed mid-fetch
   }
 
+  const timingChanged = adjustedData !== originalDataRef;
   lyrics.data = adjustedData;
 
-  renderFinalLyrics(lyrics, currentSong, finalDisplayMode);
+  // Avoid duplicate full DOM rebuild if preliminary render already rendered identical state
+  if (!(renderedPreliminary && !timingChanged && !hasTranslation && !hasRomanization && finalDisplayMode === 'none')) {
+    renderFinalLyrics(lyrics, currentSong, finalDisplayMode);
+  }
 
   lastKnownSongInfo = currentSong;
   lastProcessedDisplayMode = finalDisplayMode;
@@ -782,10 +900,12 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     const isMissingTranslation = needsTranslation && !lastTranslationResponse;
     const isMissingRomanization = needsRomanization && !lastRomanizationResponse;
 
-    if (isNewSong) {
+    let renderedPreliminary = false;
+    if (isNewSong && needsAsyncTimingFetch(baseLyrics, currentSong)) {
       renderPreliminaryBaseLyrics(baseLyrics, currentSong);
+      renderedPreliminary = true;
     }
-    await updateAndRenderCombinedLyrics(currentSong, fetchId);
+    await updateAndRenderCombinedLyrics(currentSong, fetchId, renderedPreliminary);
 
     if (isMissingTranslation || isMissingRomanization) {
       if (LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
@@ -829,17 +949,16 @@ function setCurrentDisplayModeAndRender(mode, overrideSongInfo) {
 
 window.addEventListener('YOUPLUS_SETTINGS_UPDATED', ({ detail }) => {
   const { changedKeys } = detail;
-  if (!changedKeys) return;
+  if (!changedKeys || changedKeys.length === 0) return;
 
-  if (changedKeys.some(k => TRANSLATION_SETTING_KEYS.includes(k))) lastTranslationResponse = null;
-  if (changedKeys.some(k => ROMANIZATION_SETTING_KEYS.includes(k))) lastRomanizationResponse = null;
+  if (changedKeys.some(k => TRANSLATION_SETTING_SET.has(k))) lastTranslationResponse = null;
+  if (changedKeys.some(k => ROMANIZATION_SETTING_SET.has(k))) lastRomanizationResponse = null;
 
   lastProcessedDisplayMode = 'none';
 
   if (!lastKnownSongInfo) return;
 
-  const nonRenderingKeys = [...TRANSLATION_SETTING_KEYS, ...ROMANIZATION_SETTING_KEYS, ...RESTART_REQUIRED_KEYS];
-  const shouldRender = changedKeys.some(k => !nonRenderingKeys.includes(k));
+  const shouldRender = changedKeys.some(k => !NON_RENDERING_KEY_SET.has(k));
 
   if (shouldRender) {
     console.log("Live settings update received, re-rendering lyrics...", changedKeys);

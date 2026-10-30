@@ -46,6 +46,9 @@ const defaultSettings = {
 };
 
 let currentSettings = { ...defaultSettings };
+let _lastAppliedDynamicPlayer = null;
+let _lastInjectedCustomCSS = null;
+let _cachedCustomStyleTag = null;
 
 window.addEventListener('message', (event) => {
     if (event.source !== window || !event.data || event.data.type !== 'UPDATE_SETTINGS') return;
@@ -58,24 +61,37 @@ function loadSettings(callback) {
     storageLocalGet(defaultSettings).then((items) => {
         currentSettings = items;
         console.log(currentSettings);
-        applyDynamicPlayerClass();
+        applyDynamicPlayerClass(true);
         injectCustomCSS(currentSettings.customCSS);
         if (callback) callback();
     });
 }
 
 function updateSettings(newSettings) {
+    if (!newSettings || typeof newSettings !== 'object') return;
+
+    const changedKeys = [];
+    for (const key of Object.keys(newSettings)) {
+        if (currentSettings[key] !== newSettings[key]) {
+            changedKeys.push(key);
+        }
+    }
+
     currentSettings = { ...currentSettings, ...newSettings };
 
-    applyDynamicPlayerClass();
+    if (newSettings.dynamicPlayer !== undefined) {
+        applyDynamicPlayerClass(false);
+    }
     if (newSettings.customCSS !== undefined) {
         injectCustomCSS(currentSettings.customCSS);
     }
 
+    if (changedKeys.length === 0) return;
+
     window.dispatchEvent(new CustomEvent('YOUPLUS_SETTINGS_UPDATED', {
         detail: {
             settings: currentSettings,
-            changedKeys: Object.keys(newSettings)
+            changedKeys
         }
     }));
 }
@@ -84,7 +100,7 @@ if (pBrowser && pBrowser.storage) {
     pBrowser.storage.onChanged.addListener((changes, area) => {
         if (area === 'local') {
             const changedSettings = {};
-            for (let key in changes) {
+            for (const key in changes) {
                 changedSettings[key] = changes[key].newValue;
             }
             console.log("Settings updated via storage:", changedSettings);
@@ -93,23 +109,46 @@ if (pBrowser && pBrowser.storage) {
     });
 }
 
-function applyDynamicPlayerClass() {
+function applyDynamicPlayerClass(force = false) {
+    const enabled = !!currentSettings.dynamicPlayer;
+    if (!force && _lastAppliedDynamicPlayer === enabled) return;
+    _lastAppliedDynamicPlayer = enabled;
+
     const layoutElement = document.getElementById('layout');
-    if (layoutElement) {
-        layoutElement.classList.toggle('dynamic-player', currentSettings.dynamicPlayer);
+    if (layoutElement && layoutElement.classList.contains('dynamic-player') !== enabled) {
+        layoutElement.classList.toggle('dynamic-player', enabled);
     }
     if (typeof LYPLUS_bgConfig !== 'undefined' && Array.isArray(LYPLUS_bgConfig.dynamicPlayerSelectors)) {
         for (let i = 0; i < LYPLUS_bgConfig.dynamicPlayerSelectors.length; i++) {
-            document.querySelector(LYPLUS_bgConfig.dynamicPlayerSelectors[i])?.classList.toggle('dynamic-player', !!currentSettings.dynamicPlayer);
+            const el = document.querySelector(LYPLUS_bgConfig.dynamicPlayerSelectors[i]);
+            if (el && el.classList.contains('dynamic-player') !== enabled) {
+                el.classList.toggle('dynamic-player', enabled);
+            }
         }
     }
 }
+
 function injectCustomCSS(customCSS) {
-    let styleTag = document.getElementById('lyrics-plus-custom-css');
+    const nextCSS = customCSS || '';
+    if (_lastInjectedCustomCSS === nextCSS) return;
+
+    let styleTag = (_cachedCustomStyleTag && _cachedCustomStyleTag.isConnected)
+        ? _cachedCustomStyleTag
+        : document.getElementById('lyrics-plus-custom-css');
+
     if (!styleTag) {
+        if (!nextCSS) {
+            _lastInjectedCustomCSS = '';
+            return;
+        }
         styleTag = document.createElement('style');
         styleTag.id = 'lyrics-plus-custom-css';
         document.head.appendChild(styleTag);
     }
-    styleTag.textContent = customCSS || '';
+
+    _cachedCustomStyleTag = styleTag;
+    _lastInjectedCustomCSS = nextCSS;
+    if (styleTag.textContent !== nextCSS) {
+        styleTag.textContent = nextCSS;
+    }
 }
