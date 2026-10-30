@@ -8,6 +8,9 @@ let currentFetchMediaId = null;
 let fetchSessionCounter = 0;
 let currentDisplayMode = 'none';     // User's intended display mode ('none', 'translate', 'romanize', 'both')
 let lastProcessedDisplayMode = 'none'; // The mode that was actually rendered
+let lastRenderedHasTranslation = false;
+let lastRenderedHasRomanization = false;
+let forceNextRender = false;
 
 let lastKnownSongInfo = null;
 let lastBaseLyrics = null;
@@ -239,13 +242,15 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId) {
     Math.abs((lastKnownSongInfo.duration || 0) - (currentSong.duration || 0)) < 2;
 
   if (!isNewSong && !forceReload && isSameSong) {
-    if (LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
     return lastBaseLyrics;
   }
 
   LyricsPlusAPI.cleanupLyrics();
   lastTranslationResponse = null;
   lastRomanizationResponse = null;
+  lastRenderedHasTranslation = false;
+  lastRenderedHasRomanization = false;
+  forceNextRender = true;
 
   const response = await pBrowser.runtime.sendMessage({
     type: 'FETCH_LYRICS',
@@ -716,6 +721,9 @@ async function switchLyricsProvider(providerId) {
       // Clear previous translation and romanization responses as lyrics lines/timing differ
       lastTranslationResponse = null;
       lastRomanizationResponse = null;
+      lastRenderedHasTranslation = false;
+      lastRenderedHasRomanization = false;
+      forceNextRender = true;
 
       lastBaseLyrics = response.lyrics;
       await updateAndRenderCombinedLyrics(currentSong, fetchId);
@@ -833,18 +841,41 @@ async function updateAndRenderCombinedLyrics(currentSong, fetchId, renderedPreli
   const timingChanged = adjustedData !== originalDataRef;
   lyrics.data = adjustedData;
 
-  // Avoid duplicate full DOM rebuild if preliminary render already rendered identical state
-  if (!(renderedPreliminary && !timingChanged && !hasTranslation && !hasRomanization && finalDisplayMode === 'none')) {
-    renderFinalLyrics(lyrics, currentSong, finalDisplayMode);
-  }
-
-  lastKnownSongInfo = currentSong;
-  lastProcessedDisplayMode = finalDisplayMode;
-
   const needsTranslation = currentDisplayMode === 'translate' || currentDisplayMode === 'both';
   const needsRomanization = currentDisplayMode === 'romanize' || currentDisplayMode === 'both' || currentSettings.largerTextMode === "romanization";
   const isTranslationPending = needsTranslation && !lastTranslationResponse;
   const isRomanizationPending = needsRomanization && !lastRomanizationResponse;
+
+  const isSameSongRendered =
+    !forceNextRender &&
+    lastKnownSongInfo &&
+    lastKnownSongInfo.title === currentSong.title &&
+    lastKnownSongInfo.artist === currentSong.artist &&
+    lastKnownSongInfo.album === currentSong.album;
+
+  const modeChanged = finalDisplayMode !== lastProcessedDisplayMode;
+  const dataChanged =
+    hasTranslation !== lastRenderedHasTranslation ||
+    hasRomanization !== lastRenderedHasRomanization;
+
+  const skipRedundantPreliminary =
+    renderedPreliminary && !timingChanged && !hasTranslation && !hasRomanization && finalDisplayMode === 'none';
+  const skipWhilePendingUnchanged =
+    !renderedPreliminary && isSameSongRendered && !timingChanged && !modeChanged && !dataChanged;
+
+  if (!skipRedundantPreliminary && !skipWhilePendingUnchanged) {
+    renderFinalLyrics(lyrics, currentSong, finalDisplayMode);
+    forceNextRender = false;
+    lastRenderedHasTranslation = hasTranslation;
+    lastRenderedHasRomanization = hasRomanization;
+    lastProcessedDisplayMode = finalDisplayMode;
+  }
+
+  lastKnownSongInfo = currentSong;
+
+  if (!isTranslationPending && !isRomanizationPending) {
+    currentDisplayMode = finalDisplayMode;
+  }
 
   if (LyricsPlusAPI.setTranslationLoading) {
     LyricsPlusAPI.setTranslationLoading(isTranslationPending || isRomanizationPending);
@@ -931,6 +962,8 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
 
 function setCurrentDisplayModeAndRender(mode, overrideSongInfo) {
   currentDisplayMode = mode;
+  clearTimeout(lyricsFetchDebounceTimer);
+  lyricsFetchDebounceTimer = null;
   const song = overrideSongInfo || lastKnownSongInfo;
 
   if (song) {
@@ -951,14 +984,26 @@ window.addEventListener('YOUPLUS_SETTINGS_UPDATED', ({ detail }) => {
   const { changedKeys } = detail;
   if (!changedKeys || changedKeys.length === 0) return;
 
-  if (changedKeys.some(k => TRANSLATION_SETTING_SET.has(k))) lastTranslationResponse = null;
-  if (changedKeys.some(k => ROMANIZATION_SETTING_SET.has(k))) lastRomanizationResponse = null;
+  const translationInvalidated = changedKeys.some(k => TRANSLATION_SETTING_SET.has(k));
+  const romanizationInvalidated = changedKeys.some(k => ROMANIZATION_SETTING_SET.has(k));
+  if (translationInvalidated) {
+    lastTranslationResponse = null;
+    lastRenderedHasTranslation = false;
+  }
+  if (romanizationInvalidated) {
+    lastRomanizationResponse = null;
+    lastRenderedHasRomanization = false;
+  }
 
+  forceNextRender = true;
   lastProcessedDisplayMode = 'none';
 
   if (!lastKnownSongInfo) return;
 
-  const shouldRender = changedKeys.some(k => !NON_RENDERING_KEY_SET.has(k));
+  const shouldRender =
+    changedKeys.some(k => !NON_RENDERING_KEY_SET.has(k)) ||
+    (translationInvalidated && (currentDisplayMode === 'translate' || currentDisplayMode === 'both')) ||
+    (romanizationInvalidated && (currentDisplayMode === 'romanize' || currentDisplayMode === 'both' || currentSettings.largerTextMode === 'romanization'));
 
   if (shouldRender) {
     console.log("Live settings update received, re-rendering lyrics...", changedKeys);

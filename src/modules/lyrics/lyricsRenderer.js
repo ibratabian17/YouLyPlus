@@ -319,6 +319,8 @@ class LyricsPlusRenderer {
     this._appliedScrollEasing = null;
     this._lastScrollDurationMs = 400;
     this._cachedGapHeight = 0;
+    this._renderedState = null;
+    this._renderedLyricLines = null;
 
     this.wakeLock = null;
     this._wakeLockPending = false;
@@ -867,6 +869,11 @@ class LyricsPlusRenderer {
     };
 
     lyrics.data.forEach((line, lineIdx) => {
+      if (line.syllabus) {
+        for (let si = 0; si < line.syllabus.length; si++) {
+          line.syllabus[si]._rawSylIdx = si;
+        }
+      }
       const currentLine = document.createElement("div");
       currentLine.className = "lyrics-line";
       currentLine.dataset.startTime = line.startTime;
@@ -877,6 +884,9 @@ class LyricsPlusRenderer {
       const currentLineContainer = document.createElement("div");
       currentLineContainer.className = "lyrics-line-container";
       currentLine.appendChild(currentLineContainer);
+      currentLine._lineContainer = currentLineContainer;
+      currentLine._rawLineData = line;
+      currentLine._rawSyllabus = line.syllabus || null;
 
       const assignedSide = lineSideAssignments && lineSideAssignments[lineIdx];
       const singerClass = assignedSide || (
@@ -889,6 +899,7 @@ class LyricsPlusRenderer {
       const mainContainer = document.createElement("p");
       mainContainer.classList.add("main-vocal-container");
       currentLineContainer.appendChild(mainContainer);
+      currentLine._mainVocalContainer = mainContainer;
 
       const lineSyllables = [];
       const lineWraps = [];
@@ -1385,6 +1396,10 @@ class LyricsPlusRenderer {
         mainContainer.classList.add("rtl-text");
       }
 
+      lineEl._lineContainer = lineContainer;
+      lineEl._mainVocalContainer = mainContainer;
+      lineEl._rawLineData = line;
+      lineEl._rawSyllabus = null;
       lineContainer.appendChild(mainContainer);
       this._renderTranslationContainer(lineContainer, line, displayMode);
       fragment.appendChild(lineEl);
@@ -1498,7 +1513,6 @@ class LyricsPlusRenderer {
         subrow0.className = vc._translitIsRtl
           ? "lyrics-romanization-container lyrics-romanization-subrow rtl-text"
           : "lyrics-romanization-container lyrics-romanization-subrow";
-        subrow0.style.display = "block";
         pool[0] = subrow0;
       }
 
@@ -1592,7 +1606,6 @@ class LyricsPlusRenderer {
           nextSubrow.className = vc._translitIsRtl
             ? "lyrics-romanization-container lyrics-romanization-subrow rtl-text"
             : "lyrics-romanization-container lyrics-romanization-subrow";
-          nextSubrow.style.display = "block";
           pool[r + 1] = nextSubrow;
         }
 
@@ -1614,13 +1627,106 @@ class LyricsPlusRenderer {
   }
 
   /**
-   * Renders the translation/romanization container for a given lyric line.
-   * @param {HTMLElement} lineElement - The DOM element for the lyric line.
+   * Syncs newly arrived romanizedText onto the initial raw syllabus objects
+   * so existing word buffers on the DOM line have up-to-date romanization.
+   * @private
+   */
+  _syncLineRomanizationData(parentLine, lineData) {
+    if (!parentLine || !lineData) return;
+    parentLine._rawLineData = lineData;
+    const rawSyls = parentLine._rawSyllabus;
+    const newSyls = lineData.syllabus;
+    if (rawSyls && Array.isArray(newSyls)) {
+      const len = Math.min(rawSyls.length, newSyls.length);
+      for (let i = 0; i < len; i++) {
+        if (newSyls[i] && newSyls[i].romanizedText !== undefined) {
+          rawSyls[i].romanizedText = newSyls[i].romanizedText;
+        }
+      }
+      const lineContainer = parentLine._lineContainer;
+      if (lineContainer) {
+        const vcList = lineContainer.querySelectorAll(".main-vocal-container, .background-vocal-wrap");
+        for (let v = 0; v < vcList.length; v++) {
+          const words = vcList[v]._words;
+          if (!words) continue;
+          for (let w = 0; w < words.length; w++) {
+            const buf = words[w]._wordSyllabus;
+            if (!buf) continue;
+            for (let k = 0; k < buf.length; k++) {
+              const item = buf[k];
+              const orig = item._origSyl || item;
+              if (orig._parts) {
+                const hasRom = orig._parts.some((p) => p.romanizedText);
+                if (hasRom) {
+                  orig.romanizedText = orig._parts.map((p) => p.romanizedText || p.text || "").join("");
+                }
+              } else if (orig._rawSylIdx !== undefined && newSyls[orig._rawSylIdx]) {
+                orig.romanizedText = newSyls[orig._rawSylIdx].romanizedText;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Removes previously built romanization DOM elements from a line container
+   * when romanization settings/data change for the same song.
+   * @private
+   */
+  _cleanupLineRomanization(lineElement) {
+    if (!lineElement) return;
+    const parentLine = lineElement.parentElement;
+    if (lineElement._romanContainer) {
+      lineElement._romanContainer.remove();
+      lineElement._romanContainer = null;
+    }
+    const wraps = lineElement._wraps || lineElement.querySelectorAll(".lyrics-syllable-wrap");
+    for (let i = 0; i < wraps.length; i++) {
+      const wrap = wraps[i];
+      wrap.classList.remove("has-translit", "has-translit-rtl");
+      if (wrap.parentElement && wrap.parentElement.classList.contains("lyrics-word")) {
+        wrap.parentElement.classList.remove("has-translit");
+      }
+      const trs = wrap.querySelectorAll(".lyrics-syllable.transliteration");
+      for (let j = 0; j < trs.length; j++) {
+        trs[j].remove();
+      }
+    }
+    const subrows = lineElement.querySelectorAll(".lyrics-romanization-subrow");
+    for (let i = 0; i < subrows.length; i++) {
+      subrows[i].remove();
+    }
+    const vcList = lineElement.querySelectorAll(".main-vocal-container, .background-vocal-wrap");
+    for (let i = 0; i < vcList.length; i++) {
+      const vc = vcList[i];
+      vc._rtlInitialized = false;
+      if (vc._rtlSubrows) vc._rtlSubrows.length = 0;
+      const idx = this._rtlVocalContainers ? this._rtlVocalContainers.indexOf(vc) : -1;
+      if (idx !== -1) this._rtlVocalContainers.splice(idx, 1);
+    }
+    if (parentLine) {
+      parentLine.classList.remove("has-rtl-row-roman");
+      parentLine._cachedSyllableElements = Array.from(parentLine.querySelectorAll(".lyrics-syllable"));
+      parentLine._maskPreMeasured = false;
+      if (parentLine._maskAnimator) parentLine._maskAnimator.dispose();
+    }
+    lineElement._romanBuiltSig = null;
+  }
+
+  /**
+   * Renders or updates the translation/romanization containers for a given lyric line in-place.
+   * @param {HTMLElement} lineElement - The .lyrics-line-container element for the lyric line.
    * @param {object} lineData - The data object for the lyric line (from lyrics.data).
    * @param {string} displayMode - The current display mode ('none', 'translate', 'romanize', 'both').
+   * @returns {{ builtRoman: boolean, builtTrans: boolean }}
    * @private
    */
   _renderTranslationContainer(lineElement, lineData, displayMode) {
+    let builtRoman = false;
+    let builtTrans = false;
+    const parentLine = lineElement.parentElement;
     const isRTL = this._isRTL(this._getDataText(lineData, true));
     const hasSyl = Array.isArray(lineData.syllabus) && lineData.syllabus.length > 0;
 
@@ -1640,158 +1746,192 @@ class LyricsPlusRenderer {
             return trans && orig && trans !== orig;
           });
 
+        let romanSig = "";
         if (hasPerSyllableTransliteration && isWordSynced) {
-          const translitIsRtl = lineData.syllabus.some(s => {
-            const trans = this._getDataText(s, false);
-            return trans && this._isRTL(trans) && trans.trim() !== this._getDataText(s, true).trim();
-          });
+          romanSig = "W:" + lineData.syllabus.map(s => this._getDataText(s, false) || "").join("|");
+        } else if (lineData.romanizedText && lineData.text.trim() !== lineData.romanizedText.trim()) {
+          romanSig = "L:" + this._getDataText(lineData, false);
+        }
 
-          if (isRTL || translitIsRtl) {
-            const parentLine = lineElement.parentElement;
-            const vocalContainers = lineElement.querySelectorAll(".main-vocal-container, .background-vocal-wrap");
-            for (let vcIdx = 0; vcIdx < vocalContainers.length; vcIdx++) {
-              const vc = vocalContainers[vcIdx];
-              const words = vc._words || vc.querySelectorAll(".lyrics-word");
-              const wLen = words.length;
-              if (!wLen) continue;
+        if (romanSig && lineElement._romanBuiltSig !== romanSig) {
+          if (lineElement._romanBuiltSig) {
+            this._cleanupLineRomanization(lineElement);
+          }
+          this._syncLineRomanizationData(parentLine, lineData);
 
-              const isBg = vc.classList.contains("background-vocal-wrap");
-              let hasAnyTranslit = false;
-              let vcTranslitIsRtl = false;
+          if (hasPerSyllableTransliteration && isWordSynced) {
+            const translitIsRtl = lineData.syllabus.some(s => {
+              const trans = this._getDataText(s, false);
+              return trans && this._isRTL(trans) && trans.trim() !== this._getDataText(s, true).trim();
+            });
 
-              for (let wIdx = 0; wIdx < wLen; wIdx++) {
-                const wordEl = words[wIdx];
-                const rawBuf = wordEl._wordSyllabus;
-                if (!rawBuf || !rawBuf.length) continue;
+            if (isRTL || translitIsRtl) {
+              const vocalContainers = lineElement.querySelectorAll(".main-vocal-container, .background-vocal-wrap");
+              for (let vcIdx = 0; vcIdx < vocalContainers.length; vcIdx++) {
+                const vc = vocalContainers[vcIdx];
+                const words = vc._words || vc.querySelectorAll(".lyrics-word");
+                const wLen = words.length;
+                if (!wLen) continue;
 
-                const pEl = wordEl.parentElement;
-                let anchor = wordEl;
-                if (pEl && pEl !== vc && (pEl.classList.contains("bidi-rtl") || pEl.classList.contains("bidi-ltr"))) {
-                  if (wordEl === pEl.lastElementChild) anchor = pEl;
-                }
-                if (anchor.nextSibling && anchor.nextSibling.nodeType === 3) {
-                  anchor = anchor.nextSibling;
-                }
-                wordEl._insertAnchor = anchor;
+                const isBg = vc.classList.contains("background-vocal-wrap");
+                let hasAnyTranslit = false;
+                let vcTranslitIsRtl = false;
 
-                const origSyls = [];
-                for (let k = 0; k < rawBuf.length; k++) {
-                  const o = rawBuf[k]._origSyl || rawBuf[k];
-                  if (origSyls[origSyls.length - 1] !== o) origSyls.push(o);
-                }
+                for (let wIdx = 0; wIdx < wLen; wIdx++) {
+                  const wordEl = words[wIdx];
+                  const rawBuf = wordEl._wordSyllabus;
+                  if (!rawBuf || !rawBuf.length) continue;
 
-                const mergedRoman = this._mergeJoiningSyllables(
-                  origSyls,
-                  (s) => this._getDataText(s, false)
-                );
+                  const pEl = wordEl.parentElement;
+                  let anchor = wordEl;
+                  if (pEl && pEl !== vc && (pEl.classList.contains("bidi-rtl") || pEl.classList.contains("bidi-ltr"))) {
+                    if (wordEl === pEl.lastElementChild) anchor = pEl;
+                  }
+                  if (anchor.nextSibling && anchor.nextSibling.nodeType === 3) {
+                    anchor = anchor.nextSibling;
+                  }
+                  wordEl._insertAnchor = anchor;
 
-                const wordRomanSpans = [];
-                for (let mIdx = 0; mIdx < mergedRoman.length; mIdx++) {
-                  const s = mergedRoman[mIdx];
-                  let txt = this._getDataText(s, false);
-                  if (!txt) continue;
-                  if (isBg) txt = txt.replace(/[()]/g, "");
-                  const origTxt = this._getDataText(s, true) || "";
-                  if (currentSettings.hidePhoneticDup && txt.trim() === origTxt.trim()) continue;
-
-                  const span = document.createElement("span");
-                  span.className = "lyrics-syllable";
-                  span.textContent = txt;
-                  span._rawText = txt;
-                  span._baseText = txt;
-                  span._trimmedText = txt.replace(/\s+$/, "");
-                  if (this._isRTL(txt)) {
-                    span.classList.add("rtl-text");
-                    vcTranslitIsRtl = true;
+                  const origSyls = [];
+                  for (let k = 0; k < rawBuf.length; k++) {
+                    const o = rawBuf[k]._origSyl || rawBuf[k];
+                    if (origSyls[origSyls.length - 1] !== o) origSyls.push(o);
                   }
 
-                  span._startTimeMs = s.time;
-                  span._durationMs = s.duration;
-                  span._endTimeMs = s.time + s.duration;
-                  span._isFirstInContainer = true;
-                  span._state = 0;
-                  if (s._parts) span._segments = this._buildSegments(s, false, isBg);
+                  const mergedRoman = this._mergeJoiningSyllables(
+                    origSyls,
+                    (s) => this._getDataText(s, false)
+                  );
 
-                  wordRomanSpans.push(span);
+                  const wordRomanSpans = [];
+                  for (let mIdx = 0; mIdx < mergedRoman.length; mIdx++) {
+                    const s = mergedRoman[mIdx];
+                    let txt = this._getDataText(s, false);
+                    if (!txt) continue;
+                    if (isBg) txt = txt.replace(/[()]/g, "");
+                    const origTxt = this._getDataText(s, true) || "";
+                    if (currentSettings.hidePhoneticDup && txt.trim() === origTxt.trim()) continue;
+
+                    const span = document.createElement("span");
+                    span.className = "lyrics-syllable";
+                    span.textContent = txt;
+                    span._rawText = txt;
+                    span._baseText = txt;
+                    span._trimmedText = txt.replace(/\s+$/, "");
+                    if (this._isRTL(txt)) {
+                      span.classList.add("rtl-text");
+                      vcTranslitIsRtl = true;
+                    }
+
+                    span._startTimeMs = s.time;
+                    span._durationMs = s.duration;
+                    span._endTimeMs = s.time + s.duration;
+                    span._isFirstInContainer = true;
+                    span._state = 0;
+                    if (s._parts) span._segments = this._buildSegments(s, false, isBg);
+
+                    wordRomanSpans.push(span);
+                  }
+
+                  if (wordRomanSpans.length > 0) {
+                    wordEl._romanSpans = wordRomanSpans;
+                    hasAnyTranslit = true;
+                  }
                 }
 
-                if (wordRomanSpans.length > 0) {
-                  wordEl._romanSpans = wordRomanSpans;
-                  hasAnyTranslit = true;
+                if (hasAnyTranslit) {
+                  vc.style.whiteSpace = "normal";
+                  vc._rtlWords = words;
+                  vc._translitIsRtl = vcTranslitIsRtl;
+                  vc._parentLine = parentLine;
+                  vc._rtlInitialized = false;
+                  if (parentLine) {
+                    parentLine.classList.add("has-rtl-row-roman");
+                    parentLine.style.contentVisibility = "visible";
+                  }
+                  if (!this._rtlVocalContainers.includes(vc)) {
+                    this._rtlVocalContainers.push(vc);
+                  }
+                  builtRoman = true;
                 }
               }
 
-              if (hasAnyTranslit) {
-                vc.style.whiteSpace = "normal";
-                vc._rtlWords = words;
-                vc._translitIsRtl = vcTranslitIsRtl;
-                vc._parentLine = parentLine;
-                if (parentLine) {
-                  parentLine.classList.add("has-rtl-row-roman");
-                  parentLine.style.contentVisibility = "visible";
+            } else {
+              const wraps = cachedWraps || Array.from(lineElement.querySelectorAll(".lyrics-syllable-wrap"));
+              const lineSyllables = parentLine ? parentLine._cachedSyllableElements : null;
+
+              for (let i = 0; i < lineData.syllabus.length && i < wraps.length; i++) {
+                const s = lineData.syllabus[i];
+                const wrap = wraps[i];
+                const wrapContainer = wrap.parentElement?.parentElement;
+                const isBackground = !!(wrapContainer && (
+                  wrapContainer.classList.contains("background-vocal-container") ||
+                  wrapContainer.classList.contains("background-vocal-wrap")
+                ));
+
+                const transTxt = ((isBackground ? this._getDataText(s, false).replace(/[()]/g, "") : (this._getDataText(s, false))) || "");
+                if (!transTxt) continue;
+
+                const tr = document.createElement("span");
+                tr.className = "lyrics-syllable transliteration";
+                if (this._isRTL(transTxt)) tr.classList.add("rtl-text");
+                wrap.appendChild(tr);
+                wrap.classList.add("has-translit");
+                if (tr.classList.contains("rtl-text")) wrap.classList.add("has-translit-rtl");
+                const wordEl = wrap.parentElement;
+                if (wordEl && wordEl.classList.contains("lyrics-word")) wordEl.classList.add("has-translit");
+
+                if (currentSettings.hidePhoneticDup && this._getDataText(s, false).trim() === this._getDataText(s, true).trim()) {
+                  tr.classList.add("hidden");
                 }
-                this._rtlVocalContainers.push(vc);
+
+                tr.textContent = transTxt;
+                tr._rawText = transTxt;
+                tr.dataset.startTime = s.time;
+                tr.dataset.duration = s.duration;
+                tr.dataset.endTime = s.time + s.duration;
+                tr._startTimeMs = s.time;
+                tr._durationMs = s.duration;
+                tr._endTimeMs = s.time + s.duration;
+                tr._isFirstInContainer = true;
+                tr._state = 0;
+                tr._vocalContainer = isBackground
+                  ? (wrapContainer.classList.contains("background-vocal-container") ? wrapContainer : wrapContainer.parentElement)
+                  : wrapContainer;
+                if (lineSyllables) lineSyllables.push(tr);
+                builtRoman = true;
               }
             }
 
-          } else {
-            const wraps = cachedWraps || Array.from(lineElement.querySelectorAll(".lyrics-syllable-wrap"));
-            const parentLine = lineElement.parentElement;
-            const lineSyllables = parentLine ? parentLine._cachedSyllableElements : null;
+          } else if (lineData.romanizedText && lineData.text.trim() !== lineData.romanizedText.trim()) {
+            const cont = document.createElement("div");
+            cont.classList.add("lyrics-romanization-container");
+            const romanText = this._getDataText(lineData, false);
+            cont.textContent = romanText;
+            cont._rawText = romanText;
 
-            for (let i = 0; i < lineData.syllabus.length && i < wraps.length; i++) {
-              const s = lineData.syllabus[i];
-              const wrap = wraps[i];
-              const wrapContainer = wrap.parentElement?.parentElement;
-              const isBackground = !!(wrapContainer && (
-                wrapContainer.classList.contains("background-vocal-container") ||
-                wrapContainer.classList.contains("background-vocal-wrap")
-              ));
-
-              const transTxt = ((isBackground ? this._getDataText(s, false).replace(/[()]/g, "") : (this._getDataText(s, false))) || "");
-              if (!transTxt) continue;
-
-              const tr = document.createElement("span");
-              tr.className = "lyrics-syllable transliteration";
-              if (this._isRTL(transTxt)) tr.classList.add("rtl-text");
-              wrap.appendChild(tr);
-              wrap.classList.add("has-translit");
-              if (tr.classList.contains("rtl-text")) wrap.classList.add("has-translit-rtl");
-              const wordEl = wrap.parentElement;
-              if (wordEl && wordEl.classList.contains("lyrics-word")) wordEl.classList.add("has-translit");
-
-              if (currentSettings.hidePhoneticDup && this._getDataText(s, false).trim() === this._getDataText(s, true).trim()) {
-                tr.classList.add("hidden");
-              }
-
-              tr.textContent = transTxt;
-              tr._rawText = transTxt;
-              tr.dataset.startTime = s.time;
-              tr.dataset.duration = s.duration;
-              tr.dataset.endTime = s.time + s.duration;
-              tr._startTimeMs = s.time;
-              tr._durationMs = s.duration;
-              tr._endTimeMs = s.time + s.duration;
-              tr._isFirstInContainer = true;
-              tr._state = 0;
-              tr._vocalContainer = isBackground
-                ? (wrapContainer.classList.contains("background-vocal-container") ? wrapContainer : wrapContainer.parentElement)
-                : wrapContainer;
-              if (lineSyllables) lineSyllables.push(tr);
+            if (this._isRTL(romanText)) {
+              cont.classList.add("rtl-text");
             }
+
+            const transEl = lineElement._translationContainer;
+            const bottomBg = parentLine?._bgWrap?.parentElement;
+            if (transEl && transEl.parentElement === lineElement) {
+              lineElement.insertBefore(cont, transEl);
+            } else if (bottomBg && !bottomBg.classList.contains("onTop") && bottomBg.parentElement === lineElement) {
+              lineElement.insertBefore(cont, bottomBg);
+            } else {
+              lineElement.appendChild(cont);
+            }
+            lineElement._romanContainer = cont;
+            builtRoman = true;
           }
 
-        } else if (lineData.romanizedText && lineData.text.trim() !== lineData.romanizedText.trim()) {
-          const cont = document.createElement("div");
-          cont.classList.add("lyrics-romanization-container");
-          const romanText = this._getDataText(lineData, false);
-          cont.textContent = romanText;
-
-          if (this._isRTL(romanText)) {
-            cont.classList.add("rtl-text");
+          lineElement._romanBuiltSig = romanSig;
+          if (parentLine && builtRoman) {
+            parentLine._maskPreMeasured = false;
+            if (parentLine._maskAnimator) parentLine._maskAnimator.dispose();
           }
-
-          lineElement.appendChild(cont);
         }
       }
     }
@@ -1802,15 +1942,33 @@ class LyricsPlusRenderer {
         if (!lineData._normTranslated) lineData._normTranslated = lineData.translatedText.toLowerCase().replaceAll(' ', '').trim();
       }
       if (lineData.translatedText && lineData._normText !== lineData._normTranslated) {
-        const cont = document.createElement("div");
-        cont.classList.add("lyrics-translation-container");
-        cont.textContent = lineData.translatedText;
-        if (this._isRTL(lineData.translatedText)) {
-          cont.classList.add("rtl-text");
+        let cont = lineElement._translationContainer;
+        if (!cont) {
+          cont = document.createElement("div");
+          cont.classList.add("lyrics-translation-container");
+          cont.textContent = lineData.translatedText;
+          cont._rawText = lineData.translatedText;
+          if (this._isRTL(lineData.translatedText)) {
+            cont.classList.add("rtl-text");
+          }
+          const bottomBg = parentLine?._bgWrap?.parentElement;
+          if (bottomBg && !bottomBg.classList.contains("onTop") && bottomBg.parentElement === lineElement) {
+            lineElement.insertBefore(cont, bottomBg);
+          } else {
+            lineElement.appendChild(cont);
+          }
+          lineElement._translationContainer = cont;
+          builtTrans = true;
+        } else if (cont._rawText !== lineData.translatedText) {
+          cont.textContent = lineData.translatedText;
+          cont._rawText = lineData.translatedText;
+          cont.classList.toggle("rtl-text", this._isRTL(lineData.translatedText));
+          builtTrans = true;
         }
-        lineElement.appendChild(cont);
       }
     }
+
+    return { builtRoman, builtTrans };
   }
 
   /**
@@ -1937,14 +2095,240 @@ class LyricsPlusRenderer {
     );
   }
 
+  _getSongRenderKey(songInfo) {
+    if (!songInfo) return "";
+    return `${songInfo.videoId || ""}|${songInfo.title || ""}|${songInfo.artist || ""}|${songInfo.album || ""}`;
+  }
+
+  _hasAnyRomanizationData(lyrics) {
+    if (!lyrics || !Array.isArray(lyrics.data)) return false;
+    for (let i = 0; i < lyrics.data.length; i++) {
+      const line = lyrics.data[i];
+      if (line.romanizedText) return true;
+      if (Array.isArray(line.syllabus)) {
+        for (let j = 0; j < line.syllabus.length; j++) {
+          if (line.syllabus[j].romanizedText) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  _canUpdateInPlace(lyrics, currentSettings) {
+    const state = this._renderedState;
+    const lines = this._renderedLyricLines;
+    if (!state || !lines || !lyrics || !Array.isArray(lyrics.data)) return false;
+    if (lines.length === 0 || lines.length !== lyrics.data.length) return false;
+    if (!this.lyricsContainer || !lines[0].isConnected || !this.lyricsContainer.contains(lines[0])) return false;
+    if (this.lyricsContainer.classList.contains("lyrics-plus-message") || this.lyricsContainer.classList.contains("plain-text-mode")) return false;
+
+    const isWordByWordMode = lyrics.type === "Word" && !!currentSettings.wordByWord;
+    const provider = lyrics.provider || lyrics.metadata?.provider || lyrics.metadata?.source || "";
+    const targetScript = (currentSettings && currentSettings.transliterationTargetScript) || "latin";
+    const mainUsedRoman = this.largerTextMode === "romanization" && this._hasAnyRomanizationData(lyrics);
+
+    if (
+      state.songKey !== this._getSongRenderKey(this.lastKnownSongInfo) ||
+      state.provider !== provider ||
+      state.isWordByWordMode !== isWordByWordMode ||
+      state.largerTextMode !== this.largerTextMode ||
+      state.lightweight !== !!currentSettings.lightweight ||
+      state.bkgOverlap !== !!currentSettings.bkgOverlap ||
+      state.hidePhoneticDup !== !!currentSettings.hidePhoneticDup ||
+      state.targetScript !== targetScript ||
+      state.mainUsedRoman !== mainUsedRoman
+    ) {
+      return false;
+    }
+
+    for (let i = 0; i < lines.length; i++) {
+      const domLine = lines[i];
+      const lineData = lyrics.data[i];
+      const startMs = parseFloat(lineData.startTime) * 1000;
+      const endMs = parseFloat(lineData.endTime) * 1000;
+      if (Math.abs(domLine._startTimeMs - startMs) > 1 || Math.abs(domLine._endTimeMs - endMs) > 1) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Updates translation and romanization in-place without recreating the container or lyric lines.
+   * Translation/romanization layout appears/disappears directly (no transition on the subtext),
+   * while the lyric lines smoothly slide (FLIP) into their new positions.
+   * @private
+   */
+  _updateDisplayModeInPlace(lyrics, displayMode, currentSettings) {
+    const container = this._getContainer();
+    if (!container) return;
+
+    const prevMode = this.currentDisplayMode || "none";
+    this.currentDisplayMode = displayMode;
+
+    const prevShowTrans = prevMode === "translate" || prevMode === "both";
+    const prevShowRoman = prevMode === "romanize" || prevMode === "both";
+    const nextShowTrans = displayMode === "translate" || displayMode === "both";
+    const nextShowRoman = displayMode === "romanize" || displayMode === "both";
+
+    const renderedLines = this._renderedLyricLines;
+    const allTimedLines = this.cachedLyricsLines || [];
+    const scroller = container.parentElement;
+    const canAnimate =
+      typeof Element.prototype.animate === "function" &&
+      container.offsetWidth > 0 &&
+      container.offsetHeight > 0;
+
+    // 1. Capture visible line positions & anchor line before DOM/class changes
+    let visMin = Infinity;
+    let visMax = -1;
+    if (this.visibleLineIds && this.visibleLineIds.size > 0 && this._lineById) {
+      for (const id of this.visibleLineIds) {
+        const idx = this._lineById.get(id)?._idx;
+        if (idx !== undefined) {
+          if (idx < visMin) visMin = idx;
+          if (idx > visMax) visMax = idx;
+        }
+      }
+    }
+    if (visMax < 0 && allTimedLines.length > 0) {
+      const center = Math.max(0, this._lastActiveIndex || 0);
+      visMin = Math.max(0, center - 4);
+      visMax = Math.min(allTimedLines.length - 1, center + 6);
+    }
+    const lo = visMax >= 0 ? Math.max(0, visMin - 2) : 0;
+    const hi = visMax >= 0 ? Math.min(allTimedLines.length - 1, visMax + 4) : -1;
+
+    let anchorLine = null;
+    if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
+      anchorLine = this.currentPrimaryActiveLine;
+    } else if (visMin < allTimedLines.length) {
+      anchorLine = allTimedLines[visMin] || this.currentPrimaryActiveLine || allTimedLines[0];
+    }
+
+    const scrollTopBefore = scroller ? scroller.scrollTop : 0;
+    const anchorTopBefore = canAnimate && anchorLine ? anchorLine.offsetTop : null;
+
+    const snapshotLines = [];
+    if (canAnimate && hi >= lo) {
+      for (let i = lo; i <= hi; i++) {
+        const line = allTimedLines[i];
+        if (!line) continue;
+        snapshotLines.push({
+          line,
+          topBefore: line.offsetTop
+        });
+      }
+    }
+
+    // 2. Patch new translation/romanization data into existing line DOM elements
+    let anyBuiltRoman = false;
+    let anyBuiltTrans = false;
+    for (let i = 0; i < renderedLines.length; i++) {
+      const lineEl = renderedLines[i];
+      const lineData = lyrics.data[i];
+      if (!lineEl || !lineData || !lineEl._lineContainer) continue;
+      lineEl._rawLineData = lineData;
+      const { builtRoman, builtTrans } = this._renderTranslationContainer(
+        lineEl._lineContainer,
+        lineData,
+        displayMode
+      );
+      if (builtRoman) anyBuiltRoman = true;
+      if (builtTrans) anyBuiltTrans = true;
+    }
+
+    // 3. Apply display mode classes (translation/romanization layout shows/hides directly)
+    this._applyDisplayModeClasses(container, displayMode);
+    this._applyPaletteSettings(container, currentSettings);
+    container.classList.toggle("blur-inactive-enabled", !!currentSettings.blurInactive);
+
+    if (nextShowRoman && this._rtlVocalContainers && this._rtlVocalContainers.length > 0) {
+      this._layoutAllRtlVisualRowRomanizations();
+    }
+
+    // 4. Refresh syllable cache and mask animators when romanization state changes
+    if (anyBuiltRoman || prevShowRoman !== nextShowRoman) {
+      const allSyllables = [];
+      for (let i = 0; i < allTimedLines.length; i++) {
+        const l = allTimedLines[i];
+        let syls = l._cachedSyllableElements;
+        if (!syls) {
+          syls = Array.from(l.querySelectorAll(".lyrics-syllable"));
+          l._cachedSyllableElements = syls;
+        }
+        for (let j = 0; j < syls.length; j++) {
+          allSyllables.push(syls[j]);
+        }
+      }
+      this.cachedSyllables = allSyllables;
+      this._invalidateMaskAnimators(true);
+    }
+
+    // 5. Compensate scrollTop so anchor line stays pinned, and slide lines (FLIP) into their new positions
+    const layoutChanged =
+      prevShowTrans !== nextShowTrans ||
+      prevShowRoman !== nextShowRoman ||
+      (nextShowTrans && anyBuiltTrans) ||
+      (nextShowRoman && anyBuiltRoman);
+
+    if (canAnimate && layoutChanged) {
+      const anchorTopAfter = anchorLine ? anchorLine.offsetTop : null;
+      if (scroller && anchorTopBefore !== null && anchorTopAfter !== null) {
+        const anchorDelta = anchorTopAfter - anchorTopBefore;
+        if (Math.abs(anchorDelta) >= 0.5) {
+          const maxScroll = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+          const nextScrollTop = Math.min(maxScroll, Math.max(0, scrollTopBefore + anchorDelta));
+          scroller.scrollTo({ top: nextScrollTop, behavior: "instant" });
+          const applied = nextScrollTop - scrollTopBefore;
+          this.currentScrollOffset = -nextScrollTop;
+          const st = this._scrollAnimationState;
+          if (st && st.pendingUpdate !== null) st.pendingUpdate -= applied;
+        }
+      }
+
+      const scrollTopAfter = scroller ? scroller.scrollTop : 0;
+      const ms = this._lastScrollDurationMs || 400;
+      const easing = this._appliedScrollEasing || "cubic-bezier(.41, 0, .12, .99)";
+      const userScrolling = container.classList.contains("user-scrolling");
+      const elapsed = performance.now() - (this._scrollAnimT0 || -1e9);
+
+      for (let i = 0; i < snapshotLines.length; i++) {
+        const item = snapshotLines[i];
+        const line = item.line;
+        const dy = (item.topBefore - scrollTopBefore) - (line.offsetTop - scrollTopAfter);
+        const delay = (!userScrolling && line._scrollAnim)
+          ? Math.max(0, (line._scrollDelay || 0) - elapsed)
+          : 0;
+        LyricsPlusRenderer._flipTranslateY(line, dy, ms, easing, delay);
+      }
+    }
+
+    // 6. Re-sync active syllable mask animations at current playback time
+    const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 - (this.userOffsetMs || 0);
+    if (this._tempActiveLines && this._tempActiveLines.length > 0) {
+      this._updateSyllables(currentTime, this._tempActiveLines);
+    }
+
+    if (this.dropdownMenu && !this.dropdownMenu.classList.contains("hidden")) {
+      this._createDropdownMenu(this.buttonsWrapper);
+    }
+  }
+
   /**
    * Updates the display of lyrics based on a new display mode (translation/romanization).
-   * This method re-renders the lyric lines without re-fetching the entire lyrics data.
+   * Updates in-place when the base lyrics for the current song are already rendered.
    * @param {object} lyrics - The lyrics data object.
-   * @param {string} displayMode - The new display mode ('none', 'translate', 'romanize').
+   * @param {string} displayMode - The new display mode ('none', 'translate', 'romanize', 'both').
    * @param {object} currentSettings - The current user settings.
    */
   updateDisplayMode(lyrics, displayMode, currentSettings) {
+    if (this._canUpdateInPlace(lyrics, currentSettings)) {
+      this._updateDisplayModeInPlace(lyrics, displayMode, currentSettings);
+      return;
+    }
+
     this.currentDisplayMode = displayMode;
     const container = this._getContainer();
     if (!container) return;
@@ -2143,6 +2527,18 @@ class LyricsPlusRenderer {
 
     // 3. Assemble final fragment with gap lines, metadata, and trailing spacers in memory before mounting
     const originalLines = Array.from(linesFragment.childNodes);
+    this._renderedLyricLines = originalLines;
+    this._renderedState = {
+      songKey: this._getSongRenderKey(this.lastKnownSongInfo),
+      provider: lyrics.provider || lyrics.metadata?.provider || lyrics.metadata?.source || "",
+      isWordByWordMode,
+      largerTextMode: this.largerTextMode,
+      lightweight: !!currentSettings.lightweight,
+      bkgOverlap: !!currentSettings.bkgOverlap,
+      hidePhoneticDup: !!currentSettings.hidePhoneticDup,
+      targetScript: (currentSettings && currentSettings.transliterationTargetScript) || "latin",
+      mainUsedRoman: this.largerTextMode === "romanization" && this._hasAnyRomanizationData(lyrics)
+    };
     const finalFragment = document.createDocumentFragment();
     const allTimedLines = [];
 
@@ -2383,6 +2779,8 @@ class LyricsPlusRenderer {
       fragment.append(emptyDiv, emptyFixedDiv);
       container.replaceChildren(fragment);
 
+      this._renderedState = null;
+      this._renderedLyricLines = null;
       this.cachedLyricsLines = [];
       this.cachedSyllables = [];
       this.activeLineIds.clear();
@@ -3941,6 +4339,7 @@ class LyricsPlusRenderer {
 
     const container = this._getContainer();
     const useBackgroundWipe = this._isBackgroundWipeEnabled(container);
+    const isRomanMode = !!(container && (container.classList.contains("lyrics-romanized") || container.classList.contains("lyrics-both-modes")));
     const lineIsRtl = lineElement.classList.contains("rtl-text") ? "rtl" : "ltr";
 
     for (let i = 0; i < syllables.length; i++) {
@@ -3953,6 +4352,7 @@ class LyricsPlusRenderer {
       const isBg = containerEl.classList.contains("background-vocal-container");
       const isRoman = containerEl.classList.contains("lyrics-romanization-container");
       const isTranslit = syl.classList.contains("transliteration");
+      if (!isRomanMode && (isTranslit || isRoman)) continue;
       const trackTypeKey = `${isBg ? "bg" : (isRoman ? "rom" : "main")}:${isTranslit ? "t" : "m"}:${lineIsRtl}`;
 
       const tm = this._getTrackStyleMetrics(syl, trackTypeKey);
@@ -4045,6 +4445,7 @@ class LyricsPlusRenderer {
 
     const container = this._getContainer();
     const useBackgroundWipe = this._isBackgroundWipeEnabled(container);
+    const isRomanMode = !!(container && (container.classList.contains("lyrics-romanized") || container.classList.contains("lyrics-both-modes")));
     const lineIsRtl = lineElement.classList.contains("rtl-text") ? "rtl" : "ltr";
 
     const lineStartTime = lineElement._startTimeMs !== undefined
@@ -4072,13 +4473,14 @@ class LyricsPlusRenderer {
       const containerEl = syl._vocalContainer || (
         syl._vocalContainer = syl.closest(".background-vocal-container, .lyrics-romanization-container, .main-vocal-container") || lineElement
       );
-      let ci = containers.indexOf(containerEl);
-      if (ci < 0) ci = containers.push(containerEl) - 1;
-      const isTranslit = syl.classList.contains("transliteration");
-      const key = (isTranslit ? "t" : "m") + ci;
-
       const isBg = containerEl.classList.contains("background-vocal-container");
       const isRoman = containerEl.classList.contains("lyrics-romanization-container");
+      const isTranslit = syl.classList.contains("transliteration");
+      if (!isRomanMode && (isTranslit || isRoman)) continue;
+
+      let ci = containers.indexOf(containerEl);
+      if (ci < 0) ci = containers.push(containerEl) - 1;
+      const key = (isTranslit ? "t" : "m") + ci;
       const trackTypeKey = `${isBg ? "bg" : (isRoman ? "rom" : "main")}:${isTranslit ? "t" : "m"}:${lineIsRtl}`;
       const tm = this._getTrackStyleMetrics(syl, trackTypeKey);
       if (tm.isHidden) continue;
@@ -6095,6 +6497,8 @@ class LyricsPlusRenderer {
     this._appliedScrollDurStr = null;
     this._appliedScrollEasing = null;
     this._cachedGapHeight = 0;
+    this._renderedState = null;
+    this._renderedLyricLines = null;
     this.userOffsetMs = 0;
     this.currentLyrics = null;
     this.currentLyricsType = null;
