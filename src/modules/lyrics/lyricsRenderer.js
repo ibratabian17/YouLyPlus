@@ -300,9 +300,12 @@ class LyricsPlusRenderer {
     this._tempActiveLines = [];
     this._deactivatingLines = [];
     this._activatingLines = [];
+    this._bgShifts = [];
+    this._bgShifts = [];
     this._activeIndices = [];
     this._rtlVocalContainers = [];
     this._lastContainerWidth = 0;
+    this._lastContainerFont = "";
     this._rtlNeedsInitialLayout = false;
     this._lineById = new Map();
     this._positionClassedLines = [];
@@ -316,8 +319,6 @@ class LyricsPlusRenderer {
     this._appliedScrollEasing = null;
     this._lastScrollDurationMs = 400;
     this._cachedGapHeight = 0;
-    this._paletteStyleElement = null;
-    this._lastPaletteCssText = "";
 
     this.wakeLock = null;
     this._wakeLockPending = false;
@@ -610,8 +611,12 @@ class LyricsPlusRenderer {
     this._trackStyleCache.clear();
 
     const newW = container.clientWidth || 0;
-    if (newW > 0 && (this._rtlNeedsInitialLayout || Math.abs((this._lastContainerWidth || 0) - newW) > 1)) {
+    const newFont = this._getContainerFont();
+    const widthChanged = newW > 0 && Math.abs((this._lastContainerWidth || 0) - newW) > 1;
+    const fontChanged = !!(this._lastContainerFont && this._lastContainerFont !== newFont);
+    if (newW > 0 && (this._rtlNeedsInitialLayout || widthChanged || fontChanged)) {
       this._lastContainerWidth = newW;
+      this._lastContainerFont = newFont;
       if (this._rtlVocalContainers && this._rtlVocalContainers.length > 0) {
         this._layoutAllRtlVisualRowRomanizations();
       }
@@ -1862,32 +1867,6 @@ class LyricsPlusRenderer {
   }
 
   /**
-   * Updates palette CSS variables via a dedicated stylesheet rule rather than
-   * mutating #lyrics-plus-container's inline style attribute (which would trigger
-   * expensive style invalidations).
-   */
-  _setContainerPaletteVars(overrideColor, songPaletteRgb) {
-    let cssText = "";
-    if (overrideColor) {
-      cssText = `#lyrics-plus-container { --lyplus-override-pallete: ${overrideColor}; }`;
-    } else if (songPaletteRgb) {
-      cssText = `#lyrics-plus-container { --lyplus-song-pallete: ${songPaletteRgb}; }`;
-    }
-    if (this._lastPaletteCssText === cssText) return;
-    this._lastPaletteCssText = cssText;
-
-    if (!this._paletteStyleElement || !this._paletteStyleElement.isConnected) {
-      this._paletteStyleElement = document.getElementById("lyplus-palette-vars");
-      if (!this._paletteStyleElement) {
-        this._paletteStyleElement = document.createElement("style");
-        this._paletteStyleElement.id = "lyplus-palette-vars";
-        (document.head || document.documentElement).appendChild(this._paletteStyleElement);
-      }
-    }
-    this._paletteStyleElement.textContent = cssText;
-  }
-
-  /**
    * Applies palette-related CSS classes and custom properties to the container
    * based on the current settings. Called from both displayLyrics and updateDisplayMode.
    * @param {HTMLElement} container - The lyrics container element.
@@ -1899,11 +1878,14 @@ class LyricsPlusRenderer {
 
     if (currentSettings.overridePaletteColor) {
       container.classList.add("override-palette-color");
+      container.style.setProperty(
+        "--lyplus-override-pallete",
+        currentSettings.overridePaletteColor
+      );
       container.classList.remove(
         "use-song-palette-fullscreen",
         "use-song-palette-all-modes"
       );
-      this._setContainerPaletteVars(currentSettings.overridePaletteColor, null);
     } else {
       container.classList.remove("override-palette-color");
       container.classList.toggle(
@@ -1914,7 +1896,6 @@ class LyricsPlusRenderer {
         "use-song-palette-all-modes",
         !!currentSettings.useSongPaletteAllModes
       );
-      let rgbVal = null;
       if (
         currentSettings.useSongPaletteFullscreen ||
         currentSettings.useSongPaletteAllModes
@@ -1923,11 +1904,13 @@ class LyricsPlusRenderer {
           const songPalette = LYPLUS_getSongPalette();
           if (songPalette) {
             const { r, g, b } = songPalette;
-            rgbVal = `rgb(${r}, ${g}, ${b})`;
+            container.style.setProperty(
+              "--lyplus-song-pallete",
+              `rgb(${r}, ${g}, ${b})`
+            );
           }
         }
       }
-      this._setContainerPaletteVars(null, rgbVal);
     }
     const patchParent = container.parentElement;
     if (patchParent && patchParent.id === "lyplus-patch-container") {
@@ -2251,6 +2234,7 @@ class LyricsPlusRenderer {
     container.replaceChildren(finalFragment);
 
     this._lastContainerWidth = container.clientWidth || 0;
+    this._lastContainerFont = this._getContainerFont();
     if (this._rtlVocalContainers.length > 0) {
       this._layoutAllRtlVisualRowRomanizations();
     }
@@ -2671,7 +2655,7 @@ class LyricsPlusRenderer {
    * @param {number} offsetAboveDelta - Known vertical layout shift occurring above activeLine in this tick.
    * @param {number} totalHeightDelta - Known total height change occurring in the container in this tick.
    */
-  _captureScrollSnapshot(activeLine, offsetAboveDelta = 0, totalHeightDelta = 0) {
+  _captureScrollSnapshot(activeLine, offsetAboveDelta = 0, totalHeightDelta = 0, layoutShifts = null) {
     if (!activeLine || !this.lyricsContainer) return null;
     if (this._containerDisplayCache === undefined) {
       this._containerDisplayCache = getComputedStyle(this.lyricsContainer).display;
@@ -2680,6 +2664,17 @@ class LyricsPlusRenderer {
 
     const scrollContainer = this.lyricsContainer.parentElement;
     if (!scrollContainer) return { hidden: true };
+
+    if (layoutShifts && layoutShifts.length > 0) {
+      const targetIdx = this._lineIndex(activeLine);
+      offsetAboveDelta = 0;
+      totalHeightDelta = 0;
+      for (let i = 0; i < layoutShifts.length; i++) {
+        const s = layoutShifts[i];
+        totalHeightDelta += s.shift;
+        if (s.idx < targetIdx) offsetAboveDelta += s.shift;
+      }
+    }
 
     const paddingTop = this._getScrollPaddingTop();
     const scrollHeight = scrollContainer.scrollHeight + totalHeightDelta;
@@ -2711,11 +2706,20 @@ class LyricsPlusRenderer {
       }
     }
 
+    const shiftAboveLine = (lineIdx) => {
+      if (!layoutShifts || layoutShifts.length === 0) return offsetAboveDelta;
+      let sum = 0;
+      for (let i = 0; i < layoutShifts.length; i++) {
+        if (layoutShifts[i].idx < lineIdx) sum += layoutShifts[i].shift;
+      }
+      return sum;
+    };
+
     const SCROLL_TAIL_MARGIN_PX = 200;
     const SCROLL_TAIL_MIN_LINES = 3;
     const reachBottom = targetTop + clientHeight + Math.abs(delta) + SCROLL_TAIL_MARGIN_PX;
     let end = Math.min(len, Math.max(visMax, Math.max(0, referenceIndex)) + 1);
-    while (end < len && (linesArr[end].offsetTop + offsetAboveDelta) < reachBottom) end++;
+    while (end < len && (linesArr[end].offsetTop + shiftAboveLine(end)) < reachBottom) end++;
     end = Math.min(len, end + SCROLL_TAIL_MIN_LINES);
 
     return {
@@ -3087,6 +3091,8 @@ class LyricsPlusRenderer {
 
     const bgToggled = this._bgToggled || (this._bgToggled = []);
     bgToggled.length = 0;
+    const bgShifts = this._bgShifts || (this._bgShifts = []);
+    bgShifts.length = 0;
     const deactivating = this._deactivatingLines;
     const activating = this._activatingLines;
     deactivating.length = 0;
@@ -3114,8 +3120,12 @@ class LyricsPlusRenderer {
             deactivating.push(line);
             const wrap = this._getBgVocalWrap(line);
             if (wrap) {
-              wrap._lastMeasuredBgH = this._measureBgHeight(wrap);
+              const h = this._measureBgHeight(wrap);
               bgToggled.push(line, false);
+              if (h >= 0.5) {
+                const idx = this._lineIndex(line);
+                if (idx >= 0) bgShifts.push({ idx, shift: -h });
+              }
             }
           }
           this.activeLineIds.delete(oldId);
@@ -3129,8 +3139,12 @@ class LyricsPlusRenderer {
           this.activeLineIds.add(line.id);
           const wrap = this._getBgVocalWrap(line);
           if (wrap) {
-            wrap._lastMeasuredBgH = this._measureBgHeight(wrap);
+            const h = this._measureBgHeight(wrap);
             bgToggled.push(line, true);
+            if (h >= 0.5) {
+              const idx = this._lineIndex(line);
+              if (idx >= 0) bgShifts.push({ idx, shift: h });
+            }
           }
         }
       }
@@ -3172,34 +3186,36 @@ class LyricsPlusRenderer {
       }
     }
 
-    // Read scroll snapshot on the clean DOM (adjusting for known gapShifts if any)
+    // Read scroll snapshot on the clean DOM (adjusting for both gapShifts and bgShifts)
     let scrollSnapshot = null;
     if (shouldScroll && !unmeasuredGapOpen) {
-      let gapAboveDelta = 0;
-      let gapTotalDelta = 0;
-      const targetIdx = this._lineIndex(lineToScroll);
-      if (gapShifts) {
-        for (let g = 0; g < gapShifts.length; g++) {
-          gapTotalDelta += gapShifts[g].shift;
-          if (gapShifts[g].idx < targetIdx) {
-            gapAboveDelta += gapShifts[g].shift;
-          }
-        }
+      let combinedShifts = null;
+      if (gapShifts && bgShifts.length > 0) {
+        combinedShifts = gapShifts.concat(bgShifts);
+      } else if (gapShifts) {
+        combinedShifts = gapShifts;
+      } else if (bgShifts.length > 0) {
+        combinedShifts = bgShifts;
       }
-      scrollSnapshot = this._captureScrollSnapshot(lineToScroll, gapAboveDelta, gapTotalDelta);
+      scrollSnapshot = this._captureScrollSnapshot(lineToScroll, 0, 0, combinedShifts);
     }
 
     // Pre-read scroller state for _animateBgVocalReflow if needed
     let bgScrollerSnapshot = null;
     if (bgToggled.length > 0 && this.lyricsContainer?.parentElement) {
+      let totalBgAndGapDelta = 0;
+      for (let i = 0; i < bgShifts.length; i++) totalBgAndGapDelta += bgShifts[i].shift;
+      if (gapShifts) {
+        for (let i = 0; i < gapShifts.length; i++) totalBgAndGapDelta += gapShifts[i].shift;
+      }
       const scroller = this.lyricsContainer.parentElement;
-      bgScrollerSnapshot = scrollSnapshot ? {
+      bgScrollerSnapshot = scrollSnapshot && !scrollSnapshot.hidden ? {
         scrollTop: scrollSnapshot.scrollTop,
         scrollHeight: scrollSnapshot.scrollHeight,
         clientHeight: scrollSnapshot.clientHeight
       } : {
         scrollTop: scroller.scrollTop,
-        scrollHeight: scroller.scrollHeight,
+        scrollHeight: scroller.scrollHeight + totalBgAndGapDelta,
         clientHeight: scroller.clientHeight
       };
     }
@@ -3211,7 +3227,7 @@ class LyricsPlusRenderer {
     if (shouldScroll) {
       if (unmeasuredGapOpen) {
         gapShifts = this._syncGapLayout(lineToScroll, isForceScroll, this._tempActiveLines, tempActiveCount);
-        scrollSnapshot = this._captureScrollSnapshot(lineToScroll);
+        scrollSnapshot = this._captureScrollSnapshot(lineToScroll, 0, 0, bgShifts.length > 0 ? bgShifts : null);
       } else if (gapPlan) {
         for (let i = 0; i < gapPlan.toOpen.length; i++) {
           const g = gapPlan.toOpen[i];
@@ -3296,7 +3312,8 @@ class LyricsPlusRenderer {
     if (!this._bgResizeObserver) {
       this._bgResizeObserver = new ResizeObserver((entries) => {
         for (const e of entries) {
-          e.target._bgH = e.borderBoxSize?.[0]?.blockSize ?? e.contentRect.height;
+          const h = e.borderBoxSize?.[0]?.blockSize ?? e.contentRect.height;
+          if (h > 0.5) e.target._bgH = h;
         }
       });
     }
@@ -3305,9 +3322,8 @@ class LyricsPlusRenderer {
 
   _measureBgHeight(wrap) {
     if (wrap._bgH > 0.5) return wrap._bgH;
-    if (wrap._lastMeasuredBgH > 0.5) return wrap._lastMeasuredBgH;
     const h = wrap.offsetHeight;
-    if (h > 0.5) wrap._lastMeasuredBgH = h;
+    if (h > 0.5) wrap._bgH = h;
     return h;
   }
 
@@ -3406,10 +3422,21 @@ class LyricsPlusRenderer {
       LyricsPlusRenderer._flipTranslateY(line, applied - above, ms, easing, lineDelay(line));
     }
 
+    const durStr = `${ms}ms`;
     for (let e = 0; e < events.length; e++) {
       const ev = events[e];
       const ownDelay = lineDelay(ev.line);
       const bgContainer = ev.wrap.parentElement;
+      if (bgContainer) {
+        if (bgContainer._scrollDur !== durStr) {
+          bgContainer.style.setProperty("--scroll-duration", durStr);
+          bgContainer._scrollDur = durStr;
+        }
+        if (bgContainer._scrollEase !== easing) {
+          bgContainer.style.setProperty("--scroll-easing", easing);
+          bgContainer._scrollEase = easing;
+        }
+      }
       for (let el = bgContainer && bgContainer.nextElementSibling; el; el = el.nextElementSibling) {
         LyricsPlusRenderer._flipTranslateY(el, -ev.delta, ms, easing, ownDelay);
       }
@@ -3974,6 +4001,9 @@ class LyricsPlusRenderer {
       if (!l) continue;
       l._maskPreMeasured = false;
       if (l._maskAnimator) l._maskAnimator.dispose();
+      if (clearDimensions && l._bgWrap) {
+        l._bgWrap._bgH = undefined;
+      }
       if (clearDimensions && l._cachedSyllableElements) {
         const syls = l._cachedSyllableElements;
         for (let j = 0; j < syls.length; j++) {
@@ -6065,7 +6095,6 @@ class LyricsPlusRenderer {
     this._appliedScrollDurStr = null;
     this._appliedScrollEasing = null;
     this._cachedGapHeight = 0;
-    this._setContainerPaletteVars(null, null);
     this.userOffsetMs = 0;
     this.currentLyrics = null;
     this.currentLyricsType = null;
@@ -6113,6 +6142,8 @@ class LyricsPlusRenderer {
         ? "lyrics-plus-integrated lyrics-plus-message blur-inactive-enabled is-firefox"
         : "lyrics-plus-integrated lyrics-plus-message blur-inactive-enabled";
       container.innerHTML = `<div class="loading-container"><span class="text-loading">${t("loading")}</span><div class="loading-loop-m3"></div></div>`;
+      container.style.removeProperty("--lyplus-override-pallete");
+      container.style.removeProperty("--lyplus-song-pallete");
     }
 
     if (this.textWidthCanvas) {
