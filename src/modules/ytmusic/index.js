@@ -16,11 +16,12 @@ const uiConfig = {
     player: 'video',
     patchParent: '#lyplus-patch-container',
     selectors: [
+        '#lyplus-patch-container.is-visible',
         '#lyplus-patch-container',
-        'ytmusic-tab-renderer:has(#lyplus-patch-container)',
-        'ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
-        'ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])',
-        'ytmusic-player-page:not([is-video-truncation-fix-enabled])[player-fullscreened] ytmusic-tab-renderer:has(#lyrics-plus-container[style*="display: block"])'
+        'ytmusic-tab-renderer.is-visible',
+        'ytmusic-tab-renderer',
+        'ytmusic-app-layout[is-mweb-modernization-enabled] ytmusic-tab-renderer.is-visible',
+        'ytmusic-player-page:not([is-video-truncation-fix-enabled])[player-fullscreened] ytmusic-tab-renderer.is-visible'
     ],
     buttonParent: 'ytmusic-app-layout',
     disableNativeTick: true,
@@ -51,6 +52,9 @@ function patchTabRenderer() {
             console.log('LyricsPlus: Creating wrapper container...');
             patchWrapper = document.createElement('div');
             patchWrapper.id = 'lyplus-patch-container';
+            if (window.__lyplusLyricsVisible) {
+                patchWrapper.classList.add('is-visible');
+            }
             tabRenderer.appendChild(patchWrapper);
         }
 
@@ -59,6 +63,9 @@ function patchTabRenderer() {
 
             if (!lyricsRendererInstance) {
                 lyricsRendererInstance = new LyricsPlusRenderer(uiConfig);
+            }
+            if (window.__lyplusLyricsVisible) {
+                document.getElementById('lyrics-plus-container')?.classList.add('is-visible');
             }
         }
     }
@@ -264,6 +271,8 @@ function injectSongInfo() {
     }
 
     player.appendChild(songInfoContainerElem);
+    player.classList.add('has-song-info');
+    document.querySelector('#player.ytmusic-player-page')?.classList.add('has-song-info');
 
     // Observe for layout changes
     marqueeResizeObserver.observe(titleElementElem);

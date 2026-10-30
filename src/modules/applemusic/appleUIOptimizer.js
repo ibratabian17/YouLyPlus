@@ -626,6 +626,18 @@
 
       document.body.classList.toggle('lyplus-fullscreen-modal-open', isModalOpen);
       document.body.classList.toggle('lyplus-sidebar-open', isSidebarOpen);
+      document.body.classList.toggle('has-modal', isModalOpen || !!document.querySelector('[data-testid="modal"]'));
+
+      const sidePanelEl = document.querySelector('[data-testid="side-panel"]');
+      if (sidePanelEl) {
+        sidePanelEl.classList.toggle('has-lyrics-sidebar', isSidebarOpen);
+      }
+
+      const patchEl = document.getElementById('lyplus-patch-container');
+      const hasVisiblePatch = patchEl && !patchEl.classList.contains('lyrics-hidden');
+      document.querySelectorAll('.lyrics__container').forEach(el => {
+        el.classList.toggle('has-lyplus', !!hasVisiblePatch);
+      });
 
       const ampLyricsList = document.querySelectorAll('amp-lyrics');
       for (let i = 0; i < ampLyricsList.length; i++) {

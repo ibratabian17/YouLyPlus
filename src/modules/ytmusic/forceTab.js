@@ -57,16 +57,48 @@
     });
   }
 
-  function handleTabInteraction(clickedIndex, middleIndex) {
-    const lyricsElement = document.querySelector(SELECTORS.LYRICS);
-    if (!lyricsElement) return;
+  function setLyricsVisibility(visible) {
+    window.__lyplusLyricsVisible = visible;
 
-    if (clickedIndex !== middleIndex) {
-      lyricsElement.style.display = 'none';
-      return;
+    const lyricsElement = document.querySelector(SELECTORS.LYRICS) || document.getElementById('lyrics-plus-container');
+    if (lyricsElement) {
+      lyricsElement.classList.toggle('is-visible', visible);
+      lyricsElement.style.display = visible ? 'block' : 'none';
     }
 
-    lyricsElement.style.display = 'block';
+    const patchContainer = document.getElementById('lyplus-patch-container');
+    if (patchContainer) {
+      patchContainer.classList.toggle('is-visible', visible);
+    }
+
+    const tabRenderer = document.querySelector(SELECTORS.SCROLL_CONTAINER) || document.querySelector('ytmusic-tab-renderer');
+    if (tabRenderer) {
+      tabRenderer.classList.toggle('is-visible', visible);
+    }
+
+    const playerPage = document.querySelector('ytmusic-player-page') || document.querySelector('#player-page');
+    if (playerPage) {
+      playerPage.classList.toggle('is-visible', visible);
+    }
+
+    const playerPageSlot = document.querySelector('ytmusic-app-layout > [slot="player-page"]');
+    if (playerPageSlot && playerPageSlot !== playerPage) {
+      playerPageSlot.classList.toggle('is-visible', visible);
+    }
+
+    const appLayout = document.querySelector(SELECTORS.APP_LAYOUT) || document.getElementById('layout');
+    if (appLayout) {
+      appLayout.classList.toggle('is-visible', visible);
+    }
+  }
+
+  window.__lyplusSetLyricsVisibility = setLyricsVisibility;
+
+  function handleTabInteraction(clickedIndex, middleIndex) {
+    const isLyricsTab = clickedIndex === middleIndex;
+    setLyricsVisibility(isLyricsTab);
+
+    if (!isLyricsTab) return;
 
     const sidePanel = state.sidePanel || document.querySelector(SELECTORS.SIDE_PANEL);
     if (sidePanel) {
@@ -103,8 +135,41 @@
     return state.container;
   }
 
+  function syncPlayerState() {
+    const player = document.querySelector('ytmusic-player');
+    const mode = player?.getAttribute('playback-mode');
+    const playerPage = document.querySelector('ytmusic-player-page') || document.querySelector('#player-page');
+    const appLayout = document.querySelector(SELECTORS.APP_LAYOUT) || document.getElementById('layout');
+
+    if (playerPage) {
+      if (mode) playerPage.setAttribute('playback-mode', mode);
+      else playerPage.removeAttribute('playback-mode');
+
+      const pageState = playerPage.getAttribute('player-page-ui-state');
+      if (appLayout) {
+        if (pageState) appLayout.setAttribute('player-page-ui-state', pageState);
+        else appLayout.removeAttribute('player-page-ui-state');
+      }
+    }
+    if (appLayout && mode) {
+      appLayout.setAttribute('playback-mode', mode);
+    }
+
+    const docEl = document.documentElement;
+    const body = document.body;
+    const themeSong = document.getElementById('ThemeSong-MainContainer');
+    docEl.classList.toggle('has-themesong', !!themeSong);
+    if (body) {
+      body.classList.toggle('has-themesong-dynamic-light', !!(themeSong && themeSong.querySelector('#DynamicLight')));
+      body.classList.toggle('has-themesong-static-light', !!(themeSong && themeSong.querySelector('#StaticLight')));
+    }
+    const kawarp = document.getElementById('better-lyrics-kawarp-player');
+    docEl.classList.toggle('has-kawarp-player', !!kawarp);
+  }
+
   function sync() {
     syncQueued = false;
+    syncPlayerState();
 
     const container = findContainer();
     if (!container) return;
@@ -118,13 +183,17 @@
     if (middleTab !== state.middleTab) {
       middleTabObserver?.disconnect();
       state.middleTab = middleTab;
-      middleTabObserver = new MutationObserver(queueActivate);
+      middleTabObserver = new MutationObserver(() => {
+        queueActivate();
+        checkActiveTab();
+      });
       middleTabObserver.observe(middleTab, {
         attributes: true,
-        attributeFilter: ['disabled', 'aria-disabled']
+        attributeFilter: ['disabled', 'aria-disabled', 'aria-selected', 'class']
       });
     }
     queueActivate();
+    checkActiveTab();
 
     bindContainer(container);
 
@@ -136,6 +205,16 @@
     }
 
     initSidePanelObserver();
+  }
+
+  function checkActiveTab() {
+    const middleTab = state.middleTab;
+    if (!middleTab) return;
+    const isSelected = middleTab.getAttribute('aria-selected') === 'true' ||
+      middleTab.classList.contains('iron-selected');
+    if (isSelected && !window.__lyplusLyricsVisible) {
+      setLyricsVisibility(true);
+    }
   }
 
   function queueSync() {
@@ -152,8 +231,8 @@
     state.sidePanel = sidePanel;
 
     const ensureActive = () => {
-      const lyrics = document.querySelector(SELECTORS.LYRICS);
-      if (!lyrics || lyrics.style.display !== 'block') return;
+      const lyrics = document.querySelector(SELECTORS.LYRICS) || document.getElementById('lyrics-plus-container');
+      if (!lyrics || (!lyrics.classList.contains('is-visible') && lyrics.style.display !== 'block')) return;
       sidePanel.removeAttribute('inert');
       sidePanel.removeAttribute('hidden');
       if (getComputedStyle(sidePanel).display === 'none') sidePanel.style.display = 'flex';
@@ -170,7 +249,12 @@
 
   function onRootMutations(mutations) {
     for (let i = 0; i < mutations.length; i++) {
-      const added = mutations[i].addedNodes;
+      const m = mutations[i];
+      if (m.type === 'attributes') {
+        queueSync();
+        return;
+      }
+      const added = m.addedNodes;
       for (let j = 0; j < added.length; j++) {
         const n = added[j];
         if (n.nodeType !== 1) continue;
@@ -186,7 +270,12 @@
   function start() {
     const root = document.querySelector(SELECTORS.APP_LAYOUT) || document.body;
     rootObserver = new MutationObserver(onRootMutations);
-    rootObserver.observe(root, { childList: true, subtree: true });
+    rootObserver.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['playback-mode', 'player-page-ui-state', 'video-mode']
+    });
 
     document.addEventListener('yt-navigate-finish', queueSync, { passive: true, signal: ac.signal });
 

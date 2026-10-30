@@ -1863,7 +1863,7 @@ class LyricsPlusRenderer {
   /**
    * Updates palette CSS variables via a dedicated stylesheet rule rather than
    * mutating #lyrics-plus-container's inline style attribute (which would trigger
-   * expensive :has(#lyrics-plus-container[style*="display: block"]) invalidations).
+   * expensive style invalidations).
    */
   _setContainerPaletteVars(overrideColor, songPaletteRgb) {
     let cssText = "";
@@ -1927,6 +1927,12 @@ class LyricsPlusRenderer {
         }
       }
       this._setContainerPaletteVars(null, rgbVal);
+    }
+    const patchParent = container.parentElement;
+    if (patchParent && patchParent.id === "lyplus-patch-container") {
+      patchParent.classList.toggle("override-palette-color", container.classList.contains("override-palette-color"));
+      patchParent.classList.toggle("use-song-palette-fullscreen", container.classList.contains("use-song-palette-fullscreen"));
+      patchParent.classList.toggle("use-song-palette-all-modes", container.classList.contains("use-song-palette-all-modes"));
     }
 
     const isBgWipe = this._isBackgroundWipeEnabled(container);
@@ -3988,7 +3994,7 @@ class LyricsPlusRenderer {
    * Builds and attaches WAAPI mask/background wipe animations for a line.
    * All maskImage / maskSize / backgroundImage / backgroundSize properties are embedded
    * directly inside the WAAPI keyframes rather than mutating el.style, completely eliminating
-   * inline style attribute invalidations and :has([style...]) recalculations on start and dispose().
+   * inline style attribute invalidations on start and dispose().
    */
   _getOrCreateLineMaskAnimator(lineElement) {
     if (lineElement._maskAnimator) return lineElement._maskAnimator;
@@ -4816,8 +4822,7 @@ class LyricsPlusRenderer {
   /**
    * Applies the new scroll position with a robust buffer logic.
    * Keeps scroll duration and easing in JS without mutating #lyrics-plus-container's inline style
-   * attribute (which would invalidate :has(#lyrics-plus-container[style*="display: block"]) and
-   * force a 1,000+ element inherited custom property recalculation on every scroll).
+   * attribute (which would force a 1,000+ element inherited custom property recalculation on every scroll).
    *
    * @param {number} newTranslateY - The target Y-axis translation value in pixels.
    * @param {boolean} forceScroll - If true, all animation delays are ignored for instant movement.

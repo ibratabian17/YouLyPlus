@@ -61,6 +61,10 @@
     color-scheme: only light; /* tell browser that this only work on lightmode*/
 }
 
+#lyrics-plus-container.is-visible {
+    display: block;
+}
+
 #lyrics-plus-container.override-palette-color {
     --lyplus-lyrics-pallete: var(--lyplus-override-pallete) !important;
 }

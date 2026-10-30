@@ -11,7 +11,6 @@
 }
 
 /* New UI */
-#nowPlaying [data-test="now-playing-lyrics"]:has(~ #lyplus-patch-container),
 #nowPlaying.lyplus-active [data-test="now-playing-lyrics"] {
     display: none !important;
 }
@@ -160,8 +159,8 @@
     opacity: 0;
 }
 
-#wimp.dynamic-player [data-test="new-now-playing"]:has(.lyplus-blur-container) > [class*="_background_"],
-[class*="_fullscreen_"] [data-test="new-now-playing"]:has(.lyplus-blur-container) > [class*="_background_"] {
+#wimp.dynamic-player [data-test="new-now-playing"].has-blur-container > [class*="_background_"],
+[class*="_fullscreen_"] [data-test="new-now-playing"].has-blur-container > [class*="_background_"] {
     background-color: transparent !important;
 }
 
@@ -173,8 +172,8 @@
     z-index: 2;
 }
 
-#wimp.dynamic-player:has(#nowPlaying._nowPlayingHidden_7e74506) ._player_8c80ae6._notFullscreen_60c5a14,
-#wimp.dynamic-player:has(#nowPlaying[class*="_nowPlayingHidden_"]) [data-test="footer-player"][class*="_notFullscreen_"] {
+#wimp.dynamic-player.has-hidden-now-playing ._player_8c80ae6._notFullscreen_60c5a14,
+#wimp.dynamic-player.has-hidden-now-playing [data-test="footer-player"][class*="_notFullscreen_"] {
     background-color: #0000004d;
     backdrop-filter: blur(23px);
     box-shadow: 0 -6px 24px #0000003d;

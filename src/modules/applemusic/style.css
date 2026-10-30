@@ -2,13 +2,15 @@
     --lyrics-scroll-padding-top: 36%;
 }
 
-[data-testid="side-panel"]:has([data-testid="lyrics-sidebar"]) {
+[data-testid="side-panel"].has-lyrics-sidebar,
+body.lyplus-sidebar-open [data-testid="side-panel"] {
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
 }
 
-[data-testid="side-panel"] .side-panel-content:has([data-testid="lyrics-sidebar"]) {
+[data-testid="side-panel"].has-lyrics-sidebar .side-panel-content,
+body.lyplus-sidebar-open [data-testid="side-panel"] .side-panel-content {
     position: relative !important;
     flex: 1 1 0% !important;
     width: 100% !important;
@@ -65,15 +67,15 @@ article[data-testid="lyrics-fullscreen-modal"] .lyplus-blur-container,
     pointer-events: none !important;
 }
 
-.lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)),
-.lyrics__container.is-lyrics-off.svelte-1n2xfan.svelte-1n2xfan:has(#lyplus-patch-container:not(.lyrics-hidden)) {
+.lyrics__container.is-lyrics-off.has-lyplus.svelte-fix90v.svelte-fix90v,
+.lyrics__container.is-lyrics-off.has-lyplus.svelte-1n2xfan.svelte-1n2xfan {
     grid-template-columns: 32vw 40vw;
     padding: 0 10vw;
 }
 
 @media (min-width: 1680px) {
-    .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)),
-    .lyrics__container.is-lyrics-off.svelte-1n2xfan.svelte-1n2xfan:has(#lyplus-patch-container:not(.lyrics-hidden)) {
+    .lyrics__container.is-lyrics-off.has-lyplus.svelte-fix90v.svelte-fix90v,
+    .lyrics__container.is-lyrics-off.has-lyplus.svelte-1n2xfan.svelte-1n2xfan {
         grid-template-columns: 31vw 38vw !important;
         padding: 0 12vw !important;
         column-gap: 5vw;
@@ -81,16 +83,16 @@ article[data-testid="lyrics-fullscreen-modal"] .lyplus-blur-container,
 }
 
 @media (min-width: 2000px) {
-    .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)),
-    .lyrics__container.is-lyrics-off.svelte-1n2xfan.svelte-1n2xfan:has(#lyplus-patch-container:not(.lyrics-hidden)) {
+    .lyrics__container.is-lyrics-off.has-lyplus.svelte-fix90v.svelte-fix90v,
+    .lyrics__container.is-lyrics-off.has-lyplus.svelte-1n2xfan.svelte-1n2xfan {
         grid-template-columns: 30vw 38vw !important;
         padding: 0 13vw !important;
     }
 }
 
 @media (min-width: 2561px) {
-    .lyrics__container.is-lyrics-off.svelte-fix90v.svelte-fix90v:has(#lyplus-patch-container:not(.lyrics-hidden)),
-    .lyrics__container.is-lyrics-off.svelte-1n2xfan.svelte-1n2xfan:has(#lyplus-patch-container:not(.lyrics-hidden)) {
+    .lyrics__container.is-lyrics-off.has-lyplus.svelte-fix90v.svelte-fix90v,
+    .lyrics__container.is-lyrics-off.has-lyplus.svelte-1n2xfan.svelte-1n2xfan {
         grid-template-columns: calc(30% + 199.68px) calc(38% + 252.928px) !important;
         padding: 0 13% !important;
     }
@@ -98,7 +100,7 @@ article[data-testid="lyrics-fullscreen-modal"] .lyplus-blur-container,
 
 body.lyplus-fullscreen-modal-open main,
 body.lyplus-fullscreen-modal-open #scrollable-page,
-body:has([data-testid="modal"]) main {
+body.has-modal main {
     display: none !important;
     content-visibility: hidden !important;
 }
@@ -285,13 +287,13 @@ article[data-testid="lyrics-fullscreen-modal"] .lyrics__lyrics,
     border-top: 0.5px solid var(--labelDivider);
 }
 
-[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-line.lyrics-activest),
-[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-plus-metadata.lyrics-activest) {
+[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap)[class*="prev-"] {
     opacity: 0;
     transition: opacity 0.3s ease 0.3s, transform 0.4s ease var(--lyrics-line-delay, 0ms), filter 0.3s ease;
 }
 
-[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):has(~ .lyrics-line.prev-2) {
+[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).prev-3,
+[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).prev-4 {
     filter: none;
 }
 
@@ -313,6 +315,6 @@ article[data-testid="lyrics-fullscreen-modal"] .lyrics__lyrics,
     border-color: transparent;
 }
 
-#lyrics-plus-buttons-wrapper:has(#lyrics-plus-show-hide-btn:not(.active)) #lyrics-plus-translate-button {
+#lyrics-plus-buttons-wrapper.has-inactive-show-hide #lyrics-plus-translate-button {
     opacity: 0;
 }

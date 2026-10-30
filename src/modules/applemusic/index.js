@@ -160,13 +160,15 @@ injectPlatformCSS = function () {
         const styleEl = document.createElement('style');
         styleEl.id = 'lyplus-applemusic-surface-patches';
         styleEl.textContent = `
-            [data-testid="side-panel"]:has([data-testid="lyrics-sidebar"]) {
+            [data-testid="side-panel"].has-lyrics-sidebar,
+            body.lyplus-sidebar-open [data-testid="side-panel"] {
                 display: flex !important;
                 flex-direction: column !important;
                 overflow: hidden !important;
                 contain: strict !important;
             }
-            [data-testid="side-panel"] .side-panel-content:has([data-testid="lyrics-sidebar"]) {
+            [data-testid="side-panel"].has-lyrics-sidebar .side-panel-content,
+            body.lyplus-sidebar-open [data-testid="side-panel"] .side-panel-content {
                 position: relative !important;
                 flex: 1 1 0% !important;
                 width: 100% !important;
@@ -225,8 +227,7 @@ injectPlatformCSS = function () {
                 --lyplus-font-size-base: 26px;
                 contain: layout style;
             }
-            [data-testid="lyrics-sidebar"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):not(.active):has(~ .lyrics-line.lyrics-activest),
-            [data-testid="lyrics-sidebar"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):not(.active):has(~ .lyrics-plus-metadata.lyrics-activest) {
+            [data-testid="lyrics-sidebar"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):not(.active)[class*="prev-"] {
                 opacity: 0.8 !important;
             }
         `;
@@ -528,18 +529,21 @@ function tryInject() {
     const lyricsSidebar = document.querySelector('[data-testid="lyrics-sidebar"]');
 
     if (lyricsArticle && lyricsArticle.isConnected) {
-        document.body?.classList.add('lyplus-fullscreen-modal-open');
+        document.body?.classList.add('lyplus-fullscreen-modal-open', 'has-modal');
         document.body?.classList.remove('lyplus-sidebar-open');
+        document.querySelector('[data-testid="side-panel"]')?.classList.remove('has-lyrics-sidebar');
         overrideAppleCanvasWithYouLy();
         mountLyricsIntoTarget(lyricsArticle, 'modal');
     } else if (lyricsSidebar && lyricsSidebar.isConnected) {
-        document.body?.classList.remove('lyplus-fullscreen-modal-open');
+        document.body?.classList.remove('lyplus-fullscreen-modal-open', 'has-modal');
         document.body?.classList.add('lyplus-sidebar-open');
+        document.querySelector('[data-testid="side-panel"]')?.classList.add('has-lyrics-sidebar');
         parkYouLyBlurContainer();
         disableNativeSidebarLyrics(lyricsSidebar);
         mountLyricsIntoTarget(lyricsSidebar, 'sidebar');
     } else {
-        document.body?.classList.remove('lyplus-fullscreen-modal-open', 'lyplus-sidebar-open');
+        document.body?.classList.remove('lyplus-fullscreen-modal-open', 'lyplus-sidebar-open', 'has-modal');
+        document.querySelector('[data-testid="side-panel"]')?.classList.remove('has-lyrics-sidebar');
         activeSurface = null;
         parkYouLyBlurContainer();
     }
@@ -594,9 +598,15 @@ function injectShowHideButton(retryCount = 0) {
         if (container) {
             container.classList.toggle('lyrics-hidden');
             btn.classList.toggle('active');
+            buttonsWrapper.classList.toggle('has-inactive-show-hide', !btn.classList.contains('active'));
+            const hasVisiblePatch = !container.classList.contains('lyrics-hidden');
+            document.querySelectorAll('.lyrics__container').forEach(el => {
+                el.classList.toggle('has-lyplus', hasVisiblePatch);
+            });
         }
     });
 
+    buttonsWrapper.classList.toggle('has-inactive-show-hide', !btn.classList.contains('active'));
     buttonsWrapper.prepend(btn);
 }
 

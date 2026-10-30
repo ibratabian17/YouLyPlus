@@ -1,7 +1,7 @@
 if (typeof LYPLUS_setBgConfig === 'function') {
     LYPLUS_setBgConfig({
         dynamicPlayerSelectors: ['#wimp'],
-        blurContainerParentSelector: '#wimp [data-test="new-now-playing"]:has(> header, > [class*="_content_"]), #wimp [data-test="new-now-playing"]:not([class*="_fullscreen_"] *)',
+        blurContainerParentSelector: '#wimp [data-test="new-now-playing"]',
         mutationObserverRootSelector: '#wimp',
         artworkSelector: '[data-test="now-playing-artwork"], [data-test="current-media-imagery"] img'
     });
@@ -78,10 +78,13 @@ function getNowPlayingRoot(btn) {
 }
 
 function getActiveNowPlayingRoot() {
-    return document.querySelector(
-        '#wimp [data-test="new-now-playing"]:has(> header, > [class*="_content_"]), ' +
-        '#wimp [data-test="new-now-playing"]:not([class*="_fullscreen_"] *)'
-    );
+    const list = document.querySelectorAll('#wimp [data-test="new-now-playing"]');
+    for (const el of list) {
+        if (el.querySelector(':scope > header, :scope > [class*="_content_"]') || !el.closest('[class*="_fullscreen_"]')) {
+            return el;
+        }
+    }
+    return document.querySelector('#wimp [data-test="new-now-playing"]');
 }
 
 function syncBlurContainerToActiveRoot() {
@@ -92,6 +95,7 @@ function syncBlurContainerToActiveRoot() {
     if (blurContainer && blurContainer.parentElement !== targetRoot) {
         targetRoot.prepend(blurContainer);
     }
+    targetRoot.classList.add('has-blur-container');
 }
 
 function hideTidalLyricsIn(root) {
@@ -505,16 +509,30 @@ const uiObserver = new MutationObserver((mutations) => {
         });
     });
 
+    syncWimpState();
     if (shouldCheckUI) setTimeout(ensureLyricsUI, 50);
     if (shouldSyncBg) setTimeout(syncBlurContainerToActiveRoot, 50);
     panelRoots.forEach(root => setTimeout(() => ensureLyricsPatchContainer(root), 50));
 });
 
+function syncWimpState() {
+    const wimp = document.getElementById('wimp');
+    if (!wimp) return;
+    const np = document.getElementById('nowPlaying');
+    const isHidden = np && (np.classList.contains('_nowPlayingHidden_7e74506') || Array.from(np.classList).some(c => c.includes('_nowPlayingHidden_')));
+    wimp.classList.toggle('has-hidden-now-playing', !!isHidden);
+    const nnp = document.querySelector('#wimp [data-test="new-now-playing"]');
+    if (nnp) {
+        nnp.classList.toggle('has-blur-container', !!nnp.querySelector('.lyplus-blur-container'));
+    }
+}
+
 function startUiObserver() {
     const appRoot = document.getElementById('wimp') || document.body;
     if (appRoot) {
-        uiObserver.observe(appRoot, { childList: true, subtree: true });
+        uiObserver.observe(appRoot, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
         setTimeout(ensureLyricsUI, 500);
+        syncWimpState();
     } else {
         setTimeout(startUiObserver, 1000);
     }
