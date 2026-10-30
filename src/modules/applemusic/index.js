@@ -245,8 +245,8 @@ const LyricsPlusAPI = {
         refreshScrollBindingAndPosition();
         return res;
     },
-    displaySongNotFound: () => lyricsRendererInstance?.displaySongNotFound(),
-    displaySongError: () => lyricsRendererInstance?.displaySongError(),
+    displaySongNotFound: (...args) => lyricsRendererInstance?.displaySongNotFound(...args),
+    displaySongError: (...args) => lyricsRendererInstance?.displaySongError(...args),
     cleanupLyrics: () => lyricsRendererInstance?.cleanupLyrics(),
     updateDisplayMode: (lyrics, displayMode, settings) => {
         const effectiveSettings = getEffectiveSettings(settings);
@@ -484,40 +484,31 @@ function mountLyricsIntoTarget(targetEl, surfaceType) {
     lyricsRendererInstance.uiConfig.buttonParent = uiConfig.buttonParent;
 
     const existingContainer = document.getElementById('lyrics-plus-container');
-    const hasRenderedLines = !!(lyricsRendererInstance.cachedLyricsLines && lyricsRendererInstance.cachedLyricsLines.length > 0);
-    const needsMountOrFetch =
-        isInitialInstance ||
-        surfaceChanged ||
-        wrapperMoved ||
-        !existingContainer ||
-        !patchWrapper.contains(existingContainer) ||
-        !hasRenderedLines;
+    const containerInWrapper = existingContainer && patchWrapper.contains(existingContainer);
 
-    if (needsMountOrFetch) {
-        const canReuse =
-            !isInitialInstance &&
-            hasRenderedLines &&
-            lyricsRendererInstance.lyricsContainer &&
-            lyricsRendererInstance.lastKnownSongInfo &&
-            currentSongInfo &&
-            lyricsRendererInstance.lastKnownSongInfo.title === currentSongInfo.title &&
-            lyricsRendererInstance.lastKnownSongInfo.artist === currentSongInfo.artist &&
-            lyricsRendererInstance.lastKnownSongInfo.album === currentSongInfo.album;
+    if (!containerInWrapper && lyricsRendererInstance.lyricsContainer) {
+        patchWrapper.appendChild(lyricsRendererInstance.lyricsContainer);
+    }
 
-        if (canReuse) {
-            if (!patchWrapper.contains(lyricsRendererInstance.lyricsContainer)) {
-                patchWrapper.appendChild(lyricsRendererInstance.lyricsContainer);
-            }
-            applySurfaceScrollMode(true);
+    if (surfaceChanged || wrapperMoved) {
+        applySurfaceScrollMode(true);
+        const hasRenderedLines = !!(lyricsRendererInstance.cachedLyricsLines && lyricsRendererInstance.cachedLyricsLines.length > 0);
+        if (hasRenderedLines) {
             lyricsRendererInstance.restore();
-            refreshScrollBindingAndPosition();
-        } else if (currentSongInfo && currentSongInfo.title && typeof fetchAndDisplayLyrics === 'function') {
-            if (!patchWrapper.contains(lyricsRendererInstance.lyricsContainer)) {
-                lyricsRendererInstance.lyricsContainer = null;
-            }
-            applySurfaceScrollMode(true);
-            fetchAndDisplayLyrics(currentSongInfo, false);
         }
+        refreshScrollBindingAndPosition();
+    }
+
+    const hasAnyContainer = existingContainer || lyricsRendererInstance.lyricsContainer;
+    const needsFetch =
+        !hasAnyContainer &&
+        currentSongInfo?.title &&
+        currentSongInfo?.artist &&
+        typeof fetchAndDisplayLyrics === 'function';
+
+    if (needsFetch) {
+        applySurfaceScrollMode(true);
+        fetchAndDisplayLyrics(currentSongInfo, false);
     }
 
     if (surfaceType === 'modal') {
@@ -616,7 +607,8 @@ function disableNativeLyrics() {
     const lyricsArticle = document.querySelector('article.lyrics__container[data-testid="lyrics-fullscreen-modal"]');
     const lyricsToggleBtn = document.querySelector('article.lyrics__container[data-testid="lyrics-fullscreen-modal"] .toggle-button.toggle-button--lyrics.lyrics-button');
 
-    if (lyricsArticle && lyricsToggleBtn) {
+    if (lyricsArticle && lyricsToggleBtn && !lyricsToggleBtn.hasAttribute('data-lyplus-toggled')) {
+        lyricsToggleBtn.setAttribute('data-lyplus-toggled', 'true');
         const isNativeLyricsVisible = !lyricsArticle.classList.contains('is-lyrics-off');
 
         if (isNativeLyricsVisible) {
@@ -673,6 +665,7 @@ function setupObservers() {
     }
 
     document.addEventListener('click', (e) => {
+        if (!e.isTrusted) return;
         if (e.target?.closest?.('[data-testid="lyrics-button"], [data-testid="lyrics-fullscreen-button"], .toggle-button--lyrics')) {
             setTimeout(tryInject, 100);
         }

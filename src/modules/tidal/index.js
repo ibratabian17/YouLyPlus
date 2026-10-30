@@ -13,8 +13,8 @@ let pendingCheckCount = 0;
 
 const LyricsPlusAPI = {
     displayLyrics: (...args) => lyricsRendererInstance?.displayLyrics(...args),
-    displaySongNotFound: () => lyricsRendererInstance?.displaySongNotFound(),
-    displaySongError: () => lyricsRendererInstance?.displaySongError(),
+    displaySongNotFound: (...args) => lyricsRendererInstance?.displaySongNotFound(...args),
+    displaySongError: (...args) => lyricsRendererInstance?.displaySongError(...args),
     cleanupLyrics: () => lyricsRendererInstance?.cleanupLyrics(),
     updateDisplayMode: (...args) => lyricsRendererInstance?.updateDisplayMode(...args),
     updateCurrentTick: (...args) => lyricsRendererInstance?.updateCurrentTick(...args),

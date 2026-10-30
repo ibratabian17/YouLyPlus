@@ -2828,14 +2828,20 @@ class LyricsPlusRenderer {
   /**
    * Displays a "not found" message in the lyrics container.
    */
-  displaySongNotFound() {
+  displaySongNotFound(songInfo = null) {
+    if (songInfo) {
+      this.lastKnownSongInfo = songInfo;
+    }
     this._displayMessage("notFound");
   }
 
   /**
    * Displays an error message in the lyrics container.
    */
-  displaySongError() {
+  displaySongError(songInfo = null) {
+    if (songInfo) {
+      this.lastKnownSongInfo = songInfo;
+    }
     this._displayMessage("notFoundError");
   }
 

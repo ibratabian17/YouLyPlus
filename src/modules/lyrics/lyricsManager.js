@@ -14,6 +14,7 @@ let forceNextRender = false;
 
 let lastKnownSongInfo = null;
 let lastBaseLyrics = null;
+let lastLyricsNotFound = false;
 let lastTranslationResponse = null;
 let lastRomanizationResponse = null;
 
@@ -234,7 +235,6 @@ function resolveEffectiveMode(isNewSong) {
  */
 async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId) {
   const isSameSong =
-    lastBaseLyrics &&
     lastKnownSongInfo &&
     lastKnownSongInfo.title === currentSong.title &&
     lastKnownSongInfo.artist === currentSong.artist &&
@@ -242,7 +242,13 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId) {
     Math.abs((lastKnownSongInfo.duration || 0) - (currentSong.duration || 0)) < 2;
 
   if (!isNewSong && !forceReload && isSameSong) {
-    return lastBaseLyrics;
+    if (lastLyricsNotFound) {
+      if (LyricsPlusAPI.displaySongNotFound) LyricsPlusAPI.displaySongNotFound(currentSong);
+      return null;
+    }
+    if (lastBaseLyrics) {
+      return lastBaseLyrics;
+    }
   }
 
   LyricsPlusAPI.cleanupLyrics();
@@ -265,10 +271,14 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId) {
 
   if (!response?.success) {
     console.warn('Failed to fetch original lyrics:', response?.error || response?.err || 'Unknown error');
-    if (LyricsPlusAPI.displaySongNotFound) LyricsPlusAPI.displaySongNotFound();
+    lastKnownSongInfo = currentSong;
+    lastLyricsNotFound = true;
+    lastBaseLyrics = null;
+    if (LyricsPlusAPI.displaySongNotFound) LyricsPlusAPI.displaySongNotFound(currentSong);
     return null;
   }
 
+  lastLyricsNotFound = false;
   lastBaseLyrics = response.lyrics;
   if (response.availableProviders) {
     setAvailableProviders(response.availableProviders);
@@ -871,6 +881,7 @@ async function updateAndRenderCombinedLyrics(currentSong, fetchId, renderedPreli
     lastProcessedDisplayMode = finalDisplayMode;
   }
 
+  lastLyricsNotFound = false;
   lastKnownSongInfo = currentSong;
 
   if (!isTranslationPending && !isRomanizationPending) {
@@ -948,9 +959,12 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     console.warn('Error in fetchAndDisplayLyrics:', error);
     currentDisplayMode = 'none';
     lastProcessedDisplayMode = 'none';
+    lastKnownSongInfo = currentSong;
+    lastLyricsNotFound = true;
+    lastBaseLyrics = null;
 
     if (currentFetchMediaId === fetchId) {
-      if (LyricsPlusAPI.displaySongError) LyricsPlusAPI.displaySongError();
+      if (LyricsPlusAPI.displaySongError) LyricsPlusAPI.displaySongError(currentSong);
     }
   }
 }

@@ -151,16 +151,16 @@
     const attrs = item.attributes;
     const artworkUrl = attrs.artwork?.url ? attrs.artwork.url.replace('{w}', '800').replace('{h}', '800') : '';
     const durationSec = (attrs.durationInMillis || 0) / 1000;
-    const songId = attrs.playParams.catalogId || attrs.playParams.id;
+    const songId = attrs.playParams?.catalogId || attrs.playParams?.id || item.id;
 
     const songInfo = {
-      title: attrs.name,
-      artist: attrs.artistName,
-      album: attrs.albumName,
+      title: attrs.name || '',
+      artist: attrs.artistName || '',
+      album: attrs.albumName || '',
       duration: durationSec,
       artwork: artworkUrl,
       appleId: songId,
-      isVideo: attrs.playParams.kind === 'music-videos',
+      isVideo: attrs.playParams?.kind === 'music-videos',
       lyricsJSON: null
     };
 
