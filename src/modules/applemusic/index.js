@@ -117,12 +117,23 @@ function injectDOMScript() {
         console.warn('APPLE MUSIC: runtime.getURL unavailable, skipping DOM script inject');
         return;
     }
+    if (!document.documentElement?.hasAttribute('data-lyplus-optimizer-main-injected')) {
+        document.documentElement?.setAttribute('data-lyplus-optimizer-main-injected', 'true');
+        const optimizerScript = document.createElement('script');
+        optimizerScript.src = pBrowser.runtime.getURL('src/modules/applemusic/appleUIOptimizer.js');
+        optimizerScript.onload = function () {
+            this.remove();
+        };
+        (document.head || document.documentElement).appendChild(optimizerScript);
+    }
+
     const script = document.createElement('script');
     script.src = pBrowser.runtime.getURL('src/inject/applemusic/songTracker.js');
     script.onload = function () {
         this.remove();
     };
     (document.head || document.documentElement).appendChild(script);
+
     const parser = document.createElement('script');
     parser.src = pBrowser.runtime.getURL('src/lib/parser.js');
     parser.type = 'module';
@@ -153,6 +164,7 @@ injectPlatformCSS = function () {
                 display: flex !important;
                 flex-direction: column !important;
                 overflow: hidden !important;
+                contain: strict !important;
             }
             [data-testid="side-panel"] .side-panel-content:has([data-testid="lyrics-sidebar"]) {
                 position: relative !important;
@@ -164,6 +176,7 @@ injectPlatformCSS = function () {
                 overflow: hidden !important;
                 display: flex !important;
                 flex-direction: column !important;
+                contain: strict !important;
             }
             [data-testid="lyrics-sidebar"] {
                 --lyrics-scroll-padding-top: 25%;
@@ -176,6 +189,7 @@ injectPlatformCSS = function () {
                 overflow: hidden !important;
                 display: flex !important;
                 flex-direction: column !important;
+                contain: strict !important;
             }
             [data-testid="lyrics-sidebar"] [data-testid="lyrics-buttons-container"] {
                 position: relative;
@@ -199,6 +213,7 @@ injectPlatformCSS = function () {
                 scrollbar-width: none;
                 will-change: scroll-position;
                 scroll-snap-type: y proximity;
+                contain: strict !important;
                 mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 82%, transparent 100%);
                 -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 82%, transparent 100%);
             }
@@ -208,6 +223,7 @@ injectPlatformCSS = function () {
                 padding: 0 16px;
                 padding-top: calc(1em + 25vh);
                 --lyplus-font-size-base: 26px;
+                contain: layout style;
             }
             [data-testid="lyrics-sidebar"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):not(.active):has(~ .lyrics-line.lyrics-activest),
             [data-testid="lyrics-sidebar"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):not(.active):has(~ .lyrics-plus-metadata.lyrics-activest) {
@@ -307,6 +323,14 @@ function parkYouLyBlurContainer() {
         backdropObserver = null;
     }
     observedBackdropEl = null;
+
+    // Stop the WebGL animation loop when the fullscreen modal is closed
+    try {
+        if (typeof globalAnimationId !== 'undefined' && globalAnimationId) {
+            cancelAnimationFrame(globalAnimationId);
+            globalAnimationId = null;
+        }
+    } catch (_) {}
 
     const blurContainer = document.querySelector('.lyplus-blur-container');
     if (blurContainer && blurContainer.parentElement !== document.body && document.body) {
@@ -416,7 +440,12 @@ function disableNativeSidebarLyrics(sidebarEl) {
     if (ampLyrics && !ampLyrics.hasAttribute('data-lyplus-disabled')) {
         ampLyrics.setAttribute('data-lyplus-disabled', 'true');
         ampLyrics.setAttribute('static-lyrics', 'true');
+        ampLyrics.removeAttribute('visible');
+        ampLyrics.removeAttribute('catalog-id');
         ampLyrics.style.setProperty('display', 'none', 'important');
+        if (ampLyrics.shadowRoot) {
+            ampLyrics.shadowRoot.innerHTML = '';
+        }
     }
 }
 
@@ -499,13 +528,18 @@ function tryInject() {
     const lyricsSidebar = document.querySelector('[data-testid="lyrics-sidebar"]');
 
     if (lyricsArticle && lyricsArticle.isConnected) {
+        document.body?.classList.add('lyplus-fullscreen-modal-open');
+        document.body?.classList.remove('lyplus-sidebar-open');
         overrideAppleCanvasWithYouLy();
         mountLyricsIntoTarget(lyricsArticle, 'modal');
     } else if (lyricsSidebar && lyricsSidebar.isConnected) {
+        document.body?.classList.remove('lyplus-fullscreen-modal-open');
+        document.body?.classList.add('lyplus-sidebar-open');
         parkYouLyBlurContainer();
         disableNativeSidebarLyrics(lyricsSidebar);
         mountLyricsIntoTarget(lyricsSidebar, 'sidebar');
     } else {
+        document.body?.classList.remove('lyplus-fullscreen-modal-open', 'lyplus-sidebar-open');
         activeSurface = null;
         parkYouLyBlurContainer();
     }
@@ -515,16 +549,17 @@ function startInjectionWatcher() {
     if (injectionInterval) clearInterval(injectionInterval);
 
     injectionInterval = setInterval(() => {
+        if (document.hidden) return;
         const modalExists = document.querySelector('article[data-testid="lyrics-fullscreen-modal"]');
         const sidebarExists = document.querySelector('[data-testid="lyrics-sidebar"]');
 
         if (modalExists || sidebarExists) {
             tryInject();
-        } else {
+        } else if (activeSurface !== null) {
             activeSurface = null;
             parkYouLyBlurContainer();
         }
-    }, 1000);
+    }, 1500);
 }
 
 function injectShowHideButton(retryCount = 0) {
