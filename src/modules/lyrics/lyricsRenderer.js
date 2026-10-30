@@ -307,6 +307,7 @@ class LyricsPlusRenderer {
     this._lineById = new Map();
     this._positionClassedLines = [];
     this._nextPositionClassedLines = [];
+    this._lastPastLineIndex = -1;
     this._animatingLines = [];
     this._visibilityChanges = [];
     this._springConfigCache = null;
@@ -2228,6 +2229,7 @@ class LyricsPlusRenderer {
     this._lastActiveGroupEndIndex = 0;
     this._positionClassedLines.length = 0;
     this._nextPositionClassedLines.length = 0;
+    this._lastPastLineIndex = -1;
     this._resetGapState();
 
     // Pre-apply initial gap-open class in detached fragment before mounting to avoid post-mount reflow
@@ -5321,6 +5323,26 @@ class LyricsPlusRenderer {
     };
     assign(lineToScroll, "lyrics-activest");
     const elements = this.cachedLyricsLines;
+    const targetPastEnd = scrollLineIndex - 1;
+
+    if (forceScroll || this._lastPastLineIndex === -1 || Math.abs((this._lastPastLineIndex ?? -1) - targetPastEnd) > 5) {
+      for (let i = 0; i <= targetPastEnd && i < elements.length; i++) {
+        elements[i].classList.add("past-line");
+      }
+      for (let i = Math.max(0, targetPastEnd + 1); i < elements.length; i++) {
+        elements[i].classList.remove("past-line");
+      }
+    } else if (this._lastPastLineIndex < targetPastEnd) {
+      for (let i = this._lastPastLineIndex + 1; i <= targetPastEnd && i < elements.length; i++) {
+        elements[i].classList.add("past-line");
+      }
+    } else if (this._lastPastLineIndex > targetPastEnd) {
+      for (let i = targetPastEnd + 1; i <= this._lastPastLineIndex && i < elements.length; i++) {
+        elements[i].classList.remove("past-line");
+      }
+    }
+    this._lastPastLineIndex = targetPastEnd;
+
     for (
       let i = Math.max(0, scrollLineIndex - 4);
       i <= Math.min(elements.length - 1, scrollLineIndex + 4);
@@ -6122,6 +6144,7 @@ class LyricsPlusRenderer {
     this._lineById = null;
     this._positionClassedLines = [];
     this._nextPositionClassedLines = [];
+    this._lastPastLineIndex = -1;
     this._scrollPaddingTopCache = undefined;
     this._containerDisplayCache = undefined;
 

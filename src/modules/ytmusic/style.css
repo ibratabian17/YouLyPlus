@@ -537,6 +537,8 @@ div#lyrics-song-progressbar {
         transform-origin: center !important;
     }
 
+    ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).past-line,
+    ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).post-active-line,
     ytmusic-player-page[player-fullscreened] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap)[class*="prev-"] {
         opacity: 0;
         transition: opacity 0.3s ease 0.3s, transform 0.4s ease var(--lyrics-line-delay, 0ms), filter 0.3s ease;

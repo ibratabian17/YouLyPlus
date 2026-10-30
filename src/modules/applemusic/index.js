@@ -227,6 +227,8 @@ injectPlatformCSS = function () {
                 --lyplus-font-size-base: 26px;
                 contain: layout style;
             }
+            [data-testid="lyrics-sidebar"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):not(.active).past-line,
+            [data-testid="lyrics-sidebar"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):not(.active).post-active-line,
             [data-testid="lyrics-sidebar"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):not(.active)[class*="prev-"] {
                 opacity: 0.8 !important;
             }

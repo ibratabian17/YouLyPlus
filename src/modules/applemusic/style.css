@@ -287,13 +287,28 @@ article[data-testid="lyrics-fullscreen-modal"] .lyrics__lyrics,
     border-top: 0.5px solid var(--labelDivider);
 }
 
-[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap)[class*="prev-"] {
+[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).past-line,
+[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).post-active-line,
+[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap)[class*="prev-"],
+article[data-testid="lyrics-fullscreen-modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).past-line,
+article[data-testid="lyrics-fullscreen-modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).post-active-line,
+article[data-testid="lyrics-fullscreen-modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap)[class*="prev-"],
+body.lyplus-fullscreen-modal-open #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).past-line,
+body.lyplus-fullscreen-modal-open #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).post-active-line,
+body.lyplus-fullscreen-modal-open #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap)[class*="prev-"] {
     opacity: 0;
     transition: opacity 0.3s ease 0.3s, transform 0.4s ease var(--lyrics-line-delay, 0ms), filter 0.3s ease;
 }
 
+[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).past-line:not(.post-active-line):not(.prev-2),
 [data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).prev-3,
-[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).prev-4 {
+[data-testid="modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).prev-4,
+article[data-testid="lyrics-fullscreen-modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).past-line:not(.post-active-line):not(.prev-2),
+article[data-testid="lyrics-fullscreen-modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).prev-3,
+article[data-testid="lyrics-fullscreen-modal"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).prev-4,
+body.lyplus-fullscreen-modal-open #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).past-line:not(.post-active-line):not(.prev-2),
+body.lyplus-fullscreen-modal-open #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).prev-3,
+body.lyplus-fullscreen-modal-open #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap).prev-4 {
     filter: none;
 }
 
