@@ -816,6 +816,7 @@ class LyricsPlusRenderer {
   _onLyricClick(lineEl) {
     const time = parseFloat(lineEl.dataset.startTime);
     const offsetSec = (this.userOffsetMs || 0) / 1000;
+    this._clickSeekUntil = performance.now() + 500;
     this._seekPlayerTo(time + offsetSec - 0.05);
     this._scrollToActiveLine(lineEl, true);
   }
@@ -5389,21 +5390,6 @@ class LyricsPlusRenderer {
       animatingLines.length = 0;
     };
 
-    const isFarJump = Math.abs(delta) > clientHeight * LyricsPlusRenderer._NATIVE_SCROLL_DISTANCE_RATIO;
-
-    if (forceScroll || isFarJump) {
-      cancelPrev();
-      parent.scrollTo({ top: targetTop, behavior: 'smooth' });
-      state.isAnimating = false;
-      state.pendingUpdate = null;
-      return;
-    }
-
-    if (referenceIndex === -1 || referenceIndex === undefined) {
-      cancelPrev();
-      return;
-    }
-
     const gapShifts = this._pendingGapShifts;
     const gapShiftAt = (i) => {
       if (!gapShifts) return 0;
@@ -5412,25 +5398,17 @@ class LyricsPlusRenderer {
       return sh;
     };
 
-    let totalShift = 0;
-    if (gapShifts) for (let g = 0; g < gapShifts.length; g++) totalShift += gapShifts[g].shift;
-    const newIndex = this._lastActiveIndex;
-    let scrollingDown;
-    if (newIndex > referenceIndex) scrollingDown = true;
-    else if (newIndex < referenceIndex) scrollingDown = false;
-    else scrollingDown = (delta - totalShift) >= 0;
-
     const canAnimate = typeof Element.prototype.animate === 'function';
     const waapiEasing = easing || 'cubic-bezier(.41, 0, .12, .99)';
     const FINAL_TRANSFORM = 'translateY(0px) translateZ(1px)';
 
-    const applyLine = (line, delay, i) => {
+    const applyLine = (line, delay, i, dur = scrollDuration, ease = waapiEasing) => {
       if (!canAnimate) return;
       const d = delta - gapShiftAt(i);
       if (!(Math.abs(d) >= 0.5)) return;
       const anim = line.animate(
         [{ transform: `translateY(${d.toFixed(2)}px) translateZ(1px)` }, { transform: FINAL_TRANSFORM }],
-        { duration: scrollDuration, delay, easing: waapiEasing, fill: 'backwards', composite: 'add' }
+        { duration: dur, delay, easing: ease, fill: 'backwards', composite: 'add' }
       );
       line._scrollAnim = anim;
       line._scrollDelay = delay;
@@ -5440,6 +5418,91 @@ class LyricsPlusRenderer {
       };
       animatingLines.push(line);
     };
+
+    const isFarJump = Math.abs(delta) > clientHeight * LyricsPlusRenderer._NATIVE_SCROLL_DISTANCE_RATIO;
+
+    if (forceScroll || isFarJump) {
+      state.isAnimating = false;
+      state.pendingUpdate = null;
+      const clickSeek = !!this._clickSeekUntil && performance.now() < this._clickSeekUntil;
+      if (!clickSeek || !canAnimate) {
+        cancelPrev();
+        parent.scrollTo({ top: targetTop, behavior: 'smooth' });
+        return;
+      }
+      if (Math.abs(delta) < 0.5) return;
+
+      const prevTop = -prevOffset;
+      const margin = 200;
+      const oldLo = prevTop - margin;
+      const oldHi = prevTop + clientHeight + margin;
+      const newLo = targetTop - margin;
+      const newHi = targetTop + clientHeight + margin;
+      const flipLines = [];
+      const flipIdx = [];
+      for (let i = 0; i < len; i++) {
+        const line = this.cachedLyricsLines[i];
+        const top = line.offsetTop;
+        const bottom = top + line.offsetHeight;
+        if ((bottom > oldLo && top < oldHi) || (bottom > newLo && top < newHi)) {
+          flipLines.push(line);
+          flipIdx.push(i);
+        }
+      }
+
+      const flatEasing = 'cubic-bezier(.41, 0, .12, .99)';
+      const anchorTop = snapshot && !snapshot.hidden
+        ? snapshot.activeOffsetTop
+        : targetTop + this._getScrollPaddingTop();
+      let anchorIdx = 0;
+      for (let i = 0; i < len; i++) {
+        if (this.cachedLyricsLines[i].offsetTop <= anchorTop + 1) anchorIdx = i;
+        else break;
+      }
+
+      parent.scrollTo({ top: targetTop, behavior: 'instant' });
+      const flipDuration = 380;
+      this._lastScrollDurationMs = flipDuration;
+      this._appliedScrollEasing = flatEasing;
+      this._scrollAnimT0 = performance.now();
+
+      const maxStagger = 6;
+      const down = delta > 0;
+      let counter = 0;
+      if (down) {
+        for (let k = 0; k < flipLines.length; k++) {
+          const i = flipIdx[k];
+          const line = flipLines[k];
+          if (i > anchorIdx && !line._isGap) counter++;
+          const delay = i > anchorIdx ? Math.min(counter, maxStagger) * delayIncrement : 0;
+          applyLine(line, delay, i, flipDuration, flatEasing);
+        }
+      } else {
+        for (let k = flipLines.length - 1; k >= 0; k--) {
+          const i = flipIdx[k];
+          const line = flipLines[k];
+          if (i < anchorIdx && !line._isGap) counter++;
+          let delay = i < anchorIdx ? Math.min(counter, maxStagger) * delayIncrement : 0;
+          if (isRelaxMode) delay = delay / 2;
+          applyLine(line, delay, i, flipDuration, flatEasing);
+        }
+      }
+      return;
+    }
+
+    if (referenceIndex === -1 || referenceIndex === undefined) {
+      cancelPrev();
+      return;
+    }
+
+    let totalShift = 0;
+    if (gapShifts) for (let g = 0; g < gapShifts.length; g++) totalShift += gapShifts[g].shift;
+    const newIndex = this._lastActiveIndex;
+    let scrollingDown;
+    if (newIndex > referenceIndex) scrollingDown = true;
+    else if (newIndex < referenceIndex) scrollingDown = false;
+    else scrollingDown = (delta - totalShift) >= 0;
+
 
     state.isAnimating = true;
     const BASE_DURATION = 400;
