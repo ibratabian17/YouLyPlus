@@ -3224,6 +3224,8 @@ class LyricsPlusRenderer {
     const activationStartDelayMs = isWordByWord ? 150 : 250;
     const overlapLookAheadMs = Math.max(250, scrollLookAheadMs - activationStartDelayMs);
     const overlapTime = currentTime + overlapLookAheadMs;
+    const lastLineEndLookAheadMs = 200;
+    const lastLinePredictiveTime = currentTime + lastLineEndLookAheadMs;
 
     // 1. Pure JS: Collect raw active lines at predictiveTime
     const hint = isSeek ? 0 : this._lastActiveIndex;
@@ -3251,7 +3253,10 @@ class LyricsPlusRenderer {
         !line._isGap &&
         nextLine._startTimeMs < line._endTimeMs
       );
-      const endCheckTime = overlapsNextLine ? overlapTime : predictiveTime;
+      const isLastLyricLine = !nextLine || !nextLine.classList.contains("lyrics-line");
+      const endCheckTime = overlapsNextLine
+        ? overlapTime
+        : (isLastLyricLine ? lastLinePredictiveTime : predictiveTime);
       if (startCheckTime >= line._startTimeMs && endCheckTime < line._endTimeMs) {
         rawActiveIndices.push(i);
         if (line._endTimeMs > maxActiveEndMs) {
@@ -3267,9 +3272,12 @@ class LyricsPlusRenderer {
       for (let k = 0; k < currentActiveIndices.length; k++) {
         const prevIdx = currentActiveIndices[k];
         const prevLine = lines[prevIdx];
+        const nextAfterPrev = (prevIdx >= 0 && prevIdx + 1 < linesLen) ? lines[prevIdx + 1] : null;
+        const prevIsLastLyricLine = !nextAfterPrev || !nextAfterPrev.classList.contains("lyrics-line");
+        const prevEndCheckTime = prevIsLastLyricLine ? lastLinePredictiveTime : predictiveTime;
         if (
           prevLine &&
-          predictiveTime < prevLine._endTimeMs &&
+          prevEndCheckTime < prevLine._endTimeMs &&
           currentTime + LyricsPlusRenderer._SCROLL_LEAD_MAX >= prevLine._startTimeMs
         ) {
           rawActiveIndices.push(prevIdx);
@@ -3328,7 +3336,7 @@ class LyricsPlusRenderer {
         const nextAfterPrev = (lastPrevIdx >= 0 && lastPrevIdx + 1 < linesLen) ? lines[lastPrevIdx + 1] : null;
         const hasNextLyricLine = !!(nextAfterPrev && nextAfterPrev.classList.contains("lyrics-line"));
         const exitedGapLine = !!(lastPrevLine && lastPrevLine._isGap && predictiveTime >= lastPrevLine._endTimeMs);
-        const exitedLastLyricLine = !!(lastPrevLine && !hasNextLyricLine && predictiveTime >= lastPrevLine._endTimeMs);
+        const exitedLastLyricLine = !!(lastPrevLine && !hasNextLyricLine && lastLinePredictiveTime >= lastPrevLine._endTimeMs);
         let maxPrevEndMs = lastPrevLine ? lastPrevLine._endTimeMs : -Infinity;
         for (let k = 0; k < currentActiveIndices.length; k++) {
           const l = lines[currentActiveIndices[k]];
