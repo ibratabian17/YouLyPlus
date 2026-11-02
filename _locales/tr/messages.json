@@ -967,10 +967,6 @@
     "message": "API anahtarınız yerel olarak saklanır. Ücretsiz plan anahtarları genellikle :fx ile biter",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Kullanıcı Katkıları)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

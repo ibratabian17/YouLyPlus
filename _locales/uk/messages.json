@@ -967,10 +967,6 @@
     "message": "Ваш ключ API зберігається локально. Ключі безкоштовного тарифного плану зазвичай закінчуються на :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (від користувачів)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

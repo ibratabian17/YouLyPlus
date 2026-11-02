@@ -967,10 +967,6 @@
     "message": "Ukhiye wakho we-API ugcinwa endaweni yakho. Okhiye bohlelo lwamahhala imvamisa baphela ngo-:fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Iminikelo Yabasebenzisi)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

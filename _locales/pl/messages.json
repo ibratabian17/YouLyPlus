@@ -967,10 +967,6 @@
     "message": "Twój klucz API jest przechowywany lokalnie. Klucze z darmowego planu zazwyczaj kończą się na :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Wkład użytkowników)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

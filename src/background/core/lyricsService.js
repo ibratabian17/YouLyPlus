@@ -693,7 +693,7 @@ export class LyricsService {
   static async fetchSpecificSource(songInfo, source, forceReload = true) {
     const settings = await SettingsManager.getLyricsSettings();
     const fetchOptions = { cache: 'no-store' };
-    const kpoeSources = ['apple', 'lyricsplus', 'qq', 'musixmatch', 'musixmatch-word'];
+    const kpoeSources = ['apple', 'qq', 'musixmatch', 'musixmatch-word'];
     const cacheKey = this.createCacheKey(songInfo);
 
     let lyrics = null;

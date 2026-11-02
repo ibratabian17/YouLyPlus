@@ -13,13 +13,21 @@ export class SettingsManager {
   }
 
   static async getLyricsSettings() {
-    return this.get({
+    const settings = await this.get({
       'lyricsProviderOrder': 'kpoe,lrcred,unison,lrclib',
-      'lyricsSourceOrder': 'apple,lyricsplus,qq,musixmatch,musixmatch-word',
+      'lyricsSourceOrder': 'apple,qq,musixmatch,musixmatch-word',
       'customKpoeUrl': '',
       'cacheStrategy': 'aggressive',
       'preferUnisonVideo': false
     });
+    if (typeof settings.lyricsSourceOrder === 'string' && settings.lyricsSourceOrder.includes('lyricsplus')) {
+      settings.lyricsSourceOrder = settings.lyricsSourceOrder
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s && s !== 'lyricsplus')
+        .join(',');
+    }
+    return settings;
   }
 
   static async getTranslationSettings() {

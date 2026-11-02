@@ -967,10 +967,6 @@
     "message": "API 키는 로컬에 저장됩니다. 무료 플랜 키는 일반적으로 :fx로 끝납니다.",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (사용자 제공)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

@@ -967,10 +967,6 @@
     "message": "आपकी API कुंजी स्थानीय रूप से संग्रहीत है। फ्री प्लान कुंजियाँ आमतौर पर :fx पर समाप्त होती हैं।",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (प्रयोक्ता योगदान)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

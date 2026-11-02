@@ -967,10 +967,6 @@
     "message": "Je API-sleutel wordt lokaal opgeslagen. Sleutels voor het gratis abonnement eindigen meestal op :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Gebruikersbijdragen)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

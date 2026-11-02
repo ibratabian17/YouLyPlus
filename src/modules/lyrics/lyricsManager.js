@@ -64,7 +64,7 @@ const NON_RENDERING_KEY_SET = new Set([
 ]);
 
 const KNOWN_LYRICS_SOURCES = [
-  'lyricsplus', 'lyrics+', 'apple', 'apple music', 'qq', 'musixmatch', 'musixmatch-word',
+  'lyrics+', 'apple', 'apple music', 'qq', 'musixmatch', 'musixmatch-word',
   'unison', 'lrclib', 'lrcred', 'lrc.red', 'lrc-red', 'binilyrics', 'subtitles', 'youtube captions', 'youtube subtitles',
   'local', 'local lyrics', 'spotify', 'kpoe', 'customkpoe', 'lyricfind'
 ];

@@ -967,10 +967,6 @@
     "message": "La tua chiave API è salvata localmente. Le chiavi del piano gratuito terminano solitamente con :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Contributo utenti)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

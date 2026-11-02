@@ -967,10 +967,6 @@
     "message": "Din API-nøgle gemmes lokalt. Gratis abonnementsnøgler slutter normalt på :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Brugerbidrag)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

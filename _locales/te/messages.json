@@ -967,10 +967,6 @@
     "message": "మీ API కీ స్థానికంగా నిల్వ చేయబడుతుంది. ఉచిత ప్లాన్ కీలు సాధారణంగా :fx తో ముగుస్తాయి",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (యూజర్ కాంట్రిబ్యూషన్స్)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

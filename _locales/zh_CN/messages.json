@@ -967,10 +967,6 @@
     "message": "您的 API Key 仅保存在本地。免费版 Key 通常以 :fx 结尾。",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (用户投稿)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

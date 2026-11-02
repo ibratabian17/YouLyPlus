@@ -967,10 +967,6 @@
     "message": "Ufunguo wako wa API umehifadhiwa ndani ya kifaa chako. Funguo za mpango wa bure kwa kawaida huishia na :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Michango ya Watumiaji)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

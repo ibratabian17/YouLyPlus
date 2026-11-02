@@ -967,10 +967,6 @@
     "message": "APIキーはローカルに保存されます。Freeプランのキーは通常 :fx で終わります。",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (ユーザー投稿)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

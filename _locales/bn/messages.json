@@ -967,10 +967,6 @@
     "message": "আপনার এপিআই কি স্থানীয়ভাবে সংরক্ষিত থাকে। ফ্রি প্ল্যান কি সাধারণত :fx দিয়ে শেষ হয়।",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (ব্যবহারকারীর অবদান)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

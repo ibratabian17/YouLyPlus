@@ -967,10 +967,6 @@
     "message": "Το κλειδί API αποθηκεύεται τοπικά. Τα κλειδιά του δωρεάν προγράμματος συνήθως λήγουν σε :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Συνεισφορές Χρηστών)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

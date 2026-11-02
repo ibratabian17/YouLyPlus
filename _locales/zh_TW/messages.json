@@ -967,10 +967,6 @@
     "message": "您的 API 金鑰將儲存在本地。免費方案的金鑰通常以 :fx 結尾。",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (使用者生成)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

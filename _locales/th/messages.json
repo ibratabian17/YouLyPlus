@@ -967,10 +967,6 @@
     "message": "API Key ของคุณจะถูกจัดเก็บไว้ในเครื่อง คีย์สำหรับแผนฟรีมักจะลงท้ายด้วย :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (ผลงานผู้ใช้)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

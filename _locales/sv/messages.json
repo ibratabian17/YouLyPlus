@@ -967,10 +967,6 @@
     "message": "Din API-nyckel lagras lokalt. Nycklar för gratisabonnemang slutar vanligtvis med :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Användarbidrag)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

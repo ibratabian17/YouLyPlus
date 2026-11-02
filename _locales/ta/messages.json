@@ -967,10 +967,6 @@
     "message": "உங்கள் API சாவி உள்ளூரில் சேமிக்கப்படும். இலவசத் திட்டச் சாவிகள் பொதுவாக :fx என்று முடியும்.",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (பயனர் பங்களிப்புகள்)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

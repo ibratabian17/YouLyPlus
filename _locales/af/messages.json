@@ -967,10 +967,6 @@
     "message": "Jou API-sleutel word plaaslik gestoor. Gratis plan-sleutels eindig gewoonlik met :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Gebruikersbydraes)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

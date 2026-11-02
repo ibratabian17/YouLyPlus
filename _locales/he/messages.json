@@ -967,10 +967,6 @@
     "message": "מפתח ה-API שלך נשמר מקומית. מפתחות מתוכנית חינמית מסתיימים לרוב ב-:fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (תרומות משתמשים)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

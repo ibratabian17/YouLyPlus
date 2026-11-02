@@ -4,7 +4,7 @@ const pBrowser = typeof browser !== 'undefined'
 
 const defaultSettings = {
     lyricsProviderOrder: 'kpoe,lrcred,unison,lrclib',
-    lyricsSourceOrder: 'apple,lyricsplus,qq,musixmatch,musixmatch-word',
+    lyricsSourceOrder: 'apple,qq,musixmatch,musixmatch-word',
     wordByWord: true,
     lightweight: false,
     isEnabled: true,
@@ -60,6 +60,13 @@ window.addEventListener('message', (event) => {
 function loadSettings(callback) {
     storageLocalGet(defaultSettings).then((items) => {
         currentSettings = items;
+        if (typeof currentSettings.lyricsSourceOrder === 'string' && currentSettings.lyricsSourceOrder.includes('lyricsplus')) {
+            currentSettings.lyricsSourceOrder = currentSettings.lyricsSourceOrder
+                .split(',')
+                .map(s => s.trim())
+                .filter(s => s && s !== 'lyricsplus')
+                .join(',');
+        }
         console.log(currentSettings);
         applyDynamicPlayerClass(true);
         injectCustomCSS(currentSettings.customCSS);
@@ -69,6 +76,13 @@ function loadSettings(callback) {
 
 function updateSettings(newSettings) {
     if (!newSettings || typeof newSettings !== 'object') return;
+    if (typeof newSettings.lyricsSourceOrder === 'string' && newSettings.lyricsSourceOrder.includes('lyricsplus')) {
+        newSettings.lyricsSourceOrder = newSettings.lyricsSourceOrder
+            .split(',')
+            .map(s => s.trim())
+            .filter(s => s && s !== 'lyricsplus')
+            .join(',');
+    }
 
     const changedKeys = [];
     for (const key of Object.keys(newSettings)) {

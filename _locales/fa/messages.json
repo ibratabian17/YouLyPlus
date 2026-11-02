@@ -967,10 +967,6 @@
     "message": "کلید API شما به صورت محلی ذخیره می‌شود. کلیدهای طرح رایگان معمولاً با :fx ختم می‌شوند.",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (مشارکت کاربران)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

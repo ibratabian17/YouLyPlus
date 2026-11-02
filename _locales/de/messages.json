@@ -967,10 +967,6 @@
     "message": "Dein API-Schlüssel wird lokal gespeichert. Schlüssel für den kostenlosen Tarif enden meist mit :fx",
     "description": "Helper text"
   },
-  "sourceNameLyricsPlus": {
-    "message": "Lyrics+ (Nutzerbeiträge)",
-    "description": "Display name for lyricsplus source"
-  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

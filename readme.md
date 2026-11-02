@@ -140,7 +140,7 @@ YouLy+ integrates with several third-party lyrics providers. By using this exten
 * **[lrc.red](https://lrc.red):** Apple Music word-synced lyrics database.
 * **[Unison](https://github.com/better-lyrics/unison):** As our alternate word-sync API lyrics using data from the Better-Lyrics community.
 * **[LRCLIB](https://github.com/tranxuanthang/lrclib):** A massive, crowdsourced database API that used as a primary fallback for synchronized lyrics.
-* **Lyrics+ Backend:** Our internal engine that prioritizes official metadata from Apple Music, QQ Music, and Musixmatch to ensure professional-grade accuracy. while it has our own community-driven source too!
+* **Lyrics+ Backend:** Our internal engine that prioritizes official metadata from Apple Music, QQ Music, and Musixmatch to ensure professional-grade accuracy. Community lyrics are asked to migrate to Unison.
 
 ## Development
 
