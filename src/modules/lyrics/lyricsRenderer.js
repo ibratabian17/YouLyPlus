@@ -2008,113 +2008,52 @@ class LyricsPlusRenderer {
       songWritersDiv.append(label, document.createTextNode(" " + writers.join(", ")));
       metadataContainer.appendChild(songWritersDiv);
     }
-    const detectedProvider = (
-      lyrics.provider ||
-      lyrics.metadata?.provider ||
-      (typeof detectLyricsProviderFromSource === 'function' ? detectLyricsProviderFromSource(lyrics.metadata?.source) : '') ||
-      ''
-    ).toLowerCase();
-
-    const isUnison =
-      detectedProvider === 'unison' ||
-      lyrics.metadata?.source?.toLowerCase() === 'unison';
-
-    if (isUnison || isValidLyricsSource(lyrics.metadata?.source, this.currentSettings, lyrics)) {
+    if (isValidLyricsSource(lyrics.metadata?.source, this.currentSettings, lyrics)) {
       const sourceDiv = document.createElement("span");
       sourceDiv.className = "lyrics-source-provider";
 
       const sourceLabel = t("source") || "Lyrics provided by: ";
       sourceDiv.appendChild(document.createTextNode(sourceLabel));
 
-      const rawSource = lyrics.metadata?.source || (isUnison ? 'Unison' : '');
-      const sourceLower = rawSource.toLowerCase();
-
-      // Resolve source link URL
-      let sourceUrl = null;
-      let sourceDisplayName = rawSource;
-
-      if (isUnison) {
-        sourceDisplayName = 'Unison';
-        const videoId = lyrics.metadata?.videoId || lyrics.videoId || this.lastKnownSongInfo?.videoId;
-        const unisonId = lyrics.metadata?.unisonId || lyrics.id;
-        if (videoId) {
-          sourceUrl = `https://unison.betterlyrics.org/song/${encodeURIComponent(videoId)}${unisonId ? `?variantId=${encodeURIComponent(unisonId)}` : ''}`;
-        } else if (unisonId) {
-          sourceUrl = `https://unison.betterlyrics.org/song/?variantId=${encodeURIComponent(unisonId)}`;
-        } else {
-          sourceUrl = 'https://unison.betterlyrics.org/';
-        }
-      } else if (
-        detectedProvider === 'lrcred' ||
-        detectedProvider === 'binilyrics' ||
-        sourceLower.includes('lrc.red') ||
-        sourceLower.includes('lrcred') ||
-        sourceLower.includes('lrc-red') ||
-        sourceLower.includes('binilyrics')
-      ) {
-        const isrc = lyrics.metadata?.isrc || lyrics.isrc || this.lastKnownSongInfo?.isrc;
-        sourceUrl = isrc ? `https://lrc.red/s/${encodeURIComponent(isrc)}` : 'https://lrc.red/';
-      } else if (
-        detectedProvider === 'lrclib' ||
-        sourceLower.includes('lrclib')
-      ) {
-        const trackId = lyrics.metadata?.id || lyrics.metadata?.trackId || lyrics.id;
-        sourceUrl = trackId ? `https://lrclib.net/tracks/${encodeURIComponent(trackId)}` : 'https://lrclib.net/';
-      } else if (
-        detectedProvider === 'kpoe' ||
-        detectedProvider === 'customkpoe' ||
-        sourceLower.includes('lyrics+') ||
-        sourceLower.includes('kpoe')
-      ) {
-        const title = lyrics.metadata?.title || this.lastKnownSongInfo?.title || '';
-        const artist = lyrics.metadata?.artist || this.lastKnownSongInfo?.artist || '';
-        const album = lyrics.metadata?.album || this.lastKnownSongInfo?.album || '';
-        const dur = lyrics.metadata?.duration || this.lastKnownSongInfo?.duration || 0;
-
-        const params = new URLSearchParams();
-        if (title) params.set('title', title);
-        if (artist) params.set('artist', artist);
-        if (album) params.set('album', album);
-        if (dur > 0) params.set('duration', Math.round(dur));
-
-        sourceUrl = `https://youlyplus.prjktla.my.id/findlyrics.html?${params.toString()}`;
-      }
+      const sourceName = lyrics.metadata.source;
+      const sourceUrl = lyrics.metadata?.sourceUrl || lyrics.metadata?.url;
 
       if (sourceUrl) {
         const sourceLink = document.createElement("a");
         sourceLink.href = sourceUrl;
         sourceLink.target = "_blank";
         sourceLink.rel = "noopener noreferrer";
-        sourceLink.textContent = sourceDisplayName;
+        sourceLink.textContent = sourceName;
         sourceLink.style.color = "inherit";
         sourceLink.style.textDecoration = "none";
         sourceLink.addEventListener("click", (e) => e.stopPropagation());
         sourceDiv.appendChild(sourceLink);
       } else {
-        sourceDiv.appendChild(document.createTextNode(sourceDisplayName));
+        sourceDiv.appendChild(document.createTextNode(sourceName));
       }
 
-      const submitter = lyrics.metadata?.submitter || lyrics.metadata?.curator;
-      const displayName = typeof submitter === 'object' && submitter
-        ? (submitter.displayName || submitter.name)
-        : (typeof submitter === 'string' ? submitter : null);
+      const curator = lyrics.metadata?.curator || lyrics.metadata?.submitter;
+      const curatorName = typeof curator === "string"
+        ? curator
+        : (typeof curator === "object" && curator ? (curator.displayName || curator.name) : null);
 
-      if (displayName) {
+      if (curatorName) {
         const syncedPrefix = t("syncedBy") || "Synced by ";
         sourceDiv.appendChild(document.createTextNode(` (${syncedPrefix}`));
 
-        if (typeof submitter === 'object' && submitter?.keyId && isUnison) {
+        const curatorUrl = lyrics.metadata?.curatorUrl || (typeof curator === "object" ? curator?.url : null);
+        if (curatorUrl) {
           const curatorLink = document.createElement("a");
-          curatorLink.href = `https://unison.betterlyrics.org/curator/${encodeURIComponent(submitter.keyId)}`;
+          curatorLink.href = curatorUrl;
           curatorLink.target = "_blank";
           curatorLink.rel = "noopener noreferrer";
-          curatorLink.textContent = displayName;
+          curatorLink.textContent = curatorName;
           curatorLink.style.color = "inherit";
           curatorLink.style.textDecoration = "none";
           curatorLink.addEventListener("click", (e) => e.stopPropagation());
           sourceDiv.appendChild(curatorLink);
         } else {
-          sourceDiv.appendChild(document.createTextNode(displayName));
+          sourceDiv.appendChild(document.createTextNode(curatorName));
         }
 
         sourceDiv.appendChild(document.createTextNode(")"));
