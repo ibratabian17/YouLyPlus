@@ -40,7 +40,13 @@ export class LRCLibService {
       if (!response.ok) return null;
       
       const data = await response.json();
-      return DataParser.parseLRCLibFormat(data);
+      const parsed = DataParser.parseLRCLibFormat(data);
+      if (parsed) {
+        parsed.provider = 'lrclib';
+        if (!parsed.metadata) parsed.metadata = {};
+        parsed.metadata.provider = 'lrclib';
+      }
+      return parsed;
     } catch (error) {
       console.error("LRCLIB error:", error);
       return null;

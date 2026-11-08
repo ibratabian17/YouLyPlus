@@ -71,7 +71,23 @@ export class KPoeService {
 
       if (response.ok) {
         const data = await response.json();
-        return DataParser.parseKPoeFormat(data);
+        const parsed = DataParser.parseKPoeFormat(data);
+        if (parsed) {
+          const title = parsed.metadata?.title || songInfo.title || '';
+          const artist = parsed.metadata?.artist || songInfo.artist || '';
+          const album = parsed.metadata?.album || songInfo.album || '';
+          const dur = parsed.metadata?.duration || songInfo.duration || 0;
+
+          const queryParams = new URLSearchParams();
+          if (title) queryParams.set('title', title);
+          if (artist) queryParams.set('artist', artist);
+          if (album) queryParams.set('album', album);
+          if (dur > 0) queryParams.set('duration', Math.round(dur));
+
+          if (!parsed.metadata) parsed.metadata = {};
+          parsed.metadata.sourceUrl = `https://youlyplus.prjktla.my.id/findlyrics.html?${queryParams.toString()}`;
+        }
+        return parsed;
       }
 
       if (response.status === 404 || response.status === 403) {

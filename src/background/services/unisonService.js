@@ -10,7 +10,7 @@ export class UnisonService {
   static async fetch(songInfo, fetchOptions = {}) {
     // Try video ID lookup first (exact match)
     if (songInfo.videoId) {
-      const result = await this.fetchByVideoId(songInfo.videoId, fetchOptions);
+      const result = await this.fetchByVideoId(songInfo.videoId, fetchOptions, songInfo);
       if (result) return result;
     }
 
@@ -33,13 +33,15 @@ export class UnisonService {
     return null;
   }
 
-  static async fetchByVideoId(videoId, fetchOptions) {
+  static async fetchByVideoId(videoId, fetchOptions, songInfo = {}) {
     const url = `${UNISON_BASE_URL}/lyrics?v=${encodeURIComponent(videoId)}`;
-    const result = await this.fetchAndParse(url, fetchOptions);
+    const result = await this.fetchAndParse(url, fetchOptions, { ...songInfo, videoId });
     if (result) {
       result.byVideoId = true;
       if (!result.metadata) result.metadata = {};
       result.metadata.byVideoId = true;
+      result.metadata.provider = 'unison';
+      result.provider = 'unison';
     }
     return result;
   }
@@ -54,16 +56,18 @@ export class UnisonService {
     if (songInfo.duration > 0) params.append('duration', songInfo.duration);
 
     const url = `${UNISON_BASE_URL}/lyrics?${params}`;
-    const result = await this.fetchAndParse(url, fetchOptions);
+    const result = await this.fetchAndParse(url, fetchOptions, songInfo);
     if (result) {
       result.byVideoId = false;
       if (!result.metadata) result.metadata = {};
       result.metadata.byVideoId = false;
+      result.metadata.provider = 'unison';
+      result.provider = 'unison';
     }
     return result;
   }
 
-  static async fetchAndParse(url, fetchOptions) {
+  static async fetchAndParse(url, fetchOptions, songInfo = {}) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -79,7 +83,7 @@ export class UnisonService {
       const json = await response.json();
       if (!json.success || !json.data) return null;
 
-      return DataParser.parseUnisonFormat(json.data);
+      return DataParser.parseUnisonFormat(json.data, songInfo);
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Unison error:', error);

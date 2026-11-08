@@ -75,12 +75,16 @@ export class LrcredService {
         return null;
       }
 
+      const isrc = match.isrc || match.id || songInfo.isrc || null;
+      const sourceUrl = isrc ? `https://lrc.red/s/${encodeURIComponent(isrc)}` : 'https://lrc.red/';
       kpoeData.metadata = {
         ...kpoeData.metadata,
         title: match.track_name || songInfo.title,
         artist: match.artist_name || songInfo.artist,
         album: match.album_name || songInfo.album,
+        isrc,
         source: 'lrc.red',
+        sourceUrl,
         provider: 'lrcred'
       };
 
@@ -89,6 +93,8 @@ export class LrcredService {
         parsed.provider = 'lrcred';
         if (!parsed.metadata) parsed.metadata = {};
         parsed.metadata.provider = 'lrcred';
+        parsed.metadata.isrc = isrc;
+        parsed.metadata.sourceUrl = sourceUrl;
       }
       return parsed;
     } catch (error) {

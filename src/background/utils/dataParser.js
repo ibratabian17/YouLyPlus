@@ -91,15 +91,21 @@ export class DataParser {
       })
       .filter(line => line.text.trim() !== "♪" && line.text.trim() !== "");
 
+    const sourceUrl = data.id ? `https://lrclib.net/tracks/${encodeURIComponent(data.id)}` : 'https://lrclib.net/';
+
     return {
       type: 'Line',
       data: parsedLines,
       metadata: {
+        id: data.id,
+        trackId: data.id,
         title: data.trackName,
         artist: data.artistName,
         album: data.albumName,
         duration: data.duration,
-        source: "LRCLIB"
+        source: "LRCLIB",
+        sourceUrl,
+        provider: "lrclib"
       }
     };
   }
@@ -219,7 +225,7 @@ export class DataParser {
     };
   }
 
-  static parseUnisonFormat(data) {
+  static parseUnisonFormat(data, songInfo = {}) {
     if (!data?.lyrics) return null;
 
     const format = (data.format || '').toLowerCase();
@@ -229,28 +235,86 @@ export class DataParser {
     const typeMap = { richsync: 'Word', linesync: 'Line', plain: 'None' };
     const internalType = typeMap[syncType] || 'Line';
 
+    const videoId = data.videoId || songInfo?.videoId || null;
+    const unisonId = data.id || null;
+    const submitter = data.submitter || null;
+
+    let sourceUrl = 'https://unison.betterlyrics.org/';
+    if (videoId) {
+      sourceUrl = `https://unison.betterlyrics.org/song/${encodeURIComponent(videoId)}${unisonId ? `?variantId=${encodeURIComponent(unisonId)}` : ''}`;
+    } else if (unisonId) {
+      sourceUrl = `https://unison.betterlyrics.org/song/?variantId=${encodeURIComponent(unisonId)}`;
+    }
+
+    const curator = typeof submitter === 'object' && submitter
+      ? (submitter.displayName || submitter.name || null)
+      : (typeof submitter === 'string' ? submitter : null);
+
+    const curatorUrl = typeof submitter === 'object' && submitter?.keyId
+      ? `https://unison.betterlyrics.org/curator/${encodeURIComponent(submitter.keyId)}`
+      : null;
+
     const metadata = {
-      title: data.song || '',
-      artist: data.artist || '',
-      album: data.album || '',
+      title: data.song || songInfo?.title || '',
+      artist: data.artist || songInfo?.artist || '',
+      album: data.album || songInfo?.album || '',
       language: data.language || '',
-      source: 'Unison'
+      source: 'Unison',
+      sourceUrl,
+      curator,
+      curatorUrl,
+      provider: 'unison',
+      videoId,
+      unisonId,
+      submitter
     };
 
     if (format === 'ttml') {
       const kpoeData = parseAppleTTML(data.lyrics);
       if (!kpoeData?.lyrics?.length) return null;
 
-      kpoeData.metadata.source = 'Unison';
-      return this.parseKPoeFormat(kpoeData);
+      kpoeData.metadata = {
+        ...(kpoeData.metadata || {}),
+        ...metadata,
+        source: 'Unison',
+        provider: 'unison'
+      };
+      const parsed = this.parseKPoeFormat(kpoeData);
+      if (parsed) {
+        parsed.provider = 'unison';
+        parsed.metadata = {
+          ...(parsed.metadata || {}),
+          ...metadata,
+          source: 'Unison',
+          provider: 'unison',
+          songWriters: parsed.metadata?.songWriters || kpoeData.metadata?.songWriters || []
+        };
+      }
+      return parsed;
     }
 
     if (format === 'lrc') {
       const kpoeData = parseSyncedLyrics(data.lyrics);
       if (!kpoeData?.lyrics?.length) return null;
 
-      kpoeData.metadata.source = 'Unison';
-      return this.parseKPoeFormat(kpoeData);
+      kpoeData.metadata = {
+        ...(kpoeData.metadata || {}),
+        ...metadata,
+        source: 'Unison',
+        provider: 'unison'
+      };
+      const parsed = this.parseKPoeFormat(kpoeData);
+      if (parsed) {
+        parsed.provider = 'unison';
+        parsed.metadata = {
+          ...(parsed.metadata || {}),
+          ...metadata,
+          source: 'Unison',
+          provider: 'unison',
+          songWriters: parsed.metadata?.songWriters || kpoeData.metadata?.songWriters || []
+        };
+      }
+      return parsed;
     }
 
     const lines = data.lyrics.split('\n').filter(l => l.trim());
@@ -258,6 +322,7 @@ export class DataParser {
 
     return {
       type: 'None',
+      provider: 'unison',
       data: lines.map(text => ({
         text: text.trim(),
         startTime: 0,
