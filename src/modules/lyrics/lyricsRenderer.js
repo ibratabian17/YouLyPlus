@@ -2008,7 +2008,7 @@ class LyricsPlusRenderer {
       songWritersDiv.append(label, document.createTextNode(" " + writers.join(", ")));
       metadataContainer.appendChild(songWritersDiv);
     }
-    if (isValidLyricsSource(lyrics.metadata?.source, this.currentSettings, lyrics)) {
+    if (lyrics.metadata?.source && (lyrics.metadata?.sourceUrl || isValidLyricsSource(lyrics.metadata?.source, this.currentSettings, lyrics))) {
       const sourceDiv = document.createElement("span");
       sourceDiv.className = "lyrics-source-provider";
 
@@ -2026,7 +2026,12 @@ class LyricsPlusRenderer {
         sourceLink.textContent = sourceName;
         sourceLink.style.color = "inherit";
         sourceLink.style.textDecoration = "none";
-        sourceLink.addEventListener("click", (e) => e.stopPropagation());
+        sourceLink.style.cursor = "pointer";
+        sourceLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.open(sourceUrl, "_blank", "noopener,noreferrer");
+        });
         sourceDiv.appendChild(sourceLink);
       } else {
         sourceDiv.appendChild(document.createTextNode(sourceName));
@@ -2050,7 +2055,12 @@ class LyricsPlusRenderer {
           curatorLink.textContent = curatorName;
           curatorLink.style.color = "inherit";
           curatorLink.style.textDecoration = "none";
-          curatorLink.addEventListener("click", (e) => e.stopPropagation());
+          curatorLink.style.cursor = "pointer";
+          curatorLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(curatorUrl, "_blank", "noopener,noreferrer");
+          });
           sourceDiv.appendChild(curatorLink);
         } else {
           sourceDiv.appendChild(document.createTextNode(curatorName));

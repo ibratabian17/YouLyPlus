@@ -127,11 +127,15 @@ export class LyricsService {
         lyrics: parsedApple || DataParser.parseKPoeFormat(songInfo.lyricsJSON),
         version: Date.now()
       };
+      if (embeddedResult.lyrics) {
+        this.ensureAttribution(embeddedResult.lyrics, songInfo);
+      }
 
       if (!settings.appleMusicTTMLBypass || lyricsJsonType === "WORD") {
         if (!forceReload && state.hasCached(cacheKey)) {
           const cached = state.getCached(cacheKey);
           if (cached && !Utilities.isEmptyLyrics(cached.lyrics)) {
+            this.ensureAttribution(cached.lyrics, songInfo);
             return cached;
           }
         }
@@ -229,8 +233,15 @@ export class LyricsService {
       }
 
       console.log(`External lyrics type is ${extType || 'unsynced'}. Reverting to embedded Apple Music line-synced lyrics.`);
+      if (embeddedFallback?.lyrics) {
+        this.ensureAttribution(embeddedFallback.lyrics, songInfo);
+      }
       state.setCached(cacheKey, embeddedFallback);
       return embeddedFallback;
+    }
+
+    if (result?.lyrics) {
+      this.ensureAttribution(result.lyrics, songInfo);
     }
 
     return result;
@@ -359,6 +370,7 @@ export class LyricsService {
           if (!finalLyrics.metadata) finalLyrics.metadata = {};
           finalLyrics.metadata.songWriters = songInfo.songWriters;
         }
+        this.ensureAttribution(finalLyrics, songInfo);
         this.cacheProviderLyrics(cacheKey, winningProvider, finalLyrics);
       }
 
@@ -586,6 +598,81 @@ export class LyricsService {
     return PROVIDERS.KPOE;
   }
 
+  static ensureAttribution(lyrics, songInfo = {}) {
+    if (!lyrics) return;
+    if (!lyrics.metadata) lyrics.metadata = {};
+
+    const provider = (lyrics.provider || lyrics.metadata.provider || this.detectProvider(lyrics) || '').toLowerCase();
+    const source = (lyrics.metadata.source || '').toLowerCase();
+
+    // 1. Unison
+    if (provider === 'unison' || source === 'unison') {
+      if (!lyrics.metadata.source) lyrics.metadata.source = 'Unison';
+      if (!lyrics.metadata.sourceUrl) {
+        const videoId = lyrics.metadata.videoId || songInfo.videoId;
+        const unisonId = lyrics.metadata.unisonId || lyrics.id;
+        if (videoId) {
+          lyrics.metadata.sourceUrl = `https://unison.betterlyrics.org/song/${encodeURIComponent(videoId)}${unisonId ? `?variantId=${encodeURIComponent(unisonId)}` : ''}`;
+        } else if (unisonId) {
+          lyrics.metadata.sourceUrl = `https://unison.betterlyrics.org/song/?variantId=${encodeURIComponent(unisonId)}`;
+        } else {
+          lyrics.metadata.sourceUrl = 'https://unison.betterlyrics.org/';
+        }
+      }
+      const submitter = lyrics.metadata.submitter || lyrics.metadata.curator;
+      if (!lyrics.metadata.curatorUrl && typeof submitter === 'object' && submitter?.keyId) {
+        lyrics.metadata.curatorUrl = `https://unison.betterlyrics.org/curator/${encodeURIComponent(submitter.keyId)}`;
+      }
+      if (!lyrics.metadata.curator && submitter) {
+        lyrics.metadata.curator = typeof submitter === 'object'
+          ? (submitter.displayName || submitter.name)
+          : submitter;
+      }
+    }
+    // 2. lrc.red
+    else if (provider === 'lrcred' || provider === 'binilyrics' || source.includes('lrc.red') || source.includes('lrcred') || source.includes('bini')) {
+      if (!lyrics.metadata.source) lyrics.metadata.source = 'lrc.red';
+      if (!lyrics.metadata.sourceUrl) {
+        const isrc = lyrics.metadata.isrc || lyrics.isrc || songInfo.isrc;
+        lyrics.metadata.sourceUrl = isrc ? `https://lrc.red/s/${encodeURIComponent(isrc)}` : 'https://lrc.red/';
+      }
+    }
+    // 3. LRCLIB
+    else if (provider === 'lrclib' || source.includes('lrclib')) {
+      if (!lyrics.metadata.source) lyrics.metadata.source = 'LRCLIB';
+      if (!lyrics.metadata.sourceUrl) {
+        const trackId = lyrics.metadata.id || lyrics.metadata.trackId || lyrics.id;
+        lyrics.metadata.sourceUrl = trackId ? `https://lrclib.net/tracks/${encodeURIComponent(trackId)}` : 'https://lrclib.net/';
+      }
+    }
+    // 4. KPoe / Lyrics+
+    else if (
+      provider === 'kpoe' ||
+      provider === 'customkpoe' ||
+      source.includes('lyrics+') ||
+      source.includes('kpoe') ||
+      source.includes('apple') ||
+      source.includes('spotify') ||
+      source.includes('musixmatch') ||
+      source.includes('qq')
+    ) {
+      if (!lyrics.metadata.sourceUrl) {
+        const title = lyrics.metadata.title || songInfo.title || '';
+        const artist = lyrics.metadata.artist || songInfo.artist || '';
+        const album = lyrics.metadata.album || songInfo.album || '';
+        const dur = lyrics.metadata.duration || songInfo.duration || 0;
+
+        const params = new URLSearchParams();
+        if (title) params.set('title', title);
+        if (artist) params.set('artist', artist);
+        if (album) params.set('album', album);
+        if (dur > 0) params.set('duration', Math.round(dur));
+
+        lyrics.metadata.sourceUrl = `https://youlyplus.prjktla.my.id/findlyrics.html?${params.toString()}`;
+      }
+    }
+  }
+
   static async fetchFromProvider(provider, songInfo, settings, fetchOptions, forceReload, signal) {
     const opts = { ...fetchOptions, signal };
     let lyrics = null;
@@ -677,6 +764,7 @@ export class LyricsService {
     }
 
     if (lyrics && !Utilities.isEmptyLyrics(lyrics)) {
+      this.ensureAttribution(lyrics, songInfo);
       const version = Date.now();
       const result = { lyrics, version, fromCache };
       state.setCached(cacheKey, { lyrics, version });
@@ -733,6 +821,7 @@ export class LyricsService {
     if (!lyrics.metadata) lyrics.metadata = {};
     lyrics.metadata.provider = source;
     lyrics.provider = source;
+    this.ensureAttribution(lyrics, songInfo);
     this.cacheProviderLyrics(cacheKey, source, lyrics);
 
     const version = Date.now();

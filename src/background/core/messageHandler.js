@@ -57,6 +57,9 @@ export class MessageHandler {
   static async fetchLyrics(message, sendResponse) {
     try {
       const { lyrics } = await LyricsService.getOrFetch(message.songInfo, message.forceReload, message.requestedSource);
+      if (lyrics) {
+        LyricsService.ensureAttribution(lyrics, message.songInfo);
+      }
       const availableProviders = await LyricsService.getAvailableProviders(message.songInfo);
       sendResponse({ success: true, lyrics, metadata: message.songInfo, availableProviders });
     } catch (error) {
@@ -276,6 +279,7 @@ export class MessageHandler {
     try {
       const result = await LyricsService.getProviderLyrics(message.songInfo, message.provider);
       if (result && result.lyrics) {
+        LyricsService.ensureAttribution(result.lyrics, message.songInfo);
         const availableProviders = await LyricsService.getAvailableProviders(message.songInfo);
         sendResponse({ success: true, lyrics: result.lyrics, provider: message.provider, fromCache: result.fromCache, availableProviders });
       } else {
