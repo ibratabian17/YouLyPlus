@@ -122,6 +122,19 @@ function combineLyricsData(baseLyrics, translation, romanization) {
       if (translatedLine?.translatedText) {
         mergedLine.translatedText = translatedLine.translatedText;
       }
+      if (translatedLine?.translatedBackgroundText) {
+        mergedLine.translatedBackgroundText = translatedLine.translatedBackgroundText;
+      }
+      if (translatedLine?.isReplacement) {
+        mergedLine.isReplacement = true;
+        mergedLine.replacementText = translatedLine.replacementText || translatedLine.translatedText || mergedLine.text;
+        const repSyls = translatedLine.replacementSyllabus || translatedLine.chunk || translatedLine.translatedSyllabus;
+        if (Array.isArray(repSyls) && repSyls.length > 0) {
+          mergedLine.replacementSyllabus = repSyls.map(s => ({ ...s }));
+        }
+      } else if (Array.isArray(translatedLine?.translatedSyllabus) && translatedLine.translatedSyllabus.length > 0) {
+        mergedLine.translatedSyllabus = translatedLine.translatedSyllabus.map(s => ({ ...s }));
+      }
 
       if (romanizedLine) {
         const hasWordSyncedRomanization =
@@ -137,8 +150,18 @@ function combineLyricsData(baseLyrics, translation, romanization) {
               romanizedText: romanizedSyllable?.text || syllable.text
             };
           });
-        } else if (romanizedLine.text) {
-          mergedLine.romanizedText = romanizedLine.text;
+        }
+        if (isWordLyrics && romanizedLine.chunk?.length > 0 && mergedLine.replacementSyllabus?.length > 0) {
+          mergedLine.replacementSyllabus = mergedLine.replacementSyllabus.map((syllable, sylIndex) => {
+            const romanizedSyllable = romanizedLine.chunk[sylIndex];
+            return {
+              ...syllable,
+              romanizedText: romanizedSyllable?.text || syllable.romanizedText || syllable.text
+            };
+          });
+        }
+        if (romanizedLine.text || romanizedLine.romanizedText) {
+          mergedLine.romanizedText = romanizedLine.text || romanizedLine.romanizedText;
         }
       }
 
@@ -188,7 +211,7 @@ function convertWordLyricsToLine(lyrics) {
 
   return {
     type: "Line",
-    data: lyrics.data.map(line => ({ ...line, syllabus: [] })),
+    data: lyrics.data.map(line => ({ ...line, syllabus: [], replacementSyllabus: undefined, translatedSyllabus: undefined })),
     metadata: lyrics.metadata,
     ignoreSponsorblock: lyrics.ignoreSponsorblock,
     provider: lyrics.provider,

@@ -8,6 +8,8 @@ import { SettingsManager } from '../storage/settings.js';
 import { PROVIDERS } from '../constants.js';
 import { Utilities } from '../utils/utilities.js';
 import { LyricsService } from './lyricsService.js';
+import { DataParser } from '../utils/dataParser.js';
+import { getPrimaryLanguageCode, findFallbackLanguage } from '../../lib/parser.js';
 
 import { GoogleProvider } from '../services/translation/providers/GoogleProvider.js';
 import { GeminiProvider } from '../services/translation/providers/GeminiProvider.js';
@@ -124,20 +126,54 @@ export class TranslationService {
     return originalLyrics.data;
   }
 
+  static resolveEmbeddedTranslation(line, targetLang) {
+    if (!line || !targetLang) return null;
+
+    if (line.translations && typeof line.translations === 'object') {
+      const availableLangs = Object.keys(line.translations);
+      const matchedLang = findFallbackLanguage(availableLangs, targetLang);
+      if (matchedLang && line.translations[matchedLang]?.text) {
+        return line.translations[matchedLang];
+      }
+    }
+
+    if (line.scripts && typeof line.scripts === 'object') {
+      const availableScriptLangs = Object.keys(line.scripts);
+      const matchedScriptLang = findFallbackLanguage(availableScriptLangs, targetLang);
+      if (matchedScriptLang && line.scripts[matchedScriptLang]?.text) {
+        return line.scripts[matchedScriptLang];
+      }
+    }
+
+    const embedded = line.translation;
+    if (embedded && embedded.text) {
+      const targetPrimary = getPrimaryLanguageCode(targetLang).toLowerCase();
+      const embeddedPrimary = getPrimaryLanguageCode(embedded.lang || '').toLowerCase();
+      if (embeddedPrimary && embeddedPrimary === targetPrimary) {
+        return embedded;
+      }
+    }
+
+    return null;
+  }
+
   static async translate(originalLyrics, targetLang, settings, songInfo = {}) {
     const provider = this.getProvider(settings.translationProvider, settings);
-
-    const normalizeLang = (l) => l ? l.toLowerCase().split('-')[0].trim() : '';
-    const targetBase = normalizeLang(targetLang);
 
     const linesToTranslate = [];
     const indicesToTranslate = [];
     const finalTranslations = new Array(originalLyrics.data.length).fill(null);
+    const resolvedTranslationObjects = new Array(originalLyrics.data.length).fill(null);
 
     originalLyrics.data.forEach((line, index) => {
-      const embedded = line.translation;
-      if (embedded && embedded.text && normalizeLang(embedded.lang) === targetBase) {
-        finalTranslations[index] = embedded.text;
+      const matched = this.resolveEmbeddedTranslation(line, targetLang);
+      if (matched && matched.text) {
+        resolvedTranslationObjects[index] = matched;
+        let combinedTransText = matched.text;
+        if (matched.backgroundText && !combinedTransText.includes(matched.backgroundText)) {
+          combinedTransText = `${combinedTransText} (${matched.backgroundText})`;
+        }
+        finalTranslations[index] = combinedTransText;
       } else {
         linesToTranslate.push(line.text);
         indicesToTranslate.push(index);
@@ -166,10 +202,32 @@ export class TranslationService {
       });
     }
 
-    return originalLyrics.data.map((line, index) => ({
-      ...line,
-      translatedText: finalTranslations[index] || line.text
-    }));
+    return originalLyrics.data.map((line, index) => {
+      const matchedObj = resolvedTranslationObjects[index];
+      const out = {
+        ...line,
+        translatedText: finalTranslations[index] || line.text
+      };
+      if (matchedObj) {
+        out.translation = matchedObj;
+        const isReplacement = !!(matchedObj.type === 'replacement' || matchedObj.isReplacement);
+        if (isReplacement) {
+          out.isReplacement = true;
+          out.replacementText = matchedObj.text || out.translatedText;
+          if (Array.isArray(matchedObj.syllabus) && matchedObj.syllabus.length > 0) {
+            out.replacementSyllabus = matchedObj.syllabus;
+          }
+        }
+        if (Array.isArray(matchedObj.syllabus) && matchedObj.syllabus.length > 0) {
+          out.translatedSyllabus = matchedObj.syllabus;
+          out.chunk = matchedObj.syllabus;
+        }
+        if (matchedObj.backgroundText) {
+          out.translatedBackgroundText = matchedObj.backgroundText;
+        }
+      }
+      return out;
+    });
   }
 
   /**
@@ -204,14 +262,41 @@ export class TranslationService {
   static async romanize(originalLyrics, settings, songInfo = {}, targetLang, targetScript = 'latin') {
     if (targetScript === 'latin') {
       const hasPrebuilt = originalLyrics.data.some(line =>
-        line.romanizedText || (line.syllabus && line.syllabus.some(syl => syl.romanizedText))
+        line.romanizedText ||
+        (line.syllabus && line.syllabus.some(syl => syl.romanizedText)) ||
+        (line.transliterations && Object.keys(line.transliterations).length > 0)
       );
 
       if (hasPrebuilt) {
         console.log("Using prebuilt romanization");
-        return originalLyrics.data.map(line => ({
-          text: line.romanizedText || line.text
-        }));
+        return originalLyrics.data.map(line => {
+          let chosenTranslit = line.transliteration;
+          if (line.transliterations && typeof line.transliterations === 'object') {
+            const avail = Object.keys(line.transliterations);
+            const matchedLang = (targetLang && findFallbackLanguage(avail, targetLang)) || avail[0];
+            if (matchedLang && line.transliterations[matchedLang]) {
+              chosenTranslit = line.transliterations[matchedLang];
+            }
+          }
+
+          let alignedSyls = line.syllabus;
+          if (chosenTranslit && Array.isArray(line.syllabus) && line.syllabus.length > 0) {
+            const newlyAligned = DataParser.alignTransliterationSyllabus(line.syllabus, chosenTranslit);
+            if (newlyAligned) alignedSyls = newlyAligned;
+          }
+
+          const hasWordRoman = Array.isArray(alignedSyls) && alignedSyls.some(s => s.romanizedText);
+          const chunk = hasWordRoman
+            ? alignedSyls.map(s => ({ text: s.romanizedText || s.text }))
+            : undefined;
+          const resolvedText = chosenTranslit?.text || line.romanizedText || line.text;
+
+          return {
+            text: resolvedText,
+            romanizedText: resolvedText,
+            chunk
+          };
+        });
       }
     }
 

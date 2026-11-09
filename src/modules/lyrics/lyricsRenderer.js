@@ -580,19 +580,41 @@ class LyricsPlusRenderer {
     return changed ? out : syllabus;
   }
 
+  _isReplacementActive(line, displayMode = this.currentDisplayMode) {
+    return (
+      (displayMode === "translate" || displayMode === "both") &&
+      !!(
+        line &&
+        line.isReplacement &&
+        (line.replacementText || (Array.isArray(line.replacementSyllabus) && line.replacementSyllabus.length > 0))
+      )
+    );
+  }
+
+  _getActiveSyllabus(line, displayMode = this.currentDisplayMode) {
+    if (!line) return [];
+    if (this._isReplacementActive(line, displayMode) && Array.isArray(line.replacementSyllabus) && line.replacementSyllabus.length > 0) {
+      return line.replacementSyllabus;
+    }
+    return line.syllabus || [];
+  }
+
   _getDataText(normal, isOriginal = true) {
     if (!normal) return "";
 
+    const baseText = this._isReplacementActive(normal)
+      ? (normal.replacementText || normal.translatedText || normal.text || "")
+      : (normal.text || "");
     const isRomanizationMode = this.largerTextMode === "romanization";
 
     if (isOriginal) {
       return isRomanizationMode
-        ? normal.romanizedText || normal.text || ""
-        : normal.text || "";
+        ? normal.romanizedText || baseText
+        : baseText;
     } else {
       return isRomanizationMode
-        ? normal.text || ""
-        : normal.romanizedText || normal.text || "";
+        ? baseText
+        : normal.romanizedText || baseText;
     }
   }
 
@@ -870,9 +892,11 @@ class LyricsPlusRenderer {
     };
 
     lyrics.data.forEach((line, lineIdx) => {
-      if (line.syllabus) {
-        for (let si = 0; si < line.syllabus.length; si++) {
-          line.syllabus[si]._rawSylIdx = si;
+      const activeSyllabus = this._getActiveSyllabus(line, displayMode);
+      const activeLineText = this._getDataText(line, true);
+      if (activeSyllabus) {
+        for (let si = 0; si < activeSyllabus.length; si++) {
+          activeSyllabus[si]._rawSylIdx = si;
         }
       }
       const currentLine = document.createElement("div");
@@ -887,7 +911,7 @@ class LyricsPlusRenderer {
       currentLine.appendChild(currentLineContainer);
       currentLine._lineContainer = currentLineContainer;
       currentLine._rawLineData = line;
-      currentLine._rawSyllabus = line.syllabus || null;
+      currentLine._rawSyllabus = activeSyllabus || null;
 
       const assignedSide = lineSideAssignments && lineSideAssignments[lineIdx];
       const singerClass = assignedSide || (
@@ -918,12 +942,12 @@ class LyricsPlusRenderer {
       let pendingSyllable = null;
 
       const renderSyllabus = this._splitNeedSplitSyllables(
-        this._mergeJoiningSyllables(line.syllabus, (s) => this._getDataText(s, true))
+        this._mergeJoiningSyllables(activeSyllabus, (s) => this._getDataText(s, true))
       );
 
-      const isLineBiDi = line.text &&
-        this._isRTL(line.text) &&
-        LyricsPlusRenderer._BIDI_CHECK_RE.test(line.text);
+      const isLineBiDi = activeLineText &&
+        this._isRTL(activeLineText) &&
+        LyricsPlusRenderer._BIDI_CHECK_RE.test(activeLineText);
 
       const linkSyllables = (prevSyllable, nextSyllable) => {
         const physicsData = calculatePhysicsPreHighlightDelay(
@@ -1216,7 +1240,7 @@ class LyricsPlusRenderer {
         pendingSyllable = syllableElements.length > 0 ? syllableElements[syllableElements.length - 1] : null;
       };
 
-      if (line.syllabus && line.syllabus.length > 0) {
+      if (activeSyllabus && activeSyllabus.length > 0) {
         const logicalWordGroups = [];
         let currentGroupBuffer = [];
 
@@ -1295,21 +1319,21 @@ class LyricsPlusRenderer {
           }
         });
       } else {
-        mainContainer.textContent = line.text;
+        mainContainer.textContent = activeLineText;
       }
 
       if (!backgroundInnerWrap) {
         currentLine._bgWrap = null;
       }
 
-      const mainText = line.text || mainContainer.textContent;
+      const mainText = activeLineText || mainContainer.textContent;
       let applyRtlToLine = this._isRTL(mainText);
 
       if (applyRtlToLine && isLineBiDi) {
         let firstSyllableText = "";
 
-        if (line.syllabus && line.syllabus.length > 0) {
-          const firstValid = line.syllabus.find(s => LyricsPlusRenderer._LETTER_OR_NUM_RE.test(this._getDataText(s)));
+        if (activeSyllabus && activeSyllabus.length > 0) {
+          const firstValid = activeSyllabus.find(s => LyricsPlusRenderer._LETTER_OR_NUM_RE.test(this._getDataText(s)));
           if (firstValid) {
             firstSyllableText = this._getDataText(firstValid);
           }
@@ -1636,7 +1660,7 @@ class LyricsPlusRenderer {
     if (!parentLine || !lineData) return;
     parentLine._rawLineData = lineData;
     const rawSyls = parentLine._rawSyllabus;
-    const newSyls = lineData.syllabus;
+    const newSyls = this._getActiveSyllabus(lineData);
     if (rawSyls && Array.isArray(newSyls)) {
       const len = Math.min(rawSyls.length, newSyls.length);
       for (let i = 0; i < len; i++) {
@@ -1728,12 +1752,14 @@ class LyricsPlusRenderer {
     let builtRoman = false;
     let builtTrans = false;
     const parentLine = lineElement.parentElement;
-    const isRTL = this._isRTL(this._getDataText(lineData, true));
-    const hasSyl = Array.isArray(lineData.syllabus) && lineData.syllabus.length > 0;
+    const activeSyllabus = this._getActiveSyllabus(lineData, displayMode);
+    const activeLineText = this._getDataText(lineData, true);
+    const isRTL = this._isRTL(activeLineText);
+    const hasSyl = Array.isArray(activeSyllabus) && activeSyllabus.length > 0;
 
     if (displayMode === "romanize" || displayMode === "both") {
       const targetScript = (typeof currentSettings !== 'undefined' && currentSettings.transliterationTargetScript) || 'latin';
-      if (targetScript !== 'latin' || !this._isPurelyLatinScript(lineData.text)) {
+      if (targetScript !== 'latin' || !this._isPurelyLatinScript(activeLineText)) {
         const cachedWraps = lineElement._wraps;
         const isWordSynced = cachedWraps
           ? cachedWraps.length > 0
@@ -1741,7 +1767,7 @@ class LyricsPlusRenderer {
 
         const hasPerSyllableTransliteration =
           hasSyl &&
-          lineData.syllabus.some(s => {
+          activeSyllabus.some(s => {
             const orig = (this._getDataText(s, true) || "").trim();
             const trans = (this._getDataText(s, false) || "").trim();
             return trans && orig && trans !== orig;
@@ -1749,7 +1775,7 @@ class LyricsPlusRenderer {
 
         let romanSig = "";
         if (hasPerSyllableTransliteration && isWordSynced) {
-          romanSig = "W:" + lineData.syllabus.map(s => this._getDataText(s, false) || "").join("|");
+          romanSig = "W:" + activeSyllabus.map(s => this._getDataText(s, false) || "").join("|");
         } else if (lineData.romanizedText && lineData.text.trim() !== lineData.romanizedText.trim()) {
           romanSig = "L:" + this._getDataText(lineData, false);
         }
@@ -1761,7 +1787,7 @@ class LyricsPlusRenderer {
           this._syncLineRomanizationData(parentLine, lineData);
 
           if (hasPerSyllableTransliteration && isWordSynced) {
-            const translitIsRtl = lineData.syllabus.some(s => {
+            const translitIsRtl = activeSyllabus.some(s => {
               const trans = this._getDataText(s, false);
               return trans && this._isRTL(trans) && trans.trim() !== this._getDataText(s, true).trim();
             });
@@ -1861,8 +1887,8 @@ class LyricsPlusRenderer {
               const wraps = cachedWraps || Array.from(lineElement.querySelectorAll(".lyrics-syllable-wrap"));
               const lineSyllables = parentLine ? parentLine._cachedSyllableElements : null;
 
-              for (let i = 0; i < lineData.syllabus.length && i < wraps.length; i++) {
-                const s = lineData.syllabus[i];
+              for (let i = 0; i < activeSyllabus.length && i < wraps.length; i++) {
+                const s = activeSyllabus[i];
                 const wrap = wraps[i];
                 const wrapContainer = wrap.parentElement?.parentElement;
                 const isBackground = !!(wrapContainer && (
@@ -1938,33 +1964,40 @@ class LyricsPlusRenderer {
     }
 
     if (displayMode === "translate" || displayMode === "both") {
-      if (lineData.translatedText) {
-        if (!lineData._normText) lineData._normText = lineData.text.toLowerCase().replaceAll(' ', '').trim();
-        if (!lineData._normTranslated) lineData._normTranslated = lineData.translatedText.toLowerCase().replaceAll(' ', '').trim();
-      }
-      if (lineData.translatedText && lineData._normText !== lineData._normTranslated) {
-        let cont = lineElement._translationContainer;
-        if (!cont) {
-          cont = document.createElement("div");
-          cont.classList.add("lyrics-translation-container");
-          cont.textContent = lineData.translatedText;
-          cont._rawText = lineData.translatedText;
-          if (this._isRTL(lineData.translatedText)) {
-            cont.classList.add("rtl-text");
+      if (this._isReplacementActive(lineData, displayMode)) {
+        if (lineElement._translationContainer) {
+          lineElement._translationContainer.remove();
+          lineElement._translationContainer = null;
+        }
+      } else {
+        if (lineData.translatedText) {
+          if (!lineData._normText) lineData._normText = lineData.text.toLowerCase().replaceAll(' ', '').trim();
+          if (!lineData._normTranslated) lineData._normTranslated = lineData.translatedText.toLowerCase().replaceAll(' ', '').trim();
+        }
+        if (lineData.translatedText && lineData._normText !== lineData._normTranslated) {
+          let cont = lineElement._translationContainer;
+          if (!cont) {
+            cont = document.createElement("div");
+            cont.classList.add("lyrics-translation-container");
+            cont.textContent = lineData.translatedText;
+            cont._rawText = lineData.translatedText;
+            if (this._isRTL(lineData.translatedText)) {
+              cont.classList.add("rtl-text");
+            }
+            const bottomBg = parentLine?._bgWrap?.parentElement;
+            if (bottomBg && !bottomBg.classList.contains("onTop") && bottomBg.parentElement === lineElement) {
+              lineElement.insertBefore(cont, bottomBg);
+            } else {
+              lineElement.appendChild(cont);
+            }
+            lineElement._translationContainer = cont;
+            builtTrans = true;
+          } else if (cont._rawText !== lineData.translatedText) {
+            cont.textContent = lineData.translatedText;
+            cont._rawText = lineData.translatedText;
+            cont.classList.toggle("rtl-text", this._isRTL(lineData.translatedText));
+            builtTrans = true;
           }
-          const bottomBg = parentLine?._bgWrap?.parentElement;
-          if (bottomBg && !bottomBg.classList.contains("onTop") && bottomBg.parentElement === lineElement) {
-            lineElement.insertBefore(cont, bottomBg);
-          } else {
-            lineElement.appendChild(cont);
-          }
-          lineElement._translationContainer = cont;
-          builtTrans = true;
-        } else if (cont._rawText !== lineData.translatedText) {
-          cont.textContent = lineData.translatedText;
-          cont._rawText = lineData.translatedText;
-          cont.classList.toggle("rtl-text", this._isRTL(lineData.translatedText));
-          builtTrans = true;
         }
       }
     }
@@ -2172,7 +2205,22 @@ class LyricsPlusRenderer {
     return false;
   }
 
-  _canUpdateInPlace(lyrics, currentSettings) {
+  _hasAnyReplacementData(lyrics) {
+    if (!lyrics || !Array.isArray(lyrics.data)) return false;
+    for (let i = 0; i < lyrics.data.length; i++) {
+      const line = lyrics.data[i];
+      if (
+        line &&
+        line.isReplacement &&
+        (line.replacementText || (Array.isArray(line.replacementSyllabus) && line.replacementSyllabus.length > 0))
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  _canUpdateInPlace(lyrics, currentSettings, displayMode = this.currentDisplayMode) {
     const state = this._renderedState;
     const lines = this._renderedLyricLines;
     if (!state || !lines || !lyrics || !Array.isArray(lyrics.data)) return false;
@@ -2184,6 +2232,7 @@ class LyricsPlusRenderer {
     const provider = lyrics.provider || lyrics.metadata?.provider || lyrics.metadata?.source || "";
     const targetScript = (currentSettings && currentSettings.transliterationTargetScript) || "latin";
     const mainUsedRoman = this.largerTextMode === "romanization" && this._hasAnyRomanizationData(lyrics);
+    const mainUsedReplacement = (displayMode === "translate" || displayMode === "both") && this._hasAnyReplacementData(lyrics);
 
     if (
       state.songKey !== this._getSongRenderKey(this.lastKnownSongInfo) ||
@@ -2194,7 +2243,8 @@ class LyricsPlusRenderer {
       state.bkgOverlap !== !!currentSettings.bkgOverlap ||
       state.hidePhoneticDup !== !!currentSettings.hidePhoneticDup ||
       state.targetScript !== targetScript ||
-      state.mainUsedRoman !== mainUsedRoman
+      state.mainUsedRoman !== mainUsedRoman ||
+      state.mainUsedReplacement !== mainUsedReplacement
     ) {
       return false;
     }
@@ -2382,7 +2432,7 @@ class LyricsPlusRenderer {
    * @param {object} currentSettings - The current user settings.
    */
   updateDisplayMode(lyrics, displayMode, currentSettings) {
-    if (this._canUpdateInPlace(lyrics, currentSettings)) {
+    if (this._canUpdateInPlace(lyrics, currentSettings, displayMode)) {
       this._updateDisplayModeInPlace(lyrics, displayMode, currentSettings);
       return;
     }
@@ -2595,7 +2645,8 @@ class LyricsPlusRenderer {
       bkgOverlap: !!currentSettings.bkgOverlap,
       hidePhoneticDup: !!currentSettings.hidePhoneticDup,
       targetScript: (currentSettings && currentSettings.transliterationTargetScript) || "latin",
-      mainUsedRoman: this.largerTextMode === "romanization" && this._hasAnyRomanizationData(lyrics)
+      mainUsedRoman: this.largerTextMode === "romanization" && this._hasAnyRomanizationData(lyrics),
+      mainUsedReplacement: (displayMode === "translate" || displayMode === "both") && this._hasAnyReplacementData(lyrics)
     };
     const finalFragment = document.createDocumentFragment();
     const allTimedLines = [];

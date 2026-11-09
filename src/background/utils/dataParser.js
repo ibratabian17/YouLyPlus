@@ -5,6 +5,95 @@
 import { parseSyncedLyrics, parseAppleTTML } from '../../lib/parser.js';
 
 export class DataParser {
+  static alignTransliterationSyllabus(syllabus, transliteration) {
+    if (!Array.isArray(syllabus) || syllabus.length === 0 || !transliteration) {
+      return undefined;
+    }
+
+    const translitSyls = Array.isArray(transliteration.syllabus) ? transliteration.syllabus : [];
+    const translitFgSyls = Array.isArray(transliteration.foregroundSyllabus)
+      ? transliteration.foregroundSyllabus
+      : translitSyls.filter(s => !s.isBackground);
+    const translitBgSyls = Array.isArray(transliteration.backgroundSyllabus)
+      ? transliteration.backgroundSyllabus
+      : translitSyls.filter(s => s.isBackground);
+
+    if (translitSyls.length === 0 && translitFgSyls.length === 0 && translitBgSyls.length === 0) {
+      return undefined;
+    }
+
+    if (translitSyls.length === syllabus.length) {
+      return syllabus.map((syl, index) => ({
+        ...syl,
+        romanizedText: translitSyls[index]?.text || syl.text
+      }));
+    }
+
+    const mainFgIndices = [];
+    const mainBgIndices = [];
+    syllabus.forEach((syl, idx) => {
+      if (syl.isBackground) mainBgIndices.push(idx);
+      else mainFgIndices.push(idx);
+    });
+
+    if (
+      (mainFgIndices.length > 0 && translitFgSyls.length === mainFgIndices.length) ||
+      (mainBgIndices.length > 0 && translitBgSyls.length === mainBgIndices.length)
+    ) {
+      const result = syllabus.map(syl => ({ ...syl }));
+      if (translitFgSyls.length === mainFgIndices.length) {
+        mainFgIndices.forEach((sylIdx, fgIdx) => {
+          result[sylIdx].romanizedText = translitFgSyls[fgIdx]?.text || result[sylIdx].text;
+        });
+      }
+      if (translitBgSyls.length === mainBgIndices.length) {
+        mainBgIndices.forEach((sylIdx, bgIdx) => {
+          result[sylIdx].romanizedText = translitBgSyls[bgIdx]?.text || result[sylIdx].text;
+        });
+      }
+      return result;
+    }
+
+    if (translitSyls.length > 0) {
+      const assigned = new Array(syllabus.length).fill('');
+      let anyMatched = false;
+
+      for (const ts of translitSyls) {
+        if (!ts || !ts.text) continue;
+        const tsStart = Number(ts.time || 0);
+        const tsEnd = tsStart + Math.max(1, Number(ts.duration || 0));
+        let bestIdx = -1;
+        let bestOverlap = -1;
+
+        for (let i = 0; i < syllabus.length; i++) {
+          const s = syllabus[i];
+          if (Boolean(s.isBackground) !== Boolean(ts.isBackground)) continue;
+          const sStart = Number(s.time || 0);
+          const sEnd = sStart + Math.max(1, Number(s.duration || 0));
+          const overlap = Math.min(tsEnd, sEnd) - Math.max(tsStart, sStart);
+          if (overlap > bestOverlap) {
+            bestOverlap = overlap;
+            bestIdx = i;
+          }
+        }
+
+        if (bestIdx !== -1) {
+          assigned[bestIdx] += ts.text;
+          anyMatched = true;
+        }
+      }
+
+      if (anyMatched) {
+        return syllabus.map((syl, idx) => ({
+          ...syl,
+          romanizedText: assigned[idx] || syl.text
+        }));
+      }
+    }
+
+    return undefined;
+  }
+
   static parseKPoeFormat(data) {
     if (!data?.lyrics || !Array.isArray(data.lyrics) || data.lyrics.length === 0) {
       return null;
@@ -12,35 +101,40 @@ export class DataParser {
 
     return {
       type: data.type,
-      data: data.lyrics.map(item => {
+      data: data.lyrics.map((item, idx) => {
         const startTime = Number(item.time || 0) / 1000;
         const duration = Number(item.duration || 0) / 1000;
 
-        const syllabus = (item.syllabus || []).map(syl => ({
-          text: syl.text || '',
-          time: Number(syl.time || 0),
-          duration: Number(syl.duration || 0),
-          isBackground: syl.isBackground || false
-        }));
+        const syllabus = (item.syllabus || []).map(syl => {
+          const mappedSyl = {
+            text: syl.text || '',
+            time: Number(syl.time || 0),
+            duration: Number(syl.duration || 0),
+            isBackground: syl.isBackground || false
+          };
+          if (syl.htmlText !== undefined) mappedSyl.htmlText = syl.htmlText;
+          if (syl.keepParenthesis !== undefined) mappedSyl.keepParenthesis = syl.keepParenthesis;
+          if (syl.agent !== undefined) mappedSyl.agent = syl.agent;
+          if (syl.singer !== undefined) mappedSyl.singer = syl.singer;
+          if (syl.wordIndex !== undefined) mappedSyl.wordIndex = syl.wordIndex;
+          if (syl.isWhitespace !== undefined) mappedSyl.isWhitespace = syl.isWhitespace;
+          if (syl.romanizedText !== undefined) mappedSyl.romanizedText = syl.romanizedText;
+          return mappedSyl;
+        });
 
         let lineRomanizedText = undefined;
         let romanizedSyllabus = undefined;
 
         if (item.transliteration) {
-          if (Array.isArray(item.transliteration.syllabus) &&
-            item.transliteration.syllabus.length === syllabus.length &&
-            syllabus.length > 0) {
-            romanizedSyllabus = syllabus.map((syl, index) => ({
-              ...syl,
-              romanizedText: item.transliteration.syllabus[index].text || syl.text
-            }));
-            lineRomanizedText = item.transliteration.text || item.text;
-          } else if (item.transliteration.text) {
+          romanizedSyllabus = this.alignTransliterationSyllabus(syllabus, item.transliteration);
+          if (item.transliteration.text) {
             lineRomanizedText = item.transliteration.text;
+          } else if (romanizedSyllabus) {
+            lineRomanizedText = romanizedSyllabus.map(s => s.romanizedText || s.text).join('');
           }
         }
 
-        return {
+        const parsedLine = {
           text: item.text || '',
           startTime,
           duration,
@@ -50,6 +144,23 @@ export class DataParser {
           romanizedText: lineRomanizedText,
           translation: item.translation || null
         };
+
+        if (item.lineId !== undefined) parsedLine.lineId = item.lineId;
+        else parsedLine.lineId = idx;
+        if (item.mainText !== undefined) parsedLine.mainText = item.mainText;
+        if (item.htmlText !== undefined) parsedLine.htmlText = item.htmlText;
+        if (item.backgroundText !== undefined) parsedLine.backgroundText = item.backgroundText;
+        if (item.htmlBackgroundText !== undefined) parsedLine.htmlBackgroundText = item.htmlBackgroundText;
+        if (item.keepParenthesis !== undefined) parsedLine.keepParenthesis = item.keepParenthesis;
+        if (item.words !== undefined) parsedLine.words = item.words;
+        if (item.backgroundWords !== undefined) parsedLine.backgroundWords = item.backgroundWords;
+        if (item.translations !== undefined) parsedLine.translations = item.translations;
+        if (item.transliteration !== undefined) parsedLine.transliteration = item.transliteration;
+        if (item.transliterations !== undefined) parsedLine.transliterations = item.transliterations;
+        if (item.scripts !== undefined) parsedLine.scripts = item.scripts;
+        if (item.validationWarnings !== undefined) parsedLine.validationWarnings = item.validationWarnings;
+
+        return parsedLine;
       }),
       metadata: {
         ...data.metadata,
@@ -472,5 +583,3 @@ export class DataParser {
     return null;
   }
 }
-
-

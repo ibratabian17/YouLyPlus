@@ -95,7 +95,7 @@
     return mkInstance.currentPlaybackTime || 0;
   }
 
-  async function fetchSyllableLyrics(songId, storefront) {
+  async function fetchSyllableLyrics(songId, storefront, isMusicVideo = false) {
     if (!songId || !mkInstance) return null;
     try {
       const developerToken = mkInstance.developerToken || mkInstance.configuration?.app?.developerToken;
@@ -121,8 +121,6 @@
         'extend': 'ttmlLocalizations'
       });
 
-      const url = `https://amp-api.music.apple.com/v1/catalog/${storefront}/songs/${songId}/syllable-lyrics?${queryParams.toString()}`;
-
       const headers = {
         'Authorization': `Bearer ${developerToken}`,
         'Accept': 'application/json',
@@ -131,7 +129,14 @@
 
       if (mkInstance.musicUserToken) headers['Music-User-Token'] = mkInstance.musicUserToken;
 
-      const res = await fetch(url, { headers });
+      const entityType = isMusicVideo ? 'music-videos' : 'songs';
+      const primaryUrl = `https://amp-api.music.apple.com/v1/catalog/${storefront}/${entityType}/${songId}/syllable-lyrics?${queryParams.toString()}`;
+
+      let res = await fetch(primaryUrl, { headers });
+      if (!res.ok && isMusicVideo) {
+        const fallbackUrl = `https://amp-api.music.apple.com/v1/catalog/${storefront}/songs/${songId}/syllable-lyrics?${queryParams.toString()}`;
+        res = await fetch(fallbackUrl, { headers });
+      }
       if (!res.ok) return null;
       return await res.json();
     } catch (e) {
@@ -153,6 +158,7 @@
     const durationSec = (attrs.durationInMillis || 0) / 1000;
     const songId = attrs.playParams?.catalogId || attrs.playParams?.id || item.id;
 
+    const isMusicVideo = attrs.playParams?.kind === 'music-videos';
     const songInfo = {
       title: attrs.name || '',
       artist: attrs.artistName || '',
@@ -160,18 +166,21 @@
       duration: durationSec,
       artwork: artworkUrl,
       appleId: songId,
-      isVideo: attrs.playParams?.kind === 'music-videos',
+      adamId: songId,
+      isVideo: isMusicVideo,
       lyricsJSON: null
     };
 
     const storefront = mkInstance.storefrontId || 'us';
 
     if (attrs.hasLyrics) {
-      const lyricsData = await fetchSyllableLyrics(songId, storefront);
+      const lyricsData = await fetchSyllableLyrics(songId, storefront, isMusicVideo);
       try {
         if (lyricsData?.data?.[0]) {
-          const ttmlData = lyricsData.data[0].attributes.ttmlLocalizations || lyricsData.data[0].attributes.ttml;
+          const entry = lyricsData.data[0];
+          const ttmlData = entry.attributes?.ttmlLocalizations || entry.attributes?.ttml;
           songInfo.appleMusicTTML = ttmlData;
+          if (entry.id) songInfo.lyricsId = entry.id;
         }
       } catch (e) {}
     }
