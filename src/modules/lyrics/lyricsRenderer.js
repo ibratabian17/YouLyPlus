@@ -581,30 +581,18 @@ class LyricsPlusRenderer {
   }
 
   _isReplacementActive(line, displayMode = this.currentDisplayMode) {
-    return (
-      (displayMode === "translate" || displayMode === "both") &&
-      !!(
-        line &&
-        line.isReplacement &&
-        (line.replacementText || (Array.isArray(line.replacementSyllabus) && line.replacementSyllabus.length > 0))
-      )
-    );
+    return false;
   }
 
   _getActiveSyllabus(line, displayMode = this.currentDisplayMode) {
     if (!line) return [];
-    if (this._isReplacementActive(line, displayMode) && Array.isArray(line.replacementSyllabus) && line.replacementSyllabus.length > 0) {
-      return line.replacementSyllabus;
-    }
     return line.syllabus || [];
   }
 
   _getDataText(normal, isOriginal = true) {
     if (!normal) return "";
 
-    const baseText = this._isReplacementActive(normal)
-      ? (normal.replacementText || normal.translatedText || normal.text || "")
-      : (normal.text || "");
+    const baseText = normal.text || "";
     const isRomanizationMode = this.largerTextMode === "romanization";
 
     if (isOriginal) {
@@ -1759,19 +1747,20 @@ class LyricsPlusRenderer {
 
     if (displayMode === "romanize" || displayMode === "both") {
       const targetScript = (typeof currentSettings !== 'undefined' && currentSettings.transliterationTargetScript) || 'latin';
-      if (targetScript !== 'latin' || !this._isPurelyLatinScript(activeLineText)) {
+      const hasExplicitRomanText = !!(lineData.romanizedText && lineData.text && lineData.text.trim() !== lineData.romanizedText.trim());
+      const hasPerSyllableTransliteration =
+        hasSyl &&
+        activeSyllabus.some(s => {
+          const orig = (this._getDataText(s, true) || "").trim();
+          const trans = (this._getDataText(s, false) || "").trim();
+          return trans && orig && trans !== orig;
+        });
+
+      if (hasExplicitRomanText || hasPerSyllableTransliteration || targetScript !== 'latin' || !this._isPurelyLatinScript(activeLineText)) {
         const cachedWraps = lineElement._wraps;
         const isWordSynced = cachedWraps
           ? cachedWraps.length > 0
           : lineElement.querySelector(".lyrics-syllable-wrap") !== null;
-
-        const hasPerSyllableTransliteration =
-          hasSyl &&
-          activeSyllabus.some(s => {
-            const orig = (this._getDataText(s, true) || "").trim();
-            const trans = (this._getDataText(s, false) || "").trim();
-            return trans && orig && trans !== orig;
-          });
 
         let romanSig = "";
         if (hasPerSyllableTransliteration && isWordSynced) {
@@ -2206,17 +2195,6 @@ class LyricsPlusRenderer {
   }
 
   _hasAnyReplacementData(lyrics) {
-    if (!lyrics || !Array.isArray(lyrics.data)) return false;
-    for (let i = 0; i < lyrics.data.length; i++) {
-      const line = lyrics.data[i];
-      if (
-        line &&
-        line.isReplacement &&
-        (line.replacementText || (Array.isArray(line.replacementSyllabus) && line.replacementSyllabus.length > 0))
-      ) {
-        return true;
-      }
-    }
     return false;
   }
 

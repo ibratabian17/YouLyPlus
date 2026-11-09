@@ -206,38 +206,77 @@ function parseSyncedLyrics(lrcContent) {
   };
 }
 
-export function getPrimaryLanguageCode(languageCode) {
+function getPrimaryLanguageCode(languageCode) {
   if (!languageCode || typeof languageCode !== 'string') return '';
   const trimmed = languageCode.trim();
   if (!trimmed) return '';
   return trimmed.split(/[-_]/)[0] || '';
 }
 
-export function findFallbackLanguage(availableLanguages, requestedLanguage) {
+function getLanguageScript(tag) {
+  if (!tag || typeof tag !== 'string') return '';
+  const lower = tag.toLowerCase().replace(/_/g, '-');
+  if (lower.includes('hant') || lower === 'zh-tw' || lower === 'zh-hk' || lower === 'zh-mo') return 'Hant';
+  if (lower.includes('hans') || lower === 'zh-cn' || lower === 'zh-sg') return 'Hans';
+  const parts = lower.split('-');
+  if (parts.length > 1 && parts[1].length === 4) {
+    return parts[1].charAt(0).toUpperCase() + parts[1].slice(1).toLowerCase();
+  }
+  return '';
+}
+
+function findFallbackLanguage(availableLanguages, requestedLanguage) {
   if (!Array.isArray(availableLanguages) || availableLanguages.length === 0 || !requestedLanguage) {
     return '';
   }
-  const reqTrimmed = String(requestedLanguage).trim();
-  if (!reqTrimmed) return '';
 
-  const exactIdx = availableLanguages.indexOf(reqTrimmed);
-  if (exactIdx !== -1) return availableLanguages[exactIdx];
+  const reqList = Array.isArray(requestedLanguage)
+    ? requestedLanguage
+    : [requestedLanguage];
 
-  const reqLower = reqTrimmed.toLowerCase();
-  for (const candidate of availableLanguages) {
-    if (String(candidate).toLowerCase() === reqLower) {
-      return candidate;
+  for (const req of reqList) {
+    if (!req) continue;
+    const reqTrimmed = String(req).trim();
+    if (!reqTrimmed) continue;
+
+    const exactIdx = availableLanguages.indexOf(reqTrimmed);
+    if (exactIdx !== -1) return availableLanguages[exactIdx];
+
+    const reqLower = reqTrimmed.toLowerCase();
+    for (const candidate of availableLanguages) {
+      if (String(candidate).toLowerCase() === reqLower) {
+        return candidate;
+      }
+    }
+
+    const reqScript = getLanguageScript(reqTrimmed);
+    const primaryReq = getPrimaryLanguageCode(reqTrimmed).toLowerCase();
+
+    // Script-aware match (prioritize matching Chinese traditional/simplified scripts)
+    if (reqScript && primaryReq) {
+      for (const candidate of availableLanguages) {
+        if (getPrimaryLanguageCode(candidate).toLowerCase() === primaryReq) {
+          const candidateScript = getLanguageScript(candidate);
+          if (candidateScript && candidateScript === reqScript) {
+            return candidate;
+          }
+        }
+      }
+    }
+
+    // Primary language code match, avoiding conflicting scripts
+    if (primaryReq) {
+      for (const candidate of availableLanguages) {
+        if (getPrimaryLanguageCode(candidate).toLowerCase() === primaryReq) {
+          const candidateScript = getLanguageScript(candidate);
+          if (!reqScript || !candidateScript || reqScript === candidateScript) {
+            return candidate;
+          }
+        }
+      }
     }
   }
 
-  const primaryReq = getPrimaryLanguageCode(reqTrimmed).toLowerCase();
-  if (!primaryReq) return '';
-
-  for (const candidate of availableLanguages) {
-    if (getPrimaryLanguageCode(candidate).toLowerCase() === primaryReq) {
-      return candidate;
-    }
-  }
   return '';
 }
 
@@ -1055,9 +1094,6 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
             scriptsByKey[lineKey][lang] = entry;
             if (!scriptsByLang[lang]) scriptsByLang[lang] = {};
             scriptsByLang[lang][lineKey] = entry;
-            if (!translationMap[lineKey]) {
-              translationMap[lineKey] = entry;
-            }
           }
         }
       }
@@ -1367,83 +1403,6 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
   };
 }
 
-export function resolveAppleTTMLTranslations(parsedLyrics, action = 'translate', targetLang = '') {
-  if (!parsedLyrics || !Array.isArray(parsedLyrics.data)) return null;
-
-  if (action === 'translate') {
-    const firstWithMap = parsedLyrics.data.find(l => l.translations || l.scripts);
-    let matchedLang = '';
-    let useScriptMap = false;
-
-    if (firstWithMap) {
-      const transLangs = firstWithMap.translations ? Object.keys(firstWithMap.translations) : [];
-      matchedLang = findFallbackLanguage(transLangs, targetLang);
-      if (!matchedLang && firstWithMap.scripts) {
-        const scriptLangs = Object.keys(firstWithMap.scripts);
-        matchedLang = findFallbackLanguage(scriptLangs, targetLang);
-        if (matchedLang) useScriptMap = true;
-      }
-    }
-
-    if (!matchedLang) {
-      const hasLegacyMatch = parsedLyrics.data.some(l => {
-        if (!l.translation?.text) return false;
-        const p1 = getPrimaryLanguageCode(l.translation.lang);
-        const p2 = getPrimaryLanguageCode(targetLang);
-        return p1 && p2 && p1.toLowerCase() === p2.toLowerCase();
-      });
-      if (!hasLegacyMatch) return null;
-    }
-
-    return {
-      ...parsedLyrics,
-      data: parsedLyrics.data.map(line => {
-        const entry = matchedLang
-          ? (useScriptMap ? line.scripts?.[matchedLang] : line.translations?.[matchedLang])
-          : line.translation;
-        const isReplacement = !!(entry && (entry.type === 'replacement' || entry.isReplacement || useScriptMap));
-        return {
-          ...line,
-          isReplacement,
-          translatedText: entry?.text || line.text,
-          translatedBackgroundText: entry?.backgroundText,
-          replacementText: isReplacement ? (entry?.text || line.text) : undefined,
-          replacementSyllabus: isReplacement && Array.isArray(entry?.syllabus) ? entry.syllabus : undefined,
-          translatedSyllabus: Array.isArray(entry?.syllabus) ? entry.syllabus : undefined,
-          chunk: Array.isArray(entry?.syllabus) ? entry.syllabus : undefined
-        };
-      })
-    };
-  }
-
-  if (action === 'romanize') {
-    const firstWithPron = parsedLyrics.data.find(l => l.transliterations);
-    let matchedLang = '';
-    if (firstWithPron && firstWithPron.transliterations) {
-      const pronLangs = Object.keys(firstWithPron.transliterations);
-      matchedLang = findFallbackLanguage(pronLangs, targetLang) || pronLangs[0] || '';
-    }
-
-    const hasAnyPron = matchedLang || parsedLyrics.data.some(l => l.romanizedText || l.transliteration);
-    if (!hasAnyPron) return null;
-
-    return {
-      ...parsedLyrics,
-      data: parsedLyrics.data.map(line => {
-        const entry = (matchedLang && line.transliterations?.[matchedLang]) || line.transliteration;
-        return {
-          ...line,
-          text: entry?.text || line.romanizedText || line.text,
-          romanizedText: entry?.text || line.romanizedText || line.text,
-          chunk: entry?.syllabus
-        };
-      })
-    };
-  }
-
-  return null;
-}
-
 /**
  * Normalizes a v2 lyrics object so every line element uses songPartIndex
  * pointing into metadata.songParts[], replacing legacy songPart strings.
@@ -1593,7 +1552,7 @@ function convertToStandardJson(parsedLyrics) {
 }
 
 if (typeof exports !== 'undefined') {
-  module.exports = { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2, normalizeV2 };
+  module.exports = { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2, normalizeV2, findFallbackLanguage, getLanguageScript, getPrimaryLanguageCode };
 }
 
 if (typeof window !== 'undefined') {
@@ -1603,6 +1562,9 @@ if (typeof window !== 'undefined') {
   window.lyricspluslib.v1Tov2 = v1Tov2;
   window.lyricspluslib.normalizeV2 = normalizeV2;
   window.lyricspluslib.convertToStandardJson = convertToStandardJson;
+  window.lyricspluslib.findFallbackLanguage = findFallbackLanguage;
+  window.lyricspluslib.getLanguageScript = getLanguageScript;
+  window.lyricspluslib.getPrimaryLanguageCode = getPrimaryLanguageCode;
 }
 
-export { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2, normalizeV2 };
+export { parseSyncedLyrics, parseAppleTTML, convertToStandardJson, v1Tov2, normalizeV2, findFallbackLanguage, getLanguageScript, getPrimaryLanguageCode };

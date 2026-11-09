@@ -137,14 +137,6 @@ export class TranslationService {
       }
     }
 
-    if (line.scripts && typeof line.scripts === 'object') {
-      const availableScriptLangs = Object.keys(line.scripts);
-      const matchedScriptLang = findFallbackLanguage(availableScriptLangs, targetLang);
-      if (matchedScriptLang && line.scripts[matchedScriptLang]?.text) {
-        return line.scripts[matchedScriptLang];
-      }
-    }
-
     const embedded = line.translation;
     if (embedded && embedded.text) {
       const targetPrimary = getPrimaryLanguageCode(targetLang).toLowerCase();
@@ -210,14 +202,6 @@ export class TranslationService {
       };
       if (matchedObj) {
         out.translation = matchedObj;
-        const isReplacement = !!(matchedObj.type === 'replacement' || matchedObj.isReplacement);
-        if (isReplacement) {
-          out.isReplacement = true;
-          out.replacementText = matchedObj.text || out.translatedText;
-          if (Array.isArray(matchedObj.syllabus) && matchedObj.syllabus.length > 0) {
-            out.replacementSyllabus = matchedObj.syllabus;
-          }
-        }
         if (Array.isArray(matchedObj.syllabus) && matchedObj.syllabus.length > 0) {
           out.translatedSyllabus = matchedObj.syllabus;
           out.chunk = matchedObj.syllabus;

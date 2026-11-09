@@ -73,6 +73,421 @@ let _cachedValidSources = null;
 
 
 /* =================================================================
+   LANGUAGE, SCRIPT & EMBEDDED DATA RESOLUTION
+   ================================================================= */
+
+function getPrimaryLanguageCode(code) {
+  if (!code || typeof code !== 'string') return '';
+  const trimmed = code.trim();
+  if (!trimmed) return '';
+  return trimmed.split(/[-_]/)[0] || '';
+}
+
+function getLanguageScript(tag) {
+  if (!tag || typeof tag !== 'string') return '';
+  const lower = tag.toLowerCase().replace(/_/g, '-');
+  if (lower.includes('hant') || lower === 'zh-tw' || lower === 'zh-hk' || lower === 'zh-mo') return 'Hant';
+  if (lower.includes('hans') || lower === 'zh-cn' || lower === 'zh-sg') return 'Hans';
+  const parts = lower.split('-');
+  if (parts.length > 1 && parts[1].length === 4) {
+    return parts[1].charAt(0).toUpperCase() + parts[1].slice(1).toLowerCase();
+  }
+  return '';
+}
+
+function findFallbackLanguage(availableLanguages, requestedLanguage) {
+  if (!Array.isArray(availableLanguages) || availableLanguages.length === 0 || !requestedLanguage) {
+    return '';
+  }
+
+  const reqList = Array.isArray(requestedLanguage)
+    ? requestedLanguage
+    : [requestedLanguage];
+
+  for (const req of reqList) {
+    if (!req) continue;
+    const reqTrimmed = String(req).trim();
+    if (!reqTrimmed) continue;
+
+    const exactIdx = availableLanguages.indexOf(reqTrimmed);
+    if (exactIdx !== -1) return availableLanguages[exactIdx];
+
+    const reqLower = reqTrimmed.toLowerCase();
+    for (const candidate of availableLanguages) {
+      if (String(candidate).toLowerCase() === reqLower) {
+        return candidate;
+      }
+    }
+
+    const reqScript = getLanguageScript(reqTrimmed);
+    const primaryReq = getPrimaryLanguageCode(reqTrimmed).toLowerCase();
+
+    if (reqScript && primaryReq) {
+      for (const candidate of availableLanguages) {
+        if (getPrimaryLanguageCode(candidate).toLowerCase() === primaryReq) {
+          const candidateScript = getLanguageScript(candidate);
+          if (candidateScript && candidateScript === reqScript) {
+            return candidate;
+          }
+        }
+      }
+    }
+
+    if (primaryReq) {
+      for (const candidate of availableLanguages) {
+        if (getPrimaryLanguageCode(candidate).toLowerCase() === primaryReq) {
+          const candidateScript = getLanguageScript(candidate);
+          if (!reqScript || !candidateScript || reqScript === candidateScript) {
+            return candidate;
+          }
+        }
+      }
+    }
+  }
+
+  return '';
+}
+
+/**
+ * Resolves the user's intended target language without using web native language.
+ * Checks user settings override (customTranslateTarget) first,
+ * then falls back to user system/browser languages (navigator.languages || navigator.language).
+ */
+function getResolvedLyricsLanguage(settings = currentSettings) {
+  if (settings?.overrideTranslateTarget && settings?.customTranslateTarget?.trim()) {
+    return settings.customTranslateTarget.trim();
+  }
+  if (typeof navigator !== 'undefined') {
+    if (Array.isArray(navigator.languages) && navigator.languages.length > 0) {
+      return navigator.languages;
+    }
+    if (navigator.language) {
+      return navigator.language;
+    }
+  }
+  return 'en';
+}
+
+function getPrimaryTargetLanguage(settings = currentSettings) {
+  const resolved = getResolvedLyricsLanguage(settings);
+  if (Array.isArray(resolved)) {
+    return resolved[0] || 'en';
+  }
+  return resolved || 'en';
+}
+
+function applyScriptToLine(line, scriptEntry, lang = '') {
+  if (!line || !scriptEntry) return;
+
+  if (!line.original) {
+    line.original = {
+      text: line.text,
+      mainText: line.mainText,
+      htmlText: line.htmlText,
+      words: line.words ? line.words.slice() : [],
+      syllabus: line.syllabus ? line.syllabus.slice() : [],
+      backgroundText: line.backgroundText,
+      htmlBackgroundText: line.htmlBackgroundText,
+      backgroundWords: line.backgroundWords ? line.backgroundWords.slice() : undefined,
+      keepParenthesis: line.keepParenthesis
+    };
+  }
+
+  const hasTimedSpans = (Array.isArray(scriptEntry.words) && scriptEntry.words.length > 0) ||
+                        (Array.isArray(scriptEntry.syllabus) && scriptEntry.syllabus.length > 0);
+
+  if (hasTimedSpans) {
+    line.words = scriptEntry.words ? scriptEntry.words.slice() : [];
+    line.syllabus = scriptEntry.syllabus ? scriptEntry.syllabus.slice() : [];
+    line.mainText = (scriptEntry.text || '').trim();
+    line.htmlText = (scriptEntry.htmlText || scriptEntry.text || '').trim();
+
+    if (scriptEntry.backgroundText) {
+      line.backgroundText = scriptEntry.backgroundText.trim();
+      line.htmlBackgroundText = (scriptEntry.htmlBackgroundText || scriptEntry.backgroundText).trim();
+      line.text = line.syllabus.length > 0
+        ? line.syllabus.map(s => s.text).join('').trim()
+        : `${line.mainText} (${line.backgroundText})`;
+    } else {
+      delete line.backgroundText;
+      delete line.htmlBackgroundText;
+      line.text = line.syllabus.length > 0
+        ? line.syllabus.map(s => s.text).join('').trim()
+        : line.mainText;
+    }
+
+    if (scriptEntry.backgroundWords && scriptEntry.backgroundWords.length > 0) {
+      line.backgroundWords = scriptEntry.backgroundWords.slice();
+    } else {
+      delete line.backgroundWords;
+    }
+
+    if (scriptEntry.keepParenthesis !== undefined) {
+      line.keepParenthesis = scriptEntry.keepParenthesis;
+    }
+  } else {
+    // Plain text replacement without spans
+    line.mainText = (scriptEntry.text || '').trim();
+    line.htmlText = (scriptEntry.htmlText || scriptEntry.text || '').trim();
+    line.words = [];
+    line.syllabus = [];
+
+    if (scriptEntry.backgroundText) {
+      line.backgroundText = scriptEntry.backgroundText.trim();
+      line.htmlBackgroundText = (scriptEntry.htmlBackgroundText || scriptEntry.backgroundText).trim();
+      line.text = `${line.mainText} (${line.backgroundText})`;
+    } else {
+      delete line.backgroundText;
+      delete line.htmlBackgroundText;
+      line.text = line.mainText;
+    }
+
+    delete line.backgroundWords;
+    if (scriptEntry.keepParenthesis !== undefined) {
+      line.keepParenthesis = scriptEntry.keepParenthesis;
+    }
+  }
+
+  line.appliedScript = lang || scriptEntry.lang || '';
+  line.isScriptApplied = true;
+}
+
+function restoreOriginalLyrics(lyrics) {
+  if (!lyrics || !Array.isArray(lyrics.data)) return;
+  for (const line of lyrics.data) {
+    if (line.original) {
+      line.text = line.original.text;
+      line.mainText = line.original.mainText;
+      line.htmlText = line.original.htmlText;
+      line.words = line.original.words ? line.original.words.slice() : [];
+      line.syllabus = line.original.syllabus ? line.original.syllabus.slice() : [];
+      if (line.original.backgroundText) {
+        line.backgroundText = line.original.backgroundText;
+        line.htmlBackgroundText = line.original.htmlBackgroundText;
+      } else {
+        delete line.backgroundText;
+        delete line.htmlBackgroundText;
+      }
+      if (line.original.backgroundWords) {
+        line.backgroundWords = line.original.backgroundWords.slice();
+      } else {
+        delete line.backgroundWords;
+      }
+      line.keepParenthesis = line.original.keepParenthesis;
+      delete line.appliedScript;
+      delete line.isScriptApplied;
+    }
+  }
+  if (lyrics.metadata) delete lyrics.metadata.appliedScript;
+  delete lyrics.appliedScript;
+}
+
+/**
+ * Resolves and applies script replacement on baseLyrics in-place inside LyricsManager.
+ */
+function applyLyricsScript(lyrics, targetLanguage = null) {
+  if (!lyrics || !Array.isArray(lyrics.data) || lyrics.data.length === 0) return null;
+
+  const metadata = lyrics.metadata || {};
+  let scriptLanguages = metadata.scriptLanguages;
+  if (!Array.isArray(scriptLanguages) || scriptLanguages.length === 0) {
+    if (metadata.scriptsByLang && typeof metadata.scriptsByLang === 'object') {
+      scriptLanguages = Object.keys(metadata.scriptsByLang);
+    } else {
+      const set = new Set();
+      for (const line of lyrics.data) {
+        if (line.scripts && typeof line.scripts === 'object') {
+          for (const k of Object.keys(line.scripts)) set.add(k);
+        }
+      }
+      scriptLanguages = Array.from(set);
+    }
+  }
+
+  if (!scriptLanguages || scriptLanguages.length === 0) {
+    if (lyrics.appliedScript) restoreOriginalLyrics(lyrics);
+    return null;
+  }
+
+  const requested = targetLanguage || getResolvedLyricsLanguage();
+  const matchedLang = findFallbackLanguage(scriptLanguages, requested);
+  if (!matchedLang) {
+    if (lyrics.appliedScript) restoreOriginalLyrics(lyrics);
+    return null;
+  }
+
+  if (lyrics.appliedScript === matchedLang) {
+    return matchedLang;
+  }
+
+  restoreOriginalLyrics(lyrics);
+
+  let anyWords = false;
+  for (const line of lyrics.data) {
+    const key = line.lineKey || line.key;
+    const entry = line.scripts?.[matchedLang] || (key && metadata.scriptsByLang?.[matchedLang]?.[key]);
+    if (entry) {
+      applyScriptToLine(line, entry, matchedLang);
+    }
+    if (Array.isArray(line.words) && line.words.some(w => !w.isWhitespace)) {
+      anyWords = true;
+    }
+  }
+
+  metadata.appliedScript = matchedLang;
+  lyrics.appliedScript = matchedLang;
+  if (anyWords) {
+    lyrics.type = 'Word';
+  }
+
+  return matchedLang;
+}
+
+/**
+ * Resolves embedded subtitle translations directly from the lyrics file without background fetch.
+ */
+function resolveEmbeddedTranslations(baseLyrics, targetLanguage = null) {
+  if (!baseLyrics || !Array.isArray(baseLyrics.data)) return null;
+
+  const lines = baseLyrics.data;
+  const metadata = baseLyrics.metadata || {};
+
+  let availableLangs = metadata.translationLanguages;
+  if (!Array.isArray(availableLangs) || availableLangs.length === 0) {
+    if (metadata.translationsByLang && typeof metadata.translationsByLang === 'object') {
+      availableLangs = Object.keys(metadata.translationsByLang);
+    } else {
+      const set = new Set();
+      for (const l of lines) {
+        if (l.translations && typeof l.translations === 'object') {
+          for (const k of Object.keys(l.translations)) set.add(k);
+        }
+      }
+      availableLangs = Array.from(set);
+    }
+  }
+
+  const requested = targetLanguage || getResolvedLyricsLanguage();
+  let matchedLang = findFallbackLanguage(availableLangs, requested);
+
+  if (!matchedLang) {
+    const primaryReq = getPrimaryLanguageCode(Array.isArray(requested) ? requested[0] : requested).toLowerCase();
+    const hasLegacyMatch = lines.some(l => {
+      if (!l.translation?.text) return false;
+      const p = getPrimaryLanguageCode(l.translation.lang || '').toLowerCase();
+      return p && p === primaryReq;
+    });
+    if (!hasLegacyMatch) return null;
+  }
+
+  let hasAnyText = false;
+  const translatedData = lines.map(line => {
+    const key = line.lineKey || line.key;
+    const entry = (matchedLang && (line.translations?.[matchedLang] || (key && metadata.translationsByLang?.[matchedLang]?.[key])))
+      || line.translation
+      || null;
+
+    if (!entry || !entry.text) {
+      return {
+        ...line,
+        translatedText: line.text
+      };
+    }
+
+    hasAnyText = true;
+    let combinedText = entry.text;
+    if (entry.backgroundText && !combinedText.includes(entry.backgroundText)) {
+      combinedText = `${combinedText} (${entry.backgroundText})`;
+    }
+
+    return {
+      ...line,
+      translation: entry,
+      translatedText: combinedText,
+      translatedBackgroundText: entry.backgroundText,
+      translatedSyllabus: Array.isArray(entry.syllabus) ? entry.syllabus : undefined,
+      chunk: Array.isArray(entry.syllabus) ? entry.syllabus : undefined
+    };
+  });
+
+  if (!hasAnyText) return null;
+
+  return {
+    success: true,
+    data: translatedData,
+    translatedLyrics: {
+      ...baseLyrics,
+      data: translatedData
+    }
+  };
+}
+
+/**
+ * Resolves embedded transliterations/pronunciations directly from the lyrics file without background fetch.
+ */
+function resolveEmbeddedTransliterations(baseLyrics, targetLanguage = null) {
+  if (!baseLyrics || !Array.isArray(baseLyrics.data)) return null;
+
+  const lines = baseLyrics.data;
+  const metadata = baseLyrics.metadata || {};
+
+  let availableLangs = metadata.pronunciationLanguages;
+  if (!Array.isArray(availableLangs) || availableLangs.length === 0) {
+    if (metadata.pronunciationsByLang && typeof metadata.pronunciationsByLang === 'object') {
+      availableLangs = Object.keys(metadata.pronunciationsByLang);
+    } else {
+      const set = new Set();
+      for (const l of lines) {
+        if (l.transliterations && typeof l.transliterations === 'object') {
+          for (const k of Object.keys(l.transliterations)) set.add(k);
+        }
+      }
+      availableLangs = Array.from(set);
+    }
+  }
+
+  const requested = targetLanguage || getResolvedLyricsLanguage();
+  let matchedLang = '';
+  if (availableLangs && availableLangs.length > 0) {
+    matchedLang = findFallbackLanguage(availableLangs, requested) || availableLangs[0];
+  }
+
+  const hasAnyPron = matchedLang || lines.some(l => l.romanizedText || l.transliteration);
+  if (!hasAnyPron) return null;
+
+  let hasAnyText = false;
+  const romanizedData = lines.map(line => {
+    const key = line.lineKey || line.key;
+    const entry = (matchedLang && (line.transliterations?.[matchedLang] || (key && metadata.pronunciationsByLang?.[matchedLang]?.[key])))
+      || line.transliteration
+      || null;
+
+    const romText = entry?.text || line.romanizedText || line.text;
+    if (entry?.text || line.romanizedText) hasAnyText = true;
+
+    const romChunk = entry?.syllabus || (line.syllabus?.some(s => s.romanizedText) ? line.syllabus.map(s => ({ text: s.romanizedText || s.text })) : undefined);
+
+    return {
+      ...line,
+      text: romText,
+      romanizedText: romText,
+      chunk: romChunk
+    };
+  });
+
+  if (!hasAnyText) return null;
+
+  return {
+    success: true,
+    data: romanizedData,
+    translatedLyrics: {
+      ...baseLyrics,
+      data: romanizedData
+    }
+  };
+}
+
+/* =================================================================
    HELPER FUNCTIONS - DATA PROCESSING
    ================================================================= */
 
@@ -125,14 +540,7 @@ function combineLyricsData(baseLyrics, translation, romanization) {
       if (translatedLine?.translatedBackgroundText) {
         mergedLine.translatedBackgroundText = translatedLine.translatedBackgroundText;
       }
-      if (translatedLine?.isReplacement) {
-        mergedLine.isReplacement = true;
-        mergedLine.replacementText = translatedLine.replacementText || translatedLine.translatedText || mergedLine.text;
-        const repSyls = translatedLine.replacementSyllabus || translatedLine.chunk || translatedLine.translatedSyllabus;
-        if (Array.isArray(repSyls) && repSyls.length > 0) {
-          mergedLine.replacementSyllabus = repSyls.map(s => ({ ...s }));
-        }
-      } else if (Array.isArray(translatedLine?.translatedSyllabus) && translatedLine.translatedSyllabus.length > 0) {
+      if (Array.isArray(translatedLine?.translatedSyllabus) && translatedLine.translatedSyllabus.length > 0) {
         mergedLine.translatedSyllabus = translatedLine.translatedSyllabus.map(s => ({ ...s }));
       }
 
@@ -145,18 +553,12 @@ function combineLyricsData(baseLyrics, translation, romanization) {
         if (hasWordSyncedRomanization) {
           mergedLine.syllabus = mergedLine.syllabus.map((syllable, sylIndex) => {
             const romanizedSyllable = romanizedLine.chunk[sylIndex];
+            const romSylText = (typeof romanizedSyllable === 'object' && romanizedSyllable !== null)
+              ? (romanizedSyllable.romanizedText || romanizedSyllable.text)
+              : (typeof romanizedSyllable === 'string' ? romanizedSyllable : (syllable?.text || ''));
             return {
               ...syllable,
-              romanizedText: romanizedSyllable?.text || syllable.text
-            };
-          });
-        }
-        if (isWordLyrics && romanizedLine.chunk?.length > 0 && mergedLine.replacementSyllabus?.length > 0) {
-          mergedLine.replacementSyllabus = mergedLine.replacementSyllabus.map((syllable, sylIndex) => {
-            const romanizedSyllable = romanizedLine.chunk[sylIndex];
-            return {
-              ...syllable,
-              romanizedText: romanizedSyllable?.text || syllable.romanizedText || syllable.text
+              romanizedText: romSylText || syllable?.text || ''
             };
           });
         }
@@ -303,6 +705,9 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId) {
 
   lastLyricsNotFound = false;
   lastBaseLyrics = response.lyrics;
+  if (lastBaseLyrics) {
+    applyLyricsScript(lastBaseLyrics);
+  }
   if (response.availableProviders) {
     setAvailableProviders(response.availableProviders);
   }
@@ -333,50 +738,65 @@ function scheduleCombinedLyricsRender(currentSong, fetchId) {
 
 /**
  * Initiates translation and romanization fetches independently without blocking each other.
- * Coalesces near-simultaneous responses into a single render pass.
+ * Checks embedded translations/transliterations from the lyrics file first;
+ * falls back to background external providers only when not available in the lyrics file.
  */
-function fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId) {
+function fetchAdditionalData(currentSong, effectiveMode, fetchId) {
   const needsTranslation = effectiveMode === 'translate' || effectiveMode === 'both';
   const needsRomanization = effectiveMode === 'romanize' || effectiveMode === 'both' || currentSettings.largerTextMode === "romanization";
 
   if (needsTranslation && !lastTranslationResponse) {
-    pBrowser.runtime.sendMessage({
-      type: 'TRANSLATE_LYRICS',
-      action: 'translate',
-      songInfo: currentSong,
-      targetLang: htmlLang
-    }).then(response => {
-      if (currentFetchMediaId === fetchId) {
-        lastTranslationResponse = response || { success: false };
-        scheduleCombinedLyricsRender(currentSong, fetchId);
-      }
-    }).catch(error => {
-      console.warn("Translation request error:", error);
-      if (currentFetchMediaId === fetchId) {
-        lastTranslationResponse = { success: false, error: error.message };
-        scheduleCombinedLyricsRender(currentSong, fetchId);
-      }
-    });
+    const embedded = resolveEmbeddedTranslations(lastBaseLyrics);
+    if (embedded) {
+      lastTranslationResponse = embedded;
+      scheduleCombinedLyricsRender(currentSong, fetchId);
+    } else {
+      const targetLang = getPrimaryTargetLanguage();
+      pBrowser.runtime.sendMessage({
+        type: 'TRANSLATE_LYRICS',
+        action: 'translate',
+        songInfo: currentSong,
+        targetLang
+      }).then(response => {
+        if (currentFetchMediaId === fetchId) {
+          lastTranslationResponse = response || { success: false };
+          scheduleCombinedLyricsRender(currentSong, fetchId);
+        }
+      }).catch(error => {
+        console.warn("Translation request error:", error);
+        if (currentFetchMediaId === fetchId) {
+          lastTranslationResponse = { success: false, error: error.message };
+          scheduleCombinedLyricsRender(currentSong, fetchId);
+        }
+      });
+    }
   }
 
   if (needsRomanization && !lastRomanizationResponse) {
-    pBrowser.runtime.sendMessage({
-      type: 'TRANSLATE_LYRICS',
-      action: 'romanize',
-      songInfo: currentSong,
-      targetLang: htmlLang
-    }).then(response => {
-      if (currentFetchMediaId === fetchId) {
-        lastRomanizationResponse = response || { success: false };
-        scheduleCombinedLyricsRender(currentSong, fetchId);
-      }
-    }).catch(error => {
-      console.warn("Romanization request error:", error);
-      if (currentFetchMediaId === fetchId) {
-        lastRomanizationResponse = { success: false, error: error.message };
-        scheduleCombinedLyricsRender(currentSong, fetchId);
-      }
-    });
+    const embedded = resolveEmbeddedTransliterations(lastBaseLyrics);
+    if (embedded) {
+      lastRomanizationResponse = embedded;
+      scheduleCombinedLyricsRender(currentSong, fetchId);
+    } else {
+      const targetLang = getPrimaryTargetLanguage();
+      pBrowser.runtime.sendMessage({
+        type: 'TRANSLATE_LYRICS',
+        action: 'romanize',
+        songInfo: currentSong,
+        targetLang
+      }).then(response => {
+        if (currentFetchMediaId === fetchId) {
+          lastRomanizationResponse = response || { success: false };
+          scheduleCombinedLyricsRender(currentSong, fetchId);
+        }
+      }).catch(error => {
+        console.warn("Romanization request error:", error);
+        if (currentFetchMediaId === fetchId) {
+          lastRomanizationResponse = { success: false, error: error.message };
+          scheduleCombinedLyricsRender(currentSong, fetchId);
+        }
+      });
+    }
   }
 }
 
@@ -759,6 +1179,9 @@ async function switchLyricsProvider(providerId) {
       forceNextRender = true;
 
       lastBaseLyrics = response.lyrics;
+      if (lastBaseLyrics) {
+        applyLyricsScript(lastBaseLyrics);
+      }
       await updateAndRenderCombinedLyrics(currentSong, fetchId);
 
       // Re-trigger translation / romanization fetch if enabled
@@ -766,8 +1189,7 @@ async function switchLyricsProvider(providerId) {
       const needsRomanization = currentDisplayMode === 'romanize' || currentDisplayMode === 'both' || currentSettings.largerTextMode === "romanization";
       if (needsTranslation || needsRomanization) {
         if (LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
-        const htmlLang = document.documentElement.getAttribute('lang');
-        fetchAdditionalData(currentSong, currentDisplayMode, htmlLang, fetchId);
+        fetchAdditionalData(currentSong, currentDisplayMode, fetchId);
       }
 
       if (LyricsPlusAPI.showToast) {
@@ -962,6 +1384,16 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
     const needsTranslation = effectiveMode === 'translate' || effectiveMode === 'both';
     const needsRomanization = effectiveMode === 'romanize' || effectiveMode === 'both' || currentSettings.largerTextMode === "romanization";
 
+    // Eagerly resolve embedded translation / transliteration from lyrics file if available
+    if (needsTranslation && !lastTranslationResponse) {
+      const embedded = resolveEmbeddedTranslations(baseLyrics);
+      if (embedded) lastTranslationResponse = embedded;
+    }
+    if (needsRomanization && !lastRomanizationResponse) {
+      const embedded = resolveEmbeddedTransliterations(baseLyrics);
+      if (embedded) lastRomanizationResponse = embedded;
+    }
+
     const isMissingTranslation = needsTranslation && !lastTranslationResponse;
     const isMissingRomanization = needsRomanization && !lastRomanizationResponse;
 
@@ -974,8 +1406,7 @@ async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload
 
     if (isMissingTranslation || isMissingRomanization) {
       if (LyricsPlusAPI.setTranslationLoading) LyricsPlusAPI.setTranslationLoading(true);
-      const htmlLang = document.documentElement.getAttribute('lang');
-      fetchAdditionalData(currentSong, effectiveMode, htmlLang, fetchId);
+      fetchAdditionalData(currentSong, effectiveMode, fetchId);
     }
 
   } catch (error) {
@@ -1026,6 +1457,9 @@ window.addEventListener('YOUPLUS_SETTINGS_UPDATED', ({ detail }) => {
   if (translationInvalidated) {
     lastTranslationResponse = null;
     lastRenderedHasTranslation = false;
+    if (lastBaseLyrics) {
+      applyLyricsScript(lastBaseLyrics);
+    }
   }
   if (romanizationInvalidated) {
     lastRomanizationResponse = null;

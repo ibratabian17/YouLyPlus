@@ -158,6 +158,9 @@ export class DataParser {
         if (item.transliteration !== undefined) parsedLine.transliteration = item.transliteration;
         if (item.transliterations !== undefined) parsedLine.transliterations = item.transliterations;
         if (item.scripts !== undefined) parsedLine.scripts = item.scripts;
+        if (item.appliedScript !== undefined) parsedLine.appliedScript = item.appliedScript;
+        if (item.isScriptApplied !== undefined) parsedLine.isScriptApplied = item.isScriptApplied;
+        if (item.original !== undefined) parsedLine.original = item.original;
         if (item.validationWarnings !== undefined) parsedLine.validationWarnings = item.validationWarnings;
 
         return parsedLine;
