@@ -122,6 +122,9 @@ body.has-modal main {
     --lyplus-font-size-base: 22px;
     line-height: 1.3;
     contain: layout style;
+    --lyplus-lyrics-pallete: var(--bodyTextColor, var(--systemPrimary));
+    --lyplus-text-primary: var(--bodyTextColor, var(--systemPrimary));
+    --lyplus-text-secondary: color-mix(in srgb, var(--bodyTextColor, var(--systemPrimary)) 35%, transparent);
 }
 
 [data-testid="lyrics-sidebar"] #lyplus-patch-container {
@@ -150,6 +153,12 @@ body.has-modal main {
 [data-testid="lyrics-sidebar"] #lyrics-plus-container .lyrics-line:not(.lyrics-gap) .lyrics-line-container {
     transform: scale3d(1, 1, 1);
     transition: transform 0.3s ease, background-color 0.7s, color 0.7s;
+}
+
+[data-testid="lyrics-sidebar"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):not(.active).past-line,
+[data-testid="lyrics-sidebar"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):not(.active).post-active-line,
+[data-testid="lyrics-sidebar"] #lyrics-plus-container:not(.not-focused) .lyrics-line:not(.lyrics-gap):not(.active)[class*="prev-"] {
+    opacity: 0.8 !important;
 }
 
 [data-testid="modal"] #lyrics-plus-buttons-wrapper,
