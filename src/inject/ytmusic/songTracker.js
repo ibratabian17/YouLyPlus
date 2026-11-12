@@ -329,6 +329,16 @@
         }
     }
 
+    function cleanProviderName(value) {
+        if (typeof value !== "string") return null;
+        const providerName = value.split('\n')[0]
+            .replace(/^(source|lyrics provided by|lyrics)\s*:\s*/i, '')
+            .trim();
+        return providerName && !providerName.toLowerCase().includes("youtube")
+            ? providerName
+            : null;
+    }
+
     function extractFooterAndProvider(r) {
         let provider = null;
         let trackId = null;
@@ -338,16 +348,8 @@
                 o.footer?.runs ? o.footer.runs.map(r => r.text || '').join('').trim() :
                 o.footer?.simpleText ? o.footer.simpleText.trim() : null
             );
-            if (footerText) {
-                if (footerText.toLowerCase().includes("musixmatch")) provider = "Musixmatch";
-                if (footerText.includes("LyricFind")) provider = "LyricFind";
-                else {
-                    const clean = footerText.split('\n')[0].replace(/^(source|lyrics provided by|lyrics)\s*:\s*/i, '').trim();
-                    if (clean && !clean.toLowerCase().includes("youtube")) {
-                        provider = clean;
-                    }
-                }
-            }
+            const providerName = cleanProviderName(o.sourceMessage) || cleanProviderName(footerText);
+            if (providerName) provider = providerName;
             if (o.logLyricEventCommand?.serializedLyricInfo) {
                 trackId = decodeB64(o.logLyricEventCommand.serializedLyricInfo);
             }
