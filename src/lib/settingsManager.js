@@ -8,7 +8,7 @@ export const pBrowser = typeof browser !== 'undefined'
 
 export const defaultSettings = {
     lyricsProviderOrder: 'kpoe,lrcred,unison,lrclib',
-    lyricsSourceOrder: 'apple,qq,musixmatch,musixmatch-word',
+    lyricsSourceOrder: 'apple,qq',
     wordByWord: true,
     lightweight: false,
     isEnabled: true,
@@ -112,12 +112,11 @@ export function storageLocalSet(items) {
 export function loadSettings(callback) {
     return storageLocalGet(defaultSettings).then((items) => {
         currentSettings = { ...defaultSettings, ...items };
-        if (typeof currentSettings.lyricsSourceOrder === 'string' && currentSettings.lyricsSourceOrder.includes('lyricsplus')) {
-            currentSettings.lyricsSourceOrder = currentSettings.lyricsSourceOrder
-                .split(',')
-                .map(s => s.trim())
-                .filter(s => s && s !== 'lyricsplus')
-                .join(',');
+        const sources = typeof currentSettings.lyricsSourceOrder === 'string'
+            ? currentSettings.lyricsSourceOrder.split(',').map(source => source.trim()).filter(source => ['apple', 'qq'].includes(source))
+            : [];
+        currentSettings.lyricsSourceOrder = sources.length ? sources.join(',') : 'apple,qq';
+        if (currentSettings.lyricsSourceOrder !== items.lyricsSourceOrder) {
             saveSettings();
         }
         injectCustomCSS(currentSettings.customCSS);

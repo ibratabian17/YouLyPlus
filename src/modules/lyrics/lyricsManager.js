@@ -64,9 +64,9 @@ const NON_RENDERING_KEY_SET = new Set([
 ]);
 
 const KNOWN_LYRICS_SOURCES = [
-  'lyrics+', 'apple', 'apple music', 'qq', 'musixmatch', 'musixmatch-word',
+  'lyrics+', 'apple', 'apple music', 'qq',
   'unison', 'lrclib', 'lrcred', 'lrc.red', 'lrc-red', 'binilyrics', 'subtitles', 'youtube captions', 'youtube subtitles',
-  'local', 'local lyrics', 'spotify', 'kpoe', 'customkpoe', 'lyricfind'
+  'local', 'local lyrics', 'kpoe', 'customkpoe', 'lyricfind'
 ];
 let _cachedSourceKey = null;
 let _cachedValidSources = null;
@@ -978,7 +978,7 @@ function detectLyricsProviderFromSource(source) {
   if (s.includes('subtitles') || s.includes('captions')) return 'subtitles';
   if (s.includes('lyricfind')) return 'ytmusic';
   if (s.includes('youtube music') || s.includes('ytmusic')) return 'ytmusic';
-  if (s.includes('apple') || s.includes('spotify') || s.includes('musixmatch') || s.includes('qq') || s.includes('kpoe') || s.includes('lyrics+')) return 'kpoe';
+  if (s.includes('apple') || s.includes('qq') || s.includes('kpoe') || s.includes('lyrics+')) return 'kpoe';
   return '';
 }
 

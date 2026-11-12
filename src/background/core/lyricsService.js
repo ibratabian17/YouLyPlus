@@ -594,7 +594,7 @@ export class LyricsService {
     if (source.includes('local')) return PROVIDERS.LOCAL;
     if (source.includes('subtitles') || source.includes('captions')) return PROVIDERS.SUBTITLES;
     if (source.includes('lyricfind') || source.includes('youtube music') || source.includes('ytmusic')) return PROVIDERS.YTMUSIC;
-    if (source.includes('apple') || source.includes('spotify') || source.includes('musixmatch') || source.includes('qq') || source.includes('kpoe') || source.includes('lyrics+')) return PROVIDERS.KPOE;
+    if (source.includes('apple') || source.includes('qq') || source.includes('kpoe') || source.includes('lyrics+')) return PROVIDERS.KPOE;
     return PROVIDERS.KPOE;
   }
 
@@ -652,8 +652,6 @@ export class LyricsService {
       source.includes('lyrics+') ||
       source.includes('kpoe') ||
       source.includes('apple') ||
-      source.includes('spotify') ||
-      source.includes('musixmatch') ||
       source.includes('qq')
     ) {
       if (!lyrics.metadata.sourceUrl) {
@@ -781,7 +779,7 @@ export class LyricsService {
   static async fetchSpecificSource(songInfo, source, forceReload = true) {
     const settings = await SettingsManager.getLyricsSettings();
     const fetchOptions = { cache: 'no-store' };
-    const kpoeSources = ['apple', 'qq', 'musixmatch', 'musixmatch-word'];
+    const kpoeSources = ['apple', 'qq'];
     const cacheKey = this.createCacheKey(songInfo);
 
     let lyrics = null;

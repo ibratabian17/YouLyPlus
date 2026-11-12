@@ -4,7 +4,7 @@ const pBrowser = typeof browser !== 'undefined'
 
 const defaultSettings = {
     lyricsProviderOrder: 'kpoe,lrcred,unison,lrclib',
-    lyricsSourceOrder: 'apple,qq,musixmatch,musixmatch-word',
+    lyricsSourceOrder: 'apple,qq',
     wordByWord: true,
     lightweight: false,
     isEnabled: true,
@@ -60,13 +60,10 @@ window.addEventListener('message', (event) => {
 function loadSettings(callback) {
     storageLocalGet(defaultSettings).then((items) => {
         currentSettings = items;
-        if (typeof currentSettings.lyricsSourceOrder === 'string' && currentSettings.lyricsSourceOrder.includes('lyricsplus')) {
-            currentSettings.lyricsSourceOrder = currentSettings.lyricsSourceOrder
-                .split(',')
-                .map(s => s.trim())
-                .filter(s => s && s !== 'lyricsplus')
-                .join(',');
-        }
+        const sources = typeof currentSettings.lyricsSourceOrder === 'string'
+            ? currentSettings.lyricsSourceOrder.split(',').map(source => source.trim()).filter(source => ['apple', 'qq'].includes(source))
+            : [];
+        currentSettings.lyricsSourceOrder = sources.length ? sources.join(',') : 'apple,qq';
         console.log(currentSettings);
         applyDynamicPlayerClass(true);
         injectCustomCSS(currentSettings.customCSS);
@@ -76,12 +73,9 @@ function loadSettings(callback) {
 
 function updateSettings(newSettings) {
     if (!newSettings || typeof newSettings !== 'object') return;
-    if (typeof newSettings.lyricsSourceOrder === 'string' && newSettings.lyricsSourceOrder.includes('lyricsplus')) {
-        newSettings.lyricsSourceOrder = newSettings.lyricsSourceOrder
-            .split(',')
-            .map(s => s.trim())
-            .filter(s => s && s !== 'lyricsplus')
-            .join(',');
+    if (typeof newSettings.lyricsSourceOrder === 'string') {
+        const sources = newSettings.lyricsSourceOrder.split(',').map(source => source.trim()).filter(source => ['apple', 'qq'].includes(source));
+        newSettings.lyricsSourceOrder = sources.length ? sources.join(',') : 'apple,qq';
     }
 
     const changedKeys = [];

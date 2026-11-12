@@ -15,18 +15,15 @@ export class SettingsManager {
   static async getLyricsSettings() {
     const settings = await this.get({
       'lyricsProviderOrder': 'kpoe,lrcred,unison,lrclib',
-      'lyricsSourceOrder': 'apple,qq,musixmatch,musixmatch-word',
+      'lyricsSourceOrder': 'apple,qq',
       'customKpoeUrl': '',
       'cacheStrategy': 'aggressive',
       'preferUnisonVideo': false
     });
-    if (typeof settings.lyricsSourceOrder === 'string' && settings.lyricsSourceOrder.includes('lyricsplus')) {
-      settings.lyricsSourceOrder = settings.lyricsSourceOrder
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s && s !== 'lyricsplus')
-        .join(',');
-    }
+    const sources = typeof settings.lyricsSourceOrder === 'string'
+      ? settings.lyricsSourceOrder.split(',').map(source => source.trim()).filter(source => ['apple', 'qq'].includes(source))
+      : [];
+    settings.lyricsSourceOrder = sources.length ? sources.join(',') : 'apple,qq';
     return settings;
   }
 

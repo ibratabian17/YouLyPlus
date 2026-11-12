@@ -339,8 +339,8 @@
                 o.footer?.simpleText ? o.footer.simpleText.trim() : null
             );
             if (footerText) {
+                if (footerText.toLowerCase().includes("musixmatch")) provider = "Musixmatch";
                 if (footerText.includes("LyricFind")) provider = "LyricFind";
-                else if (footerText.includes("Musixmatch")) provider = "Musixmatch";
                 else {
                     const clean = footerText.split('\n')[0].replace(/^(source|lyrics provided by|lyrics)\s*:\s*/i, '').trim();
                     if (clean && !clean.toLowerCase().includes("youtube")) {
