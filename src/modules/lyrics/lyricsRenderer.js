@@ -245,6 +245,7 @@ class LyricsPlusRenderer {
     this._scrollBaseDurationMs = 750;
     this._scrollGapT = null;
     this._lastHighlightTime = undefined;
+    this._lastPredictiveTime = undefined;
     this._activeLineIndices = [];
     this._prevActiveLineIndices = [];
     this._lastActiveGroupEndIndex = 0;
@@ -2748,6 +2749,8 @@ class LyricsPlusRenderer {
     this._suggestedLineOffsetMs = -500;
     this._scrollBaseDurationMs = 750;
     this._scrollGapT = null;
+    this._lastHighlightTime = undefined;
+    this._lastPredictiveTime = undefined;
     if (this._activeLineIndices) this._activeLineIndices.length = 0;
     if (this._prevActiveLineIndices) this._prevActiveLineIndices.length = 0;
     this._lastActiveGroupEndIndex = 0;
@@ -3268,7 +3271,7 @@ class LyricsPlusRenderer {
 
     const rawSec = this._getEffectivePlayerTimeSec();
     const rawMs = rawSec * 1000;
-    const isForceScroll = forceScroll || (this.lastTime !== undefined && Math.abs(rawMs - this.lastTime) > 1000);
+    const isForceScroll = !!forceScroll;
     const currentTimeMs = (rawSec - (this.offsetLatency || 0)) * 1000 - (this.userOffsetMs || 0);
 
     this._updateLyricsHighlight(currentTimeMs, isForceScroll, this.currentSettings);
@@ -3349,6 +3352,11 @@ class LyricsPlusRenderer {
 
   updateCurrentTick(currentTime, syncMeta = null) {
     const now = performance.now();
+    const prevMediaSec = this._clockAnchorMediaSec;
+    const prevPerfMs = this._clockAnchorPerfMs;
+    const prevRate = this._getEffectivePlaybackRate();
+    const wasPlaying = this._isSongPlaying();
+
     this._clockAnchorMediaSec = currentTime;
     this._clockAnchorPerfMs = (syncMeta && typeof syncMeta.timestamp === "number")
       ? syncMeta.timestamp
@@ -3366,7 +3374,10 @@ class LyricsPlusRenderer {
     }
 
     const rawMs = currentTime * 1000;
-    const isForceScroll = this.lastTime !== undefined && Math.abs(rawMs - this.lastTime) > 1000;
+    const expectedMs = (prevPerfMs !== null && wasPlaying)
+      ? (prevMediaSec + Math.max(0, (now - prevPerfMs) / 1000) * prevRate) * 1000
+      : this.lastTime;
+    const isForceScroll = this.lastTime !== undefined && expectedMs !== undefined && Math.abs(rawMs - expectedMs) > 1000;
     const effectiveLyricTimeMs = (currentTime - (this.offsetLatency || 0)) * 1000 - (this.userOffsetMs || 0);
 
     this._cancelScheduledSync();
@@ -3558,6 +3569,9 @@ class LyricsPlusRenderer {
 
     const linesLen = lines.length;
     const isBackwardSeek = this._lastHighlightTime !== undefined && (this._lastHighlightTime - currentTime) > 80;
+    if (!isForceScroll && !isBackwardSeek && this._lastHighlightTime !== undefined && currentTime < this._lastHighlightTime) {
+      currentTime = this._lastHighlightTime;
+    }
     this._lastHighlightTime = currentTime;
     const isSeek = isForceScroll || isBackwardSeek;
     if (isSeek || this._suggestedLineOffsetMs === undefined) {
@@ -3567,7 +3581,11 @@ class LyricsPlusRenderer {
 
     const isWordByWord = !!(this.lyricsContainer && this.lyricsContainer.classList.contains("word-by-word-mode"));
     const scrollLookAheadMs = -this._suggestedLineOffsetMs;
-    const predictiveTime = currentTime + scrollLookAheadMs;
+    let predictiveTime = currentTime + scrollLookAheadMs;
+    if (!isSeek && this._lastPredictiveTime !== undefined && predictiveTime < this._lastPredictiveTime) {
+      predictiveTime = this._lastPredictiveTime;
+    }
+    this._lastPredictiveTime = predictiveTime;
     const activationStartDelayMs = isWordByWord ? 150 : 250;
     const overlapLookAheadMs = Math.max(250, scrollLookAheadMs - activationStartDelayMs);
     const overlapTime = currentTime + overlapLookAheadMs;
@@ -7419,6 +7437,8 @@ class LyricsPlusRenderer {
     this._suggestedLineOffsetMs = -500;
     this._scrollBaseDurationMs = 750;
     this._scrollGapT = null;
+    this._lastHighlightTime = undefined;
+    this._lastPredictiveTime = undefined;
     if (this._activeLineIndices) this._activeLineIndices.length = 0;
     if (this._prevActiveLineIndices) this._prevActiveLineIndices.length = 0;
     this._lastActiveGroupEndIndex = 0;
