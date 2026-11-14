@@ -4687,7 +4687,7 @@ class LyricsPlusRenderer {
             el._roLineH = newHeight;
             if (oldW !== undefined && (Math.abs(oldW - newWidth) > 0.5 || Math.abs(oldH - newHeight) > 0.5)) {
               el._maskPreMeasured = false;
-              if (el._maskAnimator) invalidatedLines.add(el);
+              if (el._maskAnimator && !el._maskAnimator._filling) invalidatedLines.add(el);
             }
           }
           continue;
@@ -4700,7 +4700,7 @@ class LyricsPlusRenderer {
             const owner = el._maskOwnerLine;
             if (owner) {
               owner._maskPreMeasured = false;
-              if (owner._maskAnimator) {
+              if (owner._maskAnimator && !owner._maskAnimator._filling) {
                 invalidatedLines.add(owner);
               }
             }
@@ -4708,7 +4708,7 @@ class LyricsPlusRenderer {
         }
       }
       for (const line of invalidatedLines) {
-        if (line._maskAnimator) {
+        if (line._maskAnimator && !line._maskAnimator._filling) {
           line._maskAnimator.dispose();
         }
       }
@@ -4965,7 +4965,11 @@ class LyricsPlusRenderer {
       const l = lines[i];
       if (!l) continue;
       l._maskPreMeasured = false;
-      if (l._maskAnimator) l._maskAnimator.dispose();
+      if (l._maskAnimator) {
+        const onFillDone = l._maskAnimator._filling ? l._maskAnimator._onFillDone : null;
+        l._maskAnimator.dispose();
+        if (onFillDone) onFillDone();
+      }
       if (clearDimensions) {
         l._roLineW = undefined;
         l._roLineH = undefined;
@@ -5484,6 +5488,7 @@ class LyricsPlusRenderer {
           clearTimeout(this._fillTimer);
           this._fillTimer = null;
         }
+        this._onFillDone = null;
         if (this._filling || this._playing) {
           this._filling = false;
           this._playing = false;
@@ -5510,6 +5515,7 @@ class LyricsPlusRenderer {
           return;
         }
         this._filling = true;
+        this._onFillDone = onDone || null;
         const rate = remaining / durationMs;
         for (let idx = 0; idx < animations.length; idx++) {
           const anim = animations[idx];
@@ -5526,6 +5532,7 @@ class LyricsPlusRenderer {
         this._fillTimer = setTimeout(() => {
           this._fillTimer = null;
           this._filling = false;
+          this._onFillDone = null;
           this.dispose();
           if (onDone) onDone();
         }, durationMs);
@@ -5536,6 +5543,7 @@ class LyricsPlusRenderer {
           this._fillTimer = null;
         }
         this._filling = false;
+        this._onFillDone = null;
         for (let idx = 0; idx < animations.length; idx++) {
           animations[idx].cancel();
         }
