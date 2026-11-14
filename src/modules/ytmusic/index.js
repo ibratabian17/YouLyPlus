@@ -9,6 +9,22 @@ if (typeof LYPLUS_setBgConfig === 'function') {
     });
 }
 
+let lastKnownTime = 0;
+let lastSyncPerfTime = null;
+let lastSyncPlaying = false;
+let lastSyncRate = 1;
+
+function getInterpolatedTime() {
+    const video = document.querySelector('video');
+    if (video && Number.isFinite(video.currentTime) && (video.currentTime > 0 || lastKnownTime === 0)) {
+        return video.currentTime;
+    }
+    if (lastSyncPlaying && lastSyncPerfTime !== null) {
+        return lastKnownTime + Math.max(0, (performance.now() - lastSyncPerfTime) / 1000) * lastSyncRate;
+    }
+    return lastKnownTime;
+}
+
 // This script is the bridge between the generic renderer and the YouTube Music UI
 
 // 1. Platform-specific implementations
@@ -25,19 +41,23 @@ const uiConfig = {
     ],
     buttonParent: 'ytmusic-app-layout',
     disableNativeTick: true,
+    getCurrentTime: () => getInterpolatedTime(),
     isPlaying: () => {
         const video = document.querySelector('video');
-        return video ? (!video.paused && !video.ended) : false;
+        if (video && typeof video.paused === 'boolean') {
+            return !video.paused && !video.ended;
+        }
+        return lastSyncPlaying;
     },
     seekTo: (time) => {
+        lastKnownTime = time;
+        lastSyncPerfTime = performance.now();
         window.postMessage({ type: 'LYPLUS_SEEK_TO', time: time }, '*');
     }
 };
 let lyricsRendererInstance = null;
 let progressBar;
 let currentSongDuration = 1;
-let lastUpdateTimestamp = 0;
-const THROTTLE_MS = 33.3;
 
 const titleElementElem = document.createElement('p');
 const artistElementElem = document.createElement('p');
@@ -78,7 +98,7 @@ const LyricsPlusAPI = {
     displaySongError: (...args) => lyricsRendererInstance.displaySongError(...args),
     cleanupLyrics: () => lyricsRendererInstance.cleanupLyrics(),
     updateDisplayMode: (...args) => lyricsRendererInstance.updateDisplayMode(...args),
-    updateCurrentTick: (...args) => lyricsRendererInstance.updateCurrentTick(...args),
+    updateCurrentTick: (...args) => lyricsRendererInstance?.updateCurrentTick(...args),
     setPlaybackState: (...args) => lyricsRendererInstance?.setPlaybackState(...args),
     setTranslationLoading: (...args) => lyricsRendererInstance.setTranslationLoading(...args),
     showToast: (...args) => lyricsRendererInstance?.showToast(...args),
@@ -244,12 +264,21 @@ function injectSongInfo() {
         progressBarElem.classList.add('progress-container');
         songInfoContainerElem.appendChild(progressBarElem);
         progressBar = new WavyProgressBar(progressBarElem);
+        if (typeof progressBar.setProgressProvider === 'function') {
+            progressBar.setProgressProvider(() => (
+                currentSongDuration > 0 ? getInterpolatedTime() / currentSongDuration : 0
+            ));
+        }
 
         progressBarElem.addEventListener('seek', (e) => {
             if (typeof e.detail?.progress === 'number' && currentSongDuration > 0) {
+                const targetTime = e.detail.progress * currentSongDuration;
+                lastKnownTime = targetTime;
+                lastSyncPerfTime = performance.now();
+                progressBar.update(e.detail.progress);
                 window.postMessage({
                     type: 'LYPLUS_SEEK_TO',
-                    time: e.detail.progress * currentSongDuration
+                    time: targetTime
                 }, '*');
             }
         });
@@ -308,19 +337,38 @@ window.addEventListener('message', (event) => {
     if (event.source !== window || !data) return;
 
     if (data.type === 'LYPLUS_TIME_UPDATE' && typeof data.currentTime === 'number') {
-        LyricsPlusAPI.updateCurrentTick(data.currentTime);
+        lastKnownTime = data.currentTime;
+        lastSyncPerfTime = typeof data.timestamp === 'number' ? data.timestamp : performance.now();
+        if (typeof data.isPlaying === 'boolean') {
+            lastSyncPlaying = data.isPlaying;
+            videoPlaying = data.isPlaying;
+            syncProgressBar();
+        }
+        if (typeof data.playbackRate === 'number' && data.playbackRate > 0) {
+            lastSyncRate = data.playbackRate;
+        }
 
-        if (progressBar && barVisible && !document.hidden && currentSettings.YTSongInfo) {
-            const now = performance.now();
-            if (now - lastUpdateTimestamp >= THROTTLE_MS) {
-                lastUpdateTimestamp = now;
-                progressBar.update(data.currentTime / currentSongDuration);
-            }
+        LyricsPlusAPI.updateCurrentTick(data.currentTime, data);
+
+        if (progressBar && barVisible && !document.hidden && currentSettings.YTSongInfo && currentSongDuration > 0) {
+            progressBar.update(data.currentTime / currentSongDuration);
         }
         return;
     }
 
+    if (data.type === 'LYPLUS_PLAYBACK_STATE' && typeof data.isPlaying === 'boolean') {
+        lastKnownTime = getInterpolatedTime();
+        lastSyncPerfTime = performance.now();
+        lastSyncPlaying = data.isPlaying;
+        videoPlaying = data.isPlaying;
+        syncProgressBar();
+        LyricsPlusAPI.setPlaybackState(data.isPlaying);
+        return;
+    }
+
     if (data.type === 'LYPLUS_SONG_CHANGED' && data.songInfo?.duration) {
+        lastKnownTime = 0;
+        lastSyncPerfTime = performance.now();
         if (!currentSettings.YTSongInfo) return;
 
         const songInfo = data.songInfo;

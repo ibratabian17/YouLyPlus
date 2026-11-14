@@ -3,9 +3,20 @@
 (function () {
   let mkInstance = null;
   let lastProcessedID = null;
-  let timeUpdateFrame = null;
   let playing = false;
   let lyricsSurfaceVisible = true;
+
+  let lastSyncAudioTime = -1;
+  let lastSyncPerfTime = null;
+  let lastSyncPlaying = null;
+  let lastSyncRate = 1;
+  let driftCheckTimer = null;
+  let settleTimer = null;
+  let boundMediaEl = null;
+
+  const DRIFT_THRESHOLD_SEC = 0.010;
+  const DRIFT_CHECK_INTERVAL_MS = 1000;
+  const SETTLE_SYNC_DELAY_MS = 120;
 
   const killedCanvases = new WeakSet();
 
@@ -60,6 +71,8 @@
         } else if (!lyricsSurfaceVisible) {
           stopTimeUpdater();
         }
+      } else if (nextVisible) {
+        emitTimeSync(true);
       }
     }
   });
@@ -67,13 +80,25 @@
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       stopTimeUpdater();
-    } else if (playing && hasActiveLyricsSurface()) {
+    } else if (hasActiveLyricsSurface()) {
       lyricsSurfaceVisible = true;
-      startTimeUpdater();
+      if (playing) {
+        startTimeUpdater();
+      } else {
+        emitTimeSync(true);
+      }
     }
   }, { passive: true });
 
   sweepAppleCanvases();
+
+  function getMediaElement() {
+    try {
+      const el = mkInstance?.services?.mediaItemPlayback?._currentPlayer?._targetElement;
+      if (el) return el;
+    } catch (e) {}
+    return document.querySelector('#apple-music-player, audio, video') || null;
+  }
 
   function getPreciseTime() {
     if (!mkInstance) return 0;
@@ -93,6 +118,117 @@
     }
 
     return mkInstance.currentPlaybackTime || 0;
+  }
+
+  function getPlaybackRate() {
+    const el = getMediaElement();
+    const rate = el?.playbackRate || mkInstance?.playbackRate || 1;
+    return (typeof rate === 'number' && rate > 0) ? rate : 1;
+  }
+
+  function isActuallyPlaying() {
+    if (!mkInstance || !playing) return false;
+    const el = getMediaElement();
+    if (el && typeof el.paused === 'boolean') {
+      return !el.paused && !el.ended && el.readyState >= 2;
+    }
+    return true;
+  }
+
+  function emitTimeSync(force = false) {
+    if (!mkInstance) return;
+
+    const now = performance.now();
+    const actualTime = getPreciseTime();
+    const rate = getPlaybackRate();
+    const activePlaying = isActuallyPlaying();
+
+    const expectedTime = (lastSyncPlaying && lastSyncPerfTime !== null)
+      ? lastSyncAudioTime + ((now - lastSyncPerfTime) / 1000) * lastSyncRate
+      : lastSyncAudioTime;
+    const drift = Math.abs(actualTime - expectedTime);
+
+    if (
+      force ||
+      activePlaying !== lastSyncPlaying ||
+      rate !== lastSyncRate ||
+      lastSyncPerfTime === null ||
+      drift > DRIFT_THRESHOLD_SEC
+    ) {
+      lastSyncAudioTime = actualTime;
+      lastSyncPerfTime = now;
+      lastSyncPlaying = activePlaying;
+      lastSyncRate = rate;
+
+      window.postMessage({
+        type: 'LYPLUS_TIME_UPDATE',
+        currentTime: actualTime,
+        timestamp: now,
+        isPlaying: activePlaying,
+        playbackRate: rate
+      }, '*');
+    }
+  }
+
+  function scheduleSettleCheck() {
+    if (settleTimer) clearTimeout(settleTimer);
+    settleTimer = setTimeout(() => {
+      settleTimer = null;
+      if (mkInstance && playing && !document.hidden && hasActiveLyricsSurface()) {
+        emitTimeSync(false);
+      }
+    }, SETTLE_SYNC_DELAY_MS);
+  }
+
+  const onMediaActiveSync = () => {
+    playing = !!(mkInstance && mkInstance.isPlaying);
+    emitTimeSync(true);
+    scheduleSettleCheck();
+  };
+
+  const onMediaStateSync = () => {
+    playing = !!(mkInstance && mkInstance.isPlaying);
+    emitTimeSync(true);
+  };
+
+  const onMediaTimeUpdate = () => {
+    if (mkInstance && playing && !document.hidden && hasActiveLyricsSurface()) {
+      emitTimeSync(false);
+    }
+  };
+
+  function bindMediaElement() {
+    const el = getMediaElement();
+    if (el === boundMediaEl) return;
+
+    if (boundMediaEl) {
+      const opts = { passive: true };
+      boundMediaEl.removeEventListener('play', onMediaActiveSync, opts);
+      boundMediaEl.removeEventListener('playing', onMediaActiveSync, opts);
+      boundMediaEl.removeEventListener('seeked', onMediaActiveSync, opts);
+      boundMediaEl.removeEventListener('ratechange', onMediaActiveSync, opts);
+      boundMediaEl.removeEventListener('pause', onMediaStateSync, opts);
+      boundMediaEl.removeEventListener('waiting', onMediaStateSync, opts);
+      boundMediaEl.removeEventListener('stalled', onMediaStateSync, opts);
+      boundMediaEl.removeEventListener('seeking', onMediaStateSync, opts);
+      boundMediaEl.removeEventListener('ended', onMediaStateSync, opts);
+      boundMediaEl.removeEventListener('timeupdate', onMediaTimeUpdate, opts);
+    }
+
+    boundMediaEl = el;
+    if (boundMediaEl) {
+      const opts = { passive: true };
+      boundMediaEl.addEventListener('play', onMediaActiveSync, opts);
+      boundMediaEl.addEventListener('playing', onMediaActiveSync, opts);
+      boundMediaEl.addEventListener('seeked', onMediaActiveSync, opts);
+      boundMediaEl.addEventListener('ratechange', onMediaActiveSync, opts);
+      boundMediaEl.addEventListener('pause', onMediaStateSync, opts);
+      boundMediaEl.addEventListener('waiting', onMediaStateSync, opts);
+      boundMediaEl.addEventListener('stalled', onMediaStateSync, opts);
+      boundMediaEl.addEventListener('seeking', onMediaStateSync, opts);
+      boundMediaEl.addEventListener('ended', onMediaStateSync, opts);
+      boundMediaEl.addEventListener('timeupdate', onMediaTimeUpdate, opts);
+    }
   }
 
   async function fetchSyllableLyrics(songId, storefront, isMusicVideo = false) {
@@ -152,6 +288,9 @@
     if (lastProcessedID === item.id) return;
 
     lastProcessedID = item.id;
+    lastSyncAudioTime = 0;
+    lastSyncPerfTime = null;
+    bindMediaElement();
 
     const attrs = item.attributes;
     const artworkUrl = attrs.artwork?.url ? attrs.artwork.url.replace('{w}', '800').replace('{h}', '800') : '';
@@ -190,6 +329,8 @@
       songInfo
     }, '*');
 
+    emitTimeSync(true);
+
     // Only wake the WebGL background renderer if the fullscreen modal is actually open
     if (document.querySelector('article[data-testid="lyrics-fullscreen-modal"]')) {
       window.postMessage({
@@ -204,7 +345,19 @@
       if (!event.data || event.data.type !== 'LYPLUS_SEEK_TO') return;
       if (mkInstance && typeof event.data.time === 'number') {
         try {
-          mkInstance.seekToTime(event.data.time);
+          const targetTime = event.data.time;
+          mkInstance.seekToTime(targetTime);
+          const now = performance.now();
+          lastSyncAudioTime = targetTime;
+          lastSyncPerfTime = now;
+          window.postMessage({
+            type: 'LYPLUS_TIME_UPDATE',
+            currentTime: targetTime,
+            timestamp: now,
+            isPlaying: isActuallyPlaying(),
+            playbackRate: getPlaybackRate()
+          }, '*');
+          scheduleSettleCheck();
         } catch (e) {}
       }
     });
@@ -212,32 +365,34 @@
 
   function startTimeUpdater() {
     stopTimeUpdater();
+    bindMediaElement();
+    emitTimeSync(true);
+    scheduleSettleCheck();
 
-    function loop() {
+    driftCheckTimer = setInterval(() => {
       if (mkInstance && playing && !document.hidden && hasActiveLyricsSurface()) {
-        window.postMessage({
-          type: 'LYPLUS_TIME_UPDATE',
-          currentTime: getPreciseTime()
-        }, '*');
-
-        timeUpdateFrame = requestAnimationFrame(loop);
+        bindMediaElement();
+        emitTimeSync(false);
       } else {
-        timeUpdateFrame = null;
+        stopTimeUpdater();
       }
-    }
-
-    timeUpdateFrame = requestAnimationFrame(loop);
+    }, DRIFT_CHECK_INTERVAL_MS);
   }
 
   function stopTimeUpdater() {
-    if (timeUpdateFrame) {
-      cancelAnimationFrame(timeUpdateFrame);
-      timeUpdateFrame = null;
+    if (driftCheckTimer) {
+      clearInterval(driftCheckTimer);
+      driftCheckTimer = null;
+    }
+    if (settleTimer) {
+      clearTimeout(settleTimer);
+      settleTimer = null;
     }
   }
 
   function init(instance) {
     mkInstance = instance;
+    bindMediaElement();
 
     instance.addEventListener('nowPlayingItemDidChange', () => {
       handleSongChange();
@@ -245,9 +400,18 @@
 
     instance.addEventListener('playbackStateDidChange', () => {
       playing = mkInstance.isPlaying;
+      bindMediaElement();
+      emitTimeSync(true);
       if (playing && hasActiveLyricsSurface()) startTimeUpdater();
       else stopTimeUpdater();
       window.postMessage({ type: 'LYPLUS_PLAYBACK_STATE', isPlaying: playing }, '*');
+    });
+
+    instance.addEventListener('playbackTimeDidChange', () => {
+      if (playing && !document.hidden && hasActiveLyricsSurface()) {
+        bindMediaElement();
+        emitTimeSync(false);
+      }
     });
 
     if (mkInstance.nowPlayingItem) handleSongChange();

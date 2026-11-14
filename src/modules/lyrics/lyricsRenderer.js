@@ -328,6 +328,12 @@ class LyricsPlusRenderer {
     this._explicitPlaybackState = null;
     this._lastTickTime = 0;
     this._tickWatchdogTimer = null;
+    this._syncTimerId = null;
+    this._clockAnchorMediaSec = 0;
+    this._clockAnchorPerfMs = null;
+    this._clockPlaybackRate = 1;
+    this._clockIsPlaying = false;
+    this._boundSyncPlayer = null;
     this._wakeLockListenersAttached = false;
     this._setupWakeLockListeners();
 
@@ -340,18 +346,42 @@ class LyricsPlusRenderer {
 
     this._boundWakeLockMediaHandler = (event) => {
       if (event && event.target && (event.target.tagName === 'VIDEO' || event.target.tagName === 'AUDIO')) {
-        this._explicitPlaybackState = !event.target.paused && !event.target.ended;
+        const el = event.target;
+        const playing = !el.paused && !el.ended;
+        this._explicitPlaybackState = playing;
+        this._clockIsPlaying = playing;
+        if (typeof el.currentTime === 'number' && Number.isFinite(el.currentTime)) {
+          this._clockAnchorMediaSec = el.currentTime;
+          this._clockAnchorPerfMs = performance.now();
+        }
+        if (typeof el.playbackRate === 'number' && el.playbackRate > 0) {
+          this._clockPlaybackRate = el.playbackRate;
+        }
+        this._syncActiveAnimationsPlaybackState(playing, this._getEffectivePlaybackRate());
+        if (playing) {
+          this._runScheduledSync(event.type === 'seeked');
+        } else {
+          this._cancelScheduledSync();
+        }
         this._updateWakeLock();
       }
     };
 
     this._boundWakeLockVisibilityHandler = () => {
+      if (document.hidden) {
+        this._cancelScheduledSync();
+      } else if (this.cachedLyricsLines && this.cachedLyricsLines.length > 0) {
+        this._runScheduledSync(false);
+      }
       this._updateWakeLock();
     };
 
     document.addEventListener('play', this._boundWakeLockMediaHandler, true);
     document.addEventListener('playing', this._boundWakeLockMediaHandler, true);
     document.addEventListener('pause', this._boundWakeLockMediaHandler, true);
+    document.addEventListener('waiting', this._boundWakeLockMediaHandler, true);
+    document.addEventListener('seeked', this._boundWakeLockMediaHandler, true);
+    document.addEventListener('ratechange', this._boundWakeLockMediaHandler, true);
     document.addEventListener('ended', this._boundWakeLockMediaHandler, true);
     document.addEventListener('visibilitychange', this._boundWakeLockVisibilityHandler);
   }
@@ -379,10 +409,7 @@ class LyricsPlusRenderer {
     if (typeof this._explicitPlaybackState === 'boolean') {
       return this._explicitPlaybackState;
     }
-    if (this.uiConfig?.disableNativeTick && this._lastTickTime) {
-      return (Date.now() - this._lastTickTime) < 2000;
-    }
-    return false;
+    return !!this._clockIsPlaying;
   }
 
   _shouldHoldWakeLock() {
@@ -398,7 +425,18 @@ class LyricsPlusRenderer {
   }
 
   setPlaybackState(isPlaying) {
-    this._explicitPlaybackState = !!isPlaying;
+    const nextPlaying = !!isPlaying;
+    const currentMediaSec = this._getEffectivePlayerTimeSec();
+    this._clockAnchorMediaSec = currentMediaSec;
+    this._clockAnchorPerfMs = performance.now();
+    this._explicitPlaybackState = nextPlaying;
+    this._clockIsPlaying = nextPlaying;
+    this._syncActiveAnimationsPlaybackState(nextPlaying, this._getEffectivePlaybackRate());
+    if (nextPlaying) {
+      this._runScheduledSync(false);
+    } else {
+      this._cancelScheduledSync();
+    }
     this._updateWakeLock();
   }
 
@@ -2759,8 +2797,13 @@ class LyricsPlusRenderer {
    */
   setUserOffset(offsetMs) {
     if (typeof offsetMs === "number") {
-      this.userOffsetMs = Math.round(offsetMs / 10) * 10;
+      const nextOffset = Math.round(offsetMs / 10) * 10;
+      const changed = this.userOffsetMs !== nextOffset;
+      this.userOffsetMs = nextOffset;
       this._updateOffsetDisplay();
+      if (changed && this.cachedLyricsLines && this.cachedLyricsLines.length > 0) {
+        this._runScheduledSync(false);
+      }
     }
   }
 
@@ -3024,11 +3067,228 @@ class LyricsPlusRenderer {
     }
   }
 
-  /**
-   * Starts the synchronization loop for highlighting lyrics based on video time.
-   * @param {object} currentSettings - The current user settings.
-   * @returns {Function} - A cleanup function to stop the sync.
-   */
+  _getEffectivePlaybackRate() {
+    const player = this._getPlayerElement();
+    if (player && typeof player.playbackRate === "number" && player.playbackRate > 0) {
+      return player.playbackRate;
+    }
+    return (typeof this._clockPlaybackRate === "number" && this._clockPlaybackRate > 0)
+      ? this._clockPlaybackRate
+      : 1;
+  }
+
+  _getEffectivePlayerTimeSec() {
+    if (!this.uiConfig?.disableNativeTick) {
+      const t = this._getCurrentPlayerTime();
+      if (typeof t === "number" && Number.isFinite(t)) return t;
+    }
+    if (typeof this.uiConfig?.getCurrentTime === "function") {
+      try {
+        const customT = this.uiConfig.getCurrentTime();
+        if (typeof customT === "number" && Number.isFinite(customT) && customT > 0) {
+          return customT;
+        }
+      } catch (e) {}
+    }
+    if (this._clockAnchorPerfMs !== null) {
+      if (this._isSongPlaying()) {
+        const elapsedSec = Math.max(0, (performance.now() - this._clockAnchorPerfMs) / 1000) * this._getEffectivePlaybackRate();
+        return this._clockAnchorMediaSec + elapsedSec;
+      }
+      return this._clockAnchorMediaSec;
+    }
+    return this._getCurrentPlayerTime() || 0;
+  }
+
+  _getEffectiveLyricTimeMs() {
+    return (this._getEffectivePlayerTimeSec() - (this.offsetLatency || 0)) * 1000 - (this.userOffsetMs || 0);
+  }
+
+  _cancelScheduledSync() {
+    if (this._syncTimerId) {
+      clearTimeout(this._syncTimerId);
+      this._syncTimerId = null;
+    }
+    if (this.lyricsAnimationFrameId) {
+      cancelAnimationFrame(this.lyricsAnimationFrameId);
+      this.lyricsAnimationFrameId = null;
+    }
+  }
+
+  _computeNextBoundaryMs(currentTimeMs) {
+    const lines = this.cachedLyricsLines;
+    if (!lines || lines.length === 0) return Infinity;
+
+    const linesLen = lines.length;
+    const isWordByWord = !!(this.lyricsContainer && this.lyricsContainer.classList.contains("word-by-word-mode"));
+    const scrollLookAheadMs = -this._suggestedLineOffsetMs;
+    const activationStartDelayMs = isWordByWord ? 150 : 250;
+    const overlapLookAheadMs = Math.max(250, scrollLookAheadMs - activationStartDelayMs);
+    const lastLineEndLookAheadMs = 200;
+
+    let minNextMs = Infinity;
+    const consider = (t) => {
+      if (t > currentTimeMs && t < minNextMs) {
+        minNextMs = t;
+      }
+    };
+
+    const startScan = Math.max(0, (this._lastActiveIndex || 0) - 2);
+    let futureLinesChecked = 0;
+
+    for (let i = startScan; i < linesLen; i++) {
+      const line = lines[i];
+      if (!line || line._startTimeMs === undefined) continue;
+
+      const sMs = line._startTimeMs;
+      const eMs = line._endTimeMs;
+
+      consider(sMs - scrollLookAheadMs);
+      consider(sMs - overlapLookAheadMs);
+      consider(sMs);
+
+      if (eMs !== undefined) {
+        consider(eMs - scrollLookAheadMs);
+        consider(eMs - overlapLookAheadMs);
+        consider(eMs - lastLineEndLookAheadMs);
+        consider(eMs);
+        consider(eMs + 1000);
+      }
+
+      if (sMs - scrollLookAheadMs > currentTimeMs) {
+        futureLinesChecked++;
+        if (futureLinesChecked === 1 && line._cachedSyllableElements) {
+          const nextSyls = line._cachedSyllableElements;
+          for (let j = 0; j < nextSyls.length; j++) {
+            const syl = nextSyls[j];
+            if (syl._startTimeMs !== undefined) consider(syl._startTimeMs);
+            if (syl._endTimeMs !== undefined) consider(syl._endTimeMs + 1);
+          }
+        }
+        if (futureLinesChecked >= 3) break;
+      }
+    }
+
+    const activeLines = this._tempActiveLines;
+    if (activeLines) {
+      for (let i = 0; i < activeLines.length; i++) {
+        const parentLine = activeLines[i];
+        if (!parentLine) continue;
+
+        const lineStartTime = parentLine._startTimeMs !== undefined
+          ? parentLine._startTimeMs
+          : parseFloat(parentLine.dataset.startTime) * 1000;
+        const fadeDur = parentLine._maskTotalFadeDuration || (parentLine._endTimeMs - lineStartTime);
+        if (Number.isFinite(lineStartTime)) {
+          consider(lineStartTime);
+          if (Number.isFinite(fadeDur) && fadeDur > 0) {
+            consider(lineStartTime + fadeDur);
+          }
+        }
+
+        const syllables = parentLine._cachedSyllableElements;
+        if (!syllables) continue;
+        for (let j = 0; j < syllables.length; j++) {
+          const syl = syllables[j];
+          if (syl._startTimeMs !== undefined) {
+            consider(syl._startTimeMs);
+          }
+          if (syl._endTimeMs !== undefined) {
+            consider(syl._endTimeMs + 1);
+          }
+        }
+      }
+    }
+
+    return minNextMs;
+  }
+
+  _scheduleNextSync() {
+    this._cancelScheduledSync();
+
+    if (
+      this.currentLyricsType === "None" ||
+      !this.cachedLyricsLines ||
+      this.cachedLyricsLines.length === 0 ||
+      document.hidden ||
+      !this._isSongPlaying()
+    ) {
+      return;
+    }
+
+    const currentTimeMs = this._getEffectiveLyricTimeMs();
+    const nextBoundaryMs = this._computeNextBoundaryMs(currentTimeMs);
+    const rate = this._getEffectivePlaybackRate();
+
+    const rawDeltaMs = Number.isFinite(nextBoundaryMs)
+      ? (nextBoundaryMs - currentTimeMs) / rate
+      : 1000;
+    const delayMs = Math.min(1000, Math.max(0, rawDeltaMs));
+
+    if (delayMs <= 16) {
+      this.lyricsAnimationFrameId = requestAnimationFrame(() => {
+        this.lyricsAnimationFrameId = null;
+        this._runScheduledSync(false);
+      });
+    } else {
+      this._syncTimerId = setTimeout(() => {
+        this._syncTimerId = null;
+        this._runScheduledSync(false);
+      }, Math.max(4, Math.floor(delayMs)));
+    }
+  }
+
+  _runScheduledSync(forceScroll = false) {
+    this._cancelScheduledSync();
+    if (this.currentLyricsType === "None" || !this.cachedLyricsLines || this.cachedLyricsLines.length === 0) {
+      return;
+    }
+
+    const rawSec = this._getEffectivePlayerTimeSec();
+    const rawMs = rawSec * 1000;
+    const isForceScroll = forceScroll || (this.lastTime !== undefined && Math.abs(rawMs - this.lastTime) > 1000);
+    const currentTimeMs = (rawSec - (this.offsetLatency || 0)) * 1000 - (this.userOffsetMs || 0);
+
+    this._updateLyricsHighlight(currentTimeMs, isForceScroll, this.currentSettings);
+    this.lastTime = rawMs;
+
+    this._scheduleNextSync();
+  }
+
+  _syncActiveAnimationsPlaybackState(isPlaying, playbackRate = 1) {
+    const activeLines = this._tempActiveLines;
+    if (!activeLines || activeLines.length === 0) return;
+
+    const currentTimeMs = this._getEffectiveLyricTimeMs();
+    for (let i = 0; i < activeLines.length; i++) {
+      const line = activeLines[i];
+      if (!line) continue;
+      if (line._maskAnimator) {
+        const lineStartTime = line._startTimeMs !== undefined
+          ? line._startTimeMs
+          : parseFloat(line.dataset.startTime) * 1000;
+        const relativeTime = currentTimeMs - lineStartTime;
+        if (isPlaying) {
+          line._maskAnimator.sync(relativeTime, true, playbackRate);
+        } else {
+          line._maskAnimator.pause(relativeTime);
+        }
+      }
+      const syllables = line._cachedSyllableElements;
+      if (syllables) {
+        for (let j = 0; j < syllables.length; j++) {
+          const syl = syllables[j];
+          if (syl && syl._isGrowable && syl._syllableIdx === 0) {
+            const wordEl = syl.parentElement?.parentElement;
+            if (wordEl?._cachedChars?.[0]?._emphasis) {
+              this._syncEmphasis(wordEl, currentTimeMs);
+            }
+          }
+        }
+      }
+    }
+  }
+
   _startLyricsSync(currentSettings = {}) {
     if (this.currentLyricsType === "None") return () => { };
 
@@ -3046,76 +3306,54 @@ class LyricsPlusRenderer {
     if (this.visibilityObserver) this.visibilityObserver.disconnect();
     this.visibilityObserver = this._setupVisibilityTracking();
 
-    if (this.lyricsAnimationFrameId) {
-      if (!this.uiConfig.disableNativeTick)
-        cancelAnimationFrame(this.lyricsAnimationFrameId);
-    }
-    this.lastTime = this._getCurrentPlayerTime() * 1000 - (this.userOffsetMs || 0);
-    this._lastPlayerPaused = false;
-    if (!this.uiConfig.disableNativeTick) {
-      const sync = () => {
-        const player = this._getPlayerElement();
-        const isPaused = player ? player.paused : false;
-        const currentTime = (this._getCurrentPlayerTime() - this.offsetLatency) * 1000 - (this.userOffsetMs || 0);
-        if (currentTime !== this.lastTime || isPaused !== this._lastPlayerPaused) {
-          const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
-          if (isPaused !== this._lastPlayerPaused) {
-            this._lastPlayerPaused = isPaused;
-            this._explicitPlaybackState = !isPaused;
-            this._updateWakeLock();
-          }
-          this._updateLyricsHighlight(
-            currentTime,
-            isForceScroll,
-            currentSettings
-          );
-          this.lastTime = currentTime;
-        }
-        this.lyricsAnimationFrameId = requestAnimationFrame(sync);
-      };
-      this.lyricsAnimationFrameId = requestAnimationFrame(sync);
-    }
+    this._cancelScheduledSync();
+
+    const initialSec = this._getEffectivePlayerTimeSec();
+    this._clockAnchorMediaSec = initialSec;
+    this._clockAnchorPerfMs = performance.now();
+    this.lastTime = initialSec * 1000;
+    this._lastPlayerPaused = !this._isSongPlaying();
 
     this._setupResizeObserver();
+    this._runScheduledSync(false);
 
     return () => {
       if (this.visibilityObserver) this.visibilityObserver.disconnect();
       if (this.resizeObserver) this.resizeObserver.disconnect();
-      if (this.lyricsAnimationFrameId) {
-        cancelAnimationFrame(this.lyricsAnimationFrameId);
-        this.lyricsAnimationFrameId = null;
-      }
+      this._cancelScheduledSync();
     };
   }
 
-  /**
-   * Updates the current time
-   * @param {number} currentTime - The current video time in seconds.
-   */
-  updateCurrentTick(currentTime) {
-    currentTime = currentTime * 1000;
-    const isForceScroll = Math.abs(currentTime - this.lastTime) > 1000;
-    this._updateLyricsHighlight((currentTime - (this.offsetLatency * 1000) - (this.userOffsetMs || 0)), isForceScroll);
-    this.lastTime = currentTime;
+  updateCurrentTick(currentTime, syncMeta = null) {
+    const now = performance.now();
+    this._clockAnchorMediaSec = currentTime;
+    this._clockAnchorPerfMs = (syncMeta && typeof syncMeta.timestamp === "number")
+      ? syncMeta.timestamp
+      : now;
+
+    if (syncMeta && typeof syncMeta.playbackRate === "number" && syncMeta.playbackRate > 0) {
+      this._clockPlaybackRate = syncMeta.playbackRate;
+    }
+    if (syncMeta && typeof syncMeta.isPlaying === "boolean") {
+      this._clockIsPlaying = syncMeta.isPlaying;
+      this._explicitPlaybackState = syncMeta.isPlaying;
+    } else if (this._explicitPlaybackState === null) {
+      this._clockIsPlaying = true;
+      this._explicitPlaybackState = true;
+    }
+
+    const rawMs = currentTime * 1000;
+    const isForceScroll = this.lastTime !== undefined && Math.abs(rawMs - this.lastTime) > 1000;
+    const effectiveLyricTimeMs = (currentTime - (this.offsetLatency || 0)) * 1000 - (this.userOffsetMs || 0);
+
+    this._cancelScheduledSync();
+    this._updateLyricsHighlight(effectiveLyricTimeMs, isForceScroll, this.currentSettings);
+    this.lastTime = rawMs;
     this._lastTickTime = Date.now();
-    this._explicitPlaybackState = true;
-    if (!this.wakeLock && !this._wakeLockPending && this._shouldHoldWakeLock()) {
-      this._requestWakeLock();
-    }
-    if (this.uiConfig?.disableNativeTick) {
-      clearTimeout(this._tickWatchdogTimer);
-      this._tickWatchdogTimer = setTimeout(() => {
-        const player = this._getPlayerElement();
-        if (player && player.paused) {
-          this._explicitPlaybackState = false;
-        } else if (!player && (Date.now() - this._lastTickTime >= 2000)) {
-          this._explicitPlaybackState = false;
-        }
-        if (this.wakeLock) {
-          this._updateWakeLock();
-        }
-      }, 2000);
-    }
+
+    this._syncActiveAnimationsPlaybackState(this._isSongPlaying(), this._getEffectivePlaybackRate());
+    this._scheduleNextSync();
+    this._updateWakeLock();
   }
 
   /**
@@ -4726,10 +4964,107 @@ class LyricsPlusRenderer {
       animations,
       totalFadeDuration,
       _lastT: -1,
+      _playing: false,
+      _rate: 1,
       _fillTimer: null,
       _filling: false,
+      getCurrentTime() {
+        if (this._playing && animations.length > 0) {
+          for (let idx = 0; idx < animations.length; idx++) {
+            const anim = animations[idx];
+            if (anim.playState === "running") {
+              const ct = Number(anim.currentTime);
+              if (Number.isFinite(ct)) {
+                this._lastT = Math.min(totalFadeDuration, Math.max(0, ct));
+                break;
+              }
+            }
+          }
+        }
+        return this._lastT;
+      },
+      sync(relativeTime, isPlaying = true, playbackRate = 1) {
+        if (this._filling) this.cancelFill();
+        const rate = playbackRate > 0 ? playbackRate : 1;
+        if (!isPlaying || relativeTime < 0) {
+          const clamped = Math.min(totalFadeDuration, Math.max(0, relativeTime));
+          if (this._playing) {
+            this._playing = false;
+            const len = animations.length;
+            for (let idx = 0; idx < len; idx++) {
+              animations[idx].pause();
+              animations[idx].currentTime = clamped;
+            }
+            this._lastT = clamped;
+            return;
+          }
+          this.setCurrentTime(clamped);
+          return;
+        }
+        const t = Math.min(totalFadeDuration, Math.max(0, relativeTime));
+        const len = animations.length;
+        const rateChanged = this._rate !== rate;
+        this._rate = rate;
+        if (!this._playing) {
+          this._playing = true;
+          this._lastT = t;
+          for (let idx = 0; idx < len; idx++) {
+            const anim = animations[idx];
+            if (anim.playbackRate !== rate) anim.playbackRate = rate;
+            const hiMs = boundsMs[idx * 2 + 1];
+            if (t >= hiMs) {
+              anim.pause();
+              anim.currentTime = totalFadeDuration;
+            } else {
+              anim.currentTime = t;
+              anim.play();
+            }
+          }
+          return;
+        }
+        this._lastT = t;
+        for (let idx = 0; idx < len; idx++) {
+          const anim = animations[idx];
+          if (rateChanged && anim.playbackRate !== rate) {
+            anim.playbackRate = rate;
+          }
+          const hiMs = boundsMs[idx * 2 + 1];
+          if (t >= hiMs) {
+            if (anim.playState === "running") {
+              anim.pause();
+              anim.currentTime = totalFadeDuration;
+            }
+            continue;
+          }
+          const cur = Number(anim.currentTime);
+          if (anim.playState !== "running") {
+            anim.currentTime = t;
+            anim.play();
+          } else if (!Number.isFinite(cur) || Math.abs(cur - t) > 16) {
+            anim.currentTime = t;
+          }
+        }
+      },
+      pause(relativeTime) {
+        if (this._filling) return;
+        const clamped = relativeTime !== undefined
+          ? Math.min(totalFadeDuration, Math.max(0, relativeTime))
+          : this.getCurrentTime();
+        this._playing = false;
+        this._lastT = Math.max(0, clamped);
+        for (let idx = 0; idx < animations.length; idx++) {
+          animations[idx].pause();
+          if (clamped >= 0) animations[idx].currentTime = clamped;
+        }
+      },
       setCurrentTime(relativeTime) {
         if (this._filling) this.cancelFill();
+        if (this._playing) {
+          this._playing = false;
+          for (let idx = 0; idx < animations.length; idx++) {
+            animations[idx].pause();
+          }
+        }
         const t = Math.min(totalFadeDuration, Math.max(0, relativeTime));
         if (t === this._lastT) return;
         const prev = this._lastT;
@@ -4752,8 +5087,9 @@ class LyricsPlusRenderer {
           clearTimeout(this._fillTimer);
           this._fillTimer = null;
         }
-        if (this._filling) {
+        if (this._filling || this._playing) {
           this._filling = false;
+          this._playing = false;
           for (let idx = 0; idx < animations.length; idx++) {
             const anim = animations[idx];
             anim.pause();
@@ -4767,7 +5103,9 @@ class LyricsPlusRenderer {
           clearTimeout(this._fillTimer);
           this._fillTimer = null;
         }
-        const startT = Math.max(0, Math.min(totalFadeDuration, this._lastT));
+        const liveT = this.getCurrentTime();
+        this._playing = false;
+        const startT = Math.max(0, Math.min(totalFadeDuration, liveT));
         const remaining = totalFadeDuration - startT;
         if (!(remaining > 1) || !(durationMs > 0) || animations.length === 0) {
           this.dispose();
@@ -4947,7 +5285,11 @@ class LyricsPlusRenderer {
       }
 
       const animation = span.animate(span._emphasisFrames, span._emphasisTiming);
+      const isPlaying = this._isSongPlaying();
+      const rate = this._getEffectivePlaybackRate();
+      if (rate !== 1) animation.playbackRate = rate;
       animation.currentTime = Math.min(elapsed, span._emphasisEnd);
+      if (!isPlaying) animation.pause();
       span._emphasis = { animation, end: span._emphasisEnd, startMs, glowEpoch: elapsed };
     }
   }
@@ -5043,19 +5385,38 @@ class LyricsPlusRenderer {
     if (!entry) return;
     const elapsed = currentTime - entry.startMs;
     if (elapsed < 0) return;
-    if (Math.abs(Number(entry.animation.currentTime) - Math.min(elapsed, entry.end)) <= 200) return;
+    const isPlaying = this._isSongPlaying();
+    const rate = this._getEffectivePlaybackRate();
+    const targetT = Math.min(elapsed, entry.end);
+    const curT = Number(entry.animation.currentTime);
+    const shouldBeRunning = isPlaying && elapsed < entry.end;
+    const isRunning = entry.animation.playState === "running";
+    if (
+      shouldBeRunning === isRunning &&
+      entry.animation.playbackRate === rate &&
+      Number.isFinite(curT) &&
+      Math.abs(curT - targetT) <= 50
+    ) {
+      return;
+    }
 
     for (let i = 0; i < chars.length; i++) {
       const span = chars[i];
       const e = span._emphasis;
       if (!e) continue;
-      e.animation.currentTime = Math.min(elapsed, e.end);
-      if (elapsed < e.end && e.animation.playState === "finished") e.animation.play();
+      if (e.animation.playbackRate !== rate) e.animation.playbackRate = rate;
+      e.animation.currentTime = targetT;
+      if (shouldBeRunning) {
+        if (e.animation.playState !== "running") e.animation.play();
+      } else if (e.animation.playState === "running") {
+        e.animation.pause();
+      }
       if (span._emphasisGlow) {
         for (const eff of span.getAnimations()) {
           if (eff.animationName === "char-glow") {
             eff.currentTime = Math.max(0, elapsed - e.glowEpoch);
-            if (elapsed < e.end) eff.play();
+            if (shouldBeRunning) eff.play();
+            else eff.pause();
           }
         }
       }
@@ -5115,7 +5476,7 @@ class LyricsPlusRenderer {
             }
           }
         } else {
-          animator.setCurrentTime(relativeTime);
+          animator.sync(relativeTime, this._isSongPlaying(), this._getEffectivePlaybackRate());
         }
       }
 
@@ -5218,12 +5579,13 @@ class LyricsPlusRenderer {
     const syllablesLength = syllables.length;
 
     const animator = line._maskAnimator;
+    const curMaskT = animator ? animator.getCurrentTime() : -1;
     if (
       !noFade &&
       !wasMaskFinished &&
       animator &&
-      animator._lastT > 0 &&
-      animator._lastT < animator.totalFadeDuration
+      curMaskT > 0 &&
+      curMaskT < animator.totalFadeDuration
     ) {
       for (let i = 0; i < syllablesLength; i++) {
         const syl = syllables[i];
@@ -6586,10 +6948,7 @@ class LyricsPlusRenderer {
     this.scrollEventHandlerAttached = false;
     clearTimeout(this.userScrollIdleTimer);
 
-    if (this.lyricsAnimationFrameId) {
-      cancelAnimationFrame(this.lyricsAnimationFrameId);
-      this.lyricsAnimationFrameId = null;
-    }
+    this._cancelScheduledSync();
 
     if (this.containerObserver) {
       this.containerObserver.disconnect();

@@ -52,6 +52,10 @@ class WavyProgressBar {
   }
 
   // --- Public API ---
+  setProgressProvider(fn) {
+    this.progressProvider = typeof fn === 'function' ? fn : null;
+  }
+
   /**
    * Update the seekbar progress
    * @param {float} progress - The float progress between 0-1
@@ -196,6 +200,7 @@ class WavyProgressBar {
 
   _initializeState() {
     this.progress = 0;
+    this.progressProvider = null;
     this.animationId = null;
     this.waveOffset = 0;
     this.currentAmplitude = 0;
@@ -344,6 +349,15 @@ class WavyProgressBar {
       const waveSpeed = 18;
       this.waveOffset += waveSpeed * deltaTime;
       needsAnotherFrame = true;
+    }
+
+    if (this.progressProvider) {
+      try {
+        const p = this.progressProvider();
+        if (typeof p === 'number' && Number.isFinite(p)) {
+          this.progress = Math.max(0, Math.min(1, p));
+        }
+      } catch (e) {}
     }
 
     this._draw();

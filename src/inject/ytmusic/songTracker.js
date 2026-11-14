@@ -2,18 +2,36 @@
 
 (function () {
     let currentSong = {};
-    let timeUpdateFrame = null;
     let debounceTimer = null;
     let playerInstance = null;
+    let boundVideoEl = null;
 
-    const timeUpdateMsg = { type: 'LYPLUS_TIME_UPDATE', currentTime: 0 };
-    let lastSentTime = -1;
+      let lastSyncAudioTime = -1;
+    let lastSyncPerfTime = null;
+    let lastSyncPlaying = null;
+    let lastSyncRate = 1;
+    let driftCheckTimer = null;
+    let settleTimer = null;
+
+    const DRIFT_THRESHOLD_SEC = 0.010;
+    const DRIFT_CHECK_INTERVAL_MS = 1000;
+    const SETTLE_SYNC_DELAY_MS = 120;
 
     console.log('LYPLUS: Tracker injected.');
 
     function init() {
         setupMutationObserver();
         setupSeekListener();
+        bindMediaEvents();
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopTimeUpdater();
+            } else {
+                bindMediaEvents();
+                emitTimeSync(true);
+                if (isActuallyPlaying()) startTimeUpdater();
+            }
+        }, { passive: true });
         checkForSongChange();
     }
 
@@ -23,6 +41,161 @@
         }
         playerInstance = document.getElementById("movie_player");
         return playerInstance;
+    }
+
+    function getVideoElement() {
+        if (boundVideoEl && boundVideoEl.isConnected) {
+            return boundVideoEl;
+        }
+        const player = getPlayer();
+        return player?.querySelector?.('video') || document.querySelector('video') || null;
+    }
+
+    function getPreciseTime() {
+        const player = getPlayer();
+        if (player && typeof player.getCurrentTime === 'function') {
+            try {
+                const t = player.getCurrentTime();
+                if (typeof t === 'number' && Number.isFinite(t)) return t;
+            } catch (e) {}
+        }
+        const video = getVideoElement();
+        return (video && Number.isFinite(video.currentTime)) ? video.currentTime : 0;
+    }
+
+    function getPlaybackRate() {
+        const video = getVideoElement();
+        if (video && typeof video.playbackRate === 'number' && video.playbackRate > 0) {
+            return video.playbackRate;
+        }
+        const player = getPlayer();
+        if (player && typeof player.getPlaybackRate === 'function') {
+            try {
+                const r = player.getPlaybackRate();
+                if (typeof r === 'number' && r > 0) return r;
+            } catch (e) {}
+        }
+        return 1;
+    }
+
+    function isActuallyPlaying() {
+        const video = getVideoElement();
+        if (video && typeof video.paused === 'boolean') {
+            if (video.paused || video.ended || video.readyState < 2) return false;
+        }
+        const player = getPlayer();
+        if (player && typeof player.getPlayerState === 'function') {
+            try {
+                return player.getPlayerState() === 1;
+            } catch (e) {}
+        }
+        return video ? (!video.paused && !video.ended) : false;
+    }
+
+    function emitTimeSync(force = false) {
+        const now = performance.now();
+        const actualTime = getPreciseTime();
+        const rate = getPlaybackRate();
+        const activePlaying = isActuallyPlaying();
+
+        const stateChanged = activePlaying !== lastSyncPlaying;
+        const expectedTime = (lastSyncPlaying && lastSyncPerfTime !== null)
+            ? lastSyncAudioTime + ((now - lastSyncPerfTime) / 1000) * lastSyncRate
+            : lastSyncAudioTime;
+        const drift = Math.abs(actualTime - expectedTime);
+
+        if (
+            force ||
+            stateChanged ||
+            rate !== lastSyncRate ||
+            lastSyncPerfTime === null ||
+            drift > DRIFT_THRESHOLD_SEC
+        ) {
+            lastSyncAudioTime = actualTime;
+            lastSyncPerfTime = now;
+            lastSyncPlaying = activePlaying;
+            lastSyncRate = rate;
+
+            window.postMessage({
+                type: 'LYPLUS_TIME_UPDATE',
+                currentTime: actualTime,
+                timestamp: now,
+                isPlaying: activePlaying,
+                playbackRate: rate
+            }, '*');
+
+            if (stateChanged) {
+                window.postMessage({
+                    type: 'LYPLUS_PLAYBACK_STATE',
+                    isPlaying: activePlaying
+                }, '*');
+            }
+        }
+    }
+
+    function scheduleSettleCheck() {
+        if (settleTimer) clearTimeout(settleTimer);
+        settleTimer = setTimeout(() => {
+            settleTimer = null;
+            if (!document.hidden && isActuallyPlaying()) {
+                emitTimeSync(false);
+            }
+        }, SETTLE_SYNC_DELAY_MS);
+    }
+
+    const onVideoActiveEvent = () => {
+        emitTimeSync(true);
+        scheduleSettleCheck();
+        if (!document.hidden && isActuallyPlaying()) {
+            startTimeUpdater();
+        }
+    };
+
+    const onVideoStateEvent = () => {
+        emitTimeSync(true);
+        if (!isActuallyPlaying()) {
+            stopTimeUpdater();
+        }
+    };
+
+    const onVideoTimeUpdate = () => {
+        if (!document.hidden && isActuallyPlaying()) {
+            emitTimeSync(false);
+        }
+    };
+
+    function bindMediaEvents() {
+        const video = getPlayer()?.querySelector?.('video') || document.querySelector('video') || null;
+        if (video === boundVideoEl) return;
+
+        if (boundVideoEl) {
+            const opts = { passive: true };
+            boundVideoEl.removeEventListener('play', onVideoActiveEvent, opts);
+            boundVideoEl.removeEventListener('playing', onVideoActiveEvent, opts);
+            boundVideoEl.removeEventListener('seeked', onVideoActiveEvent, opts);
+            boundVideoEl.removeEventListener('ratechange', onVideoActiveEvent, opts);
+            boundVideoEl.removeEventListener('pause', onVideoStateEvent, opts);
+            boundVideoEl.removeEventListener('waiting', onVideoStateEvent, opts);
+            boundVideoEl.removeEventListener('stalled', onVideoStateEvent, opts);
+            boundVideoEl.removeEventListener('seeking', onVideoStateEvent, opts);
+            boundVideoEl.removeEventListener('ended', onVideoStateEvent, opts);
+            boundVideoEl.removeEventListener('timeupdate', onVideoTimeUpdate, opts);
+        }
+
+        boundVideoEl = video;
+        if (boundVideoEl) {
+            const opts = { passive: true };
+            boundVideoEl.addEventListener('play', onVideoActiveEvent, opts);
+            boundVideoEl.addEventListener('playing', onVideoActiveEvent, opts);
+            boundVideoEl.addEventListener('seeked', onVideoActiveEvent, opts);
+            boundVideoEl.addEventListener('ratechange', onVideoActiveEvent, opts);
+            boundVideoEl.addEventListener('pause', onVideoStateEvent, opts);
+            boundVideoEl.addEventListener('waiting', onVideoStateEvent, opts);
+            boundVideoEl.addEventListener('stalled', onVideoStateEvent, opts);
+            boundVideoEl.addEventListener('seeking', onVideoStateEvent, opts);
+            boundVideoEl.addEventListener('ended', onVideoStateEvent, opts);
+            boundVideoEl.addEventListener('timeupdate', onVideoTimeUpdate, opts);
+        }
     }
 
     function setupMutationObserver() {
@@ -58,46 +231,47 @@
 
             const player = getPlayer();
             if (player && typeof event.data.time === 'number') {
-                player.seekTo(event.data.time, true);
-                timeUpdateMsg.currentTime = event.data.time;
-                window.postMessage(timeUpdateMsg, '*');
-                lastSentTime = event.data.time;
+                const targetTime = event.data.time;
+                player.seekTo(targetTime, true);
+                const now = performance.now();
+                lastSyncAudioTime = targetTime;
+                lastSyncPerfTime = now;
+                window.postMessage({
+                    type: 'LYPLUS_TIME_UPDATE',
+                    currentTime: targetTime,
+                    timestamp: now,
+                    isPlaying: isActuallyPlaying(),
+                    playbackRate: getPlaybackRate()
+                }, '*');
+                scheduleSettleCheck();
             }
         });
     }
 
     function startTimeUpdater() {
         stopTimeUpdater();
+        bindMediaEvents();
+        emitTimeSync(true);
+        scheduleSettleCheck();
 
-        function loop() {
-            const player = getPlayer();
-
-            if (player) {
-                try {
-                    const state = player.getPlayerState();
-
-                    if (state === 1) {
-                        const rawTime = player.getCurrentTime();
-
-                        if (Math.abs(rawTime - lastSentTime) > 0.001) {
-                            timeUpdateMsg.currentTime = rawTime;
-                            window.postMessage(timeUpdateMsg, '*');
-                            lastSentTime = rawTime;
-                        }
-                    }
-                } catch (e) { }
+        driftCheckTimer = setInterval(() => {
+            if (!document.hidden && isActuallyPlaying()) {
+                bindMediaEvents();
+                emitTimeSync(false);
+            } else {
+                stopTimeUpdater();
             }
-
-            timeUpdateFrame = requestAnimationFrame(loop);
-        }
-
-        timeUpdateFrame = requestAnimationFrame(loop);
+        }, DRIFT_CHECK_INTERVAL_MS);
     }
 
     function stopTimeUpdater() {
-        if (timeUpdateFrame) {
-            cancelAnimationFrame(timeUpdateFrame);
-            timeUpdateFrame = null;
+        if (driftCheckTimer) {
+            clearInterval(driftCheckTimer);
+            driftCheckTimer = null;
+        }
+        if (settleTimer) {
+            clearTimeout(settleTimer);
+            settleTimer = null;
         }
     }
 
@@ -505,6 +679,8 @@
 
         if (!player) return;
 
+        bindMediaEvents();
+
         let videoId = "";
         let duration = 0;
         let audioTrackData = null;
@@ -589,10 +765,13 @@
                 songWriters: songCredits || []
             };
 
-            startTimeUpdater();
+            lastSyncAudioTime = -1;
+            lastSyncPerfTime = null;
 
             window.postMessage({ type: 'LYPLUS_SONG_CHANGED', songInfo: currentSong }, '*');
             window.postMessage({ type: 'LYPLUS_updateFullScreenAnimatedBg', artworkUrl: finalArtwork }, '*');
+
+            startTimeUpdater();
         }
     }
 
