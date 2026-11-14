@@ -29,7 +29,8 @@
 
     --lyplus-text-primary: var(--lyplus-lyrics-pallete);
     --lyplus-text-secondary: #ffffff55;
-    --lyplus-mask-dim-alpha: 0.333;
+    --lyplus-mask-dim-alpha: 0.35;
+    --lyplus-sweep-gradient-width: 0.88em;
 
     --lyplus-blur-amount: 0.07em;
     --lyplus-blur-amount-near: 0.035em;
@@ -133,6 +134,13 @@
 }
 
 /* --- Line States & Modifiers --- */
+.lyrics-line:not(.viewport-hidden),
+.lyrics-line.active,
+.lyrics-line.next-active-line,
+.lyrics-line.post-active-line {
+    content-visibility: visible;
+}
+
 .lyrics-line.active {
     opacity: 1;
     color: var(--lyplus-text-primary);
@@ -1057,10 +1065,10 @@ span.lyrics-source-provider {
 
 /* --- Translation container: break out of parent RTL direction ---
    Four cases based on parent line direction and translation text direction:
-   A) LTR line  + LTR translation  → left-align,  direction: ltr  (default)
-   B) RTL line  + LTR translation  → right-align, direction: ltr
-   C) LTR line  + RTL translation  → right-align, direction: rtl  (.rtl-text on container)
-   D) RTL line  + RTL translation  → right-align, direction: rtl
+   A) LTR line  + LTR translation  â†’ left-align,  direction: ltr  (default)
+   B) RTL line  + LTR translation  â†’ right-align, direction: ltr
+   C) LTR line  + RTL translation  â†’ right-align, direction: rtl  (.rtl-text on container)
+   D) RTL line  + RTL translation  â†’ right-align, direction: rtl
    JS adds .rtl-text to the container when translatedText contains RTL chars. */
 
 /* Case A: LTR translation under LTR line (default) */
@@ -1081,7 +1089,7 @@ span.lyrics-source-provider {
     text-align: start;
 }
 
-/* Case C: RTL translation under LTR line ("flipped" — e.g. Arabic is the translation) */
+/* Case C: RTL translation under LTR line ("flipped" â€” e.g. Arabic is the translation) */
 .lyrics-line:not(.rtl-text) .lyrics-translation-container.rtl-text {
     direction: rtl;
     unicode-bidi: embed;
