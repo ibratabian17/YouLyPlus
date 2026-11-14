@@ -246,6 +246,8 @@ class LyricsPlusRenderer {
     this._scrollGapT = null;
     this._lastHighlightTime = undefined;
     this._lastPredictiveTime = undefined;
+    this._lastTickMediaMs = undefined;
+    this._lastTickWallMs = undefined;
     this._activeLineIndices = [];
     this._prevActiveLineIndices = [];
     this._lastActiveGroupEndIndex = 0;
@@ -361,7 +363,9 @@ class LyricsPlusRenderer {
         }
         this._syncActiveAnimationsPlaybackState(playing, this._getEffectivePlaybackRate());
         if (playing) {
-          this._runScheduledSync(event.type === 'seeked');
+          if (event.type !== 'seeked' || !this.uiConfig?.disableNativeTick) {
+            this._runScheduledSync(event.type === 'seeked');
+          }
         } else {
           this._cancelScheduledSync();
         }
@@ -673,6 +677,7 @@ class LyricsPlusRenderer {
         this._layoutAllRtlVisualRowRomanizations();
       }
       this._invalidateMaskAnimators(true);
+      this._resyncActiveMasks();
     }
 
     if (!this.isUserControllingScroll && this.currentPrimaryActiveLine) {
@@ -2409,6 +2414,7 @@ class LyricsPlusRenderer {
       }
       this.cachedSyllables = allSyllables;
       this._invalidateMaskAnimators(true);
+      this._resyncActiveMasks();
     }
 
     // 5. Compensate scrollTop so anchor line stays pinned, and slide lines (FLIP) into their new positions
@@ -2751,6 +2757,8 @@ class LyricsPlusRenderer {
     this._scrollGapT = null;
     this._lastHighlightTime = undefined;
     this._lastPredictiveTime = undefined;
+    this._lastTickMediaMs = undefined;
+    this._lastTickWallMs = undefined;
     if (this._activeLineIndices) this._activeLineIndices.length = 0;
     if (this._prevActiveLineIndices) this._prevActiveLineIndices.length = 0;
     this._lastActiveGroupEndIndex = 0;
@@ -3352,8 +3360,6 @@ class LyricsPlusRenderer {
 
   updateCurrentTick(currentTime, syncMeta = null) {
     const now = performance.now();
-    const prevMediaSec = this._clockAnchorMediaSec;
-    const prevPerfMs = this._clockAnchorPerfMs;
     const prevRate = this._getEffectivePlaybackRate();
     const wasPlaying = this._isSongPlaying();
 
@@ -3374,10 +3380,12 @@ class LyricsPlusRenderer {
     }
 
     const rawMs = currentTime * 1000;
-    const expectedMs = (prevPerfMs !== null && wasPlaying)
-      ? (prevMediaSec + Math.max(0, (now - prevPerfMs) / 1000) * prevRate) * 1000
+    const expectedMs = (this._lastTickWallMs !== undefined && wasPlaying)
+      ? this._lastTickMediaMs + Math.max(0, now - this._lastTickWallMs) * prevRate
       : this.lastTime;
     const isForceScroll = this.lastTime !== undefined && expectedMs !== undefined && Math.abs(rawMs - expectedMs) > 1000;
+    this._lastTickMediaMs = rawMs;
+    this._lastTickWallMs = now;
     const effectiveLyricTimeMs = (currentTime - (this.offsetLatency || 0)) * 1000 - (this.userOffsetMs || 0);
 
     this._cancelScheduledSync();
@@ -4692,6 +4700,9 @@ class LyricsPlusRenderer {
           line._maskAnimator.dispose();
         }
       }
+      if (invalidatedLines.size > 0) {
+        this._resyncActiveMasks(invalidatedLines);
+      }
     });
 
     this._maskObservedLines = new Set();
@@ -4902,6 +4913,38 @@ class LyricsPlusRenderer {
   }
 
   /** Drops cached mask animators so they are re-measured on the next frame. */
+  _resyncActiveMasks(filterSet = null) {
+    const activeLines = this._tempActiveLines;
+    if (!activeLines || activeLines.length === 0) return;
+
+    const isWordByWord = !!(this.lyricsContainer && this.lyricsContainer.classList.contains("word-by-word-mode"));
+    const currentTimeMs = this._getEffectiveLyricTimeMs() - (isWordByWord ? LyricsPlusRenderer._WORD_OFFSET_MS : 0);
+    const isPlaying = this._isSongPlaying();
+    const rate = this._getEffectivePlaybackRate();
+
+    for (let i = 0; i < activeLines.length; i++) {
+      const line = activeLines[i];
+      if (!line || line._isGap || line.classList.contains("lyrics-gap") || line._maskFinished) continue;
+      if (filterSet && !filterSet.has(line)) continue;
+
+      const animator = this._getOrCreateLineMaskAnimator(line);
+      if (!animator) continue;
+
+      const lineStartTime = line._startTimeMs !== undefined
+        ? line._startTimeMs
+        : parseFloat(line.dataset.startTime) * 1000;
+      const relativeTime = currentTimeMs - lineStartTime;
+      if (relativeTime >= animator.totalFadeDuration) {
+        animator.dispose();
+        line._maskFinished = true;
+      } else if (isPlaying) {
+        animator.sync(relativeTime, true, rate);
+      } else {
+        animator.pause(relativeTime);
+      }
+    }
+  }
+
   _invalidateMaskAnimators(clearDimensions = false) {
     this._trackStyleCache.clear();
     const lines = this.cachedLyricsLines;
@@ -6764,6 +6807,7 @@ class LyricsPlusRenderer {
           this._lastContainerWidth = container.clientWidth;
           this._layoutAllRtlVisualRowRomanizations();
           this._invalidateMaskAnimators(true);
+          this._resyncActiveMasks();
         }
         this._debouncedResizeHandler(container);
       }
@@ -7439,6 +7483,8 @@ class LyricsPlusRenderer {
     this._scrollGapT = null;
     this._lastHighlightTime = undefined;
     this._lastPredictiveTime = undefined;
+    this._lastTickMediaMs = undefined;
+    this._lastTickWallMs = undefined;
     if (this._activeLineIndices) this._activeLineIndices.length = 0;
     if (this._prevActiveLineIndices) this._prevActiveLineIndices.length = 0;
     this._lastActiveGroupEndIndex = 0;
