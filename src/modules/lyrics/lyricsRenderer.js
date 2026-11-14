@@ -362,11 +362,13 @@ class LyricsPlusRenderer {
           this._clockPlaybackRate = el.playbackRate;
         }
         this._syncActiveAnimationsPlaybackState(playing, this._getEffectivePlaybackRate());
-        if (playing) {
-          if (event.type !== 'seeked' || !this.uiConfig?.disableNativeTick) {
+        if (!this.uiConfig?.disableNativeTick) {
+          if (playing) {
             this._runScheduledSync(event.type === 'seeked');
+          } else {
+            this._cancelScheduledSync();
           }
-        } else {
+        } else if (!playing) {
           this._cancelScheduledSync();
         }
         this._updateWakeLock();
@@ -438,9 +440,13 @@ class LyricsPlusRenderer {
     this._explicitPlaybackState = nextPlaying;
     this._clockIsPlaying = nextPlaying;
     this._syncActiveAnimationsPlaybackState(nextPlaying, this._getEffectivePlaybackRate());
-    if (nextPlaying) {
-      this._runScheduledSync(false);
-    } else {
+    if (!this.uiConfig?.disableNativeTick) {
+      if (nextPlaying) {
+        this._runScheduledSync(false);
+      } else {
+        this._cancelScheduledSync();
+      }
+    } else if (!nextPlaying) {
       this._cancelScheduledSync();
     }
     this._updateWakeLock();
@@ -3040,6 +3046,8 @@ class LyricsPlusRenderer {
    * @private
    */
   _seekPlayerTo(time) {
+    this._cancelScheduledSync();
+    this._pendingSeekUntil = performance.now() + 500;
     if (typeof this.uiConfig.seekTo === "function") {
       this.uiConfig.seekTo(time);
       return;
@@ -3279,7 +3287,9 @@ class LyricsPlusRenderer {
 
     const rawSec = this._getEffectivePlayerTimeSec();
     const rawMs = rawSec * 1000;
-    const isForceScroll = !!forceScroll;
+    const pendingSeek = !!(this._pendingSeekUntil && performance.now() < this._pendingSeekUntil);
+    if (pendingSeek) this._pendingSeekUntil = 0;
+    const isForceScroll = !!forceScroll || pendingSeek;
     const currentTimeMs = (rawSec - (this.offsetLatency || 0)) * 1000 - (this.userOffsetMs || 0);
 
     this._updateLyricsHighlight(currentTimeMs, isForceScroll, this.currentSettings);
@@ -3380,10 +3390,12 @@ class LyricsPlusRenderer {
     }
 
     const rawMs = currentTime * 1000;
+    const pendingSeek = !!(this._pendingSeekUntil && now < this._pendingSeekUntil);
+    if (pendingSeek) this._pendingSeekUntil = 0;
     const expectedMs = (this._lastTickWallMs !== undefined && wasPlaying)
       ? this._lastTickMediaMs + Math.max(0, now - this._lastTickWallMs) * prevRate
       : this.lastTime;
-    const isForceScroll = this.lastTime !== undefined && expectedMs !== undefined && Math.abs(rawMs - expectedMs) > 1000;
+    const isForceScroll = pendingSeek || (this.lastTime !== undefined && expectedMs !== undefined && Math.abs(rawMs - expectedMs) > 1000);
     this._lastTickMediaMs = rawMs;
     this._lastTickWallMs = now;
     const effectiveLyricTimeMs = (currentTime - (this.offsetLatency || 0)) * 1000 - (this.userOffsetMs || 0);
@@ -3544,7 +3556,7 @@ class LyricsPlusRenderer {
           this._openGaps.delete(g);
           continue;
         }
-        if (force) {
+        if (force || (this._gapCloseTimers && this._gapCloseTimers.has(g))) {
           scheduleClose.push(g);
         } else if (g.classList.contains("gap-open")) {
           // Pre-read closing gap height while DOM is still 100% clean!
@@ -3952,7 +3964,7 @@ class LyricsPlusRenderer {
     let gapShifts = null;
     let unmeasuredGapOpen = false;
     if (shouldScroll) {
-      gapPlan = this._planGapChanges(lineToScroll, isForceScroll, this._tempActiveLines, tempActiveCount);
+      gapPlan = this._planGapChanges(lineToScroll, isSeek, this._tempActiveLines, tempActiveCount);
       if (gapPlan) {
         if (gapPlan.toOpen.length > 0 && !(this._cachedGapHeight > 0)) {
           unmeasuredGapOpen = true;
