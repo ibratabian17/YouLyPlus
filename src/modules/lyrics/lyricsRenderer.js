@@ -6159,6 +6159,25 @@ class LyricsPlusRenderer {
       this._scrollAnimationTimeout = null;
     }
 
+    if (this.currentSettings && this.currentSettings.lightweight) {
+      state.isAnimating = false;
+      state.pendingUpdate = null;
+      const animatingLines = this._animatingLines;
+      for (let i = 0; i < animatingLines.length; i++) {
+        const line = animatingLines[i];
+        const a = line._scrollAnim;
+        if (a) { a.cancel(); line._scrollAnim = null; }
+        line._scrollDelay = 0;
+      }
+      animatingLines.length = 0;
+      const targetTop = (snapshot && !snapshot.hidden)
+        ? snapshot.targetTop
+        : this._clampScrollTop(parent, -newTranslateY);
+      this.currentScrollOffset = -targetTop;
+      parent.scrollTo({ top: targetTop, behavior: 'smooth' });
+      return;
+    }
+
     const isRelaxMode = this.currentSettings && this.currentSettings.relaxScroll;
     duration = Math.min(450, duration > 0 ? duration : 300);
     duration = isRelaxMode ? duration * 1.5 : duration;
