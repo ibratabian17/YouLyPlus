@@ -675,6 +675,22 @@
     "message": "Applicerar en animerad albumbakgrund när spelaren är maximerad. Denna inställning fungerar inte i helskärmsläge.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Stil för dynamisk bakgrund",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Välj mellan iPad Apple Music-mesh eller Android Apple Music-oskärpa som bakgrund.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Audio Beat Sync (Dynamisk bakgrund)",
     "description": "Toggle label"

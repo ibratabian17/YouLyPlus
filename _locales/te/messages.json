@@ -675,6 +675,22 @@
     "message": "ప్లేయర్ విస్తరించినప్పుడు యానిమేటెడ్ ఆల్బమ్ బ్యాక్‌గ్రౌండ్‌ను ఉపయోగిస్తుంది. ఫుల్ స్క్రీన్ మోడ్‌లో ఉండగా ఈ సెట్టింగ్ పని చేయదు.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "డైనమిక్ బ్యాక్‌గ్రౌండ్ శైలి",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "iPad Apple Music మెష్ లేదా Android Apple Music బ్లర్ బ్యాక్‌గ్రౌండ్ మధ్య ఎంచుకోండి.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "ఆడియో బీట్ సింక్ (డైనమిక్ బ్యాక్‌గ్రౌండ్)",
     "description": "Toggle label"

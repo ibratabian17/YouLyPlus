@@ -675,6 +675,22 @@
     "message": "Applica uno sfondo animato basato sull'album quando il player è espanso. Questa impostazione non ha effetto a tutto schermo.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Stile sfondo dinamico",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Scegli tra lo sfondo mesh di iPad Apple Music o lo sfondo sfocato di Android Apple Music.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Pulsazione basata sull'audio (Sfondo dinamico)",
     "description": "Toggle label"

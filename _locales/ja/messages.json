@@ -675,6 +675,22 @@
     "message": "プレーヤーが展開されているときに、アニメーション付きのアルバム背景を適用します。この設定は、ダイナミックバックグラウンドが常に有効になっている全画面モードには影響しません。",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "ダイナミックバックグラウンドのスタイル",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "iPad Apple Music のメッシュ背景または Android Apple Music のぼかし背景から選択します。",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "オーディオベースのビートパルス (ダイナミックバックグラウンド)",
     "description": "Toggle label"

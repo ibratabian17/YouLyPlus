@@ -675,6 +675,22 @@
     "message": "பிளேயர் பெரிதாக்கப்படும்போது அனிமேஷன் செய்யப்பட்ட ஆல்பம் பின்னணியைப் பயன்படுத்துகிறது. முழுத் திரை முறையில் இந்த அமைப்பு செயல்படாது.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "டைனமிக் பின்னணி நடை",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "iPad Apple Music மெஷ் அல்லது Android Apple Music மங்கலான பின்னணி ஆகியவற்றில் ஒன்றைத் தேர்ந்தெடுக்கவும்.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "ஆடியோ பீட் ஒத்திசைவு (டைனமிக் பின்னணி)",
     "description": "Toggle label"

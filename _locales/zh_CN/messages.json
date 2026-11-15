@@ -675,6 +675,22 @@
     "message": "在播放器展开时应用动画专辑背景。此设置在全屏模式下无影响（全屏模式始终启用动态背景）。",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "动态背景样式",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "在 iPad Apple Music 网格背景或 Android Apple Music 模糊背景之间选择。",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "基于音频的节拍脉冲 (动态背景)",
     "description": "Toggle label"

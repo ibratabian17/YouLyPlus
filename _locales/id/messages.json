@@ -675,6 +675,22 @@
     "message": "Menerapkan latar belakang album beranimasi saat pemutar diperluas. Pengaturan ini tidak berpengaruh dalam mode layar penuh, di mana latar belakang dinamis selalu diaktifkan.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Gaya Latar Belakang Dinamis",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Pilih antara latar belakang mesh iPad Apple Music atau blur Android Apple Music.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Denyut Latar Dinamis Berbasis Audio",
     "description": "Toggle label"

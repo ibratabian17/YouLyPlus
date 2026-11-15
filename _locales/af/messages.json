@@ -675,6 +675,22 @@
     "message": "Gebruik 'n geanimeerde album-agtergrond wanneer die speler uitgebrei is. Hierdie instelling werk nie in volskerm-modus nie.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Dinamiese agtergrondstyl",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Kies tussen iPad Apple Music-maas of Android Apple Music-vervaagde agtergrond.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Klank-ritme-sinkronisering (Dinamiese Agtergrond)",
     "description": "Toggle label"

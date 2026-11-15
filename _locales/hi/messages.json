@@ -675,6 +675,22 @@
     "message": "जब प्लेयर को बड़ा किया जाता है तो एक एनिमेटेड एल्बम बैकग्राउंड लागू करता है। यह फुलस्क्रीन मोड में काम नहीं करता है।",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "डायनेमिक बैकग्राउंड स्टाइल",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "iPad Apple Music मेश या Android Apple Music ब्लर बैकग्राउंड में से चुनें।",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "ऑडियो बीट सिंक (डायनेमिक बैकग्राउंड)",
     "description": "Toggle label"

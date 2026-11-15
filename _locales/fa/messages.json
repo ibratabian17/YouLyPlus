@@ -675,6 +675,22 @@
     "message": "هنگامی که پلیر بزرگ می‌شود، یک پس‌زمینه آلبوم متحرک اعمال می‌کند. این تنظیم در حالت تمام صفحه کار نمی‌کند.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "سبک پس‌زمینه پویا",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "بین پس‌زمینه توری iPad Apple Music یا پس‌زمینه تار Android Apple Music انتخاب کنید.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "همگام‌سازی ضرب‌آهنگ (پس‌زمینه پویا)",
     "description": "Toggle label"

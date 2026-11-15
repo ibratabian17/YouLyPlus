@@ -1,10 +1,10 @@
-const DEFAULT_DYNAMIC_BG_STYLE = 'android'; // 'mac' | 'android'
+const DEFAULT_DYNAMIC_BG_STYLE = 'android'; // 'ipad' | 'android'
 
-function _isMacBgStyle() {
+function _isIpadBgStyle() {
     if (typeof currentSettings !== 'undefined' && currentSettings.dynamicBgStyle) {
-        return currentSettings.dynamicBgStyle === 'mac';
+        return currentSettings.dynamicBgStyle === 'ipad';
     }
-    return DEFAULT_DYNAMIC_BG_STYLE === 'mac';
+    return DEFAULT_DYNAMIC_BG_STYLE === 'ipad';
 }
 
 // Apple Music Android
@@ -247,7 +247,7 @@ const _androidPipeline = {
 };
 
 function _getActivePipeline() {
-    return _isMacBgStyle() ? _meshPipeline : _androidPipeline;
+    return _isIpadBgStyle() ? _meshPipeline : _androidPipeline;
 }
 
 let gl = null;
@@ -773,7 +773,7 @@ function LYPLUS_setupBlurEffect() {
 
     blurContainerElem = document.createElement('div');
     blurContainerElem.classList.add('lyplus-blur-container');
-    blurContainerElem.classList.toggle('lyplus-bg-mac', _isMacBgStyle());
+    blurContainerElem.classList.toggle('lyplus-bg-ipad', _isIpadBgStyle());
     webglCanvas = document.createElement('canvas');
     webglCanvas.id = 'lyplus-webgl-canvas';
     blurContainerElem.appendChild(webglCanvas);
@@ -1346,7 +1346,7 @@ window.addEventListener('message', (event) => {
 
 function _syncDynamicBgStyle() {
     if (blurContainerElem) {
-        blurContainerElem.classList.toggle('lyplus-bg-mac', _isMacBgStyle());
+        blurContainerElem.classList.toggle('lyplus-bg-ipad', _isIpadBgStyle());
     }
     if (!gl || !glProgram) return;
 
@@ -1382,7 +1382,7 @@ window.addEventListener('YOUPLUS_SETTINGS_UPDATED', (event) => {
     }
 });
 
-// Apple Music Mac
+// Apple Music iPad
 
 const MESH_PRESET_INDEX = -1; // -1 = dynamic 5-preset cycle, 0..4 = fixed preset index
 const MESH_GRID_MODE = 'auto'; // 'auto' | 'portrait' (6x6 -> 41x41) | 'landscape' (9x9 -> 33x33)

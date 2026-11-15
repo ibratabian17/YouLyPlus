@@ -675,6 +675,22 @@
     "message": "Ibenzisa ingemuva le-albhamu egqwayizayo lapho umdlali enwetshiwe. Lesi silungiselelo asisebenzi kwimodi yesikrini esigcwele.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Isitayela sengemuva le-dynamic",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Khetha phakathi kwengemuva le-mesh le-iPad Apple Music noma ingemuva elilufifi le-Android Apple Music.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Ukuvumelanisa isigqi somsindo (Ingemuva le-Dynamic)",
     "description": "Toggle label"

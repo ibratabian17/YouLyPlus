@@ -1203,7 +1203,7 @@ span.lyrics-source-provider {
     --webgl-post-process-tick: 0;
 }
 
-.lyplus-blur-container.lyplus-bg-mac {
+.lyplus-blur-container.lyplus-bg-ipad {
     --webgl-post-process: saturate(2.0) pre-saturate(1.3) black-scrim(0.25) white-scrim(0.15) brightness(1) contrast(1);
 }
 

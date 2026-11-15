@@ -675,6 +675,22 @@
     "message": "Applique un fond d'album animé lorsque le lecteur est étendu. Ce paramètre n'a aucun effet en mode plein écran.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Style de fond dynamique",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Choisissez entre le maillage iPad Apple Music ou le fond flou Android Apple Music.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Pulsations synchronisées sur l'audio (Fond dynamique)",
     "description": "Toggle label"

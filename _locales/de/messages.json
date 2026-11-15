@@ -675,6 +675,22 @@
     "message": "Wendet einen animierten Album-Hintergrund an, wenn der Player erweitert ist. Diese Einstellung hat im Vollbildmodus keine Auswirkung.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Stil des dynamischen Hintergrunds",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Wähle zwischen dem iPad Apple Music-Mesh-Hintergrund oder dem unscharfen Android Apple Music-Hintergrund.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Audiobasierter Beat-Puls (Dynamischer Hintergrund)",
     "description": "Toggle label"

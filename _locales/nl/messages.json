@@ -675,6 +675,22 @@
     "message": "Past een geanimeerde albumachtergrond toe wanneer de speler wordt uitgevouwen. Deze instelling werkt niet in volledig scherm-modus.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Stijl van dynamische achtergrond",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Kies tussen de iPad Apple Music-mesh of de vervaagde Android Apple Music-achtergrond.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Audio Beat Sync (Dynamische achtergrond)",
     "description": "Toggle label"

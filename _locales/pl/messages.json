@@ -675,6 +675,22 @@
     "message": "Stosuje animowane tło albumu po powiększeniu odtwarzacza. To ustawienie nie działa w trybie pełnoekranowym.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Styl dynamicznego tła",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Wybierz między siatką iPad Apple Music a rozmytym tłem Android Apple Music.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Synchronizacja z rytmem (dynamiczne tło)",
     "description": "Toggle label"

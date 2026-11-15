@@ -675,6 +675,22 @@
     "message": "Aplica un fondo de álbum animado cuando el reproductor está expandido. Este ajuste no tiene efecto en modo pantalla completa.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Estilo de fondo dinámico",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Elige entre el fondo de malla de iPad Apple Music o el fondo desenfocado de Android Apple Music.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Pulso rítmico basado en audio (Fondo dinámico)",
     "description": "Toggle label"

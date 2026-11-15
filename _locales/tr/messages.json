@@ -675,6 +675,22 @@
     "message": "Oynatıcı büyütüldüğünde animasyonlu bir albüm arka planı uygular. Bu ayar tam ekran modunda çalışmaz.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Dinamik Arka Plan Stili",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "iPad Apple Music ağ arka planı veya Android Apple Music bulanık arka planı arasında seçim yapın.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Ses Vuruşu Senkronizasyonu (Dinamik Arka Plan)",
     "description": "Toggle label"

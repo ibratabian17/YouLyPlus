@@ -675,6 +675,22 @@
     "message": "Mô phỏng nền album chuyển động khi trình phát được mở rộng. Cài đặt này không ảnh hưởng trong chế độ toàn màn hình.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Kiểu nền động",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Chọn giữa nền lưới iPad Apple Music hoặc nền mờ Android Apple Music.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Xung nhịp dựa trên âm thanh (Nền động)",
     "description": "Toggle label"

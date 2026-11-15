@@ -675,6 +675,22 @@
     "message": "מחיל רקע אלבום מונפש כאשר הנגן מוגדל. הגדרה זו אינה פועלת במצב מסך מלא.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "סגנון רקע דינמי",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "בחר בין רקע רשת של iPad Apple Music לרקע מטושטש של Android Apple Music.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "סנכרון קצב שמע (רקע דינמי)",
     "description": "Toggle label"

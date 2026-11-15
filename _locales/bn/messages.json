@@ -675,6 +675,22 @@
     "message": "প্লেয়ারটি বড় করা হলে একটি অ্যানিমেটেড অ্যালবাম ব্যাকগ্রাউন্ড প্রয়োগ করে। এই সেটিংস ফুলস্ক্রিন মোডে কাজ করে না।",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "ডায়নামিক ব্যাকগ্রাউন্ডের ধরন",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "iPad Apple Music মেশ বা Android Apple Music ব্লার ব্যাকগ্রাউন্ডের মধ্যে বেছে নিন।",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "অডিও বিট সিঙ্ক (ডায়নামিক ব্যাকগ্রাউন্ড)",
     "description": "Toggle label"

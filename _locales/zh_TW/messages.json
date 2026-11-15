@@ -675,6 +675,22 @@
     "message": "當播放器展開時套用動畫專輯背景。此設定在全螢幕模式下無效（全螢幕始終啟用動態背景）。",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "動態背景樣式",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "在 iPad Apple Music 網格背景或 Android Apple Music 模糊背景之間選擇。",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "基於音訊的動態背景節拍脈衝",
     "description": "Toggle label"

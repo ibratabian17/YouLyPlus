@@ -675,6 +675,22 @@
     "message": "Χρησιμοποιεί ένα κινούμενο φόντο άλμπουμ όταν ο παίκτης είναι ανεπτυγμένος. Αυτή η ρύθμιση δεν λειτουργεί σε λειτουργία πλήρους οθόνης.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Στυλ δυναμικού φόντου",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Επιλέξτε ανάμεσα σε φόντο πλέγματος iPad Apple Music ή θολό φόντο Android Apple Music.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Συγχρονισμός ρυθμού ήχου (Δυναμικό Φόντο)",
     "description": "Toggle label"

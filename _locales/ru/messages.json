@@ -675,6 +675,22 @@
     "message": "Анимированный фон на основе обложки альбома. Не влияет на полноэкранный режим.",
     "description": "Description"
   },
+  "settingDynamicBgStyle": {
+    "message": "Стиль динамического фона",
+    "description": "Dropdown label"
+  },
+  "descDynamicBgStyle": {
+    "message": "Выберите между сеткой iPad Apple Music и размытым фоном Android Apple Music.",
+    "description": "Description"
+  },
+  "optionDynamicBgIpad": {
+    "message": "iPad Apple Music",
+    "description": "Select option"
+  },
+  "optionDynamicBgAndroid": {
+    "message": "Android Apple Music",
+    "description": "Select option"
+  },
   "settingAudioBeatSync": {
     "message": "Пульсация в такт музыке (Динамический фон)",
     "description": "Toggle label"
