@@ -119,6 +119,7 @@ const autoSaveControls = [
     { id: 'hide-offscreen', key: 'hideOffscreen', type: 'checkbox' },
     { id: 'blur-inactive', key: 'blurInactive', type: 'checkbox' },
     { id: 'dynamic-player', key: 'dynamicPlayer', type: 'checkbox' },
+    { id: 'dynamic-bg-style', key: 'dynamicBgStyle', type: 'value' },
     { id: 'audio-beat-sync', key: 'audioBeatSync', type: 'checkbox' },
     { id: 'relax-scroll', key: 'relaxScroll', type: 'checkbox' },
     { id: 'useSongPaletteFullscreen', key: 'useSongPaletteFullscreen', type: 'checkbox' },
@@ -197,6 +198,8 @@ function updateUI(settings) {
     setCheck('hide-offscreen', currentSettings.hideOffscreen);
     setCheck('blur-inactive', currentSettings.blurInactive);
     setCheck('dynamic-player', currentSettings.dynamicPlayer);
+    setVal('dynamic-bg-style', currentSettings.dynamicBgStyle || 'android');
+    updateCustomSelectDisplay('dynamic-bg-style');
     setCheck('audio-beat-sync', currentSettings.audioBeatSync);
     setCheck('relax-scroll', currentSettings.relaxScroll);
     setCheck('useSongPaletteFullscreen', currentSettings.useSongPaletteFullscreen);

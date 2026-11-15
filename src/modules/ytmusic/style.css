@@ -212,6 +212,10 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response {
     --webgl-post-process: saturate(2.5) black-scrim(0.5) white-scrim(0.051) brightness(0.85) contrast(1);
     --webgl-post-process-tick: 1;
 }
+#layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container.lyplus-bg-mac {
+    --webgl-post-process: saturate(2.2) pre-saturate(1.3) black-scrim(0.35) white-scrim(0.08) brightness(1) contrast(1);
+    --webgl-post-process-tick: 2;
+}
 
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container::after {
     background-color: transparent;

@@ -19,6 +19,7 @@ export const defaultSettings = {
     hideOffscreen: true,
     blurInactive: false,
     dynamicPlayer: false,
+    dynamicBgStyle: 'android', // 'mac' or 'android'
     audioBeatSync: false,
     relaxScroll: false,
     customCSS: '',
