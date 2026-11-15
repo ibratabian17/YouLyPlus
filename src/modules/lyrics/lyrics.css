@@ -38,6 +38,8 @@
     --lyplus-fade-gap-timing-function: ease-out;
 
     --lyplus-lyrics-elevation: -0.05em;
+    --lyplus-spring-elevation-duration: 1300ms;
+    --lyplus-spring-elevation-timing: linear(0, 0.012, 0.044, 0.089, 0.143, 0.201, 0.261, 0.322, 0.381, 0.438, 0.492, 0.543, 0.590, 0.633, 0.673, 0.709, 0.741, 0.771, 0.797, 0.821, 0.842, 0.861, 0.878, 0.893, 0.906, 0.918, 0.928, 0.937, 0.945, 0.952, 0.958, 0.964, 0.968, 0.972, 0.976, 0.979, 0.982, 0.984, 0.986, 0.988, 1);
 
     --lyplus-spring-scroll: true;
     --lyplus-spring-dynamic: true;
@@ -383,11 +385,11 @@
 /* --- Syllable States (Finished, Highlight, etc.) --- */
 .lyrics-line .lyrics-syllable.finished {
     color: var(--lyplus-text-primary);
-    transition: transform 1s ease !important;
+    transition: transform var(--lyplus-spring-elevation-duration) var(--lyplus-spring-elevation-timing) !important;
 }
 
 .lyrics-line:not(.active) .lyrics-syllable {
-    transition: color 0.5s ease, transform 0.7s ease;
+    transition: color 0.5s ease, transform var(--lyplus-spring-elevation-duration) var(--lyplus-spring-elevation-timing);
 }
 
 .lyrics-line:not(.active) .lyrics-syllable.finished {
@@ -396,7 +398,7 @@
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable {
     transform: translateY(0.001%) translateZ(1px);
-    transition: transform 1s ease;
+    transition: transform var(--lyplus-spring-elevation-duration) var(--lyplus-spring-elevation-timing);
     color: var(--lyplus-text-primary, #fff);
 }
 
@@ -425,7 +427,7 @@
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight,
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.pre-highlight {
     color: var(--lyplus-text-primary, #fff);
-    transition: transform 1s ease;
+    transition: transform var(--lyplus-spring-elevation-duration) var(--lyplus-spring-elevation-timing);
 }
 
 .lyrics-line.active:not(.lyrics-gap) .lyrics-syllable.highlight.rtl-text,

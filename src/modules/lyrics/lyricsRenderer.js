@@ -4544,6 +4544,85 @@ class LyricsPlusRenderer {
   }
 
   /**
+   * Filters a piecewise-linear 1D row sweep trajectory through a 2nd-order spring-damper
+   * so the gradient sweep has smooth momentum across syllable boundaries.
+   */
+  static _applySpringToRowTimeline(timeline, totalFadeDurationMs, zeta = 1, responseSec = 0.18) {
+    const srcTimes = timeline.times;
+    const srcPos = timeline.positions;
+    if (!srcTimes || srcTimes.length < 2 || totalFadeDurationMs <= 0 || responseSec <= 0) {
+      return timeline;
+    }
+
+    const totalSec = totalFadeDurationMs / 1000;
+    const omega = (2 * Math.PI) / Math.max(0.02, responseSec);
+    const omegaSq = omega * omega;
+    const damp = 2 * zeta * omega;
+
+    const sampleDtMs = Math.max(12, totalFadeDurationMs / 480);
+    const numSamples = Math.max(2, Math.ceil(totalFadeDurationMs / sampleDtMs));
+    const dtOutSec = totalSec / numSamples;
+    const subSteps = Math.max(1, Math.ceil(dtOutSec / 0.004));
+    const dt = dtOutSec / subSteps;
+
+    let seg = 0;
+    const sampleTarget = (tNorm) => {
+      while (seg < srcTimes.length - 2 && tNorm > srcTimes[seg + 1]) {
+        seg++;
+      }
+      const t0 = srcTimes[seg];
+      const t1 = srcTimes[seg + 1];
+      if (t1 <= t0) return srcPos[seg + 1];
+      const alpha = Math.min(1, Math.max(0, (tNorm - t0) / (t1 - t0)));
+      return srcPos[seg] + (srcPos[seg + 1] - srcPos[seg]) * alpha;
+    };
+
+    let x = srcPos[0];
+    let v = 0;
+    const outTimes = [0];
+    const outPos = [x];
+    let lastEmittedX = x;
+    let wasIdle = false;
+    let lastIdleTime = 0;
+    let lastIdleX = x;
+
+    for (let i = 1; i <= numSamples; i++) {
+      const tStartSec = (i - 1) * dtOutSec;
+      for (let s = 0; s < subSteps; s++) {
+        const tSubNorm = Math.min(1, (tStartSec + (s + 1) * dt) / totalSec);
+        const target = sampleTarget(tSubNorm);
+        const acc = omegaSq * (target - x) - damp * v;
+        v += acc * dt;
+        x += v * dt;
+      }
+
+      const tNorm = i === numSamples ? 1 : i / numSamples;
+      const targetNow = sampleTarget(tNorm);
+      const isIdle = Math.abs(x - lastEmittedX) < 0.05 && Math.abs(v) < 0.5 && Math.abs(targetNow - x) < 0.05;
+
+      if (isIdle && i < numSamples) {
+        wasIdle = true;
+        lastIdleTime = tNorm;
+        lastIdleX = x;
+        continue;
+      }
+
+      if (wasIdle) {
+        outTimes.push(lastIdleTime);
+        outPos.push(lastIdleX);
+        wasIdle = false;
+      }
+
+      const finalX = i === numSamples ? srcPos[srcPos.length - 1] : x;
+      outTimes.push(tNorm);
+      outPos.push(finalX);
+      lastEmittedX = finalX;
+    }
+
+    return { times: outTimes, positions: outPos };
+  }
+
+  /**
    * Projects a precomputed row sweep timeline onto an individual syllable/char element,
    * collapsing collinear constant-hold keyframes so each WAAPI animation stays minimal.
    */
@@ -5275,16 +5354,25 @@ class LyricsPlusRenderer {
     const animations = [];
     const boundsMs = []; // [loMs, hiMs] per animation in milliseconds
 
+    const springCfg = this._springConfigCache || (this._springConfigCache = this._resolveSpringConfig());
     for (let r = 0; r < rowTracks.length; r++) {
       const words = rowTracks[r];
       if (!words.length) continue;
       const fadeWidth = mainSweepWidth > 0 ? mainSweepWidth : (words[0].sweepWidth || words[0].height * 0.88);
-      const rowTimeline = LyricsPlusRenderer._buildRowSweepTimeline(
+      let rowTimeline = LyricsPlusRenderer._buildRowSweepTimeline(
         words,
         fadeWidth,
         lineStartTime,
         totalFadeDuration
       );
+      if (springCfg.sweepEnabled) {
+        rowTimeline = LyricsPlusRenderer._applySpringToRowTimeline(
+          rowTimeline,
+          totalFadeDuration,
+          springCfg.sweepZeta,
+          springCfg.sweepResponse
+        );
+      }
 
       for (let i = 0; i < words.length; i++) {
         const w = words[i];
@@ -6094,7 +6182,10 @@ class LyricsPlusRenderer {
       dynamicZeta: style.getPropertyValue('--lyplus-spring-dynamic').trim() !== 'false',
       zetaTight: readNum('--lyplus-spring-zeta-tight-gap', LyricsPlusRenderer._SPRING_ZETA_TIGHT_GAP),
       zetaWide: readNum('--lyplus-spring-zeta-wide-gap', LyricsPlusRenderer._SPRING_ZETA_WIDE_GAP),
-      settleRatioRelax: readNum('--lyplus-spring-settle-ratio-relax', 1.5)
+      settleRatioRelax: readNum('--lyplus-spring-settle-ratio-relax', 1.5),
+      sweepEnabled: style.getPropertyValue('--lyplus-spring-sweep').trim() === 'true',
+      sweepZeta: readNum('--lyplus-spring-sweep-zeta', 1),
+      sweepResponse: readNum('--lyplus-spring-sweep-response', 0.18)
     };
   }
 

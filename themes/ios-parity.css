@@ -1,0 +1,21 @@
+/* ==========================================================================
+   YouLyPlus Custom Theme: Apple Music iOS parity
+   by: Ibratabian17
+   ========================================================================== */
+
+#lyrics-plus-container {
+    --lyplus-blur-amount: 0.09em;
+    --lyplus-blur-amount-near: 0.045em;
+
+    --lyplus-spring-sweep: true;
+    --lyplus-spring-sweep-zeta: 1;
+    --lyplus-spring-sweep-response: 0.18;
+}
+
+.lyrics-line {
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(.41, 0, .12, .99) var(--lyrics-line-delay, 0ms), filter 0.1s ease;
+}
+
+.lyrics-plus-metadata {
+    transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1) var(--lyrics-line-delay, 0ms), filter 0.1s ease;
+}
