@@ -4,6 +4,9 @@
    ========================================================================== */
 
 #lyrics-plus-container {
+    --lyplus-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'SF Pro', sans-serif;
+    font-weight: 800;
+
     --lyplus-blur-amount: 0.09em;
     --lyplus-blur-amount-near: 0.045em;
 
@@ -14,6 +17,55 @@
 
 .lyrics-line {
     transition: opacity 0.3s ease, transform 0.4s cubic-bezier(.41, 0, .12, .99) var(--lyrics-line-delay, 0ms), filter 0.1s ease;
+}
+
+.line-by-line-mode .lyrics-line:not(.lyrics-gap) .main-vocal-container,
+.line-by-line-mode .lyrics-line:not(.lyrics-gap) .lyrics-romanization-container {
+    transition: transform 0.7s ease, opacity 0.7s;
+}
+
+.line-by-line-mode .lyrics-line:not(.lyrics-gap).active .main-vocal-container,
+.line-by-line-mode .lyrics-line:not(.lyrics-gap).active .lyrics-romanization-container {
+    transition: transform 0.5s ease, opacity 0.18s;
+}
+
+.lyrics-line:not(.lyrics-gap) .lyrics-line-container {
+    transition: transform 0.7s ease, background-color 0.7s;
+}
+
+#lyrics-plus-container.relax-scroll .lyrics-line:not(.lyrics-gap) .lyrics-line-container {
+    transition: transform 0.3s ease, background-color 0.7s;
+}
+
+.lyrics-line.active:not(.lyrics-gap) .lyrics-line-container {
+    transition: transform 0.5s ease, background-color 0.18s;
+}
+
+.lyrics-line:not(.active) .lyrics-syllable {
+    transition: transform var(--lyplus-spring-elevation-duration) var(--lyplus-spring-elevation-timing);
+}
+
+.lyrics-line:not(.active) .lyrics-syllable.finished {
+    transition: none;
+}
+
+.lyrics-line .lyrics-syllable span.char {
+    transition: background-color 0.5s ease, transform 0.7s ease;
+}
+
+.lyrics-line:not(.active) .lyrics-syllable.finished span.char {
+    transition: background-color 0.5s ease;
+}
+
+.lyrics-translation-container,
+.lyrics-romanization-container {
+    transition: opacity 0.3s ease;
+}
+
+.lyrics-line:not(.active) .lyrics-syllable span.char.emphasis-active[data-glow]::after {
+    animation: none;
+    opacity: 0;
+    text-shadow: none;
 }
 
 .lyrics-plus-metadata {
