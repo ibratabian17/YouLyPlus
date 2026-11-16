@@ -630,8 +630,9 @@ function convertWordLyricsToLine(lyrics) {
  * Returns false if an in-flight debounce already covers this exact request,
  * signalling that the fetch can be safely skipped.
  */
-function shouldFetchLyrics(songKey, forceReload) {
+function shouldFetchLyrics(songKey, isNewSong, forceReload) {
   return !(
+    isNewSong &&
     lyricsFetchDebounceTimer &&
     lastRequestedSongKey === songKey &&
     !forceReload &&
@@ -672,6 +673,7 @@ async function fetchBaseLyrics(currentSong, isNewSong, forceReload, fetchId) {
       return null;
     }
     if (lastBaseLyrics) {
+      forceNextRender = true;
       return lastBaseLyrics;
     }
   }
@@ -1346,7 +1348,7 @@ async function updateAndRenderCombinedLyrics(currentSong, fetchId, renderedPreli
 async function fetchAndDisplayLyrics(currentSong, isNewSong = false, forceReload = false) {
   const songKey = `${currentSong.title}-${currentSong.artist}-${currentSong.album}`;
 
-  if (!shouldFetchLyrics(songKey, forceReload)) return;
+  if (!shouldFetchLyrics(songKey, isNewSong, forceReload)) return;
 
   clearTimeout(lyricsFetchDebounceTimer);
   lyricsFetchDebounceTimer = setTimeout(() => {

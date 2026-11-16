@@ -16,14 +16,73 @@
     }
   })();
 
-  // Runs in page context to patch Apple's Svelte/Stencil/Sentry/PixiJS bundles
   function initMainWorld() {
     if (window[MAIN_FLAG]) return;
     window[MAIN_FLAG] = true;
 
+    if (document.documentElement) {
+      document.documentElement.setAttribute('data-lyplus-optimizer-main-injected', 'true');
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.documentElement?.setAttribute('data-lyplus-optimizer-main-injected', 'true');
+      }, { once: true });
+    }
+
     const killedCanvases = new WeakSet();
     const killedContexts = new WeakSet();
     const killedAmpLyrics = new WeakSet();
+    const fnKindCache = new WeakMap();
+
+    const fnToString = Function.prototype.toString;
+    const origDateNow = Date.now.bind(Date);
+
+    function safeFnString(fn) {
+      if (typeof fn !== 'function') return '';
+      try {
+        return fnToString.call(fn);
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function unwrapSentry(fn) {
+      let cur = fn;
+      for (let i = 0; i < 4 && typeof cur === 'function'; i++) {
+        if (typeof cur.__sentry_original__ === 'function' && cur.__sentry_original__ !== cur) {
+          cur = cur.__sentry_original__;
+        } else {
+          break;
+        }
+      }
+      return cur;
+    }
+
+    function isSentryWrapper(fn) {
+      if (typeof fn !== 'function') return false;
+      if (typeof fn.__sentry_original__ === 'function' || fn.__sentry_wrapped__) return true;
+      const s = safeFnString(fn);
+      return s.includes('__sentry_') || (s.includes('try{return ') && s.includes('.apply(this,arguments)}catch('));
+    }
+
+    function lockPatchedMethod(obj, prop, patchedFn) {
+      let current = patchedFn;
+      try {
+        Object.defineProperty(obj, prop, {
+          configurable: true,
+          enumerable: true,
+          get() {
+            return current;
+          },
+          set(val) {
+            if (typeof val === 'function' && !isSentryWrapper(val)) {
+              current = val;
+            }
+          }
+        });
+      } catch (_) {
+        try { obj[prop] = patchedFn; } catch (__) {}
+      }
+    }
 
     function isLyplusNode(node) {
       if (!node || !(node instanceof Element)) return false;
@@ -51,24 +110,91 @@
       return false;
     }
 
-    // Bypass Sentry TryCatch wrapper on rAF so it doesn't allocate a closure every frame
-    try {
-      const unwrap = (fn) => (typeof fn === 'function' && typeof fn.__sentry_original__ === 'function')
-        ? fn.__sentry_original__
-        : fn;
+    function classifyRAFCallback(cb) {
+      let kind = fnKindCache.get(cb);
+      if (kind !== undefined) return kind;
+      const s = safeFnString(cb);
+      if (s.includes('_requestId') && s.includes('.started') && s.includes('.update(')) {
+        kind = 1;
+      } else if (s.includes('activeTargets') && s.includes('skippedTargets')) {
+        kind = 2;
+      } else {
+        kind = 0;
+      }
+      fnKindCache.set(cb, kind);
+      return kind;
+    }
 
-      const origRAF = unwrap(window.requestAnimationFrame);
+    try {
+      const origRAF = unwrapSentry(window.requestAnimationFrame);
       if (typeof origRAF === 'function' && !origRAF.__lyplusPatched) {
         const raf = function (cb) {
-          return origRAF.call(window, unwrap(cb));
+          const clean = unwrapSentry(cb);
+          if (typeof clean !== 'function') {
+            return origRAF.call(window, cb);
+          }
+
+          const kind = classifyRAFCallback(clean);
+          if (kind === 1) {
+            return 0;
+          }
+
+          if (kind === 2) {
+            return origRAF.call(window, function (ts) {
+              let dateCallCount = 0;
+              const prevDateNow = Date.now;
+              Date.now = function () {
+                dateCallCount++;
+                if (dateCallCount === 1) {
+                  return origDateNow() + 100000;
+                }
+                return origDateNow();
+              };
+              try {
+                return clean.call(this, ts);
+              } finally {
+                Date.now = prevDateNow;
+              }
+            });
+          }
+
+          return origRAF.call(window, clean);
         };
         raf.__lyplusPatched = true;
-        window.requestAnimationFrame = raf;
+        lockPatchedMethod(window, 'requestAnimationFrame', raf);
+      }
+
+      const origSetTimeout = unwrapSentry(window.setTimeout);
+      if (typeof origSetTimeout === 'function' && !origSetTimeout.__lyplusPatched) {
+        const patchedSetTimeout = function (cb, delay) {
+          const clean = typeof cb === 'function' ? unwrapSentry(cb) : cb;
+          if (arguments.length <= 2) {
+            return origSetTimeout.call(window, clean, delay);
+          }
+          const args = Array.prototype.slice.call(arguments);
+          args[0] = clean;
+          return origSetTimeout.apply(window, args);
+        };
+        patchedSetTimeout.__lyplusPatched = true;
+        lockPatchedMethod(window, 'setTimeout', patchedSetTimeout);
+      }
+
+      const origSetInterval = unwrapSentry(window.setInterval);
+      if (typeof origSetInterval === 'function' && !origSetInterval.__lyplusPatched) {
+        const patchedSetInterval = function (cb, delay) {
+          const clean = typeof cb === 'function' ? unwrapSentry(cb) : cb;
+          if (arguments.length <= 2) {
+            return origSetInterval.call(window, clean, delay);
+          }
+          const args = Array.prototype.slice.call(arguments);
+          args[0] = clean;
+          return origSetInterval.apply(window, args);
+        };
+        patchedSetInterval.__lyplusPatched = true;
+        lockPatchedMethod(window, 'setInterval', patchedSetInterval);
       }
     } catch (_) {}
 
-    // Block root full-DOM MutationObservers (Sentry MultiClick/rrweb & RO polyfill)
-    // and ignore internal LyricsPlus DOM mutations
     try {
       const OrigMO = window.MutationObserver;
       const origObserve = OrigMO?.prototype?.observe;
@@ -91,7 +217,6 @@
               return;
             }
 
-            // Skip per-item tabindex attribute observers on shelf/nav items
             if (
               target instanceof Element &&
               options.attributes === true &&
@@ -111,6 +236,7 @@
 
         const PatchedMO = function (callback) {
           let instance = null;
+          const cleanCb = unwrapSentry(callback);
           const wrapped = function (mutations, observer) {
             if (instance && instance.__lyplusBlocked) return;
             if (Array.isArray(mutations) && mutations.length > 0) {
@@ -123,7 +249,7 @@
               }
               if (!hasExternal) return;
             }
-            return callback.call(this, mutations, observer);
+            return cleanCb.call(this, mutations, observer);
           };
           instance = new OrigMO(wrapped);
           return instance;
@@ -134,8 +260,6 @@
       }
     } catch (_) {}
 
-    // Skip ResizeObserver on .multiline-clamp (handled natively by -webkit-line-clamp,
-    // avoids synchronous scrollHeight + getComputedStyle on 150+ elements)
     try {
       const OrigRO = window.ResizeObserver;
       const origROObserve = OrigRO?.prototype?.observe;
@@ -152,7 +276,6 @@
       }
     } catch (_) {}
 
-    // No-op telemetry impressionsObserver and ListKeyboardAccess tabindex thrashing
     try {
       const OrigIO = window.IntersectionObserver;
       if (OrigIO && !OrigIO.__lyplusPatched) {
@@ -160,8 +283,9 @@
         const emptyRecords = function () { return []; };
 
         const PatchedIO = function (callback, options) {
-          if (typeof callback === 'function') {
-            const fnStr = Function.prototype.toString.call(callback);
+          const clean = unwrapSentry(callback);
+          if (typeof clean === 'function') {
+            const fnStr = safeFnString(clean);
 
             if (
               options?.root === document ||
@@ -180,7 +304,7 @@
               });
             }
           }
-          return new OrigIO(callback, options);
+          return new OrigIO(clean, options);
         };
         PatchedIO.__lyplusPatched = true;
         PatchedIO.prototype = OrigIO.prototype;
@@ -189,12 +313,12 @@
       }
     } catch (_) {}
 
-    // Filter noisy capture events, Sentry click/keypress trackers, and LYPLUS postMessages
     try {
-      const origAddEventListener = EventTarget.prototype.addEventListener;
+      const origAddEventListener = unwrapSentry(EventTarget.prototype.addEventListener);
+      const origRemoveEventListener = unwrapSentry(EventTarget.prototype.removeEventListener);
       if (origAddEventListener && !origAddEventListener.__lyplusPatched) {
         const roNoisyEvents = new Set([
-          'transitionend', 'animationend', 'animationstart', 'animationiteration',
+          'load', 'transitionend', 'animationend', 'animationstart', 'animationiteration',
           'keyup', 'keydown', 'mouseup', 'mousedown', 'mouseover', 'mouseout', 'blur', 'focus'
         ]);
 
@@ -203,69 +327,61 @@
             return origAddEventListener.call(this, type, listener, options);
           }
 
-          const clean = typeof listener.__sentry_original__ === 'function'
-            ? listener.__sentry_original__
-            : listener;
+          const clean = unwrapSentry(listener);
 
-          // Keep Apple's CommerceKit message listener from parsing LYPLUS_ ticks
           if (this === window && type === 'message') {
-            const fnStr = Function.prototype.toString.call(clean);
-            if (!fnStr.includes('LYPLUS_')) {
-              const filtered = function (event) {
-                const msgType = event?.data?.type;
-                if (typeof msgType === 'string' && msgType.startsWith('LYPLUS_')) return;
-                return clean.apply(this, arguments);
+            const fnStr = safeFnString(clean);
+            if (!fnStr.includes('LYPLUS_') && !isSentryWrapper(clean)) {
+              const filtered = function (ev) {
+                const d = ev?.data;
+                if (d && typeof d.type === 'string' && d.type.startsWith('LYPLUS_')) return;
+                return clean.call(this, ev);
               };
+              try { clean.__lyplusFilteredMsg = filtered; } catch (_) {}
               return origAddEventListener.call(this, type, filtered, options);
             }
           }
 
-          if ((this === window || this === document) && options === true && roNoisyEvents.has(type)) {
-            const fnStr = Function.prototype.toString.call(clean);
-            if (fnStr.includes('.schedule()')) return;
-            const wrapped = function (ev) {
-              if (ev && isLyplusNode(ev.target)) return;
-              return clean.apply(this, arguments);
-            };
-            return origAddEventListener.call(this, type, wrapped, options);
+          const isCapture = options === true || (options && typeof options === 'object' && options.capture === true);
+          if (
+            isCapture &&
+            (this === window || this === document || this === document.documentElement || this === document.body) &&
+            roNoisyEvents.has(type)
+          ) {
+            const fnStr = safeFnString(clean);
+            if (
+              fnStr.includes('repeat(') ||
+              fnStr.includes('.run(') ||
+              (fnStr.length < 120 && /\b[a-zA-Z_$][\w$]*\.run\(/.test(fnStr))
+            ) {
+              return;
+            }
           }
 
-          if (this === document && (type === 'click' || type === 'keypress') && options === false) {
-            const fnStr = Function.prototype.toString.call(clean);
-            if (fnStr.includes('keypress') && fnStr.includes('clearTimeout')) return;
+          if ((type === 'scroll' || type === 'wheel' || type === 'touchstart' || type === 'touchmove') && options === undefined) {
+            return origAddEventListener.call(this, type, clean, { passive: true });
           }
 
           return origAddEventListener.call(this, type, clean, options);
         };
         patchedAddEventListener.__lyplusPatched = true;
-        EventTarget.prototype.addEventListener = patchedAddEventListener;
+        lockPatchedMethod(EventTarget.prototype, 'addEventListener', patchedAddEventListener);
+
+        if (origRemoveEventListener && !origRemoveEventListener.__lyplusPatched) {
+          const patchedRemoveEventListener = function (type, listener, options) {
+            if (typeof listener === 'function') {
+              const clean = unwrapSentry(listener);
+              const targetFn = clean.__lyplusFilteredMsg || listener.__lyplusFilteredMsg || clean;
+              return origRemoveEventListener.call(this, type, targetFn, options);
+            }
+            return origRemoveEventListener.call(this, type, listener, options);
+          };
+          patchedRemoveEventListener.__lyplusPatched = true;
+          lockPatchedMethod(EventTarget.prototype, 'removeEventListener', patchedRemoveEventListener);
+        }
       }
     } catch (_) {}
 
-    // Block Svelte's legacy about:blank resize-sensor iframes inside shelf headers
-    try {
-      const origAppendChild = Node.prototype.appendChild;
-      if (origAppendChild && !origAppendChild.__lyplusPatched) {
-        const patchedAppendChild = function (child) {
-          if (
-            child &&
-            child.nodeType === 1 &&
-            child.tagName === 'IFRAME' &&
-            child.getAttribute('aria-hidden') === 'true' &&
-            child.tabIndex === -1 &&
-            this instanceof Element &&
-            this.classList?.contains('shelf-grid__header')
-          ) {
-            return child;
-          }
-          return origAppendChild.call(this, child);
-        };
-        patchedAppendChild.__lyplusPatched = true;
-        Node.prototype.appendChild = patchedAppendChild;
-      }
-    } catch (_) {}
-
-    // Skip shelf intersection querySelectorAll("a, button") tabindex toggling
     try {
       const origQSA = Element.prototype.querySelectorAll;
       if (origQSA && !origQSA.__lyplusPatched) {
@@ -284,7 +400,6 @@
       }
     } catch (_) {}
 
-    // Stop native <amp-lyrics> Stencil component from rendering in its shadowRoot
     function disableAmpLyrics(el) {
       if (!el || killedAmpLyrics.has(el)) return;
       killedAmpLyrics.add(el);
@@ -320,7 +435,6 @@
       }
     } catch (_) {}
 
-    // Kill Apple's native PixiJS lyrics backdrop canvas & 15fps ticker
     try {
       const origGetBCR = HTMLCanvasElement.prototype.getBoundingClientRect;
       if (origGetBCR && !origGetBCR.__lyplusPatched) {
@@ -419,15 +533,39 @@
       const noop = function () {};
       const methods = [
         'drawArrays', 'drawElements', 'drawArraysInstanced', 'drawElementsInstanced',
-        'drawRangeElements', 'clear', 'blitFramebuffer', 'texImage2D', 'texSubImage2D',
-        'texImage3D', 'texSubImage3D', 'renderbufferStorage', 'renderbufferStorageMultisample',
-        'shaderSource', 'compileShader', 'linkProgram', 'flush', 'finish'
+        'drawRangeElements', 'clear', 'blitFramebuffer', 'flush', 'finish'
       ];
       for (let i = 0; i < methods.length; i++) {
         const m = methods[i];
         if (typeof gl[m] === 'function') {
           try { gl[m] = noop; } catch (_) {}
         }
+      }
+
+      const origGetShaderParam = gl.getShaderParameter;
+      if (typeof origGetShaderParam === 'function') {
+        try {
+          gl.getShaderParameter = function (shader, pname) {
+            if (pname === 0x8B81) return true;
+            return origGetShaderParam.call(this, shader, pname);
+          };
+        } catch (_) {}
+      }
+
+      const origGetProgramParam = gl.getProgramParameter;
+      if (typeof origGetProgramParam === 'function') {
+        try {
+          gl.getProgramParameter = function (program, pname) {
+            if (pname === 0x8B82) return true;
+            return origGetProgramParam.call(this, program, pname);
+          };
+        } catch (_) {}
+      }
+
+      if (typeof gl.checkFramebufferStatus === 'function') {
+        try {
+          gl.checkFramebufferStatus = function () { return 0x8CD5; };
+        } catch (_) {}
       }
     }
 
@@ -456,7 +594,6 @@
     } catch (_) {}
   }
 
-  // Manages offscreen media/rows, closed modals, and idle WebGL loops
   function initDOMOptimizer() {
     if (window[DOM_FLAG]) return;
     window[DOM_FLAG] = true;
@@ -464,10 +601,9 @@
     const observedNodes = new WeakSet();
     let sweepQueued = false;
     let modalOpenState = false;
+    let lastPostedSurfaceVisible = null;
     let viewportObserver = null;
 
-    // Avoid `contain: layout/paint` on player-bar, side-panel, or sections so
-    // `position: fixed` panels/menus and overflowing radiosity glows never break.
     const CSS_RULES = `
       #lyplus-patch-container {
         contain: strict !important;
@@ -477,8 +613,8 @@
         contain: layout style;
       }
 
-      .songs-list-row[data-testid="track-list-item"][data-lyplus-offscreen="true"]:not(:hover):not(:focus-within),
-      .library-track[data-testid="library-track"][data-lyplus-offscreen="true"]:not(:hover):not(:focus-within) {
+      .songs-list-row[data-testid="track-list-item"]:not(:hover):not(:focus-within),
+      .library-track[data-testid="library-track"]:not(:hover):not(:focus-within) {
         content-visibility: auto;
         contain-intrinsic-size: auto 56px;
       }
@@ -517,10 +653,9 @@
       const style = document.createElement('style');
       style.id = STYLE_ID;
       style.textContent = CSS_RULES;
-      (document.head || document.documentElement).appendChild(style);
+      (document.head || document.documentElement)?.appendChild(style);
     }
 
-    // Pause animated art <video> when offscreen and resume when back in view
     function syncAmbientVideo(ampVideo) {
       if (!ampVideo || !(ampVideo instanceof Element)) return;
 
@@ -533,7 +668,7 @@
       for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
         if (shouldPause) {
-          if (!video.paused) {
+          if (!video.paused && video.readyState >= 2) {
             video.setAttribute('data-lyplus-was-playing', 'true');
             try { video.pause(); } catch (_) {}
           }
@@ -584,25 +719,17 @@
       ensureViewportObserver();
       if (!viewportObserver) return;
 
-      const targets = root.querySelectorAll(
-        '.songs-list-row[data-testid="track-list-item"], ' +
-        '.library-track[data-testid="library-track"], ' +
-        'amp-ambient-video'
-      );
-
+      const targets = root.querySelectorAll('amp-ambient-video');
       for (let i = 0; i < targets.length; i++) {
         const el = targets[i];
         if (!observedNodes.has(el)) {
           observedNodes.add(el);
           viewportObserver.observe(el);
         }
-        if (el.tagName === 'AMP-AMBIENT-VIDEO') {
-          syncAmbientVideo(el);
-        }
+        syncAmbientVideo(el);
       }
     }
 
-    // Remove 300+ redundant hreflang link tags injected on route changes
     function pruneHeadLinks() {
       if (!document.head) return;
       const links = document.head.querySelectorAll('link[rel="alternate"][hreflang]');
@@ -611,7 +738,6 @@
       }
     }
 
-    // Sync modal/sidebar classes and stop dynamicBkg WebGL rAF when modal is closed
     function syncSurfaces() {
       if (!document.body) return;
 
@@ -671,12 +797,16 @@
         document.querySelectorAll('amp-ambient-video').forEach(syncAmbientVideo);
       }
 
-      window.postMessage({
-        type: 'LYPLUS_SURFACE_VISIBILITY',
-        visible: (isModalOpen || isSidebarOpen) && !document.hidden,
-        modalOpen: isModalOpen,
-        sidebarOpen: isSidebarOpen
-      }, '*');
+      const surfaceVisible = (isModalOpen || isSidebarOpen) && !document.hidden;
+      if (surfaceVisible !== lastPostedSurfaceVisible) {
+        lastPostedSurfaceVisible = surfaceVisible;
+        window.postMessage({
+          type: 'LYPLUS_SURFACE_VISIBILITY',
+          visible: surfaceVisible,
+          modalOpen: isModalOpen,
+          sidebarOpen: isSidebarOpen
+        }, '*');
+      }
     }
 
     function sweep() {
@@ -772,16 +902,8 @@
         const script = document.createElement('script');
         script.src = api.runtime.getURL('src/modules/applemusic/appleUIOptimizer.js');
         script.onload = function () { this.remove(); };
-        script.onerror = function () {
-          this.remove();
-          try {
-            const inline = document.createElement('script');
-            inline.textContent = `(${initMainWorld.toString()})();`;
-            (document.head || document.documentElement).appendChild(inline);
-            inline.remove();
-          } catch (_) {}
-        };
-        (document.head || document.documentElement).appendChild(script);
+        script.onerror = function () { this.remove(); };
+        (document.head || document.documentElement)?.appendChild(script);
       }
     };
 
@@ -792,6 +914,5 @@
     }
   } else {
     initMainWorld();
-    initDOMOptimizer();
   }
 })();

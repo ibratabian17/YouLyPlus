@@ -402,10 +402,11 @@ const LYPLUS_connectedElements = new WeakSet();
 let _audioDataArray = null;
 
 const LYPLUS_MEDIA_SELECTORS = [
+    'audio#apple-music-player',
     'video.video-stream.html5-main-video',
     'video#video-one',
     'audio',
-    'video',
+    'video:not(amp-ambient-video video):not([data-loop])',
 ];
 let _cachedMediaElement = null;
 let _lastMediaSearchTime = 0;
@@ -1181,7 +1182,7 @@ function _renderLayerQuads(tex, progress) {
 }
 
 function animateWebGLBackground(timestamp) {
-    if (!gl || document.hidden) { globalAnimationId = null; return; }
+    if (!gl || document.hidden || !_isCanvasVisible) { globalAnimationId = null; return; }
 
     const interval = (timestamp < _bgThrottleUntil && artworkTransitionProgress >= 1.0)
         ? THROTTLED_FRAME_INTERVAL

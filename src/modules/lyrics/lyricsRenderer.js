@@ -351,6 +351,12 @@ class LyricsPlusRenderer {
     this._boundWakeLockMediaHandler = (event) => {
       if (event && event.target && (event.target.tagName === 'VIDEO' || event.target.tagName === 'AUDIO')) {
         const el = event.target;
+        if (el.closest?.('amp-ambient-video') || el.hasAttribute('data-loop')) return;
+        const playerEl = this._getPlayerElement();
+        if (playerEl && el !== playerEl) return;
+        if (this.uiConfig?.player && el.matches && !el.matches(this.uiConfig.player) && document.querySelector(this.uiConfig.player)) {
+          return;
+        }
         const playing = !el.paused && !el.ended;
         this._explicitPlaybackState = playing;
         this._clockIsPlaying = playing;
@@ -368,7 +374,13 @@ class LyricsPlusRenderer {
           } else {
             this._cancelScheduledSync();
           }
-        } else if (!playing) {
+        } else if (playing) {
+          if (event.type === 'seeked') {
+            this._runScheduledSync(true);
+          } else if (!this._syncTimerId && !this.lyricsAnimationFrameId) {
+            this._scheduleNextSync();
+          }
+        } else {
           this._cancelScheduledSync();
         }
         this._updateWakeLock();
@@ -446,7 +458,11 @@ class LyricsPlusRenderer {
       } else {
         this._cancelScheduledSync();
       }
-    } else if (!nextPlaying) {
+    } else if (nextPlaying) {
+      if (!this._syncTimerId && !this.lyricsAnimationFrameId) {
+        this._scheduleNextSync();
+      }
+    } else {
       this._cancelScheduledSync();
     }
     this._updateWakeLock();
@@ -3018,10 +3034,16 @@ class LyricsPlusRenderer {
    * @private
    */
   _getPlayerElement() {
-    if (!this._playerElement || !this._playerElement.isConnected) {
+    if (this.uiConfig?.player) {
+      if (!this._playerElement || !this._playerElement.isConnected || !this._playerElement.matches?.(this.uiConfig.player)) {
+        this._playerElement = document.querySelector(this.uiConfig.player) || null;
+      }
+      if (this._playerElement) return this._playerElement;
+    }
+    if (!this._playerElement || !this._playerElement.isConnected || this._playerElement.closest?.('amp-ambient-video')) {
       this._playerElement =
-        (this.uiConfig?.player ? document.querySelector(this.uiConfig.player) : null) ||
-        document.querySelector('video, audio') ||
+        document.querySelector('audio') ||
+        document.querySelector('video:not(amp-ambient-video video):not([data-loop])') ||
         null;
     }
     return this._playerElement;

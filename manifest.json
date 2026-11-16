@@ -77,6 +77,16 @@
         "*://*.music.apple.com/*"
       ],
       "js": [
+        "src/modules/applemusic/appleUIOptimizer.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "*://*.music.apple.com/*"
+      ],
+      "js": [
         "src/lib/subtitleRetimer.js",
         "src/lib/polyfill.js",
         "src/localization.js",
@@ -114,6 +124,7 @@
         "src/inject/ytmusic/songTracker.js",
         "src/lib/parser.js",
         "src/modules/applemusic/style.css",
+        "src/modules/applemusic/appleUIOptimizer.js",
         "src/inject/applemusic/songTracker.js",
         "src/assets/loading.gif"
       ],
@@ -138,6 +149,7 @@
       "resources": [
         "src/modules/lyrics/lyrics.css",
         "src/modules/applemusic/style.css",
+        "src/modules/applemusic/appleUIOptimizer.js",
         "src/assets/loading.gif"
       ],
       "matches": [

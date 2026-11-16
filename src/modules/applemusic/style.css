@@ -119,7 +119,7 @@ body.has-modal main {
     display: block !important;
     padding: 0 16px;
     padding-top: calc(1em + 25vh);
-    --lyplus-font-size-base: 22px;
+    --lyplus-font-size-base: 28px;
     line-height: 1.3;
     contain: layout style;
     --lyplus-lyrics-pallete: var(--bodyTextColor, var(--systemPrimary));

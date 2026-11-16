@@ -4,7 +4,7 @@
   let mkInstance = null;
   let lastProcessedID = null;
   let playing = false;
-  let lyricsSurfaceVisible = true;
+  let lyricsSurfaceVisible = false;
 
   let lastSyncAudioTime = -1;
   let lastSyncPerfTime = null;
@@ -13,27 +13,14 @@
   let driftCheckTimer = null;
   let settleTimer = null;
   let boundMediaEl = null;
+  let cachedSurfaceEl = null;
+  let lastSurfaceQueryTime = 0;
 
   const DRIFT_THRESHOLD_SEC = 0.010;
   const DRIFT_CHECK_INTERVAL_MS = 1000;
   const SETTLE_SYNC_DELAY_MS = 120;
 
   const killedCanvases = new WeakSet();
-
-  function isAppleLyricsCanvas(canvas) {
-    if (!canvas || !(canvas instanceof HTMLCanvasElement)) return false;
-    if (canvas.id === 'lyplus-webgl-canvas') return false;
-    if (killedCanvases.has(canvas)) return true;
-    if (
-      canvas.closest?.('[data-testid="now-playing-backdrop"]') ||
-      canvas.closest?.('.dt-lyrics__platter') ||
-      canvas.closest?.('article[data-testid="lyrics-fullscreen-modal"]')
-    ) {
-      killedCanvases.add(canvas);
-      return true;
-    }
-    return false;
-  }
 
   function sweepAppleCanvases() {
     const canvases = document.querySelectorAll(
@@ -48,12 +35,23 @@
     });
   }
 
-  function hasActiveLyricsSurface() {
+  function hasActiveLyricsSurface(forceQuery = false) {
     if (document.hidden) return false;
-    return !!(
+    if (cachedSurfaceEl && cachedSurfaceEl.isConnected) {
+      lyricsSurfaceVisible = true;
+      return true;
+    }
+    const now = performance.now();
+    if (!forceQuery && now - lastSurfaceQueryTime < 250) {
+      return lyricsSurfaceVisible;
+    }
+    lastSurfaceQueryTime = now;
+    cachedSurfaceEl =
       document.querySelector('article[data-testid="lyrics-fullscreen-modal"]') ||
-      document.querySelector('[data-testid="lyrics-sidebar"]')
-    );
+      document.querySelector('[data-testid="lyrics-sidebar"]') ||
+      null;
+    lyricsSurfaceVisible = !!cachedSurfaceEl;
+    return lyricsSurfaceVisible;
   }
 
   window.addEventListener('message', (event) => {
@@ -64,15 +62,24 @@
     }
     if (event.data.type === 'LYPLUS_SURFACE_VISIBILITY') {
       const nextVisible = !!event.data.visible;
-      if (nextVisible !== lyricsSurfaceVisible) {
-        lyricsSurfaceVisible = nextVisible;
-        if (playing && lyricsSurfaceVisible) {
-          startTimeUpdater();
-        } else if (!lyricsSurfaceVisible) {
-          stopTimeUpdater();
+      lyricsSurfaceVisible = nextVisible;
+      if (!nextVisible) {
+        cachedSurfaceEl = null;
+        stopTimeUpdater();
+      } else {
+        hasActiveLyricsSurface(true);
+        bindMediaElement();
+        playing = isMediaOrPlayerPlaying();
+        if (playing) {
+          if (!driftCheckTimer) {
+            startTimeUpdater();
+          } else {
+            emitTimeSync(true);
+            scheduleSettleCheck();
+          }
+        } else {
+          emitTimeSync(true);
         }
-      } else if (nextVisible) {
-        emitTimeSync(true);
       }
     }
   });
@@ -80,8 +87,9 @@
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       stopTimeUpdater();
-    } else if (hasActiveLyricsSurface()) {
-      lyricsSurfaceVisible = true;
+    } else if (hasActiveLyricsSurface(true)) {
+      bindMediaElement();
+      playing = isMediaOrPlayerPlaying();
       if (playing) {
         startTimeUpdater();
       } else {
@@ -97,7 +105,12 @@
       const el = mkInstance?.services?.mediaItemPlayback?._currentPlayer?._targetElement;
       if (el) return el;
     } catch (e) {}
-    return document.querySelector('#apple-music-player, audio, video') || null;
+    return (
+      document.getElementById('apple-music-player') ||
+      document.querySelector('audio#apple-music-player, audio') ||
+      document.querySelector('video:not(amp-ambient-video video):not([data-loop])') ||
+      null
+    );
   }
 
   function getPreciseTime() {
@@ -107,17 +120,22 @@
       const player = mkInstance.services?.mediaItemPlayback?._currentPlayer;
       const mediaElement = player?._targetElement;
 
-      if (mediaElement) {
+      if (mediaElement && typeof mediaElement.currentTime === 'number' && Number.isFinite(mediaElement.currentTime)) {
         const rawTime = mediaElement.currentTime;
         const offset = player._buffer?.currentTimestampOffset || 0;
-
         return rawTime - offset;
       }
-    } catch (e) {
-      // ignore internal player structure changes
+    } catch (e) {}
+
+    const mkTime = mkInstance.currentPlaybackTime || 0;
+    const el = getMediaElement();
+    if (el && typeof el.currentTime === 'number' && Number.isFinite(el.currentTime) && el.currentTime > 0) {
+      if (mkTime === 0 || Math.abs(el.currentTime - mkTime) < 2.5) {
+        return el.currentTime;
+      }
     }
 
-    return mkInstance.currentPlaybackTime || 0;
+    return mkTime;
   }
 
   function getPlaybackRate() {
@@ -126,13 +144,18 @@
     return (typeof rate === 'number' && rate > 0) ? rate : 1;
   }
 
-  function isActuallyPlaying() {
-    if (!mkInstance || !playing) return false;
+  function isMediaOrPlayerPlaying() {
+    if (!mkInstance) return false;
     const el = getMediaElement();
     if (el && typeof el.paused === 'boolean') {
-      return !el.paused && !el.ended && el.readyState >= 2;
+      if (!el.paused && !el.ended && el.readyState >= 2) return true;
+      if (el.paused || el.ended) return false;
     }
-    return true;
+    return !!mkInstance.isPlaying;
+  }
+
+  function isActuallyPlaying() {
+    return isMediaOrPlayerPlaying();
   }
 
   function emitTimeSync(force = false) {
@@ -142,6 +165,7 @@
     const actualTime = getPreciseTime();
     const rate = getPlaybackRate();
     const activePlaying = isActuallyPlaying();
+    playing = activePlaying;
 
     const expectedTime = (lastSyncPlaying && lastSyncPerfTime !== null)
       ? lastSyncAudioTime + ((now - lastSyncPerfTime) / 1000) * lastSyncRate
@@ -174,30 +198,39 @@
     if (settleTimer) clearTimeout(settleTimer);
     settleTimer = setTimeout(() => {
       settleTimer = null;
-      if (mkInstance && playing && !document.hidden && hasActiveLyricsSurface()) {
+      if (mkInstance && isMediaOrPlayerPlaying() && !document.hidden && hasActiveLyricsSurface()) {
         emitTimeSync(false);
       }
     }, SETTLE_SYNC_DELAY_MS);
   }
 
   const onMediaActiveSync = () => {
-    playing = !!(mkInstance && mkInstance.isPlaying);
+    playing = isMediaOrPlayerPlaying();
     emitTimeSync(true);
-    scheduleSettleCheck();
+    if (playing && hasActiveLyricsSurface() && !driftCheckTimer) {
+      startTimeUpdater();
+    } else {
+      scheduleSettleCheck();
+    }
   };
 
   const onMediaStateSync = () => {
-    playing = !!(mkInstance && mkInstance.isPlaying);
+    playing = isMediaOrPlayerPlaying();
     emitTimeSync(true);
   };
 
   const onMediaTimeUpdate = () => {
-    if (mkInstance && playing && !document.hidden && hasActiveLyricsSurface()) {
+    if (!mkInstance || document.hidden) return;
+    playing = isMediaOrPlayerPlaying();
+    if (playing && hasActiveLyricsSurface()) {
       emitTimeSync(false);
     }
   };
 
   function bindMediaElement() {
+    if (boundMediaEl && boundMediaEl.isConnected && boundMediaEl.id === 'apple-music-player') {
+      return;
+    }
     const el = getMediaElement();
     if (el === boundMediaEl) return;
 
@@ -331,7 +364,6 @@
 
     emitTimeSync(true);
 
-    // Only wake the WebGL background renderer if the fullscreen modal is actually open
     if (document.querySelector('article[data-testid="lyrics-fullscreen-modal"]')) {
       window.postMessage({
         type: 'LYPLUS_updateFullScreenAnimatedBg',
@@ -370,9 +402,12 @@
     scheduleSettleCheck();
 
     driftCheckTimer = setInterval(() => {
-      if (mkInstance && playing && !document.hidden && hasActiveLyricsSurface()) {
+      if (mkInstance && !document.hidden && hasActiveLyricsSurface()) {
         bindMediaElement();
-        emitTimeSync(false);
+        playing = isMediaOrPlayerPlaying();
+        if (playing) {
+          emitTimeSync(false);
+        }
       } else {
         stopTimeUpdater();
       }
@@ -399,26 +434,29 @@
     });
 
     instance.addEventListener('playbackStateDidChange', () => {
-      playing = mkInstance.isPlaying;
       bindMediaElement();
+      playing = isMediaOrPlayerPlaying();
       emitTimeSync(true);
-      if (playing && hasActiveLyricsSurface()) startTimeUpdater();
+      if (playing && hasActiveLyricsSurface(true)) startTimeUpdater();
       else stopTimeUpdater();
       window.postMessage({ type: 'LYPLUS_PLAYBACK_STATE', isPlaying: playing }, '*');
     });
 
     instance.addEventListener('playbackTimeDidChange', () => {
-      if (playing && !document.hidden && hasActiveLyricsSurface()) {
+      if (!document.hidden && hasActiveLyricsSurface()) {
         bindMediaElement();
-        emitTimeSync(false);
+        playing = isMediaOrPlayerPlaying();
+        if (playing) {
+          emitTimeSync(false);
+        }
       }
     });
 
     if (mkInstance.nowPlayingItem) handleSongChange();
 
-    if (mkInstance.isPlaying) {
+    if (isMediaOrPlayerPlaying()) {
       playing = true;
-      if (hasActiveLyricsSurface()) startTimeUpdater();
+      if (hasActiveLyricsSurface(true)) startTimeUpdater();
       window.postMessage({ type: 'LYPLUS_PLAYBACK_STATE', isPlaying: true }, '*');
     }
 

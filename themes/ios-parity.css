@@ -41,20 +41,28 @@
     transition: transform 0.5s ease, background-color 0.18s;
 }
 
-.lyrics-line:not(.active) .lyrics-syllable {
-    transition: transform var(--lyplus-spring-elevation-duration) var(--lyplus-spring-elevation-timing);
-}
-
+.lyrics-line:not(.active) .lyrics-syllable,
 .lyrics-line:not(.active) .lyrics-syllable.finished {
-    transition: none;
+    color: var(--lyplus-text-secondary) !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    background-image: none !important;
+    -webkit-text-fill-color: unset !important;
+    transition: transform var(--lyplus-spring-elevation-duration) var(--lyplus-spring-elevation-timing) !important;
 }
 
 .lyrics-line .lyrics-syllable span.char {
     transition: background-color 0.5s ease, transform 0.7s ease;
 }
 
+.lyrics-line:not(.active) .lyrics-syllable span.char,
 .lyrics-line:not(.active) .lyrics-syllable.finished span.char {
-    transition: background-color 0.5s ease;
+    color: var(--lyplus-text-secondary) !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    background-image: none !important;
+    -webkit-text-fill-color: unset !important;
+    transition: transform 0.7s ease !important;
 }
 
 .lyrics-translation-container,
