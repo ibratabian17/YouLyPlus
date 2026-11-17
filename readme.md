@@ -90,6 +90,7 @@ Play any song, and the lyrics panel will automatically be enhanced by YouLy+.
 
 -   **Word-by-word, syllable-synced lyrics**: YouLy+ features real-time, accurately synced lyrics with word-by-word highlighting.
 -   **Apple Music engine overhaul**: Replaces the resource-heavy native Apple Music Web UI. YouLy+ replace their murdered animation with Apple Music Android-like animation with optimization. It also expands the lyric sources—if AM lacks synced lyrics, YouLy+ finds them elsewhere!
+-   **Apple Music Web UI Optimizer**: Cleans up Apple Music's expensive DOM, canvas, WebGL, and ambient-video behavior so the lyrics surface stays responsive and lightweight. The optimizer disables noisy observers, strips heavy CSS rules, pauses offscreen background media, and freezes unnecessary Apple rendering work to reduce CPU/GPU waste while keeping the lyrics UI smooth.
 -   **Optimize Apple Music**: This code inject any Apple Music Web function that using inefficient way with the new web browser native feature/other optimization implementation
 -   **Multi-platform fallback**: Automatically searches multiple platforms to find lyrics for almost every song.
 -   **Fits seamlessly**: Replaces default lyrics panels out of the box with designs that fit in to whichever platform you use.
