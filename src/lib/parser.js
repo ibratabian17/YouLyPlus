@@ -670,7 +670,8 @@ function parseAppleTTML(ttml, offset = 0, separate = false) {
         if (parsedLs !== -1) metadata.leadingSilenceMs = parsedLs;
       }
       const lyricOffsetAttr = getAttr(node, 'lyricOffset');
-      if (lyricOffsetAttr !== null && metadata.lyricOffset === 0) {
+      const roleAttr = (getAttr(node, 'role') || '').trim().toLowerCase();
+      if (lyricOffsetAttr !== null && roleAttr !== 'spatial' && metadata.lyricOffset === 0) {
         metadata.lyricOffset = timeToMs(lyricOffsetAttr, 0);
       }
     }
