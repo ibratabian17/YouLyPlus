@@ -266,13 +266,20 @@ let u_main_aspect = null;
 let u_main_renderHeight = null;
 let u_main_preSaturate = null;
 let _appliedPreSaturate = NaN;
+let _appliedClearR = -1;
+let _appliedClearG = -1;
+let _appliedClearB = -1;
 let _viewportAspect = 1.0;
+let _viewportWidth = 0;
+let _viewportHeight = 0;
+let _viewportDirty = true;
 const _layerSizeFactor = new Float32Array([1, 1, 1]);
 let _activeLightweight = null;
 let _needsRedraw = false;
 let _isCanvasVisible = true;
 let _viewportObserver = null;
 let _intersectionObserver = null;
+let _observedBgParent = null;
 
 const MIN_ASPECT = 0.4;
 const MAX_ASPECT = 3.5;
@@ -290,8 +297,9 @@ let _bgThrottleUntil = 0;
 
 // Cached post-process values
 const _postParams = {};
-let _postParamsDirty = true;
+let _postParamsDirty = false;
 let _appliedPostUniformsDirty = true;
+let _postParamsIdleId = 0;
 
 // WebGL objects
 let quadBuffer = null;
@@ -410,12 +418,42 @@ const LYPLUS_MEDIA_SELECTORS = [
 ];
 let _cachedMediaElement = null;
 let _lastMediaSearchTime = 0;
+let _mediaPlayListenerAttached = false;
+
+function _isValidMediaCandidate(el) {
+    if (!el || !el.isConnected) return false;
+    if (el.tagName === 'AUDIO') return true;
+    if (el.tagName === 'VIDEO') {
+        if (el.hasAttribute('data-loop')) return false;
+        if (el.closest && el.closest('amp-ambient-video')) return false;
+        return true;
+    }
+    return false;
+}
+
+function _attachMediaPlayCapture() {
+    if (_mediaPlayListenerAttached || typeof document === 'undefined') return;
+    _mediaPlayListenerAttached = true;
+    document.addEventListener('play', (e) => {
+        const t = e.target;
+        if (_isValidMediaCandidate(t)) {
+            _cachedMediaElement = t;
+        }
+    }, true);
+}
 
 function _resolveMediaElement() {
     if (_cachedMediaElement && _cachedMediaElement.isConnected) return _cachedMediaElement;
     const now = performance.now();
-    if (now - _lastMediaSearchTime < 250) return null;
+    if (now - _lastMediaSearchTime < 2000) return null;
     _lastMediaSearchTime = now;
+
+    const byId = document.getElementById('apple-music-player') || document.getElementById('video-one');
+    if (byId) {
+        _cachedMediaElement = byId;
+        return byId;
+    }
+
     for (let i = 0; i < LYPLUS_MEDIA_SELECTORS.length; i++) {
         const el = document.querySelector(LYPLUS_MEDIA_SELECTORS[i]);
         if (el) { _cachedMediaElement = el; return el; }
@@ -689,10 +727,25 @@ function _parsePostProcess(str, out) {
 
 function _readPostParamsFromCSS() {
     if (!blurContainerElem) return;
-    const raw = getComputedStyle(blurContainerElem).getPropertyValue('--webgl-post-process');
+    const inlineVal = blurContainerElem.style.getPropertyValue('--webgl-post-process');
+    const raw = inlineVal || getComputedStyle(blurContainerElem).getPropertyValue('--webgl-post-process');
     _parsePostProcess(raw, _postParams);
     _postParamsDirty = false;
     _appliedPostUniformsDirty = true;
+    _needsRedraw = true;
+}
+
+function _schedulePostParamsSync() {
+    if (_postParamsIdleId) return;
+    const run = () => {
+        _postParamsIdleId = 0;
+        if (_postParamsDirty) _readPostParamsFromCSS();
+    };
+    if (typeof requestIdleCallback === 'function') {
+        _postParamsIdleId = requestIdleCallback(run, { timeout: 200 });
+    } else {
+        _postParamsIdleId = setTimeout(run, 16);
+    }
 }
 
 function handleContextLost(event) {
@@ -707,6 +760,9 @@ function handleContextLost(event) {
     glProgram = null;
     _activeLightweight = null;
     _appliedPreSaturate = NaN;
+    _appliedClearR = -1;
+    _appliedClearG = -1;
+    _appliedClearB = -1;
     _kernelBaseSize = 0;
     _androidPipeline.resetState();
     _meshPipeline.resetState();
@@ -755,14 +811,25 @@ function createProgram(glCtx, vs, fs) {
     return program;
 }
 
+function _observeBgParent(parent) {
+    if (!bgObserver || !parent || _observedBgParent === parent) return;
+    bgObserver.disconnect();
+    _observedBgParent = parent;
+    bgObserver.observe(parent, { childList: true, subtree: false });
+}
+
 function LYPLUS_setupBlurEffect() {
     console.log("LYPLUS: Setting up Optimized WebGL2...");
+    _attachMediaPlayCapture();
     const pipeline = _getActivePipeline();
 
     canvasDimensions.width = 0;
     canvasDimensions.height = 0;
     blurDimensions.width = 0;
     blurDimensions.height = 0;
+    _viewportWidth = window.innerWidth || 1280;
+    _viewportHeight = window.innerHeight || 720;
+    _viewportDirty = true;
 
     if (typeof currentSettings !== 'undefined' && currentSettings.dynamicPlayer) {
         for (let i = 0; i < LYPLUS_bgConfig.dynamicPlayerSelectors.length; i++) {
@@ -775,15 +842,13 @@ function LYPLUS_setupBlurEffect() {
     blurContainerElem = document.createElement('div');
     blurContainerElem.classList.add('lyplus-blur-container');
     blurContainerElem.classList.toggle('lyplus-bg-ipad', _isIpadBgStyle());
+    blurContainerElem.style.contain = 'strict';
     webglCanvas = document.createElement('canvas');
     webglCanvas.id = 'lyplus-webgl-canvas';
+    webglCanvas.style.cssText = 'width:100%;height:100%;display:block;pointer-events:none;';
     blurContainerElem.appendChild(webglCanvas);
-    (document.querySelector(LYPLUS_bgConfig.blurContainerParentSelector) || document.body).prepend(blurContainerElem);
-
-    blurContainerElem.style.transition = '--webgl-post-process-tick 0.001ms step-start';
-    blurContainerElem.addEventListener('transitionstart', (e) => {
-        if (e.propertyName === '--webgl-post-process-tick') _postParamsDirty = true;
-    });
+    const containerParent = document.querySelector(LYPLUS_bgConfig.blurContainerParentSelector) || document.body;
+    containerParent.prepend(blurContainerElem);
 
     const ctxAttribs = {
         alpha: false,
@@ -803,17 +868,20 @@ function LYPLUS_setupBlurEffect() {
     _meshPipeline.resetState();
     _activeLightweight = null;
     _appliedPreSaturate = NaN;
+    _appliedClearR = -1;
+    _appliedClearG = -1;
+    _appliedClearB = -1;
     _kernelBaseSize = 0;
 
-    if (bgObserver) bgObserver.disconnect();
-    bgObserver = new MutationObserver(() => {
-        if (blurContainerElem && !blurContainerElem.isConnected) {
-            checkBg();
-        }
-    });
-
-    const parent = document.querySelector(LYPLUS_bgConfig.mutationObserverRootSelector) || document.body;
-    bgObserver.observe(parent, { childList: true, subtree: parent === document.body });
+    if (!bgObserver) {
+        bgObserver = new MutationObserver(() => {
+            if (blurContainerElem && !blurContainerElem.isConnected) {
+                checkBg();
+            }
+        });
+    }
+    _observedBgParent = null;
+    _observeBgParent(containerParent);
 
     webglCanvas.addEventListener('webglcontextlost', handleContextLost, false);
     webglCanvas.addEventListener('webglcontextrestored', handleContextRestored, false);
@@ -863,6 +931,7 @@ function LYPLUS_setupBlurEffect() {
 
     _postParamsDirty = true;
     _appliedPostUniformsDirty = true;
+    _schedulePostParamsSync();
 
     // Textures & Framebuffers
     currentArtworkTexture = createDefaultTexture();
@@ -893,14 +962,31 @@ function LYPLUS_setupBlurEffect() {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    handleResize();
+    _applyResizeInternal();
     if (!pipeline.isProgramsReady()) return null;
+
     window.removeEventListener('resize', handleResize);
-    window.addEventListener('resize', handleResize, { passive: true });
     if (_viewportObserver) _viewportObserver.disconnect();
     if (typeof ResizeObserver !== 'undefined') {
-        _viewportObserver = new ResizeObserver(handleResize);
-        _viewportObserver.observe(webglCanvas);
+        _viewportObserver = new ResizeObserver((entries) => {
+            const rect = entries[0]?.contentRect;
+            if (rect && rect.width > 0 && rect.height > 0) {
+                const w = Math.round(rect.width);
+                const h = Math.round(rect.height);
+                if (w !== _viewportWidth || h !== _viewportHeight) {
+                    _viewportWidth = w;
+                    _viewportHeight = h;
+                    _viewportDirty = true;
+                    _needsRedraw = true;
+                    if (!globalAnimationId && _isCanvasVisible && !document.hidden) {
+                        globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+                    }
+                }
+            }
+        });
+        _viewportObserver.observe(blurContainerElem);
+    } else {
+        window.addEventListener('resize', handleResize, { passive: true });
     }
 
     startTime = performance.now() / 1000;
@@ -916,7 +1002,7 @@ function LYPLUS_setupBlurEffect() {
             globalAnimationId = null;
         }
     }, { threshold: 0.01 });
-    _intersectionObserver.observe(webglCanvas);
+    _intersectionObserver.observe(blurContainerElem);
 
     document.removeEventListener('visibilitychange', _handleVisibilityChange);
     document.addEventListener('visibilitychange', _handleVisibilityChange);
@@ -968,16 +1054,15 @@ function _applyViewportUniforms() {
 }
 
 function _getViewportAspect() {
-    let w = 0, h = 0;
-    if (webglCanvas) { w = webglCanvas.clientWidth; h = webglCanvas.clientHeight; }
-    if (!(w > 0 && h > 0) && blurContainerElem) { w = blurContainerElem.clientWidth; h = blurContainerElem.clientHeight; }
-    if (!(w > 0 && h > 0)) { w = window.innerWidth; h = window.innerHeight; }
+    const w = _viewportWidth > 0 ? _viewportWidth : (window.innerWidth || 1280);
+    const h = _viewportHeight > 0 ? _viewportHeight : (window.innerHeight || 720);
     if (!(w > 0 && h > 0)) return 1.0;
     return Math.min(MAX_ASPECT, Math.max(MIN_ASPECT, w / h));
 }
 
-function handleResize() {
+function _applyResizeInternal() {
     if (!gl || !webglCanvas) return;
+    _viewportDirty = false;
     const pipeline = _getActivePipeline();
     const lightweight = _isLightweightMode();
     const base = lightweight ? RENDER_SIZE_LIGHTWEIGHT : RENDER_SIZE;
@@ -992,7 +1077,11 @@ function handleResize() {
 
     const sizeChanged = rw !== blurDimensions.width || rh !== blurDimensions.height ||
                         cw !== canvasDimensions.width || ch !== canvasDimensions.height;
-    if (!sizeChanged && lightweight === _activeLightweight) return;
+    if (!sizeChanged && lightweight === _activeLightweight && pipeline.isProgramsReady() && _kernelBaseSize === base) {
+        return;
+    }
+
+    _activeLightweight = lightweight;
 
     if (cw !== canvasDimensions.width || ch !== canvasDimensions.height) {
         canvasDimensions.width = cw;
@@ -1017,10 +1106,21 @@ function handleResize() {
     }
     _viewportAspect = aspect;
     _applyViewportUniforms();
-    _activeLightweight = lightweight;
-
     _needsRedraw = true;
-    if (!globalAnimationId) globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+}
+
+function handleResize() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    if (w > 0 && h > 0) {
+        _viewportWidth = w;
+        _viewportHeight = h;
+    }
+    _viewportDirty = true;
+    _needsRedraw = true;
+    if (!globalAnimationId && gl && _isCanvasVisible && !document.hidden) {
+        globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+    }
 }
 
 function createDefaultTexture() {
@@ -1207,6 +1307,10 @@ function animateWebGLBackground(timestamp) {
     const pulse = LYPLUS_audioState.beatPulse;
     const isLightweight = _isLightweightMode();
 
+    if (_viewportDirty || isLightweight !== _activeLightweight) {
+        _applyResizeInternal();
+    }
+
     const shouldRender =
         !isLightweight ||
         isTransitioning ||
@@ -1219,15 +1323,11 @@ function animateWebGLBackground(timestamp) {
         return;
     }
 
-    if (isLightweight !== _activeLightweight) handleResize();
-
     const pipeline = _getActivePipeline();
     if (!pipeline.isProgramsReady()) {
         globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         return;
     }
-
-    if (_postParamsDirty) _readPostParamsFromCSS();
 
     beatEnergyBaseline += (pulse - beatEnergyBaseline) * Math.min(1.0, 0.8 * elapsedSec);
     const relativePulse = pulse > beatEnergyBaseline ? pulse - beatEnergyBaseline : 0.0;
@@ -1279,7 +1379,15 @@ function animateWebGLBackground(timestamp) {
     gl.viewport(0, 0, bw, bh);
 
     const bgCol = currentTargetMasterArtworkPalette?.background || DEFAULT_PALETTE.background;
-    gl.clearColor((bgCol.r || 0) / 255.0, (bgCol.g || 0) / 255.0, (bgCol.b || 0) / 255.0, 1.0);
+    const cr = (bgCol.r || 0) / 255.0;
+    const cg = (bgCol.g || 0) / 255.0;
+    const cb = (bgCol.b || 0) / 255.0;
+    if (cr !== _appliedClearR || cg !== _appliedClearG || cb !== _appliedClearB) {
+        gl.clearColor(cr, cg, cb, 1.0);
+        _appliedClearR = cr;
+        _appliedClearG = cg;
+        _appliedClearB = cb;
+    }
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     gl.useProgram(glProgram);
@@ -1320,6 +1428,7 @@ function checkBg() {
         const parent = document.querySelector(LYPLUS_bgConfig.blurContainerParentSelector) || document.body;
         if (parent) {
             parent.prepend(blurContainerElem);
+            _observeBgParent(parent);
             if (!globalAnimationId) globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         } else {
             bgCheckRetryTimeout = setTimeout(checkBg, 100);
@@ -1336,12 +1445,18 @@ window.addEventListener('message', (event) => {
     if (event.source !== window) return;
     const type = event.data?.type;
     if (type === 'LYPLUS_updateFullScreenAnimatedBg') {
-        const el = LYPLUS_bgConfig.artworkSelector ? document.querySelector(LYPLUS_bgConfig.artworkSelector) : null;
         checkBg();
-        const targetUrl = event.data?.artworkUrl || (el ? el.src : null);
+        let targetUrl = event.data?.artworkUrl;
+        if (!targetUrl && LYPLUS_bgConfig.artworkSelector) {
+            const el = document.querySelector(LYPLUS_bgConfig.artworkSelector);
+            if (el) targetUrl = el.src;
+        }
         LYPLUS_requestProcessNewArtwork(targetUrl);
     } else if (type === 'LYPLUS_reattachBg') {
         checkBg();
+    } else if (type === 'LYPLUS_updatePostProcess') {
+        _postParamsDirty = true;
+        _schedulePostParamsSync();
     }
 });
 
@@ -1364,9 +1479,11 @@ function _syncDynamicBgStyle() {
     pipeline.applyDefaultPostParams(_postParams);
     _postParamsDirty = true;
     _appliedPostUniformsDirty = true;
+    _viewportDirty = true;
     _needsRedraw = true;
+    _schedulePostParamsSync();
 
-    _applyViewportUniforms();
+    _applyResizeInternal();
     gl.useProgram(glProgram);
     _appliedPreSaturate = pipeline.getPreSaturate();
     gl.uniform1f(u_main_preSaturate, _appliedPreSaturate);
@@ -1979,8 +2096,8 @@ const _meshPipeline = {
 
     getCanvasBaseSize() {
         const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
-        const cssW = (webglCanvas && webglCanvas.clientWidth) || (typeof window !== 'undefined' && window.innerWidth) || 1280;
-        const cssH = (webglCanvas && webglCanvas.clientHeight) || (typeof window !== 'undefined' && window.innerHeight) || 720;
+        const cssW = _viewportWidth > 0 ? _viewportWidth : ((typeof window !== 'undefined' && window.innerWidth) || 1280);
+        const cssH = _viewportHeight > 0 ? _viewportHeight : ((typeof window !== 'undefined' && window.innerHeight) || 720);
         const scaled = Math.round(Math.sqrt(cssW * cssH) * 0.5 * dpr);
         return Math.min(1024, Math.max(512, scaled));
     },
