@@ -32,9 +32,12 @@
     const killedContexts = new WeakSet();
     const killedAmpLyrics = new WeakSet();
     const fnKindCache = new WeakMap();
+    const activeHlsSessions = new Set();
 
     const fnToString = Function.prototype.toString;
     const origDateNow = Date.now.bind(Date);
+    const origPerfNow = performance.now.bind(performance);
+    const origSetTimeout = unwrapSentry(window.setTimeout);
 
     function safeFnString(fn) {
       if (typeof fn !== 'function') return '';
@@ -118,6 +121,8 @@
         kind = 1;
       } else if (s.includes('activeTargets') && s.includes('skippedTargets')) {
         kind = 2;
+      } else if (s.includes('RAF_FN_LIMIT_MS')) {
+        kind = 3;
       } else {
         kind = 0;
       }
@@ -158,13 +163,31 @@
             });
           }
 
+          if (kind === 3) {
+            return origRAF.call(window, function (ts) {
+              let perfCallCount = 0;
+              const prevPerfNow = performance.now;
+              performance.now = function () {
+                perfCallCount++;
+                if (perfCallCount >= 2) {
+                  return origPerfNow() + 10;
+                }
+                return origPerfNow();
+              };
+              try {
+                return clean.call(this, ts);
+              } finally {
+                performance.now = prevPerfNow;
+              }
+            });
+          }
+
           return origRAF.call(window, clean);
         };
         raf.__lyplusPatched = true;
         lockPatchedMethod(window, 'requestAnimationFrame', raf);
       }
 
-      const origSetTimeout = unwrapSentry(window.setTimeout);
       if (typeof origSetTimeout === 'function' && !origSetTimeout.__lyplusPatched) {
         const patchedSetTimeout = function (cb, delay) {
           const clean = typeof cb === 'function' ? unwrapSentry(cb) : cb;
@@ -196,11 +219,34 @@
     } catch (_) {}
 
     try {
+      const OrigPO = window.PerformanceObserver;
+      if (OrigPO && !OrigPO.__lyplusPatched) {
+        const noop = function () {};
+        const emptyRecords = function () { return []; };
+        const PatchedPO = function () {
+          return Object.create(OrigPO.prototype, {
+            observe: { value: noop },
+            disconnect: { value: noop },
+            takeRecords: { value: emptyRecords }
+          });
+        };
+        PatchedPO.supportedEntryTypes = OrigPO.supportedEntryTypes || [];
+        PatchedPO.__lyplusPatched = true;
+        PatchedPO.prototype = OrigPO.prototype;
+        window.PerformanceObserver = PatchedPO;
+      }
+    } catch (_) {}
+
+    try {
       const OrigMO = window.MutationObserver;
       const origObserve = OrigMO?.prototype?.observe;
 
       if (OrigMO && origObserve && !origObserve.__lyplusPatched) {
         const patchedObserve = function (target, options) {
+          if (target && target.nodeType === 3) {
+            this.__lyplusTextNodeObserver = true;
+            return origObserve.call(this, target, options);
+          }
           if (options) {
             const isRoot =
               target === document ||
@@ -239,6 +285,9 @@
           const cleanCb = unwrapSentry(callback);
           const wrapped = function (mutations, observer) {
             if (instance && instance.__lyplusBlocked) return;
+            if (instance && instance.__lyplusTextNodeObserver) {
+              return cleanCb.call(this, mutations, observer);
+            }
             if (Array.isArray(mutations) && mutations.length > 0) {
               let hasExternal = false;
               for (let i = 0; i < mutations.length; i++) {
@@ -313,6 +362,42 @@
       }
     } catch (_) {}
 
+    function patchBasePlayerListener(listener) {
+      if (!listener || typeof listener !== 'object' || typeof listener.handleEvent !== 'function') return;
+      const proto = Object.getPrototypeOf(listener);
+      const target = (proto && typeof proto.handleEvent === 'function') ? proto : listener;
+      if (target.handleEvent.__lyplusPatched) return;
+
+      const origHandleEvent = target.handleEvent;
+      const patchedHandleEvent = function (ev) {
+        if (ev && ev.type === 'timeupdate') {
+          const buf = this._buffer;
+          if (buf) {
+            buf.currentTime = this.currentPlaybackTime;
+          }
+          const sec = Math.floor(this.currentPlaybackTime || 0);
+          const dur = Math.floor(this.currentPlaybackDuration || 0);
+          if (this.__lyplusLastTimeSec === sec && this.__lyplusLastTimeDur === dur) {
+            return;
+          }
+          this.__lyplusLastTimeSec = sec;
+          this.__lyplusLastTimeDur = dur;
+        } else if (ev && ev.type === 'progress') {
+          const now = origDateNow();
+          if (this.__lyplusLastProgTs && now - this.__lyplusLastProgTs < 1000) {
+            try { this.handleBufferStart?.(); } catch (_) {}
+            return;
+          }
+          this.__lyplusLastProgTs = now;
+        } else if (ev && (ev.type === 'seeked' || ev.type === 'playing' || ev.type === 'pause' || ev.type === 'durationchange' || ev.type === 'loadedmetadata')) {
+          this.__lyplusLastTimeSec = -1;
+        }
+        return origHandleEvent.apply(this, arguments);
+      };
+      patchedHandleEvent.__lyplusPatched = true;
+      target.handleEvent = patchedHandleEvent;
+    }
+
     try {
       const origAddEventListener = unwrapSentry(EventTarget.prototype.addEventListener);
       const origRemoveEventListener = unwrapSentry(EventTarget.prototype.removeEventListener);
@@ -321,13 +406,60 @@
           'load', 'transitionend', 'animationend', 'animationstart', 'animationiteration',
           'keyup', 'keydown', 'mouseup', 'mousedown', 'mouseover', 'mouseout', 'blur', 'focus'
         ]);
+        const focusVisibleDedupe = new Set();
 
         const patchedAddEventListener = function (type, listener, options) {
+          if (listener && typeof listener === 'object' && typeof listener.handleEvent === 'function') {
+            if (this instanceof HTMLMediaElement) {
+              patchBasePlayerListener(listener);
+            }
+            return origAddEventListener.call(this, type, listener, options);
+          }
+
           if (typeof listener !== 'function') {
             return origAddEventListener.call(this, type, listener, options);
           }
 
           const clean = unwrapSentry(listener);
+
+          if (this instanceof HTMLVideoElement) {
+            if (type === 'pause') {
+              const fnStr = safeFnString(clean);
+              if (fnStr.includes('syncPlayingState') || fnStr.includes('.paused') || fnStr.includes('bound ')) {
+                const guardedPause = function (ev) {
+                  if (this.getAttribute('data-lyplus-paused') === 'true') {
+                    try { this.__lyplusHls?.stopLoad?.(); } catch (_) {}
+                    return;
+                  }
+                  if (
+                    this.hasAttribute('data-loop') &&
+                    (this.ended || (this.duration > 0 && this.currentTime >= this.duration - 0.35))
+                  ) {
+                    return;
+                  }
+                  return clean.call(this, ev);
+                };
+                try { clean.__lyplusFilteredMsg = guardedPause; } catch (_) {}
+                return origAddEventListener.call(this, type, guardedPause, options);
+              }
+            } else if (type === 'ended') {
+              const guardedEnded = function (ev) {
+                if (this.getAttribute('data-lyplus-paused') === 'true') {
+                  return;
+                }
+                const res = clean.call(this, ev);
+                if (this.hasAttribute('data-loop') && this.paused && !document.hidden) {
+                  try {
+                    const p = this.play();
+                    if (p && typeof p.catch === 'function') p.catch(() => {});
+                  } catch (_) {}
+                }
+                return res;
+              };
+              try { clean.__lyplusFilteredMsg = guardedEnded; } catch (_) {}
+              return origAddEventListener.call(this, type, guardedEnded, options);
+            }
+          }
 
           if (this === window && type === 'message') {
             const fnStr = safeFnString(clean);
@@ -342,6 +474,14 @@
             }
           }
 
+          if (this === window && type === 'blur') {
+            const fnStr = safeFnString(clean);
+            if (fnStr.includes('focusMethod=void 0')) {
+              if (focusVisibleDedupe.has('win_blur')) return;
+              focusVisibleDedupe.add('win_blur');
+            }
+          }
+
           const isCapture = options === true || (options && typeof options === 'object' && options.capture === true);
           if (
             isCapture &&
@@ -352,9 +492,31 @@
             if (
               fnStr.includes('repeat(') ||
               fnStr.includes('.run(') ||
-              (fnStr.length < 120 && /\b[a-zA-Z_$][\w$]*\.run\(/.test(fnStr))
+              fnStr.includes('.schedule(') ||
+              (fnStr.length < 120 && /\b[a-zA-Z_$][\w$]*\.(?:run|schedule)\(/.test(fnStr))
             ) {
               return;
+            }
+            if (
+              this === document.documentElement &&
+              (fnStr.includes('focusMethod') || fnStr.includes('removeAttribute(this.attr)'))
+            ) {
+              const key = 'doc_' + type;
+              if (focusVisibleDedupe.has(key)) return;
+              focusVisibleDedupe.add(key);
+            }
+          }
+
+          if (isCapture && this === document && (type === 'mousemove' || type === 'focusin')) {
+            const fnStr = safeFnString(clean);
+            if (fnStr.includes('setTimeout') && fnStr.includes('clearTimeout')) {
+              const guarded = function (ev) {
+                const takeover = document.querySelector('amp-window-takeover');
+                if (takeover && takeover.getAttribute('aria-hidden') === 'true') return;
+                return clean.call(this, ev);
+              };
+              try { clean.__lyplusFilteredMsg = guarded; } catch (_) {}
+              return origAddEventListener.call(this, type, guarded, options);
             }
           }
 
@@ -383,6 +545,99 @@
     } catch (_) {}
 
     try {
+      const origPlay = HTMLMediaElement.prototype.play;
+      if (typeof origPlay === 'function' && !origPlay.__lyplusPatched) {
+        const patchedPlay = function () {
+          if (this instanceof HTMLVideoElement) {
+            const isPausedByOpt = this.getAttribute('data-lyplus-paused') === 'true';
+            const inModal = !!this.closest?.('article[data-testid="lyrics-fullscreen-modal"]');
+            const coveredByModal = document.body?.classList?.contains('lyplus-fullscreen-modal-open') && !inModal && !!this.closest?.('amp-ambient-video');
+            if (isPausedByOpt || coveredByModal || document.hidden) {
+              this.setAttribute('data-lyplus-paused', 'true');
+              this.setAttribute('data-lyplus-was-playing', 'true');
+              try { this.__lyplusHls?.stopLoad?.(); } catch (_) {}
+              return Promise.resolve();
+            }
+            try { this.__lyplusHls?.startLoad?.(); } catch (_) {}
+            try {
+              const p = origPlay.apply(this, arguments);
+              if (p && typeof p.catch === 'function' && this.hasAttribute('data-loop')) {
+                p.catch(() => {});
+              }
+              return p;
+            } catch (_) {
+              return Promise.resolve();
+            }
+          }
+          return origPlay.apply(this, arguments);
+        };
+        patchedPlay.__lyplusPatched = true;
+        HTMLMediaElement.prototype.play = patchedPlay;
+      }
+    } catch (_) {}
+
+    function patchMseBuffer(mse) {
+      if (!mse || typeof mse !== 'object') return mse;
+      const proto = Object.getPrototypeOf(mse);
+      if (proto && typeof proto.loadSegment === 'function' && !proto.loadSegment.__lyplusPatched) {
+        const origLoadSegment = proto.loadSegment;
+        const patchedLoadSegment = function () {
+          const idx = this.segmentIndexToFetch;
+          if (
+            typeof idx !== 'number' ||
+            idx <= 2 ||
+            this.seekResolver ||
+            this.seekWhenUpdated ||
+            this.isAtEndOfStream
+          ) {
+            if (this.__lyplusSegmentTimer) {
+              clearTimeout(this.__lyplusSegmentTimer);
+              this.__lyplusSegmentTimer = 0;
+            }
+            return origLoadSegment.apply(this, arguments);
+          }
+          const bufferedEnd = Number(this.endOfBufferTime) || 0;
+          const currentTime = Number(this.element?.currentTime) || 0;
+          const ahead = bufferedEnd - currentTime;
+          if (ahead > 15) {
+            if (this.__lyplusSegmentTimer) {
+              return Promise.resolve();
+            }
+            const delay = ahead > 35 ? 220 : 120;
+            return new Promise((resolve) => {
+              this.__lyplusSegmentTimer = origSetTimeout.call(window, () => {
+                this.__lyplusSegmentTimer = 0;
+                try {
+                  resolve(origLoadSegment.call(this));
+                } catch (_) {
+                  resolve();
+                }
+              }, delay);
+            });
+          }
+          return origLoadSegment.apply(this, arguments);
+        };
+        patchedLoadSegment.__lyplusPatched = true;
+        proto.loadSegment = patchedLoadSegment;
+      }
+      return mse;
+    }
+
+    try {
+      let currentMseBuffer = window.mseBuffer ? patchMseBuffer(window.mseBuffer) : undefined;
+      Object.defineProperty(window, 'mseBuffer', {
+        configurable: true,
+        enumerable: true,
+        get() {
+          return currentMseBuffer;
+        },
+        set(val) {
+          currentMseBuffer = patchMseBuffer(val);
+        }
+      });
+    } catch (_) {}
+
+    try {
       const origQSA = Element.prototype.querySelectorAll;
       if (origQSA && !origQSA.__lyplusPatched) {
         const patchedQSA = function (selector) {
@@ -399,6 +654,144 @@
         Element.prototype.querySelectorAll = patchedQSA;
       }
     } catch (_) {}
+
+    function pruneDisconnectedHls() {
+      if (activeHlsSessions.size === 0) return;
+      for (const hls of activeHlsSessions) {
+        const mediaEl = hls.__lyplusMediaEl;
+        if (mediaEl && !mediaEl.isConnected && mediaEl.id !== 'apple-music-player') {
+          activeHlsSessions.delete(hls);
+          hls.__lyplusDestroyed = true;
+          try {
+            if (typeof hls.__lyplusOrigDestroy === 'function') {
+              hls.__lyplusOrigDestroy.call(hls);
+            } else if (typeof hls.destroy === 'function') {
+              hls.destroy();
+            }
+          } catch (_) {}
+        }
+      }
+    }
+
+    function patchHlsClass(HlsCtor) {
+      if (typeof HlsCtor !== 'function' || HlsCtor.__lyplusPatched) return HlsCtor;
+      HlsCtor.__lyplusPatched = true;
+
+      const proto = HlsCtor.prototype;
+      if (proto && !proto.__lyplusPatched) {
+        proto.__lyplusPatched = true;
+        const origAttachMedia = proto.attachMedia;
+        const origLoadSource = proto.loadSource;
+        const origDestroy = proto.destroy;
+
+        if (typeof origLoadSource === 'function') {
+          proto.loadSource = function (url, opts) {
+            this.__lyplusOrigDestroy = origDestroy;
+            pruneDisconnectedHls();
+            if (opts && opts.appData && opts.appData.serviceName && opts.appData.serviceName !== 'web-static-video') {
+              const audioEl = document.getElementById('apple-music-player');
+              if (audioEl && audioEl.__lyplusHls && audioEl.__lyplusHls !== this) {
+                const prev = audioEl.__lyplusHls;
+                activeHlsSessions.delete(prev);
+                prev.__lyplusDestroyed = true;
+                try { origDestroy.call(prev); } catch (_) {}
+              }
+              if (audioEl) {
+                audioEl.__lyplusHls = this;
+                this.__lyplusMediaEl = audioEl;
+                activeHlsSessions.add(this);
+              }
+            }
+            return origLoadSource.apply(this, arguments);
+          };
+        }
+
+        if (typeof origAttachMedia === 'function') {
+          proto.attachMedia = function (mediaEl) {
+            this.__lyplusOrigDestroy = origDestroy;
+            pruneDisconnectedHls();
+
+            if (mediaEl instanceof HTMLMediaElement) {
+              if (mediaEl.__lyplusHls && mediaEl.__lyplusHls !== this) {
+                const prev = mediaEl.__lyplusHls;
+                activeHlsSessions.delete(prev);
+                prev.__lyplusDestroyed = true;
+                try { origDestroy.call(prev); } catch (_) {}
+              }
+              mediaEl.__lyplusHls = this;
+              this.__lyplusMediaEl = mediaEl;
+              activeHlsSessions.add(this);
+            }
+
+            const res = origAttachMedia.apply(this, arguments);
+            if (mediaEl instanceof HTMLVideoElement && mediaEl.getAttribute('data-lyplus-paused') === 'true') {
+              try { this.stopLoad?.(); } catch (_) {}
+            }
+            return res;
+          };
+        }
+
+        if (typeof origDestroy === 'function') {
+          proto.destroy = function () {
+            this.__lyplusDestroyed = true;
+            activeHlsSessions.delete(this);
+            return origDestroy.apply(this, arguments);
+          };
+        }
+      }
+
+      const WrappedHls = new Proxy(HlsCtor, {
+        construct(Target, args, newTarget) {
+          const cfg = args[0] && typeof args[0] === 'object' ? Object.assign({}, args[0]) : {};
+          cfg.stallCheckIntervalMs = 2500;
+          cfg.lowBufferWatchdogPeriod = 5;
+          cfg.highBufferWatchdogPeriod = 10;
+          cfg.trottleCheckInterval = 60000;
+          cfg.abrSamplePeriodMs = 1000;
+          cfg.enableCEA708Captions = false;
+          cfg.enableWebVTT = false;
+          cfg.enableRtcReporting = false;
+          cfg.rtcErrStackNumLines = 0;
+          cfg.rtcLogHistoryNumLines = 0;
+          args[0] = cfg;
+          return Reflect.construct(Target, args, newTarget);
+        }
+      });
+      WrappedHls.__lyplusPatched = true;
+      return WrappedHls;
+    }
+
+    try {
+      let currentHls = window.Hls ? patchHlsClass(window.Hls) : undefined;
+      Object.defineProperty(window, 'Hls', {
+        configurable: true,
+        enumerable: true,
+        get() {
+          return currentHls;
+        },
+        set(val) {
+          currentHls = patchHlsClass(val);
+        }
+      });
+    } catch (_) {}
+
+    window.addEventListener('message', (ev) => {
+      const d = ev?.data;
+      if (!d || d.type !== 'LYPLUS_SURFACE_VISIBILITY') return;
+      if (d.modalOpen) {
+        for (const hls of activeHlsSessions) {
+          const el = hls.__lyplusMediaEl;
+          if (el instanceof HTMLVideoElement && !el.closest?.('article[data-testid="lyrics-fullscreen-modal"]')) {
+            el.setAttribute('data-lyplus-paused', 'true');
+            if (!el.paused) {
+              el.setAttribute('data-lyplus-was-playing', 'true');
+              try { el.pause(); } catch (_) {}
+            }
+            try { hls.stopLoad?.(); } catch (_) {}
+          }
+        }
+      }
+    });
 
     function disableAmpLyrics(el) {
       if (!el || killedAmpLyrics.has(el)) return;
@@ -431,6 +824,33 @@
             Ctor.prototype.attributeChangedCallback = function () {};
           }
           document.querySelectorAll('amp-lyrics').forEach(disableAmpLyrics);
+        }).catch(() => {});
+
+        window.customElements.whenDefined('amp-ambient-video').then(() => {
+          const Ctor = window.customElements.get('amp-ambient-video');
+          const origDisconnected = Ctor?.prototype?.disconnectedCallback;
+          if (typeof origDisconnected === 'function' && !origDisconnected.__lyplusPatched) {
+            const patchedDisconnected = function () {
+              const res = origDisconnected.apply(this, arguments);
+              try {
+                const video = this.querySelector?.('video');
+                const hls = video?.__lyplusHls;
+                if (hls && !hls.__lyplusDestroyed) {
+                  activeHlsSessions.delete(hls);
+                  hls.__lyplusDestroyed = true;
+                  if (typeof hls.__lyplusOrigDestroy === 'function') {
+                    hls.__lyplusOrigDestroy.call(hls);
+                  } else if (typeof hls.destroy === 'function') {
+                    hls.destroy();
+                  }
+                }
+                pruneDisconnectedHls();
+              } catch (_) {}
+              return res;
+            };
+            patchedDisconnected.__lyplusPatched = true;
+            Ctor.prototype.disconnectedCallback = patchedDisconnected;
+          }
         }).catch(() => {});
       }
     } catch (_) {}
@@ -599,6 +1019,7 @@
     window[DOM_FLAG] = true;
 
     const observedNodes = new WeakSet();
+    const sanitizedSheets = new WeakSet();
     let sweepQueued = false;
     let modalOpenState = false;
     let lastPostedSurfaceVisible = null;
@@ -611,6 +1032,111 @@
 
       #lyrics-plus-container {
         contain: layout style;
+      }
+
+      .chrome-player.svelte-3m7vi0:before {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+      }
+
+      amp-playback-controls-progress.progress--compact {
+        contain: size layout style;
+        height: 2px;
+        width: 100%;
+      }
+
+      .chrome-player__lcd.svelte-3m7vi0,
+      .player-lcd.svelte-1f9skug,
+      .player-lcd__progress.svelte-1f9skug,
+      .progress-container.svelte-1iv1zwr,
+      .lyrics__controls.svelte-1n2xfan,
+      .lyrics__playback-controls.svelte-1n2xfan,
+      amp-playback-controls-progress,
+      amp-playback-controls-progress-range,
+      apple-music-playback-controls,
+      amp-chrome-volume,
+      amp-lcd-metadata {
+        contain: layout style;
+      }
+
+      .lyrics__artwork-radiosity-container.svelte-1n2xfan {
+        transform: scale(0.92) translateZ(0);
+        backface-visibility: hidden;
+        contain: layout paint style;
+      }
+
+      .lyrics__button.svelte-1idgbrc {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+      }
+
+      amp-window-takeover[aria-hidden="true"] {
+        display: none !important;
+        content-visibility: hidden !important;
+        contain: strict !important;
+      }
+
+      amp-ambient-video.editorial-video {
+        -webkit-mask-image: none !important;
+        mask-image: none !important;
+        contain: layout paint style;
+      }
+
+      .artwork__radiosity,
+      .singular-content-page__artwork-radiosity,
+      .song-header-page__artwork-radiosity,
+      .tv-movie-header__radiosity {
+        transform: scale(0.88) translateZ(0) !important;
+        backface-visibility: hidden;
+        contain: layout paint style;
+      }
+
+      .playback-bars.svelte-1ky4dn6 {
+        contain: strict;
+      }
+
+      .playback-bars__svg.svelte-1ky4dn6 {
+        overflow: hidden;
+      }
+
+      .playback-bars__svg.svelte-1ky4dn6 g[mask] {
+        mask: none !important;
+        -webkit-mask: none !important;
+      }
+
+      .shelf-grid__header > iframe[aria-hidden="true"][tabindex="-1"] {
+        display: none !important;
+        visibility: hidden !important;
+      }
+
+      .play-button--platter .icon,
+      .more-button--material,
+      .shelf-grid--onhover .shelf-grid-nav__arrow,
+      .powerswoosh .powerswoosh__artwork,
+      .powerswoosh .powerswoosh__chin,
+      .powerswoosh .powerswoosh__chin--legibility-gradient {
+        will-change: auto !important;
+      }
+
+      .product-lockup.interactive:not(:hover):not(:focus-within):not(.has-open-menu) .product-lockup__controls,
+      .powerswoosh.interactive:not(:hover):not(:focus-within):not(.has-open-menu) .powerswoosh__lockup-controls {
+        visibility: hidden;
+      }
+
+      .product-lockup.interactive:not(:hover):not(:focus-within):not(.has-open-menu) .play-button--platter .icon,
+      .product-lockup.interactive:not(:hover):not(:focus-within):not(.has-open-menu) .more-button--material,
+      .powerswoosh.interactive:not(:hover):not(:focus-within):not(.has-open-menu) .play-button--platter .icon,
+      .powerswoosh.interactive:not(:hover):not(:focus-within):not(.has-open-menu) .more-button--material,
+      .shelf-grid--onhover:not(:hover):not(:focus-within) .shelf-grid-nav__arrow {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+        will-change: auto !important;
+      }
+
+      [data-testid="section-container"][data-lyplus-offscreen="true"] * {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+        will-change: auto !important;
       }
 
       .songs-list-row[data-testid="track-list-item"]:not(:hover):not(:focus-within),
@@ -656,6 +1182,47 @@
       (document.head || document.documentElement)?.appendChild(style);
     }
 
+    function sanitizeRuleList(ruleList) {
+      if (!ruleList) return;
+      for (let i = ruleList.length - 1; i >= 0; i--) {
+        const rule = ruleList[i];
+        if (!rule) continue;
+        const sel = rule.selectorText;
+        if (typeof sel === 'string' && sel.includes(':has(')) {
+          if (
+            sel.includes('--artwork-bg-color') ||
+            sel.includes(':root:has(') ||
+            sel.includes('.lyrics__sidebar') ||
+            sel.includes('.player-bar')
+          ) {
+            try {
+              ruleList.deleteRule ? ruleList.deleteRule(i) : rule.parentStyleSheet?.deleteRule(i);
+            } catch (_) {}
+            continue;
+          }
+        }
+        if (rule.cssRules && rule.cssRules.length > 0) {
+          try { sanitizeRuleList(rule); } catch (_) {}
+        }
+      }
+    }
+
+    function sanitizeAppleStyleSheets() {
+      if (!document.styleSheets) return;
+      for (let i = 0; i < document.styleSheets.length; i++) {
+        const sheet = document.styleSheets[i];
+        if (!sheet || sanitizedSheets.has(sheet)) continue;
+        try {
+          const rules = sheet.cssRules;
+          if (!rules) continue;
+          sanitizedSheets.add(sheet);
+          sanitizeRuleList(sheet);
+        } catch (_) {
+          sanitizedSheets.add(sheet);
+        }
+      }
+    }
+
     function syncAmbientVideo(ampVideo) {
       if (!ampVideo || !(ampVideo instanceof Element)) return;
 
@@ -668,17 +1235,19 @@
       for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
         if (shouldPause) {
-          if (!video.paused && video.readyState >= 2) {
+          video.setAttribute('data-lyplus-paused', 'true');
+          if (!video.paused) {
             video.setAttribute('data-lyplus-was-playing', 'true');
             try { video.pause(); } catch (_) {}
           }
         } else {
+          video.removeAttribute('data-lyplus-paused');
           const wantsPlay =
             ampVideo.getAttribute('data-playing') === 'true' ||
             ampVideo.hasAttribute('playing') ||
             video.getAttribute('data-lyplus-was-playing') === 'true';
 
-          if (wantsPlay && video.paused && video.readyState >= 2) {
+          if (wantsPlay && video.paused) {
             video.removeAttribute('data-lyplus-was-playing');
             try {
               const p = video.play();
@@ -710,7 +1279,7 @@
         }
       }, {
         root: null,
-        rootMargin: '300px 0px 300px 0px',
+        rootMargin: '400px 0px 400px 0px',
         threshold: 0
       });
     }
@@ -719,14 +1288,16 @@
       ensureViewportObserver();
       if (!viewportObserver) return;
 
-      const targets = root.querySelectorAll('amp-ambient-video');
+      const targets = root.querySelectorAll('amp-ambient-video, [data-testid="section-container"]');
       for (let i = 0; i < targets.length; i++) {
         const el = targets[i];
         if (!observedNodes.has(el)) {
           observedNodes.add(el);
           viewportObserver.observe(el);
         }
-        syncAmbientVideo(el);
+        if (el.tagName === 'AMP-AMBIENT-VIDEO') {
+          syncAmbientVideo(el);
+        }
       }
     }
 
@@ -798,7 +1369,7 @@
       }
 
       const surfaceVisible = (isModalOpen || isSidebarOpen) && !document.hidden;
-      if (surfaceVisible !== lastPostedSurfaceVisible) {
+      if (surfaceVisible !== lastPostedSurfaceVisible || modalChanged) {
         lastPostedSurfaceVisible = surfaceVisible;
         window.postMessage({
           type: 'LYPLUS_SURFACE_VISIBILITY',
@@ -812,6 +1383,7 @@
     function sweep() {
       sweepQueued = false;
       injectStyles();
+      sanitizeAppleStyleSheets();
       syncSurfaces();
       observeTargets();
       pruneHeadLinks();
