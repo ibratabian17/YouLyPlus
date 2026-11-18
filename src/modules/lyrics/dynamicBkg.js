@@ -1506,7 +1506,7 @@ const MESH_PRESET_INDEX = -1; // -1 = dynamic 5-preset cycle, 0..4 = fixed prese
 const MESH_GRID_MODE = 'auto'; // 'auto' | 'portrait' (6x6 -> 41x41) | 'landscape' (9x9 -> 33x33)
 const DISABLE_GAUSSIAN_BLUR = false; // true = MPSImageGaussianBlur sigma 0
 
-const MESH_LAYER_SCALES = new Float32Array([1.12, 0.92, 0.84]);
+const MESH_LAYER_SCALES = new Float32Array([1.4, 0.92, 0.84]);
 const MESH_LAYER_BASE_POSITIONS = [0, 0, 0.58, -0.58, -0.58, 0.58];
 const MESH_LAYER_ABS_BASE_X = new Float32Array([
     Math.abs(MESH_LAYER_BASE_POSITIONS[0]),
