@@ -149,23 +149,39 @@ function findFallbackLanguage(availableLanguages, requestedLanguage) {
 }
 
 /**
- * Resolves the user's intended target language without using web native language.
+ * Resolves the user's intended target language.
  * Checks user settings override (customTranslateTarget) first,
- * then falls back to user system/browser languages (navigator.languages || navigator.language).
+ * then falls back to app language (<html lang>) and browser languages (navigator.languages || navigator.language).
  */
 function getResolvedLyricsLanguage(settings = currentSettings) {
-  if (settings?.overrideTranslateTarget && settings?.customTranslateTarget?.trim()) {
-    return settings.customTranslateTarget.trim();
+  const customTarget = settings?.customTranslateTarget?.trim();
+  if (customTarget && customTarget.toLowerCase() !== 'auto') {
+    return customTarget;
+  }
+
+  const langs = [];
+  if (typeof document !== 'undefined') {
+    const htmlLang = (document.documentElement?.getAttribute?.('lang') || document.documentElement?.lang || '').trim();
+    if (htmlLang) {
+      langs.push(htmlLang);
+    }
   }
   if (typeof navigator !== 'undefined') {
     if (Array.isArray(navigator.languages) && navigator.languages.length > 0) {
-      return navigator.languages;
-    }
-    if (navigator.language) {
-      return navigator.language;
+      for (const lang of navigator.languages) {
+        const trimmed = typeof lang === 'string' ? lang.trim() : '';
+        if (trimmed && !langs.includes(trimmed)) {
+          langs.push(trimmed);
+        }
+      }
+    } else if (navigator.language) {
+      const trimmed = navigator.language.trim();
+      if (trimmed && !langs.includes(trimmed)) {
+        langs.push(trimmed);
+      }
     }
   }
-  return 'en';
+  return langs.length > 0 ? langs : 'en';
 }
 
 function getPrimaryTargetLanguage(settings = currentSettings) {
