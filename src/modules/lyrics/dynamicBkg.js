@@ -733,6 +733,9 @@ function _readPostParamsFromCSS() {
     _postParamsDirty = false;
     _appliedPostUniformsDirty = true;
     _needsRedraw = true;
+    if (!globalAnimationId && gl && _isCanvasVisible && !document.hidden) {
+        globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+    }
 }
 
 function _schedulePostParamsSync() {
@@ -849,6 +852,14 @@ function LYPLUS_setupBlurEffect() {
     blurContainerElem.appendChild(webglCanvas);
     const containerParent = document.querySelector(LYPLUS_bgConfig.blurContainerParentSelector) || document.body;
     containerParent.prepend(blurContainerElem);
+
+    blurContainerElem.style.transition = '--webgl-post-process-tick 0.001ms step-start';
+    blurContainerElem.addEventListener('transitionstart', (e) => {
+        if (e.propertyName === '--webgl-post-process-tick') {
+            _postParamsDirty = true;
+            _schedulePostParamsSync();
+        }
+    });
 
     const ctxAttribs = {
         alpha: false,
