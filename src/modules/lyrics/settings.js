@@ -4,7 +4,7 @@ const pBrowser = typeof browser !== 'undefined'
 
 const defaultSettings = {
     lyricsProviderOrder: 'kpoe,lrcred,unison,lrclib',
-    lyricsSourceOrder: 'apple,qq',
+    lyricsSourceOrder: 'apple,lyricsplus,qq',
     wordByWord: true,
     lightweight: false,
     isEnabled: true,
@@ -62,9 +62,12 @@ function loadSettings(callback) {
     storageLocalGet(defaultSettings).then((items) => {
         currentSettings = items;
         const sources = typeof currentSettings.lyricsSourceOrder === 'string'
-            ? currentSettings.lyricsSourceOrder.split(',').map(source => source.trim()).filter(source => ['apple', 'qq'].includes(source))
+            ? currentSettings.lyricsSourceOrder.split(',').map(source => source.trim()).filter(source => ['apple', 'lyricsplus', 'qq'].includes(source))
             : [];
-        currentSettings.lyricsSourceOrder = sources.length ? sources.join(',') : 'apple,qq';
+        if (sources.join(',') === 'apple,qq') {
+            sources.splice(1, 0, 'lyricsplus');
+        }
+        currentSettings.lyricsSourceOrder = sources.length ? sources.join(',') : 'apple,lyricsplus,qq';
         console.log(currentSettings);
         applyDynamicPlayerClass(true);
         injectCustomCSS(currentSettings.customCSS);
@@ -75,8 +78,11 @@ function loadSettings(callback) {
 function updateSettings(newSettings) {
     if (!newSettings || typeof newSettings !== 'object') return;
     if (typeof newSettings.lyricsSourceOrder === 'string') {
-        const sources = newSettings.lyricsSourceOrder.split(',').map(source => source.trim()).filter(source => ['apple', 'qq'].includes(source));
-        newSettings.lyricsSourceOrder = sources.length ? sources.join(',') : 'apple,qq';
+        const sources = newSettings.lyricsSourceOrder.split(',').map(source => source.trim()).filter(source => ['apple', 'lyricsplus', 'qq'].includes(source));
+        if (sources.join(',') === 'apple,qq') {
+            sources.splice(1, 0, 'lyricsplus');
+        }
+        newSettings.lyricsSourceOrder = sources.length ? sources.join(',') : 'apple,lyricsplus,qq';
     }
 
     const changedKeys = [];

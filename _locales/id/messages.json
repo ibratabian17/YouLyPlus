@@ -983,6 +983,10 @@
     "message": "Kunci API Anda disimpan secara lokal. Kunci paket gratis biasanya diakhiri dengan :fx",
     "description": "Helper text"
   },
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+",
+    "description": "Display name for lyricsplus source"
+  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

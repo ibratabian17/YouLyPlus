@@ -983,6 +983,10 @@
     "message": "Sua chave de API é armazenada localmente. Chaves do plano gratuito geralmente terminam com :fx",
     "description": "Helper text"
   },
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+",
+    "description": "Display name for lyricsplus source"
+  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

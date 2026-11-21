@@ -983,6 +983,10 @@
     "message": "يتم تخزين مفتاح API الخاص بك محلياً. عادة ما تنتهي مفاتيح الخطة المجانية بـ :fx",
     "description": "Helper text"
   },
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+",
+    "description": "Display name for lyricsplus source"
+  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

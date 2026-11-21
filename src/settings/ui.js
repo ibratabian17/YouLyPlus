@@ -302,6 +302,7 @@ function getSourceDisplayName(sourceName) {
         'binilyrics': 'sourceNameLrcred',
         'lrclib': 'sourceNameLRCLib',
         'apple': 'sourceNameApple',
+        'lyricsplus': 'sourceNameLyricsPlus',
         'qq': 'sourceNameQQ'
     };
     if (sourceKeys[sourceName]) {
@@ -580,7 +581,7 @@ function createDraggableSourceItem(sourceName) {
 function populateDraggableSources() {
     const draggableContainer = document.getElementById('lyrics-source-order-draggable');
     const availableSourcesDropdown = document.getElementById('available-sources-dropdown');
-    const allowedSources = ['apple', 'qq'];
+    const allowedSources = ['apple', 'lyricsplus', 'qq'];
 
     if (!draggableContainer || !availableSourcesDropdown) return;
 

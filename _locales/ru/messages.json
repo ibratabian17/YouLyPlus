@@ -983,6 +983,10 @@
     "message": "Ваш API-ключ хранится локально. Ключи бесплатного тарифа обычно заканчиваются на :fx",
     "description": "Helper text"
   },
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+",
+    "description": "Display name for lyricsplus source"
+  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"

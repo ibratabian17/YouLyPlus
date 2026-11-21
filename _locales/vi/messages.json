@@ -983,6 +983,10 @@
     "message": "Khóa API của bạn được lưu trữ cục bộ. Khóa của gói miễn phí thường kết thúc bằng :fx",
     "description": "Helper text"
   },
+  "sourceNameLyricsPlus": {
+    "message": "Lyrics+",
+    "description": "Display name for lyricsplus source"
+  },
   "sourceNameApple": {
     "message": "Apple Music",
     "description": "Display name for apple source"
