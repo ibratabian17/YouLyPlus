@@ -4723,19 +4723,18 @@ class LyricsPlusRenderer {
       posTags.push(xPos);
     };
 
-    let lastPos = positions[0] <= 0 ? minOffset : (baseShift + positions[0]);
+    let lastPos = baseShift + positions[0];
     let lastTime = times[0];
-    emitClamped(lastTime, Math.min(Math.max(lastPos, minOffset), 0));
+    emitClamped(lastTime, positions[0] <= 0 ? minOffset : Math.min(Math.max(lastPos, minOffset), 0));
 
     for (let k = 1; k < times.length; k++) {
       const time = Math.min(1, Math.max(lastTime, times[k]));
       const prevP = positions[k - 1];
       const curP = positions[k];
-      if (prevP <= 0 && curP > 0 && lastPos < baseShift) {
-        lastPos = baseShift;
-        emitClamped(lastTime, Math.min(Math.max(lastPos, minOffset), 0));
+      if (prevP <= 0 && curP > 0 && baseShift > minOffset) {
+        emitClamped(lastTime, Math.min(Math.max(baseShift, minOffset), 0));
       }
-      const curPos = curP <= 0 ? minOffset : (baseShift + curP);
+      const curPos = baseShift + curP;
       const moveOffset = curPos - lastPos;
       const duration = time - lastTime;
 
@@ -4753,7 +4752,7 @@ class LyricsPlusRenderer {
         }
       }
 
-      emitClamped(time, Math.min(Math.max(curPos, minOffset), 0));
+      emitClamped(time, curP <= 0 ? minOffset : Math.min(Math.max(curPos, minOffset), 0));
       lastPos = curPos;
       lastTime = time;
     }
