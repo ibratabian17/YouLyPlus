@@ -1997,9 +1997,11 @@ class LyricsPlusRenderer {
                 tr._endTimeMs = s.time + s.duration;
                 tr._isFirstInContainer = true;
                 tr._state = 0;
-                tr._vocalContainer = isBackground
-                  ? (wrapContainer.classList.contains("background-vocal-container") ? wrapContainer : wrapContainer.parentElement)
-                  : wrapContainer;
+                tr._vocalContainer = wrap.closest(".background-vocal-container, .main-vocal-container") || (
+                  isBackground
+                    ? (wrapContainer.classList.contains("background-vocal-container") ? wrapContainer : wrapContainer.parentElement)
+                    : wrapContainer
+                );
                 if (lineSyllables) lineSyllables.push(tr);
                 builtRoman = true;
               }
@@ -2318,7 +2320,14 @@ class LyricsPlusRenderer {
       const lineData = lyrics.data[i];
       const startMs = parseFloat(lineData.startTime) * 1000;
       const endMs = parseFloat(lineData.endTime) * 1000;
-      if (Math.abs(domLine._startTimeMs - startMs) > 1 || Math.abs(domLine._endTimeMs - endMs) > 1) {
+      if (
+        !Number.isFinite(domLine._startTimeMs) ||
+        !Number.isFinite(domLine._endTimeMs) ||
+        !Number.isFinite(startMs) ||
+        !Number.isFinite(endMs) ||
+        Math.abs(domLine._startTimeMs - startMs) > 1 ||
+        Math.abs(domLine._endTimeMs - endMs) > 1
+      ) {
         return false;
       }
     }
@@ -4427,6 +4436,7 @@ class LyricsPlusRenderer {
           sylCharLen: w.sylCharLen,
           isSplitScript: w.isSplitScript,
           hasWiderWrap: w.hasWiderWrap,
+          isPronunciation: w.isPronunciation,
         });
         cumW += segW;
       }
@@ -4443,7 +4453,7 @@ class LyricsPlusRenderer {
     if (isSplitScript && !piece.hasWiderWrap) return 0;
 
     if (isRowEnd) {
-      return fadeWidth + (piece.padding || 0);
+      return fadeWidth;
     }
 
     const isSubSyllable = piece.isSubSyllable !== undefined ? piece.isSubSyllable : !piece.gapAfter;
@@ -4462,7 +4472,7 @@ class LyricsPlusRenderer {
   /**
    * Precomputes the shared 1D sweep trajectory (times[], positions[]) once per visual row in O(N).
    */
-  static _buildRowSweepTimeline(words, fadeWidth, lineStartTime, totalFadeDuration) {
+  static _buildRowSweepTimeline(words, fadeWidth, lineStartTime, totalFadeDuration, rowContainerWidth = 0, nextRowSnapMs = Infinity) {
     const pieces = LyricsPlusRenderer._flattenSegments(words);
     const times = [0];
     const positions = [0];
@@ -4489,7 +4499,8 @@ class LyricsPlusRenderer {
     for (let j = 0; j < pieces.length; j++) {
       const piece = pieces[j];
       const pieceX = piece.rowX !== undefined ? piece.rowX : fallbackX;
-      const spanWidth = piece.spanWidth !== undefined ? piece.spanWidth : (piece.width + (piece.gapAfter || 0));
+      const wordWidth = piece.width + (piece.gapAfter || 0);
+      const spanWidth = piece.spanWidth !== undefined ? piece.spanWidth : wordWidth;
 
       const effectiveStart = Math.max(lastTimeMs, piece.startTime);
       const effectiveEnd = Math.max(effectiveStart, piece.endTime);
@@ -4511,12 +4522,20 @@ class LyricsPlusRenderer {
       currentLineP = startLineP;
 
       const nextPiece = pieces[j + 1];
-      const nextStartTime = nextPiece !== undefined ? nextPiece.startTime : Infinity;
       const isRowEnd = j === pieces.length - 1;
+      const nextStartTime = nextPiece !== undefined
+        ? nextPiece.startTime
+        : (isRowEnd && Number.isFinite(nextRowSnapMs) ? nextRowSnapMs : Infinity);
       const leadPx = LyricsPlusRenderer._computeSweepLead(fadeWidth, piece, isRowEnd);
-      const targetEndLineP = Math.max(currentLineP, pieceX + spanWidth + leadPx);
+      const targetEndLineP = Math.max(currentLineP, pieceX + wordWidth + leadPx);
       const movePx = targetEndLineP - currentLineP;
       const dur = effectiveEnd - effectiveStart;
+      const isSplitScript = piece.isSplitScript !== undefined
+        ? piece.isSplitScript
+        : LyricsPlusRenderer._NEED_SPLIT_CHAR_RE.test((piece.word || "").trim());
+      const allowSplitRush = isRowEnd && !piece.isInternalSegment && isSplitScript && !piece.isPronunciation;
+      const rowEdgeFullP = Math.max(rowContainerWidth, pieceX + wordWidth) + fadeWidth;
+      const padSnapP = pieceX + wordWidth + fadeWidth + (piece.padding || 0);
 
       if (dur > 0 && nextStartTime < effectiveEnd) {
         const cutTime = Math.max(effectiveStart, nextStartTime);
@@ -4527,7 +4546,7 @@ class LyricsPlusRenderer {
           currentLineP += movePx * fraction;
           pushPoint(cutOffset, currentLineP);
         }
-        currentLineP = targetEndLineP;
+        currentLineP = isRowEnd ? Math.max(targetEndLineP, padSnapP) : targetEndLineP;
         pushPoint(cutOffset, currentLineP);
         lastTimeMs = cutTime;
       } else {
@@ -4539,17 +4558,23 @@ class LyricsPlusRenderer {
         pushPoint(endOffset, currentLineP);
         lastTimeMs = effectiveEnd;
 
-        const isSplitScript = piece.isSplitScript !== undefined
-          ? piece.isSplitScript
-          : LyricsPlusRenderer._NEED_SPLIT_CHAR_RE.test((piece.word || "").trim());
-        if (isRowEnd && !piece.isInternalSegment && isSplitScript && !piece.hasWiderWrap) {
+        if (allowSplitRush) {
           const tailEndMs = Math.min(lineStartTime + totalFadeDuration, effectiveEnd + 500);
           const tailOffset = Math.min(1, Math.max(endOffset, (tailEndMs - lineStartTime) / totalFadeDuration));
-          const tailTargetP = Math.max(currentLineP, pieceX + spanWidth + fadeWidth + (piece.padding || 0));
+          const tailTargetP = Math.max(currentLineP, rowEdgeFullP);
           if (tailOffset > lastTime) {
             currentLineP = tailTargetP;
             pushPoint(tailOffset, currentLineP);
             lastTimeMs = tailEndMs;
+          }
+          if (padSnapP > currentLineP + 0.01) {
+            currentLineP = padSnapP;
+            pushPoint(lastTime, currentLineP);
+          }
+        } else if (isRowEnd && !piece.isInternalSegment && (!isSplitScript || piece.hasWiderWrap)) {
+          if (padSnapP > currentLineP + 0.01) {
+            currentLineP = padSnapP;
+            pushPoint(endOffset, currentLineP);
           }
         }
       }
@@ -4698,13 +4723,19 @@ class LyricsPlusRenderer {
       posTags.push(xPos);
     };
 
-    let lastPos = baseShift + positions[0];
+    let lastPos = positions[0] <= 0 ? minOffset : (baseShift + positions[0]);
     let lastTime = times[0];
     emitClamped(lastTime, Math.min(Math.max(lastPos, minOffset), 0));
 
     for (let k = 1; k < times.length; k++) {
       const time = Math.min(1, Math.max(lastTime, times[k]));
-      const curPos = baseShift + positions[k];
+      const prevP = positions[k - 1];
+      const curP = positions[k];
+      if (prevP <= 0 && curP > 0 && lastPos < baseShift) {
+        lastPos = baseShift;
+        emitClamped(lastTime, Math.min(Math.max(lastPos, minOffset), 0));
+      }
+      const curPos = curP <= 0 ? minOffset : (baseShift + curP);
       const moveOffset = curPos - lastPos;
       const duration = time - lastTime;
 
@@ -4989,6 +5020,11 @@ class LyricsPlusRenderer {
       const tm = this._getTrackStyleMetrics(syl, trackTypeKey);
       if (tm.isHidden) continue;
 
+      if (containerEl._roContainerWidth === undefined) {
+        const contW = containerEl.clientWidth;
+        if (contW > 0) containerEl._roContainerWidth = contW;
+      }
+
       const cw = syl.clientWidth;
       const ch = syl.clientHeight;
       if (cw > 0) {
@@ -5000,9 +5036,26 @@ class LyricsPlusRenderer {
         syl._roOffsetTop = syl.offsetTop;
         syl._roOffsetLeft = syl.offsetLeft;
         const parentEl = syl.parentElement;
-        syl._roWrapWidth = parentEl && parentEl.classList.contains("lyrics-syllable-wrap")
-          ? Math.max(0, parentEl.clientWidth - tm.padH)
-          : syl._roContentWidth;
+        if (parentEl && parentEl.classList.contains("lyrics-syllable-wrap")) {
+          syl._roWrapWidth = Math.max(0, parentEl.clientWidth);
+          syl._roGroupWidth = syl._roContentWidth;
+        } else if (
+          parentEl &&
+          parentEl.classList.contains("lyrics-syllable-letters") &&
+          parentEl.parentElement &&
+          parentEl.parentElement.classList.contains("lyrics-syllable-wrap")
+        ) {
+          if (!syl.nextElementSibling) {
+            syl._roWrapWidth = Math.max(0, parentEl.parentElement.clientWidth);
+            syl._roGroupWidth = Math.max(0, parentEl.clientWidth);
+          } else {
+            syl._roWrapWidth = syl._roContentWidth;
+            syl._roGroupWidth = syl._roContentWidth;
+          }
+        } else {
+          syl._roWrapWidth = syl._roContentWidth;
+          syl._roGroupWidth = syl._roContentWidth;
+        }
       }
 
       if (useBackgroundWipe && syl._cachedCharSpans && syl._cachedCharSpans.length > 0) {
@@ -5084,6 +5137,8 @@ class LyricsPlusRenderer {
             s._roOffsetTop = undefined;
             s._roOffsetLeft = undefined;
             s._roWrapWidth = undefined;
+            s._roGroupWidth = undefined;
+            if (s._vocalContainer) s._vocalContainer._roContainerWidth = undefined;
             if (s._cachedCharSpans) {
               for (let c = 0; c < s._cachedCharSpans.length; c++) {
                 s._cachedCharSpans[c]._roContentWidth = undefined;
@@ -5183,6 +5238,9 @@ class LyricsPlusRenderer {
       const rowTop = syl._roOffsetTop !== undefined ? syl._roOffsetTop : syl.offsetTop;
       const rowLeft = syl._roOffsetLeft !== undefined ? syl._roOffsetLeft : syl.offsetLeft;
       const wrapWidth = syl._roWrapWidth !== undefined ? syl._roWrapWidth : width;
+      const groupWidth = syl._roGroupWidth !== undefined ? syl._roGroupWidth : width;
+      const isPronunciation = isTranslit || isRoman;
+      const containerWidth = containerEl._roContainerWidth || 0;
 
       let sylCharLen = syl._sylCharLen;
       let isSplitScript = syl._isSplitScript;
@@ -5204,7 +5262,7 @@ class LyricsPlusRenderer {
       const isStandaloneSyl = syl._isStandaloneSyl !== undefined
         ? syl._isStandaloneSyl
         : !isSubSyllable;
-      const hasWiderWrap = isRomanMode && !isTranslit && wrapWidth > width + 2;
+      const hasWiderWrap = isRomanMode && wrapWidth > groupWidth + 2;
 
       let charTargets = null;
       if (useBackgroundWipe && syl._cachedCharSpans && syl._cachedCharSpans.length > 0) {
@@ -5281,13 +5339,16 @@ class LyricsPlusRenderer {
         sylCharLen,
         isSplitScript,
         hasWiderWrap,
+        isPronunciation,
+        containerWidth,
         rtl: LyricsPlusRenderer._resolveWipeRtl(text, sylDir),
       });
     }
 
     // Split each vocal container into wrapped visual rows using native browser offsetTop / offsetLeft
     const rowTracks = [];
-    baseTracks.forEach((items) => {
+    const rowTrackKeys = [];
+    baseTracks.forEach((items, baseKey) => {
       const n = items.length;
       if (!n) return;
       let curRow = [items[0]];
@@ -5306,6 +5367,7 @@ class LyricsPlusRenderer {
 
         if (verticalWrap || dirWrap || horizontalWrap) {
           rowTracks.push(curRow);
+          rowTrackKeys.push(baseKey);
           curRow = [item];
           curTop = item.rowTop;
         } else {
@@ -5315,7 +5377,10 @@ class LyricsPlusRenderer {
           }
         }
       }
-      if (curRow.length) rowTracks.push(curRow);
+      if (curRow.length) {
+        rowTracks.push(curRow);
+        rowTrackKeys.push(baseKey);
+      }
     });
 
     // Compute native horizontal row positions (rowX) and span widths per wrapped row
@@ -5355,16 +5420,13 @@ class LyricsPlusRenderer {
           const nextW = row[i + 1];
           const nativeSpan = nextW.rowX - w.rowX;
           w.spanWidth = Math.max(w.width, nativeSpan);
-          if (nativeSpan > w.width + (w.gapAfter || 0) + 2) {
-            w.hasWiderWrap = true;
-          }
         } else {
           w.spanWidth = w.width;
         }
       }
 
       const lastWord = row[m - 1];
-      if (lastWord && lastWord.isSplitScript && !lastWord.hasWiderWrap) {
+      if (lastWord && lastWord.isSplitScript && !lastWord.isPronunciation) {
         const tailEnd = lastWord.endTime + 500;
         if (tailEnd > lineEndTime) lineEndTime = tailEnd;
       }
@@ -5381,11 +5443,21 @@ class LyricsPlusRenderer {
       const words = rowTracks[r];
       if (!words.length) continue;
       const fadeWidth = mainSweepWidth > 0 ? mainSweepWidth : (words[0].sweepWidth || words[0].height * 0.88);
+      const rowContainerWidth = words[0].containerWidth || 0;
+      let nextRowSnapMs = Infinity;
+      if (r + 1 < rowTracks.length && rowTrackKeys[r + 1] === rowTrackKeys[r]) {
+        const nextRowFirst = rowTracks[r + 1][0];
+        if (nextRowFirst && (nextRowFirst.isPronunciation || !nextRowFirst.isSplitScript)) {
+          nextRowSnapMs = nextRowFirst.startTime;
+        }
+      }
       let rowTimeline = LyricsPlusRenderer._buildRowSweepTimeline(
         words,
         fadeWidth,
         lineStartTime,
-        totalFadeDuration
+        totalFadeDuration,
+        rowContainerWidth,
+        nextRowSnapMs
       );
       if (springCfg.sweepEnabled) {
         rowTimeline = LyricsPlusRenderer._applySpringToRowTimeline(
