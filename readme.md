@@ -184,6 +184,7 @@ Thanks to everyone who has contributed code, translations, bug reports and ideas
     <td align="center"><a href="https://github.com/oRevived"><img src="https://github.com/oRevived.png?size=100" width="80" alt="oRevived"><br>oRevived</a></td>
     <td align="center"><a href="https://github.com/Dipak-Chauhan"><img src="https://github.com/Dipak-Chauhan.png?size=100" width="80" alt="Dipak-Chauhan"><br>Dipak-Chauhan</a></td>
     <td align="center"><a href="https://github.com/DeVFirmino"><img src="https://github.com/DeVFirmino.png?size=100" width="80" alt="DeVFirmino"><br>DeVFirmino</a></td>
+    <td align="center"><a href="https://github.com/nurislamaibekuly"><img src="https://github.com/nurislamaibekuly.png?size=100" width="80" alt="nurislamaibekuly"><br>nurislamaibekuly</a></td>
   </tr>
 </table>
 
