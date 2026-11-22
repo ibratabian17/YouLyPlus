@@ -7,6 +7,33 @@ function _isIpadBgStyle() {
     return DEFAULT_DYNAMIC_BG_STYLE === 'ipad';
 }
 
+const GLSL_RGB_HSL_HELPERS = `
+    vec3 rgb2hsl(vec3 c) {
+        float maxC = max(c.r, max(c.g, c.b));
+        float minC = min(c.r, min(c.g, c.b));
+        float l = (maxC + minC) * 0.5;
+        float d = maxC - minC;
+        if (d < 0.0001) return vec3(0.0, 0.0, l);
+        float s = d / (1.0 - abs(2.0 * l - 1.0));
+        float h;
+        if (maxC == c.r)      h = mod((c.g - c.b) / d, 6.0);
+        else if (maxC == c.g) h = (c.b - c.r) / d + 2.0;
+        else                  h = (c.r - c.g) / d + 4.0;
+        h *= 0.16666667;
+        return vec3(h, s, l);
+    }
+
+    vec3 hsl2rgb(vec3 hsl) {
+        float h = hsl.x, s = hsl.y, l = hsl.z;
+        if (s < 0.0001) return vec3(l);
+        float q = l < 0.5 ? l * (1.0 + s) : l + s - l * s;
+        float p = 2.0 * l - q;
+        vec3 t = fract(vec3(h + 0.33333333, h, h - 0.33333333));
+        vec3 rgb = clamp(abs(t * 6.0 - 3.0) - 1.0, 0.0, 1.0);
+        return p + (q - p) * rgb;
+    }
+`;
+
 // Apple Music Android
 
 const ANDROID_LAYER_SCALES = new Float32Array([1.4, 1.26, 1.26]);
@@ -62,32 +89,7 @@ function buildBlurVPostFragmentShaderSource(kernel) {
     float interleavedGradientNoise(highp vec2 uv) {
         return fract(52.9829189 * fract(dot(uv, vec2(0.06711056, 0.00583715))));
     }
-
-    vec3 rgb2hsl(vec3 c) {
-        float maxC = max(c.r, max(c.g, c.b));
-        float minC = min(c.r, min(c.g, c.b));
-        float l = (maxC + minC) * 0.5;
-        float d = maxC - minC;
-        if (d < 0.0001) return vec3(0.0, 0.0, l);
-        float s = d / (1.0 - abs(2.0 * l - 1.0));
-        float h;
-        if (maxC == c.r)      h = mod((c.g - c.b) / d, 6.0);
-        else if (maxC == c.g) h = (c.b - c.r) / d + 2.0;
-        else                  h = (c.r - c.g) / d + 4.0;
-        h *= 0.16666667;
-        return vec3(h, s, l);
-    }
-
-    vec3 hsl2rgb(vec3 hsl) {
-        float h = hsl.x, s = hsl.y, l = hsl.z;
-        if (s < 0.0001) return vec3(l);
-        float q = l < 0.5 ? l * (1.0 + s) : l + s - l * s;
-        float p = 2.0 * l - q;
-        vec3 t = fract(vec3(h + 0.33333333, h, h - 0.33333333));
-        vec3 rgb = clamp(abs(t * 6.0 - 3.0) - 1.0, 0.0, 1.0);
-        return p + (q - p) * rgb;
-    }
-
+${GLSL_RGB_HSL_HELPERS}
     void main() {
 ${_blurTapsGLSL(kernel)}
         float luma = dot(c, vec3(0.2126, 0.7152, 0.0722));
@@ -113,12 +115,21 @@ ${_blurTapsGLSL(kernel)}
 }
 
 const _androidPipeline = {
+    handlesFullRender: false,
+    usesHalfFloatTargets: false,
+    targetFps: 24,
     layerScales: ANDROID_LAYER_SCALES,
     layerAbsBaseX: ANDROID_LAYER_ABS_BASE_X,
     layerAbsBaseY: ANDROID_LAYER_ABS_BASE_Y,
 
-    getCanvasBaseSize() {
-        return CANVAS_SIZE;
+    computeSizes(base, aspect) {
+        const rt = Math.sqrt(aspect);
+        return {
+            cw: Math.max(8, Math.round(CANVAS_SIZE * rt)),
+            ch: Math.max(8, Math.round(CANVAS_SIZE / rt)),
+            rw: Math.max(8, Math.round(base * rt)),
+            rh: Math.max(8, Math.round(base / rt))
+        };
     },
 
     applyDefaultPostParams(out) {
@@ -130,11 +141,9 @@ const _androidPipeline = {
         out.opacity = 1.0;
         out.blackScrim = 0.5;
         out.whiteScrim = 13.0 / 255.0;
-        out.darkFactor = 0.20;
-        out.lightFactor = 0.0;
-        out.floor = 0.07;
-        out.ceiling = 0.97;
-        out.meshWarpTimeScale = 1.75;
+        out.blurScale = 1.0;
+        out.pinchStrength = 1.0;
+        out.meshWarpTimeScale = 1.0;
     },
 
     getPreSaturate() {
@@ -217,6 +226,8 @@ const _androidPipeline = {
         gl.uniform2f(u_blurVPost_step, 0.0, 1.0 / blurDimensions.height);
     },
 
+    onActivate() {},
+
     renderFrame() {
         gl.useProgram(blurHProgram);
         gl.bindVertexArray(blurHVAO);
@@ -275,6 +286,8 @@ let _viewportHeight = 0;
 let _viewportDirty = true;
 const _layerSizeFactor = new Float32Array([1, 1, 1]);
 let _activeLightweight = null;
+let _activeTargetHalfFloat = null;
+let _halfFloatSupported = false;
 let _needsRedraw = false;
 let _isCanvasVisible = true;
 let _viewportObserver = null;
@@ -289,19 +302,15 @@ const RENDER_SIZE_LIGHTWEIGHT = 64;
 const ARTWORK_TEX_SIZE = 128;
 const BLUR_SIGMA_UV = 0.08;
 const BLUR_KERNEL_SIGMAS = 3.0;
-const TARGET_FPS = 40;
-const FRAME_INTERVAL = 1000 / TARGET_FPS;
 const THROTTLED_FPS = 20;
 const THROTTLED_FRAME_INTERVAL = 1000 / THROTTLED_FPS;
 let _bgThrottleUntil = 0;
 
-// Cached post-process values
 const _postParams = {};
 let _postParamsDirty = false;
 let _appliedPostUniformsDirty = true;
 let _postParamsIdleId = 0;
 
-// WebGL objects
 let quadBuffer = null;
 let currentArtworkTexture = null;
 let previousArtworkTexture = null;
@@ -329,7 +338,6 @@ const QUAD_VERTICES = new Float32Array([
      1,  1
 ]);
 
-// Reusable offscreen 2D canvases for artwork downscaling (zero DOM allocation per song change)
 const _scratchCanvases = [null, null];
 const _scratchCtxs = [null, null];
 
@@ -348,7 +356,6 @@ function _getScratchCanvas(idx, w, h) {
     return { canvas: c, ctx: cx };
 }
 
-// Animation State
 const blurDimensions = { width: 0, height: 0 };
 const canvasDimensions = { width: 0, height: 0 };
 const DEFAULT_PALETTE = {
@@ -369,7 +376,6 @@ function LYPLUS_setBgConfig(config) {
     Object.assign(LYPLUS_bgConfig, config);
 }
 
-// Layer Config & Precalculated Constants
 const ROTATION_POWER = 0.8;
 const ROTATION_SPEEDS = [-0.10, 0.10, 0.25];
 const EFFECTIVE_ROT_SPEEDS = new Float32Array([
@@ -387,7 +393,6 @@ const EFFECTIVE_PERIM_VEL = new Float32Array([
 ]);
 const LAYER_OFFSETS = new Float32Array([0.0, 0.33, 0.66]);
 
-// Dynamic State
 let artworkTransitionProgress = 1.0;
 let globalAnimationId = null;
 let startTime = 0;
@@ -402,12 +407,12 @@ const layerBeatScale = new Float32Array([0, 0, 0]);
 const layerBeatRot = new Float32Array([0, 0, 0]);
 let beatEnergyBaseline = 0;
 
-// Precalculated per-frame layer transform cache: 3x [rot, scale, px, py]
 const _layerTransforms = new Float32Array(12);
 
 const LYPLUS_FFT_SIZE = 2048;
 const LYPLUS_connectedElements = new WeakSet();
 let _audioDataArray = null;
+let _audioFreqArray = null;
 
 const LYPLUS_MEDIA_SELECTORS = [
     'audio#apple-music-player',
@@ -468,11 +473,16 @@ let LYPLUS_audioState = {
     element: null,
     resumeContextHandler: null,
     beatPulse: 0,
+    energy: [0, 0, 0, 0],
 };
 
 function processAudioPulse() {
     if (typeof currentSettings === 'undefined' || !currentSettings.audioBeatSync) {
         LYPLUS_audioState.beatPulse = LYPLUS_audioState.beatPulse > 0.0001 ? LYPLUS_audioState.beatPulse * 0.9 : 0;
+        LYPLUS_audioState.energy[0] = 0;
+        LYPLUS_audioState.energy[1] = 0;
+        LYPLUS_audioState.energy[2] = 0;
+        LYPLUS_audioState.energy[3] = 0;
         return;
     }
 
@@ -553,12 +563,31 @@ function processAudioPulse() {
         const maxDiff = (128 - minVal) > (maxVal - 128) ? (128 - minVal) : (maxVal - 128);
 
         s.beatPulse = (maxDiff * 0.0078125) * volumeMultiplier;
+
+        if (_isIpadBgStyle()) {
+            if (!_audioFreqArray || _audioFreqArray.length !== bufferLength) {
+                _audioFreqArray = new Uint8Array(bufferLength);
+            }
+            s.analyser.getByteFrequencyData(_audioFreqArray);
+            const ranges = [0, 8, 32, 128, 512];
+            for (let b = 0; b < 4; b++) {
+                const lo = ranges[b];
+                const hi = Math.min(bufferLength, ranges[b + 1]);
+                let sum = 0;
+                for (let i = lo; i < hi; i++) sum += _audioFreqArray[i];
+                const avg = hi > lo ? sum / ((hi - lo) * 255) : 0;
+                s.energy[b] = Math.min(1, avg * volumeMultiplier);
+            }
+        }
     } else {
         s.beatPulse = s.beatPulse > 0.0001 ? s.beatPulse * 0.9 : 0;
+        s.energy[0] = 0;
+        s.energy[1] = 0;
+        s.energy[2] = 0;
+        s.energy[3] = 0;
     }
 }
 
-// Artwork Processing
 let isProcessingArtwork = false;
 let pendingArtworkUrl = null;
 let currentProcessingArtworkIdentifier = null;
@@ -569,12 +598,9 @@ const MAX_ARTWORK_RETRIES = 5;
 const ARTWORK_RECHECK_DELAY = 300;
 const NO_ARTWORK_IDENTIFIER = 'LYPLUS_NO_ARTWORK';
 
-// Shader Sources
-
 const vertexShaderSource = `#version 300 es
     in vec2 a_position;
     
-    // [rotation(rad), scale, offsetX, offsetY] per layer instance
     uniform vec4 u_layerTransforms[3]; 
     
     uniform float u_aspect;
@@ -714,10 +740,8 @@ function _parsePostProcess(str, out) {
             else if (fn === 'opacity')             out.opacity = val;
             else if (fn === 'black-scrim')         out.blackScrim = val;
             else if (fn === 'white-scrim')         out.whiteScrim = val;
-            else if (fn === 'dark-factor')         out.darkFactor = val;
-            else if (fn === 'light-factor')        out.lightFactor = val;
-            else if (fn === 'floor')               out.floor = val;
-            else if (fn === 'ceiling')             out.ceiling = val;
+            else if (fn === 'blur-scale')          out.blurScale = val;
+            else if (fn === 'pinch-strength')      out.pinchStrength = val;
             else if (fn === 'mesh-warp-timescale') out.meshWarpTimeScale = val;
             else if (fn === 'hue-rotate')          out.hueRotate = raw.endsWith('rad') ? num : num * DEG_TO_RAD;
         }
@@ -762,6 +786,8 @@ function handleContextLost(event) {
     mainVAO = null;
     glProgram = null;
     _activeLightweight = null;
+    _activeTargetHalfFloat = null;
+    _halfFloatSupported = false;
     _appliedPreSaturate = NaN;
     _appliedClearR = -1;
     _appliedClearG = -1;
@@ -812,6 +838,20 @@ function createProgram(glCtx, vs, fs) {
         return null;
     }
     return program;
+}
+
+function _compileProgramFromSources(vsSrc, fsSrc) {
+    const vs = createShader(gl, gl.VERTEX_SHADER, vsSrc);
+    const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSrc);
+    if (!vs || !fs) {
+        if (vs) gl.deleteShader(vs);
+        if (fs) gl.deleteShader(fs);
+        return null;
+    }
+    const prog = createProgram(gl, vs, fs);
+    gl.deleteShader(vs);
+    gl.deleteShader(fs);
+    return prog;
 }
 
 function _observeBgParent(parent) {
@@ -875,9 +915,15 @@ function LYPLUS_setupBlurEffect() {
 
     if (!gl) return null;
 
+    _halfFloatSupported = Boolean(
+        gl.getExtension('EXT_color_buffer_float') ||
+        gl.getExtension('EXT_color_buffer_half_float')
+    );
+
     _androidPipeline.resetState();
     _meshPipeline.resetState();
     _activeLightweight = null;
+    _activeTargetHalfFloat = null;
     _appliedPreSaturate = NaN;
     _appliedClearR = -1;
     _appliedClearG = -1;
@@ -897,21 +943,13 @@ function LYPLUS_setupBlurEffect() {
     webglCanvas.addEventListener('webglcontextlost', handleContextLost, false);
     webglCanvas.addEventListener('webglcontextrestored', handleContextRestored, false);
 
-    // Main Rotating Layers Shader Compilation
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const mainFragShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-    if (!vertexShader || !mainFragShader) return null;
-
-    glProgram = createProgram(gl, vertexShader, mainFragShader);
-    gl.deleteShader(vertexShader);
-    gl.deleteShader(mainFragShader);
+    glProgram = _compileProgramFromSources(vertexShaderSource, fragmentShaderSource);
     if (!glProgram) return null;
 
     if (!pipeline.initStaticPrograms()) return null;
 
     pipeline.applyDefaultPostParams(_postParams);
 
-    // Locations - Main
     a_main_pos = gl.getAttribLocation(glProgram, 'a_position');
     u_main_artworkTexture = gl.getUniformLocation(glProgram, 'u_artworkTexture');
     u_main_transitionProgress = gl.getUniformLocation(glProgram, 'u_transitionProgress');
@@ -925,12 +963,10 @@ function LYPLUS_setupBlurEffect() {
     _appliedPreSaturate = pipeline.getPreSaturate();
     gl.uniform1f(u_main_preSaturate, _appliedPreSaturate);
 
-    // Position-only Quad Buffer [x, y]
     quadBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, QUAD_VERTICES, gl.STATIC_DRAW);
 
-    // VAO Setup
     mainVAO = gl.createVertexArray();
     gl.bindVertexArray(mainVAO);
     gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
@@ -944,7 +980,6 @@ function LYPLUS_setupBlurEffect() {
     _appliedPostUniformsDirty = true;
     _schedulePostParamsSync();
 
-    // Textures & Framebuffers
     currentArtworkTexture = createDefaultTexture();
     previousArtworkTexture = createDefaultTexture();
     renderFramebuffer = gl.createFramebuffer();
@@ -1005,9 +1040,17 @@ function LYPLUS_setupBlurEffect() {
     if (_intersectionObserver) _intersectionObserver.disconnect();
     _isCanvasVisible = true;
     _intersectionObserver = new IntersectionObserver((entries) => {
+        const wasVisible = _isCanvasVisible;
         _isCanvasVisible = entries[0].isIntersecting;
         if (_isCanvasVisible && !document.hidden) {
-            if (!globalAnimationId) globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+            if (!wasVisible) {
+                _postParamsDirty = true;
+                _readPostParamsFromCSS();
+            }
+            if (!globalAnimationId) {
+                lastDrawTime = performance.now();
+                globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+            }
         } else if (globalAnimationId) {
             cancelAnimationFrame(globalAnimationId);
             globalAnimationId = null;
@@ -1028,6 +1071,7 @@ function _handleVisibilityChange() {
             globalAnimationId = null;
         }
     } else if (_isCanvasVisible && gl && !globalAnimationId) {
+        lastDrawTime = performance.now();
         globalAnimationId = requestAnimationFrame(animateWebGLBackground);
     }
 }
@@ -1038,13 +1082,19 @@ function _isLightweightMode() {
 
 let _kernelBaseSize = 0;
 function _rebuildBlurPrograms(renderSize) {
+    const pipeline = _getActivePipeline();
+    if (pipeline.handlesFullRender) {
+        _kernelBaseSize = renderSize;
+        _appliedPostUniformsDirty = true;
+        return pipeline.isProgramsReady();
+    }
     const kernel = _buildGaussianKernel(BLUR_SIGMA_UV * renderSize, BLUR_KERNEL_SIGMAS);
 
     const quadVS = createShader(gl, gl.VERTEX_SHADER, quadVertexShaderSource);
     const passFS = createShader(gl, gl.FRAGMENT_SHADER, buildBlurPassFragmentShaderSource(kernel));
     if (!quadVS || !passFS) return false;
 
-    const ok = _getActivePipeline().rebuildBlurPrograms(quadVS, passFS, kernel);
+    const ok = pipeline.rebuildBlurPrograms(quadVS, passFS, kernel);
     gl.deleteShader(quadVS);
     gl.deleteShader(passFS);
     if (!ok) return false;
@@ -1071,6 +1121,32 @@ function _getViewportAspect() {
     return Math.min(MAX_ASPECT, Math.max(MIN_ASPECT, w / h));
 }
 
+function _allocateSharedRenderTargets(rw, rh, wantHalfFloat) {
+    const useHalf = wantHalfFloat && _halfFloatSupported;
+    const alloc = (half) => {
+        const internalFmt = half ? gl.RGBA16F : gl.RGBA8;
+        const type = half ? gl.HALF_FLOAT : gl.UNSIGNED_BYTE;
+        gl.bindTexture(gl.TEXTURE_2D, renderTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, internalFmt, rw, rh, 0, gl.RGBA, type, null);
+        gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
+        gl.texImage2D(gl.TEXTURE_2D, 0, internalFmt, rw, rh, 0, gl.RGBA, type, null);
+    };
+
+    alloc(useHalf);
+    if (useHalf) {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
+        const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        if (status !== gl.FRAMEBUFFER_COMPLETE) {
+            _halfFloatSupported = false;
+            alloc(false);
+            _activeTargetHalfFloat = false;
+            return;
+        }
+    }
+    _activeTargetHalfFloat = useHalf;
+}
+
 function _applyResizeInternal() {
     if (!gl || !webglCanvas) return;
     _viewportDirty = false;
@@ -1078,17 +1154,15 @@ function _applyResizeInternal() {
     const lightweight = _isLightweightMode();
     const base = lightweight ? RENDER_SIZE_LIGHTWEIGHT : RENDER_SIZE;
     const aspect = _getViewportAspect();
-    const rt = Math.sqrt(aspect);
+    const wantHalfFloat = Boolean(pipeline.usesHalfFloatTargets && _halfFloatSupported);
 
-    const rw = Math.max(8, Math.round(base * rt));
-    const rh = Math.max(8, Math.round(base / rt));
-    const canvasBase = pipeline.getCanvasBaseSize();
-    const cw = Math.max(8, Math.round(canvasBase * rt));
-    const ch = Math.max(8, Math.round(canvasBase / rt));
+    const { cw, ch, rw, rh } = pipeline.computeSizes(base, aspect, lightweight);
 
     const sizeChanged = rw !== blurDimensions.width || rh !== blurDimensions.height ||
                         cw !== canvasDimensions.width || ch !== canvasDimensions.height;
-    if (!sizeChanged && lightweight === _activeLightweight && pipeline.isProgramsReady() && _kernelBaseSize === base) {
+    const fmtChanged = _activeTargetHalfFloat !== wantHalfFloat;
+
+    if (!sizeChanged && !fmtChanged && lightweight === _activeLightweight && pipeline.isProgramsReady() && _kernelBaseSize === base) {
         return;
     }
 
@@ -1100,13 +1174,10 @@ function _applyResizeInternal() {
         webglCanvas.width = cw;
         webglCanvas.height = ch;
     }
-    if (rw !== blurDimensions.width || rh !== blurDimensions.height) {
+    if (rw !== blurDimensions.width || rh !== blurDimensions.height || fmtChanged) {
         blurDimensions.width = rw;
         blurDimensions.height = rh;
-        gl.bindTexture(gl.TEXTURE_2D, renderTexture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, rw, rh, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-        gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, rw, rh, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        _allocateSharedRenderTargets(rw, rh, wantHalfFloat);
     }
 
     if (!pipeline.isProgramsReady() || _kernelBaseSize !== base) {
@@ -1284,7 +1355,6 @@ function processNextArtworkFromQueue() {
     img.src = currentProcessingArtworkIdentifier;
 }
 
-// Draw a single artwork texture with 3 instanced layers using precalculated transforms
 function _renderLayerQuads(tex, progress) {
     if (progress <= 0.001) return;
     gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -1295,9 +1365,11 @@ function _renderLayerQuads(tex, progress) {
 function animateWebGLBackground(timestamp) {
     if (!gl || document.hidden || !_isCanvasVisible) { globalAnimationId = null; return; }
 
+    const pipeline = _getActivePipeline();
+    const baseInterval = 1000 / pipeline.targetFps;
     const interval = (timestamp < _bgThrottleUntil && artworkTransitionProgress >= 1.0)
         ? THROTTLED_FRAME_INTERVAL
-        : FRAME_INTERVAL;
+        : baseInterval;
     const elapsed = timestamp - lastDrawTime;
     if (elapsed < interval) {
         globalAnimationId = requestAnimationFrame(animateWebGLBackground);
@@ -1310,7 +1382,10 @@ function animateWebGLBackground(timestamp) {
 
     const isTransitioning = artworkTransitionProgress < 1.0;
     if (isTransitioning) {
-        artworkTransitionProgress = Math.min(1.0, artworkTransitionProgress + ARTWORK_TRANSITION_STEP);
+        const step = pipeline.handlesFullRender
+            ? (elapsedSec / (MESH_TRANSITION_DURATION * 0.5))
+            : ARTWORK_TRANSITION_STEP;
+        artworkTransitionProgress = Math.min(1.0, artworkTransitionProgress + step);
         if (artworkTransitionProgress >= 1.0) needsAnimation = false;
     }
 
@@ -1320,6 +1395,11 @@ function animateWebGLBackground(timestamp) {
 
     if (_viewportDirty || isLightweight !== _activeLightweight) {
         _applyResizeInternal();
+    }
+
+    if (!pipeline.isProgramsReady()) {
+        globalAnimationId = requestAnimationFrame(animateWebGLBackground);
+        return;
     }
 
     const shouldRender =
@@ -1334,8 +1414,9 @@ function animateWebGLBackground(timestamp) {
         return;
     }
 
-    const pipeline = _getActivePipeline();
-    if (!pipeline.isProgramsReady()) {
+    if (pipeline.handlesFullRender) {
+        pipeline.renderFrame(currentTime, isLightweight, elapsedSec);
+        _needsRedraw = false;
         globalAnimationId = requestAnimationFrame(animateWebGLBackground);
         return;
     }
@@ -1385,7 +1466,6 @@ function animateWebGLBackground(timestamp) {
     const bw = blurDimensions.width;
     const bh = blurDimensions.height;
 
-    // --- PASS 1: Render 3 rotating artwork layers to renderFramebuffer ---
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
     gl.viewport(0, 0, bw, bh);
 
@@ -1419,7 +1499,7 @@ function animateWebGLBackground(timestamp) {
 
     gl.disable(gl.BLEND);
 
-    pipeline.renderFrame(currentTime, isLightweight);
+    pipeline.renderFrame(currentTime, isLightweight, elapsedSec);
 
     _needsRedraw = false;
 
@@ -1488,6 +1568,7 @@ function _syncDynamicBgStyle() {
     }
 
     pipeline.applyDefaultPostParams(_postParams);
+    pipeline.onActivate();
     _postParamsDirty = true;
     _appliedPostUniformsDirty = true;
     _viewportDirty = true;
@@ -1513,24 +1594,18 @@ window.addEventListener('YOUPLUS_SETTINGS_UPDATED', (event) => {
 
 // Apple Music iPad
 
-const MESH_PRESET_INDEX = -1; // -1 = dynamic 5-preset cycle, 0..4 = fixed preset index
-const MESH_GRID_MODE = 'auto'; // 'auto' | 'portrait' (6x6 -> 21x21) | 'landscape' (9x9 -> 33x33)
-const DISABLE_GAUSSIAN_BLUR = false; // true = MPSImageGaussianBlur sigma 0
+const MESH_PRESET_INDEX = -1; // -1 = random pair per session, 0..4 = fixed preset index
+const MESH_GRID_MODE = 'auto'; // 'auto' | 'portrait' | 'landscape'
+const DISABLE_GAUSSIAN_BLUR = false;
 
-const MESH_LAYER_SCALES = new Float32Array([1.4, 0.92, 0.84]);
-const MESH_LAYER_BASE_POSITIONS = [0, 0, 0.58, -0.58, -0.58, 0.58];
-const MESH_LAYER_ABS_BASE_X = new Float32Array([
-    Math.abs(MESH_LAYER_BASE_POSITIONS[0]),
-    Math.abs(MESH_LAYER_BASE_POSITIONS[2]),
-    Math.abs(MESH_LAYER_BASE_POSITIONS[4])
-]);
-const MESH_LAYER_ABS_BASE_Y = new Float32Array([
-    Math.abs(MESH_LAYER_BASE_POSITIONS[1]),
-    Math.abs(MESH_LAYER_BASE_POSITIONS[3]),
-    Math.abs(MESH_LAYER_BASE_POSITIONS[5])
-]);
-
-const MESH_FLOATS_PER_VERTEX = 22;
+const MESH_RENDER_SCALE = 0.35;
+const MESH_RENDER_SCALE_LIGHTWEIGHT = 0.2;
+const MESH_BLUR_DOWNSAMPLE = 4;
+const MESH_MAX_BLUR_RADIUS = 512;
+const MESH_INSTANCE_SCRIM_STEP = 0.0075;
+const MESH_WARP_PERIOD_DIVISOR = 3.5;
+const MESH_TRANSITION_DURATION = 0.8;
+const MESH_BLUR_RADIUS_POINTS_PER_SECOND = 60;
 
 const MESH_LANDSCAPE_BASE_FROM = new Float32Array([
     0, 0,  0.13, 0,  0.25, 0,  0.38, 0,  0.5, 0,  0.63, 0,  0.75, 0,  0.88, 0,  1, 0,
@@ -1543,6 +1618,79 @@ const MESH_LANDSCAPE_BASE_FROM = new Float32Array([
     0, 0.88,  0.13, 0.88,  0.25, 0.88,  0.38, 0.88,  0.5, 0.88,  0.63, 0.88,  0.75, 0.88,  0.88, 0.88,  1, 0.88,
     0, 1,  0.13, 1,  0.25, 1,  0.38, 1,  0.5, 1,  0.63, 1,  0.75, 1,  0.88, 1,  1, 1
 ]);
+
+const MESH_LANDSCAPE_PRESETS = [
+    {
+        from: MESH_LANDSCAPE_BASE_FROM,
+        to: new Float32Array([
+            -0.2292, -0.0529,  -0.0402, -0.127,  0.1116, -0.3122,  0.0923, -0.336,  1.1205, -0.164,  1.0089, -0.0635,  1.1205, -0.0529,  1.1116, -0.0899,  1.1979, -0.0741,
+            -0.2202, 0.2685,  0.0238, 0.1435,  0.0997, 0.0933,  0.0774, 0.1091,  0.75, 0.0933,  0.7738, 0.1091,  0.7991, 0.1435,  1.2798, 0.088,  1.1801, 0.1435,
+            -0.1667, 0.3611,  0.0432, 0.25,  0.1116, 0.25,  0.0923, 0.2791,  0.5387, 0.2791,  0.5908, 0.3161,  0.625, 0.3161,  0.9896, 0.2791,  1.0893, 0.2341,
+            -0.1176, 0.4544,  0.0625, 0.3909,  0.1503, 0.4418,  0.1637, 0.4306,  0.4836, 0.3909,  0.6161, 0.4544,  0.6458, 0.4544,  0.7411, 0.3909,  1.064, 0.338,
+            -0.0625, 0.5344,  0.0997, 0.5159,  0.2664, 0.5721,  0.2589, 0.5721,  0.4836, 0.5344,  0.7113, 0.5344,  0.7411, 0.5344,  0.7991, 0.5159,  1.0461, 0.5,
+            -0.0402, 0.6574,  0.375, 0.713,  0.3929, 0.6574,  0.375, 0.625,  0.5, 0.6038,  0.7991, 0.5721,  0.808, 0.625,  0.875, 0.625,  1.0461, 0.6435,
+            -0.0298, 0.7685,  0.3586, 0.9041,  0.4063, 0.8003,  0.4568, 0.75,  0.625, 0.6574,  0.8616, 0.67,  0.8408, 0.713,  0.8943, 0.7288,  1.1265, 0.8214,
+            -0.0402, 0.9041,  0.2589, 1.0152,  0.4747, 0.9676,  0.4568, 0.8882,  0.7411, 0.8538,  0.8616, 0.8538,  0.8408, 0.875,  0.9211, 0.9438,  1.1116, 0.9676,
+            -0.0625, 1.0979,  0.0238, 1.2196,  0.3304, 1.0688,  0.375, 1,  0.7887, 1.0556,  0.8408, 1.0556,  0.875, 1.0688,  0.9435, 1.0688,  1.0893, 1.2196
+        ])
+    },
+    {
+        from: MESH_LANDSCAPE_BASE_FROM,
+        to: new Float32Array([
+            -0.1726, -0.1984,  0.0551, -0.2593,  0.2158, -0.2593,  0.3839, -0.1984,  0.5119, -0.1984,  0.6473, -0.1243,  0.744, -0.2698,  1.0179, -0.4259,  1.2515, -0.2698,
+            0, 0.0562,  0.125, 0.1971,  0.2381, 0.2679,  0.375, 0.2917,  0.5, 0.2202,  0.625, 0.125,  0.8467, -0.1111,  1, -0.1528,  1.1042, 0.0146,
+            -0.0193, 0.0357,  0.125, 0.1766,  0.25, 0.25,  0.375, 0.3082,  0.5, 0.25,  0.625, 0.1766,  0.7887, 0.0146,  0.9598, -0.0648,  1.0551, -0.0172,
+            0, 0.3353,  0.125, 0.3896,  0.2167, 0.3444,  0.375, 0.3231,  0.5119, 0.3772,  0.625, 0.3353,  0.7768, 0.1025,  0.9464, 0.0562,  1.0685, 0.1647,
+            -0.0521, 0.5192,  0.125, 0.4471,  0.2229, 0.3824,  0.375, 0.3444,  0.5119, 0.3933,  0.6577, 0.4353,  0.75, 0.4677,  0.8601, 0.4353,  1.1473, 0.2345,
+            -0.0402, 0.6442,  0.125, 0.5192,  0.2277, 0.4,  0.375, 0.3664,  0.5119, 0.4074,  0.6577, 0.4677,  0.75, 0.5,  0.8527, 0.4471,  1.128, 0.2345,
+            -0.0253, 0.7718,  0.1116, 0.5675,  0.2339, 0.4353,  0.3708, 0.4219,  0.5148, 0.4353,  0.6726, 0.5,  0.7649, 0.578,  0.8601, 0.5357,  1.1622, 0.3082,
+            -0.0253, 0.9041,  0.0982, 0.7718,  0.2381, 0.6872,  0.375, 0.6442,  0.5119, 0.6442,  0.6577, 0.6872,  0.8229, 0.7348,  0.875, 0.875,  1.2411, 1.1343,
+            -0.0521, 1.1005,  0.0982, 1.0556,  0.2277, 1.0556,  0.3557, 1.0556,  0.5, 1.1587,  0.625, 1.1799,  0.7649, 1.3677,  0.8958, 1.4841,  1.0685, 1.3519
+        ])
+    },
+    {
+        from: MESH_LANDSCAPE_BASE_FROM,
+        to: new Float32Array([
+            -0.064, -0.1323,  0.0893, -0.1614,  0.25, -0.0608,  0.5729, -0.1614,  0.6771, -0.1614,  0.7292, -0.1614,  0.7634, -0.1217,  0.875, -0.0608,  1.0164, -0.0423,
+            -0.0714, 0.1091,  0.2054, 0.0985,  0.2292, 0.1091,  0.375, 0.125,  0.5357, 0.2077,  0.6131, 0.25,  0.6458, 0.125,  0.75, -0.0284,  1.0164, 0.1091,
+            -0.0565, 0.25,  0.1696, 0.2077,  0.1771, 0.2262,  0.2143, 0.2262,  0.375, 0.1759,  0.625, 0.2937,  0.6369, 0.3161,  0.6652, 0.2262,  1.0104, 0.2262,
+            -0.0565, 0.375,  0.0997, 0.375,  0.125, 0.375,  0.1771, 0.3882,  0.3616, 0.2077,  0.6131, 0.3406,  0.6548, 0.3406,  0.7068, 0.375,  1.0313, 0.3538,
+            -0.1429, 0.6058,  0.1414, 0.5,  0.1563, 0.5,  0.1949, 0.5,  0.5193, 0.2937,  0.6964, 0.4517,  0.7158, 0.4517,  0.7902, 0.4841,  1.0461, 0.4841,
+            -0.0714, 0.6753,  0.2054, 0.625,  0.2054, 0.625,  0.2292, 0.625,  0.6131, 0.375,  0.7158, 0.5298,  0.7634, 0.5456,  0.8557, 0.625,  1.0789, 0.625,
+            -0.0565, 0.8108,  0.2143, 0.75,  0.2292, 0.75,  0.25, 0.7315,  0.6652, 0.6865,  0.7634, 0.6462,  0.8095, 0.7077,  0.8914, 0.75,  1.0923, 0.75,
+            -0.0565, 0.9306,  0.2054, 0.9067,  0.2054, 0.9306,  0.2292, 0.9411,  0.625, 0.875,  0.7634, 0.7718,  0.8557, 0.8108,  0.939, 0.8538,  1.0789, 0.9306,
+            0, 1,  -0.0714, 1.2169,  0.125, 1.4021,  0.25, 1.0794,  0.625, 1.0794,  0.7902, 1.0794,  0.875, 1.0794,  0.9509, 1.0582,  1.0104, 1.0794
+        ])
+    },
+    {
+        from: MESH_LANDSCAPE_BASE_FROM,
+        to: new Float32Array([
+            -0.2292, -0.3968,  0.0699, -0.3439,  0.2217, -0.1799,  0.3512, -0.1376,  0.6533, -0.2407,  0.6845, -0.164,  0.7753, -0.3148,  0.9494, -0.3677,  1.381, -0.5476,
+            -0.1711, 0.0827,  -0.0387, -0.1263,  0.25, 0.125,  0.2887, 0.125,  0.5, 0.125,  0.5565, 0.125,  0.7827, -0.0787,  0.9182, -0.1799,  1.2039, -0.0628,
+            -0.1057, 0.2209,  0.0268, 0.1918,  0.25, 0.25,  0.2679, 0.2844,  0.2887, 0.2685,  0.3958, 0.2844,  0.6771, 0.125,  0.9702, 0.0542,  1.2113, 0.1091,
+            -0.1176, 0.2983,  0.1101, 0.33,  0.25, 0.42,  0.317, 0.42,  0.3571, 0.42,  0.3958, 0.42,  0.6369, 0.2983,  0.9107, 0.2844,  1.2113, 0.33,
+            -0.1533, 0.375,  0.1533, 0.375,  0.2292, 0.42,  0.375, 0.5,  0.4301, 0.5377,  0.4583, 0.5377,  0.6845, 0.4735,  0.811, 0.4735,  1.1369, 0.463,
+            -0.0938, 0.5728,  0.1533, 0.4054,  0.3363, 0.5,  0.4167, 0.5377,  0.5, 0.625,  0.5476, 0.6991,  0.7887, 0.6118,  0.8378, 0.588,  1.1563, 0.5608,
+            -0.0789, 0.75,  0.25, 0.5608,  0.3958, 0.5608,  0.4732, 0.625,  0.5402, 0.75,  0.5967, 0.7976,  0.8839, 0.7361,  0.8839, 0.7811,  1.1563, 0.6389,
+            -0.1057, 0.9226,  0.125, 0.875,  0.2976, 0.875,  0.4464, 0.8882,  0.5908, 0.9041,  0.625, 0.875,  0.9702, 0.9041,  1.0268, 1,  1.1726, 1.0443,
+            -0.0387, 1.1138,  0.0878, 1.1349,  0.2292, 1.1138,  0.4301, 1.1852,  0.625, 1.2804,  0.625, 1.3254,  1.0372, 1.2328,  0.9568, 1.2328,  1.0938, 1.2328
+        ])
+    },
+    {
+        from: MESH_LANDSCAPE_BASE_FROM,
+        to: new Float32Array([
+            -0.0952, -0.1561,  0.0997, -0.1561,  0.2396, -0.0847,  0.3586, -0.0608,  0.4926, -0.0608,  0.6086, -0.1561,  0.7426, -0.1772,  0.8616, -0.1561,  1.064, -0.2275,
+            -0.0521, 0.0933,  -0.0521, 0.3062,  0.2708, 0.375,  0.375, 0.3485,  0.4926, 0.3062,  0.625, 0.2335,  0.75, 0.125,  0.875, -0.0337,  1.064, -0.1772,
+            -0.125, 0.3611,  0.0789, 0.5,  0.2827, 0.4147,  0.3824, 0.375,  0.4926, 0.33,  0.625, 0.25,  0.75, 0.1812,  0.8988, 0.0146,  1.0804, -0.123,
+            -0.0952, 0.5119,  0.1518, 0.5344,  0.2827, 0.4683,  0.3824, 0.4147,  0.4926, 0.375,  0.625, 0.2851,  0.7589, 0.2163,  0.8988, 0.2335,  1.119, 0.4147,
+            -0.0521, 0.625,  0.2827, 0.5344,  0.2961, 0.5985,  0.3646, 0.5119,  0.4926, 0.3995,  0.6324, 0.3062,  0.7589, 0.2619,  0.9286, 0.3062,  1.1071, 0.4683,
+            -0.1399, 0.6938,  0.2902, 0.5721,  0.2604, 0.6759,  0.3586, 0.5344,  0.5, 0.4286,  0.6414, 0.33,  0.8006, 0.3062,  0.9673, 0.375,  1.119, 0.5985,
+            -0.0521, 0.7897,  0.192, 0.8294,  0.25, 0.75,  0.2708, 0.6759,  0.5, 0.5119,  0.7738, 0.5589,  0.8988, 0.7315,  0.9286, 0.713,  1.119, 0.75,
+            -0.0685, 0.9438,  0.1518, 0.9438,  0.1979, 0.875,  0.25, 0.957,  0.5, 0.7718,  0.7738, 0.7315,  0.936, 0.9755,  1, 1.0205,  1.1726, 0.957,
+            -0.0283, 1.0873,  0.0997, 1.1561,  0.125, 1.1799,  0.2604, 1.1243,  0.4926, 1.0688,  0.8006, 1.0873,  0.9167, 1.1376,  1.0313, 1.2698,  1.1548, 1.3228
+        ])
+    }
+];
 
 const MESH_PORTRAIT_PRESETS = [
     {
@@ -1637,298 +1785,316 @@ const MESH_PORTRAIT_PRESETS = [
     }
 ];
 
-const MESH_LANDSCAPE_PRESETS = [
-    {
-        from: MESH_LANDSCAPE_BASE_FROM,
-        to: new Float32Array([
-            -0.2292, -0.0529,  -0.0402, -0.127,  0.1116, -0.3122,  0.0923, -0.336,  1.1205, -0.164,  1.0089, -0.0635,  1.1205, -0.0529,  1.1116, -0.0899,  1.1979, -0.0741,
-            -0.2202, 0.2685,  0.0238, 0.1435,  0.0997, 0.0933,  0.0774, 0.1091,  0.75, 0.0933,  0.7738, 0.1091,  0.7991, 0.1435,  1.2798, 0.088,  1.1801, 0.1435,
-            -0.1667, 0.3611,  0.0432, 0.25,  0.1116, 0.25,  0.0923, 0.2791,  0.5387, 0.2791,  0.5908, 0.3161,  0.625, 0.3161,  0.9896, 0.2791,  1.0893, 0.2341,
-            -0.1176, 0.4544,  0.0625, 0.3909,  0.1503, 0.4418,  0.1637, 0.4306,  0.4836, 0.3909,  0.6161, 0.4544,  0.6458, 0.4544,  0.7411, 0.3909,  1.064, 0.338,
-            -0.0625, 0.5344,  0.0997, 0.5159,  0.2664, 0.5721,  0.2589, 0.5721,  0.4836, 0.5344,  0.7113, 0.5344,  0.7411, 0.5344,  0.7991, 0.5159,  1.0461, 0.5,
-            -0.0402, 0.6574,  0.375, 0.713,  0.3929, 0.6574,  0.375, 0.625,  0.5, 0.6038,  0.7991, 0.5721,  0.808, 0.625,  0.875, 0.625,  1.0461, 0.6435,
-            -0.0298, 0.7685,  0.3586, 0.9041,  0.4063, 0.8003,  0.4568, 0.75,  0.625, 0.6574,  0.8616, 0.67,  0.8408, 0.713,  0.8943, 0.7288,  1.1265, 0.8214,
-            -0.0402, 0.9041,  0.2589, 1.0152,  0.4747, 0.9676,  0.4568, 0.8882,  0.7411, 0.8538,  0.8616, 0.8538,  0.8408, 0.875,  0.9211, 0.9438,  1.1116, 0.9676,
-            -0.0625, 1.0979,  0.0238, 1.2196,  0.3304, 1.0688,  0.375, 1,  0.7887, 1.0556,  0.8408, 1.0556,  0.875, 1.0688,  0.9435, 1.0688,  1.0893, 1.2196
-        ])
-    },
-    {
-        from: MESH_LANDSCAPE_BASE_FROM,
-        to: new Float32Array([
-            -0.1726, -0.1984,  0.0551, -0.2593,  0.2158, -0.2593,  0.3839, -0.1984,  0.5119, -0.1984,  0.6473, -0.1243,  0.744, -0.2698,  1.0179, -0.4259,  1.2515, -0.2698,
-            0, 0.0562,  0.125, 0.1971,  0.2381, 0.2679,  0.375, 0.2917,  0.5, 0.2202,  0.625, 0.125,  0.8467, -0.1111,  1, -0.1528,  1.1042, 0.0146,
-            -0.0193, 0.0357,  0.125, 0.1766,  0.25, 0.25,  0.375, 0.3082,  0.5, 0.25,  0.625, 0.1766,  0.7887, 0.0146,  0.9598, -0.0648,  1.0551, -0.0172,
-            0, 0.3353,  0.125, 0.3896,  0.2167, 0.3444,  0.375, 0.3231,  0.5119, 0.3772,  0.625, 0.3353,  0.7768, 0.1025,  0.9464, 0.0562,  1.0685, 0.1647,
-            -0.0521, 0.5192,  0.125, 0.4471,  0.2229, 0.3824,  0.375, 0.3444,  0.5119, 0.3933,  0.6577, 0.4353,  0.75, 0.4677,  0.8601, 0.4353,  1.1473, 0.2345,
-            -0.0402, 0.6442,  0.125, 0.5192,  0.2277, 0.4,  0.375, 0.3664,  0.5119, 0.4074,  0.6577, 0.4677,  0.75, 0.5,  0.8527, 0.4471,  1.128, 0.2345,
-            -0.0253, 0.7718,  0.1116, 0.5675,  0.2339, 0.4353,  0.3708, 0.4219,  0.5148, 0.4353,  0.6726, 0.5,  0.7649, 0.578,  0.8601, 0.5357,  1.1622, 0.3082,
-            -0.0253, 0.9041,  0.0982, 0.7718,  0.2381, 0.6872,  0.375, 0.6442,  0.5119, 0.6442,  0.6577, 0.6872,  0.8229, 0.7348,  0.875, 0.875,  1.2411, 1.1343,
-            -0.0521, 1.1005,  0.0982, 1.0556,  0.2277, 1.0556,  0.3557, 1.0556,  0.5, 1.1587,  0.625, 1.1799,  0.7649, 1.3677,  0.8958, 1.4841,  1.0685, 1.3519
-        ])
-    },
-    {
-        from: MESH_LANDSCAPE_BASE_FROM,
-        to: new Float32Array([
-            -0.064, -0.1323,  0.0893, -0.1614,  0.25, -0.0608,  0.5729, -0.1614,  0.6771, -0.1614,  0.7292, -0.1614,  0.7634, -0.1217,  0.875, -0.0608,  1.0164, -0.0423,
-            -0.0714, 0.1091,  0.2054, 0.0985,  0.2292, 0.1091,  0.375, 0.125,  0.5357, 0.2077,  0.6131, 0.25,  0.6458, 0.125,  0.75, -0.0284,  1.0164, 0.1091,
-            -0.0565, 0.25,  0.1696, 0.2077,  0.1771, 0.2262,  0.2143, 0.2262,  0.375, 0.1759,  0.625, 0.2937,  0.6369, 0.3161,  0.6652, 0.2262,  1.0104, 0.2262,
-            -0.0565, 0.375,  0.0997, 0.375,  0.125, 0.375,  0.1771, 0.3882,  0.3616, 0.2077,  0.6131, 0.3406,  0.6548, 0.3406,  0.7068, 0.375,  1.0313, 0.3538,
-            -0.1429, 0.6058,  0.1414, 0.5,  0.1563, 0.5,  0.1949, 0.5,  0.5193, 0.2937,  0.6964, 0.4517,  0.7158, 0.4517,  0.7902, 0.4841,  1.0461, 0.4841,
-            -0.0714, 0.6753,  0.2054, 0.625,  0.2054, 0.625,  0.2292, 0.625,  0.6131, 0.375,  0.7158, 0.5298,  0.7634, 0.5456,  0.8557, 0.625,  1.0789, 0.625,
-            -0.0565, 0.8108,  0.2143, 0.75,  0.2292, 0.75,  0.25, 0.7315,  0.6652, 0.6865,  0.7634, 0.6462,  0.8095, 0.7077,  0.8914, 0.75,  1.0923, 0.75,
-            -0.0565, 0.9306,  0.2054, 0.9067,  0.2054, 0.9306,  0.2292, 0.9411,  0.625, 0.875,  0.7634, 0.7718,  0.8557, 0.8108,  0.939, 0.8538,  1.0789, 0.9306,
-            0, 1,  -0.0714, 1.2169,  0.125, 1.4021,  0.25, 1.0794,  0.625, 1.0794,  0.7902, 1.0794,  0.875, 1.0794,  0.9509, 1.0582,  1.0104, 1.0794
-        ])
-    },
-    {
-        from: MESH_LANDSCAPE_BASE_FROM,
-        to: new Float32Array([
-            -0.2292, -0.3968,  0.0699, -0.3439,  0.2217, -0.1799,  0.3512, -0.1376,  0.6533, -0.2407,  0.6845, -0.164,  0.7753, -0.3148,  0.9494, -0.3677,  1.381, -0.5476,
-            -0.1711, 0.0827,  -0.0387, -0.1263,  0.25, 0.125,  0.2887, 0.125,  0.5, 0.125,  0.5565, 0.125,  0.7827, -0.0787,  0.9182, -0.1799,  1.2039, -0.0628,
-            -0.1057, 0.2209,  0.0268, 0.1918,  0.25, 0.25,  0.2679, 0.2844,  0.2887, 0.2685,  0.3958, 0.2844,  0.6771, 0.125,  0.9702, 0.0542,  1.2113, 0.1091,
-            -0.1176, 0.2983,  0.1101, 0.33,  0.25, 0.42,  0.317, 0.42,  0.3571, 0.42,  0.3958, 0.42,  0.6369, 0.2983,  0.9107, 0.2844,  1.2113, 0.33,
-            -0.1533, 0.375,  0.1533, 0.375,  0.2292, 0.42,  0.375, 0.5,  0.4301, 0.5377,  0.4583, 0.5377,  0.6845, 0.4735,  0.811, 0.4735,  1.1369, 0.463,
-            -0.0938, 0.5728,  0.1533, 0.4054,  0.3363, 0.5,  0.4167, 0.5377,  0.5, 0.625,  0.5476, 0.6991,  0.7887, 0.6118,  0.8378, 0.588,  1.1563, 0.5608,
-            -0.0789, 0.75,  0.25, 0.5608,  0.3958, 0.5608,  0.4732, 0.625,  0.5402, 0.75,  0.5967, 0.7976,  0.8839, 0.7361,  0.8839, 0.7811,  1.1563, 0.6389,
-            -0.1057, 0.9226,  0.125, 0.875,  0.2976, 0.875,  0.4464, 0.8882,  0.5908, 0.9041,  0.625, 0.875,  0.9702, 0.9041,  1.0268, 1,  1.1726, 1.0443,
-            -0.0387, 1.1138,  0.0878, 1.1349,  0.2292, 1.1138,  0.4301, 1.1852,  0.625, 1.2804,  0.625, 1.3254,  1.0372, 1.2328,  0.9568, 1.2328,  1.0938, 1.2328
-        ])
-    },
-    {
-        from: MESH_LANDSCAPE_BASE_FROM,
-        to: new Float32Array([
-            -0.0952, -0.1561,  0.0997, -0.1561,  0.2396, -0.0847,  0.3586, -0.0608,  0.4926, -0.0608,  0.6086, -0.1561,  0.7426, -0.1772,  0.8616, -0.1561,  1.064, -0.2275,
-            -0.0521, 0.0933,  -0.0521, 0.3062,  0.2708, 0.375,  0.375, 0.3485,  0.4926, 0.3062,  0.625, 0.2335,  0.75, 0.125,  0.875, -0.0337,  1.064, -0.1772,
-            -0.125, 0.3611,  0.0789, 0.5,  0.2827, 0.4147,  0.3824, 0.375,  0.4926, 0.33,  0.625, 0.25,  0.75, 0.1812,  0.8988, 0.0146,  1.0804, -0.123,
-            -0.0952, 0.5119,  0.1518, 0.5344,  0.2827, 0.4683,  0.3824, 0.4147,  0.4926, 0.375,  0.625, 0.2851,  0.7589, 0.2163,  0.8988, 0.2335,  1.119, 0.4147,
-            -0.0521, 0.625,  0.2827, 0.5344,  0.2961, 0.5985,  0.3646, 0.5119,  0.4926, 0.3995,  0.6324, 0.3062,  0.7589, 0.2619,  0.9286, 0.3062,  1.1071, 0.4683,
-            -0.1399, 0.6938,  0.2902, 0.5721,  0.2604, 0.6759,  0.3586, 0.5344,  0.5, 0.4286,  0.6414, 0.33,  0.8006, 0.3062,  0.9673, 0.375,  1.119, 0.5985,
-            -0.0521, 0.7897,  0.192, 0.8294,  0.25, 0.75,  0.2708, 0.6759,  0.5, 0.5119,  0.7738, 0.5589,  0.8988, 0.7315,  0.9286, 0.713,  1.119, 0.75,
-            -0.0685, 0.9438,  0.1518, 0.9438,  0.1979, 0.875,  0.25, 0.957,  0.5, 0.7718,  0.7738, 0.7315,  0.936, 0.9755,  1, 1.0205,  1.1726, 0.957,
-            -0.0283, 1.0873,  0.0997, 1.1561,  0.125, 1.1799,  0.2604, 1.1243,  0.4926, 1.0688,  0.8006, 1.0873,  0.9167, 1.1376,  1.0313, 1.2698,  1.1548, 1.3228
-        ])
+function _meshClamp(v, lo, hi) {
+    return Math.min(hi, Math.max(lo, v));
+}
+
+function _m4mulInto(a, b, out) {
+    for (let c = 0; c < 4; c++) {
+        const i = c * 4;
+        const b0 = b[i], b1 = b[i + 1], b2 = b[i + 2], b3 = b[i + 3];
+        out[i]     = a[0] * b0 + a[4] * b1 + a[8]  * b2 + a[12] * b3;
+        out[i + 1] = a[1] * b0 + a[5] * b1 + a[9]  * b2 + a[13] * b3;
+        out[i + 2] = a[2] * b0 + a[6] * b1 + a[10] * b2 + a[14] * b3;
+        out[i + 3] = a[3] * b0 + a[7] * b1 + a[11] * b2 + a[15] * b3;
     }
+    return out;
+}
+
+const MESH_MODELS = [
+    { matrix: new Float32Array([1.4, 0, 0, 0,  0, 1.4, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1]), parent: null, period: 120 },
+    { matrix: new Float32Array([0.7, 0, 0, 0,  0, 0.7, 0, 0,  0, 0, 1, 0,  -0.25, 0.15, 0, 1]), parent: null, period: 70 },
+    { matrix: new Float32Array([0.7, 0, 0, 0,  0, 0.7, 0, 0,  0, 0, 1, 0,  0.7, 0.7, 0, 1]), parent: 0, period: 90 }
 ];
 
-let meshBlurHProgram = null;
-let meshBlurVProgram = null;
-let meshPostProgram = null;
-let meshBlurHVAO = null;
-let meshBlurVVAO = null;
-let meshVAO = null;
-let meshVertexBuffer = null;
-let meshIndexBuffer = null;
-let _meshActiveLandscape = null;
-let _meshIndexCount = 0;
-let _meshPinchProgress = 0.0;
-let _meshLastTime = 0.0;
-const _meshCache = { portrait: null, landscape: null };
-const _meshPresetWeights0 = new Float32Array(3);
-const _meshPresetWeights1 = new Float32Array(2);
+const _m4ScratchA = new Float32Array(16);
+const _m4ScratchB = new Float32Array(16);
+const _m4Rot = new Float32Array([1, 0, 0, 0,  0, 1, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1]);
+const _m4Out = new Float32Array(16);
 
-let a_meshBlurH_pos = -1;
-let u_meshBlurH_image = null;
-let u_meshBlurH_step = null;
+function _meshFillRot(angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    _m4Rot[0] = c; _m4Rot[1] = -s;
+    _m4Rot[4] = s; _m4Rot[5] = c;
+    return _m4Rot;
+}
 
-let a_meshBlurV_pos = -1;
-let u_meshBlurV_image = null;
-let u_meshBlurV_step = null;
+function _meshInstanceMatrix(index, time, aspect, power) {
+    const model = MESH_MODELS[index];
+    const angle = TWO_PI * time;
+    const mVal = power[0] + (power[1] - power[0]) * 0.1;
+    const s = 1 + mVal * mVal * 0.33;
+    const vx = aspect >= 1 ? s : s / aspect;
+    const vy = aspect >= 1 ? s * aspect : s;
 
-let a_mesh_uv = -1;
-let a_mesh_preset0 = -1;
-let a_mesh_preset1 = -1;
-let a_mesh_preset2 = -1;
-let a_mesh_preset3 = -1;
-let a_mesh_preset4 = -1;
+    _m4ScratchA.fill(0);
+    _m4ScratchA[0] = vx;
+    _m4ScratchA[5] = vy;
+    _m4ScratchA[10] = 1;
+    _m4ScratchA[15] = 1;
 
-let u_mesh_image = null;
-let u_mesh_viewAspect = null;
-let u_mesh_time = null;
-let u_mesh_warpTimeScale = null;
-let u_mesh_pinchMix = null;
-let u_mesh_presetWeights0 = null;
-let u_mesh_presetWeights1 = null;
-let u_mesh_saturate = null;
-let u_mesh_whiteScrim = null;
-let u_mesh_blackScrim = null;
-let u_mesh_darkFactor = null;
-let u_mesh_lightFactor = null;
-let u_mesh_floor = null;
-let u_mesh_ceiling = null;
-let u_mesh_brightness = null;
-let u_mesh_contrast = null;
-let u_mesh_hueRotate = null;
-let u_mesh_opacity = null;
+    let cur = _m4ScratchA;
+    if (model.parent !== null) {
+        _m4mulInto(cur, _meshFillRot(angle / MESH_MODELS[model.parent].period), _m4ScratchB);
+        cur = _m4ScratchB;
+    }
+    const next = cur === _m4ScratchA ? _m4ScratchB : _m4ScratchA;
+    _m4mulInto(cur, model.matrix, next);
+    return _m4mulInto(next, _meshFillRot(angle / model.period), _m4Out);
+}
 
 function _meshBezier(t, a, b) {
-    const u = 1.0 - t;
-    return 3.0 * u * u * t * a + 3.0 * u * t * t * b + t * t * t;
+    const u = 1 - t;
+    return 3 * u * u * t * a + 3 * u * t * t * b + t * t * t;
+}
+
+function _meshCubicSolve(x, p1x, p1y, p2x, p2y) {
+    x = _meshClamp(x, 0, 1);
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 8; i++) {
+        const cx = _meshBezier(t, p1x, p2x) - x;
+        const u = 1 - t;
+        const dx = 3 * u * u * p1x + 6 * u * t * (p2x - p1x) + 3 * t * t * (1 - p2x);
+        if (Math.abs(cx) < 1e-5 || dx === 0) break;
+        t = _meshClamp(t - cx / dx, 0, 1);
+    }
+    return _meshBezier(t, p1y, p2y);
+}
+
+function _meshEaseOut(x) {
+    return _meshCubicSolve(x, 0, 0, 0.3, 1);
 }
 
 function _meshEaseInOut(x) {
-    x = Math.min(1.0, Math.max(0.0, x));
-    if (x <= 0.0) return 0.0;
-    if (x >= 1.0) return 1.0;
-    let t = x;
-    for (let i = 0; i < 8; i++) {
-        const cx = _meshBezier(t, 0.42, 0.58) - x;
-        const u = 1.0 - t;
-        const dx = 3.0 * u * u * 0.42 + 6.0 * u * t * 0.16 + 3.0 * t * t * 0.42;
-        if (Math.abs(cx) < 1e-5 || dx === 0.0) break;
-        t = Math.min(1.0, Math.max(0.0, t - cx / dx));
-    }
-    return _meshBezier(t, 0.0, 1.0);
+    return _meshCubicSolve(x, 0.42, 0, 0.58, 1);
 }
 
-const meshVertexShaderSource = `#version 300 es
-    in vec2 a_uv;
-    in vec4 a_preset0;
-    in vec4 a_preset1;
-    in vec4 a_preset2;
-    in vec4 a_preset3;
-    in vec4 a_preset4;
+function _meshTargetBlurRadius(landscape, exciting) {
+    if (landscape) return exciting ? 120 : 200;
+    return exciting ? 85 : 160;
+}
 
-    uniform float u_viewAspect;
-    uniform float u_time;
-    uniform float u_warpTimeScale;
-    uniform float u_pinchMix;
-    uniform vec3 u_presetWeights0;
-    uniform vec2 u_presetWeights1;
+function _meshTargetSaturation(landscape, exciting) {
+    if (landscape) return exciting ? 2.4 : 2.9;
+    return exciting ? 2.0 : 2.4;
+}
 
-    out vec2 v_texCoord;
+const _meshSpectrumLevels = [0, 0, 0, 0];
+const _meshSpectrumSmoothed = [0, 0, 0, 0];
+const _meshPower = [0, 0, 0, 0];
 
-    void main() {
-        float t = u_time * u_warpTimeScale;
-        float warpMix = (sin(t / 3.5) + 1.0) * 0.5;
-
-        vec2 p0 = mix(a_preset0.xy, a_preset0.zw, warpMix);
-        vec2 p1 = mix(a_preset1.xy, a_preset1.zw, warpMix);
-        vec2 p2 = mix(a_preset2.xy, a_preset2.zw, warpMix);
-        vec2 p3 = mix(a_preset3.xy, a_preset3.zw, warpMix);
-        vec2 p4 = mix(a_preset4.xy, a_preset4.zw, warpMix);
-
-        vec2 base = (a_uv - 0.5) * (2.0 + 0.5 * (1.0 - u_pinchMix));
-        vec2 warped = p0 * u_presetWeights0.x
-                    + p1 * u_presetWeights0.y
-                    + p2 * u_presetWeights0.z
-                    + p3 * u_presetWeights1.x
-                    + p4 * u_presetWeights1.y;
-        vec2 pos = mix(base, warped, u_pinchMix);
-
-        gl_Position = vec4(pos, 0.0, 1.0);
-        v_texCoord = a_uv;
+function _meshSpectrumUpdate(input, dt, intensity) {
+    const frames = Math.max(0, dt) * 60;
+    const decay = [
+        Math.pow(1 - 1 / 50, frames),
+        Math.pow(1 - 1 / 100, frames),
+        Math.pow(1 - 1 / 1000, frames),
+        0
+    ];
+    for (let i = 0; i < 4; i++) {
+        _meshSpectrumLevels[i] = Math.max(_meshSpectrumLevels[i] * decay[i], _meshClamp(input[i] || 0, 0, 1));
     }
+    const k = 1 - Math.pow(0.5, frames);
+    for (let i = 0; i < 4; i++) {
+        _meshSpectrumSmoothed[i] += (_meshSpectrumLevels[i] - _meshSpectrumSmoothed[i]) * k;
+        const x = _meshClamp(_meshSpectrumSmoothed[i] * intensity, 0, 1);
+        _meshPower[i] = x * x * x * (x * (x * 6 - 15) + 10);
+    }
+}
+
+const MESH_FULLSCREEN_VS = `#version 300 es
+out vec2 vUv;
+void main() {
+    vec2 p[3] = vec2[3](vec2(-1.0, -1.0), vec2(3.0, -1.0), vec2(-1.0, 3.0));
+    vec2 position = p[gl_VertexID];
+    vUv = position * 0.5 + 0.5;
+    gl_Position = vec4(position, 0.0, 1.0);
+}
 `;
 
-const meshFragmentShaderSource = `#version 300 es
-    precision highp float;
+const MESH_ROTATE_VS = `#version 300 es
+uniform mat4 uModels[3];
+uniform float uBlackScrim;
+uniform float uInstanceStep;
+out vec2 vUv;
+out float vScrim;
+void main() {
+    vec2 quad[4] = vec2[4](vec2(-1.0, -1.0), vec2(-1.0, 1.0), vec2(1.0, 1.0), vec2(1.0, -1.0));
+    vec2 uvs[4] = vec2[4](vec2(0.0, 1.0), vec2(0.0, 0.0), vec2(1.0, 0.0), vec2(1.0, 1.0));
+    uint order[6] = uint[6](0u, 1u, 2u, 0u, 2u, 3u);
+    int k = int(order[gl_VertexID]);
+    gl_Position = uModels[gl_InstanceID] * vec4(quad[k], 0.0, 1.0);
+    vUv = uvs[k];
+    vScrim = uBlackScrim + float(gl_InstanceID) * uInstanceStep;
+}
+`;
 
-    in vec2 v_texCoord;
-    uniform sampler2D u_image;
-    uniform float u_saturate;
-    uniform float u_whiteScrim;
-    uniform float u_blackScrim;
-    uniform float u_darkFactor;
-    uniform float u_lightFactor;
-    uniform float u_floor;
-    uniform float u_ceiling;
-    uniform float u_brightness;
-    uniform float u_contrast;
-    uniform float u_hueRotate;
-    uniform float u_opacity;
-
-    out vec4 fragColor;
-
-    float gradeWindow(float h, float centre, float halfWidth) {
-        float d = abs(h - centre);
-        d = mod(d, 360.0);
-        d = min(d, 360.0 - d);
-        return d < halfWidth ? 0.5 * (1.0 + cos(3.141592653589793 * d / halfWidth)) : 0.0;
+const MESH_ROTATE_FS = `#version 300 es
+precision highp float;
+in vec2 vUv;
+in float vScrim;
+uniform sampler2D uPrevious;
+uniform sampler2D uArtwork;
+uniform float uMix;
+uniform float uContrast;
+uniform float uSaturation;
+out vec4 outColor;
+void main() {
+    vec3 c = texture(uArtwork, vUv).rgb;
+    if (uMix < 0.999) {
+        c = mix(texture(uPrevious, vUv).rgb, c, uMix);
     }
+    c = mix(c, vec3(0.0), vScrim);
+    c = (c - 0.5) * uContrast + 0.5;
+    float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+    c = mix(vec3(l), c, uSaturation);
+    outColor = vec4(c, 1.0);
+}
+`;
 
-    vec3 grade(vec3 c) {
-        float mx = max(c.r, max(c.g, c.b));
-        float mn = min(c.r, min(c.g, c.b));
-        float chroma = mx - mn;
-        if (chroma < 1e-4 || mx < 1e-4) return c;
-        float s = chroma / mx;
-        float h;
-        if (mx == c.r) h = mod((c.g - c.b) / chroma + 6.0, 6.0);
-        else if (mx == c.g) h = (c.b - c.r) / chroma + 2.0;
-        else h = (c.r - c.g) / chroma + 4.0;
-        h *= 60.0;
-        float wr = gradeWindow(h, 0.0, 56.0);
-        float wb = gradeWindow(h, 241.0, 57.0);
-        float value = mx * (1.0 - s * (0.336 * wr + 0.312 * wb));
-        float sat = s * (1.0 - (1.0 - 0.828 * s) * (0.473 * wr + 0.397 * wb));
-        vec3 t = (c - mn) / chroma;
-        return value * (1.0 - sat * (1.0 - t));
-    }
-
-    float dither(vec2 position, float step) {
-        uvec2 p = uvec2(position);
-        uint h = p.x * 0x8da6b343u ^ p.y * 0xd8163841u;
-        h ^= h >> 16;
-        h *= 0x7feb352du;
-        h ^= h >> 15;
-        h *= 0x846ca68bu;
-        h ^= h >> 16;
-        float a = float(h & 0xffffu) / 65535.0;
-        float b = float(h >> 16) / 65535.0;
-        return (a + b - 1.0) * step;
-    }
-
-    vec3 rgb2hsl(vec3 c) {
-        float maxC = max(c.r, max(c.g, c.b));
-        float minC = min(c.r, min(c.g, c.b));
-        float l = (maxC + minC) * 0.5;
-        float d = maxC - minC;
-        if (d < 0.0001) return vec3(0.0, 0.0, l);
-        float s = d / (1.0 - abs(2.0 * l - 1.0));
-        float h;
-        if (maxC == c.r)      h = mod((c.g - c.b) / d, 6.0);
-        else if (maxC == c.g) h = (c.b - c.r) / d + 2.0;
-        else                  h = (c.r - c.g) / d + 4.0;
-        h *= 0.16666667;
-        return vec3(h, s, l);
-    }
-
-    vec3 hsl2rgb(vec3 hsl) {
-        float h = hsl.x, s = hsl.y, l = hsl.z;
-        if (s < 0.0001) return vec3(l);
-        float q = l < 0.5 ? l * (1.0 + s) : l + s - l * s;
-        float p = 2.0 * l - q;
-        vec3 t = fract(vec3(h + 0.33333333, h, h - 0.33333333));
-        vec3 rgb = clamp(abs(t * 6.0 - 3.0) - 1.0, 0.0, 1.0);
-        return p + (q - p) * rgb;
-    }
-
-    void main() {
-        vec4 s = texture(u_image, v_texCoord);
-        vec3 c = s.rgb / max(s.a, 1e-3);
-
-        float luma = dot(c, vec3(0.2126, 0.7152, 0.0722));
-        c = mix(vec3(luma), c, u_saturate);
-
-        c = mix(c, vec3(0.0), u_blackScrim);
-        c = mix(c, vec3(1.0), u_whiteScrim);
-        c = grade(c);
-        c = c * (1.0 - u_darkFactor) + u_lightFactor;
-        c = clamp(c, vec3(u_floor), vec3(u_ceiling));
-
-        c *= u_brightness;
-        c = (c - 0.5) * u_contrast + 0.5;
-        if (abs(u_hueRotate) > 0.0001) {
-            vec3 hsl = rgb2hsl(clamp(c, 0.0, 1.0));
-            hsl.x = fract(hsl.x + u_hueRotate * 0.15915494);
-            c = hsl2rgb(hsl);
+const MESH_BLUR_FS = `#version 300 es
+precision highp float;
+in vec2 vUv;
+uniform sampler2D uTexture;
+uniform vec2 uTexel;
+uniform vec2 uDir;
+uniform float uSigma;
+uniform int uRadius;
+out vec4 outColor;
+void main() {
+    float sigma2 = uSigma * uSigma;
+    vec4 sum = texture(uTexture, vUv);
+    float total = 1.0;
+    for (int i = 1; i <= uRadius; i += 2) {
+        float fi = float(i);
+        float w1 = exp(-0.5 * fi * fi / sigma2);
+        float w = w1;
+        float offset = fi;
+        if (i < uRadius) {
+            float fi2 = fi + 1.0;
+            float w2 = exp(-0.5 * fi2 * fi2 / sigma2);
+            w += w2;
+            offset += w2 / w;
         }
-
-        c += dither(gl_FragCoord.xy, 1.0 / 255.0);
-        c = clamp(c, 0.0, 1.0);
-        fragColor = vec4(c, u_opacity);
+        vec2 delta = uDir * uTexel * offset;
+        vec2 uvA = vUv + delta;
+        vec2 uvB = vUv - delta;
+        vec4 s = vec4(0.0);
+        if (all(greaterThanEqual(uvA, vec2(0.0))) && all(lessThanEqual(uvA, vec2(1.0)))) s += texture(uTexture, uvA);
+        if (all(greaterThanEqual(uvB, vec2(0.0))) && all(lessThanEqual(uvB, vec2(1.0)))) s += texture(uTexture, uvB);
+        sum += s * w;
+        total += 2.0 * w;
     }
+    outColor = sum / total;
+}
 `;
+
+const MESH_PINCH_VS = `#version 300 es
+layout(location = 0) in vec2 aUv;
+layout(location = 1) in vec2 aFrom;
+layout(location = 2) in vec2 aTo;
+uniform float uPinchMix;
+uniform float uWarpMix;
+out vec2 vUv;
+void main() {
+    vec2 base = (aUv - 0.5) * (2.0 + 0.5 * (1.0 - uPinchMix));
+    vec2 warped = mix(aFrom, aTo, uWarpMix);
+    vec2 position = mix(base, warped, uPinchMix);
+    vUv = aUv;
+    gl_Position = vec4(position, 0.0, 1.0);
+}
+`;
+
+const MESH_PINCH_FS = `#version 300 es
+precision highp float;
+in vec2 vUv;
+uniform sampler2D uBlurred;
+uniform float uWhiteScrim;
+uniform float uBrightness;
+uniform float uGrade;
+uniform float uDitherStep;
+uniform float uHueRotate;
+uniform float uOpacity;
+out vec4 outColor;
+
+float gradeWindow(float h, float centre, float halfWidth) {
+    float d = abs(h - centre);
+    d = mod(d, 360.0);
+    d = min(d, 360.0 - d);
+    return d < halfWidth ? 0.5 * (1.0 + cos(3.141592653589793 * d / halfWidth)) : 0.0;
+}
+
+vec3 grade(vec3 c) {
+    float mx = max(c.r, max(c.g, c.b));
+    float mn = min(c.r, min(c.g, c.b));
+    float chroma = mx - mn;
+    if (chroma < 1e-4 || mx < 1e-4) return c;
+    float s = chroma / mx;
+    float h;
+    if (mx == c.r) h = mod((c.g - c.b) / chroma + 6.0, 6.0);
+    else if (mx == c.g) h = (c.b - c.r) / chroma + 2.0;
+    else h = (c.r - c.g) / chroma + 4.0;
+    h *= 60.0;
+    float wr = gradeWindow(h, 0.0, 56.0);
+    float wb = gradeWindow(h, 241.0, 57.0);
+    float value = mx * (1.0 - s * (0.336 * wr + 0.312 * wb));
+    float sat = s * (1.0 - (1.0 - 0.828 * s) * (0.473 * wr + 0.397 * wb));
+    vec3 t = (c - mn) / chroma;
+    return value * (1.0 - sat * (1.0 - t));
+}
+${GLSL_RGB_HSL_HELPERS}
+float dither(vec2 position, float step) {
+    uvec2 p = uvec2(position);
+    uint h = p.x * 0x8da6b343u ^ p.y * 0xd8163841u;
+    h ^= h >> 16;
+    h *= 0x7feb352du;
+    h ^= h >> 15;
+    h *= 0x846ca68bu;
+    h ^= h >> 16;
+    float a = float(h & 0xffffu) / 65535.0;
+    float b = float(h >> 16) / 65535.0;
+    return (a + b - 1.0) * step;
+}
+
+void main() {
+    vec4 s = texture(uBlurred, vUv);
+    vec3 c = s.rgb / max(s.a, 1e-3);
+    c = mix(c, vec3(1.0), uWhiteScrim);
+    if (uGrade > 0.5) c = grade(c);
+    c *= uBrightness;
+    if (abs(uHueRotate) > 0.0001) {
+        vec3 hsl = rgb2hsl(clamp(c, 0.0, 1.0));
+        hsl.x = fract(hsl.x + uHueRotate * 0.15915494);
+        c = hsl2rgb(hsl);
+    }
+    c += dither(gl_FragCoord.xy, uDitherStep);
+    outColor = vec4(clamp(c, 0.0, 1.0), uOpacity);
+}
+`;
+
+const _meshSessionPreset = Math.floor(Math.random() * 5);
+
+let _meshEmptyVAO = null;
+let _meshRotateProgram = null;
+let _meshBlurProgram = null;
+let _meshPinchProgram = null;
+let _meshUniforms = null;
+
+let meshVAO = null;
+let meshVertexBuffer = null;
+let meshIndexBuffer = null;
+let _meshIndexCount = 0;
+let _meshActiveLandscape = null;
+let _meshActiveStrength = 1.0;
+let _meshDirty = true;
+let _meshTime = 0;
+let _meshPinchProgress = 0;
+let _meshBlurRadius = 0;
+let _meshSaturation = 0;
+let _meshStateInitialised = false;
 
 function _subdivideControlMesh(points, n) {
     const stride = 2 * n + 1;
@@ -2018,340 +2184,357 @@ function _subdivideControlMesh(points, n) {
     return out;
 }
 
-function _subdivideControlPair(rawArray, baseQuads, steps) {
-    const count = (baseQuads + 1) * (baseQuads + 1);
-    let pts = new Array(count);
-    for (let i = 0; i < count; i++) {
-        pts[i] = [rawArray[i * 2] * 2.0 - 1.0, rawArray[i * 2 + 1] * 2.0 - 1.0];
-    }
-    let n = baseQuads;
-    for (let s = 0; s < steps; s++) {
-        pts = _subdivideControlMesh(pts, n);
+function _makePinchMesh(landscape, strength) {
+    const idx = MESH_PRESET_INDEX >= 0 ? (Math.floor(MESH_PRESET_INDEX) % 5) : _meshSessionPreset;
+    const pair = (landscape ? MESH_LANDSCAPE_PRESETS : MESH_PORTRAIT_PRESETS)[idx];
+    const cells = landscape ? 8 : 5;
+    const s = _meshClamp(strength == null ? 1 : strength, 0, 1);
+
+    const buildControlPoints = (data) => {
+        const count = (cells + 1) * (cells + 1);
+        const result = new Array(count);
+        for (let k = 0; k < count; k++) {
+            const fx = (k % (cells + 1)) / cells;
+            const fy = Math.floor(k / (cells + 1)) / cells;
+            const px = data[2 * k];
+            const py = data[2 * k + 1];
+            result[k] = [(fx + (px - fx) * s) * 2 - 1, (fy + (py - fy) * s) * 2 - 1];
+        }
+        return result;
+    };
+
+    let from = buildControlPoints(pair.from);
+    let to = buildControlPoints(pair.to);
+    let n = cells;
+    for (let level = 0; level < 2; level++) {
+        from = _subdivideControlMesh(from, n);
+        to = _subdivideControlMesh(to, n);
         n *= 2;
     }
-    return pts;
-}
 
-function _getMeshGeometry(isLandscape) {
-    const key = isLandscape ? 'landscape' : 'portrait';
-    if (_meshCache[key]) return _meshCache[key];
-
-    const presets = isLandscape ? MESH_LANDSCAPE_PRESETS : MESH_PORTRAIT_PRESETS;
-    const baseQuads = isLandscape ? 8 : 5;
-    const subdivSteps = 2;
-    const quads = baseQuads * (1 << subdivSteps);
-    const width = quads + 1;
-    const vertexCount = width * width;
-
-    const subdividedFrom = new Array(5);
-    const subdividedTo = new Array(5);
-    for (let p = 0; p < 5; p++) {
-        subdividedFrom[p] = _subdivideControlPair(presets[p].from, baseQuads, subdivSteps);
-        subdividedTo[p] = _subdivideControlPair(presets[p].to, baseQuads, subdivSteps);
+    const width = n + 1;
+    const count = width * width;
+    const vertices = new Float32Array(count * 6);
+    for (let k = 0; k < count; k++) {
+        const o = k * 6;
+        vertices[o]     = (k % width) / n;
+        vertices[o + 1] = Math.floor(k / width) / n;
+        vertices[o + 2] = from[k][0];
+        vertices[o + 3] = from[k][1];
+        vertices[o + 4] = to[k][0];
+        vertices[o + 5] = to[k][1];
     }
 
-    const vertices = new Float32Array(vertexCount * MESH_FLOATS_PER_VERTEX);
-    let vPtr = 0;
-    for (let i = 0; i < vertexCount; i++) {
-        vertices[vPtr++] = (i % width) / quads;
-        vertices[vPtr++] = Math.floor(i / width) / quads;
-        for (let p = 0; p < 5; p++) {
-            const f = subdividedFrom[p][i];
-            const t = subdividedTo[p][i];
-            vertices[vPtr++] = f[0];
-            vertices[vPtr++] = f[1];
-            vertices[vPtr++] = t[0];
-            vertices[vPtr++] = t[1];
+    const indices = new Uint16Array(n * n * 6);
+    let offset = 0;
+    for (let j = 0; j < n; j++) {
+        for (let i = 0; i < n; i++) {
+            const a = j * width + i;
+            const b = a + 1;
+            const d = a + width;
+            const c = d + 1;
+            indices[offset++] = a;
+            indices[offset++] = c;
+            indices[offset++] = d;
+            indices[offset++] = a;
+            indices[offset++] = b;
+            indices[offset++] = c;
         }
     }
-
-    const indices = new Uint16Array(quads * quads * 6);
-    let iPtr = 0;
-    for (let y = 0; y < quads; y++) {
-        const row0 = y * width;
-        const row1 = (y + 1) * width;
-        for (let x = 0; x < quads; x++) {
-            const i00 = row0 + x;
-            const i10 = i00 + 1;
-            const i01 = row1 + x;
-            const i11 = i01 + 1;
-            indices[iPtr++] = i00;
-            indices[iPtr++] = i11;
-            indices[iPtr++] = i01;
-            indices[iPtr++] = i00;
-            indices[iPtr++] = i10;
-            indices[iPtr++] = i11;
-        }
-    }
-
-    const geo = { vertices, indices, indexCount: indices.length };
-    _meshCache[key] = geo;
-    return geo;
+    return { vertices, indices };
 }
 
 function _resolveMeshLandscape() {
     if (MESH_GRID_MODE === 'landscape') return true;
     if (MESH_GRID_MODE === 'portrait') return false;
-    return _viewportAspect >= 1.0;
+    return canvasDimensions.width > canvasDimensions.height;
 }
 
-function _uploadMeshGeometry(isLandscape) {
-    const geo = _getMeshGeometry(isLandscape);
+function _rebuildMeshGeometry(landscape, strength) {
+    const mesh = _makePinchMesh(landscape, strength);
+    gl.bindVertexArray(meshVAO);
     gl.bindBuffer(gl.ARRAY_BUFFER, meshVertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, geo.vertices, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, mesh.vertices, gl.DYNAMIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, meshIndexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, geo.indices, gl.STATIC_DRAW);
-    _meshIndexCount = geo.indexCount;
-    _meshActiveLandscape = isLandscape;
-}
-
-function _bindMeshAttributes() {
-    const stride = MESH_FLOATS_PER_VERTEX * 4;
-    gl.bindBuffer(gl.ARRAY_BUFFER, meshVertexBuffer);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, meshIndexBuffer);
-    if (a_mesh_uv >= 0) {
-        gl.enableVertexAttribArray(a_mesh_uv);
-        gl.vertexAttribPointer(a_mesh_uv, 2, gl.FLOAT, false, stride, 0);
-    }
-    const attrs = [a_mesh_preset0, a_mesh_preset1, a_mesh_preset2, a_mesh_preset3, a_mesh_preset4];
-    for (let i = 0; i < 5; i++) {
-        if (attrs[i] >= 0) {
-            gl.enableVertexAttribArray(attrs[i]);
-            gl.vertexAttribPointer(attrs[i], 4, gl.FLOAT, false, stride, 8 + i * 16);
-        }
-    }
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mesh.indices, gl.DYNAMIC_DRAW);
+    gl.bindVertexArray(null);
+    _meshIndexCount = mesh.indices.length;
+    _meshActiveLandscape = landscape;
+    _meshActiveStrength = strength;
+    _meshDirty = false;
 }
 
 const _meshPipeline = {
-    layerScales: MESH_LAYER_SCALES,
-    layerAbsBaseX: MESH_LAYER_ABS_BASE_X,
-    layerAbsBaseY: MESH_LAYER_ABS_BASE_Y,
+    handlesFullRender: true,
+    usesHalfFloatTargets: true,
+    targetFps: 30,
+    layerScales: ANDROID_LAYER_SCALES,
+    layerAbsBaseX: ANDROID_LAYER_ABS_BASE_X,
+    layerAbsBaseY: ANDROID_LAYER_ABS_BASE_Y,
 
-    getCanvasBaseSize() {
+    computeSizes(_base, _aspect, lightweight) {
         const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
         const cssW = _viewportWidth > 0 ? _viewportWidth : ((typeof window !== 'undefined' && window.innerWidth) || 1280);
         const cssH = _viewportHeight > 0 ? _viewportHeight : ((typeof window !== 'undefined' && window.innerHeight) || 720);
-        const scaled = Math.round(Math.sqrt(cssW * cssH) * 0.5 * dpr);
-        return Math.min(1024, Math.max(512, scaled));
+        const scale = (lightweight ? MESH_RENDER_SCALE_LIGHTWEIGHT : MESH_RENDER_SCALE) * dpr;
+        const cw = Math.max(1, Math.round(cssW * scale));
+        const ch = Math.max(1, Math.round(cssH * scale));
+        return {
+            cw,
+            ch,
+            rw: Math.max(1, Math.floor(cw / MESH_BLUR_DOWNSAMPLE)),
+            rh: Math.max(1, Math.floor(ch / MESH_BLUR_DOWNSAMPLE))
+        };
     },
 
     applyDefaultPostParams(out) {
         out.brightness = 1.0;
-        out.saturate = 2.0;
-        out.preSaturate = 1.3;
+        out.saturate = 1.0;
+        out.preSaturate = 1.0;
         out.contrast = 1.0;
         out.hueRotate = 0.0;
         out.opacity = 1.0;
-        out.blackScrim = 0.25;
+        out.blackScrim = 0.5;
         out.whiteScrim = 0.1;
-        out.darkFactor = 0.0;
-        out.lightFactor = 0.0;
-        out.floor = 0.0;
-        out.ceiling = 1.0;
+        out.blurScale = 1.0;
+        out.pinchStrength = 1.0;
         out.meshWarpTimeScale = 1.0;
     },
 
     getPreSaturate() {
-        return _postParams.preSaturate;
+        return 1.0;
     },
 
     resetState() {
-        meshBlurHProgram = null;
-        meshBlurVProgram = null;
-        meshPostProgram = null;
-        meshBlurHVAO = null;
-        meshBlurVVAO = null;
+        _meshEmptyVAO = null;
+        _meshRotateProgram = null;
+        _meshBlurProgram = null;
+        _meshPinchProgram = null;
+        _meshUniforms = null;
         meshVAO = null;
+        meshVertexBuffer = null;
+        meshIndexBuffer = null;
+        _meshIndexCount = 0;
         _meshActiveLandscape = null;
-        _meshPinchProgress = 0.0;
-        _meshLastTime = 0.0;
+        _meshDirty = true;
+        _meshStateInitialised = false;
+        _meshPinchProgress = 0;
     },
 
     initStaticPrograms() {
-        const meshVS = createShader(gl, gl.VERTEX_SHADER, meshVertexShaderSource);
-        const meshFS = createShader(gl, gl.FRAGMENT_SHADER, meshFragmentShaderSource);
-        if (!meshVS || !meshFS) return false;
+        _meshEmptyVAO = gl.createVertexArray();
+        _meshRotateProgram = _compileProgramFromSources(MESH_ROTATE_VS, MESH_ROTATE_FS);
+        _meshBlurProgram = _compileProgramFromSources(MESH_FULLSCREEN_VS, MESH_BLUR_FS);
+        _meshPinchProgram = _compileProgramFromSources(MESH_PINCH_VS, MESH_PINCH_FS);
+        if (!_meshRotateProgram || !_meshBlurProgram || !_meshPinchProgram) {
+            return false;
+        }
 
-        meshPostProgram = createProgram(gl, meshVS, meshFS);
-        gl.deleteShader(meshVS);
-        gl.deleteShader(meshFS);
-        if (!meshPostProgram) return false;
+        _meshUniforms = {
+            rotate: {
+                models: [0, 1, 2].map((i) => gl.getUniformLocation(_meshRotateProgram, 'uModels[' + i + ']')),
+                previous: gl.getUniformLocation(_meshRotateProgram, 'uPrevious'),
+                artwork: gl.getUniformLocation(_meshRotateProgram, 'uArtwork'),
+                mix: gl.getUniformLocation(_meshRotateProgram, 'uMix'),
+                blackScrim: gl.getUniformLocation(_meshRotateProgram, 'uBlackScrim'),
+                contrast: gl.getUniformLocation(_meshRotateProgram, 'uContrast'),
+                saturation: gl.getUniformLocation(_meshRotateProgram, 'uSaturation'),
+                instanceStep: gl.getUniformLocation(_meshRotateProgram, 'uInstanceStep')
+            },
+            blur: {
+                texture: gl.getUniformLocation(_meshBlurProgram, 'uTexture'),
+                texel: gl.getUniformLocation(_meshBlurProgram, 'uTexel'),
+                dir: gl.getUniformLocation(_meshBlurProgram, 'uDir'),
+                sigma: gl.getUniformLocation(_meshBlurProgram, 'uSigma'),
+                radius: gl.getUniformLocation(_meshBlurProgram, 'uRadius')
+            },
+            pinch: {
+                blurred: gl.getUniformLocation(_meshPinchProgram, 'uBlurred'),
+                pinchMix: gl.getUniformLocation(_meshPinchProgram, 'uPinchMix'),
+                warpMix: gl.getUniformLocation(_meshPinchProgram, 'uWarpMix'),
+                whiteScrim: gl.getUniformLocation(_meshPinchProgram, 'uWhiteScrim'),
+                brightness: gl.getUniformLocation(_meshPinchProgram, 'uBrightness'),
+                grade: gl.getUniformLocation(_meshPinchProgram, 'uGrade'),
+                ditherStep: gl.getUniformLocation(_meshPinchProgram, 'uDitherStep'),
+                hueRotate: gl.getUniformLocation(_meshPinchProgram, 'uHueRotate'),
+                opacity: gl.getUniformLocation(_meshPinchProgram, 'uOpacity')
+            }
+        };
 
-        a_mesh_uv      = gl.getAttribLocation(meshPostProgram, 'a_uv');
-        a_mesh_preset0 = gl.getAttribLocation(meshPostProgram, 'a_preset0');
-        a_mesh_preset1 = gl.getAttribLocation(meshPostProgram, 'a_preset1');
-        a_mesh_preset2 = gl.getAttribLocation(meshPostProgram, 'a_preset2');
-        a_mesh_preset3 = gl.getAttribLocation(meshPostProgram, 'a_preset3');
-        a_mesh_preset4 = gl.getAttribLocation(meshPostProgram, 'a_preset4');
+        gl.useProgram(_meshRotateProgram);
+        gl.uniform1i(_meshUniforms.rotate.previous, 1);
+        gl.uniform1i(_meshUniforms.rotate.artwork, 0);
+        gl.uniform1f(_meshUniforms.rotate.instanceStep, MESH_INSTANCE_SCRIM_STEP);
 
-        u_mesh_image          = gl.getUniformLocation(meshPostProgram, 'u_image');
-        u_mesh_viewAspect     = gl.getUniformLocation(meshPostProgram, 'u_viewAspect');
-        u_mesh_time           = gl.getUniformLocation(meshPostProgram, 'u_time');
-        u_mesh_warpTimeScale  = gl.getUniformLocation(meshPostProgram, 'u_warpTimeScale');
-        u_mesh_pinchMix       = gl.getUniformLocation(meshPostProgram, 'u_pinchMix');
-        u_mesh_presetWeights0 = gl.getUniformLocation(meshPostProgram, 'u_presetWeights0');
-        u_mesh_presetWeights1 = gl.getUniformLocation(meshPostProgram, 'u_presetWeights1');
-        u_mesh_saturate       = gl.getUniformLocation(meshPostProgram, 'u_saturate');
-        u_mesh_whiteScrim     = gl.getUniformLocation(meshPostProgram, 'u_whiteScrim');
-        u_mesh_blackScrim     = gl.getUniformLocation(meshPostProgram, 'u_blackScrim');
-        u_mesh_darkFactor     = gl.getUniformLocation(meshPostProgram, 'u_darkFactor');
-        u_mesh_lightFactor    = gl.getUniformLocation(meshPostProgram, 'u_lightFactor');
-        u_mesh_floor          = gl.getUniformLocation(meshPostProgram, 'u_floor');
-        u_mesh_ceiling        = gl.getUniformLocation(meshPostProgram, 'u_ceiling');
-        u_mesh_brightness     = gl.getUniformLocation(meshPostProgram, 'u_brightness');
-        u_mesh_contrast       = gl.getUniformLocation(meshPostProgram, 'u_contrast');
-        u_mesh_hueRotate      = gl.getUniformLocation(meshPostProgram, 'u_hueRotate');
-        u_mesh_opacity        = gl.getUniformLocation(meshPostProgram, 'u_opacity');
+        gl.useProgram(_meshBlurProgram);
+        gl.uniform1i(_meshUniforms.blur.texture, 0);
 
-        gl.useProgram(meshPostProgram);
-        gl.uniform1i(u_mesh_image, 0);
+        gl.useProgram(_meshPinchProgram);
+        gl.uniform1i(_meshUniforms.pinch.blurred, 0);
+        gl.uniform1f(_meshUniforms.pinch.grade, 1.0);
+        gl.uniform1f(_meshUniforms.pinch.ditherStep, 1.0 / 255.0);
         return true;
     },
 
     initVAOs() {
+        meshVAO = gl.createVertexArray();
         meshVertexBuffer = gl.createBuffer();
         meshIndexBuffer = gl.createBuffer();
-        _uploadMeshGeometry(_resolveMeshLandscape());
-
-        meshVAO = gl.createVertexArray();
         gl.bindVertexArray(meshVAO);
-        _bindMeshAttributes();
+        gl.bindBuffer(gl.ARRAY_BUFFER, meshVertexBuffer);
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 24, 0);
+        gl.enableVertexAttribArray(1);
+        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 24, 8);
+        gl.enableVertexAttribArray(2);
+        gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 24, 16);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, meshIndexBuffer);
         gl.bindVertexArray(null);
+        _meshDirty = true;
     },
 
     isProgramsReady() {
-        return !!(meshPostProgram && meshBlurHProgram && meshBlurVProgram);
+        return !!(_meshRotateProgram && _meshBlurProgram && _meshPinchProgram);
     },
 
-    rebuildBlurPrograms(quadVS, passFS) {
-        const newH = createProgram(gl, quadVS, passFS);
-        const newV = createProgram(gl, quadVS, passFS);
-        if (!newH || !newV) return false;
-
-        if (meshBlurHProgram) gl.deleteProgram(meshBlurHProgram);
-        if (meshBlurVProgram) gl.deleteProgram(meshBlurVProgram);
-        meshBlurHProgram = newH;
-        meshBlurVProgram = newV;
-
-        a_meshBlurH_pos = gl.getAttribLocation(meshBlurHProgram, 'a_position');
-        u_meshBlurH_image = gl.getUniformLocation(meshBlurHProgram, 'u_image');
-        u_meshBlurH_step = gl.getUniformLocation(meshBlurHProgram, 'u_step');
-
-        a_meshBlurV_pos = gl.getAttribLocation(meshBlurVProgram, 'a_position');
-        u_meshBlurV_image = gl.getUniformLocation(meshBlurVProgram, 'u_image');
-        u_meshBlurV_step = gl.getUniformLocation(meshBlurVProgram, 'u_step');
-
-        if (meshBlurHVAO) gl.deleteVertexArray(meshBlurHVAO);
-        if (meshBlurVVAO) gl.deleteVertexArray(meshBlurVVAO);
-
-        meshBlurHVAO = gl.createVertexArray();
-        gl.bindVertexArray(meshBlurHVAO);
-        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
-        gl.enableVertexAttribArray(a_meshBlurH_pos);
-        gl.vertexAttribPointer(a_meshBlurH_pos, 2, gl.FLOAT, false, 0, 0);
-
-        meshBlurVVAO = gl.createVertexArray();
-        gl.bindVertexArray(meshBlurVVAO);
-        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
-        gl.enableVertexAttribArray(a_meshBlurV_pos);
-        gl.vertexAttribPointer(a_meshBlurV_pos, 2, gl.FLOAT, false, 0, 0);
-        gl.bindVertexArray(null);
-
-        gl.useProgram(meshBlurHProgram);
-        gl.uniform1i(u_meshBlurH_image, 0);
-        gl.useProgram(meshBlurVProgram);
-        gl.uniform1i(u_meshBlurV_image, 0);
-        return true;
+    rebuildBlurPrograms() {
+        return this.isProgramsReady();
     },
 
     applyViewportUniforms() {
-        const wantLandscape = _resolveMeshLandscape();
-        if (_meshActiveLandscape !== null && wantLandscape !== _meshActiveLandscape && meshVertexBuffer && meshIndexBuffer) {
-            _uploadMeshGeometry(wantLandscape);
+        if (_meshActiveLandscape !== _resolveMeshLandscape()) {
+            _meshDirty = true;
         }
-        gl.useProgram(meshBlurHProgram);
-        gl.uniform2f(u_meshBlurH_step, 1.0 / blurDimensions.width, 0.0);
-        gl.useProgram(meshBlurVProgram);
-        gl.uniform2f(u_meshBlurV_step, 0.0, 1.0 / blurDimensions.height);
-        gl.useProgram(meshPostProgram);
-        gl.uniform1f(u_mesh_viewAspect, _viewportAspect);
+        gl.useProgram(_meshBlurProgram);
+        gl.uniform2f(_meshUniforms.blur.texel, 1.0 / blurDimensions.width, 1.0 / blurDimensions.height);
     },
 
-    renderFrame(currentTime, isLightweight) {
-        if (!DISABLE_GAUSSIAN_BLUR) {
-            gl.useProgram(meshBlurHProgram);
-            gl.bindVertexArray(meshBlurHVAO);
+    onActivate() {
+        _meshDirty = true;
+        _meshStateInitialised = false;
+    },
+
+    renderFrame(_currentTime, isLightweight, elapsedSec) {
+        if (!currentArtworkTexture) return;
+
+        const width = canvasDimensions.width;
+        const height = canvasDimensions.height;
+        const bw = blurDimensions.width;
+        const bh = blurDimensions.height;
+        const landscape = _resolveMeshLandscape();
+        const dt = elapsedSec || (1 / 30);
+        const speed = _postParams.meshWarpTimeScale != null ? _postParams.meshWarpTimeScale : 1.0;
+        const reduced = (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) ? 0.1 : 1.0;
+
+        if (!isLightweight) {
+            _meshTime += dt * reduced * speed;
+        }
+
+        const exciting = !isLightweight;
+        const energy = LYPLUS_audioState.energy;
+        _meshSpectrumUpdate([energy[0], energy[1], energy[3], energy[2]], dt, exciting ? 1.0 : 0.2);
+
+        const rate = dt / (MESH_TRANSITION_DURATION * 0.5);
+        const strength = _meshClamp(_postParams.pinchStrength != null ? _postParams.pinchStrength : 1.0, 0, 1);
+        const pinching = exciting && strength > 0;
+        _meshPinchProgress = pinching
+            ? Math.min(1, _meshPinchProgress + rate)
+            : Math.max(0, _meshPinchProgress - rate);
+
+        const blurScale = _postParams.blurScale != null ? _postParams.blurScale : 1.0;
+        const satScale = _postParams.saturate != null ? _postParams.saturate : 1.0;
+        const blurTarget = _meshTargetBlurRadius(landscape, exciting) * blurScale;
+        const satTarget = _meshTargetSaturation(landscape, exciting) * satScale;
+
+        if (!_meshStateInitialised) {
+            _meshBlurRadius = blurTarget;
+            _meshSaturation = satTarget;
+            _meshStateInitialised = true;
+        } else {
+            const step = MESH_BLUR_RADIUS_POINTS_PER_SECOND * dt * Math.max(0.25, blurScale);
+            _meshBlurRadius += Math.min(step, Math.max(-step, blurTarget - _meshBlurRadius));
+            _meshSaturation += (satTarget - _meshSaturation) * Math.min(1, rate);
+        }
+
+        if (_meshDirty || _meshActiveLandscape !== landscape || _meshActiveStrength !== strength) {
+            _rebuildMeshGeometry(landscape, strength);
+        }
+
+        gl.disable(gl.BLEND);
+
+        const ur = _meshUniforms.rotate;
+        const aspect = width / height;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
+        gl.viewport(0, 0, bw, bh);
+        if (_appliedClearR !== 0 || _appliedClearG !== 0 || _appliedClearB !== 0) {
+            gl.clearColor(0, 0, 0, 1);
+            _appliedClearR = 0;
+            _appliedClearG = 0;
+            _appliedClearB = 0;
+        }
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.useProgram(_meshRotateProgram);
+        gl.bindVertexArray(_meshEmptyVAO);
+        for (let i = 0; i < 3; i++) {
+            gl.uniformMatrix4fv(ur.models[i], false, _meshInstanceMatrix(i, _meshTime, aspect, _meshPower));
+        }
+        gl.uniform1f(ur.mix, artworkTransitionProgress < 1.0 ? _meshEaseOut(artworkTransitionProgress) : 1.0);
+        gl.uniform1f(ur.blackScrim, _postParams.blackScrim);
+        gl.uniform1f(ur.contrast, _postParams.contrast * (1 + _meshPower[0] * 0.076));
+        gl.uniform1f(ur.saturation, _meshSaturation + _meshPower[2] * 0.166);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, currentArtworkTexture);
+        if (artworkTransitionProgress < 1.0 && previousArtworkTexture) {
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, previousArtworkTexture);
+            gl.activeTexture(gl.TEXTURE0);
+        }
+        gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, 3);
+
+        const cssWidth = _viewportWidth > 0 ? _viewportWidth : (webglCanvas.clientWidth || width);
+        const pixelScale = width / Math.max(1, cssWidth);
+        const sigmaKey = DISABLE_GAUSSIAN_BLUR
+            ? 0
+            : Math.round(_meshBlurRadius * pixelScale / MESH_BLUR_DOWNSAMPLE * 2);
+
+        if (sigmaKey >= 1) {
+            const sigma = sigmaKey / 2;
+            const radius = Math.min(MESH_MAX_BLUR_RADIUS, Math.max(1, Math.ceil(3 * sigma)));
+            const ubl = _meshUniforms.blur;
+            gl.useProgram(_meshBlurProgram);
+            gl.uniform1f(ubl.sigma, sigma);
+            gl.uniform1i(ubl.radius, radius);
+
             gl.bindFramebuffer(gl.FRAMEBUFFER, blurFramebuffer);
+            gl.uniform2f(ubl.dir, 1, 0);
             gl.bindTexture(gl.TEXTURE_2D, renderTexture);
-            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-            gl.useProgram(meshBlurVProgram);
-            gl.bindVertexArray(meshBlurVVAO);
             gl.bindFramebuffer(gl.FRAMEBUFFER, renderFramebuffer);
+            gl.uniform2f(ubl.dir, 0, 1);
             gl.bindTexture(gl.TEXTURE_2D, blurTextureA);
-            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
         }
 
-        const dt = Math.min(0.1, Math.max(0.0, currentTime - _meshLastTime));
-        _meshLastTime = currentTime;
-        const rate = dt / 0.4;
-        _meshPinchProgress = !isLightweight
-            ? Math.min(1.0, _meshPinchProgress + rate)
-            : Math.max(0.0, _meshPinchProgress - rate);
-
-        gl.useProgram(meshPostProgram);
-
-        let idxA = 0, idxB = 0, presetMix = 0.0;
-        if (MESH_PRESET_INDEX >= 0) {
-            idxA = idxB = Math.floor(MESH_PRESET_INDEX) % 5;
-        } else if (!isLightweight) {
-            const cycleDuration = 16.0;
-            const totalPhase = Math.max(0.0, currentTime) / cycleDuration;
-            const stepIdx = Math.floor(totalPhase);
-            const rawT = totalPhase - stepIdx;
-            presetMix = rawT * rawT * (3.0 - 2.0 * rawT);
-            idxA = stepIdx % 5;
-            idxB = (stepIdx + 1) % 5;
-        }
-
-        _meshPresetWeights0[0] = 0.0;
-        _meshPresetWeights0[1] = 0.0;
-        _meshPresetWeights0[2] = 0.0;
-        _meshPresetWeights1[0] = 0.0;
-        _meshPresetWeights1[1] = 0.0;
-
-        if (idxA < 3) _meshPresetWeights0[idxA] += 1.0 - presetMix;
-        else _meshPresetWeights1[idxA - 3] += 1.0 - presetMix;
-
-        if (idxB < 3) _meshPresetWeights0[idxB] += presetMix;
-        else _meshPresetWeights1[idxB - 3] += presetMix;
-
+        const up = _meshUniforms.pinch;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, width, height);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.useProgram(_meshPinchProgram);
         gl.bindVertexArray(meshVAO);
 
         if (_appliedPostUniformsDirty) {
-            gl.uniform1f(u_mesh_saturate,      _postParams.saturate);
-            gl.uniform1f(u_mesh_whiteScrim,    _postParams.whiteScrim);
-            gl.uniform1f(u_mesh_blackScrim,    _postParams.blackScrim);
-            gl.uniform1f(u_mesh_darkFactor,    _postParams.darkFactor);
-            gl.uniform1f(u_mesh_lightFactor,   _postParams.lightFactor);
-            gl.uniform1f(u_mesh_floor,         _postParams.floor);
-            gl.uniform1f(u_mesh_ceiling,       _postParams.ceiling);
-            gl.uniform1f(u_mesh_brightness,    _postParams.brightness);
-            gl.uniform1f(u_mesh_contrast,      _postParams.contrast);
-            gl.uniform1f(u_mesh_hueRotate,     _postParams.hueRotate);
-            gl.uniform1f(u_mesh_opacity,       _postParams.opacity);
-            gl.uniform1f(u_mesh_warpTimeScale, _postParams.meshWarpTimeScale);
+            gl.uniform1f(up.whiteScrim, _postParams.whiteScrim);
+            gl.uniform1f(up.brightness, _postParams.brightness);
+            gl.uniform1f(up.hueRotate,  _postParams.hueRotate);
+            gl.uniform1f(up.opacity,    _postParams.opacity);
             _appliedPostUniformsDirty = false;
         }
 
-        gl.uniform1f(u_mesh_time, isLightweight ? 0.0 : currentTime);
-        gl.uniform1f(u_mesh_pinchMix, _meshEaseInOut(_meshPinchProgress));
-        gl.uniform3fv(u_mesh_presetWeights0, _meshPresetWeights0);
-        gl.uniform2fv(u_mesh_presetWeights1, _meshPresetWeights1);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
+        gl.uniform1f(up.pinchMix, _meshEaseInOut(_meshPinchProgress));
+        gl.uniform1f(up.warpMix, (Math.sin(_meshTime / MESH_WARP_PERIOD_DIVISOR) + 1) * 0.5);
         gl.bindTexture(gl.TEXTURE_2D, renderTexture);
         gl.drawElements(gl.TRIANGLES, _meshIndexCount, gl.UNSIGNED_SHORT, 0);
+        gl.bindVertexArray(null);
     }
 };

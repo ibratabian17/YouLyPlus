@@ -213,7 +213,7 @@ ytmusic-app #layout[player-ui-state="FULLSCREEN"] .ytmusic-browse-response {
     --webgl-post-process-tick: 1;
 }
 #layout.dynamic-player[player-ui-state="PLAYER_PAGE_OPEN"] .lyplus-blur-container.lyplus-bg-ipad {
-    --webgl-post-process: saturate(2.2) pre-saturate(1.3) black-scrim(0.35) white-scrim(0.08) brightness(1) contrast(1);
+    --webgl-post-process: saturate(1) black-scrim(0.6) white-scrim(0.1) brightness(1) contrast(1);
     --webgl-post-process-tick: 2;
 }
 
@@ -612,6 +612,12 @@ Lyrics+ without any visual bug*/
     body.has-themesong-dynamic-light .lyplus-blur-container,
     body.has-themesong-static-light .lyplus-blur-container {
         --webgl-post-process: saturate(2);
+        --webgl-post-process-tick: 2;
+    }
+
+    body.has-themesong-dynamic-light .lyplus-blur-container.lyplus-bg-ipad,
+    body.has-themesong-static-light .lyplus-blur-container.lyplus-bg-ipad {
+        --webgl-post-process: saturate(1);
         --webgl-post-process-tick: 2;
     }
 
