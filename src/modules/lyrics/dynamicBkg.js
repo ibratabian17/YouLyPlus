@@ -117,7 +117,7 @@ ${_blurTapsGLSL(kernel)}
 const _androidPipeline = {
     handlesFullRender: false,
     usesHalfFloatTargets: false,
-    targetFps: 24,
+    targetFps: 40,
     layerScales: ANDROID_LAYER_SCALES,
     layerAbsBaseX: ANDROID_LAYER_ABS_BASE_X,
     layerAbsBaseY: ANDROID_LAYER_ABS_BASE_Y,
@@ -241,14 +241,14 @@ const _androidPipeline = {
 
         if (_appliedPostUniformsDirty) {
             gl.uniform1f(u_blurVPost_brightness, _postParams.brightness);
-            gl.uniform1f(u_blurVPost_saturate,   _postParams.saturate);
-            gl.uniform1f(u_blurVPost_contrast,   _postParams.contrast);
             gl.uniform1f(u_blurVPost_hueRotate,  _postParams.hueRotate);
             gl.uniform1f(u_blurVPost_opacity,    _postParams.opacity);
             gl.uniform1f(u_blurVPost_blackScrim, _postParams.blackScrim);
             gl.uniform1f(u_blurVPost_whiteScrim, _postParams.whiteScrim);
             _appliedPostUniformsDirty = false;
         }
+        gl.uniform1f(u_blurVPost_contrast, _postParams.contrast * (1.0 + _spectrumPower[0] * 0.076));
+        gl.uniform1f(u_blurVPost_saturate, _postParams.saturate + _spectrumPower[2] * 0.166);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.viewport(0, 0, canvasDimensions.width, canvasDimensions.height);
@@ -400,19 +400,61 @@ let lastDrawTime = 0;
 let bgObserver = null;
 const BEAT_ROT_BOOST = new Float32Array([0.28, -0.18, 0.02]);
 const BEAT_SPD_BOOST = new Float32Array([0.8, 0.2, 0.5]);
-const BEAT_SCALE_BOOST = new Float32Array([0.2, 0.34, 0.39]);
-const BEAT_SCALE_DECAY = 2;
 const layerPerimTime = new Float64Array([0, 0, 0]);
-const layerBeatScale = new Float32Array([0, 0, 0]);
-const layerBeatRot = new Float32Array([0, 0, 0]);
-let beatEnergyBaseline = 0;
 
 const _layerTransforms = new Float32Array(12);
 
 const LYPLUS_FFT_SIZE = 2048;
+const AUDIO_OCTAVE_HZ = [30, 60, 125, 250, 500, 1000, 2000, 6000, 14000];
+const AUDIO_OCTAVE_COUNT = 8;
+const AUDIO_FLOOR_DB = -72.0;
+const AUDIO_CEIL_DB = -6.0;
+const AUDIO_RELEASE_TAU = 0.28;
+const AUDIO_BASELINE_TAU = 0.65;
+
 const LYPLUS_connectedElements = new WeakSet();
-let _audioDataArray = null;
 let _audioFreqArray = null;
+const _audioOctaveBins = new Int32Array(AUDIO_OCTAVE_COUNT + 1);
+const _audioOctaveEnv = new Float32Array(AUDIO_OCTAVE_COUNT);
+const _audioOctaveBase = new Float32Array(AUDIO_OCTAVE_COUNT);
+let _audioSampleRate = 0;
+
+const _spectrumLevels = new Float32Array(4);
+const _spectrumSmoothed = new Float32Array(4);
+const _spectrumPower = new Float32Array(4);
+
+function _syncAudioOctaveBins(sampleRate) {
+    if (_audioSampleRate > 0 && Math.abs(sampleRate - _audioSampleRate) < 1) return;
+    _audioSampleRate = sampleRate;
+    const maxBin = (LYPLUS_FFT_SIZE >> 1) - 1;
+    const hzPerBin = sampleRate / LYPLUS_FFT_SIZE;
+    for (let i = 0; i <= AUDIO_OCTAVE_COUNT; i++) {
+        _audioOctaveBins[i] = Math.max(1, Math.min(Math.round(AUDIO_OCTAVE_HZ[i] / hzPerBin), maxBin));
+    }
+}
+
+function _updateSpectrumPower(energy, dt, intensity) {
+    const frames = Math.max(0, dt) * 60;
+    const d0 = Math.pow(1 - 1 / 50, frames);
+    const d1 = Math.pow(1 - 1 / 100, frames);
+    const d2 = Math.pow(1 - 1 / 1000, frames);
+    const i0 = Math.min(1, Math.max(0, energy[0] || 0));
+    const i1 = Math.min(1, Math.max(0, energy[1] || 0));
+    const i2 = Math.min(1, Math.max(0, energy[3] || 0));
+    const i3 = Math.min(1, Math.max(0, energy[2] || 0));
+
+    _spectrumLevels[0] = Math.max(_spectrumLevels[0] * d0, i0);
+    _spectrumLevels[1] = Math.max(_spectrumLevels[1] * d1, i1);
+    _spectrumLevels[2] = Math.max(_spectrumLevels[2] * d2, i2);
+    _spectrumLevels[3] = i3;
+
+    const k = 1 - Math.pow(0.5, frames);
+    for (let i = 0; i < 4; i++) {
+        _spectrumSmoothed[i] += (_spectrumLevels[i] - _spectrumSmoothed[i]) * k;
+        const x = Math.min(1, Math.max(0, _spectrumSmoothed[i] * intensity));
+        _spectrumPower[i] = x * x * x * (x * (x * 6 - 15) + 10);
+    }
+}
 
 const LYPLUS_MEDIA_SELECTORS = [
     'audio#apple-music-player',
@@ -476,13 +518,43 @@ let LYPLUS_audioState = {
     energy: [0, 0, 0, 0],
 };
 
-function processAudioPulse() {
+function _composeAudioEnergy() {
+    const low = (_audioOctaveEnv[0] * 0.25 + _audioOctaveEnv[1] * 0.45 + _audioOctaveEnv[2] * 0.30);
+    const mid = (_audioOctaveEnv[3] * 0.30 + _audioOctaveEnv[4] * 0.40 + _audioOctaveEnv[5] * 0.30);
+    const high = (_audioOctaveEnv[6] * 0.60 + _audioOctaveEnv[7] * 0.40);
+    const overall = Math.min(1, Math.sqrt(low * low * 0.55 + mid * mid * 0.30 + high * high * 0.15));
+    const e = LYPLUS_audioState.energy;
+    e[0] = low;
+    e[1] = mid;
+    e[2] = high;
+    e[3] = overall;
+    LYPLUS_audioState.beatPulse = overall;
+}
+
+function _decayAudioBands(dt) {
+    const fall = Math.exp(-Math.max(0, dt) / AUDIO_RELEASE_TAU);
+    const baseFall = Math.exp(-Math.max(0, dt) / AUDIO_BASELINE_TAU);
+    let any = false;
+    for (let i = 0; i < AUDIO_OCTAVE_COUNT; i++) {
+        const v = _audioOctaveEnv[i] * fall;
+        _audioOctaveEnv[i] = v > 0.0001 ? v : 0;
+        _audioOctaveBase[i] *= baseFall;
+        if (_audioOctaveEnv[i] > 0) any = true;
+    }
+    if (!any) {
+        const e = LYPLUS_audioState.energy;
+        e[0] = e[1] = e[2] = e[3] = 0;
+        LYPLUS_audioState.beatPulse = 0;
+        return;
+    }
+    _composeAudioEnergy();
+}
+
+function processAudioPulse(dt) {
+    const safeDt = dt > 0 ? dt : (1 / 30);
+
     if (typeof currentSettings === 'undefined' || !currentSettings.audioBeatSync) {
-        LYPLUS_audioState.beatPulse = LYPLUS_audioState.beatPulse > 0.0001 ? LYPLUS_audioState.beatPulse * 0.9 : 0;
-        LYPLUS_audioState.energy[0] = 0;
-        LYPLUS_audioState.energy[1] = 0;
-        LYPLUS_audioState.energy[2] = 0;
-        LYPLUS_audioState.energy[3] = 0;
+        _decayAudioBands(safeDt);
         return;
     }
 
@@ -505,7 +577,7 @@ function processAudioPulse() {
 
             const an = ac.createAnalyser();
             an.fftSize = LYPLUS_FFT_SIZE;
-            an.smoothingTimeConstant = 0.8;
+            an.smoothingTimeConstant = 0.0;
 
             LYPLUS_audioState.ctx = ac;
             LYPLUS_audioState.analyser = an;
@@ -543,48 +615,41 @@ function processAudioPulse() {
     const s = LYPLUS_audioState;
     if (s.ctx && !s.ctx.failed && s.analyser && s.element && !s.element.paused) {
         const bufferLength = s.analyser.frequencyBinCount;
-
-        if (!_audioDataArray || _audioDataArray.length !== bufferLength) {
-            _audioDataArray = new Uint8Array(bufferLength);
+        if (!_audioFreqArray || _audioFreqArray.length !== bufferLength) {
+            _audioFreqArray = new Float32Array(bufferLength);
         }
-        const dataArray = _audioDataArray;
-        s.analyser.getByteTimeDomainData(dataArray);
+        _syncAudioOctaveBins(s.ctx.sampleRate || 48000);
+        s.analyser.getFloatFrequencyData(_audioFreqArray);
 
         const vol = s.element.volume;
-        const volumeMultiplier = vol > 0.005 ? 1 / vol : 1;
+        const volDb = vol > 0.005 ? -20 * Math.log10(vol) : 0;
+        const release = Math.exp(-safeDt / AUDIO_RELEASE_TAU);
+        const baseAlpha = 1 - Math.exp(-safeDt / AUDIO_BASELINE_TAU);
+        const invSpan = 1.0 / (AUDIO_CEIL_DB - AUDIO_FLOOR_DB);
 
-        let minVal = 128;
-        let maxVal = 128;
-        for (let i = 0; i < bufferLength; i++) {
-            const v = dataArray[i];
-            if (v < minVal) minVal = v;
-            else if (v > maxVal) maxVal = v;
-        }
-        const maxDiff = (128 - minVal) > (maxVal - 128) ? (128 - minVal) : (maxVal - 128);
-
-        s.beatPulse = (maxDiff * 0.0078125) * volumeMultiplier;
-
-        if (_isIpadBgStyle()) {
-            if (!_audioFreqArray || _audioFreqArray.length !== bufferLength) {
-                _audioFreqArray = new Uint8Array(bufferLength);
+        for (let b = 0; b < AUDIO_OCTAVE_COUNT; b++) {
+            const lo = _audioOctaveBins[b];
+            const hi = Math.max(lo + 1, _audioOctaveBins[b + 1]);
+            let pwrSum = 0;
+            for (let k = lo; k < hi; k++) {
+                const db = _audioFreqArray[k] + volDb;
+                if (db > -110) pwrSum += Math.pow(10, db * 0.1);
             }
-            s.analyser.getByteFrequencyData(_audioFreqArray);
-            const ranges = [0, 8, 32, 128, 512];
-            for (let b = 0; b < 4; b++) {
-                const lo = ranges[b];
-                const hi = Math.min(bufferLength, ranges[b + 1]);
-                let sum = 0;
-                for (let i = lo; i < hi; i++) sum += _audioFreqArray[i];
-                const avg = hi > lo ? sum / ((hi - lo) * 255) : 0;
-                s.energy[b] = Math.min(1, avg * volumeMultiplier);
-            }
+            const rmsDb = 10 * Math.log10(Math.max(pwrSum / (hi - lo), 1e-11));
+            const level = Math.min(1, Math.max(0, (rmsDb - AUDIO_FLOOR_DB) * invSpan));
+
+            const base = _audioOctaveBase[b] + (level - _audioOctaveBase[b]) * baseAlpha;
+            _audioOctaveBase[b] = base;
+
+            const flux = level > base ? (level - base) * 2.2 : 0;
+            const driven = Math.min(1, level * 0.6 + flux);
+            const prev = _audioOctaveEnv[b];
+            _audioOctaveEnv[b] = driven > prev ? driven : prev * release + driven * (1 - release);
         }
+
+        _composeAudioEnergy();
     } else {
-        s.beatPulse = s.beatPulse > 0.0001 ? s.beatPulse * 0.9 : 0;
-        s.energy[0] = 0;
-        s.energy[1] = 0;
-        s.energy[2] = 0;
-        s.energy[3] = 0;
+        _decayAudioBands(safeDt);
     }
 }
 
@@ -1383,13 +1448,13 @@ function animateWebGLBackground(timestamp) {
     const isTransitioning = artworkTransitionProgress < 1.0;
     if (isTransitioning) {
         const step = pipeline.handlesFullRender
-            ? (elapsedSec / (MESH_TRANSITION_DURATION * 0.5))
+            ? (elapsedSec / MESH_CROSSFADE_DURATION)
             : ARTWORK_TRANSITION_STEP;
         artworkTransitionProgress = Math.min(1.0, artworkTransitionProgress + step);
         if (artworkTransitionProgress >= 1.0) needsAnimation = false;
     }
 
-    processAudioPulse();
+    processAudioPulse(elapsedSec);
     const pulse = LYPLUS_audioState.beatPulse;
     const isLightweight = _isLightweightMode();
 
@@ -1421,8 +1486,9 @@ function animateWebGLBackground(timestamp) {
         return;
     }
 
-    beatEnergyBaseline += (pulse - beatEnergyBaseline) * Math.min(1.0, 0.8 * elapsedSec);
-    const relativePulse = pulse > beatEnergyBaseline ? pulse - beatEnergyBaseline : 0.0;
+    _updateSpectrumPower(LYPLUS_audioState.energy, elapsedSec, isLightweight ? 0.2 : 1.0);
+    const specM = _spectrumPower[0] + (_spectrumPower[1] - _spectrumPower[0]) * 0.1;
+    const specZoom = 1.0 + specM * specM * 0.33;
 
     const layerScales = pipeline.layerScales;
     const layerAbsBaseX = pipeline.layerAbsBaseX;
@@ -1438,26 +1504,12 @@ function animateWebGLBackground(timestamp) {
         }
     } else {
         for (let i = 0; i < 3; i++) {
-            const tPerim = (layerPerimTime[i] += elapsedSec * (1.0 + pulse * BEAT_SPD_BOOST[i]));
-
-            let bs = layerBeatScale[i];
-            const speed = relativePulse > bs ? 12.0 : BEAT_SCALE_DECAY;
-            const delta = Math.min(1.0, speed * elapsedSec);
-            bs += (relativePulse - bs) * delta;
-            layerBeatScale[i] = bs;
-
-            let br = layerBeatRot[i];
-            br += (relativePulse - br) * delta;
-            layerBeatRot[i] = br;
-
-            const smoothBS = bs * bs * (3.0 - 2.0 * bs);
-            const smoothBR = br * br * (3.0 - 2.0 * br);
-
+            const tPerim = (layerPerimTime[i] += elapsedSec * (1.0 + _spectrumPower[2] * BEAT_SPD_BOOST[i]));
             const angle = ((LAYER_OFFSETS[i] + EFFECTIVE_PERIM_VEL[i] * tPerim) % 1.0) * TWO_PI;
 
             const base = i * 4;
-            _layerTransforms[base]     = INITIAL_ROTATIONS[i] + EFFECTIVE_ROT_SPEEDS[i] * currentTime + smoothBR * BEAT_ROT_BOOST[i];
-            _layerTransforms[base + 1] = (layerScales[i] + smoothBS * BEAT_SCALE_BOOST[i]) * _layerSizeFactor[i];
+            _layerTransforms[base]     = INITIAL_ROTATIONS[i] + EFFECTIVE_ROT_SPEEDS[i] * currentTime + _spectrumPower[0] * BEAT_ROT_BOOST[i];
+            _layerTransforms[base + 1] = layerScales[i] * specZoom * _layerSizeFactor[i];
             _layerTransforms[base + 2] = layerAbsBaseX[i] * Math.cos(angle);
             _layerTransforms[base + 3] = layerAbsBaseY[i] * Math.sin(angle);
         }
@@ -1605,6 +1657,7 @@ const MESH_MAX_BLUR_RADIUS = 512;
 const MESH_INSTANCE_SCRIM_STEP = 0.0075;
 const MESH_WARP_PERIOD_DIVISOR = 3.5;
 const MESH_TRANSITION_DURATION = 0.8;
+const MESH_CROSSFADE_DURATION = 1.0;
 const MESH_BLUR_RADIUS_POINTS_PER_SECOND = 60;
 
 const MESH_LANDSCAPE_BASE_FROM = new Float32Array([
@@ -1864,10 +1917,6 @@ function _meshCubicSolve(x, p1x, p1y, p2x, p2y) {
     return _meshBezier(t, p1y, p2y);
 }
 
-function _meshEaseOut(x) {
-    return _meshCubicSolve(x, 0, 0, 0.3, 1);
-}
-
 function _meshEaseInOut(x) {
     return _meshCubicSolve(x, 0.42, 0, 0.58, 1);
 }
@@ -1880,29 +1929,6 @@ function _meshTargetBlurRadius(landscape, exciting) {
 function _meshTargetSaturation(landscape, exciting) {
     if (landscape) return exciting ? 2.4 : 2.9;
     return exciting ? 2.0 : 2.4;
-}
-
-const _meshSpectrumLevels = [0, 0, 0, 0];
-const _meshSpectrumSmoothed = [0, 0, 0, 0];
-const _meshPower = [0, 0, 0, 0];
-
-function _meshSpectrumUpdate(input, dt, intensity) {
-    const frames = Math.max(0, dt) * 60;
-    const decay = [
-        Math.pow(1 - 1 / 50, frames),
-        Math.pow(1 - 1 / 100, frames),
-        Math.pow(1 - 1 / 1000, frames),
-        0
-    ];
-    for (let i = 0; i < 4; i++) {
-        _meshSpectrumLevels[i] = Math.max(_meshSpectrumLevels[i] * decay[i], _meshClamp(input[i] || 0, 0, 1));
-    }
-    const k = 1 - Math.pow(0.5, frames);
-    for (let i = 0; i < 4; i++) {
-        _meshSpectrumSmoothed[i] += (_meshSpectrumLevels[i] - _meshSpectrumSmoothed[i]) * k;
-        const x = _meshClamp(_meshSpectrumSmoothed[i] * intensity, 0, 1);
-        _meshPower[i] = x * x * x * (x * (x * 6 - 15) + 10);
-    }
 }
 
 const MESH_FULLSCREEN_VS = `#version 300 es
@@ -2431,8 +2457,7 @@ const _meshPipeline = {
         }
 
         const exciting = !isLightweight;
-        const energy = LYPLUS_audioState.energy;
-        _meshSpectrumUpdate([energy[0], energy[1], energy[3], energy[2]], dt, exciting ? 1.0 : 0.2);
+        _updateSpectrumPower(LYPLUS_audioState.energy, dt, exciting ? 1.0 : 0.2);
 
         const rate = dt / (MESH_TRANSITION_DURATION * 0.5);
         const strength = _meshClamp(_postParams.pinchStrength != null ? _postParams.pinchStrength : 1.0, 0, 1);
@@ -2476,12 +2501,12 @@ const _meshPipeline = {
         gl.useProgram(_meshRotateProgram);
         gl.bindVertexArray(_meshEmptyVAO);
         for (let i = 0; i < 3; i++) {
-            gl.uniformMatrix4fv(ur.models[i], false, _meshInstanceMatrix(i, _meshTime, aspect, _meshPower));
+            gl.uniformMatrix4fv(ur.models[i], false, _meshInstanceMatrix(i, _meshTime, aspect, _spectrumPower));
         }
-        gl.uniform1f(ur.mix, artworkTransitionProgress < 1.0 ? _meshEaseOut(artworkTransitionProgress) : 1.0);
+        gl.uniform1f(ur.mix, artworkTransitionProgress < 1.0 ? _meshEaseInOut(artworkTransitionProgress) : 1.0);
         gl.uniform1f(ur.blackScrim, _postParams.blackScrim);
-        gl.uniform1f(ur.contrast, _postParams.contrast * (1 + _meshPower[0] * 0.076));
-        gl.uniform1f(ur.saturation, _meshSaturation + _meshPower[2] * 0.166);
+        gl.uniform1f(ur.contrast, _postParams.contrast * (1 + _spectrumPower[0] * 0.076));
+        gl.uniform1f(ur.saturation, _meshSaturation + _spectrumPower[2] * 0.166);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, currentArtworkTexture);
         if (artworkTransitionProgress < 1.0 && previousArtworkTexture) {
